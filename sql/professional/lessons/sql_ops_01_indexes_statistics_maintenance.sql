@@ -1,11 +1,11 @@
 -- SQL-OPS-01: Index types, statistics, and maintenance lifecycle
 -- BEGINNER WORKFLOW - sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle
 -- Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-ops-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-ops-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -22,7 +22,9 @@
 \echo 'SQL-OPS-01: disposable index and statistics lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_ops_lab;
+
 CREATE TABLE pro_ops_lab.events (
   event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   device_id text NOT NULL,
@@ -32,6 +34,7 @@ CREATE TABLE pro_ops_lab.events (
   location point NOT NULL,
   message text NOT NULL
 );
+
 INSERT INTO pro_ops_lab.events (device_id, occurred_at, severity, tags, location, message)
 SELECT
   'device-' || lpad(((g.n % 40) + 1)::text, 3, '0'),
@@ -52,24 +55,34 @@ SELECT
   END
 FROM
   generate_series(1, 6000) AS g (n);
+
 -- B-tree: equality and ordered/range access.
 CREATE INDEX events_device_time_btree ON pro_ops_lab.events (device_id, occurred_at DESC) INCLUDE (severity);
+
 -- BRIN: compact summaries for a large table physically correlated with time.
 CREATE INDEX events_occurred_at_brin ON pro_ops_lab.events USING brin (occurred_at) WITH (pages_per_range = 8);
+
 -- GIN: inverted membership over array elements.
 CREATE INDEX events_tags_gin ON pro_ops_lab.events USING gin (tags);
+
 -- GiST: nearest-neighbour and geometric operators for point.
 CREATE INDEX events_location_gist ON pro_ops_lab.events USING gist (location);
+
 -- SP-GiST: partitioned search structure with a text operator class.
 CREATE INDEX events_device_spgist ON pro_ops_lab.events USING spgist (device_id);
+
 -- Expression and partial indexes require query expressions/predicates that are
 -- compatible with their stored expressions.
 CREATE INDEX events_lower_message_btree ON pro_ops_lab.events (lower(message));
+
 CREATE INDEX events_high_severity_partial ON pro_ops_lab.events (occurred_at DESC, device_id)
 WHERE
   severity >= 4;
+
 CREATE STATISTICS pro_ops_lab.events_device_severity_stats (dependencies, mcv) ON device_id, severity FROM pro_ops_lab.events;
+
 ANALYZE pro_ops_lab.events;
+
 \echo 'Catalog every index method, definition, predicate, and measured size'
 SELECT
   ci.relname AS index_name,

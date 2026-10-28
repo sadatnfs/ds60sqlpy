@@ -261,19 +261,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Use immutable value keys.</strong> Create two equal Point records and insert one into a map. <strong>Expected:</strong> lookup with the other returns origin; hashes equal. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with lookup with the other returns origin; hashes equal.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Sort with a tie-breaker.</strong> Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID. <strong>Expected:</strong> IDs c,a,b. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IDs c,a,b.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Expose comparator uniqueness.</strong> Insert two different people ofage20 into a TreeSet comparingage only. <strong>Expected:</strong> setsize1 despite unequal records. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with setsize1 despite unequal records.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Demonstrate mutable-key failure.</strong> Insert a key withhash1,mutate its hash field to2,and attempt lookup with the same object. <strong>Expected:</strong> lookup fails in this fixture while mapsize remains1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with lookup fails in this fixture while mapsize remains1.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Avoid comparator subtraction.</strong> CompareInteger.MIN_VALUE and 1 usingInteger.compare. <strong>Expected:</strong> negative result;subtraction overflows positive. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with negative result;subtraction overflows positive.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep identity and display separate.</strong> Give twoPoints the same formatted label but different coordinates;compare values. <strong>Expected:</strong> display labels equal; points unequal. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with display labels equal; points unequal.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

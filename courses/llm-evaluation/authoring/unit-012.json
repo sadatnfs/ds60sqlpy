@@ -1,0 +1,67 @@
+{
+  "number": 12,
+  "title": "Prompt, model and seed effects",
+  "concepts": [
+    "crossed design",
+    "interaction",
+    "prompt sensitivity",
+    "generation seed",
+    "replication"
+  ],
+  "outcome": "Analyze a crossed prompt/model/seed experiment and distinguish decoding variability from independent task evidence.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-006", "eval-011"],
+  "exercises": [
+    {
+      "title": "Inspect each prompt",
+      "task": "Calculate candidate minus baseline under each prompt.",
+      "expected": "The differences are -0.1 and +0.3.",
+      "hint": "Average seeds before comparing aligned cells.",
+      "answer": "An overall favorable result does not imply improvement under every configuration."
+    },
+    {
+      "title": "Check reconstruction",
+      "task": "Recombine grand mean, model, prompt and interaction terms.",
+      "expected": "Every observed cell is recovered within floating tolerance.",
+      "hint": "Broadcast model effects down rows and prompt effects across columns.",
+      "answer": "This algebraic identity is a useful implementation check, independent of any inferential assumptions."
+    },
+    {
+      "title": "Change the prompt target",
+      "task": "Put all deployment weight on the first prompt.",
+      "expected": "The candidate difference becomes-0.1.",
+      "hint": "The target distribution is part of the estimand.",
+      "answer": "A fixed-prompt deployment needs evidence for that prompt, not an attractive average over unused alternatives."
+    },
+    {
+      "title": "Equalize selection budgets",
+      "task": "Select the best prompt separately for both models on development data.",
+      "expected": "Both selected development scores are 0.9.",
+      "hint": "Apply the same procedure to both candidates.",
+      "answer": "A comparison of selection procedures differs from a comparison of one selected system with an untuned mean; final assessment must still be independent."
+    },
+    {
+      "title": "Count seed replication",
+      "task": "Compute variance for baseline/prompt 1 across its three authored seeds.",
+      "expected": "The sample variance is 0.01.",
+      "hint": "Use `ddof=1` for this descriptive sample calculation.",
+      "answer": "This describes the three constructed seed scores. It does not quantify variation across an unseen population of task families."
+    },
+    {
+      "title": "Validate axes",
+      "task": "Provide only a two-dimensional matrix to the helper.",
+      "expected": "The tensor contract rejects it.",
+      "hint": "Every dimension must retain its scientific meaning.",
+      "answer": "Silently averaging an unidentified axis can mix model, prompt and replication factors and invalidate the comparison."
+    }
+  ],
+  "sources": [
+    [
+      "Experimental design foundations",
+      "../../../courses/statistics-ml/chapters/13-classical-experimental-design.md"
+    ],
+    ["HELM system configuration and evaluation", "https://arxiv.org/abs/2211.09110"]
+  ]
+}

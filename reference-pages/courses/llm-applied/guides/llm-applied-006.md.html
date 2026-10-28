@@ -286,19 +286,19 @@ a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">,</s
 <ol>
 <li><strong>Rank a discriminating term.</strong> Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization. <strong>Expected:</strong> a ranks first with a positive score; the other scores are 0. <strong>Verify:</strong> Save the assertion results for exercise 1, including a ranks first with a positive score; the other scores are 0.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect term rarity.</strong> Compare IDF for a term present in 1 of 3 documents with a term present in 2 of 3. <strong>Expected:</strong> the rarer term has larger IDF. <strong>Verify:</strong> Save the assertion results for exercise 2, including the rarer term has larger IDF.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Verify saturation.</strong> Disable length normalization with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">b=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> and compare term frequencies 1, 2, 10 under the same IDF. <strong>Expected:</strong> scores increase, but 10 occurrences yield less than 10 times the single-occurrence score. <strong>Verify:</strong> Save the assertion results for exercise 3, including scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose a synonym miss.</strong> Query purchase against a document containing only buy. <strong>Expected:</strong> score 0 despite the semantic relationship. <strong>Verify:</strong> Save the assertion results for exercise 4, including score 0 despite the semantic relationship.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Make ties deterministic.</strong> Query an absent word with document IDs z, a, b. <strong>Expected:</strong> order a, b, z with zero scores. <strong>Verify:</strong> Save the assertion results for exercise 5, including order a, b, z with zero scores.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Check corpus edge cases.</strong> Score an empty corpus and a corpus containing one empty document. <strong>Expected:</strong> empty result for no documents; finite zero score for an empty document. <strong>Verify:</strong> Save the assertion results for exercise 6, including empty result for no documents; finite zero score for an empty document.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

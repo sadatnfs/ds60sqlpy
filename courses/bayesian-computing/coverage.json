@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "mode": "tutorial",
+  "baseline": ["statistics-018", "statistics-science-009"],
+  "areas": [
+    {
+      "area": "exact probability and prediction",
+      "units": ["bayes-001", "bayes-002", "bayes-003", "bayes-004", "bayes-005"],
+      "new_evidence": "Finite Bayes odds, quadrature/conjugacy, Jacobians and exact posterior-risk identities"
+    },
+    {
+      "area": "computation and calibration",
+      "units": ["bayes-006", "bayes-007", "bayes-008"],
+      "new_evidence": "Actual Metropolis sequence, leapfrog reversibility and SBC with an ignored-data counterexample"
+    },
+    {
+      "area": "prepared PyMC and ArviZ",
+      "units": [
+        "bayes-009",
+        "bayes-010",
+        "bayes-011",
+        "bayes-012",
+        "bayes-013",
+        "bayes-014",
+        "bayes-015",
+        "bayes-016"
+      ],
+      "new_evidence": "Actual model fits, diagnostics, predictive simulations, exact LOO/oracle decisions and GP covariance comparison"
+    },
+    {
+      "area": "compiled Stan language",
+      "units": [
+        "bayes-017",
+        "bayes-018",
+        "bayes-019",
+        "bayes-020",
+        "bayes-021",
+        "bayes-022",
+        "bayes-023",
+        "bayes-024"
+      ],
+      "new_evidence": "Real typed models, fixed bounded sampling, analytic reference quantities, hierarchical and censored likelihoods"
+    }
+  ],
+  "boundaries": [
+    "Short classroom chains do not certify convergence.",
+    "Constants can have undefined sampling diagnostics; zero rounded elapsed time can yield infinite ESS/sec.",
+    "The native Stan pad has transformed-data constants and no separate JSON editor.",
+    "The optional normal-mean project uses a real data block and explicit prepared CmdStanPy/CmdStan.",
+    "Calibration and numerical oracles establish bounded computational evidence, not external model validity."
+  ]
+}

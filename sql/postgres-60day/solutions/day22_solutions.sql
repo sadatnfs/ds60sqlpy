@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Combine named windows, explicit frames, exclusions, and gap/session logic while keeping each intermediate grain inspectable.
 -- Assumptions: Event sessions use a 30-minute inactivity threshold and UTC instants. Named windows share partition/order clauses but may still need different frames.
@@ -47,6 +48,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Compare each employee salary with the average of other employees in the department.
@@ -71,6 +73,7 @@ FROM
 ORDER BY
   e.department_id,
   e.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show each order's distance from its customer's average and standard deviation.
@@ -98,6 +101,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Sessionize events using a 30-minute gap and predict why the first event starts a session.
@@ -145,6 +149,7 @@ ORDER BY
   customer_id,
   event_time,
   event_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Find consecutive calendar-day islands in customer order dates without nesting windows.
@@ -197,6 +202,7 @@ GROUP BY
 ORDER BY
   customer_id,
   island_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Summarize sessions from the sessionized event stream with start, end, event count, and duration.
@@ -252,5 +258,6 @@ GROUP BY
 ORDER BY
   customer_id,
   session_number;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

@@ -15,7 +15,9 @@
 \set ON_ERROR_STOP on
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_analytics_lab;
+
 CREATE TABLE pro_analytics_lab.events (
   ingestion_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   source_event_id text NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE pro_analytics_lab.events (
   event_at timestamptz NOT NULL,
   ingested_at timestamptz NOT NULL
 );
+
 INSERT INTO pro_analytics_lab.events (source_event_id, user_id, event_name, event_at, ingested_at)
 VALUES
   ('A1', 1, 'signup', TIMESTAMPTZ '2026-01-01 09:00+00', TIMESTAMPTZ '2026-01-01 09:01+00'),
@@ -37,6 +40,7 @@ VALUES
   ('B1', 2, 'signup', TIMESTAMPTZ '2026-01-02 09:00+00', TIMESTAMPTZ '2026-01-02 09:01+00'),
   ('B2', 2, 'view_item', TIMESTAMPTZ '2026-01-02 09:10+00', TIMESTAMPTZ '2026-01-02 09:11+00'),
   ('B3', 2, 'purchase', TIMESTAMPTZ '2026-01-10 09:30+00', TIMESTAMPTZ '2026-01-10 09:31+00');
+
 CREATE VIEW pro_analytics_lab.deduplicated_events AS
 SELECT
   ingestion_id,
@@ -53,6 +57,7 @@ FROM (
     pro_analytics_lab.events AS e) AS ranked
 WHERE
   rn = 1;
+
 -- Exercise 1.
 SELECT
   de.source_event_id,
@@ -65,6 +70,7 @@ GROUP BY
   de.source_event_id
 ORDER BY
   de.source_event_id;
+
 -- Retried delivery is not automatically harmless. This diagnostic reveals one
 -- source ID carrying conflicting business fields; an empty result is expected
 -- for the reference fixture.
@@ -79,6 +85,7 @@ HAVING
   COUNT(DISTINCT ROW (e.user_id, e.event_name, e.event_at)) > 1
 ORDER BY
   e.source_event_id;
+
 -- Exercise 2: exactly 60 minutes remains in the same session because the rule
 -- starts a new session only when the gap is greater than 60 minutes.
 WITH lagged AS (
@@ -118,6 +125,7 @@ GROUP BY
 ORDER BY
   user_id,
   session_number;
+
 -- Exercise 3: ordered per-user funnel timestamps.
 WITH signup AS (
   SELECT
@@ -179,6 +187,7 @@ FROM
   completed AS c
 ORDER BY
   c.user_id;
+
 -- Exercise 4: derive islands only after reducing to one row per user/day. User
 -- 1 has a positive Jan 1-Jan 2 island; many Jan 1 events still count as one
 -- active day.
@@ -211,6 +220,7 @@ HAVING
 ORDER BY
   n.user_id,
   island_start;
+
 -- Exercise 5: attribution needs separate touch/purchase fixture rows. The
 -- reference rule is LEFT LATERAL, ordered touched_at DESC, touch_id DESC, so
 -- purchases with no qualifying touch remain with NULL attribution.
@@ -220,11 +230,13 @@ CREATE TABLE pro_analytics_lab.campaign_touches (
   campaign text NOT NULL,
   touched_at timestamptz NOT NULL
 );
+
 INSERT INTO pro_analytics_lab.campaign_touches (user_id, campaign, touched_at)
 VALUES
   (1, 'search', TIMESTAMPTZ '2026-01-01 08:00+00'),
   (1, 'email-a', TIMESTAMPTZ '2026-01-01 09:15+00'),
   (1, 'email-b', TIMESTAMPTZ '2026-01-01 09:15+00');
+
 SELECT
   p.source_event_id,
   p.user_id,
@@ -253,6 +265,7 @@ WHERE
   p.event_name = 'purchase'
 ORDER BY
   p.source_event_id;
+
 -- Exercise 6: expose cohort denominator and retained numerator before division.
 WITH cohorts AS (
   SELECT
@@ -282,6 +295,7 @@ GROUP BY
   c.cohort_month
 ORDER BY
   c.cohort_month;
+
 DO $solution$
 DECLARE
     january_cohort_users bigint;
@@ -319,6 +333,7 @@ BEGIN
     END IF;
 END
 $solution$;
+
 -- Exercise 7: the as-of contract is valid_from <= event_at AND
 -- event_at < valid_to. It must assert at most one match, not hide overlap with
 -- ORDER BY/LIMIT 1.
@@ -330,20 +345,24 @@ CREATE TABLE pro_analytics_lab.user_tiers (
   PRIMARY KEY (user_id, valid_from),
   CHECK (valid_to IS NULL OR valid_to > valid_from)
 );
+
 CREATE TABLE pro_analytics_lab.event_probes (
   probe_id text PRIMARY KEY,
   user_id bigint NOT NULL,
   event_at timestamptz NOT NULL
 );
+
 INSERT INTO pro_analytics_lab.user_tiers
 VALUES
   (1, 'basic', TIMESTAMPTZ '2026-01-01 00:00+00', TIMESTAMPTZ '2026-01-10 00:00+00'),
   (1, 'pro', TIMESTAMPTZ '2026-01-10 00:00+00', NULL);
+
 INSERT INTO pro_analytics_lab.event_probes
 VALUES
   ('before', 1, TIMESTAMPTZ '2026-01-09 23:59:59+00'),
   ('boundary', 1, TIMESTAMPTZ '2026-01-10 00:00:00+00'),
   ('after', 1, TIMESTAMPTZ '2026-01-10 00:00:01+00');
+
 SELECT
   p.probe_id,
   p.event_at,
@@ -361,6 +380,7 @@ GROUP BY
   p.event_at
 ORDER BY
   p.probe_id;
+
 DO $solution$
 BEGIN
     IF EXISTS (
@@ -377,6 +397,7 @@ BEGIN
     END IF;
 END
 $solution$;
+
 -- Exercise 8: a dense spine preserves calendar meaning for the trailing window.
 WITH spine AS (
   SELECT
@@ -398,6 +419,7 @@ FROM
   spine AS s
 ORDER BY
   s.report_date;
+
 -- Exercise 9: percentile input is exactly one row per derived session.
 WITH lagged AS (
   SELECT
@@ -437,6 +459,7 @@ SELECT
   percentile_cont(ARRAY[0.5, 0.9]) WITHIN GROUP (ORDER BY s.duration) AS median_and_p90
 FROM
   sessions AS s;
+
 -- Exercise 10: compare rank semantics before choosing the top-N contract.
 WITH counts AS (
   SELECT
@@ -459,11 +482,13 @@ FROM
 ORDER BY
   c.user_id,
   row_number_position;
+
 -- Exercise 11: carry a visited-ID path and refuse to recurse into it.
 CREATE TABLE pro_analytics_lab.campaign_nodes (
   campaign_id integer PRIMARY KEY,
   parent_campaign_id integer
 );
+
 INSERT INTO pro_analytics_lab.campaign_nodes
 VALUES
   (1, NULL),
@@ -472,6 +497,7 @@ VALUES
   (4, 3),
   (5, 6),
   (6, 5);
+
 WITH RECURSIVE tree AS (
   SELECT
     c.campaign_id,
@@ -502,6 +528,7 @@ FROM
   tree
 ORDER BY
   path;
+
 WITH RECURSIVE reachable AS (
   SELECT
     c.campaign_id,
@@ -533,6 +560,7 @@ WHERE
       r.campaign_id = c.campaign_id)
 ORDER BY
   c.campaign_id;
+
 -- Exercise 12: start from dates and keep event filters in the join/aggregate.
 WITH spine AS (
   SELECT
@@ -552,12 +580,14 @@ GROUP BY
   s.report_date
 ORDER BY
   s.report_date;
+
 -- Exercise 13: core PostgreSQL gives an exact answer. An approximate sketch
 -- requires an approved implementation and a measured error/merge contract.
 SELECT
   COUNT(DISTINCT de.user_id) AS exact_distinct_users
 FROM
   pro_analytics_lab.deduplicated_events AS de;
+
 SELECT
   *
 FROM (
@@ -568,6 +598,7 @@ FROM (
     (5, 'ownership', 'name monitoring, upgrade, privacy, and rebuild owners')) AS approximation_review (criterion_number, criterion, required_evidence)
 ORDER BY
   criterion_number;
+
 -- Exercise 14: reject invalid parameters before applying the half-open bound.
 CREATE FUNCTION pro_analytics_lab.valid_time_window (p_starts_at timestamptz, p_ends_at timestamptz)
   RETURNS boolean
@@ -586,16 +617,16 @@ BEGIN
 END
 $function$
 ;
-  WITH parameters AS (
-    SELECT
-      TIMESTAMPTZ '2026-01-01 00:00+00' AS starts_at,
-      TIMESTAMPTZ '2026-02-01 00:00+00' AS ends_at
-)
+WITH parameters AS (
   SELECT
-    de.source_event_id,
-    de.event_at
-  FROM
-    pro_analytics_lab.deduplicated_events AS de
+    TIMESTAMPTZ '2026-01-01 00:00+00' AS starts_at,
+    TIMESTAMPTZ '2026-02-01 00:00+00' AS ends_at
+)
+SELECT
+  de.source_event_id,
+  de.event_at
+FROM
+  pro_analytics_lab.deduplicated_events AS de
   CROSS JOIN parameters AS p
 WHERE
   pro_analytics_lab.valid_time_window (p.starts_at, p.ends_at)
@@ -604,7 +635,8 @@ WHERE
 ORDER BY
   de.event_at,
   de.source_event_id;
-  DO $solution$
+
+DO $solution$
 BEGIN
     BEGIN
         PERFORM pro_analytics_lab.valid_time_window(
@@ -618,7 +650,8 @@ BEGIN
     END;
 END
 $solution$;
-  DO $solution$
+
+DO $solution$
 BEGIN
     IF EXISTS (
         SELECT 1
@@ -634,4 +667,5 @@ BEGIN
     END IF;
 END
 $solution$;
+
 ROLLBACK;

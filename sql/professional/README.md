@@ -13,8 +13,9 @@ Days 1–60. They teach database responsibilities that are normally encountered
 in application and production work: owning a relational model, evolving it
 through reviewed migrations, and enforcing least privilege.
 
-The classroom supplies PostgreSQL 17; the portable SQL examples target PostgreSQL 16 or newer and the disposable
-`advanced_sql_training` database. Run commands from the repository root. Never
+The classroom supplies PostgreSQL 17. Most examples also support PostgreSQL 16;
+the explicitly marked PostgreSQL 17 lessons require version 17 or newer. Every
+script targets the disposable `advanced_sql_training` database. Run commands from the repository root. Never
 substitute a production, shared, or personally valuable database.
 
 ## Learning path
@@ -38,6 +39,11 @@ The advanced correctness path adds three focused labs:
 - [Bag reconciliation and join fanout](companion-guides/sql_quality_01_bags_and_fanout.md) exposes equal-total counterexamples, duplicate multiplicity, and independent-child overcounting.
 - [Cursor pagination and bounded batches](companion-guides/sql_scale_01_cursors_and_batches.md) handles timestamp ties, NULL phases, mutation cases, and the difference between a cursor and a snapshot.
 - [Isolation traces and optimistic concurrency](companion-guides/sql_concurrency_01_isolation_and_versions.md) tests versioned writes and supplies a separately prepared, optional two-session visibility experiment.
+
+The PostgreSQL 17 extension adds two advanced labs after their named prerequisites:
+
+- [Change application with MERGE and ON CONFLICT](companion-guides/sql_write_01_merge_and_upsert.md) separates complete snapshots from partial events, validates source identity, audits changed rows and checks repeat convergence.
+- [Typed JSON_TABLE projection and result grain](companion-guides/sql_json_01_json_table.md) explains nested rows, ordinality, missing values versus JSON null, conversion errors and parent-level totals.
 
 Use the generated catalog for the exact inventory, ordering, levels, direct
 prerequisites, and artifact paths rather than copying a second module table:

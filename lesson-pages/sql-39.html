@@ -404,12 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-39-locks-blocking-and-deadlocks">Day 39: Locks, Blocking, and Deadlocks<a class="heading-anchor" href="#guide--day-39-locks-blocking-and-deadlocks" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> <a href="sql-38.html#guide">Day 38; transactions and isolation</a></li>
-<li><strong>Artifacts:</strong> <a href="sql-39.html#learner">learner SQL</a> · <a href="sql-39.html#solution-1">solution reasoning</a> · <a href="sql-39.html#solution-2">executable solution</a></li>
-</ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-39</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -425,12 +419,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-39</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-38.html#guide">Day 38; transactions and isolation</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-39.html#learner">learner SQL</a> · <a href="sql-39.html#solution-1">solution reasoning</a> · <a href="sql-39.html#solution-2">executable solution</a></li>
+</ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Blocking, Deadlock, Advisory lock. Its worked SQL reads or creates <code>orders</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with 40P01. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form. The first runnable example has a concrete contract: Example 1 returns one row per <code>pid</code> with columns <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code> from <code>pg_locks</code>, and <code>pg_class</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code>. Reselect the returned key columns from <code>pg_locks</code>, and <code>pg_class</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day39_locks_deadlocks.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/postgres-60day/day39_locks_deadlocks.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> locktype<span class="syntax-punctuation">,</span> relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">,</span> <span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">granted</span>
 <span class="syntax-keyword">FROM</span> pg_locks
@@ -553,7 +553,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/day39_locks_deadlocks.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -565,13 +565,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 39: Locks &amp; Deadlock Prevention</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-39: Locks Deadlocks</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-39: Locks Deadlocks</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day39_locks_deadlocks.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-39/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-39.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -584,6 +584,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Observe locks (requires access to pg_catalog)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pid<span class="syntax-punctuation">,</span></span>
@@ -597,6 +598,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">granted</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  relation<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Row-level locking for concurrent updates</span></span>
 <span class="source-line"><span class="syntax-comment">-- Session A:</span></span>
 <span class="source-line"><span class="syntax-comment">--   BEGIN; SELECT * FROM orders WHERE order_id = 1 FOR UPDATE;</span></span>
@@ -622,6 +624,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  orders o</span>
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> to_lock t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- consistent order prevents deadlocks</span></span>
 <span class="source-line"><span class="syntax-comment">-- Explicit advisory locks (application-level)</span></span>
 <span class="source-line"><span class="syntax-comment">-- SELECT pg_try_advisory_lock(42);  -- returns boolean</span></span>
@@ -874,7 +877,7 @@ WHERE order_id = 1;</code></pre>
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/solutions/day39_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -901,6 +904,7 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: deadlocks are prevented when every writer locks shared keys in</span></span>
 <span class="source-line"><span class="syntax-comment">-- the same consistent order.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> keys <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
@@ -921,18 +925,21 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">    <span class="syntax-keyword">OF</span> o<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: a runnable job-queue pattern.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_jobs <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  job_id <span class="syntax-builtin">int</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  payload <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  processed_at timestamptz</span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_jobs <span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;third&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;fourth&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  job_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  payload</span>
@@ -945,9 +952,11 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">  SKIP LOCKED</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Transaction-scoped advisory locks release automatically at transaction end.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3901</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> acquired_course_lock<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: manual deadlock reproduction requires two concurrent sessions:</span></span>
 <span class="source-line"><span class="syntax-comment">-- A: BEGIN; UPDATE orders SET status=status WHERE order_id=1;</span></span>
 <span class="source-line"><span class="syntax-comment">-- B: BEGIN; UPDATE orders SET status=status WHERE order_id=2;</span></span>
@@ -966,6 +975,7 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line">  order_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">  NOWAIT<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: select and update claimed jobs in one statement. SKIP LOCKED lets</span></span>
 <span class="source-line"><span class="syntax-comment">-- concurrent workers choose different available rows.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> claimed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
@@ -992,6 +1002,7 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line">  j<span class="syntax-punctuation">.</span>job_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  j<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  j<span class="syntax-punctuation">.</span>processed_at<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: both selection and locking retain the same unique order_id order;</span></span>
 <span class="source-line"><span class="syntax-comment">-- every competing transaction must follow that contract.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> ordered_keys <span class="syntax-keyword">AS</span> MATERIALIZED <span class="syntax-punctuation">(</span></span>
@@ -1014,13 +1025,16 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">    <span class="syntax-keyword">OF</span> o<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 7: transaction-scoped advisory locks cannot be forgotten after</span></span>
 <span class="source-line"><span class="syntax-comment">-- COMMIT/ROLLBACK. The second attempt in this transaction remains successful</span></span>
 <span class="source-line"><span class="syntax-comment">-- because this backend already owns the same lock.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3902</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_attempt<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3902</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> same_owner_attempt<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

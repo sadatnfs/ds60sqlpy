@@ -161,6 +161,81 @@
       "baseline": 0,
       "target": 6,
       "basis": "new-lesson"
+    },
+    "sql-write-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-json-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-lang-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-lang-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-lang-04": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-05": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-06": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-07": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-08": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-05": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-06": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-07": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-05": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-06": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-07": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
     }
   }
 }

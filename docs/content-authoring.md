@@ -504,7 +504,9 @@ python scripts/build_lesson_readers.py --check
 ## Extending subjects, languages, and learning modes
 
 Follow [the extension playbook](curriculum-extension-playbook.md) to choose
-between a legacy catalog extension, an authored module and the tutorial book.
+between a legacy catalog extension, an authored practice module and a tutorial
+track. Additive tracks accept validated `learning_mode: "tutorial"`; omission
+means practice. Preserve the original statistics manifest/outline contract.
 New classroom subjects normally use `courses/<subject>/track.json` and
 `lessons.json`; the original five modules retain their existing plans. Follow
 [the module contract](implementation/ADDING_A_MODULE.md) for exact admission,
@@ -521,7 +523,9 @@ For legacy catalog additions, preserve `curriculum/practice_baseline.json` and
 register new IDs in `curriculum/practice_expansion.json`. Ordinary module
 practice uses the subject's depth and six-exercise contract. Reading-only
 practice still needs worked reasoning and a separate explanation. The tutorial
-book has no practice requirement or answer gate.
+book and additive tutorial tracks have no practice requirement or answer gate.
+Tutorial `source_path` must contain a complete worked example; additional
+`solution_paths` remain visible examples, not a hidden-answer mechanism.
 
 For C++/Scala learner sources, label prompts `// Exercise 1:` through the final
 number. Kubernetes YAML uses `# Exercise 1:` comments. Count distinct learner
@@ -571,3 +575,25 @@ audit merges this disjoint registry with the immutable historical baseline.
 The new legacy guides still need distinct inspectable exercises, and the depth
 and shared guide-contract checks both apply. Module subjects and tutorial books
 use their separate contracts described above.
+
+## Scientific teaching and captured evidence
+
+Use [the scientist roadmap](scientist-roadmap.md) to locate existing mechanisms
+before designing an extension. A complete analysis names the data grain,
+estimand, assumptions, likelihood or objective, implementation, uncertainty and
+counterexample. Derive an independent numerical oracle where possible. A
+sampler's successful exit, an optimizer's status or a fitted model's score is
+not enough to establish a scientifically justified result.
+
+Tables and JSON reports use the shared [output contract](plotting.md), alongside
+plots. Declare expected outputs in `figure-contracts.json` when a worked
+reference needs them. Preserve values, units, denominators and exact identifiers;
+encode unsafe large JSON integers as strings. The saved output belongs to its
+submitted source and must remain readable without replay.
+
+Keep actual execution surfaces explicit: dbt SQL/Jinja in a fixed project versus
+a full CLI project; native Stan with transformed-data fixtures versus the
+separate JSON-data project; Julia's prepared read-only depot versus a contributor
+package environment; a bounded Python job versus the separate local ML service.
+Do not promise a multi-file browser editor, package downloads or durable scratch
+files that the platform does not provide.

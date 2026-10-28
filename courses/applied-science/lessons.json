@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "track_id": "applied-science",
+  "lessons": [
+    {
+      "id": "science-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-001.md",
+      "source_path": "courses/applied-science/examples/science-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-002.md",
+      "source_path": "courses/applied-science/examples/science-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-003.md",
+      "source_path": "courses/applied-science/examples/science-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-004.md",
+      "source_path": "courses/applied-science/examples/science-004.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-005.md",
+      "source_path": "courses/applied-science/examples/science-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-006.md",
+      "source_path": "courses/applied-science/examples/science-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-007.md",
+      "source_path": "courses/applied-science/examples/science-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-008.md",
+      "source_path": "courses/applied-science/examples/science-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-009.md",
+      "source_path": "courses/applied-science/examples/science-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-010.md",
+      "source_path": "courses/applied-science/examples/science-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-011.md",
+      "source_path": "courses/applied-science/examples/science-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-012.md",
+      "source_path": "courses/applied-science/examples/science-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-013.md",
+      "source_path": "courses/applied-science/examples/science-013.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-014.md",
+      "source_path": "courses/applied-science/examples/science-014.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-015.md",
+      "source_path": "courses/applied-science/examples/science-015.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-016.md",
+      "source_path": "courses/applied-science/examples/science-016.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-017.md",
+      "source_path": "courses/applied-science/examples/science-017.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-018.md",
+      "source_path": "courses/applied-science/examples/science-018.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-019.md",
+      "source_path": "courses/applied-science/examples/science-019.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-020.md",
+      "source_path": "courses/applied-science/examples/science-020.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-021.md",
+      "source_path": "courses/applied-science/examples/science-021.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-022.md",
+      "source_path": "courses/applied-science/examples/science-022.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-023.md",
+      "source_path": "courses/applied-science/examples/science-023.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "science-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/applied-science/guides/science-024.md",
+      "source_path": "courses/applied-science/examples/science-024.py",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

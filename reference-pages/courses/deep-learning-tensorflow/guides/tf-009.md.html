@@ -240,19 +240,19 @@ ids<span class="syntax-operator">=</span><span class="syntax-builtin">list</span
 <ol>
 <li><strong>Count updates.</strong> Partition IDs 1..6 into batches of size two; retain each batch and count one update per batch. <strong>Expected:</strong> batches [[1,2],[3,4],[5,6]] and 3 updates. <strong>Verify:</strong> Save the assertion results for exercise 1, including batches [[1,2],[3,4],[5,6]] and 3 updates.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Retain a remainder.</strong> Partition five IDs by two and compare with explicitly dropping the short batch. <strong>Expected:</strong> sizes [2,2,1]; dropping retains only IDs1..4. <strong>Verify:</strong> Save the assertion results for exercise 2, including sizes [2,2,1]; dropping retains only IDs1..4.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Trace weight state.</strong> Implement three batch updates for x=1..6,y=2x,<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>,rate=.01; record the weight before each update. <strong>Expected:</strong> 3 finite, nonidentical updated weights. <strong>Verify:</strong> Save the assertion results for exercise 3, including 3 finite, nonidentical updated weights.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Compare batch policies.</strong> Repeat one epoch with sizes one and three from exactly <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>; compare update counts and endpoint weights. <strong>Expected:</strong> 6 versus2 steps and different endpoint weights. <strong>Verify:</strong> Save the assertion results for exercise 4, including 6 versus2 steps and different endpoint weights.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve pairs.</strong> Shuffle IDs with permutation [5,0,4,1,3,2] and apply the same permutation to inputs and targets. <strong>Expected:</strong> Every shuffled target equals twice its paired input. <strong>Verify:</strong> Save the assertion results for exercise 5, including Every shuffled target equals twice its paired input.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Aggregate unequal batches.</strong> Combine batch mean losses2 and8 with counts2 and 1; compare mean-of-means with the record mean. <strong>Expected:</strong> record mean4; unweighted batch mean5. <strong>Verify:</strong> Save the assertion results for exercise 6, including record mean4; unweighted batch mean5.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

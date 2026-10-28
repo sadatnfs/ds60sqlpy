@@ -278,19 +278,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Run an actual transform pipeline.</strong> Uppercase two byte chunks and collect the transformed output. <strong>Expected:</strong> ABCD after successful pipeline completion. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Observe false write and drain without guessing timing.</strong> Hold a write callback at a two-byte threshold, inspect write(), then release it. <strong>Expected:</strong> write returns false; drain follows release; stream finishes. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Propagate a producer failure and destroy the sink.</strong> Use an async source that yields once then throws. <strong>Expected:</strong> pipeline rejects with source failed; sink is destroyed. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject an invalid object in a transform.</strong> Process numeric objects but reject a negative value through the callback. <strong>Expected:</strong> pipeline rejects with RangeError. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Measure an object-mode threshold in objects.</strong> Write one large-payload object to a writable with object-mode highWaterMark 1. <strong>Expected:</strong> write false and writableLength 1, irrespective of payload string length. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Abort a generator and its awaited timer.</strong> Start a source, await its readiness signal, then abort the shared signal. <strong>Expected:</strong> pipeline rejects with AbortError; generator finally runs. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

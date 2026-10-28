@@ -1,17 +1,5 @@
 # Day 40: Advanced Analytic Functions
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisite:** `sql-found-02`
-- **Prerequisites:** Complete
-  [SQL-FOUND-02; versioned schema migrations](../../professional/companion-guides/sql_found_02_versioned_migrations.md).
-  That route already includes the window-function sequence from Days 16–22 and
-  the transaction/locking sequence through SQL-39.
-- **Artifacts:** [learner SQL](../day40_analytic_functions_advanced.sql) ·
-  [solution reasoning](../solutions/day40_solutions.md) ·
-  [executable solution](../solutions/day40_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -76,6 +64,18 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisite:** `sql-found-02`
+- **Prerequisites:** Complete
+  [SQL-FOUND-02; versioned schema migrations](../../professional/companion-guides/sql_found_02_versioned_migrations.md).
+  That route already includes the window-function sequence from Days 16–22 and
+  the transaction/locking sequence through SQL-39.
+- **Artifacts:** [learner SQL](../day40_analytic_functions_advanced.sql) ·
+  [solution reasoning](../solutions/day40_solutions.md) ·
+  [executable solution](../solutions/day40_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -95,7 +95,7 @@ The first runnable example has a concrete contract: Example 1 returns one groupe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day40_analytic_functions_advanced.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day40_analytic_functions_advanced.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

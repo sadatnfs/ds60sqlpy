@@ -588,119 +588,119 @@ frame <span class="syntax-operator">=</span> <span class="syntax-operator">%</sp
 <li><strong>Progressive hint:</strong> Choose from statement shape and reviewability, not from different security semantics.</li>
 <li><strong>Verify:</strong> Run <code>%sql SELECT current_database()</code> and the formatted customer cell query; record the same database name plus bounded rows, then explain that line magic suits a short diagnostic while cell magic exposes multi-line structure.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Security testing:</strong> Bind an injection-shaped string to a harmless read-only comparison, verify it behaves as data, then remove the value.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Use <code>:name</code>; never paste the sentinel into SQL or notebook output.</li>
 <li><strong>Verify:</strong> Bind <code>US&#x27; OR TRUE --</code> through <code>:injection_value</code>; assert the harmless comparison returns zero/expected rows, no schema changes, and saved SQL still contains <code>:injection_value</code> rather than the rendered sentinel.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>SQL practice:</strong> Query US customers whose lifetime order total meets a Python threshold; bind country and threshold, order deterministically, and limit to 10.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Aggregate after a left join, apply the threshold after grouping, and add customer ID as tie-breaker.</li>
 <li><strong>Verify:</strong> Assert the query keeps <code>:exercise_country</code> and <code>:exercise_minimum_total</code>, returns at most 10 US customers meeting the threshold, and orders equal totals by customer ID.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>DataFrame boundary:</strong> Convert the assigned result with <code>.DataFrame()</code> and assert the expected columns in order.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Treat conversion as an explicit boundary and validate shape before analysis.</li>
 <li><strong>Verify:</strong> Convert the assigned result and assert columns equal <code>[&#x27;customer_id&#x27;, &#x27;full_name&#x27;, &#x27;lifetime_total&#x27;]</code> in that order, row count is at most 10, and <code>lifetime_total</code> is numeric/Decimal-compatible.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Configuration:</strong> Repeat one small query with <code>autopandas=True</code>, identify the changed return type, then restore it to false.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Notebook-global magic configuration is hidden state unless restored visibly.</li>
 <li><strong>Verify:</strong> With <code>autopandas=False</code>, record a JupySQL result supporting <code>.DataFrame()</code>; with it true, record a pandas DataFrame; finally inspect configuration and assert it is restored false.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Memory reasoning:</strong> Explain why <code>displaylimit=25</code> does not bound memory and identify the setting/query clause that does.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Rendering fewer rows is different from fetching fewer rows.</li>
 <li><strong>Verify:</strong> State that <code>displaylimit=25</code> changes rendering only; inspect <code>autolimit</code> and explicit SQL <code>LIMIT</code> as fetch bounds, and identify aggregation/server work that <code>LIMIT</code> does not bound.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Identifier boundary:</strong> Explain why <code>FROM :table_name</code> is not identifier binding and how a Psycopg application handles a validated dynamic identifier.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Bound parameters represent data values, never SQL grammar.</li>
 <li><strong>Verify:</strong> Show <code>FROM :table_name</code> fails as grammar rather than selecting a table; the application design must allowlist the name and compose it with <code>psycopg.sql.Identifier</code>.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Architecture decision:</strong> Write a decision note choosing interactive exploration or Psycopg application code using at least three criteria.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational observability.</li>
 <li><strong>Verify:</strong> Choose notebook magics or Psycopg in a decision table covering reuse, typing/testing, transaction ownership, result size, and interactivity; the choice must follow those facts.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Cleanup:</strong> List active aliases, close <code>ds60-course</code>, dispose the engine, and verify no connection literal or output remains saved.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.</li>
 <li><strong>Verify:</strong> Run <code>%sql --connections</code>, close alias <code>ds60-course</code>, dispose the engine, and assert the final saved notebook has no connection URL, rendered credential, or non-empty output.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Setup review:</strong> Trace how the environment URL becomes a SQLAlchemy engine without ever being displayed and identify every validation step.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Run the shared course-target validator before <code>make_url</code>; distinguish allowed local transports from remote, multi-host, and connection-override routes.</li>
 <li><strong>Verify:</strong> Trace <code>DS60_DATABASE_URL</code> through <code>validate_course_database_target</code>, optional literal-name normalization, <code>make_url</code>, <code>postgresql+psycopg</code>, <code>create_engine</code>, and <code>%sql engine</code>; name the local transports it accepts and the redirect controls it rejects, then assert no step prints or evaluates the URL/engine as the final cell expression.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Prediction:</strong> Predict the difference between a <code>%sql</code> line assignment and a <code>%%sql</code> cell when both return the same rows.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Compare Python assignment syntax, multi-line readability, and result access.</li>
 <li><strong>Verify:</strong> Predict and confirm that assigned <code>%sql</code> returns a result object, while <code>%%sql</code> owns the remaining cell and cannot be placed on the assignment&#x27;s right side; both return the same rows.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Capacity:</strong> Design a query/result-size check for a table with millions of rows and explain what remains unbounded after <code>LIMIT 25</code>.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Bound output, scan scope, and server work separately.</li>
 <li><strong>Verify:</strong> For a million-row table, show a reviewed aggregate/count plus an explicit <code>LIMIT 25</code>; record that returned rows are bounded while scan, sort, and server execution may remain large.</li>
 </ul>
-<ol>
+<ol start="13">
 <li><strong>Type binding:</strong> Bind a <code>Decimal</code>, date, boolean, and list value in small read-only queries and record their PostgreSQL result types.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.</li>
 <li><strong>Verify:</strong> Bind a <code>Decimal</code>, <code>date</code>, Boolean, and Python list through named parameters; record PostgreSQL types/values and assert none of their literal representations was pasted into SQL.</li>
 </ul>
-<ol>
+<ol start="14">
 <li><strong>Transaction reasoning:</strong> Use <code>engine.begin()</code> for a rollback-safe teaching write in a disposable temporary scope, then explain why magics are not the transaction owner.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The checked-in notebook remains read-only; describe or run writes only in an explicitly authorized disposable lab.</li>
 <li><strong>Verify:</strong> Use <code>engine.begin()</code> with a temporary/course-owned rollback-safe scope and inspect cleanup; state that the context, not <code>%sql</code>, owns commit/rollback and leave the checked-in notebook read-only.</li>
 </ul>
-<ol>
+<ol start="15">
 <li><strong>Jinja boundary:</strong> Demonstrate conceptually why <code>{{value}}</code> is code generation rather than safe value binding, including a harmless fixed example.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Rendered text becomes SQL before the driver sees parameters.</li>
 <li><strong>Verify:</strong> Render one harmless fixed Jinja example as text and compare it with <code>:value</code>: assert Jinja changes SQL source before execution while the named parameter leaves source unchanged.</li>
 </ul>
-<ol>
+<ol start="16">
 <li><strong>Notebook hygiene:</strong> Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and the absence of package-install magics, shell installs, URLs, and destructive SQL.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Inspect the serialized artifact, not only the visible notebook UI.</li>
 <li><strong>Verify:</strong> Run notebook validation and assert nbformat/stable IDs/kernel/tags are valid, outputs and execution counts are clear, and no install magic, shell install, URL literal, or destructive SQL exists.</li>
 </ul>
-<ol>
+<ol start="17">
 <li><strong>Offline review:</strong> Explain how a learner without a running PostgreSQL server can still review this module and which claims remain unexecuted.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Separate structural/offline evidence from live query evidence.</li>
 <li><strong>Verify:</strong> Offline, compile/inspect Python and SQL cells, verify tags/metadata/parameters/cleanup text, and explicitly label database name, returned rows, and driver adaptation as unexecuted claims.</li>
 </ul>
-<ol>
+<ol start="18">
 <li><strong>Handoff:</strong> Extract the capstone query into a Psycopg function design with typed inputs, a small cursor Protocol, and a fake-backed test.</li>
 </ol>
 <ul>
@@ -907,119 +907,119 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <li><strong>Hint:</strong> Choose from statement shape and reviewability, not from different security semantics.</li>
 <li><strong>Verify:</strong> Run <code>%sql SELECT current_database()</code> and the formatted customer cell query; record the same database name plus bounded rows, then explain that line magic suits a short diagnostic while cell magic exposes multi-line structure.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Security testing:</strong> Bind an injection-shaped string to a harmless read-only comparison, verify it behaves as data, then remove the value.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Use <code>:name</code>; never paste the sentinel into SQL or notebook output.</li>
 <li><strong>Verify:</strong> Bind <code>US&#x27; OR TRUE --</code> through <code>:injection_value</code>; assert the harmless comparison returns zero/expected rows, no schema changes, and saved SQL still contains <code>:injection_value</code> rather than the rendered sentinel.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>SQL practice:</strong> Query US customers whose lifetime order total meets a Python threshold; bind country and threshold, order deterministically, and limit to 10.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Aggregate after a left join, apply the threshold after grouping, and add customer ID as tie-breaker.</li>
 <li><strong>Verify:</strong> Assert the query keeps <code>:exercise_country</code> and <code>:exercise_minimum_total</code>, returns at most 10 US customers meeting the threshold, and orders equal totals by customer ID.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>DataFrame boundary:</strong> Convert the assigned result with <code>.DataFrame()</code> and assert the expected columns in order.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Treat conversion as an explicit boundary and validate shape before analysis.</li>
 <li><strong>Verify:</strong> Convert the assigned result and assert columns equal <code>[&#x27;customer_id&#x27;, &#x27;full_name&#x27;, &#x27;lifetime_total&#x27;]</code> in that order, row count is at most 10, and <code>lifetime_total</code> is numeric/Decimal-compatible.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Configuration:</strong> Repeat one small query with <code>autopandas=True</code>, identify the changed return type, then restore it to false.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Notebook-global magic configuration is hidden state unless restored visibly.</li>
 <li><strong>Verify:</strong> With <code>autopandas=False</code>, record a JupySQL result supporting <code>.DataFrame()</code>; with it true, record a pandas DataFrame; finally inspect configuration and assert it is restored false.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Memory reasoning:</strong> Explain why <code>displaylimit=25</code> does not bound memory and identify the setting/query clause that does.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Rendering fewer rows is different from fetching fewer rows.</li>
 <li><strong>Verify:</strong> State that <code>displaylimit=25</code> changes rendering only; inspect <code>autolimit</code> and explicit SQL <code>LIMIT</code> as fetch bounds, and identify aggregation/server work that <code>LIMIT</code> does not bound.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Identifier boundary:</strong> Explain why <code>FROM :table_name</code> is not identifier binding and how a Psycopg application handles a validated dynamic identifier.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Bound parameters represent data values, never SQL grammar.</li>
 <li><strong>Verify:</strong> Show <code>FROM :table_name</code> fails as grammar rather than selecting a table; the application design must allowlist the name and compose it with <code>psycopg.sql.Identifier</code>.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Architecture decision:</strong> Write a decision note choosing interactive exploration or Psycopg application code using at least three criteria.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Consider reuse, transaction ownership, tests, dynamic structure, scale, and operational observability.</li>
 <li><strong>Verify:</strong> Choose notebook magics or Psycopg in a decision table covering reuse, typing/testing, transaction ownership, result size, and interactivity; the choice must follow those facts.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Cleanup:</strong> List active aliases, close <code>ds60-course</code>, dispose the engine, and verify no connection literal or output remains saved.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Both JupySQL alias state and SQLAlchemy pool state need explicit cleanup.</li>
 <li><strong>Verify:</strong> Run <code>%sql --connections</code>, close alias <code>ds60-course</code>, dispose the engine, and assert the final saved notebook has no connection URL, rendered credential, or non-empty output.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Setup review:</strong> Trace how the environment URL becomes a SQLAlchemy engine without ever being displayed and identify every validation step.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Run the shared course-target validator before <code>make_url</code>; distinguish allowed local transports from remote, multi-host, and connection-override routes.</li>
 <li><strong>Verify:</strong> Trace <code>DS60_DATABASE_URL</code> through <code>validate_course_database_target</code>, optional literal-name normalization, <code>make_url</code>, <code>postgresql+psycopg</code>, <code>create_engine</code>, and <code>%sql engine</code>; name the local transports it accepts and the redirect controls it rejects, then assert no step prints or evaluates the URL/engine as the final cell expression.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Prediction:</strong> Predict the difference between a <code>%sql</code> line assignment and a <code>%%sql</code> cell when both return the same rows.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Compare Python assignment syntax, multi-line readability, and result access.</li>
 <li><strong>Verify:</strong> Predict and confirm that assigned <code>%sql</code> returns a result object, while <code>%%sql</code> owns the remaining cell and cannot be placed on the assignment&#x27;s right side; both return the same rows.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Capacity:</strong> Design a query/result-size check for a table with millions of rows and explain what remains unbounded after <code>LIMIT 25</code>.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Bound output, scan scope, and server work separately.</li>
 <li><strong>Verify:</strong> For a million-row table, show a reviewed aggregate/count plus an explicit <code>LIMIT 25</code>; record that returned rows are bounded while scan, sort, and server execution may remain large.</li>
 </ul>
-<ol>
+<ol start="13">
 <li><strong>Type binding:</strong> Bind a <code>Decimal</code>, date, boolean, and list value in small read-only queries and record their PostgreSQL result types.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Let SQLAlchemy/JupySQL adapt Python values; do not pre-render literals.</li>
 <li><strong>Verify:</strong> Bind a <code>Decimal</code>, <code>date</code>, Boolean, and Python list through named parameters; record PostgreSQL types/values and assert none of their literal representations was pasted into SQL.</li>
 </ul>
-<ol>
+<ol start="14">
 <li><strong>Transaction reasoning:</strong> Use <code>engine.begin()</code> for a rollback-safe teaching write in a disposable temporary scope, then explain why magics are not the transaction owner.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> The checked-in notebook remains read-only; describe or run writes only in an explicitly authorized disposable lab.</li>
 <li><strong>Verify:</strong> Use <code>engine.begin()</code> with a temporary/course-owned rollback-safe scope and inspect cleanup; state that the context, not <code>%sql</code>, owns commit/rollback and leave the checked-in notebook read-only.</li>
 </ul>
-<ol>
+<ol start="15">
 <li><strong>Jinja boundary:</strong> Demonstrate conceptually why <code>{{value}}</code> is code generation rather than safe value binding, including a harmless fixed example.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Rendered text becomes SQL before the driver sees parameters.</li>
 <li><strong>Verify:</strong> Render one harmless fixed Jinja example as text and compare it with <code>:value</code>: assert Jinja changes SQL source before execution while the named parameter leaves source unchanged.</li>
 </ul>
-<ol>
+<ol start="16">
 <li><strong>Notebook hygiene:</strong> Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and the absence of package-install magics, shell installs, URLs, and destructive SQL.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Inspect the serialized artifact, not only the visible notebook UI.</li>
 <li><strong>Verify:</strong> Run notebook validation and assert nbformat/stable IDs/kernel/tags are valid, outputs and execution counts are clear, and no install magic, shell install, URL literal, or destructive SQL exists.</li>
 </ul>
-<ol>
+<ol start="17">
 <li><strong>Offline review:</strong> Explain how a learner without a running PostgreSQL server can still review this module and which claims remain unexecuted.</li>
 </ol>
 <ul>
 <li><strong>Hint:</strong> Separate structural/offline evidence from live query evidence.</li>
 <li><strong>Verify:</strong> Offline, compile/inspect Python and SQL cells, verify tags/metadata/parameters/cleanup text, and explicitly label database name, returned rows, and driver adaptation as unexecuted claims.</li>
 </ul>
-<ol>
+<ol start="18">
 <li><strong>Handoff:</strong> Extract the capstone query into a Psycopg function design with typed inputs, a small cursor Protocol, and a fake-backed test.</li>
 </ol>
 <ul>

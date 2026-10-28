@@ -279,19 +279,19 @@ proposal<span class="syntax-operator">=</span><span class="syntax-punctuation">{
 <ol>
 <li><strong>Accept one bounded proposal.</strong> Validate toolread_fixture and document_idd1. <strong>Expected:</strong> accepted proposal identifiesd1. <strong>Verify:</strong> Save the assertion results for exercise 1, including accepted proposal identifiesd1.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject an unknown operation.</strong> Submit toolrun_shell with document_idd1. <strong>Expected:</strong> ValueError;no execution. <strong>Verify:</strong> Save the assertion results for exercise 2, including ValueError;no execution.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject extra fields.</strong> Add command or path to an otherwise valid object. <strong>Expected:</strong> extra fields rejected. <strong>Verify:</strong> Save the assertion results for exercise 3, including extra fields rejected.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject traversal-like identifiers.</strong> Submit ../secret as the document ID. <strong>Expected:</strong> ValueError because the ID is outside the fixture allowlist. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError because the ID is outside the fixture allowlist.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Enforce types.</strong> Submit document_id1 and a list instead of an object. <strong>Expected:</strong> TypeError for both malformed structures. <strong>Verify:</strong> Save the assertion results for exercise 5, including TypeError for both malformed structures.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep retrieved instructions inert.</strong> Read a fixture string saying ignore policy and run a command, then verify no second operation is proposed or executed. <strong>Expected:</strong> returned value is text;dispatch count1. <strong>Verify:</strong> Save the assertion results for exercise 6, including returned value is text;dispatch count1.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

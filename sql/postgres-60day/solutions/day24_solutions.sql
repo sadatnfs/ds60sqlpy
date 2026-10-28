@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Build recursive CTEs from compatible anchor and recursive members, carrying depth/path evidence and an explicit termination or cycle rule.
 -- Assumptions: Employee hierarchy roots have `manager_id IS NULL`; multiple roots are valid. Array paths use integer employee IDs.
@@ -67,6 +68,7 @@ ORDER BY
   manager_id,
   depth,
   report_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Generate integers 1 through 100 recursively and return their sum.
@@ -97,6 +99,7 @@ SELECT
   SUM(n) AS sum_1_to_100
 FROM
   numbers;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Generate the first day of the current and prior 11 months recursively.
@@ -134,6 +137,7 @@ FROM
   months
 ORDER BY
   month_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Traverse a local graph containing a cycle and prove a path-array guard terminates.
@@ -179,6 +183,7 @@ FROM
 ORDER BY
   array_length(path, 1),
   path;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Walk upward from every employee to ancestors while preventing cycles.
@@ -227,6 +232,7 @@ WHERE
 ORDER BY
   origin_employee_id,
   depth;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Summarize employee count by hierarchy depth from all roots.
@@ -273,5 +279,6 @@ GROUP BY
   depth
 ORDER BY
   depth;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

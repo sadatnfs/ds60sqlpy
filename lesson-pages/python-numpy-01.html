@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-numpy-01.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-numpy-01.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_numpy_01.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-01.html#solution-1">explanatory solutions</a> and <a href="python-numpy-01.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -435,23 +435,23 @@ copy<span class="syntax-punctuation">[</span><span class="syntax-number">0</span
 <li><strong>Inspect a concrete layout.</strong> Implement layout for any NumPy array, returning shape, strides, itemsize and nbytes as a dictionary. Inspect np.arange(12, dtype=np.int64).reshape(3,4), its transpose and an empty float32 array. Do not mutate values.</li>
 </ol>
 <p><strong>Expected:</strong> The original has shape(3,4), strides(32,8), itemsize 8 and nbytes 96; the transpose has strides(8,32); the empty array has nbytes 0.</p>
-<ol>
+<ol start="2">
 <li><strong>Return an independent window.</strong> Implement a one-dimensional half-open window [start, stop) that returns an independent copy. Require 0&lt;=start&lt;=stop&lt;=len(values); reject a matrix or invalid bounds with ValueError. An empty valid window is allowed.</li>
 </ol>
 <p><strong>Expected:</strong> For [10,20,30,40] and bounds 1,3 return [20,30]. Changing output[0] leaves source[1]=20. Bounds 2,2 return shape(0,); bounds 3,2 raise ValueError.</p>
-<ol>
+<ol start="3">
 <li><strong>Transform without mutating callers.</strong> Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction. Reject an unrepresentable centered result with ValueError.</li>
 </ol>
 <p><strong>Expected:</strong> [[1,3],[10,14]] becomes[[-1,1],[-2,2]]; source stays unchanged and result shares no memory. Shape(0,2) remains(0,2); a zero-column or NaN input raises ValueError.</p>
-<ol>
+<ol start="4">
 <li><strong>Distinguish access restriction from a snapshot.</strong> Return a view that shares numeric storage but rejects assignment through that view. Do not change the source writeable flag. Demonstrate that changing the source remains visible in the view.</li>
 </ol>
 <p><strong>Expected:</strong> Assigning view[0]=9 raises ValueError; source[0]=7 succeeds and then view[0] equals 7. Source flags.writeable remainsTrue.</p>
-<ol>
+<ol start="5">
 <li><strong>Select a strided view deliberately.</strong> Return every step-th value from a one-dimensional array as a view. Require a positive integer step and reject bool, zero, negative or noninteger steps. Preserve empty inputs.</li>
 </ol>
 <p><strong>Expected:</strong> For np.arange(7) with step 3 return [0,3,6]; a mutation of result[1] changes source[3]. Step 0 and True raise ValueError; an empty source returns shape(0,).</p>
-<ol>
+<ol start="6">
 <li><strong>Transfer ownership across a cache boundary.</strong> Copy each array in a mapping so future numeric mutations of source arrays do not affect the snapshot. Preserve keys and allow an empty mapping. Reject object-dtype arrays with ValueError because copying their buffer would not deep-copy nested Python objects.</li>
 </ol>
 <p><strong>Expected:</strong> Two keys pointing to one source array produce two independent snapshot arrays. Mutating one snapshot leaves the other and source unchanged. Empty input returns{}; dtype=object is rejected.</p>

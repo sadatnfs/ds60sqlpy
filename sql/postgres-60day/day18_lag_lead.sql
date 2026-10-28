@@ -1,11 +1,11 @@
 -- Day 18: LAG and LEAD
--- BEGINNER WORKFLOW — sql-18: Lag Lead
+-- BEGINNER WORKFLOW - sql-18: LAG and LEAD
 -- Guide: sql/postgres-60day/companion-guides/day18_lag_lead.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-18/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-18.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.
 -- Assumptions: Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.
@@ -48,6 +49,7 @@ ORDER BY
   order_date,
   order_id
 LIMIT 100;
+
 -- YoY comparison by month
 WITH monthly AS (
   SELECT
@@ -76,6 +78,7 @@ FROM
 ORDER BY
   month_utc DESC
 LIMIT 36;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

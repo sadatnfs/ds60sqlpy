@@ -69,7 +69,9 @@ import csv
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "data" / "sales.csv"
+from ds60sqlpy.teaching_data import teaching_fixture
+
+FIXTURE = teaching_fixture("professional-sales")
 
 
 def read_raw_rows(path: Path = FIXTURE) -> list[dict[str, str]]:

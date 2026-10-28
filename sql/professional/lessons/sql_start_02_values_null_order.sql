@@ -1,6 +1,7 @@
 -- SQL-START-02: Values NULL and Deterministic Order
 -- Guide: sql/professional/companion-guides/sql_start_02_values_null_order.md
--- Use Create/open guided SQL notebook and the ignored learner copy.
+-- Use ./classroom -> PostgreSQL -> sql-start-02 and its saved learner copy.
+-- Select "Whole SQL lesson (psql)"; Docker supplies the client.
 -- Run the complete file with psql -X -v ON_ERROR_STOP=1.
 -- Only the local disposable advanced_sql_training database is permitted.
 -- Setup is supplied. Write attempts before the final ROLLBACK.
@@ -12,13 +13,17 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE start_shipments (
   shipment_id integer PRIMARY KEY,
   weight numeric,
   label text
 ) ON COMMIT DROP;
+
 INSERT INTO start_shipments (shipment_id, weight, label)
 VALUES
   (1, 0, ''),
@@ -26,6 +31,7 @@ VALUES
   (3, 5, 'ready'),
   (4, 5, ''),
   (5, NULL, 'hold');
+
 -- Example 1: Inspect truth before filtering
 -- Expected: Five shipment rows; columns shipment_id, weight, is_positive, is_missing. True positive IDs are 3 and 4; missing IDs are 2 and 5.
 SELECT
@@ -37,6 +43,7 @@ FROM
   start_shipments
 ORDER BY
   shipment_id;
+
 -- Example 2: Rank known values while preserving unknowns
 -- Expected: IDs 3,4,1,2,5, with columns shipment_id, weight, label. The NULL weights remain NULL.
 SELECT
@@ -48,6 +55,7 @@ FROM
 ORDER BY
   weight DESC NULLS LAST,
   shipment_id;
+
 -- Exercises
 -- Keep predictions and attempts in your own working copy.
 -- 1. Inspect missingness.

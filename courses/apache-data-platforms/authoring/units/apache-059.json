@@ -1,0 +1,23 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-058", "apache-057"],
+  "concepts": ["Indexes and query plans"],
+  "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
+  "sources": [
+    [
+      "Indexing",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/indexing/README.md"
+    ],
+    [
+      "Inverted index",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/indexing/inverted-index.md"
+    ],
+    [
+      "Query planning",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/querying-and-sql/query-execution-controls/explain-plan.md"
+    ]
+  ]
+}

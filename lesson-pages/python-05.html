@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day05_functions_type_hints.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day05_functions_type_hints.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -498,16 +498,16 @@ discounted<span class="syntax-punctuation">(</span><span class="syntax-number">8
 <ol>
 <li>Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior, this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</li>
 <li><strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</li>
 <li><strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</li>
@@ -662,16 +662,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</li>
 <li><strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</li>
 <li><strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</li>

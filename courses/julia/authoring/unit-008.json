@@ -1,0 +1,58 @@
+{
+  "number": 8,
+  "title": "Tuples, named records, dictionaries and sets",
+  "concepts": ["tuple", "NamedTuple", "dictionary", "set", "key equality"],
+  "outcome": "Choose collection representations according to identity, ordering, mutability and lookup needs.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-004", "julia-007"],
+  "sources": [
+    ["Julia collections", "https://docs.julialang.org/en/v1/base/collections/"],
+    ["Named tuples and functions", "https://docs.julialang.org/en/v1/manual/functions/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Make one tuple element",
+      "task": "Represent a single integer as a tuple.",
+      "expected": "Use(7,), including its comma.",
+      "hint": "Parentheses alone group an expression.",
+      "answer": "The tuple syntax distinguishes a one-field collection from the scalar value."
+    },
+    {
+      "title": "Name a returned record",
+      "task": "Return an ID, score and eligibility field.",
+      "expected": "Callers can access fields by their names.",
+      "hint": "Prefer explicit semantic labels to remembered positions.",
+      "answer": "The representation makes a small fixed schema inspectable."
+    },
+    {
+      "title": "Preserve multiplicity",
+      "task": "Count labels a,b,b before converting to a set.",
+      "expected": "Counts are 1 and 2 while the set has two distinct labels.",
+      "hint": "Frequency and membership are different questions.",
+      "answer": "Deduplication intentionally discards multiplicity and can change a scientific denominator."
+    },
+    {
+      "title": "Control presentation order",
+      "task": "Print a dictionary in an explicitly sorted key order.",
+      "expected": "The report follows the chosen ordering rule.",
+      "hint": "Do not depend on traversal order.",
+      "answer": "Stable presentation requires an explicit contract rather than an incidental implementation order."
+    },
+    {
+      "title": "Separate absent and zero",
+      "task": "Compare a present zero-valued key with an absent key.",
+      "expected": "haskey distinguishes them.",
+      "hint": "A default value can conceal missingness.",
+      "answer": "Only use an absent-to-zero convention when the measurement contract justifies it."
+    },
+    {
+      "title": "Inspect special keys",
+      "task": "Use NaN and both signed zeros as dictionary keys.",
+      "expected": "NaN is retrievable and the signed zeros remain distinct in this fixture.",
+      "hint": "Use the data-key equality contract.",
+      "answer": "Dictionary equality semantics should match the application meaning of the keys."
+    }
+  ]
+}

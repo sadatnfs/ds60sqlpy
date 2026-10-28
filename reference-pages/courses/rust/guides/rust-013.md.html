@@ -245,19 +245,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Identify which payload is valid in each state.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Add a Loading variant and update every exhaustive consumer.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Model an import as pending, completed or rejected with state-specific information.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose a collection of optional fields that permits contradictory states.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test every declared variant.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design valid transitions between states and explain which transitions should be rejected.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

@@ -252,19 +252,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Represent a missing lookup.</strong> Look up known a and unknown b in a fixed map through Optional. <strong>Expected:</strong> a present with 7; b empty. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with a present with 7; b empty.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Transform only present values.</strong> Map the known value to double and apply the same mapping to empty. <strong>Expected:</strong> 14 and empty. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 14 and empty.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare eager and lazy fallback.</strong> Use a counter-producing fallback withorElse andorElseGet on a present value. <strong>Expected:</strong> orElse increments;orElseGet does not. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with orElse increments;orElseGet does not.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject malformed lookup input.</strong> Validate an empty identifier before consulting the map. <strong>Expected:</strong> IllegalArgumentException rather than empty. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IllegalArgumentException rather than empty.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Flatten a nullable transformation.</strong> Parse an optional numeric string through a helper returningOptional&lt;Integer&gt;. <strong>Expected:</strong> valid12 present;badtext empty under this declared parser policy. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with valid12 present;badtext empty under this declared parser policy.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Expose unsafeget.</strong> Callget on empty and catchNoSuchElementException. <strong>Expected:</strong> specific absence failure. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with specific absence failure.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

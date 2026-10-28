@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "tracks": {},
+  "lessons": [
+    {
+      "id": "sql-write-01",
+      "track": "sql",
+      "day": 80,
+      "title": "PostgreSQL 17 Change Application: MERGE and ON CONFLICT",
+      "level": "advanced",
+      "phase": "Current PostgreSQL change and document contracts",
+      "estimated_minutes": 150,
+      "prerequisites": ["sql-found-02", "sql-deep-05"],
+      "lesson_path": "sql/professional/lessons/sql_write_01_merge_and_upsert.sql",
+      "guide_path": "sql/professional/companion-guides/sql_write_01_merge_and_upsert.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_write_01_solutions.md",
+        "sql/professional/solutions/sql_write_01_solutions.sql"
+      ],
+      "dependency_group": "postgres",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "PostgreSQL 17",
+        "MERGE",
+        "ON CONFLICT",
+        "RETURNING",
+        "source cardinality",
+        "snapshots",
+        "mutation contracts"
+      ]
+    },
+    {
+      "id": "sql-json-01",
+      "track": "sql",
+      "day": 81,
+      "title": "PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain",
+      "level": "advanced",
+      "phase": "Current PostgreSQL change and document contracts",
+      "estimated_minutes": 150,
+      "prerequisites": ["sql-types-01", "sql-deep-02"],
+      "lesson_path": "sql/professional/lessons/sql_json_01_json_table.sql",
+      "guide_path": "sql/professional/companion-guides/sql_json_01_json_table.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_json_01_solutions.md",
+        "sql/professional/solutions/sql_json_01_solutions.sql"
+      ],
+      "dependency_group": "postgres",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "PostgreSQL 17",
+        "JSON_TABLE",
+        "SQL/JSON",
+        "typed projection",
+        "ordinality",
+        "NULL",
+        "grain",
+        "coverage"
+      ]
+    }
+  ]
+}

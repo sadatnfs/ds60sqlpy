@@ -569,11 +569,11 @@ request_features <span class="syntax-operator">=</span> np<span class="syntax-op
 <li>Add input validation and friendly error behavior.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.</p>
-<ol>
+<ol start="2">
 <li>Return the class name as well as the numeric class identifier.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.</p>
-<ol>
+<ol start="3">
 <li>Create a minimal runtime dependency file for this API.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.</p>
@@ -586,15 +586,15 @@ request_features <span class="syntax-operator">=</span> np<span class="syntax-op
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make an API boundary explicit: validate shape and meaning, map model outputs to a versioned schema, and test behavior without relying on a manually running server.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Boundary-case testing:</strong> Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each. <strong>Progressive hint:</strong> Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.</li>
 </ol>
 <p><strong>Verify:</strong> Boundary-case testing; parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.</p>
-<ol>
+<ol start="5">
 <li><strong>Batch contract:</strong> Design a <code>/predict-batch</code> request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata. <strong>Progressive hint:</strong> Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.</li>
 </ol>
 <p><strong>Verify:</strong> Batch contract; define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.</p>
-<ol>
+<ol start="6">
 <li><strong>Artifact-compatibility check:</strong> At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe. <strong>Progressive hint:</strong> Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.</li>
 </ol>
 <p><strong>Verify:</strong> Artifact-compatibility check; tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p>
@@ -837,11 +837,11 @@ model <span class="syntax-operator">=</span> joblib<span class="syntax-operator"
 <li>Add input validation and friendly error behavior.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.</p>
-<ol>
+<ol start="2">
 <li>Return the class name as well as the numeric class identifier.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.</p>
-<ol>
+<ol start="3">
 <li>Create a minimal runtime dependency file for this API.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.</p>
@@ -854,15 +854,15 @@ model <span class="syntax-operator">=</span> joblib<span class="syntax-operator"
 <h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make an API boundary explicit: validate shape and meaning, map model outputs to a versioned schema, and test behavior without relying on a manually running server.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Boundary-case testing:</strong> Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each. <strong>Progressive hint:</strong> Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.</li>
 </ol>
 <p><strong>Verify:</strong> Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.</p>
-<ol>
+<ol start="5">
 <li><strong>Batch contract:</strong> Design a <code>/predict-batch</code> request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata. <strong>Progressive hint:</strong> Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.</li>
 </ol>
 <p><strong>Verify:</strong> Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.</p>
-<ol>
+<ol start="6">
 <li><strong>Artifact-compatibility check:</strong> At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe. <strong>Progressive hint:</strong> Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.</li>
 </ol>
 <p><strong>Verify:</strong> Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p>

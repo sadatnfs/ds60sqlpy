@@ -1,0 +1,17 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-021", "apache-019", "rust-001"],
+  "concepts": ["language bindings", "native Rust API", "version compatibility", "lazy actions"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Ballista Python interface",
+      "https://datafusion.apache.org/ballista/user-guide/python/quickstart.html"
+    ],
+    ["Ballista Rust client", "https://datafusion.apache.org/ballista/user-guide/rust.html"],
+    ["Ballista54.1 crate", "https://docs.rs/ballista/54.1.0/ballista/"]
+  ]
+}

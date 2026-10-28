@@ -404,12 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-16-window-functions-fundamentals-over-partition-by-order-by-frames-companion-guide">Day 16: Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames (Companion Guide)<a class="heading-anchor" href="#guide--day-16-window-functions-fundamentals-over-partition-by-order-by-frames-companion-guide" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Intermediate</li>
-<li><strong>Direct prerequisite:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; Relational design, DDL, and integrity constraints</a>. That module follows <a href="sql-15.html#guide">Day 15; Phase 1 project</a>, so you should already be comfortable with grouped aggregates and declared result grain.</li>
-<li><strong>Artifacts:</strong> <a href="sql-16.html#learner">learner SQL</a> · <a href="sql-16.html#solution-1">solution reasoning</a> · <a href="sql-16.html#solution-2">executable solution</a></li>
-</ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-16</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -425,12 +419,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-16</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Intermediate</li>
+<li><strong>Direct prerequisite:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; Relational design, DDL, and integrity constraints</a>. That module follows <a href="sql-15.html#guide">Day 15; Phase 1 project</a>, so you should already be comfortable with grouped aggregates and declared result grain.</li>
+<li><strong>Artifacts:</strong> <a href="sql-16.html#learner">learner SQL</a> · <a href="sql-16.html#solution-1">solution reasoning</a> · <a href="sql-16.html#solution-2">executable solution</a></li>
+</ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Window, Partition, Frame. Its worked SQL reads or creates <code>order_items</code>, <code>products</code>, <code>orders</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: Pre-aggregate net revenue to one row per category, then calculate SUM(revenue) OVER () beside each category. The ordinary aggregate establishes the category grain; the window exposes the grand total without removing those category rows. The expected contract is that One row per order. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day16_window_functions_fundamentals.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/postgres-60day/day16_window_functions_fundamentals.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> category_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
@@ -599,7 +599,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/day16_window_functions_fundamentals.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -611,13 +611,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 16: Window Functions Fundamentals</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-16: Window Functions Fundamentals</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-16: Window Functions Fundamentals</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day16_window_functions_fundamentals.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-16/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-16.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -631,6 +631,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- OVER(), PARTITION BY, ORDER BY, frames</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.</span></span>
@@ -658,6 +659,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  category_revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Row-wise metrics without collapsing rows</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
@@ -673,6 +675,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Frame example. ROWS counts observed rows, not necessarily seven consecutive</span></span>
 <span class="source-line"><span class="syntax-comment">-- calendar days; a dense date spine is required when empty dates matter.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
@@ -693,6 +696,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  d_utc <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
@@ -1013,7 +1017,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/solutions/day16_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1042,6 +1046,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.</span></span>
@@ -1070,6 +1075,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Show each employee salary with department average, minimum, and maximum.</span></span>
@@ -1095,6 +1101,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Calculate every order&#x27;s share of its customer&#x27;s stored revenue.</span></span>
@@ -1120,6 +1127,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.</span></span>
@@ -1165,6 +1173,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  windowed</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">method</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Return orders above their customer average without placing a window function in `WHERE`.</span></span>
@@ -1200,6 +1209,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Show order count and revenue context at both customer and country levels in the same row.</span></span>
@@ -1229,6 +1239,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
@@ -1280,7 +1291,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-found-01.html"><small>Previous lesson</small><strong>sql-found-01</strong><span>Relational Design, DDL, and Integrity Constraints</span></a>
-        <a class="nav-card next" href="sql-17.html"><small>Next lesson</small><strong>sql-17</strong><span>Rank Functions</span></a>
+        <a class="nav-card next" href="sql-17.html"><small>Next lesson</small><strong>sql-17</strong><span>ROW_NUMBER, RANK and DENSE_RANK</span></a>
       </nav>
     </div>
   </main>

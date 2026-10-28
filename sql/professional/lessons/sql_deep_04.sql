@@ -9,11 +9,15 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep4_vertices (
   vertex text PRIMARY KEY
 ) ON COMMIT DROP;
+
 INSERT INTO deep4_vertices
 VALUES
   ('a'),
@@ -23,12 +27,14 @@ VALUES
   ('e'),
   ('f'),
   ('g');
+
 CREATE TEMP TABLE deep4_edges (
   source text NOT NULL,
   target text NOT NULL,
   cost integer NOT NULL CHECK (cost >= 0),
   PRIMARY KEY (source, target)
 ) ON COMMIT DROP;
+
 INSERT INTO deep4_edges
 VALUES
   ('a', 'b', 1),
@@ -38,6 +44,7 @@ VALUES
   ('d', 'b', 1),
   ('b', 'e', 5),
   ('d', 'g', 1);
+
 -- Worked example 1
 WITH RECURSIVE sequence (
   value
@@ -58,11 +65,13 @@ FROM
   sequence
 ORDER BY
   value;
+
 -- Worked example 2
 SELECT
   ARRAY['a', 'b', 'c']::text[] AS path,
   'b' = ANY (ARRAY['a', 'b', 'c']::text[]) AS revisits_b,
   ARRAY['a', 'b', 'c']::text[] || 'd'::text AS extended_path;
+
 -- Exercises
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 -- 1. Compute reachability with a finite identity state

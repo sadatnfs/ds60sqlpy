@@ -34,6 +34,11 @@ from scripts.check_classroom_profiles import (  # noqa: E402
 )
 
 INVALID_SOURCE = {
+    "data-engineering": "def broken(:\n    pass\n",
+    "data-platforms-python": "def broken(:\n    pass\n",
+    "dbt-duckdb": "select from\n",
+    "stan-cpu": "parameters { real mu } model { mu ~ normal(0,1); }\n",
+    "julia": "broken = )\n",
     "jax-cpu": "def broken(:\n    pass\n",
     "bayesian-cpu": "def broken(:\n    pass\n",
     "r-statistics": "broken <-\n",
@@ -55,6 +60,11 @@ INVALID_SOURCE = {
     "spark-local-scala": "object Main { def main(args: Array[String]): Unit = { val broken = } }\n",
 }
 DIAGNOSTICS = {
+    "data-engineering": ("main.py", "syntaxerror"),
+    "data-platforms-python": ("main.py", "syntaxerror"),
+    "dbt-duckdb": ("lesson_model", "error"),
+    "stan-cpu": ("main.stan", "syntax error"),
+    "julia": ("main.jl", "parseerror"),
     "jax-cpu": ("main.py", "syntaxerror"),
     "bayesian-cpu": ("main.py", "syntaxerror"),
     "r-statistics": ("main.r", "error"),

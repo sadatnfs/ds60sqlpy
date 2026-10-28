@@ -27,6 +27,8 @@ Do not invent another learner UI or revive retired desktop/portal launchers.
 Inspect one beginner, intermediate and advanced unit in a suitable existing
 route. Reuse direct prerequisites and successful teaching patterns, not another
 language's terminology or arbitrary lesson count. Read the
+[scientist roadmap](../../../docs/scientist-roadmap.md) before describing an
+existing statistical method, ecosystem or system lesson as missing. Read the
 [progression reference](references/progression.md) for a zero-to-independent arc
 and language-specific mechanisms, including web development and GPU computing.
 
@@ -42,8 +44,12 @@ An editable worked example is not an answer to every independent exercise.
 
 Reading practice uses derivations, traces and written reasoning without an
 invented Run operation. The statistics book is a tutorial with complete worked
-answers and no exams, exercise quota or hidden-solution gate. A new tutorial
-book requires a supported loader, not merely a file named `manifest.json`.
+answers and no exams, exercise quota or hidden-solution gate. New additive
+tutorials use validated track-level `learning_mode: "tutorial"`; omission means
+practice. Applied Science, Bayesian Computing and Data and ML Engineering are
+examples. Keep complete worked source in `source_path`; empty `solution_paths`
+is allowed for tutorials.
+An arbitrary `manifest.json` still does not create a supported loader.
 
 Use small deterministic offline fixtures. Label optional downloads, hardware,
 services and separately prepared projects. Use explicit LaTeX delimiters and
@@ -139,3 +145,69 @@ executed results, browser observations and hosted CI. Do not turn a historical
 receipt into a claim about changed source, or a chapter count into expertise.
 Git commits, registry publication and destructive cleanup remain within the
 user's separately authorized scope.
+
+A new ordinary runtime changes `docker/classroom-images.tsv` and the grouped
+native AMD64/ARM64 publication coverage. Keep service names, local repositories,
+catalog suffixes, staging identities and qualification receipts aligned.
+CI publication requires a push to `main` with `[publish-docker]` in HEAD and the
+two repository secrets `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN`; ordinary commits
+do not opt in. Only add the marker with publication authorization.
+
+Staging uploads precede full qualification; combined version/latest promotion
+must wait for all checks. Existing version conflicts require a checked-in patch
+bump, not an overwritten tag. Combined tags use app `VERSION` and workers
+`VERSION-<suffix>`. Explicit latest is resolved and pinned before selecting
+workers; learner progress stays outside images.
+
+The manual `./classroom publish` route still previews local images and needs
+`--push` for an upload. It publishes one actual architecture, with no fabricated
+second platform or combined index; learners use `--architecture-tags` for that
+layout. See [distribution](../../../docs/dockerhub.md) before changing either
+contract. Local passes and staged images do not prove completed publication.
+
+## Reuse the data and scientific execution contracts
+
+Arrow, DataFusion and PyIceberg library lessons use the separately locked
+`data-platforms-python` profile. Ballista and distributed services use their
+explicit owned project environments; do not merge incompatible versions into
+that worker. The Apache/open-data route demonstrates complete tutorial
+registration alongside editable command notebooks and real service workshops.
+Read its current qualification ledger before copying a supported-runtime claim.
+Prepared Atlas/Delta Sharing clients do not establish server acceptance.
+
+Polars and full dbt/ML engineering programs use `data-engineering`. Beginner dbt
+SQL-model variants use `dbt-duckdb` and a fixed fixture; configuration, incremental
+state and multi-file projects use the complete Python/CLI route. Do not promise
+an arbitrary project editor in the browser.
+
+Native Stan uses `stan-cpu` and `main.stan` with tiny transformed-data fixtures,
+fixed compilation and two short seeded chains. Separate JSON input belongs to
+the complete CmdStanPy project, not an invented second pad. Julia uses `main.jl`,
+a read-only prepared project/depot, two threads and a fresh process. Keep real
+sampler, optimizer and numerical diagnostics visible. A tiny chain or successful
+fit is not a convergence or scientific-validity guarantee.
+
+A persistent local ML service needs an explicit owned Docker lifecycle and
+separate state. Follow the existing service fixture's read-only predictor and
+CLI-controlled model activation; do not start an unbounded server inside a pad.
+Keep synthetic local evidence distinct from cloud or production qualification.
+The engineering book's data-product project separates immutable raw acceptance,
+publication pointers and recovery decisions. Its inference project separates
+model loading, queued execution, SSE transport and durable request readback.
+Reuse their bounded contracts only when the new subject needs them, preserve
+private `.workshop/` state and require source-bound failure/lifecycle checks.
+
+When extending required project gates, update the exact required-check sets in
+`scripts/ci_classroom.py` and publication evidence validation together. Native CI
+currently requires data-product/ML-service checks for data engineering,
+inference/browser checks for PyTorch, Flight/Rust IPC for data platforms and
+Kafka semantics/lifecycle for Java. A new lesson reusing an existing profile
+does not by itself need another persistent service.
+
+Use `publish_table`/`publish_report` or the prepared plotting helpers for results.
+PNG, Plotly, table and JSON share two total outputs, 180,000 bytes per payload and
+384,000 bytes combined; tables allow 12 columns and 100 rows. Unsafe large JSON
+integers must be strings. Declare required outputs in `figure-contracts.json`,
+test actual publication and failure behavior, and verify history without replay.
+New `.jl`, `.stan`, dbt SQL/Jinja and complete project fixtures require style,
+static checks and portable packaging, excluding generated state and credentials.

@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.
 -- Assumptions: Ordered money windows use exact numeric. `ROWS` counts physical ordered rows; `RANGE` groups peers with equal ordering values.
@@ -43,6 +44,7 @@ FROM
 ORDER BY
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate each customer's cumulative stored spend.
@@ -69,6 +71,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate a trailing seven-order average within each customer.
@@ -94,6 +97,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare `ROWS` and `RANGE` cumulative sums when two rows share the same ordering value.
@@ -120,6 +124,7 @@ FROM (
     (3, 2, 5)) AS sample (row_id, sort_value, amount)
 ORDER BY
   row_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Reset a running expense total at each category and month.
@@ -148,6 +153,7 @@ ORDER BY
   e.category,
   e.expense_date,
   e.expense_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Prove the final cumulative stored revenue equals the ordinary stored-revenue sum.
@@ -193,5 +199,6 @@ FROM
   CROSS JOIN orders AS o
 GROUP BY
   fr.cumulative_revenue;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

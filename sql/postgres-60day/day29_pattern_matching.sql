@@ -1,11 +1,11 @@
 -- Day 29: Advanced Filtering & Pattern Matching
--- BEGINNER WORKFLOW — sql-29: Pattern Matching
+-- BEGINNER WORKFLOW - sql-29: Pattern Matching
 -- Guide: sql/postgres-60day/companion-guides/day29_pattern_matching.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-29/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-29.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.
 -- Assumptions: PostgreSQL `LIKE` is case-sensitive, `ILIKE` is case-insensitive, and POSIX regex operators use `~`/`~*`. Collation can affect text behavior.
@@ -36,6 +37,7 @@ WHERE
 ORDER BY
   customer_id
 LIMIT 20;
+
 -- Regex with ~ and ~*
 SELECT
   product_id,
@@ -48,6 +50,7 @@ WHERE
 ORDER BY
   product_id
 LIMIT 20;
+
 -- Full-text search (basic)
 -- Ensure textsearch configs are available (Postgres built-in)
 SELECT
@@ -59,6 +62,7 @@ WHERE
   to_tsvector('english', p.name || ' ' || p.category) @@ to_tsquery('english', 'electronics | sports')
 ORDER BY
   p.product_id;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

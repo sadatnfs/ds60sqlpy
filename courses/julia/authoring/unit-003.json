@@ -1,0 +1,58 @@
+{
+  "number": 3,
+  "title": "Strings, Unicode and indexing boundaries",
+  "concepts": ["UTF-8", "code unit", "code point", "grapheme", "normalization"],
+  "outcome": "Process text without confusing byte positions, Unicode characters and visible grapheme clusters.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-001"],
+  "sources": [
+    ["Julia strings and Unicode", "https://docs.julialang.org/en/v1/manual/strings/"],
+    ["Unicode standard library", "https://docs.julialang.org/en/v1/stdlib/Unicode/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Advance safely",
+      "task": "Move from the first to the second character in the UTF -8 fixture.",
+      "expected": "nextind returns 3.",
+      "hint": "Use a string-aware index operation.",
+      "answer": "Adding one to a valid byte index can enter a multibyte character."
+    },
+    {
+      "title": "Count visible units",
+      "task": "Compare characters and graphemes in the combining-accent example.",
+      "expected": "Two characters form one grapheme.",
+      "hint": "Use Unicode.graphemes for this representation.",
+      "answer": "A visible text unit can contain multiple code points."
+    },
+    {
+      "title": "Normalize deliberately",
+      "task": "Apply NFC to the combining-accent fixture.",
+      "expected": "It matches the precomposed form.",
+      "hint": "Retain the original if exact provenance matters.",
+      "answer": "Canonical equivalence is a specific Unicode relation, not arbitrary semantic equivalence."
+    },
+    {
+      "title": "Handle empty text",
+      "task": "Check an empty string before selecting its first character.",
+      "expected": "The empty case is identified explicitly.",
+      "hint": "Do not assume every string has index 1.",
+      "answer": "A parser or display routine needs a documented empty-input policy."
+    },
+    {
+      "title": "Choose offset units",
+      "task": "Store offsets for a cited text passage.",
+      "expected": "Name byte, character or grapheme units and the text version.",
+      "hint": "The source representation determines valid boundaries.",
+      "answer": "Offsets are only reproducible against the same representation and indexing contract."
+    },
+    {
+      "title": "Add a counterexample",
+      "task": "Test an ASCII indexing algorithm with multibyte text.",
+      "expected": "The invalid byte-index assumption becomes visible.",
+      "hint": "Use an expected failure rather than silently deleting characters.",
+      "answer": "A representative boundary fixture checks a mechanism that ASCII alone cannot exercise."
+    }
+  ]
+}

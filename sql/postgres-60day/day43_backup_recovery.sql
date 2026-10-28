@@ -1,11 +1,11 @@
 -- Day 43: Backup & Recovery Scenarios (conceptual + SQL helpers)
--- BEGINNER WORKFLOW — sql-43: Backup Recovery
+-- BEGINNER WORKFLOW - sql-43: Backup Recovery
 -- Guide: sql/postgres-60day/companion-guides/day43_backup_recovery.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-43/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-43.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Logical export/import examples with COPY (server must have file access; adjust paths)
 -- Export:
 -- COPY customers TO '/tmp/customers.csv' CSV HEADER;
@@ -26,6 +27,7 @@ SET search_path TO training, public;
 CREATE TEMP TABLE customers_stg (
   LIKE customers INCLUDING ALL
 );
+
 -- COPY customers_stg FROM '/tmp/customers.csv' CSV HEADER; -- example only
 -- Verify counts between base and staged
 SELECT
@@ -39,6 +41,7 @@ SELECT
   COUNT(*)
 FROM
   customers_stg;
+
 -- Point-in-time concepts (notes):
 -- - Use WAL archiving and base backups for PITR (outside SQL scope)
 -- - For ad-hoc recovery, restore into a separate DB and compare using EXCEPT/INTERSECT

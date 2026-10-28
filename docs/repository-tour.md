@@ -14,7 +14,7 @@ day numbers and module IDs remain stable labels rather than a fixed schedule.
 2. **Catalog loaders** validate identities, prerequisites, artifact paths and
    admitted runtimes. Python/SQL/bridge use the legacy catalog. Modern subjects
    use module plans and authored manifests. The statistics book has a separate
-   tutorial contract.
+   tutorial contract; new additive tracks can declare validated tutorial mode.
 3. **The shared classroom** derives its directory and navigation from those
    loaders. It loads guides, preserves independent pads/notes/variants, and
    exposes only the selected lesson's actual capabilities.
@@ -40,6 +40,11 @@ day numbers and module IDs remain stable labels rather than a fixed schedule.
 | Legacy metadata | `catalog_builder.py`, `catalog.py`, `curriculum/extensions/`, generated `curriculum/catalog.json` |
 | Core module plans | `module_plans.py`, [five maintained plan files](expansion/README.md) |
 | Additive module routes | `courses/<subject>/track.json`, `lessons.json`, `modules.py`, `module_extensions.py` |
+| Scientific and data routes | `courses/applied-science/`, `bayesian-computing/`, `julia/`, `polars/`, `dbt/`, `ml-engineering/`, `llm-evaluation/` under `courses/` |
+| Integrated engineering book | `courses/data-ml-engineering/`, its owned `projects/data-product/` and `projects/inference-service/` |
+| Apache and open-data systems | `courses/apache-data-platforms/`, its authoring sources, owned service projects and [qualification ledger](../courses/apache-data-platforms/authoring/ENVIRONMENTS.md) |
+| Structured result publishing | `plot_artifacts.py`, `worker_figures.py`, `worker_figures.R`, `worker_figures.jl`, `scripts/declared_outputs.py` |
+| Native statistical and dbt adapters | `stan_runner.py`, `dbt_runner.py`, `docker/workers/` |
 | Tutorial book | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters and examples |
 | Jobs, worker operations and limits | `module_jobs.py`, `module_service.py`, `worker_operations.py`, profile adapters |
 | Legacy classroom execution | `lab.py`, `execution.py`, `classroom_runs.py` |
@@ -61,6 +66,13 @@ The catalog determines the subject inventory. Execution profiles are not a subje
 count. Several languages share a worker; CUDA combines reading, CPU and optional
 GPU variants. HTML/CSS and JavaScript/D3 run in browser previews, while PHP CLI
 and the separately prepared HTTP fixture have different contracts.
+
+The engineering book is a tutorial with complete worked references. Its data
+product and inference service are separately owned persistent projects, not
+unbounded pad operations. Apache library lessons use `data-platforms-python`;
+distributed platform workshops have their own preparation, lifecycle and state.
+Read their current ledger rather than inferring server acceptance from a chapter,
+client implementation or CPU architecture descriptor.
 
 ## Generated, maintained and private files
 
@@ -104,3 +116,9 @@ For new learning paths, follow the [authoring skill](../.agents/skills/add-learn
 For tutoring, use [learning with a companion](learning-with-an-ai-tutor.md).
 The [implementation checkpoint](implementation/CHECKPOINT.md) records durable
 architecture and operational constraints, not a past developer's session state.
+
+For current scientific route placement, use [the scientist roadmap](scientist-roadmap.md).
+The full dbt project, local ML service and standard-data Stan project live under
+their subjects' `projects/` directories. Their owned copies and outputs are not
+classroom pad state. Preserve their source fixtures in packaging while excluding
+compiled models, databases, trained state and generated dbt target/log files.

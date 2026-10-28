@@ -1,6 +1,7 @@
 -- SQL-SCALE-01: Cursor Pagination and Bounded Batches
 -- Guide: sql/professional/companion-guides/sql_scale_01_cursors_and_batches.md
--- Use Create/open guided SQL notebook and the ignored learner copy.
+-- Use ./classroom -> PostgreSQL -> sql-scale-01 and its saved learner copy.
+-- Select "Whole SQL lesson (psql)"; Docker supplies the client.
 -- Run the complete file with psql -X -v ON_ERROR_STOP=1.
 -- Only the local disposable advanced_sql_training database is permitted.
 -- Setup is supplied. Write attempts before the final ROLLBACK.
@@ -12,13 +13,17 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE scale_events (
   event_id integer PRIMARY KEY,
   received_seq integer UNIQUE NOT NULL,
   occurred_at timestamptz
 ) ON COMMIT DROP;
+
 INSERT INTO scale_events
 VALUES
   (1, 1, TIMESTAMPTZ '2024-01-01 10:00+00'),
@@ -27,7 +32,9 @@ VALUES
   (4, 4, NULL),
   (5, 5, TIMESTAMPTZ '2024-01-01 09:00+00'),
   (6, 6, TIMESTAMPTZ '2024-01-01 12:00+00');
+
 CREATE INDEX ON scale_events (occurred_at DESC NULLS LAST, event_id DESC);
+
 -- Example 1: Save the whole boundary from the first page
 -- Expected: Two event rows, columns event_id, occurred_at: IDs 6 then 3; cursor (2024-01-01 11:00+00,3).
 SELECT
@@ -39,6 +46,7 @@ ORDER BY
   occurred_at DESC NULLS LAST,
   event_id DESC
 LIMIT 2;
+
 -- Example 2: Continue across a tied timestamp
 -- Expected: Two event rows, columns event_id, occurred_at: IDs 2 then 1, both 10:00 UTC.
 SELECT
@@ -51,6 +59,7 @@ ORDER BY
   occurred_at DESC NULLS LAST,
   event_id DESC
 LIMIT 2;
+
 -- Exercises
 -- Keep predictions and attempts in your own working copy.
 -- 1. Record an exact first-page boundary.

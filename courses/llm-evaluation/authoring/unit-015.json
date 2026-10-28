@@ -1,0 +1,70 @@
+{
+  "number": 15,
+  "title": "Monitoring, delayed labels and online experiments",
+  "concepts": [
+    "label delay",
+    "distribution shift",
+    "Jensen-Shannon divergence",
+    "randomization unit",
+    "guardrails"
+  ],
+  "outcome": "Monitor mature cohorts and service behavior without confusing delayed outcomes or changing traffic with model improvement.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-007", "eval-012", "eval-014"],
+  "exercises": [
+    {
+      "title": "Report immature labels",
+      "task": "Evaluate the two requests at day 2.",
+      "expected": "Accuracy 1 with label coverage 0.5.",
+      "hint": "Use the same eligible cohort in both denominators.",
+      "answer": "The missing failure label has not become a success. The report must expose incomplete outcome ascertainment."
+    },
+    {
+      "title": "Wait for the cohort",
+      "task": "Evaluate the same requests at day 10.",
+      "expected": "Accuracy 0.5 and label coverage 1.",
+      "hint": "No model change is required for the apparent decline.",
+      "answer": "The difference is explained by label arrival, so an unqualified early-versus-late accuracy comparison is misleading."
+    },
+    {
+      "title": "Identical distributions",
+      "task": "Compare a histogram to itself.",
+      "expected": "JS divergence 0.",
+      "hint": "Every log ratio is 1 before taking the logarithm.",
+      "answer": "This is an exact diagnostic invariant, not proof that model quality is unchanged."
+    },
+    {
+      "title": "Disjoint support",
+      "task": "Compare[1,0] with[0,1] using natural logarithms.",
+      "expected": "JS divergence is log 2.",
+      "hint": "Both are compared to their midpoint.",
+      "answer": "The finite maximum is a useful boundary test and differs from an unbounded one-direction KL divergence."
+    },
+    {
+      "title": "Choose assignment units",
+      "task": "Requests from one user share conversational history.",
+      "expected": "Consider user-level assignment and cluster-aware analysis.",
+      "hint": "Interference can occur across request rows.",
+      "answer": "The experimental unit should reflect how exposure and outcomes can influence one another; many rows do not create independent users."
+    },
+    {
+      "title": "Investigate an alert",
+      "task": "A drift score rises while mature-cohort quality is stable.",
+      "expected": "Investigate composition and coverage before concluding model degradation.",
+      "hint": "A diagnostic is not a causal attribution.",
+      "answer": "A changed input mix may be benign or may reveal unsupported future risk; retain outcome and operational evidence alongside drift."
+    }
+  ],
+  "sources": [
+    [
+      "Existing online experimentation route",
+      "../../../courses/statistics-ml/tutorials/experimentation/README.md"
+    ],
+    [
+      "scipy Jensen-Shannon distance definition",
+      "https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.jensenshannon.html"
+    ]
+  ]
+}

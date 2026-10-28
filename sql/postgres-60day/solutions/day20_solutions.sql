@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use `FIRST_VALUE` and `LAST_VALUE` only with an ordering and frame that covers the intended partition.
 -- Assumptions: First/last refer to ordered rows, not minimum/maximum values unless ordering states that. Ties need unique keys for deterministic row identity.
@@ -46,6 +47,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Show each product with the cheapest and most expensive price in its category.
@@ -72,6 +74,7 @@ ORDER BY
   p.category,
   p.price,
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Compare every payment with the first and last payment amount for its order.
@@ -99,6 +102,7 @@ ORDER BY
   p.order_id,
   p.payment_date,
   p.payment_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Demonstrate the default `LAST_VALUE` result versus a full-partition frame on values 10, 20, 30.
@@ -123,6 +127,7 @@ FROM (
     (30)) AS sample (value)
 ORDER BY
   value;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Return one first and one last order per customer without using window output as an accidental duplicate report.
@@ -154,6 +159,7 @@ FROM
   annotated
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Solve latest order per customer with PostgreSQL `DISTINCT ON` and compare its ordering contract with row number.
@@ -177,5 +183,6 @@ ORDER BY
   o.customer_id,
   o.order_date DESC,
   o.order_id DESC;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

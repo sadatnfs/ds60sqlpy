@@ -1,0 +1,70 @@
+{
+  "number": 4,
+  "title": "Agreement, prevalence and adjudication uncertainty",
+  "concepts": [
+    "Cohen kappa",
+    "weighted agreement",
+    "prevalence",
+    "reliability",
+    "confusion matrix"
+  ],
+  "outcome": "Calculate agreement with the correct marginals, explain prevalence effects, and distinguish reliable labels from valid labels.",
+  "level": "beginner",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-003"],
+  "exercises": [
+    {
+      "title": "Reconstruct the confusion table",
+      "task": "Rebuild the table in case A by counting label pairs.",
+      "expected": "Rows A and columns B give [[2,0],[1,1]].",
+      "hint": "Keep the category order 0,1.",
+      "answer": "Two negative-negative pairs, one positive-negative pair and one positive-positive pair determine both marginals and agreement."
+    },
+    {
+      "title": "Perfect variation",
+      "task": "Use labels 0,1 from both annotators.",
+      "expected": "Kappa equals 1.",
+      "hint": "Expected agreement is 0.5.",
+      "answer": "There is perfect observed agreement with nondegenerate marginals, so the corrected coefficient is defined and equals 1."
+    },
+    {
+      "title": "Complete disagreement",
+      "task": "Pair 0,1 with 1,0.",
+      "expected": "Kappa equals -1.",
+      "hint": "Observed agreement is 0 and expected agreement is 0.5.",
+      "answer": "A negative coefficient means less agreement than the marginal reference, not a negative count of labels."
+    },
+    {
+      "title": "Single-category degeneracy",
+      "task": "Give both reviewers only label 1.",
+      "expected": "Kappa is undefined and rejected.",
+      "hint": "Its denominator is 1 minus expected agreement.",
+      "answer": "Both raw and reference agreement are 1. The coefficient becomes 0/0, so preserve the degeneracy instead of replacing it with an attractive score."
+    },
+    {
+      "title": "Distinguish weighted quantities",
+      "task": "Compare observed ordinal disagreement to weighted kappa.",
+      "expected": "The implemented quantity lacks an expected-disagreement correction.",
+      "hint": "List numerator and denominator for each definition.",
+      "answer": "Observed squared-distance disagreement is useful descriptively, but weighted kappa would normalize it by expected disagreement under marginals."
+    },
+    {
+      "title": "Change the dependence unit",
+      "task": "Annotate ten paraphrases from each of two families.",
+      "expected": "The evaluation still has two sampled families.",
+      "hint": "Count independent groups, not annotation cells.",
+      "answer": "Additional paraphrases may reveal within-family variation, but family-level uncertainty cannot treat twenty rows as twenty independent sampled families."
+    }
+  ],
+  "sources": [
+    [
+      "Cohen kappa API and definition",
+      "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.cohen_kappa_score.html"
+    ],
+    [
+      "Statistical inference foundations",
+      "../../../courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"
+    ]
+  ]
+}

@@ -90,3 +90,17 @@ database. Return to `./classroom` when you want the interactive workspace.
 
 An optional AI tutor has its own connectivity requirements. The curriculum
 and MCP content server do not bundle an offline language model.
+
+## Scientific and data-system preparation
+
+Julia packages, native Stan/CmdStanPy and Polars/dbt/ML tools are prepared in
+their selected images. Ordinary lesson execution does not install additional
+packages. Existing projects retain their earlier profile selection; choose the
+new profiles explicitly or use `--all` while connected, then use strict resume
+when offline. Read [runtime contracts](../modules-runtime.md) before relying on a
+library that belongs to another worker.
+
+The full dbt retail project, local ML service and Stan JSON-data project have
+separate owned working copies. Preserve their output/state directories when
+returning to them. Their source fixtures are included in the course, but a
+source archive does not contain your trained state, database or posterior CSVs.

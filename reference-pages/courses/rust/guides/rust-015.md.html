@@ -245,19 +245,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Trace the success, parse-error and domain-error paths.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Add an application maximum quantity with a separate error category.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Write a function using ? to compose two fallible steps.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose replacing every Err with zero.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test empty, zero, negative and overflowing textual input.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Choose a public error enum and explain which internal details should remain private.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

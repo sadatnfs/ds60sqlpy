@@ -1,0 +1,19 @@
+# Prepared reference-server configuration. Replace only in an untracked copy.
+version: 1
+host: "0.0.0.0"
+port: 8080
+endpoint: "/delta-sharing"
+preSignedUrlTimeoutSeconds: 60
+stalenessAcceptable: false
+evaluatePredicateHints: false
+shares:
+  - name: ds60_fixture
+    schemas:
+      - name: tutorial
+        tables:
+          - name: orders
+            location: "s3a://owned-fixture-bucket/orders"
+            id: "81e0b600-1380-4b9a-a4db-000000000001"
+            historyShared: true
+# Put a generated fixture-only bearer token in a separate untracked configuration.
+# Never publish a real recipient profile or signed data URL.

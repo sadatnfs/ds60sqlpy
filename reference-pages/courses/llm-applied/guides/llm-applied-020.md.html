@@ -280,19 +280,19 @@ final_scores<span class="syntax-operator">=</span><span class="syntax-punctuatio
 <ol>
 <li><strong>Construct paired retrieval features.</strong> Use queries and documents equal to the 2x2identity matrix, with positive labels 0, 1. <strong>Expected:</strong> score shape(2, 2); one positive per query. <strong>Verify:</strong> Save the assertion results for exercise 1, including score shape(2, 2); one positive per query.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Train the query projection.</strong> Run 30SGD at 0.5 updates on cross entropy against diagonal positives. <strong>Expected:</strong> loss decreases; each query ranks its paired document first. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss decreases; each query ranks its paired document first.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Evaluate a perturbed held-out query.</strong> Use held-out feature[.9, .1] and compare its two document scores. <strong>Expected:</strong> document 0 remains higher on this declared local perturbation. <strong>Verify:</strong> Save the assertion results for exercise 3, including document 0 remains higher on this declared local perturbation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Train a pairwise reranker.</strong> Use positive feature[1, 0], negative[0, 1] and a zero linear weight; run 20SGD at 0.2 updates. <strong>Expected:</strong> positive score exceeds negative and pairwise loss decreases. <strong>Verify:</strong> Save the assertion results for exercise 4, including positive score exceeds negative and pairwise loss decreases.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Detect a false-negative identity.</strong> Assign the same document ID to positive and negative roles and identify the collision as a prospective admission failure. <strong>Expected:</strong> identity collision detected; this check is separate from the earlier training loops. <strong>Verify:</strong> Save the assertion results for exercise 5, including identity collision detected; this check is separate from the earlier training loops.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Bound the model claim.</strong> Record that fixed vectors were used and natural-language encoder quality was not measured. <strong>Expected:</strong> actual gradient updates True; pretrained_semantic_encoder False. <strong>Verify:</strong> Save the assertion results for exercise 6, including actual gradient updates True; pretrained_semantic_encoder False.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

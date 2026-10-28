@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.
 -- Assumptions: Money is exact `numeric`; division casts denominators to numeric where fractions matter. NULL/zero denominators return NULL through `NULLIF`.
@@ -43,6 +44,7 @@ FROM
 ORDER BY
   margin_rate DESC NULLS LAST,
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Safely cast a set of text values to numeric only when they match a numeric grammar.
@@ -69,6 +71,7 @@ FROM (
     ('-0.5'),
     ('many'),
     ('')) AS sample (raw_value);
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show order-item net revenue rounded only after summing.
@@ -90,6 +93,7 @@ GROUP BY
   oi.order_id
 ORDER BY
   oi.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare integer division with numeric division for 1 divided by 4.
@@ -102,6 +106,7 @@ ORDER BY
 SELECT
   1 / 4 AS integer_division,
   1::numeric / 4 AS numeric_division;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Calculate average payment amount per paid order without dividing by zero or counting payment rows as orders.
@@ -117,6 +122,7 @@ SELECT
   ROUND(SUM(p.amount) / NULLIF (COUNT(DISTINCT p.order_id), 0), 2) AS average_paid_amount_per_order
 FROM
   payments AS p;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Compare sum-of-rounded line values with rounded exact total and quantify the rounding difference.
@@ -133,5 +139,6 @@ SELECT
   SUM(ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2)) - ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS rounding_difference
 FROM
   order_items AS oi;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

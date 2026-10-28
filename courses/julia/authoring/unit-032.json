@@ -1,0 +1,73 @@
+{
+  "number": 32,
+  "title": "Scientific capstone: an auditable offline modeling report",
+  "concepts": [
+    "data contracts",
+    "availability time",
+    "validation selection",
+    "holdout",
+    "provenance",
+    "Plotly"
+  ],
+  "outcome": "Execute a complete synthetic modeling workflow from typed CSV to a source-identified decision record, exact numerical checks and an accessible Plotly report.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-016", "julia-017", "julia-018", "julia-021", "julia-024", "julia-028"],
+  "sources": [
+    [
+      "CSV 0.10 reading contract",
+      "https://github.com/JuliaData/CSV.jl/blob/v0.10.17/docs/src/reading.md"
+    ],
+    [
+      "DataFrames split transformations",
+      "https://dataframes.juliadata.org/stable/man/split_apply_combine/"
+    ],
+    ["LinearAlgebra", "https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/"],
+    ["JSON3 interface", "https://quinnj.github.io/JSON3.jl/stable/"]
+  ],
+  "figure": 1,
+  "exercises": [
+    {
+      "title": "Audit the grain",
+      "task": "Explain what one row and one ID represent.",
+      "expected": "One synthetic prediction record with declared availability evidence.",
+      "hint": "Distinct IDs prevent accidental duplication.",
+      "answer": "The eight-row contract fixes grain and denominators; repeated entities in real data would need additional grouping."
+    },
+    {
+      "title": "Reproduce the selection",
+      "task": "Compare development errors for the four fixed penalties.",
+      "expected": "Penalty 2 is selected.",
+      "hint": "Do not inspect final outcomes to choose candidates.",
+      "answer": "The declared rule chooses the minimum development MSE in fixed candidate order."
+    },
+    {
+      "title": "Verify final arithmetic",
+      "task": "Compute residuals for predictions 90/7 and 103/7 against 13 and 15.",
+      "expected": "Residuals are -1/7 and -2/7; MSE is 5/98.",
+      "hint": "Square and average the two errors.",
+      "answer": "This independent rational calculation verifies the reported floating result."
+    },
+    {
+      "title": "Inject information leakage",
+      "task": "Move a feature availability date after its prediction date.",
+      "expected": "The data validator rejects the fixture.",
+      "hint": "Event meaning and availability differ.",
+      "answer": "A future-known feature cannot enter the historical decision under the declared contract."
+    },
+    {
+      "title": "Inspect accessible evidence",
+      "task": "Compare each Plotly table row with its plotted observation and prediction.",
+      "expected": "The values and IDs must match exactly.",
+      "hint": "The chart is a view of the same final data.",
+      "answer": "Descriptions explain scope; exact tables support inspection without relying on visual position."
+    },
+    {
+      "title": "Write the decision memo",
+      "task": "State what passes and what evidence is still missing.",
+      "expected": "Synthetic computation passes; deployment is not justified.",
+      "hint": "Mention small final sample and selection history.",
+      "answer": "Require representative sampling, uncertainty, domain validation and monitoring before making a deployment claim."
+    }
+  ]
+}

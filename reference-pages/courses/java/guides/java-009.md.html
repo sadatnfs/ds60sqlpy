@@ -259,19 +259,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Close on normal completion.</strong> Open a Probe resource, record body, then inspect closure order. <strong>Expected:</strong> events body, close A. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with events body, close A.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Close in reverse order.</strong> Declare resourcesA thenB and leave the block. <strong>Expected:</strong> closeB beforecloseA. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with closeB beforecloseA.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Close after body failure.</strong> Throw IllegalStateException in the body and inspect events after catching it. <strong>Expected:</strong> close A still recorded. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with close A still recorded.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Preserve suppressed close failure.</strong> Make the body throw and the resource close throw too. <strong>Expected:</strong> primary message body;one suppressed exceptioncloseA. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with primary message body;one suppressed exceptioncloseA.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Observe close-only failure.</strong> Let the body succeed but close throwIOException. <strong>Expected:</strong> IOExceptioncloseA is primary. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOExceptioncloseA is primary.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Retain a translated cause.</strong> Wrap an IOException in IllegalStateException with a domain message and inspect cause. <strong>Expected:</strong> cause remains the original IOException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with cause remains the original IOException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -31,6 +31,7 @@ EXCLUDED_DIRECTORIES = frozenset(
         ".git",
         ".venv",
         ".learning",
+        ".workshop",
         ".classroom",
         ".module-runtime",
         ".app-build",

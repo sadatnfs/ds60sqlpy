@@ -1,16 +1,5 @@
 # Day 01 - SELECT, WHERE, ORDER BY, LIMIT/OFFSET (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Foundation (beginner)
-- **Catalog prerequisites:** `sql-start-03`, the [query construction and debugging on-ramp](../../professional/companion-guides/sql_start_03_query_debugging.md).
-- **Environment prerequisite:** follow the [SQL track setup](../README.md) so
-  the disposable `advanced_sql_training` database and guided notebook runner
-  are ready. You do not need to know DDL or migrations yet.
-- **Artifacts:** [learner SQL](../day01_select_where_orderby.sql) ·
-  [solution reasoning](../solutions/day01_solutions.md) ·
-  [executable solution](../solutions/day01_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -75,6 +64,17 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Catalog prerequisites:** `sql-start-03`, the [query construction and debugging on-ramp](../../professional/companion-guides/sql_start_03_query_debugging.md).
+- **Environment prerequisite:** follow the [SQL track setup](../README.md) so
+  the Docker classroom and its disposable `advanced_sql_training` database
+  are ready. You do not need to know DDL or migrations yet.
+- **Artifacts:** [learner SQL](../day01_select_where_orderby.sql) ·
+  [solution reasoning](../solutions/day01_solutions.md) ·
+  [executable solution](../solutions/day01_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence of the
@@ -104,7 +104,7 @@ worked queries only read data.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day01_select_where_orderby.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day01_select_where_orderby.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -202,11 +202,16 @@ For every result, write its row grain and expected shape first.
    **Inputs/evidence:** For sql-01 Exercise 5, read from `products`. Build the answer toward `product_id`, `name`, and `price`; keep `product_id` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-01 Exercise 5, expected output: At most 10 rows, highest prices first, stable across repeated runs on unchanged data. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
    **Verify:** For sql-01 Exercise 5, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, and `price` came from the same source rows. Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
-6. **Extension:** Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
-   **Progressive hint:** Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order.
-   **Inputs/evidence:** For sql-01 Exercise 6, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-01 Exercise 6, expected output: Up to 10 rows strictly after the first page with no overlap. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-   **Verify:** For sql-01 Exercise 6, assert no more than 10 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, `customer_id`, `total_amount`, and `order_date` came from the same source rows. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
+6. **Extension:** Return the second page of 10 newest orders using the same deterministic order, LIMIT 10 and OFFSET 10.
+   **Progressive hint:** Sort by order_date DESC and order_id DESC; skip the first ten ordered rows and keep the next ten.
+   **Inputs/evidence:** For sql-01 Exercise 6, read from `orders` at one row per `order_id` and compare pages only on an unchanged fixture.
+   **Expected result/shape:** For sql-01 Exercise 6, return at most 10 rows equal to positions 11 through 20 of the unchanged ordered input, one row per `order_id`. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-01 Exercise 6, display the first 20 ordered IDs and compare the page with positions 11 through 20. Assert at most 10 unique `order_id` values, no overlap with page one, and projected values matching those source IDs.
+
+`OFFSET 10` skips the first ten rows after ordering; `LIMIT 10` bounds the
+remaining result to ten rows. Keeping the same unique sort key is essential.
+If rows change between requests, offset pages can shift. The later
+`sql-scale-01` lesson explains cursor pagination for that separate setting.
 
 ## Common mistakes and how to recover
 
@@ -250,7 +255,7 @@ Core concepts and deep dive
 - Filtering (WHERE): Removes rows before projection and ordering. Remember three-valued logic: comparisons with NULL yield UNKNOWN and therefore fail the predicate.
 - Pattern matching: LIKE is case-sensitive; ILIKE is case-insensitive (Postgres). Use % for any-length wildcard, _ for single-character. Escape literal %/_ via ESCAPE clause if necessary.
 - Sorting (ORDER BY): Occurs after SELECT; you can sort by aliases. Ties are stable only by explicit secondary keys. NULLS FIRST/NULLS LAST gives control of null ordering.
-- Pagination (LIMIT/OFFSET): LIMIT n returns at most n rows; OFFSET skips rows first. For large tables, prefer keyset pagination (WHERE value < last_value ORDER BY value DESC) over OFFSET for performance.
+- Pagination (`LIMIT`/`OFFSET`): `OFFSET` skips ordered rows and `LIMIT` bounds the remaining page. Compare pages on an unchanged fixture. The later `sql-scale-01` lesson investigates cursor semantics and measured access costs with its required prerequisites.
 
 Walkthrough of the day’s script
 - Customers by country with newest first: Filters by IN ('US','CA'), sorts by created_at DESC, limits to 10. Emphasizes how WHERE reduces the set before ORDER BY runs.
@@ -287,7 +292,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-01 - Select Where Orderby.
+Tutor me through sql-01 - SELECT, WHERE, ORDER BY and LIMIT.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md

@@ -1,0 +1,67 @@
+{
+  "number": 16,
+  "title": "A reproducible evaluation decision packet",
+  "concepts": [
+    "decision memo",
+    "artifact digest",
+    "evidence ledger",
+    "minimum effect",
+    "unknown gates"
+  ],
+  "outcome": "Compute and seal a complete held-out decision packet from the connected synthetic ledger, preserving all failed and unknown conditions.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-013", "eval-015"],
+  "exercises": [
+    {
+      "title": "Change one constraint",
+      "task": "Raise coverage to 0.9 while keeping the other authored inputs.",
+      "expected": "Only the coverage gate passes; quality, critical cases and latency still fail.",
+      "hint": "Recompute each named gate.",
+      "answer": "Changing one policy input cannot erase the other failures. The reference then constructs a separate all-pass input only to check the decision-rule logic; it does not invent improved observed model outcomes."
+    },
+    {
+      "title": "Keep a missing protocol result",
+      "task": "Replace protocol_frozen with None.",
+      "expected": "The protocol gate fails.",
+      "hint": "Unknown evidence cannot satisfy an explicit True requirement.",
+      "answer": "A missing confirmation is reported as an unresolved condition rather than silently accepted."
+    },
+    {
+      "title": "Preserve a critical failure",
+      "task": "Set critical_failures to 1.",
+      "expected": "The critical-case gate fails even if quality improves.",
+      "hint": "Required constraints are not weighted into an average.",
+      "answer": "The policy gives this condition independent force; a favorable mean effect cannot cancel it."
+    },
+    {
+      "title": "Interpret zero incidents",
+      "task": "Explain the positive bound for a separate hypothetical campaign with zero failures in 200 trials.",
+      "expected": "Finite observations do not imply zero population risk.",
+      "hint": "State the binomial and sampling assumptions.",
+      "answer": "The expression 1-alpha^(1/n) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate."
+    },
+    {
+      "title": "Detect an artifact edit",
+      "task": "Change coverage after sealing the packet.",
+      "expected": "Verification rejects the old digest.",
+      "hint": "Recompute canonical serialized bytes.",
+      "answer": "Integrity helps reconstruct evidence but is separate from authentication and scientific validity."
+    },
+    {
+      "title": "Write a bounded memo",
+      "task": "Summarize the failed packet in three sentences.",
+      "expected": "State no-go, all four failing conditions and the independent evidence needed next.",
+      "hint": "Do not remove unfavorable results.",
+      "answer": "A useful memo identifies the decision, its supporting limits and a concrete next assessment without claiming universal quality or safety."
+    }
+  ],
+  "sources": [
+    ["Model cards and reporting", "https://arxiv.org/abs/1810.03993"],
+    [
+      "Existing integrated scientific workflow",
+      "../../../courses/statistics-ml/tutorials/science/07-integrated-scientific-workflow.md"
+    ]
+  ]
+}

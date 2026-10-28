@@ -574,11 +574,11 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 <li>Create a slim dependency file containing only direct API runtime needs.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
-<ol>
+<ol start="2">
 <li>Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
-<ol>
+<ol start="3">
 <li>Optionally push the image to a registry if you intentionally use a connected account.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
@@ -591,15 +591,15 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Containerize a minimal, testable service without embedding secrets or privileged assumptions. Build, readiness, and runtime health have distinct contracts.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Layer and secret audit:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent. <strong>Progressive hint:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</li>
 </ol>
 <p><strong>Verify:</strong> Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
-<ol>
+<ol start="5">
 <li><strong>Least-privilege runtime:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions. <strong>Progressive hint:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</li>
 </ol>
 <p><strong>Verify:</strong> Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
-<ol>
+<ol start="6">
 <li><strong>Health semantics:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states. <strong>Progressive hint:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</li>
 </ol>
 <p><strong>Verify:</strong> Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>
@@ -840,11 +840,11 @@ docker run --rm -p <span class="syntax-number">8000</span>:8000 ds-60day-api</co
 <li>Create a slim dependency file containing only direct API runtime needs.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
-<ol>
+<ol start="2">
 <li>Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
-<ol>
+<ol start="3">
 <li>Optionally push the image to a registry if you intentionally use a connected account.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
@@ -857,15 +857,15 @@ docker run --rm -p <span class="syntax-number">8000</span>:8000 ds-60day-api</co
 <h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Containerize a minimal, testable service without embedding secrets or privileged assumptions. Build, readiness, and runtime health have distinct contracts.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Layer and secret audit:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent. <strong>Progressive hint:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</li>
 </ol>
 <p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
-<ol>
+<ol start="5">
 <li><strong>Least-privilege runtime:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions. <strong>Progressive hint:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</li>
 </ol>
 <p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
-<ol>
+<ol start="6">
 <li><strong>Health semantics:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states. <strong>Progressive hint:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</li>
 </ol>
 <p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>

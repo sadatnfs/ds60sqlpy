@@ -4,6 +4,15 @@ const $ = (id) => document.getElementById(id);
 const phases = ["read", "predict", "attempt", "compare", "explain"];
 const finished = new Set(["succeeded", "failed", "cancelled", "timed_out", "blocked"]);
 const themes = {
+  "apache-data-platforms": ["#7e3e26", "#fff0e6", "#f4ba99", "#443127", "Data"],
+  "data-ml-engineering": ["#26576d", "#e4f3fa", "#9fcfe5", "#233b47", "Eng"],
+  polars: ["#275ea1", "#e8f2ff", "#a5cfff", "#24364d", "Pl"],
+  dbt: ["#925126", "#fff0df", "#f3c18f", "#443328", "dbt"],
+  "ml-engineering": ["#206860", "#e0f6f1", "#96dfd0", "#213c38", "ML"],
+  "llm-evaluation": ["#79438f", "#f7eafd", "#deb6ee", "#402b48", "Eval"],
+  "applied-science": ["#386d35", "#eaf6e5", "#b7dea9", "#293c25", "Sci"],
+  "bayesian-computing": ["#795821", "#fff4db", "#eed093", "#403624", "Bayes"],
+  julia: ["#6e4397", "#f2eafa", "#d6b6f2", "#382b46", "Jl"],
   python: ["#795405", "#fff3cd", "#f2ce79", "#3d3421", "Py"],
   sql: ["#2458a6", "#e9f0ff", "#a9caff", "#22334c", "SQL"],
   bridge: ["#006c7a", "#e1f5f8", "#89dce7", "#203b42", "↔"],
@@ -1388,6 +1397,7 @@ function expandedCompilerLine(output, language, lineCount) {
       csharp: "Program.cs",
       rust: "main.rs",
       swift: "main.swift",
+      julia: "main.jl",
     },
     filename = names[language];
   if (!filename) return null;
@@ -1426,7 +1436,7 @@ function sourceErrorLine(job) {
     return null;
   const output = job.output || "",
     count = $("source").value.split("\n").length;
-  if (["c", "go", "csharp", "rust", "swift"].includes(current.language))
+  if (["c", "go", "csharp", "rust", "swift", "julia"].includes(current.language))
     return expandedCompilerLine(output, current.language, count);
   let matches = [];
   if (job.legacy && current.language === "python") return tracebackLine(output, count);
@@ -1436,6 +1446,10 @@ function sourceErrorLine(job) {
     ];
   else if (current.language === "r")
     matches = [...output.matchAll(/(?:^|[\s(])(?:[^\s()]*\/)?main\.R:(\d+)(?::\d+)?:/g)];
+  else if (current.language === "stan")
+    matches = [
+      ...output.matchAll(/(?:^|\n)[^\n]*["'](?:[^"'\n]*\/)?main\.stan["'],\s*line\s+(\d+)/g),
+    ];
   else if (current.language === "cpp")
     matches = [...output.matchAll(/(?:^|\n)(?:[^\n]*[/\\])?main\.cpp:(\d+)(?::\d+)?:/g)];
   else if (current.language === "java")
@@ -1475,13 +1489,75 @@ function updateErrorJump() {
   };
 }
 let plottedReceiptKey = "";
-function showPlotArtifacts(artifacts, key, append = false) {
+// BEGIN SAVED FIGURE DOWNLOAD HELPERS
+function showWithheldArtifacts(records) {
+  if (!Array.isArray(records) || records.length > 2) return;
+  let bytes = 0;
+  const positions = new Set();
+  for (const record of records) {
+    if (
+      !record ||
+      !Number.isInteger(record.position) ||
+      record.position < 1 ||
+      record.position > 2 ||
+      positions.has(record.position) ||
+      typeof record.reason !== "string" ||
+      !record.reason ||
+      record.reason.length > 1000 ||
+      typeof record.raw_json !== "string"
+    )
+      return;
+    const size = new TextEncoder().encode(record.raw_json).length;
+    if (size > 180000) return;
+    bytes += size;
+    positions.add(record.position);
+  }
+  if (bytes > 384000) return;
+  for (const record of records) {
+    const figure = node("figure", undefined, "withheld-figure");
+    figure.dataset.savedArtifactPosition = String(record.position);
+    figure.append(
+      node("figcaption", "Saved figure " + record.position + ": original JSON retained"),
+      node("p", record.reason),
+    );
+    const download = node("button", "Download original figure JSON", "quiet");
+    download.type = "button";
+    download.addEventListener("click", () => {
+      // This is server-preserved text, never JSON.parse/JSON.stringify input.
+      // Parsing first would round the exact historical integer literals.
+      const url = URL.createObjectURL(new Blob([record.raw_json], { type: "application/json" }));
+      const link = node("a");
+      link.href = url;
+      link.download = "saved-figure-" + record.position + ".json";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    figure.append(download);
+    $("figures").append(figure);
+  }
+}
+// END SAVED FIGURE DOWNLOAD HELPERS
+
+function showPlotArtifacts(artifacts, key, append = false, withheld = []) {
   if (plottedReceiptKey === key) return;
   plottedReceiptKey = key;
   if (!append) $("figures").replaceChildren();
+  const withheldPositions = new Set(
+    (Array.isArray(withheld) ? withheld : [])
+      .filter(
+        (item) =>
+          item && Number.isInteger(item.position) && item.position >= 1 && item.position <= 2,
+      )
+      .map((item) => item.position),
+  );
+  const visiblePositions = [1, 2].filter((position) => !withheldPositions.has(position));
   for (const [position, artifact] of (artifacts || []).entries()) {
+    const originalPosition = visiblePositions[position] || position + 1;
     const figure = node("figure"),
-      title = artifact.description || "Figure " + (position + 1);
+      title = artifact.description || "Figure " + originalPosition;
+    figure.dataset.savedArtifactPosition = String(originalPosition);
     figure.append(node("figcaption", title));
     if (artifact.kind === "png") {
       const img = node("img");
@@ -1540,7 +1616,7 @@ function showPlotArtifacts(artifacts, key, append = false) {
         );
         const link = node("a");
         link.href = url;
-        link.download = "figure-" + (position + 1) + ".json";
+        link.download = "figure-" + originalPosition + ".json";
         document.body.append(link);
         link.click();
         link.remove();
@@ -1572,8 +1648,70 @@ function showPlotArtifacts(artifacts, key, append = false) {
         figure.append(details);
       }
     }
+    if (artifact.kind === "table" || artifact.kind === "json") {
+      const data = artifact.kind === "table" ? artifact.table : artifact.data;
+      if (artifact.kind === "table") {
+        const table = node("table"),
+          head = node("thead"),
+          row = node("tr"),
+          body = node("tbody");
+        table.append(node("caption", title, "sr-only"));
+        for (const label of data.columns) {
+          const cell = node("th", label);
+          cell.scope = "col";
+          row.append(cell);
+        }
+        head.append(row);
+        table.append(head);
+        for (const values of data.rows) {
+          const line = node("tr");
+          for (const value of values)
+            line.append(node("td", value === null ? "Missing" : String(value)));
+          body.append(line);
+        }
+        table.append(body);
+        const container = node("div", "", "structured-table");
+        container.append(table);
+        figure.append(container);
+      } else {
+        const pre = node("pre"),
+          code = node("code", JSON.stringify(data, null, 2));
+        pre.className = "highlighted-code language-json";
+        pre.append(code);
+        figure.append(pre);
+        if (new TextEncoder().encode(code.textContent).length <= 60000)
+          classroom("classroom-highlight", { source: code.textContent, language: "json" })
+            .then((result) => {
+              if (plottedReceiptKey === key && code.isConnected) code.innerHTML = result.html;
+            })
+            .catch(() => {});
+      }
+      const download = node("button", "Download result JSON", "quiet");
+      download.type = "button";
+      download.addEventListener("click", () => {
+        const url = URL.createObjectURL(
+          new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+        );
+        const link = node("a");
+        link.href = url;
+        link.download = "result-" + originalPosition + ".json";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+      figure.append(download);
+    }
     $("figures").append(figure);
   }
+  showWithheldArtifacts(withheld);
+  const ordered = [...$("figures").children]
+    .filter((figure) => figure.dataset.savedArtifactPosition)
+    .sort(
+      (left, right) =>
+        Number(left.dataset.savedArtifactPosition) - Number(right.dataset.savedArtifactPosition),
+    );
+  for (const figure of ordered) $("figures").append(figure);
 }
 function showJob(job) {
   if (job.kind === "browser_observation") {
@@ -1604,7 +1742,12 @@ function showJob(job) {
     (job.detail || "") +
     (job.truncated ? " · Log truncated; exit status and checks remain explicit." : "");
   $("output").textContent = job.output || "(No output yet.)";
-  showPlotArtifacts(job.artifacts || [], job.job_id + ":" + JSON.stringify(job.artifacts || []));
+  showPlotArtifacts(
+    job.artifacts || [],
+    job.job_id + ":" + JSON.stringify([job.artifacts || [], job.withheld_artifacts || []]),
+    false,
+    job.withheld_artifacts || [],
+  );
   $("checks").replaceChildren();
   for (const check of job.checks || [])
     $("checks").append(
@@ -1819,7 +1962,8 @@ function showLegacyResult(result, context, source) {
       ? " · Middle output was omitted; exit status and final messages are retained."
       : "");
   $("output").textContent = result.output || "(No printed output.)";
-  if (result.language === "sql" && result.mode !== "lesson") showSqlResults(result.output);
+  if (result.language === "sql" && context.mode !== "lesson")
+    showSqlResults(result.output, result.sql_display);
   for (const [position, source] of (result.figures || []).entries()) {
     if (typeof source !== "string" || !/^data:image\/(?:png|jpeg|webp);base64,/.test(source))
       continue;
@@ -1830,7 +1974,12 @@ function showLegacyResult(result, context, source) {
     figure.append(image, node("figcaption", image.alt));
     $("figures").append(figure);
   }
-  showPlotArtifacts(result.artifacts || [], "legacy:" + displayRevision, true);
+  showPlotArtifacts(
+    result.artifacts || [],
+    "legacy:" + displayRevision,
+    true,
+    result.withheld_artifacts || [],
+  );
   displayedJob = {
     lesson_id: context.id,
     source,
@@ -1883,6 +2032,9 @@ async function openRunReceipt(
     showLegacyResult(
       {
         ...receipt.result,
+        ...(receipt.language === "sql" && receipt.mode === "snippet"
+          ? { sql_display: data.sql_display ?? null }
+          : {}),
         receipt_id: receipt.id,
         receipt_saved: true,
         saved_at: receipt.saved_at,
@@ -1933,12 +2085,18 @@ async function refreshRunHistory({ showLatest = false } = {}) {
   if (showLatest && data.history.length && resultRevision === revision)
     await openRunReceipt(context, data.history[0].id, version, revision);
 }
-function showSqlResults(output) {
+function showSqlResults(output, projection = undefined) {
   let parsed;
-  try {
-    parsed = JSON.parse(output);
-  } catch (_) {
-    return;
+  if (projection !== undefined) {
+    // Saved transcripts remain unchanged. Null means raw text has no safe table view.
+    if (projection === null || typeof projection !== "object") return;
+    parsed = projection;
+  } else {
+    try {
+      parsed = JSON.parse(output);
+    } catch (_) {
+      return;
+    }
   }
   let number = 0;
   for (const result of parsed.results || []) {
@@ -2730,7 +2888,7 @@ async function renderSyntaxPreview() {
   try {
     const result = await classroom("classroom-highlight", {
       source,
-      language: current.language,
+      language: current.runtime_profile === "dbt-duckdb" ? "sql+jinja" : current.language,
     });
     if (
       sequence !== highlightSequence ||

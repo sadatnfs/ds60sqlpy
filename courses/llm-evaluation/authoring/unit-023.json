@@ -1,0 +1,58 @@
+{
+  "number": 23,
+  "title": "GRPO groups, normalization and KL estimators",
+  "concepts": ["GRPO", "group baseline", "zero variance", "length normalization", "KL estimator"],
+  "outcome": "Compute group-relative advantages, expose degeneracy and weighting choices, and identify the sampling law required by a KL estimator.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-021", "eval-019"],
+  "exercises": [
+    {
+      "title": "Shift all rewards",
+      "task": "Add a common constant to 0,1,2,3.",
+      "expected": "The normalized advantages stay unchanged.",
+      "hint": "Both the mean and every reward shift together.",
+      "answer": "Relative normalization removes a common level; it does not preserve information about absolute task success."
+    },
+    {
+      "title": "Inspect a constant group",
+      "task": "Compare all-zero and all-one reward groups.",
+      "expected": "Both produce zero relative advantages under the declared rule.",
+      "hint": "Record the raw rewards separately.",
+      "answer": "These groups represent different absolute outcomes despite the same lack of within-group ranking signal."
+    },
+    {
+      "title": "Change length weighting",
+      "task": "Give advantages-1,+1 to responses of length 2,4.",
+      "expected": "Response average 0; token average 1/3.",
+      "hint": "Write the two denominators explicitly.",
+      "answer": "A token average weights longer responses more heavily and defines a different objective from equal-response weighting."
+    },
+    {
+      "title": "Check the sampling law",
+      "task": "Average case B KL terms under the old uniform policy.",
+      "expected": "The value differs from current-policy KL.",
+      "hint": "The identity requires expectation under the numerator policy p.",
+      "answer": "Importance correction can recover the value expectation with adequate support, but has variance costs and does not by itself prove a gradient estimator is correct."
+    },
+    {
+      "title": "Separate value from derivative",
+      "task": "Evaluate the centered two-action surrogate at zero log odds.",
+      "expected": "Its value is 0 while its derivative is 0.5.",
+      "hint": "Each centered advantage multiplies a different probability derivative.",
+      "answer": "A zero average advantage or initial objective value does not imply absence of a learning signal."
+    },
+    {
+      "title": "Declare algorithm variants",
+      "task": "Change standard-deviation correction, epsilon or token reduction.",
+      "expected": "Record the change as part of the training algorithm.",
+      "hint": "These settings alter advantage or gradient weighting.",
+      "answer": "A shared acronym is insufficient to establish that two implementations optimize the same objective."
+    }
+  ],
+  "sources": [
+    ["GRPO outcome supervision and KL expression", "https://arxiv.org/html/2402.03300v3"],
+    ["PPO surrogate context", "https://arxiv.org/abs/1707.06347"]
+  ]
+}

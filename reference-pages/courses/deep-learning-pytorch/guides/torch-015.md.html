@@ -264,19 +264,19 @@ batches<span class="syntax-operator">=</span><span class="syntax-builtin">list</
 <ol>
 <li><strong>Inspect retained batches.</strong> Load five paired ID/value records with batch size 2 and no shuffle. <strong>Expected:</strong> sizes 2, 2, 1 and IDs 0..4 exactly once. <strong>Verify:</strong> Save the assertion results for exercise 1, including sizes 2, 2, 1 and IDs 0..4 exactly once.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Make dropping explicit.</strong> Set drop_last True on the same fixture. <strong>Expected:</strong> two batches; ID 4 omitted. <strong>Verify:</strong> Save the assertion results for exercise 2, including two batches; ID 4 omitted.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reproduce shuffle with a local generator.</strong> Construct two loaders with fresh generators both seeded 7. <strong>Expected:</strong> same permutation; all five IDs retained. <strong>Verify:</strong> Save the assertion results for exercise 3, including same permutation; all five IDs retained.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Collate variable-length sequences.</strong> Pad sequences[2, 3] and[4] with zero while keeping lengths. <strong>Expected:</strong> batch[[2, 3], [4, 0]] and lengths 2, 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including batch[[2, 3], [4, 0]] and lengths 2, 1.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve pairing after shuffle.</strong> Load values=2*IDs with shuffling and check each batch. <strong>Expected:</strong> every target equals twice its ID. <strong>Verify:</strong> Save the assertion results for exercise 5, including every target equals twice its ID.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid sequence records.</strong> Pass an empty sequence and floating, Boolean, negative or overflowing token IDs to the collator. <strong>Expected:</strong> ValueError before padding; token IDs must be nonnegative int64 integers. <strong>Verify:</strong> Save the assertion results for exercise 6, including ValueError before padding; token IDs must be nonnegative int64 integers.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

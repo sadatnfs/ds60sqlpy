@@ -1,0 +1,25 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-008", "apache-004", "java-001"],
+  "concepts": [
+    "execution graph",
+    "JobManager",
+    "TaskManager",
+    "boundedness",
+    "stream versus table"
+  ],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Flink DataStream overview",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/overview/"
+    ],
+    [
+      "Flink architecture",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/flink-architecture/"
+    ]
+  ]
+}

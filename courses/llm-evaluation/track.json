@@ -1,0 +1,515 @@
+{
+  "schema_version": 1,
+  "id": "llm-evaluation",
+  "title": "LLM evaluation and alignment",
+  "summary": "Scientific evaluation from task definitions and annotation to uncertainty, deployment decisions and preference optimization. Includes exact CPU mechanisms and small real PyTorch training runs with explicit inference boundaries.",
+  "lessons": [
+    {
+      "title": "Evaluation contracts, populations and estimands",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "python-08",
+        "llm-001"
+      ],
+      "concepts": [
+        "estimand",
+        "sampling unit",
+        "target population",
+        "missing labels",
+        "critical errors"
+      ],
+      "outcome": "Define which population, unit, loss and decision an evaluation estimates, and demonstrate why a different denominator can reverse its conclusion.",
+      "id": "eval-001",
+      "runtime": "python-core",
+      "lab": "Compute B minus A and then A minus B for one success gained by B.",
+      "verification": "The complete reference prints 'eval-001: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Evaluation data, grouping and contamination",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-001"
+      ],
+      "concepts": [
+        "group splits",
+        "temporal split",
+        "contamination",
+        "availability time",
+        "artifact identity"
+      ],
+      "outcome": "Build a reproducible family/time split and detect identifier, near-duplicate and availability-time leakage before scoring.",
+      "id": "eval-002",
+      "runtime": "python-core",
+      "lab": "Put two paraphrases from one family into train and test.",
+      "verification": "The complete reference prints 'eval-002: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Annotation rubrics and construct validity",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-002"
+      ],
+      "concepts": [
+        "rubric",
+        "construct validity",
+        "adjudication",
+        "denominator",
+        "label version"
+      ],
+      "outcome": "Turn an intended capability into auditable labels, distinguish disagreement from missing evidence, and preserve adjudication history.",
+      "id": "eval-003",
+      "runtime": "python-core",
+      "lab": "Score one level 2 criterion and one inapplicable criterion.",
+      "verification": "The complete reference prints 'eval-003: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Agreement, prevalence and adjudication uncertainty",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-003"
+      ],
+      "concepts": [
+        "Cohen kappa",
+        "weighted agreement",
+        "prevalence",
+        "reliability",
+        "confusion matrix"
+      ],
+      "outcome": "Calculate agreement with the correct marginals, explain prevalence effects, and distinguish reliable labels from valid labels.",
+      "id": "eval-004",
+      "runtime": "python-core",
+      "lab": "Rebuild the table in case A by counting label pairs.",
+      "verification": "The complete reference prints 'eval-004: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Stratified sampling and population weighting",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-001",
+        "eval-002"
+      ],
+      "concepts": [
+        "stratification",
+        "inclusion probability",
+        "Horvitz-Thompson",
+        "transport",
+        "effective sample size"
+      ],
+      "outcome": "Estimate a declared target mixture from an intentionally balanced evaluation and diagnose overlap and weight concentration.",
+      "id": "eval-005",
+      "runtime": "python-core",
+      "lab": "Use 25% routine and 75% rare in case A.",
+      "verification": "The complete reference prints 'eval-005: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Paired comparisons and clustered uncertainty",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-004",
+        "eval-005",
+        "statistics-003"
+      ],
+      "concepts": [
+        "paired comparison",
+        "permutation test",
+        "cluster bootstrap",
+        "exchangeability",
+        "confidence interval"
+      ],
+      "outcome": "Compute paired and family-level uncertainty while distinguishing a randomization null, a bootstrap approximation and a deployment claim.",
+      "id": "eval-006",
+      "runtime": "python-core",
+      "lab": "Use paired differences 0,0.",
+      "verification": "The complete reference prints 'eval-006: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Multiplicity and sequential release decisions",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-006"
+      ],
+      "concepts": [
+        "familywise error",
+        "Bonferroni",
+        "alpha spending",
+        "optional stopping",
+        "decision rule"
+      ],
+      "outcome": "Prespecify a family of comparisons and monitoring times, calculate conservative error control, and separate statistical evidence from release policy.",
+      "id": "eval-007",
+      "runtime": "python-core",
+      "lab": "Test one valid p-value 0.05 at alpha 0.05.",
+      "verification": "The complete reference prints 'eval-007: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Retrieval evaluation and ranking denominators",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-005",
+        "eval-006"
+      ],
+      "concepts": [
+        "recall at k",
+        "MRR",
+        "nDCG",
+        "judgment pools",
+        "candidate generation"
+      ],
+      "outcome": "Evaluate retrieval separately from answer quality with explicit relevance grades, duplicate handling and unjudged-document policy.",
+      "id": "eval-008",
+      "runtime": "python-core",
+      "lab": "Explain why case A has nDCG 1 but recall 2/3.",
+      "verification": "The complete reference prints 'eval-008: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Claim support, citations and evidence provenance",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-008",
+        "eval-003"
+      ],
+      "concepts": [
+        "citation precision",
+        "claim coverage",
+        "entailment labels",
+        "source version",
+        "access policy"
+      ],
+      "outcome": "Separate claim truth, citation support, evidence coverage and source availability using an auditable claim-document relation.",
+      "id": "eval-009",
+      "runtime": "python-core",
+      "lab": "Cite only c1 correctly among three eligible claims.",
+      "verification": "The complete reference prints 'eval-009: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Abstention, coverage and decision costs",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-005",
+        "eval-009"
+      ],
+      "concepts": [
+        "selective prediction",
+        "risk coverage",
+        "abstention",
+        "calibration",
+        "decision threshold"
+      ],
+      "outcome": "Choose and evaluate an abstention policy with explicit costs, coverage and held-out evidence instead of reporting only conditional accuracy.",
+      "id": "eval-010",
+      "runtime": "python-core",
+      "lab": "Use threshold 0 on the development fixture.",
+      "verification": "The complete reference prints 'eval-010: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Judge calibration and presentation bias",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-003",
+        "eval-004",
+        "eval-010"
+      ],
+      "concepts": [
+        "LLM as judge",
+        "position bias",
+        "counterbalancing",
+        "Brier score",
+        "calibration error"
+      ],
+      "outcome": "Audit a judge using identity-aware order swaps and held-out probability calibration while keeping agreement distinct from correctness.",
+      "id": "eval-011",
+      "runtime": "python-core",
+      "lab": "Candidate A is on the right and the left answer wins.",
+      "verification": "The complete reference prints 'eval-011: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Prompt, model and seed effects",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-006",
+        "eval-011"
+      ],
+      "concepts": [
+        "crossed design",
+        "interaction",
+        "prompt sensitivity",
+        "generation seed",
+        "replication"
+      ],
+      "outcome": "Analyze a crossed prompt/model/seed experiment and distinguish decoding variability from independent task evidence.",
+      "id": "eval-012",
+      "runtime": "python-core",
+      "lab": "Calculate candidate minus baseline under each prompt.",
+      "verification": "The complete reference prints 'eval-012: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Selection procedures and protected holdouts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-012",
+        "eval-007"
+      ],
+      "concepts": [
+        "selection bias",
+        "nested evaluation",
+        "holdout reuse",
+        "protocol freeze",
+        "winner optimism"
+      ],
+      "outcome": "Evaluate a complete model/prompt selection procedure without using final outcomes to choose the winner.",
+      "id": "eval-013",
+      "runtime": "python-core",
+      "lab": "Enumerate the four two-candidate noise combinations.",
+      "verification": "The complete reference prints 'eval-013: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Robustness, access policy and adversarial evaluation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-009",
+        "eval-011"
+      ],
+      "concepts": [
+        "metamorphic testing",
+        "access policy",
+        "prompt injection",
+        "critical-risk coverage",
+        "untrusted data"
+      ],
+      "outcome": "Build bounded adversarial and invariance tests while enforcing authorization independently of generated text or average answer quality.",
+      "id": "eval-014",
+      "runtime": "python-core",
+      "lab": "Change capitalization and surrounding whitespace in the query conversion.",
+      "verification": "The complete reference prints 'eval-014: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Monitoring, delayed labels and online experiments",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-007",
+        "eval-012",
+        "eval-014"
+      ],
+      "concepts": [
+        "label delay",
+        "distribution shift",
+        "Jensen-Shannon divergence",
+        "randomization unit",
+        "guardrails"
+      ],
+      "outcome": "Monitor mature cohorts and service behavior without confusing delayed outcomes or changing traffic with model improvement.",
+      "id": "eval-015",
+      "runtime": "python-core",
+      "lab": "Evaluate the two requests at day 2.",
+      "verification": "The complete reference prints 'eval-015: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "A reproducible evaluation decision packet",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-013",
+        "eval-015"
+      ],
+      "concepts": [
+        "decision memo",
+        "artifact digest",
+        "evidence ledger",
+        "minimum effect",
+        "unknown gates"
+      ],
+      "outcome": "Compute and seal a complete held-out decision packet from the connected synthetic ledger, preserving all failed and unknown conditions.",
+      "id": "eval-016",
+      "runtime": "python-core",
+      "lab": "Raise coverage to 0.9 while keeping the other authored inputs.",
+      "verification": "The complete reference prints 'eval-016: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Preference data and Bradley-Terry reward models",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-003",
+        "eval-011",
+        "llm-applied-020"
+      ],
+      "concepts": [
+        "Bradley-Terry",
+        "pairwise likelihood",
+        "identifiability",
+        "comparison graph",
+        "preference heterogeneity"
+      ],
+      "outcome": "Derive a pairwise reward likelihood, test its invariances and identify what comparison data cannot determine.",
+      "id": "eval-017",
+      "runtime": "python-core",
+      "lab": "Evaluate a positive comparison when both scores are zero.",
+      "verification": "The complete reference prints 'eval-017: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Train and audit a small reward model",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-017",
+        "torch-004"
+      ],
+      "concepts": [
+        "PyTorch reward model",
+        "pairwise training",
+        "shortcut learning",
+        "held-out preferences",
+        "autograd"
+      ],
+      "outcome": "Perform actual CPU gradient updates on a tiny reward predictor and expose a length shortcut using independent comparison features.",
+      "id": "eval-018",
+      "runtime": "llm-torch-cpu",
+      "lab": "Compare autograd at zero weights with \\(D^{\\mathsf T}(0.5-y)/n\\).",
+      "verification": "The complete reference prints 'eval-018: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "KL-regularized policies and reward exploitation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-017",
+        "eval-016"
+      ],
+      "concepts": [
+        "KL regularization",
+        "reference policy",
+        "finite policy",
+        "reward hacking",
+        "policy gradient"
+      ],
+      "outcome": "Derive an exact finite-policy optimum and show why improving a proxy reward can reduce independently defined task utility.",
+      "id": "eval-019",
+      "runtime": "python-core",
+      "lab": "Add 100 to every action reward.",
+      "verification": "The complete reference prints 'eval-019: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Direct Preference Optimization from ratios to gradients",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-019",
+        "llm-applied-015"
+      ],
+      "concepts": [
+        "DPO",
+        "reference log probability",
+        "Bradley-Terry",
+        "sequence likelihood",
+        "beta"
+      ],
+      "outcome": "Derive the DPO loss from a regularized preference model and distinguish sequence log probabilities, temperature effects and held-out evaluation.",
+      "id": "eval-020",
+      "runtime": "python-core",
+      "lab": "Set policy and reference log odds equal for any positive beta.",
+      "verification": "The complete reference prints 'eval-020: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Temporal credit, GAE and the PPO clipped objective",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-019",
+        "torch-004"
+      ],
+      "concepts": [
+        "GAE",
+        "termination",
+        "truncation",
+        "PPO clipping",
+        "old policy",
+        "reference policy"
+      ],
+      "outcome": "Compute temporal advantages with correct episode boundaries and inspect PPO clipping for both positive and negative advantages.",
+      "id": "eval-021",
+      "runtime": "python-core",
+      "lab": "Set lambda 0 in case A.",
+      "verification": "The complete reference prints 'eval-021: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Actual CPU PPO updates on a finite contextual policy",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-018",
+        "eval-021"
+      ],
+      "concepts": [
+        "PyTorch PPO",
+        "frozen rollout policy",
+        "critic",
+        "exact expectation",
+        "reward exploitation"
+      ],
+      "outcome": "Train a tiny categorical policy with the PPO surrogate and critic loss while testing frozen rollout state, optimization and independent task utility.",
+      "id": "eval-022",
+      "runtime": "llm-torch-cpu",
+      "lab": "Sum old-policy weights across both contexts and actions.",
+      "verification": "The complete reference prints 'eval-022: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "GRPO groups, normalization and KL estimators",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-021",
+        "eval-019"
+      ],
+      "concepts": [
+        "GRPO",
+        "group baseline",
+        "zero variance",
+        "length normalization",
+        "KL estimator"
+      ],
+      "outcome": "Compute group-relative advantages, expose degeneracy and weighting choices, and identify the sampling law required by a KL estimator.",
+      "id": "eval-023",
+      "runtime": "python-core",
+      "lab": "Add a common constant to 0,1,2,3.",
+      "verification": "The complete reference prints 'eval-023: all reference checks passed' after numerical and failure-case assertions."
+    },
+    {
+      "title": "Off-policy evaluation and the final alignment audit",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "eval-016",
+        "eval-020",
+        "eval-022",
+        "eval-023"
+      ],
+      "concepts": [
+        "importance sampling",
+        "self-normalization",
+        "doubly robust evaluation",
+        "overlap",
+        "independent utility"
+      ],
+      "outcome": "Evaluate a changed finite policy from logged actions with explicit propensity/support assumptions, and connect the result to an independent alignment decision.",
+      "id": "eval-024",
+      "runtime": "python-core",
+      "lab": "Set the target policy equal to the behavior policy in case A.",
+      "verification": "The complete reference prints 'eval-024: all reference checks passed' after numerical and failure-case assertions."
+    }
+  ]
+}

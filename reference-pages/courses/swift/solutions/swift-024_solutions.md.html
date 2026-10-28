@@ -202,19 +202,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Trace acquisition, use and defer cleanup.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Write and read two separate small files under the owned directory.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Persist a Codable value in a temporary file and validate after reading.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose assuming worker temporary files survive container replacement.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test empty bytes and a missing file as distinct outcomes.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design a durable app save with atomic replacement and a recoverable previous version.</li>
 </ol>
 <p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>

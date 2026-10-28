@@ -1,0 +1,58 @@
+{
+  "number": 16,
+  "title": "Joins, key validation and duplicate fanout",
+  "concepts": ["join grain", "key uniqueness", "fanout", "missing keys", "aggregation"],
+  "outcome": "Validate relational assumptions in DataFrames joins and reconcile totals before and after a merge.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-015"],
+  "sources": [
+    ["DataFrames join contracts", "https://dataframes.juliadata.org/stable/man/joins/"],
+    ["Existing SQL bag reasoning", "../../../sql/professional/README.md"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Trace the duplicate pair",
+      "task": "Join the duplicated right-side entity 1 observations.",
+      "expected": "The left entity 1 weight appears twice.",
+      "hint": "Enumerate the matching row pairs.",
+      "answer": "Join multiplicity can inflate a sum even when every individual match is syntactically valid."
+    },
+    {
+      "title": "Enforce a lookup contract",
+      "task": "Require uniqueness on the right lookup key.",
+      "expected": "The duplicate-key input is rejected.",
+      "hint": "Use the join validation option.",
+      "answer": "An executable cardinality check prevents an unintended many-to-many relationship from passing silently."
+    },
+    {
+      "title": "Aggregate at a declared grain",
+      "task": "Sum observations to one row per entity before the join.",
+      "expected": "Two entity rows and weight total 300 are preserved.",
+      "hint": "Choose an aggregation that matches the analytical question.",
+      "answer": "Preaggregation is a semantic decision, not a universal repair for duplicates."
+    },
+    {
+      "title": "Choose missing-key behavior",
+      "task": "Compare equal and nonmatching missing-key policies.",
+      "expected": "The fixture yields 1 or 0 matched rows.",
+      "hint": "Unknown keys do not imply identical entities.",
+      "answer": "The policy must reflect the data model and should be reported with excluded counts."
+    },
+    {
+      "title": "Inspect unmatched keys",
+      "task": "Use an outer join with an origin indicator.",
+      "expected": "The fixture exposes left-only, both and right-only rows.",
+      "hint": "Retain mismatch evidence.",
+      "answer": "A row-count total is not enough to explain which entities failed to match."
+    },
+    {
+      "title": "Avoid cosmetic deduplication",
+      "task": "Remove duplicate output rows without reviewing their cause.",
+      "expected": "The scientific meaning remains unresolved.",
+      "hint": "Reconcile the intended input/output grain first.",
+      "answer": "Distinct operations can conceal a modeling error and need their own justified rule."
+    }
+  ]
+}

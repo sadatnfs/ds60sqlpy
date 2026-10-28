@@ -274,19 +274,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Inspect a retained annotation.</strong> Read Version on the known Friendly provider. <strong>Expected:</strong> version 2. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with version 2.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Invoke a known public method reflectively.</strong> Findgreet(String) and invoke it with Ada. <strong>Expected:</strong> Hello, Ada. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with Hello, Ada.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Load a real local service descriptor.</strong> Create the temporaryMETA-INF/services entry and discover Greeting providers. <strong>Expected:</strong> oneFriendly provider with version 2 andworkinggreet. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with oneFriendly provider with version 2 andworkinggreet.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Preserve a reflected target failure.</strong> Invokegreet with blank text and inspect InvocationTargetException cause. <strong>Expected:</strong> causeIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with causeIllegalArgumentException.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject missing class and method contracts.</strong> Look up an absent class and an unsupportedgreet(int)signature. <strong>Expected:</strong> ClassNotFoundException and NoSuchMethodException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with ClassNotFoundException and NoSuchMethodException.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Treat provider metadata as a policy input.</strong> Accept provider versions1..2 and reject a hypotheticalversion3 under the current consumer contract. <strong>Expected:</strong> version 2 accepted;version 3 rejected. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with version 2 accepted;version 3 rejected.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

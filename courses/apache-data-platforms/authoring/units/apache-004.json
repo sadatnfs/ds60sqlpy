@@ -1,0 +1,13 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "beginner",
+  "minutes": 70,
+  "prerequisites": ["apache-003"],
+  "concepts": ["network namespaces", "Compose DNS", "listeners", "bounded RPC"],
+  "evidence": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad.",
+  "sources": [
+    ["Docker Compose networking", "https://docs.docker.com/compose/how-tos/networking/"],
+    ["Arrow Flight protocol", "https://arrow.apache.org/docs/format/Flight.html"]
+  ]
+}

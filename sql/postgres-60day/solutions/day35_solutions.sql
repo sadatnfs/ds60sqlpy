@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 1: three sargable rewrites.
 -- 1a. Range bounds instead of date_trunc(order_date).
 SELECT
@@ -23,6 +24,7 @@ FROM
 WHERE
   order_date >= date_trunc('month', CURRENT_TIMESTAMP)
   AND order_date < date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month';
+
 -- 1b. Exact comparison can use the unique email B-tree.
 SELECT
   customer_id
@@ -30,6 +32,7 @@ FROM
   customers
 WHERE
   email = 'customer100@example.com';
+
 -- 1c. country is NOT NULL, so COALESCE is unnecessary.
 SELECT
   COUNT(*)
@@ -37,6 +40,7 @@ FROM
   customers
 WHERE
   country = 'US';
+
 -- Exercise 2: replace a per-customer correlated aggregate with one grouped CTE.
 WITH order_totals AS (
   SELECT
@@ -59,6 +63,7 @@ FROM
 ORDER BY
   revenue DESC,
   c.customer_id;
+
 -- Exercise 3: a prefix has a searchable starting point; a leading wildcard
 -- generally cannot seek into a normal B-tree text index.
 EXPLAIN
@@ -68,6 +73,7 @@ FROM
   customers
 WHERE
   full_name LIKE 'A%';
+
 EXPLAIN
 SELECT
   customer_id
@@ -75,6 +81,7 @@ FROM
   customers
 WHERE
   full_name LIKE '%A%';
+
 -- Exercise 4: keyset paging starts strictly after the final tuple from the
 -- previous page and repeats the identical deterministic ordering.
 WITH boundary AS (
@@ -99,6 +106,7 @@ ORDER BY
   o.order_date DESC,
   o.order_id DESC
 LIMIT 20;
+
 -- Exercise 5: independent pre-aggregations prevent payment/item fanout.
 WITH paid AS (
   SELECT
@@ -129,6 +137,7 @@ FROM
 ORDER BY
   o.order_id
 LIMIT 20;
+
 -- Exercise 6: COUNT(expression) intentionally ignores NULL expression values.
 SELECT
   COUNT(*) AS customer_rows,
@@ -136,4 +145,5 @@ SELECT
   COUNT(*) - COUNT(email) AS customers_without_email
 FROM
   customers;
+
 ROLLBACK;

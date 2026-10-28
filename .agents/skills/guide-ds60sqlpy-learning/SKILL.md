@@ -21,7 +21,9 @@ notice. For legacy Python/SQL/bridge use the catalog and planner. For modern
 subjects use `ModuleCatalog`, the authored manifest and the selected variant.
 Use `module_subjects`, `module_lessons` and `module_lesson` through the MCP
 adapter when available. Planned metadata is not proof of an authored lesson.
-The statistics book's `learning_mode: tutorial` exposes complete worked answers.
+The catalog's `learning_mode: tutorial` exposes complete worked answers for the
+statistics book, Applied Science and Bayesian Computing. Do not apply a practice
+answer gate to those tracks.
 
 The library includes programming, SQL, systems, statistics, ML/NLP/LLMs,
 GPU/CUDA and HTML/CSS/PHP web development. Derive the inventory rather than
@@ -51,12 +53,42 @@ unselected workers already running. Ordinary default/`--all` excludes GPU and
 owned-cluster preparation. Hub mode does not fall back to compiling images.
 An interrupted initial preparation can retain completed images and selection.
 
+For a matching CI-published release, use
+`./classroom --all --from-hub USER --tag VERSION` to pull and start the ordinary
+set, or `./classroom pull --all --from-hub USER --tag VERSION` to download only.
+The default layout uses combined Linux AMD64/ARM64 indexes. A matching checkout
+or starter ZIP is still required, and Hub mode never falls back to local builds.
+
+An explicit `--tag latest` resolves to a concrete app version, must match the
+checkout, and pins that version for workers and future resume. Bare
+`./classroom resume` never pulls or follows a moving alias. Apply an intentional
+source/version/layout change with `--rebuild` on the same project; in Hub mode
+it pulls and applies images without compiling.
+
+Manual local publication uses architecture tags. Select those with
+`--architecture-tags`; an ARM64-only publication cannot serve an AMD64 engine.
+Older saved Hub preferences retain their architecture layout automatically.
+Do not switch a learner to another tag layout or version during routine resume.
+
+For an owner requesting publication instructions, distinguish two routes.
+The local `./classroom publish --to-hub USER --tag VERSION` previews existing
+single-architecture images, and `--push` uploads after operator authentication.
+CI builds both architectures only on a push to `main` whose HEAD message
+contains `[publish-docker]`, using the two repository Actions secrets. It
+promotes combined version/latest tags only after its checks. Do not add the
+marker or push images without publication authorization, and never ask the
+learner to paste token values into chat or source. Use the
+[Docker Hub guide](../../../docs/dockerhub.md) for the complete commands.
+A configured workflow, staging tag or local pass does not prove a completed
+release. Private repositories require appropriate Docker authentication.
+
 Named volumes store learner work, PostgreSQL and private runtime state.
 `.classroom/<project>/` stores launcher preferences, not a full backup. Changing
 project or engine can make data appear absent. Do not delete settings, images
 or volumes, reinstall an engine or reset progress as a routine resume repair.
 Automatic host-port changes may recreate only the app from its existing image;
-that does not imply a rebuild. Follow documented backup/transfer instructions.
+that does not imply a rebuild. Publishing and pulling images do not transfer
+saved progress; follow documented backup/transfer instructions.
 
 Static `START_HERE.html` is an offline reader, not an executor. Contributor
 `ds60 serve`, local Jupyter and external projects are distinct prepared workflows,
@@ -81,11 +113,12 @@ unasked. An error explanation alone does not authorize replacing the attempt,
 running code, resetting a database or recording completion. Carry out actions
 the learner requests using authorization already present in the conversation.
 
-For tutorial chapters, teach assumptions, equations, worked Python, use cases,
-limitations and answered interview discussion directly. The statistics book
-has no mandatory problem sets, prediction gate or hidden answers. Optional
-conversation can clarify understanding without converting its read marker into
-a mastery score.
+For tutorial chapters, teach assumptions, equations, worked code, use cases,
+limitations and answered interview discussion directly. Statistics/ML, Applied
+Science, Bayesian Computing, Data and ML Engineering and the Apache/open-data
+tutorials have no mandatory problem sets, prediction gate or hidden answers.
+Optional conversation can clarify understanding without converting its read
+marker into a mastery score.
 
 ## Match the actual execution surface
 
@@ -113,9 +146,32 @@ different things. Opening a lesson must not install packages or fetch models.
   PyMC uses its separately pinned Bayesian environment. Explain the actual
   diagnostics and state boundaries rather than equating a successful exit with
   reliable inference.
-- Python/R figure history contains captured images or chart data from the named
+- Python/R/Julia figure history and structured table/JSON reports contain output from the named
   source. Viewing it does not rerun code. Compare the edited draft separately,
   and report a capture warning without discarding a real calculation result.
+- Polars and canonical dbt/ML programs use `data-engineering`, not whichever
+  Python happens to be installed. dbt SQL-model variants accept one SQL/Jinja
+  model in a fixed fixture. Full configuration and persistent project work use
+  the documented Python/CLI route; there is no arbitrary multi-file browser editor.
+- Apache library examples use `data-platforms-python` with its declared Arrow,
+  DataFusion and PyIceberg versions. Persistent services and Ballista use
+  separately prepared owned projects. Consult their current qualification ledger;
+  a client or command notebook is not evidence of a running server. Atlas and
+  Delta Sharing retain explicit separate-server preparation boundaries.
+- Stan compiles `main.stan` with small transformed-data fixtures and fixed short
+  chains. Interpret actual diagnostics, including undefined values for constants.
+  Real JSON data uses the separate CmdStanPy project and saved-output directory.
+- Julia starts a fresh process with two threads and prepared packages in a
+  read-only depot. The classroom `DS60Plots` helper is not a standard Julia package.
+- The local ML service has its own owned Docker lifecycle and persistent state.
+  Its predictor reads state; version activation uses the explicit CLI. Starting
+  an ordinary lesson does not create a cloud service or retrain that project.
+- The engineering book's data-product project has separate accepted raw data,
+  immutable publication and recovery state. Its inference project loads a tiny
+  actual model, queues bounded requests and retains SSE history. Explain model
+  tokens, transport events and network chunks separately. Viewing a completed
+  request is readback, not another generation. Follow each project's explicit
+  start/resume/replace commands and preserve its private `.workshop/` directory.
 - PHP CLI supports its prepared SQLite examples. Real HTTP cookies/sessions use
   the separately owned web fixture; a request model is not a real web exchange.
 - CUDA reading, CPU models, device compilation, GPU execution and profiling are
@@ -159,3 +215,11 @@ already-authorized scope and do not manufacture evidence for an unperformed run.
 
 For curriculum implementation, switch to
 [add-learning-path](../add-learning-path/SKILL.md) and its subject guidance.
+
+Use [the scientist roadmap](../../../docs/scientist-roadmap.md) for cross-subject
+placement. It distinguishes already implemented foundations from deeper branches.
+A large course inventory is not a prescribed sequence or evidence of expertise.
+When interpreting structured output, inspect its source, data grain, units and
+assumptions. A saved JSON/table result does not recalculate from an edited draft.
+Storage warnings, computation failures, scientific diagnostics and unqualified
+external systems are different findings and need different next steps.

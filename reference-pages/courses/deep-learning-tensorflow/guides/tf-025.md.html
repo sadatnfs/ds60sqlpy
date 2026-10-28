@@ -275,19 +275,19 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <ol>
 <li><strong>Compare similarity measures.</strong> Use anchor[1,0],positive[1,1],negative[0,1]; compute dots and cosines. <strong>Expected:</strong> dots1,0; cosines1/sqrt2,0. <strong>Verify:</strong> Save the assertion results for exercise 1, including dots1,0; cosines1/sqrt2,0.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Scale a candidate.</strong> Multiply the positive vector by10 and compare dot product and cosine. <strong>Expected:</strong> dot10; cosine unchanged. <strong>Verify:</strong> Save the assertion results for exercise 2, including dot10; cosine unchanged.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Calculate a contrastive loss.</strong> Use logits[1,0] with the positive at index0. <strong>Expected:</strong> losslog(1+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>exp</mi><mo>⁡</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">exp</span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>). <strong>Verify:</strong> Save the assertion results for exercise 3, including losslog(1+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>exp</mi><mo>⁡</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">exp</span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>).</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect a false negative.</strong> Replace the negative vector and identity with the positive identity. <strong>Expected:</strong> duplicate positive/negative identity is flagged. <strong>Verify:</strong> Save the assertion results for exercise 4, including duplicate positive/negative identity is flagged.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Observe temperature.</strong> Compare softmax[1,0] at temperatures1 and.5. <strong>Expected:</strong> positive probability increases at.5; ranking stays0 first. <strong>Verify:</strong> Save the assertion results for exercise 5, including positive probability increases at.5; ranking stays0 first.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject undefined cosine.</strong> Implement cosine with finite and nonzero-norm checks; pass a zero anchor. <strong>Expected:</strong> ValueError for zero norm. <strong>Verify:</strong> Save the assertion results for exercise 6, including ValueError for zero norm.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

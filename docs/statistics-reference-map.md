@@ -49,3 +49,20 @@ external production systems require their own focused study. Keep that boundary
 explicit when extending coverage. Correct code and readable mathematics are
 necessary checks; they do not establish that an analysis answers the right
 scientific question.
+
+## Deeper applied and computational routes
+
+The [scientist roadmap](scientist-roadmap.md) records how the October review's
+recommendations map to current courses. [Applied Science](../courses/applied-science/README.md)
+develops causal identification, forecast vintages/reconciliation, fitted survival,
+learned ranking, uncertainty-aware decisions, synthesis and spatial/survey methods.
+[Bayesian Computing](../courses/bayesian-computing/README.md) adds actual PyMC/ArviZ
+and native Stan modeling with diagnostic and decision limitations made explicit.
+Both retain complete tutorial answers without exams.
+
+[LLM evaluation](../courses/llm-evaluation/README.md) connects sampling, annotation,
+paired uncertainty and held-out comparisons to language-system decisions and
+preference objectives. [ML engineering](../courses/ml-engineering/README.md)
+connects scientific validity to feature/training/serving and rollback evidence.
+These additions deepen selected workflows; they do not turn every specialist
+capsule into an exhaustive textbook or establish production quality from a toy fit.

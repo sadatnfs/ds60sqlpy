@@ -1,11 +1,11 @@
 -- Day 42: Data Quality & Validation
--- BEGINNER WORKFLOW — sql-42: Data Quality Validation
+-- BEGINNER WORKFLOW - sql-42: Data Quality Validation
 -- Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-42/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-42.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Null analysis and basic profiling
 SELECT
   'customers' AS table,
@@ -36,6 +37,7 @@ SELECT
     END) AS null_country
 FROM
   customers;
+
 -- Duplicate detection (emails should be unique ideally)
 SELECT
   email,
@@ -48,6 +50,7 @@ HAVING
   COUNT(*) > 1
 ORDER BY
   cnt DESC;
+
 -- Orphan checks (should be zero due to FK, but as validation queries)
 SELECT
   oi.order_id
@@ -57,6 +60,7 @@ FROM
 WHERE
   o.order_id IS NULL
 LIMIT 10;
+
 SELECT
   p.payment_id
 FROM
@@ -65,6 +69,7 @@ FROM
 WHERE
   o.order_id IS NULL
 LIMIT 10;
+
 -- Domain/constraint validation examples
 SELECT
   *
@@ -73,6 +78,7 @@ FROM
 WHERE
   total_amount < 0
 LIMIT 10;
+
 SELECT
   *
 FROM
@@ -80,6 +86,7 @@ FROM
 WHERE
   amount < 0
 LIMIT 10;
+
 -- Exercises
 -- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.
 --    Inputs: For sql-42 Exercise 1, read from `customers`, `orders`, `order_items`, `products`, and `payments`. Build the answer toward `check_name`, and `failing_rows`; keep `check_name` visible whenever the result has row-level grain.

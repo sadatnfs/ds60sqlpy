@@ -8,8 +8,13 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL lock_timeout = '2s';
+
 SET LOCAL statement_timeout = '10s';
+
 DROP TABLE sql_concurrency_live.stock;
+
 DROP SCHEMA sql_concurrency_live;
+
 COMMIT;

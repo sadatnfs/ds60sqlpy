@@ -275,19 +275,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Calculate the equal-margin loss.</strong> Set policy difference 0, reference difference 0, beta.5. <strong>Expected:</strong> loss <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span>. <strong>Verify:</strong> Save the assertion results for exercise 1, including loss <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span>.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect the preference gradient.</strong> Backpropagate the equal-margin loss. <strong>Expected:</strong> gradient-.25. <strong>Verify:</strong> Save the assertion results for exercise 2, including gradient-.25.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Perform an actual update.</strong> Take SGD at 0.2 on the scalar policy difference and recompute the loss. <strong>Expected:</strong> difference.05; loss below <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span>. <strong>Verify:</strong> Save the assertion results for exercise 3, including difference.05; loss below <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span>.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reverse the preference.</strong> At zero policy difference, reverse the chosen/rejected orientation and inspect the gradient. <strong>Expected:</strong> gradient+.25. <strong>Verify:</strong> Save the assertion results for exercise 4, including gradient+.25.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Separate objective and factual support.</strong> Record a preferred fluent answer that invents a metric denominator. <strong>Expected:</strong> preference True; source_supported False; not accepted as a grounded answer. <strong>Verify:</strong> Save the assertion results for exercise 5, including preference True; source_supported False; not accepted as a grounded answer.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Name the unexecuted RLHF machinery.</strong> Create an execution receipt distinguishing the scalar offline update from reward-model training and online policy optimization. <strong>Expected:</strong> offline update True; reward_model_trained False; online_rl False. <strong>Verify:</strong> Save the assertion results for exercise 6, including offline update True; reward_model_trained False; online_rl False.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

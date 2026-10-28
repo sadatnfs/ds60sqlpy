@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-028", "apache-030", "apache-031"],
+  "concepts": ["component health", "task states", "persistent metadata", "recovery evidence"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Airflow health checks",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/administration-and-deployment/logging-monitoring/check-health.html"
+    ],
+    [
+      "Airflow standalone boundary",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/start.html"
+    ]
+  ]
+}

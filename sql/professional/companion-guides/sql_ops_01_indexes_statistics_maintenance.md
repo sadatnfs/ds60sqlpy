@@ -1,27 +1,5 @@
 # SQL-OPS-01 - Index Types, Statistics, and Maintenance Lifecycle
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-35` and `sql-types-01`
-- **Prerequisites:** SQL Days 31–34 on plans and B-tree indexes,
-  [SQL Day 35 query pitfalls](../../postgres-60day/companion-guides/day35_avoiding_pitfalls.md),
-  plus
-  [SQL-TYPES-01](sql_types_01_native_types_search.md) for array/range operators.
-- **Artifacts:** [learner SQL](../lessons/sql_ops_01_indexes_statistics_maintenance.sql) ·
-  [solution reasoning](../solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md) ·
-  [executable solution](../solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql)
-
-Run from the repository root:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql
-```
-
-The same command works in PowerShell and POSIX shells. The default lab rolls
-back. It reads configuration/statistics but never changes host settings, runs
-`VACUUM`, or enables `pg_stat_statements`.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -86,6 +64,28 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-35` and `sql-types-01`
+- **Prerequisites:** SQL Days 31–34 on plans and B-tree indexes,
+  [SQL Day 35 query pitfalls](../../postgres-60day/companion-guides/day35_avoiding_pitfalls.md),
+  plus
+  [SQL-TYPES-01](sql_types_01_native_types_search.md) for array/range operators.
+- **Artifacts:** [learner SQL](../lessons/sql_ops_01_indexes_statistics_maintenance.sql) ·
+  [solution reasoning](../solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md) ·
+  [executable solution](../solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql)
+
+Run from the repository root:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql
+```
+
+The same command works in PowerShell and POSIX shells. The default lab rolls
+back. It reads configuration/statistics but never changes host settings, runs
+`VACUUM`, or enables `pg_stat_statements`.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -105,7 +105,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

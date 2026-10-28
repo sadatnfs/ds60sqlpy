@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.
 -- Assumptions: Course emails use one `@`; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.
@@ -40,6 +41,7 @@ FROM
   customers AS c
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Extract the email domain and count customers by domain, preserving missing emails.
@@ -67,6 +69,7 @@ GROUP BY
 ORDER BY
   customer_count DESC,
   email_domain;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Create an ordered comma-separated list of department employee names.
@@ -92,6 +95,7 @@ GROUP BY
   d.name
 ORDER BY
   d.department_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.
@@ -110,6 +114,7 @@ FROM (
   VALUES ('  Data   Tools  '),
     (E'one\ttwo'),
     (E'line1\nline2')) AS sample (source_text);
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.
@@ -133,6 +138,7 @@ WHERE
   OR c.full_name LIKE '%\_%' ESCAPE '\'
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Parse the numeric suffix from names like `Customer 42`, returning NULL for nonmatching text.
@@ -158,5 +164,6 @@ FROM
   customers AS c
 ORDER BY
   c.customer_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

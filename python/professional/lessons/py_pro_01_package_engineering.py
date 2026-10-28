@@ -72,7 +72,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "tiny_package"
+from ds60sqlpy.teaching_data import teaching_fixture
+
+FIXTURE = teaching_fixture("tiny-package-project").parent
 
 
 def read_project_table(project_root: Path = FIXTURE) -> dict[str, Any]:

@@ -225,7 +225,7 @@ causes a failure instead of an unexpected build or download.
 set -eu
 backup_dir="$HOME/Documents/REPLACE_WITH_YOUR_BACKUP_FOLDER"
 restore_project="ds60-restored-$(date +%Y%m%d-%H%M%S)"
-restore_tag=0.5.0
+restore_tag=1.0.0
 [[ "$restore_project" =~ ^[a-z0-9][a-z0-9_-]*$ ]]
 docker info --format '{{.OSType}}'
 [ -d "$backup_dir" ]

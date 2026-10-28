@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- A reconciled KPI suite at customer grain.
 WITH customer_ltv AS (
   SELECT
@@ -41,6 +42,7 @@ GROUP BY
 ORDER BY
   cohort_month DESC,
   total_ltv DESC;
+
 -- Ordered conversion funnel with rates and a stable customer denominator.
 -- A later action counts only after the same customer completed the prior one;
 -- independent reach counts are useful diagnostics, but are not conversions.
@@ -124,6 +126,7 @@ SELECT
   ROUND(COUNT(*) FILTER (WHERE bought)::numeric / NULLIF (COUNT(*) FILTER (WHERE viewed), 0), 4) AS viewer_to_buyer_rate
 FROM
   activity;
+
 -- Finance stakeholder view: YTD budget versus actual.
 WITH actual AS (
   SELECT
@@ -157,8 +160,10 @@ FROM
   FULL OUTER JOIN budget b USING (category)
 ORDER BY
   category;
+
 -- Performance evidence: add a candidate index and inspect the actual plan.
 CREATE INDEX idx_orders_customer_date_day59_solution ON orders (customer_id, order_date) INCLUDE (total_amount);
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -175,6 +180,7 @@ GROUP BY
 ORDER BY
   revenue DESC
 LIMIT 50;
+
 -- Exercise 1: an executable grain map makes transitions reviewable. The LTV
 -- pipeline starts at order rows, aggregates to customer, then summarizes by
 -- cohort/segment; joining a lower grain after that would change the metric.
@@ -184,6 +190,7 @@ FROM (
   VALUES ('order_values', 'one row per order', 'customer_id + order_id'),
     ('customer_ltv', 'one row per customer', 'customer_id'),
     ('cohort_segment_summary', 'one row per cohort/segment', 'cohort_month + segment')) AS grain_map (step_name, row_grain, key_columns);
+
 -- Exercise 2: require each later stage to occur at or after the prior stage.
 -- Independent reach counts are not funnel conversions and can exceed 100%.
 WITH viewed_stage AS (
@@ -284,6 +291,7 @@ SELECT
   ROUND(buyers::numeric / NULLIF (checkouts, 0), 4) AS checkout_to_buy
 FROM
   counts;
+
 -- Exercise 3: reconcile candidate revenue measures at order grain before a
 -- stakeholder chooses one. Differences are evidence, not values to hide.
 WITH lines AS (
@@ -318,6 +326,7 @@ FROM
 ORDER BY
   o.order_id
 LIMIT 50;
+
 -- Exercise 4: each purchase gets the latest qualifying campaign or the direct
 -- bucket. Starting from orders guarantees the buckets reconcile to purchases.
 SELECT
@@ -345,9 +354,11 @@ GROUP BY
 ORDER BY
   purchases DESC,
   attribution_bucket;
+
 -- Exercise 5: the date-leading index matches the bounded-date scan, while the
 -- customer-leading index better supports one customer's ordered history.
 CREATE INDEX idx_orders_date_customer_day59_solution ON orders (order_date, customer_id) INCLUDE (total_amount);
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -361,11 +372,13 @@ WHERE
   order_date >= CURRENT_TIMESTAMP - interval '180 days'
 GROUP BY
   customer_id;
+
 -- Exercise 6: a metric contract is data, not an undocumented assumption.
 SELECT
   *
 FROM (
   VALUES ('viewer_to_buyer_rate', 'one row for the 90-day reporting window', 'distinct customers with an order', 'distinct customers with a page_view', 'UTC timestamps; trailing 90 days', 'NULL when denominator is zero', 'test/internal events excluded only when explicitly labeled', 'analytics owner')) AS metric_contract (metric_name, grain, numerator, denominator, time_window, null_policy, exclusions, owner);
+
 -- Exercise 7: basket pairs use distinct product/order membership. Minimum
 -- together count controls noise; deterministic ties use product IDs.
 WITH baskets AS (
@@ -423,6 +436,7 @@ ORDER BY
   product_a,
   product_b
 LIMIT 20;
+
 -- Exercise 8: named controls make cross-domain sign-off machine-readable.
 SELECT
   'customers' AS control_name,
@@ -455,4 +469,5 @@ FROM
   payments
 ORDER BY
   control_name;
+
 ROLLBACK;

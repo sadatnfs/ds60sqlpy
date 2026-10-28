@@ -242,19 +242,19 @@ split<span class="syntax-operator">=</span><span class="syntax-punctuation">{</s
 <ol>
 <li><strong>Build a literal model bundle.</strong> Create a float32 two-feature model with coefficient[2,-1] and schema width2. <strong>Expected:</strong> probe[3,4] predicts2. <strong>Verify:</strong> Save the assertion results for exercise 1, including probe[3,4] predicts2.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Freeze and hash a split manifest.</strong> Hash train IDs[a,b] and test IDs[c,d] using canonical JSON. <strong>Expected:</strong> disjoint IDs and a64-character SHA256. <strong>Verify:</strong> Save the assertion results for exercise 2, including disjoint IDs and a64-character SHA256.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Catch tampered lineage.</strong> Change one test ID and compare the resulting digest. <strong>Expected:</strong> digest differs. <strong>Verify:</strong> Save the assertion results for exercise 3, including digest differs.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Block incompatible schemas.</strong> Compare an incoming three-feature schema with the frozen two-feature schema before prediction. <strong>Expected:</strong> schema gate isFalse. <strong>Verify:</strong> Save the assertion results for exercise 4, including schema gate isFalse.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Make the decision fail closed.</strong> Evaluate required gates with an unexecuted restart proof represented asNone, then with an actual failed schema gate. <strong>Expected:</strong> both decisionsno-go. <strong>Verify:</strong> Save the assertion results for exercise 5, including both decisionsno-go.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Retain a rollback decision.</strong> Construct a release record with previous artifact ID, holdout count and limits; keep no-go when any gate fails. <strong>Expected:</strong> decisionno-go and previous artifactv1 retained. <strong>Verify:</strong> Save the assertion results for exercise 6, including decisionno-go and previous artifactv1 retained.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

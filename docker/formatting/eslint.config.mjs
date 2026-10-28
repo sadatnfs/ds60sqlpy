@@ -66,7 +66,11 @@ export default [
     languageOptions: { globals: { ...globals.node } },
   },
   {
-    files: ["src/ds60sqlpy/assets/**/*.js", "courses/javascript-typescript/**/*.js"],
+    files: [
+      "src/ds60sqlpy/assets/**/*.js",
+      "courses/javascript-typescript/**/*.js",
+      "courses/data-ml-engineering/projects/inference-service/app.js",
+    ],
     languageOptions: {
       sourceType: "script",
       globals: { ...globals.browser },

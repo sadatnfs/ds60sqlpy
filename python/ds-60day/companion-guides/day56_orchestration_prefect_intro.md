@@ -1,6 +1,9 @@
 # Day 56: Orchestration with Prefect 3
 
-**Lesson ID:** `python-56` · **Level:** advanced · **Dependencies:** `production` · **Network:** first-run Seaborn cache
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
+**Lesson ID:** `python-56` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
 
 Orchestration coordinates when and how a workflow runs, records state, and helps
 operators recover from failure. It does not make a non-idempotent, leaky, or
@@ -18,17 +21,21 @@ By the end of the lesson, you can:
 
 ## Prerequisites
 
-- Complete `python-55` (containerization).
-- Recall the Day 45 training pipeline and Day 53 run metadata.
-- Install the `production` dependency group.
-- Cache Seaborn's Titanic dataset once while connected before offline study.
+Complete Day 55 and prepare the `production` and data dependencies in the
+explicit contributor or customized app environment. Default Core does not
+include Prefect. The checked-in original passenger-outcomes fixture needs no
+network; its values teach methods and are not observational evidence.
 
 ## Dataset and execution contract
 
-The learner flow loads `seaborn.load_dataset("titanic")`; the first call may
-download and cache the dataset. After that accepted bootstrap, direct local flow
-runs are offline. The Prefect UI and local server are optional; Prefect Cloud is
-not required.
+The default data path is offline: `load_teaching_frame("passenger-outcomes")`
+reads the checked-in original synthetic fixture. No Seaborn download occurs.
+`RUN_LOCAL_PREFECT_FLOW` defaults to false, so Run All defines the flow without
+starting a run or local API. To execute it, prepare Prefect 3, deliberately start
+a loopback server, configure its API URL in that separate environment, then enable
+the flag. The notebook rejects an unconfigured or non-loopback API. An offline
+dataset does not remove Prefect's process, metadata-store and package requirements.
+Numeric coercion is deterministic; imputation and scaling fit only training rows.
 
 ## Vocabulary and mental models
 
@@ -69,23 +76,23 @@ if __name__ == "__main__":
     summary_flow(limit=10)
 ```
 
-This runs directly in one local process and needs no server. Add retries only to
+Calling a Prefect 3 flow records orchestration state through an API. Depending on configuration it can start a temporary local server or use a configured server. The learner notebook requires an explicitly prepared loopback API and an opt-in call; the snippet above is for that prepared environment. Add retries only to
 operations that can safely repeat and whose failures are plausibly transient.
 
 ## Optional local Prefect 3 UI
 
-Start the local server.
+Start the local server in the separately prepared environment. Set its displayed loopback API URL with `prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api` only after verifying that this is the server you started. Do not use a hosted or unrelated profile for this exercise.
 
 macOS/Linux:
 
 ```bash
-.venv/bin/prefect server start
+.venv/bin/prefect server start --host 127.0.0.1
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\.venv\Scripts\prefect.exe server start
+.\.venv\Scripts\prefect.exe server start --host 127.0.0.1
 ```
 
 Follow the CLI output for the local API URL and open the displayed local UI
@@ -97,10 +104,13 @@ after the direct flow is correct, and keep its serving process running.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-56` for its guide, notebook and capability notice. The default Core does not include the `production` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [data and ML engineering course](../../../courses/data-ml-engineering/guides/dme-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `production` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+Teaching data are checked in and offline. Prefect remains a separately prepared dependency with local API/state requirements. Flow execution is opt-in; scheduling and a persistent UI require a separately managed local project, not the default Core pad.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -109,8 +119,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 56 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -318,7 +327,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-56` — Day 56 — Orchestration with Prefect 3.
+Tutor me through `python-56` : Day 56 : Orchestration with Prefect 3.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize observable task boundaries, retries, caching, and idempotent orchestration. Use exactly these maintained learner materials:

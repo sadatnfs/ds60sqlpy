@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO dwh, training, public;
+
 DO $require_day52$
 BEGIN
   IF to_regclass('dwh.dim_customer') IS NULL THEN
@@ -21,13 +22,16 @@ BEGIN
   END IF;
 END
 $require_day52$;
+
 -- Exercise 2: audit metadata on both changing dimensions.
 ALTER TABLE dim_customer
   ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,
   ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
 ALTER TABLE dim_product
   ADD COLUMN updated_by text NOT NULL DEFAULT CURRENT_USER,
   ADD COLUMN updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
 -- A deterministic customer change effective 30 days ago.
 CREATE TEMP TABLE staged_customer_change AS
 SELECT
@@ -45,6 +49,7 @@ FROM
 WHERE
   customer_id = 1
   AND is_current;
+
 UPDATE
   dim_customer dc
 SET
@@ -57,6 +62,7 @@ FROM
 WHERE
   dc.customer_id = s.customer_id
   AND dc.is_current;
+
 INSERT INTO dim_customer (customer_id, full_name, country, segment, country_sk, valid_from, valid_to, is_current, updated_by, updated_at)
 SELECT
   s.customer_id,
@@ -72,6 +78,7 @@ SELECT
 FROM
   staged_customer_change s
   JOIN dim_country co ON co.country_code = s.country;
+
 -- Exercise 1: rebuild a fact-key mapping by choosing the dimension versions
 -- whose validity intervals contain each order date.
 CREATE TEMP TABLE fact_sales_temporal_solution AS
@@ -95,6 +102,7 @@ FROM
   JOIN dim_product dp ON dp.product_id = oi.product_id
     AND o.order_date::date >= dp.valid_from
     AND o.order_date::date <= COALESCE(dp.valid_to, 'infinity'::date);
+
 SELECT
   (
     SELECT
@@ -113,6 +121,7 @@ SELECT
       dim_customer
     WHERE
       customer_id = 1) AS customer_versions;
+
 -- Exercise 3: date-grain closed intervals cannot represent two ordered changes
 -- on one date without an invalid or overlapping range. Surface that limitation.
 SELECT
@@ -127,6 +136,7 @@ WHERE
   customer_id = 1
 ORDER BY
   valid_from;
+
 -- Exercise 4: each pair is compared once. Inclusive validity ranges overlap
 -- when neither ends before the other begins.
 SELECT
@@ -147,6 +157,7 @@ FROM
     a.customer_id,
     version_a,
     version_b;
+
 -- Exercise 5: replay the SAME desired state used by the first application.
 -- Comparing to training.customers here would be wrong: Exercise 2 deliberately
 -- changed the segment only in staged_customer_change and dim_customer.
@@ -169,9 +180,11 @@ WHERE
   AND (dc.full_name IS DISTINCT FROM desired.full_name
     OR dc.country IS DISTINCT FROM desired.country
     OR dc.segment IS DISTINCT FROM desired.segment);
+
 -- Exercise 6: timestamp-effective ranges support same-day ordering, but require
 -- source effective timestamps (or a source sequence), not load time guesses.
 SELECT
   '[2026-01-15 09:00+00,2026-01-15 12:00+00)'::tstzrange AS first_version,
   '[2026-01-15 12:00+00,infinity)'::tstzrange AS second_version;
+
 ROLLBACK;

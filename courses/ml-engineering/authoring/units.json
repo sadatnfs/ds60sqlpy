@@ -1,0 +1,1415 @@
+{
+  "id": "ml-engineering",
+  "title": "Machine learning engineering",
+  "summary": "Build and investigate a connected local ML system: historical features, Feast, train/serve consistency, evaluation, MLflow, real API execution, safe deployment decisions, delayed labels, monitoring, rollback and governance.",
+  "units": [
+    {
+      "id": "mle-001",
+      "title": "Define the decision and the data-product contract",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": [
+        "decision unit",
+        "feature contract",
+        "label horizon",
+        "artifact graph",
+        "ownership"
+      ],
+      "prerequisites": ["python-ml-02"],
+      "outcome": "Define an ML product through its decision, information boundary and accepted artifacts.",
+      "theory": "An ML system begins with a decision, a population and an information boundary. A model score is only one component. In this course the synthetic decision is whether to offer optional support to a customer. The row grain is one customer decision, the features describe usage, tickets and region, and the outcome becomes available four hours after the prediction cutoff. These are declared teaching assumptions, not observations about a real business.\n\nThe distinction between features and labels is essential. A target column can be present in an offline development table while remaining unavailable at prediction time. Its physical presence does not make it a valid input. The first case records an explicit feature list and checks that the target is excluded. It also verifies that the synthetic label-availability clock is later than the decision clock.\n\nAn artifact graph makes workflow dependencies explicit. Validation precedes features, which precede training, evaluation and publication. A completed training step cannot by itself authorize publication. The second case identifies the next eligible stage from its actual completed dependencies. Later lessons add real libraries and a durable service, while preserving this decision logic.",
+      "syntax": "The contract is a small structured object containing row grain, prediction time, feature names, target, horizon, purpose and owner. A hash records its exact serialized identity; it does not prove that its assumptions are appropriate. The dependency map names required predecessor artifacts. Readiness is computed from completed prerequisites rather than from a fixed sleep or a successful process at another stage.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Separate prediction inputs from future labels",
+          "explanation": "The first case generates the shared synthetic dataset and checks identifiers, declared feature fields and label timing. The contract states hours as the time unit. Keeping this record with the workflow prevents a later author from treating every column as an interchangeable predictor.",
+          "expected": "There are 120 unique decisions; label is excluded from features and labels become available after their cutoffs."
+        },
+        {
+          "title": "Require evaluation before publication",
+          "explanation": "The second case marks validation, feature preparation and training complete. Evaluation is ready, while publication is not. This is a bounded dependency calculation, not a claim that a distributed orchestrator has been deployed.",
+          "expected": "The only next ready stage is evaluate."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Name the population",
+          "task": "Describe whose decisions the rows represent.",
+          "check": "The answer identifies synthetic customer decisions.",
+          "hint": "A row count is not a population definition.",
+          "answer": "State the unit, eligibility and time boundary. A change from repeat customers to unseen customers changes the learning problem."
+        },
+        {
+          "title": "Exclude the target",
+          "task": "Add a feature-list validation that rejects label.",
+          "check": "The target cannot enter training inputs accidentally.",
+          "hint": "Availability is part of the contract.",
+          "answer": "Validate a reviewed allowlist, not every non-null column. Other leakage fields such as future status or post-decision aggregates need the same review."
+        },
+        {
+          "title": "Change the horizon",
+          "task": "Describe what changes if the outcome horizon becomes 24 hours.",
+          "check": "Labels, maturity rules and evaluation need review.",
+          "hint": "The target definition changed.",
+          "answer": "Update the label construction and availability contract, then revalidate training/evaluation cohorts. A title change alone does not implement a new target."
+        },
+        {
+          "title": "Add a dependency",
+          "task": "Require model-card review before publication.",
+          "check": "Publication remains blocked until that artifact exists.",
+          "hint": "Express the dependency directly.",
+          "answer": "Add a reviewed node and prerequisite. Do not mark it complete merely because training produced a file."
+        },
+        {
+          "title": "Inspect identity",
+          "task": "Change a contract field and compare hashes.",
+          "check": "The exact identity changes.",
+          "hint": "Hash identity is not semantic approval.",
+          "answer": "Retain the previous contract and explain the change. A new hash detects different bytes but cannot judge scientific validity."
+        },
+        {
+          "title": "Define ownership",
+          "task": "Assign who reviews data, model and service decisions.",
+          "check": "Responsibilities are explicit.",
+          "hint": "The synthetic label is not an operational team.",
+          "answer": "A real deployment needs acknowledged owners and procedures. Keep that external qualification separate from this local fixture."
+        }
+      ],
+      "diagnosis": "A surprisingly strong score may indicate a poorly defined decision or target leakage. An incomplete pipeline can also look successful if publication is tied only to a training exit code. Inspect the contract and dependency graph before choosing another algorithm.",
+      "transfer": "Define an ML product through its decision, information boundary and accepted artifacts. Keep model fitting as one stage inside that contract, and use the later lessons to replace each local mechanism with actual inspected execution evidence.",
+      "lab": "Define an ML product through its decision, information boundary and accepted artifacts. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "MLflow documentation: Define the decision and the data-product contract",
+          "https://mlflow.org/docs/latest/ml/tracking/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-002",
+      "title": "Event time, knowledge time and label maturity",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["event time", "availability time", "label delay", "cutoff", "leakage"],
+      "prerequisites": ["mle-001"],
+      "outcome": "Construct an eligible training cohort from explicit feature and label clocks.",
+      "theory": "A historical model must use information eligible at its decision time. Event time describes when something happened; knowledge or availability time describes when the system could use it. A backfilled event can have an old event time and a later known time. A row that looks historical can therefore contain future knowledge.\n\nThe shared dataset uses integer hours relative to a synthetic epoch. Features become available two hours before each prediction cutoff, while labels become available four hours afterward. At training cutoff 180, the most recent decisions do not all have mature labels. Selecting every decision before 180 would include three outcomes that were not yet available.\n\nThe worked cases make both boundaries explicit. The first chooses a feature using event and known clocks. The second separates decision eligibility from label maturity. These rules should be part of the data-generation and evaluation process, not comments added after a score has already been selected.",
+      "syntax": "Feature eligibility uses both event_at<=cutoff and known_at<=cutoff in the first fixture. Training eligibility additionally requires label_available_at<=training_cutoff. The example keeps the original decision identifier so every excluded record can be explained. Use explicit timestamp units and boundary operators when adapting the integer-clock illustration.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Reject late-known information",
+          "explanation": "At cutoff 5, the event at 4 is not known until 7. The eligible value is 10, while an event-only selection would incorrectly use 999. At cutoff 9, value 30 is eligible under both clocks.",
+          "expected": "Correct feature values are [10,30]; the leaking event-only result includes 999."
+        },
+        {
+          "title": "Wait for mature training labels",
+          "explanation": "The shared data has 80 decisions before cutoff 180, but only 77 labels available by that time. The three excluded identifiers are preserved as an explicit set. This distinguishes unavailable outcomes from ordinary missing-value imputation.",
+          "expected": "Training uses 77 rows; decisions 77,78 and 79 have labels that are not yet mature."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change knowledge time",
+          "task": "Make the revision known before cutoff 5.",
+          "check": "It becomes eligible under the same rule.",
+          "hint": "The data history changed, not the rule.",
+          "answer": "Record the new source history and its identity. Retrospective conclusions depend on which version of history is being used."
+        },
+        {
+          "title": "Test an exact boundary",
+          "task": "Set known_at equal to the prediction cutoff.",
+          "check": "The example includes it under <=.",
+          "hint": "Boundary conventions are assumptions.",
+          "answer": "A transaction or ingestion watermark may require a stricter operational rule. State and test that rule explicitly."
+        },
+        {
+          "title": "Change the training cutoff",
+          "task": "Move training cutoff from 180 to 181.",
+          "check": "The label-maturity cohort changes predictably.",
+          "hint": "Check label_available_at, not only decision time.",
+          "answer": "Recompute the eligible identifiers and report them. Training and evaluation should retain the cutoff that produced their cohorts."
+        },
+        {
+          "title": "Identify a leakage field",
+          "task": "Name a post-decision field that should not be used as a predictor.",
+          "check": "The answer explains when it becomes available.",
+          "hint": "Column names can be misleading.",
+          "answer": "Examples include later resolution, future aggregate and final status. Verify availability against system behavior, not the label chosen by a data author."
+        },
+        {
+          "title": "Preserve missing outcomes",
+          "task": "Explain why immature labels should not be filled with 0.",
+          "check": "The answer separates unknown from negative.",
+          "hint": "A delayed positive can otherwise become a false negative.",
+          "answer": "Wait for maturity or use an explicit censoring/selection model. Keep label coverage visible in monitoring."
+        },
+        {
+          "title": "Transfer to timestamps",
+          "task": "Replace integer clocks with timezone-aware times.",
+          "check": "The same eligibility decisions are retained.",
+          "hint": "Use a fixed epoch and explicit units.",
+          "answer": "Avoid naive/local-time ambiguity and test boundary timestamps. Preserve event and availability columns separately."
+        }
+      ],
+      "diagnosis": "Do not diagnose every missing label as random missingness. Delays can depend on the outcome or workflow. Check known-time history, maturity windows and included identifiers before fitting or comparing models. A data warehouse's latest state is not automatically a valid historical training view.",
+      "transfer": "Construct an eligible training cohort from explicit feature and label clocks. Demonstrate a late-known counterexample and retain excluded identities. Apply these boundaries consistently to model selection, monitoring and feature-store retrieval.",
+      "lab": "Construct an eligible training cohort from explicit feature and label clocks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Feast documentation: Event time, knowledge time and label maturity",
+          "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
+        ]
+      ]
+    },
+    {
+      "id": "mle-003",
+      "title": "Build features without losing the request population",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["feature window", "Polars", "request key", "missingness", "coverage"],
+      "prerequisites": ["mle-002", "polars-006"],
+      "outcome": "Build features at the decision grain while preserving all requests and missingness categories.",
+      "theory": "Feature construction transforms raw events into one record for a decision. It must preserve the decision population, not merely return rows with convenient history. A request with no eligible feature is still a request and may need a default, an abstention or a failure response. Dropping it can change both model evaluation and service coverage.\n\nThe first case constructs event aggregates using Polars with explicit entity, event-time and known-time conditions. The event window excludes the current cutoff while known-time eligibility includes it. These boundary choices are stated so the aggregate can be checked directly. The result has one row per request after aggregation.\n\nThe second case distinguishes a real zero feature from an absent feature. It left-joins selected values back onto the complete request table and validates one-to-one matching. This pattern protects coverage even when an upstream tool omits unmatched rows. Later Feast lessons test that behavior against the actual prepared backend.",
+      "syntax": "Join events to requests by entity, filter by the complete temporal rule, then group by the stable request identifier. The small candidate join is an inspectable mechanism, not an arbitrary-scale implementation. Reattach selected features to the authoritative request table with a validated left join so absent history does not erase requests.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Calculate eligible historical totals",
+          "explanation": "The first fixture includes a late-known event that is excluded for an earlier request but included for a later one. The program checks each request's sum and count independently of input display order.",
+          "expected": "Request totals/counts are 10:2/1,11:15/3 and 12:3/1."
+        },
+        {
+          "title": "Keep zero separate from unavailable",
+          "explanation": "The second fixture supplies a valid zero, a nonzero value and no selected value for a third request. The joined result preserves all three request identities.",
+          "expected": "Values are [0,4,null] and coverage is 2/3."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Include the current event",
+          "task": "Change the event boundary deliberately and compare the result.",
+          "check": "Any changed contribution is explained.",
+          "hint": "The original window uses a strict event cutoff.",
+          "answer": "Choose whether the current event is observable at decision time. Do not change the operator solely to improve a model score."
+        },
+        {
+          "title": "Add an unmatched request",
+          "task": "Create a request for an entity with no eligible history.",
+          "check": "It remains in the final population.",
+          "hint": "Start from the authoritative request table.",
+          "answer": "Left-join selected features back and add a reason or coverage flag. Excluding it silently changes the deployment scenario."
+        },
+        {
+          "title": "Detect duplicated features",
+          "task": "Provide two selected feature rows for one request.",
+          "check": "The one-to-one contract rejects fanout.",
+          "hint": "A feature row must match the decision grain.",
+          "answer": "Resolve conflicting versions under a reviewed rule before joining. Arbitrary deduplication can conceal a temporal or identity defect."
+        },
+        {
+          "title": "Compare zero and null",
+          "task": "Describe the decision for a true zero versus absent history.",
+          "check": "The cases retain different meanings.",
+          "hint": "Zero is an observed quantity.",
+          "answer": "A missing value may use a fitted imputation or abstention policy. Carry a missingness flag when its meaning matters."
+        },
+        {
+          "title": "Validate counts",
+          "task": "Reconcile the number of requests before and after feature construction.",
+          "check": "Every request has an explained outcome.",
+          "hint": "A successful aggregate can still lose entities.",
+          "answer": "Track matched, missing, rejected and duplicated cases separately. Use the original population as the denominator for coverage."
+        },
+        {
+          "title": "Plan a scalable equivalent",
+          "task": "Describe how to avoid an unrestricted large candidate join.",
+          "check": "The proposal preserves the same eligibility rule.",
+          "hint": "Optimization must not change the historical question.",
+          "answer": "Use an appropriate indexed, versioned or windowed implementation and compare it with the small independent oracle on boundary cases."
+        }
+      ],
+      "diagnosis": "Unexpectedly high model quality may follow from dropping difficult unmatched requests. Unexpectedly large totals may follow from feature fanout. Inspect request coverage, key multiplicity and temporal eligibility before changing the model.",
+      "transfer": "Build features at the decision grain while preserving all requests and missingness categories. Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.",
+      "lab": "Build features at the decision grain while preserving all requests and missingness categories. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Polars documentation: Build features without losing the request population",
+          "https://docs.pola.rs/user-guide/transformations/joins/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-004",
+      "title": "Validate structural and semantic feature contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["schema", "domain", "quarantine", "semantic version", "quality"],
+      "prerequisites": ["mle-003"],
+      "outcome": "Validate a feature interface structurally and semantically.",
+      "theory": "A feature contract includes more than column names. It describes types, permitted values, units, identity and missingness policy. A table can satisfy a dtype schema while violating a domain rule or changing units. Validation should therefore retain both structural and semantic evidence.\n\nThe first case checks nonnegative usage and a declared region vocabulary. It preserves rejected identifiers and reasons rather than silently dropping rows or replacing every unfamiliar value. Different failures may require different actions: a malformed measurement, a new legitimate category and an unavailable observation should not automatically receive the same treatment.\n\nThe second case keeps the same field names but changes usage from hours to minutes. A contract identity changes even though a superficial column-set check would pass. Downstream models may react strongly to that difference. A semantic change needs reviewed versioning and revalidation, not merely a successful parser.",
+      "syntax": "Use explicit conditions for each domain and collect named rejection reasons. Reconcile accepted and rejected records against the original count. A canonical serialized contract can be hashed to identify a version, but the hash only detects change; it cannot determine whether the new meaning is scientifically valid or authorized.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Keep rejected evidence",
+          "explanation": "The fixture includes a negative usage and an unknown region. The program classifies both while retaining the valid row. Each input has exactly one reported outcome under the declared policy.",
+          "expected": "Only id 1 is accepted; ids 2 and 3 carry distinct reasons."
+        },
+        {
+          "title": "Detect a type-preserving meaning change",
+          "explanation": "The second case changes a unit definition while keeping the same field names. The differing contract identity makes the change visible, but human/model review is still required to judge compatibility.",
+          "expected": "The column sets agree while contract hashes differ."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Add a missing value",
+          "task": "Define a separate outcome for unavailable usage.",
+          "check": "Missing is not mislabeled as a negative value.",
+          "hint": "Classification needs explicit categories.",
+          "answer": "Use a missingness policy that the model and serving interface share. Keep the reason so coverage and model behavior can be interpreted."
+        },
+        {
+          "title": "Add a legitimate category",
+          "task": "Introduce a new region under a revised contract.",
+          "check": "The change is versioned and tested.",
+          "hint": "Unknown does not always mean invalid forever.",
+          "answer": "Review encoding and model behavior before accepting the category. A vocabulary update can affect train/serve compatibility."
+        },
+        {
+          "title": "Check a unit conversion",
+          "task": "Convert minutes to hours before applying an hours-based model.",
+          "check": "The converted value matches the declared unit.",
+          "hint": "A dtype cannot express the unit.",
+          "answer": "Apply the conversion explicitly and preserve its source definition. Do not relabel minutes as hours without transforming values."
+        },
+        {
+          "title": "Preserve rejection counts",
+          "task": "Report each reason and the original denominator.",
+          "check": "Accepted plus rejected equals the input population.",
+          "hint": "Avoid overlapping categories without explanation.",
+          "answer": "Choose a classification policy and record all relevant reasons where appropriate. Do not present a partial count as full data quality."
+        },
+        {
+          "title": "Review a hash claim",
+          "task": "Explain what the contract digest establishes.",
+          "check": "It establishes exact serialized identity.",
+          "hint": "Identity is not correctness or authenticity.",
+          "answer": "Use review and a trusted publication mechanism for those additional claims. A changed hash should trigger analysis, not automatic approval."
+        },
+        {
+          "title": "Bind the consumer",
+          "task": "State how a serving bundle identifies its expected feature contract.",
+          "check": "The version or digest is retained with the model.",
+          "hint": "A model artifact alone is insufficient.",
+          "answer": "Validate the feature interface before inference and fail clearly on incompatible inputs. The artifact lessons implement that boundary."
+        }
+      ],
+      "diagnosis": "When a model suddenly behaves differently, inspect units, vocabularies and missingness even if schemas still parse. Do not fix all unknown values by mapping them to a convenient valid category. Preserve rejected evidence and version semantic changes.",
+      "transfer": "Validate a feature interface structurally and semantically. Keep explicit rejection reasons and bind accepted feature meaning to the model artifact. This protects both reproducibility and useful diagnostics when inputs evolve.",
+      "lab": "Validate a feature interface structurally and semantically. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Feast documentation: Validate structural and semantic feature contracts",
+          "https://docs.feast.dev/getting-started/concepts/feature-view"
+        ]
+      ]
+    },
+    {
+      "id": "mle-005",
+      "title": "Validation that matches deployment and time",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["group split", "time split", "leakage", "mature labels", "target population"],
+      "prerequisites": ["mle-002", "mle-004"],
+      "outcome": "Design evaluation around the target population and information boundary.",
+      "theory": "An evaluation split defines which generalization question is being tested. Repeated observations from known entities differ from predictions for unseen entities. A random row split can place the same entity on both sides and make memorization appear useful for a cold-start deployment. The first case demonstrates that mechanism transparently rather than hiding it inside a complicated estimator.\n\nTime adds another boundary. A future evaluation should not use training decisions or labels that were unavailable at the training cutoff. The second case selects mature training rows and later test decisions, then checks identity and clock separation. This is a deployment scenario for returning entities; it is not automatically a test of unseen-customer generalization.\n\nChoose the split before using outcomes to select a model. Keep a validation set for choices such as thresholds or hyperparameters and an appropriately protected evaluation set for the final claim. Repeatedly inspecting a holdout can turn it into part of the selection procedure even if no gradient was computed on it.",
+      "syntax": "The memorizer is an explicit mapping from entity to observed label, with a declared fallback for unknown entities. The time split uses cutoff and label_available_at separately. Verify identifier overlap, entity overlap and temporal eligibility according to the intended deployment scenario; no single split recipe answers every question.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Separate repeat-entity and cold-start questions",
+          "explanation": "The mapping predicts repeated entities perfectly because their labels are already known. On two held-out entities with different labels, its fixed fallback is only half correct. The contrast exposes what the first score actually measured.",
+          "expected": "Repeated-entity accuracy is 1.0; the chosen unseen-entity case is 0.5."
+        },
+        {
+          "title": "Construct a temporally valid training set",
+          "explanation": "The second case uses only labels mature by 180 and evaluates later decisions. It checks disjoint decision identities and the maximum training label time, preserving the information boundary.",
+          "expected": "Training has 77 rows, future evaluation 40 rows, with no decision-id overlap."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Define the deployment entity",
+          "task": "State whether the target is known or unseen customers.",
+          "check": "The split follows that question.",
+          "hint": "Entity overlap can be legitimate or invalid depending on deployment.",
+          "answer": "Use grouped separation for an unseen-entity claim and a suitable time design for returning entities. State the population explicitly."
+        },
+        {
+          "title": "Audit overlap",
+          "task": "Check both row identifiers and customer identifiers.",
+          "check": "The two overlap questions are reported separately.",
+          "hint": "Unique rows can still share an entity.",
+          "answer": "Retain group identity in the evaluation ledger. A row-only overlap check can miss memorization leakage."
+        },
+        {
+          "title": "Protect label timing",
+          "task": "Exclude labels that mature after the training cutoff.",
+          "check": "The training maturity assertion holds.",
+          "hint": "The outcome may be present in a retrospective table.",
+          "answer": "Physical availability in today's dataset is different from historical eligibility. Preserve the label-availability clock."
+        },
+        {
+          "title": "Choose a threshold honestly",
+          "task": "Describe where a decision threshold should be selected.",
+          "check": "It uses an appropriate development/validation stage.",
+          "hint": "The final holdout is not an unlimited tuning tool.",
+          "answer": "Evaluate the whole selected procedure on protected data, or use a resampling design that includes selection. Do not report the best inspected holdout result as an unbiased estimate."
+        },
+        {
+          "title": "Test another fallback",
+          "task": "Change the unseen-entity fallback and interpret the result.",
+          "check": "The cold-start score changes under that policy.",
+          "hint": "The synthetic test is intentionally small.",
+          "answer": "The observed fraction is not a population guarantee. Use a representative evaluation and uncertainty analysis for a real claim."
+        },
+        {
+          "title": "Record the evaluation contract",
+          "task": "List the identities, clocks and selection decisions needed for reproduction.",
+          "check": "The record explains the generalization target.",
+          "hint": "A metric name is not the design.",
+          "answer": "Retain the data/source version, groups, cutoffs, label maturity, selection process and uncertainty limits alongside the result."
+        }
+      ],
+      "diagnosis": "A strong score may reflect repeated entities, future labels or repeated holdout selection. Diagnose the evaluation design before increasing model complexity. A lower score under a more appropriate split can be more useful evidence for the intended deployment.",
+      "transfer": "Design evaluation around the target population and information boundary. Demonstrate the difference between repeat-entity, cold-start and future-time questions, and retain the complete selection/evaluation procedure with the resulting metrics.",
+      "lab": "Design evaluation around the target population and information boundary. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "scikit-learn documentation: Validation that matches deployment and time",
+          "https://scikit-learn.org/stable/modules/cross_validation.html"
+        ]
+      ]
+    },
+    {
+      "id": "mle-006",
+      "title": "Register and retrieve actual Feast historical features",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["Feast", "entity", "feature view", "TTL", "historical retrieval", "coverage"],
+      "prerequisites": ["mle-002", "mle-003", "mle-004"],
+      "outcome": "Qualify a real feature-store retrieval against independent temporal and coverage checks.",
+      "theory": "A feature store organizes feature definitions and retrieval interfaces. In this lesson Feast uses an actual local Parquet source, registry and SQLite online-store configuration. An entity defines the join identity, a feature view defines fields and a time relationship, and historical retrieval combines those features with an entity/request table.\n\nThe normal fixture contains two versions for customer 1 and one for customer 2. Historical requests select values at their own timestamps, within the declared view TTL. Sorting by request_id restores an explicit output comparison order. A successful retrieval is then checked against known values rather than assumed correct because a package imported.\n\nBoundary behavior also needs direct observation. The prepared local backend can omit unmatched or expired request rows. The second case therefore treats the request table as authoritative and left-joins retrieved values back by a validated unique request key. This preserves missing cases explicitly. Neither a point-in-time API name nor a successful process should replace coverage and temporal validation.",
+      "syntax": "Entity declares the join key and value type. FeatureView supplies a schema, TTL and FileSource timestamp field. FeatureStore.apply registers these owned local definitions. get_historical_features returns actual retrieved data; validate keys and reattach it to the original request population when necessary. The fixture timestamp represents the feature's declared availability/validity point, not arbitrary future knowledge.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Observe actual point-in-time values",
+          "explanation": "The first case registers the real view and retrieves three identified requests. Customer 1 receives 10 before its later version and 20 afterward; customer 2 receives 5. The result is sorted by request identity for comparison.",
+          "expected": "Historical usage is [10,20,5] and one feature view is registered."
+        },
+        {
+          "title": "Retain unmatched and expired requests",
+          "explanation": "The second case includes a valid request, one before recorded history and one outside TTL. It validates retrieved-key uniqueness and restores all three request rows. The two unavailable values remain missing rather than disappearing from coverage.",
+          "expected": "The normalized population has 3 rows with values [10,null,null], regardless of whether the backend returned unmatched rows."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect registered schema",
+          "task": "List the view's fields and entity key.",
+          "check": "They match the declared local contract.",
+          "hint": "Definition registration is a distinct operation.",
+          "answer": "Check names, types, timestamp field and TTL. A registered view does not prove that its source history is scientifically valid."
+        },
+        {
+          "title": "Move a request cutoff",
+          "task": "Retrieve customer 1 before and after its later feature version.",
+          "check": "The selected value changes from 10 to 20.",
+          "hint": "Use the request's time, not the execution clock.",
+          "answer": "Verify the precise boundary and preserve the request identifier. Different request times can legitimately retrieve different versions."
+        },
+        {
+          "title": "Test no history",
+          "task": "Add an entity/request with no eligible feature.",
+          "check": "It remains in the authoritative request population.",
+          "hint": "Do not trust returned row count implicitly.",
+          "answer": "Validate unique request keys and left-join retrieval back onto the original requests. Report missingness and coverage before training or scoring."
+        },
+        {
+          "title": "Test expiration",
+          "task": "Place a request beyond the view TTL.",
+          "check": "Its selected feature is unavailable under the policy.",
+          "hint": "TTL is relative to the request time for historical retrieval.",
+          "answer": "Retain the request and an explicit unavailable status. A different TTL is a contract change that needs justification."
+        },
+        {
+          "title": "Review late availability",
+          "task": "Explain why an event-time field alone may be insufficient.",
+          "check": "The answer identifies known-time history.",
+          "hint": "A retrieval tool cannot invent unavailable source history.",
+          "answer": "Use appropriately versioned feature snapshots or an explicit availability policy, and test a late-known fixture independently. Do not assume created-time metadata automatically enforces every bitemporal rule."
+        },
+        {
+          "title": "Separate local and deployed capability",
+          "task": "State what this exercise actually runs.",
+          "check": "It runs a local Feast registry and retrieval, without a cloud service.",
+          "hint": "No external account is used.",
+          "answer": "A deployed store needs its own access, ownership, scaling and operational qualification. Preserve these local values as mechanism evidence only."
+        }
+      ],
+      "diagnosis": "If results have fewer rows than requests, investigate coverage instead of fitting on the returned subset silently. If a value is temporally wrong, inspect the declared timestamp, TTL and source history. If registration fails, verify actual field types and owned paths before changing the model.",
+      "transfer": "Qualify a real feature-store retrieval against independent temporal and coverage checks. Preserve every requested decision, retain unavailable values explicitly and distinguish local API execution from external production guarantees.",
+      "lab": "Qualify a real feature-store retrieval against independent temporal and coverage checks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Feast documentation: Register and retrieve actual Feast historical features",
+          "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
+        ]
+      ]
+    },
+    {
+      "id": "mle-007",
+      "title": "Materialization, online retrieval and freshness decisions",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["materialize", "online store", "feature age", "serving policy", "Feast"],
+      "prerequisites": ["mle-006"],
+      "outcome": "Populate a real online feature store and enforce a consumer freshness contract.",
+      "theory": "An online store serves feature values for low-latency inference. Materialization moves selected source values into that store. A successful online lookup establishes that a value was retrieved, not that it is fresh enough for the current decision. The application needs a freshness policy with a clearly defined clock and a response for stale or missing inputs.\n\nThe first case actually materializes the local Feast view into SQLite and retrieves two customers. The second compares each retained feature timestamp with a declared decision time. One value is one day old and the other three days old; a two-day maximum accepts only the first. The timestamp is included as a feature value so the consumer's policy is directly inspectable.\n\nThe fixture uses fixed historical dates to make the calculation reproducible. It does not claim those values are fresh relative to the real execution date. The longer-lived project later uses a recorded training clock and actual serving-time checks. Keep retrieval, freshness and model quality as separate evidence throughout the lifecycle.",
+      "syntax": "materialize receives an explicit interval and writes the prepared online store. get_online_features retrieves named fields for specified entity rows. The consumer computes age from a retained feature timestamp and applies both a nonfuture condition and an upper bound. A FeatureView TTL does not replace a tested online-serving freshness policy.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Populate and read the actual online store",
+          "explanation": "The first case materializes feature versions through a declared endpoint and checks the SQLite file and retrieved values. It uses the real SDK rather than a dictionary standing in for a feature store.",
+          "expected": "Latest usage values are [20,5] for the two customers."
+        },
+        {
+          "title": "Apply an independent freshness policy",
+          "explanation": "The second case uses decision time 2024-01-04 and a two-day maximum. It checks the actual ages and decisions. A stored value can therefore be retrievable yet rejected for this prediction.",
+          "expected": "Ages are 86,400 and 259,200 seconds; freshness decisions are [true,false]."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change the decision clock",
+          "task": "Move the declared decision time forward by one day.",
+          "check": "The first value reaches the boundary and the second remains stale.",
+          "hint": "Compute age from the same feature timestamp.",
+          "answer": "State whether the maximum is inclusive. Keep the boundary test with the policy so future changes are visible."
+        },
+        {
+          "title": "Reject future metadata",
+          "task": "Give a feature timestamp after the decision time.",
+          "check": "The age check rejects it.",
+          "hint": "Freshness requires a valid clock direction.",
+          "answer": "A negative age is not evidence of very fresh data. Investigate clock skew or an incorrect timestamp definition."
+        },
+        {
+          "title": "Separate publication and observation",
+          "task": "Explain why republishing an old value should not automatically reset its data age.",
+          "check": "The answer retains the measurement/availability clock.",
+          "hint": "A write timestamp and feature age can differ.",
+          "answer": "Keep the timestamp that the policy actually measures. Changing only publication metadata can hide stale information."
+        },
+        {
+          "title": "Handle missing entities",
+          "task": "Request an entity absent from the store and define the response.",
+          "check": "Missing inputs do not silently become observed zeros.",
+          "hint": "Retrieval can succeed at the protocol level without a feature.",
+          "answer": "Use a declared fallback, abstention or failure. Record coverage and avoid comparing scores from different missingness policies without explanation."
+        },
+        {
+          "title": "Inspect materialization scope",
+          "task": "Limit the source interval and verify retrieved state.",
+          "check": "The selected versions are explained.",
+          "hint": "An interval is part of the ingestion operation.",
+          "answer": "Use owned state and known fixtures before applying a materialization command to a durable environment. Do not infer completeness from the command name."
+        },
+        {
+          "title": "Test serving separately",
+          "task": "Explain which checks are still needed beyond SDK retrieval.",
+          "check": "They include schema, transformation and model-version consistency.",
+          "hint": "The store returns features, not a justified decision.",
+          "answer": "Bind the feature contract to the model, validate inputs and test the actual serving interface. The next lessons build those boundaries."
+        }
+      ],
+      "diagnosis": "If predictions use stale values, inspect the actual returned timestamp and the consumer policy. A successful materialization is not proof that every entity was covered. A recent write can also carry old information. Keep retrieval status, data age and downstream decision evidence separate.",
+      "transfer": "Populate a real online feature store and enforce a consumer freshness contract. Test missing, stale, future and boundary values, then connect only accepted features to the model interface. Preserve the declared clock when moving from a fixed fixture to a running service.",
+      "lab": "Populate a real online feature store and enforce a consumer freshness contract. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Feast documentation: Materialization, online retrieval and freshness decisions",
+          "https://docs.feast.dev/getting-started/concepts/feature-retrieval"
+        ]
+      ]
+    },
+    {
+      "id": "mle-008",
+      "title": "One fitted transformation for training and serving",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["pipeline", "preprocessing", "fit versus transform", "parity", "leakage"],
+      "prerequisites": ["mle-004", "mle-005"],
+      "outcome": "Package and use a single fitted preprocessing/model interface.",
+      "theory": "A model's effective input includes its preprocessing. Imputation values, scaling parameters, category encodings and feature order are part of the fitted state. Reimplementing those operations separately for serving can change predictions even when the classifier coefficients are unchanged. A coherent bundle should use the same fitted transformation at both boundaries.\n\nThe first case fits a scikit-learn Pipeline on the eligible training data. It compares batch predictions with predictions from individual request records. The equality check is about transformation and inference consistency on the fixture; it does not prove the model generalizes or that an external service is reliable.\n\nThe second case shows why preprocessing must respect the training boundary. A scaler fitted on values 0 and 2 transforms a held-out value 100 very differently from a scaler that includes 100 in its fitting population. Including held-out information changes the representation before the model even sees it. This is leakage even though the preprocessing step does not use target labels.",
+      "syntax": "The Pipeline contains a ColumnTransformer with numeric imputation/scaling and categorical encoding, followed by logistic regression. fit learns state from training rows; predict_proba applies that state. Construct serving inputs with the declared fields and preserve their meaning. A separate StandardScaler example makes the fitting-population difference visible numerically.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Verify batch and request parity",
+          "explanation": "The model predicts two held-out rows both as a batch and as individual dictionaries converted back into frames. Their probabilities must agree within a stated numerical tolerance. This tests the actual fitted pipeline.",
+          "expected": "Single-request and batch probabilities match and remain between 0 and 1."
+        },
+        {
+          "title": "Expose preprocessing leakage",
+          "explanation": "The second case fits a scaler on the training values and contrasts it with a scaler fitted on training plus the extreme held-out value. Both produce numbers, but only the first follows the declared training boundary.",
+          "expected": "The proper transformed value is 99; the leaking result differs by more than 90."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Reorder incoming fields",
+          "task": "Construct a request with fields in a different dictionary order.",
+          "check": "The named-column pipeline preserves the intended values.",
+          "hint": "Names and feature order need a contract.",
+          "answer": "Use explicit named selections or validate a positional interface carefully. A raw array without a recorded order is easy to misuse."
+        },
+        {
+          "title": "Add a missing numeric value",
+          "task": "Observe the fitted imputation behavior.",
+          "check": "The same training-derived policy is used in batch and serving.",
+          "hint": "Do not refit on the request.",
+          "answer": "Retain the fitted imputer with the model and make missingness handling explicit. A successful imputation does not prove that the missingness mechanism is harmless."
+        },
+        {
+          "title": "Change a category",
+          "task": "Test an unknown region under a declared policy.",
+          "check": "Behavior matches the chosen encoder/API contract.",
+          "hint": "Library defaults and service validation can differ.",
+          "answer": "Decide whether to reject, map or encode unknown values. Document and test the same policy at training and serving boundaries."
+        },
+        {
+          "title": "Inspect fitted state",
+          "task": "Read the scaler's learned means and scales.",
+          "check": "They come only from training rows.",
+          "hint": "A transformation is fitted state.",
+          "answer": "Record the relevant pipeline/version with the model artifact. Recomputing those values from a later dataset changes the model."
+        },
+        {
+          "title": "Design a parity fixture",
+          "task": "Choose inputs that exercise missingness and category boundaries.",
+          "check": "Both execution paths produce matching accepted outputs.",
+          "hint": "A single convenient row is weak evidence.",
+          "answer": "Use normal, boundary and rejected cases. Compare errors as well as successful probabilities."
+        },
+        {
+          "title": "Separate correctness and quality",
+          "task": "Explain what parity does not establish.",
+          "check": "It does not establish predictive validity.",
+          "hint": "The same wrong function can run consistently.",
+          "answer": "Use an appropriate evaluation design and independent data-contract checks in addition to parity. Consistency is necessary but not sufficient."
+        }
+      ],
+      "diagnosis": "If batch and serving disagree, inspect field order, units, missingness, category handling and fitted-state versions before changing model weights. If evaluation is suspiciously strong, check whether preprocessing was fitted on held-out or future rows.",
+      "transfer": "Package and use a single fitted preprocessing/model interface. Verify parity on contrasting request fixtures and retain the training population that estimated its state. Then evaluate predictive quality separately under the intended deployment design.",
+      "lab": "Package and use a single fitted preprocessing/model interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "scikit-learn documentation: One fitted transformation for training and serving",
+          "https://scikit-learn.org/stable/modules/compose.html"
+        ]
+      ]
+    },
+    {
+      "id": "mle-009",
+      "title": "Model evaluation, calibration and decision utility",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["Brier score", "log loss", "AUC", "calibration", "threshold", "utility"],
+      "prerequisites": ["mle-005", "mle-008"],
+      "outcome": "Evaluate probabilities, ranking and actions with separately interpreted evidence.",
+      "theory": "Different metrics describe different properties of a prediction system. Ranking metrics ask whether positive cases tend to receive higher scores. Probability losses evaluate numeric confidence. A threshold turns a probability into an action under a particular cost and benefit structure. These questions should not be collapsed into a single claim that a model is good.\n\nThe first case evaluates a fitted model on forty later synthetic decisions after all their labels are mature at cutoff 224. It reports Brier loss, log loss and AUC, then displays a descriptive calibration plot with bin counts and readable values. The plot is intentionally labeled as descriptive: forty observations do not justify a precise population-calibration claim without uncertainty analysis.\n\nThe second case applies declared utility values to four fixed labeled examples. The best threshold on this small teaching fixture is not automatically a deployable policy. In a real workflow, select thresholds using an appropriate development design, evaluate the selected procedure independently and distinguish predictive performance from causal effects of the resulting actions.",
+      "syntax": "predict_proba returns the positive-class scores under the fitted model. The example uses standard metric implementations and checks their domains. Calibration bins retain their counts and mean predictions; empty bins are omitted explicitly. The threshold case computes benefits for true positive actions and costs for false positives, with the cost values stated in the source.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Read several kinds of evaluation evidence",
+          "explanation": "The first program computes actual held-out metrics and an accessible Plotly calibration figure. Its table records bin boundaries, counts, mean scores and observed shares. It checks label maturity before interpreting the result.",
+          "expected": "Forty evaluation rows contribute; all metric values are finite and their descriptive chart retains exact bin counts."
+        },
+        {
+          "title": "Compare actions under a declared utility",
+          "explanation": "The second case uses benefits 5 and false-positive cost 2. Thresholds 0.3,0.5 and 0.8 produce different action sets and utilities. The plotted comparison makes that consequence visible without inferring business costs from data.",
+          "expected": "Utilities are 8,10 and 5 for the three thresholds."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Interpret a ranking score",
+          "task": "Explain what a high AUC would and would not establish.",
+          "check": "The answer distinguishes ranking from calibrated probabilities and utility.",
+          "hint": "Different metrics answer different questions.",
+          "answer": "A model can rank well but be poorly calibrated or unsuitable for a chosen action cost. Use evidence matched to the decision."
+        },
+        {
+          "title": "Inspect calibration support",
+          "task": "Read the sample count in each displayed bin.",
+          "check": "Sparse bins remain visibly uncertain.",
+          "hint": "A line through few points is not a precise curve.",
+          "answer": "Add an appropriate uncertainty analysis for a real claim and consider subgroup/temporal variation. Do not overinterpret the visual smoothness."
+        },
+        {
+          "title": "Change utility values",
+          "task": "Increase false-positive cost and recompute threshold utilities.",
+          "check": "The preferred action policy can change.",
+          "hint": "Costs are part of the decision contract.",
+          "answer": "State the new values and compare the resulting actions. The model's ranking can remain unchanged while the useful policy changes."
+        },
+        {
+          "title": "Protect the evaluation set",
+          "task": "Describe where thresholds should be selected.",
+          "check": "The selection and final evaluation roles are separated.",
+          "hint": "Repeated inspection can overfit a holdout.",
+          "answer": "Evaluate the selected procedure with protected data or a design that includes selection. Keep the threshold choice in the recorded workflow."
+        },
+        {
+          "title": "Add a missing label",
+          "task": "Remove an outcome and report evaluation coverage.",
+          "check": "The denominator and excluded population are explicit.",
+          "hint": "Unknown is not negative.",
+          "answer": "Do not silently evaluate only the easiest mature outcomes without reporting that selection. The monitoring lesson expands this issue."
+        },
+        {
+          "title": "Check the figure source",
+          "task": "Download or inspect the exact figure metadata and table.",
+          "check": "The values agree with the underlying metric calculation.",
+          "hint": "Appearance is not a numeric oracle.",
+          "answer": "Reconcile the plotted points and sample counts. A rendered chart does not establish that the split, labels or utility assumptions were valid."
+        }
+      ],
+      "diagnosis": "A metric improvement can come from changed data, labels, thresholds or selection rather than a better model. Inspect cohort identity and maturity before comparing scores. A calibration plot without counts can hide weak evidence, and a utility table without stated costs can hide an undefined decision.",
+      "transfer": "Evaluate probabilities, ranking and actions with separately interpreted evidence. Retain the cohort, maturity cutoff, selected procedure and decision costs, and make figures auditable through their exact values. Use a broader design before making an external deployment claim.",
+      "lab": "Evaluate probabilities, ranking and actions with separately interpreted evidence. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "scikit-learn documentation: Model evaluation, calibration and decision utility",
+          "https://scikit-learn.org/stable/modules/model_evaluation.html"
+        ]
+      ]
+    },
+    {
+      "id": "mle-010",
+      "title": "Actual MLflow tracking and artifact lineage",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["MLflow", "run", "parameter", "metric", "artifact", "status"],
+      "prerequisites": ["mle-008", "mle-009"],
+      "outcome": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run.",
+      "theory": "Experiment tracking records how a result was produced. Parameters describe choices, metrics describe measured outcomes, tags provide context and artifacts retain files such as contracts or model cards. The tracking record is useful only when those entries refer to the same actual run and source/data versions.\n\nThis lesson uses the actual MLflow client with an explicitly local SQLite backend and local artifact directory. It starts no tracking server and selects no ambient cloud workspace. The first case records a metric and a feature/data manifest, then reads both back through MLflow. The second records a failed run that still contains a measured training loss.\n\nA retained metric is not proof that the complete workflow succeeded. Failures can occur after useful observations were produced. Keep the terminal status and the evidence that justified it. Similarly, an artifact named model-card does not establish that someone reviewed its contents; the fields and acceptance decision need their own contract.",
+      "syntax": "MlflowClient receives explicit local tracking and registry URIs. create_experiment defines an owned experiment and artifact location, create_run obtains its identity, and log_param/log_metric/log_artifact attach evidence. set_terminated records the final status. get_run and list_artifacts establish actual stored readback rather than assuming a logging call was sufficient.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Record and retrieve a complete local run",
+          "explanation": "The first case logs a threshold, Brier value and manifest file, marks the run finished and retrieves the stored metadata and artifact path. The manifest identifies feature order and a small data hash.",
+          "expected": "The run is FINISHED, its metric is 0.2 and the evidence artifact is listed."
+        },
+        {
+          "title": "Retain observations from a failed workflow",
+          "explanation": "The second case records a training loss but terminates the run as FAILED. The observation remains useful for diagnosis while the status prevents it from being described as a completed accepted workflow.",
+          "expected": "The failed run retains its 0.1 training-loss observation."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Bind source identity",
+          "task": "Add a source revision or digest tag to a run.",
+          "check": "It identifies the implementation used.",
+          "hint": "A human-readable name can be reused.",
+          "answer": "Retain a stable source identity and the actual submitted configuration. Do not attach a result from another revision without explaining the difference."
+        },
+        {
+          "title": "Distinguish metadata and artifacts",
+          "task": "Explain where a metric and a model file are stored conceptually.",
+          "check": "The answer separates backend metadata from artifact bytes.",
+          "hint": "MLflow has different storage roles.",
+          "answer": "The local example places both under owned paths, but deployed stores may use separate systems. Verify both when designing retention and recovery."
+        },
+        {
+          "title": "Record a failure honestly",
+          "task": "Keep a failed status after a downstream step rejects the candidate.",
+          "check": "The useful observations remain available.",
+          "hint": "A low loss does not override workflow failure.",
+          "answer": "Retain the reason and subsequent decision. A failed run should not be relabeled successful merely to simplify a dashboard."
+        },
+        {
+          "title": "Inspect artifact content",
+          "task": "Read the manifest and check its declared feature order.",
+          "check": "It matches the intended model interface.",
+          "hint": "An artifact path is not its meaning.",
+          "answer": "Validate the file and its identity. Tracking provides lineage plumbing; it does not determine whether the contract is correct."
+        },
+        {
+          "title": "Avoid ambient routing",
+          "task": "Explain why the example sets local URIs explicitly.",
+          "check": "It cannot silently select an external workspace.",
+          "hint": "Environment defaults can change.",
+          "answer": "Keep ownership and destination explicit in automation. A real shared tracking service needs separately approved credentials and access controls."
+        },
+        {
+          "title": "Plan reproducibility",
+          "task": "List what else is needed to reproduce a trained model.",
+          "check": "It includes data, code, dependencies, randomness and procedure.",
+          "hint": "A metric alone is insufficient.",
+          "answer": "Record the relevant versions and selection process. Deterministic fixtures support debugging, but not every training system promises bitwise identity."
+        }
+      ],
+      "diagnosis": "If expected evidence is missing, inspect the run identifier, destination URI, terminal status and artifact location. Do not infer a successful upload from an old local file. Retain failures and separate a reproducible local fixture from a deployed tracking-service claim.",
+      "transfer": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.",
+      "lab": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "MLflow documentation: Actual MLflow tracking and artifact lineage",
+          "https://mlflow.org/docs/latest/tracking/backend-stores/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-011",
+      "title": "Model artifacts, registry versions and trusted loading",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": [
+        "artifact integrity",
+        "feature schema",
+        "model registry",
+        "alias",
+        "trusted serialization"
+      ],
+      "prerequisites": ["mle-004", "mle-010"],
+      "outcome": "Publish and resolve a model artifact with an explicit trusted interface.",
+      "theory": "A model artifact is a bundle of fitted state and its interface contract. The feature order, units, preprocessing, dependencies and validation evidence matter alongside the estimator. A consumer should verify compatibility and artifact identity before loading or using it.\n\nThe first case serializes a model created by this same program, verifies its exact bytes, reloads it and compares predictions. It then logs the artifact through MLflow, creates a real registered-model version and links a candidate alias to that version. This establishes actual local registry behavior, not a production promotion policy.\n\nSerialized Python objects can execute code when loaded. The example loads only its own newly written trusted artifact. A hash checks integrity relative to a trusted expected value; it does not make an attacker-provided model and attacker-provided hash safe. The longer-lived service project uses a bounded JSON model representation to avoid arbitrary object deserialization at that serving boundary.",
+      "syntax": "joblib writes and reads the program's own trusted fitted pipeline. A manifest retains feature order and SHA256. MLflow create_model_version links the artifact to its run, while set_registered_model_alias and get_model_version_by_alias exercise actual version resolution. A candidate alias is a label, not automatic acceptance or deployment.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Verify a trusted artifact and registry link",
+          "explanation": "The first program checks bytes before reloading its own model, compares prediction parity and registers the artifact with MLflow. It verifies that the alias resolves to the expected version and run.",
+          "expected": "Reloaded predictions match, and the actual registry version retains its linked run."
+        },
+        {
+          "title": "Detect integrity and semantic changes",
+          "explanation": "The second case changes an artifact payload and a unit definition separately. The same feature names do not make hours and minutes compatible. Both exact-byte identity and semantic contract versioning are therefore needed.",
+          "expected": "Tampered bytes fail their expected hash and the changed unit contract has a different identity."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Record feature order",
+          "task": "Keep the input field sequence with the artifact.",
+          "check": "A consumer can reconstruct the expected interface.",
+          "hint": "An unlabeled array is ambiguous.",
+          "answer": "Validate names, order and transformations before inference. A column permutation can change predictions without producing a type error."
+        },
+        {
+          "title": "Test a byte change",
+          "task": "Modify the saved model after recording its hash.",
+          "check": "Integrity verification rejects the changed bytes.",
+          "hint": "Check before deserialization.",
+          "answer": "Retain a trusted expected identity and fail clearly on mismatch. Do not merely recompute and overwrite the expected hash."
+        },
+        {
+          "title": "Reject untrusted loading",
+          "task": "Explain why a matching attacker-supplied hash is insufficient.",
+          "check": "It does not establish authenticity or safe code.",
+          "hint": "Integrity and trust are different properties.",
+          "answer": "Use an appropriate trusted publication mechanism and safe supported model formats. Never load arbitrary remote pickle/joblib content as a convenience."
+        },
+        {
+          "title": "Inspect registry resolution",
+          "task": "Read the version behind the candidate alias.",
+          "check": "It matches the intended registered artifact and run.",
+          "hint": "Aliases can move.",
+          "answer": "Record the resolved version used for a decision. A mutable label alone is not a complete provenance record."
+        },
+        {
+          "title": "Change the feature meaning",
+          "task": "Convert usage hours to minutes without adapting the model.",
+          "check": "The contract marks the incompatibility.",
+          "hint": "Types and names can remain unchanged.",
+          "answer": "Version the feature interface and evaluate a compatible model. Do not silently retarget an old artifact to changed units."
+        },
+        {
+          "title": "Define promotion evidence",
+          "task": "List checks needed before moving an accepted serving alias.",
+          "check": "It includes compatibility, quality, operational and rollback evidence.",
+          "hint": "Registry storage is not the decision.",
+          "answer": "Keep the actual acceptance policy and responsible review with the version. The later rollout and service project demonstrate controlled activation separately."
+        }
+      ],
+      "diagnosis": "A model can deserialize successfully and still expect the wrong inputs. An alias can resolve correctly and still point to an unaccepted candidate. Inspect artifact identity, feature meaning and acceptance evidence separately, and reject untrusted executable serialization.",
+      "transfer": "Publish and resolve a model artifact with an explicit trusted interface. Verify real registry linkage and prediction parity while keeping integrity, authenticity and deployment acceptance distinct. Prefer a safe bounded representation at a local demonstration service boundary.",
+      "lab": "Publish and resolve a model artifact with an explicit trusted interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "MLflow documentation: Model artifacts, registry versions and trusted loading",
+          "https://mlflow.org/docs/latest/ml/model-registry/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-012",
+      "title": "A real HTTP contract before a network deployment",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["FastAPI", "ASGI", "request schema", "validation", "model version", "inference"],
+      "prerequisites": ["mle-007", "mle-008", "mle-011"],
+      "outcome": "Define and test a serving contract with positive and negative requests.",
+      "theory": "A serving interface should define which inputs it accepts and what evidence it returns. Validation errors are part of that interface, not an incidental exception path. The model version and feature contract should be visible so a prediction can be interpreted and compared with its source artifact.\n\nThis lesson exercises an actual FastAPI application through an in-process ASGI client. It tests HTTP parsing, schema validation, route execution and response encoding without starting a network server. The first case compares the route's probability with the same model's direct prediction. The second rejects a negative usage value and an undeclared target field.\n\nThese checks do not establish DNS, sockets, container networking, load capacity or external authentication. The complete local-system project later starts a real loopback HTTP service and qualifies those declared lifecycle paths separately. Keeping the evidence layers distinct prevents a useful unit-level API test from being mislabeled as a deployed system.",
+      "syntax": "The Pydantic request model declares bounded usage/tickets and an allowed region vocabulary, with extra fields forbidden. A POST route converts the validated object into the model's expected frame and returns a numeric probability plus version. TestClient sends real ASGI requests inside the process. The networked project uses the same contract principles with Docker-owned state and loopback publication.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Compare HTTP-contract and direct inference",
+          "explanation": "The first case submits a valid JSON body through the application. It checks status 200, the version label and numeric agreement with direct model inference. That makes the route behavior observable.",
+          "expected": "The accepted request returns a probability matching the fitted model and version fixture-v1."
+        },
+        {
+          "title": "Reject invalid and undeclared input",
+          "explanation": "The second case sends a negative value and a label field that is not part of the prediction interface. Both must be rejected before model execution under the declared schema.",
+          "expected": "Both requests return 422 validation responses."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Test a boundary value",
+          "task": "Submit usage 0 and the declared maximum.",
+          "check": "The response follows the documented bounds.",
+          "hint": "Boundaries need explicit tests.",
+          "answer": "Check both accepted boundaries and values immediately outside them. Do not infer request validation from the model's numerical output."
+        },
+        {
+          "title": "Reject a hidden target",
+          "task": "Add label to an otherwise valid request.",
+          "check": "The API rejects the undeclared field.",
+          "hint": "The serving contract is an allowlist.",
+          "answer": "Extra-field rejection helps catch client mistakes and accidental leakage. It does not replace broader data and access controls."
+        },
+        {
+          "title": "Inspect the model version",
+          "task": "Keep the returned version with a prediction record.",
+          "check": "The observation identifies its model.",
+          "hint": "A score without version context is hard to reproduce.",
+          "answer": "Bind the version to the accepted artifact and feature contract. A display label should not diverge from the actual loaded state."
+        },
+        {
+          "title": "Test categorical policy",
+          "task": "Submit an unknown region.",
+          "check": "It is rejected under this interface contract.",
+          "hint": "The API may be stricter than an internal encoder.",
+          "answer": "Document that choice and ensure clients know the accepted vocabulary. A hidden fallback can create train/serve inconsistency."
+        },
+        {
+          "title": "Separate test boundaries",
+          "task": "List what the in-process client has not tested.",
+          "check": "It has not tested real network/container lifecycle.",
+          "hint": "ASGI behavior is one evidence layer.",
+          "answer": "Use the owned local-system checker for actual HTTP, startup, monitoring, rollback and replacement. Do not claim an external deployment from this unit alone."
+        },
+        {
+          "title": "Preserve safe errors",
+          "task": "Describe a diagnostic that avoids exposing credentials or internals.",
+          "check": "It is actionable without unnecessary sensitive detail.",
+          "hint": "Error handling is part of the API.",
+          "answer": "Return a bounded public error and retain appropriate owned operational evidence. Do not echo arbitrary secrets or expose an administrative mutation route casually."
+        }
+      ],
+      "diagnosis": "An HTTP 422 can be correct input rejection rather than a model failure. A 200 response can still carry the wrong model or transformation. Compare the route with direct inference, inspect the version and keep the limits of in-process testing explicit.",
+      "transfer": "Define and test a serving contract with positive and negative requests. Verify model parity and version identity, then use the separate real Docker service project to qualify network and persistence behavior.",
+      "lab": "Define and test a serving contract with positive and negative requests. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "FastAPI documentation: A real HTTP contract before a network deployment",
+          "https://fastapi.tiangolo.com/tutorial/testing/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-013",
+      "title": "Orchestration, checkpoints and safe retries",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["DAG", "checkpoint", "idempotency", "input identity", "retry"],
+      "prerequisites": ["mle-003", "mle-008", "mle-010"],
+      "outcome": "Define checkpoint and retry behavior using artifact identities.",
+      "theory": "A workflow coordinator decides which stages can run, what evidence is complete and what should happen after interruption. Repeating a command is not automatically a safe retry. An operation may already have written an artifact before its response was lost, and a changed input may make an old checkpoint invalid.\n\nThe local example uses an explicit ledger to expose these mechanisms. It records the input identity, derived features, model state and publication identity. A deliberate interruption occurs after the feature checkpoint. Resuming with the same input reuses that completed stage and reaches the same publication identity on another run.\n\nThe second case changes the input and invalidates the prior derived state. This is a small Python workflow model, not a disguised Prefect deployment. The existing Python orchestration lessons introduce actual framework execution. The purpose here is to make the state and retry contract explicit before choosing a scheduler or distributing work.",
+      "syntax": "The ledger keys represent completed artifacts. A stable input digest identifies which data those artifacts belong to. Publication is created only after model state exists, and repeat execution with the same input returns the same identity. An input change clears derived state under this simple policy; a larger system may invalidate only affected descendants.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Resume after a known interruption",
+          "explanation": "The first case fails deliberately after features are recorded. It confirms that publication is absent, then resumes and repeats the same run. The unchanged publication identity is evidence of the fixture's idempotent behavior.",
+          "expected": "The feature checkpoint survives; resumed model mean is 4 and repeated publication identity is unchanged."
+        },
+        {
+          "title": "Invalidate work derived from changed input",
+          "explanation": "The second case changes one source value. Its digest, derived features, model mean and publication identity change. Reusing the old result would violate the dependency contract.",
+          "expected": "New features are [2,4,8] and the mean is 14/3."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Name the side effect",
+          "task": "Identify which stage creates the consumer-facing result.",
+          "check": "Publication is separate from feature and model computation.",
+          "hint": "Retry risk depends on the operation.",
+          "answer": "Describe whether each stage is pure, idempotent or requires reconciliation. A successful earlier stage does not authorize all later effects."
+        },
+        {
+          "title": "Add an uncertain outcome",
+          "task": "Describe a timeout after publication may already have occurred.",
+          "check": "The response checks the intended identity before repeating.",
+          "hint": "Unknown differs from confirmed failure.",
+          "answer": "Read the publication record or artifact and determine whether the operation completed. Do not blindly repeat a non-idempotent effect."
+        },
+        {
+          "title": "Version the code",
+          "task": "Include transformation-code identity with the input identity.",
+          "check": "Changed logic invalidates incompatible reuse.",
+          "hint": "Equal data does not imply equal computation.",
+          "answer": "Record the source or transformation version that produced a checkpoint. Reusing it under different logic can silently return stale results."
+        },
+        {
+          "title": "Invalidate a descendant",
+          "task": "Change a feature transformation and identify affected stages.",
+          "check": "Model, evaluation and publication need new evidence.",
+          "hint": "The artifact graph defines propagation.",
+          "answer": "Recompute the affected descendants or use a proven compatible reuse rule. A checkpoint is useful only with its dependencies."
+        },
+        {
+          "title": "Keep failure evidence",
+          "task": "Retain the interruption reason and completed stages.",
+          "check": "The next attempt can explain what was reused.",
+          "hint": "A retry count alone is incomplete.",
+          "answer": "Record stage identities and actual outcomes. Avoid overwriting the original failure with a later success without preserving the distinction."
+        },
+        {
+          "title": "Choose a real orchestrator",
+          "task": "State what framework execution must still qualify.",
+          "check": "It includes persistence, scheduling, retries and resource behavior.",
+          "hint": "This example is a local mechanism model.",
+          "answer": "Use the existing Prefect route or an explicitly prepared external project to test actual orchestration. Do not call this dictionary a deployed scheduler."
+        }
+      ],
+      "diagnosis": "If reruns produce duplicated effects, inspect operation identity and publication semantics. If changed inputs reuse old outputs, inspect checkpoint dependencies. If a job outcome is unknown, reconcile it before resubmission. A scheduler's green status does not by itself establish that the correct artifact was published.",
+      "transfer": "Define checkpoint and retry behavior using artifact identities. Demonstrate a known interruption and an input change, then map those contracts to a real orchestrator with separate persistence and execution evidence.",
+      "lab": "Define checkpoint and retry behavior using artifact identities. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Prefect documentation: Orchestration, checkpoints and safe retries",
+          "https://docs.prefect.io/v3/concepts/states"
+        ]
+      ]
+    },
+    {
+      "id": "mle-014",
+      "title": "Shadow comparison and stable rollout cohorts",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["shadow", "canary", "stable assignment", "ramp", "causal evidence"],
+      "prerequisites": ["mle-009", "mle-012"],
+      "outcome": "Design stable routing and shadow comparisons with bounded conclusions.",
+      "theory": "A rollout changes which model participates in a decision. Shadow evaluation can compare predictions without changing user actions. A canary or ramp routes an explicit portion of traffic to a candidate. These mechanisms provide operational evidence, but a prediction difference or a successful router is not automatically evidence of a beneficial causal effect.\n\nStable assignment is useful when repeated requests from one entity should remain in the same cohort. The first case hashes a declared entity identity into a bounded bucket. Increasing the threshold creates a nested larger cohort. This is a deterministic assignment mechanism, not a guarantee of balance or an analysis of an experiment.\n\nThe second case compares scores from two small candidate outputs. Their thresholded decisions agree even though probabilities differ. A single disagreement count would therefore miss a change in confidence. A real rollout policy should consider input compatibility, output behavior, service errors, latency, monitoring and appropriately designed outcome evidence.",
+      "syntax": "The hash bucket is computed from a stable namespaced identity and a fixed rule. Keep the rule and salt/version with the rollout contract. Shadow comparison inspects both numeric score changes and derived actions. The fixture's acceptance limit is a declared illustrative threshold, not an estimated business-value rule.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Use a stable nested cohort",
+          "explanation": "The first case assigns one hundred synthetic entities and verifies that a ten-percent bucket range is contained within the twenty-five-percent range. It checks deterministic assignment rather than assuming every small sample has an exact percentage count.",
+          "expected": "The smaller selected set is a nonempty subset of the larger set, and assignments repeat exactly."
+        },
+        {
+          "title": "Observe score changes without action changes",
+          "explanation": "The second case has zero decision disagreements at threshold 0.5 but nonzero probability differences. This demonstrates why monitoring only labels can hide a meaningful interface change.",
+          "expected": "All thresholded decisions agree, while the probabilities have changed."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change the assignment key",
+          "task": "Compare stable customer assignment with per-request random assignment.",
+          "check": "The cohort interpretation changes.",
+          "hint": "Repeated entities can cross treatments under another rule.",
+          "answer": "Choose the unit from the experiment or rollout design and retain it consistently. Do not assume request-level assignment answers an entity-level question."
+        },
+        {
+          "title": "Record a salt/version",
+          "task": "Add an explicit assignment-version field.",
+          "check": "The routing rule is reproducible.",
+          "hint": "Hash configuration is part of the decision.",
+          "answer": "Changing it can reassign entities. Treat that as a reviewed change rather than an invisible implementation detail."
+        },
+        {
+          "title": "Inspect probabilities",
+          "task": "Compare score deltas even when decisions agree.",
+          "check": "The confidence change remains visible.",
+          "hint": "A threshold discards information.",
+          "answer": "Use appropriate numeric and calibration diagnostics alongside action disagreement. A small label difference does not prove equivalent probabilities."
+        },
+        {
+          "title": "Add operational limits",
+          "task": "Define acceptable errors and latency for a candidate.",
+          "check": "The policy names measured quantities and responses.",
+          "hint": "Predictive metrics are not the whole service.",
+          "answer": "Use actual service observations and a rollback rule. The local project supplies bounded HTTP/monitoring checks; production capacity needs separate evidence."
+        },
+        {
+          "title": "Avoid a causal claim",
+          "task": "Explain what shadow predictions cannot establish about outcomes.",
+          "check": "They do not establish the effect of changed actions.",
+          "hint": "Users did not receive the candidate action.",
+          "answer": "Use an appropriate randomized or otherwise identified design for that question, with interference, exposure and metric assumptions made explicit."
+        },
+        {
+          "title": "Plan rollback",
+          "task": "Specify the accepted version and state needed if a ramp stops.",
+          "check": "A compatible prior bundle is retained.",
+          "hint": "Rollback is an operational contract.",
+          "answer": "Restore model and feature compatibility, reconcile in-flight work and record the reason. A pointer switch alone is not every possible recovery requirement."
+        }
+      ],
+      "diagnosis": "Unstable cohorts can produce confusing comparisons and repeated exposure changes. Zero disagreement can conceal probability changes. A rollout that meets latency limits can still harm an outcome. Diagnose these separately and connect each decision to the evidence it actually requires.",
+      "transfer": "Design stable routing and shadow comparisons with bounded conclusions. Separate interface, operational and causal evidence, and retain a compatible rollback target before expanding exposure.",
+      "lab": "Design stable routing and shadow comparisons with bounded conclusions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "MLflow documentation: Shadow comparison and stable rollout cohorts",
+          "https://mlflow.org/docs/latest/ml/model-registry/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-015",
+      "title": "Monitoring with delayed labels and bounded service metrics",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["label maturity", "coverage", "drift", "latency", "monitoring population"],
+      "prerequisites": ["mle-002", "mle-009", "mle-012"],
+      "outcome": "Monitor operations, data contracts and mature outcomes as distinct signals.",
+      "theory": "Monitoring observes a running system under incomplete information. Predictions and operational events can arrive immediately, while outcomes may arrive much later. A quality metric computed from whichever labels happen to be available can describe a selected population. Report label maturity and coverage before interpreting the number.\n\nThe first case has four predictions but only two mature outcomes at cutoff 5. It computes Brier loss on those two and reports the coverage explicitly. It does not replace the unknown outcomes with negatives. A real analysis should also investigate whether label delay depends on the outcome, entity or intervention.\n\nThe second case separates covariate shift from service latency and predictive quality. A large distributional difference is a signal to investigate, not proof that model accuracy changed. A p95 latency from five samples is an observed summary with limited precision, not a service-level guarantee. Monitoring should identify the population, time window, denominator and response for every signal.",
+      "syntax": "Filter labels by their availability time, retain prediction identities and calculate coverage against the original prediction population. The example uses an actual two-sample KS statistic for a deliberately separated numeric fixture. Latency uses an explicit quantile method. The real service project keeps only a bounded number of process latency samples and labels that scope in its API.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Evaluate only mature observations and retain coverage",
+          "explanation": "Predictions 1 and 3 have known outcomes by the cutoff. Their squared probability errors average 0.085. The two excluded records remain part of the coverage denominator rather than being discarded from the monitoring story.",
+          "expected": "Mature-label coverage is 0.5 and observed Brier loss is 0.085."
+        },
+        {
+          "title": "Separate data and operational signals",
+          "explanation": "The second case shifts every input value by ten and computes a maximal KS statistic on the tiny fixture. It separately reports the chosen latency quantile. Neither signal is described as an observed change in target quality.",
+          "expected": "The shift statistic is 1.0; the observed higher-method p95 latency is 15 milliseconds."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Move the monitoring cutoff",
+          "task": "Advance the cutoff and recompute maturity and coverage.",
+          "check": "Newly available labels change the evaluated population.",
+          "hint": "Keep the original prediction denominator.",
+          "answer": "Record the cutoff and cohort identities. Comparing different maturity stages without adjustment can create a misleading trend."
+        },
+        {
+          "title": "Test outcome-dependent delay",
+          "task": "Describe a process where positive outcomes arrive later.",
+          "check": "Early observed quality can be biased.",
+          "hint": "Availability may be informative.",
+          "answer": "Investigate delay by outcome and cohort, and use an appropriate evaluation design. Do not assume missing-at-random labels without evidence."
+        },
+        {
+          "title": "Interpret drift",
+          "task": "Explain what a KS alarm establishes.",
+          "check": "It establishes a difference under the tested sample/comparison, not performance loss.",
+          "hint": "Input and target behavior are different.",
+          "answer": "Inspect data contracts and evaluate mature outcomes when available. A changed distribution can be harmless, harmful or even beneficial depending on the model and task."
+        },
+        {
+          "title": "Record metric scope",
+          "task": "State whether a latency summary covers this process or a whole deployment.",
+          "check": "The scope is explicit.",
+          "hint": "A local counter is not a fleet-wide monitor.",
+          "answer": "Aggregate with suitable identities and windows when designing a real service. Preserve reset/restart behavior in the interpretation."
+        },
+        {
+          "title": "Choose an action",
+          "task": "Define what happens after a freshness or schema alarm.",
+          "check": "The response is specific and bounded.",
+          "hint": "An alarm without an action is incomplete operations.",
+          "answer": "Use a reviewed reject, fallback, investigation or rollback policy. Avoid silently continuing with invalid inputs while reporting healthy service status."
+        },
+        {
+          "title": "Keep uncertainty visible",
+          "task": "Describe the limitations of a quantile from five samples.",
+          "check": "The estimate is visibly weak.",
+          "hint": "A percentile label does not guarantee precision.",
+          "answer": "Retain counts and distributional context, then collect representative observations for a meaningful service objective or comparison."
+        }
+      ],
+      "diagnosis": "A quality improvement can come from changing label coverage. A drift signal can occur without observed performance loss. A latency counter can reset on restart. Inspect populations, windows and evidence types before triggering a broad model replacement.",
+      "transfer": "Monitor operations, data contracts and mature outcomes as distinct signals. Keep their denominators and scopes explicit, and connect each to a reviewed response. The real local service demonstrates actual process metrics and stale-feature rejection without claiming production-scale observability.",
+      "lab": "Monitor operations, data contracts and mature outcomes as distinct signals. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "scikit-learn documentation: Monitoring with delayed labels and bounded service metrics",
+          "https://scikit-learn.org/stable/modules/model_evaluation.html"
+        ]
+      ]
+    },
+    {
+      "id": "mle-016",
+      "title": "Accepted model pointers and rollback after failure",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["activation", "artifact hash", "atomic replace", "rollback", "durable state"],
+      "prerequisites": ["mle-011", "mle-014", "mle-015"],
+      "outcome": "Activate and recover model state through explicit accepted versions.",
+      "theory": "A candidate model should not become active merely because a file was written. Activation needs accepted artifact identity, interface compatibility and a reviewed decision. Keeping the current pointer separate from candidate files lets a failed candidate leave the accepted model unchanged.\n\nThe first case validates a candidate hash before replacing the pointer. A deliberately incorrect expected hash causes rejection while the old pointer bytes remain exact. The second activates a new version and deliberately returns to the prior version. These are local file-state mechanisms, not a distributed transaction across every serving replica.\n\nAtomic visibility and durable recovery are different claims. os.replace gives a useful local replacement boundary, but power-loss durability, remote filesystems, multiple writers and deployment-wide consistency need additional design and qualification. The real Docker project restricts activation to an owned control CLI, validates model structure before publication and keeps the predictor's state mount read-only.",
+      "syntax": "Write a candidate under a versioned name, validate its identity, write a complete pending pointer and replace the current pointer atomically. The pointer records the resolved version and hash. A failed check occurs before the active pointer changes. Preserve accepted versions and define cleanup separately from activation.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Reject a bad candidate before activation",
+          "explanation": "The first case activates v1, records the exact pointer bytes and attempts a v2 activation with a wrong hash. The old pointer must remain unchanged. This tests a specific failure boundary rather than only the successful path.",
+          "expected": "The failed candidate leaves the active v1 pointer byte-identical."
+        },
+        {
+          "title": "Perform a deliberate rollback",
+          "explanation": "The second case activates v1, then v2, then v1 again. It checks the final version and absence of a pending pointer. A rollback is recorded as an explicit action, not hidden by deleting candidate evidence.",
+          "expected": "The accepted version returns to v1 with no pending pointer file."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Validate before switching",
+          "task": "List the checks that must precede pointer replacement.",
+          "check": "They include artifact identity and compatible structure.",
+          "hint": "A valid filename is not enough.",
+          "answer": "The service project also validates feature order, finite coefficients and positive scales. Broader model acceptance still needs its evaluation and operational evidence."
+        },
+        {
+          "title": "Retain failed evidence",
+          "task": "Keep the rejected candidate and its diagnostic in an owned review area.",
+          "check": "The failure remains explainable.",
+          "hint": "Cleanup is a separate decision.",
+          "answer": "Do not overwrite the previous accepted version or erase the failure merely to simplify directory contents. Apply an explicit retention policy later."
+        },
+        {
+          "title": "Reconcile an unknown response",
+          "task": "Describe a timeout after activation may have completed.",
+          "check": "The next action reads the pointer before retrying.",
+          "hint": "Unknown outcome differs from confirmed rejection.",
+          "answer": "Use the intended version/hash to reconcile actual state. Blindly repeating activation can create misleading audit history in a larger system."
+        },
+        {
+          "title": "Check bundle compatibility",
+          "task": "Explain why rolling back only coefficients may be insufficient.",
+          "check": "The feature/preprocessing contract must also match.",
+          "hint": "Models consume versioned inputs.",
+          "answer": "Restore a compatible model and feature transformation bundle. A file-level rollback can be technically successful while predictions are semantically wrong."
+        },
+        {
+          "title": "Separate local and distributed claims",
+          "task": "State what os.replace does not establish.",
+          "check": "It does not prove multi-replica consensus or power-loss durability.",
+          "hint": "One filesystem operation has a limited scope.",
+          "answer": "Use suitable synchronization, persistence and recovery mechanisms for the deployed environment, and test partial failures explicitly."
+        },
+        {
+          "title": "Exercise the real project",
+          "task": "Use the local-system CLI to activate v2 and return to v1.",
+          "check": "Actual HTTP predictions identify the selected version and restore exactly.",
+          "hint": "The project is a separate longer-lived workflow.",
+          "answer": "Retain its ownership marker and state. The checker verifies real HTTP, model integrity and replacement without retraining, while leaving external production claims out of scope."
+        }
+      ],
+      "diagnosis": "If an invalid candidate becomes active, inspect validation order. If a rollback changes predictions unexpectedly, inspect feature/preprocessing compatibility and artifact identity. If a response is uncertain, reconcile the current version before repeating or cleaning operations.",
+      "transfer": "Activate and recover model state through explicit accepted versions. Test failure before publication and exact rollback behavior, then distinguish local atomicity from the additional guarantees required by a deployed multi-process system.",
+      "lab": "Activate and recover model state through explicit accepted versions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "MLflow documentation: Accepted model pointers and rollback after failure",
+          "https://mlflow.org/docs/latest/ml/model-registry/"
+        ]
+      ]
+    },
+    {
+      "id": "mle-017",
+      "title": "Model cards, slice evidence and data minimization",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["slice metrics", "sample size", "model card", "data minimization", "governance"],
+      "prerequisites": ["mle-001", "mle-005", "mle-009", "mle-015"],
+      "outcome": "Write a model card that is grounded in actual data, metrics and operational decisions.",
+      "theory": "A model card should make intended use, inputs, evidence, limitations and operational ownership inspectable. It is not a certificate produced by filling a template. A useful card must reflect actual evaluated populations, known failure modes and the decision process used to accept or reject a version.\n\nThe first case compares two synthetic slices with different sample sizes and true-positive rates. The counts remain visible, so a rate difference is not presented as a precise population conclusion. One parity metric does not establish fairness, and a model's appropriate use depends on context, harms, alternatives and an adequately designed evaluation.\n\nThe second case defines a small input allowlist and rejects an unnecessary email field. Data minimization reduces avoidable exposure and keeps the interface focused on its purpose. It does not establish legal compliance or prove that every allowed feature is appropriate. A real system needs separately qualified governance, access, retention and review processes.",
+      "syntax": "Compute slice metrics from explicit confusion counts and retain their denominators. The card records purpose, permitted features, excluded fields, owner, limits and a rollback version. Compare incoming fields against the allowlist. Keep governance statements tied to actual evidence rather than treating an artifact's filename as approval.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Inspect rate differences with counts",
+          "explanation": "Slice A has twenty observations and true-positive rate 0.8; slice B has ten and rate 0.4. The program reports both counts and rates. Interpretation still requires uncertainty, population and decision context beyond this tiny table.",
+          "expected": "The two TPRs are 0.8 and 0.4, with different sample sizes."
+        },
+        {
+          "title": "Reject an unnecessary field",
+          "explanation": "The request includes email even though the declared model interface uses only usage, tickets and region. The program identifies that extra field and retains the card's stated limitations and rollback version.",
+          "expected": "Email is rejected by the allowlist and the card retains its synthetic-data limit."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Compute a denominator",
+          "task": "Identify the denominator of true-positive rate for each slice.",
+          "check": "It counts actual positives, not all rows.",
+          "hint": "Metric definitions matter.",
+          "answer": "Use tp+fn and retain the underlying counts. Accuracy uses a different denominator and can tell a different story."
+        },
+        {
+          "title": "Add uncertainty",
+          "task": "Describe an appropriate uncertainty analysis for the slice comparison.",
+          "check": "It acknowledges small samples and the sampling/design assumptions.",
+          "hint": "A numerical difference is not a complete inference.",
+          "answer": "Use a method appropriate to the cohort and dependence structure, with the original denominators. Avoid a universal fairness conclusion from one noisy metric."
+        },
+        {
+          "title": "Review the purpose",
+          "task": "State which decision the model is intended to support.",
+          "check": "The intended use is concrete.",
+          "hint": "A broad label such as prediction is insufficient.",
+          "answer": "Name the population, action, alternatives and limitations. Changes in intended use require fresh evaluation rather than reusing the same card automatically."
+        },
+        {
+          "title": "Minimize inputs",
+          "task": "Remove a field with no justified role in the interface.",
+          "check": "The accepted schema remains explicit.",
+          "hint": "Availability does not justify collection.",
+          "answer": "Review feature necessity and potential harms. Preserve the decision and test rejected fields, rather than accepting arbitrary payloads."
+        },
+        {
+          "title": "Record operational ownership",
+          "task": "Identify who can accept a model and initiate rollback in a real setting.",
+          "check": "The responsibility is acknowledged outside the fixture.",
+          "hint": "An owner string is a declaration.",
+          "answer": "Connect it to actual procedures, permissions and retained evidence. Do not describe this synthetic label as an implemented organizational process."
+        },
+        {
+          "title": "Bound the claim",
+          "task": "Explain why this card is not a compliance certificate.",
+          "check": "The answer separates documentation from external requirements and review.",
+          "hint": "A template cannot establish every obligation.",
+          "answer": "Use qualified governance processes and appropriate expertise for the real context. Keep this lesson's technical and statistical observations explicit."
+        }
+      ],
+      "diagnosis": "A clean aggregate metric can hide a weak slice or a changed population. A long model card can still omit the actual decision and evidence. Avoid converting one rate check, a template or an allowlist into a claim of universal fairness, safety or compliance.",
+      "transfer": "Write a model card that is grounded in actual data, metrics and operational decisions. Retain slice denominators, stated limitations and a minimal input contract, and identify which external governance claims require separate review.",
+      "lab": "Write a model card that is grounded in actual data, metrics and operational decisions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "scikit-learn documentation: Model cards, slice evidence and data minimization",
+          "https://scikit-learn.org/stable/modules/model_evaluation.html"
+        ]
+      ]
+    },
+    {
+      "id": "mle-018",
+      "title": "A connected local ML product and real service lifecycle",
+      "level": "advanced",
+      "minutes": 180,
+      "concepts": ["capstone", "Polars", "Feast", "MLflow", "serving", "publication", "recovery"],
+      "prerequisites": [
+        "mle-006",
+        "mle-007",
+        "mle-010",
+        "mle-012",
+        "mle-013",
+        "mle-016",
+        "mle-017"
+      ],
+      "outcome": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision.",
+      "theory": "The capstone connects actual components under one information and interface contract. Polars validates and prepares synthetic records. Feast stores feature snapshots and supplies the historical values used for training, then materializes the same feature contract into its SQLite online store. A fitted scikit-learn pipeline predicts from those retrieved fields, MLflow retains its metrics and model card, and a real ASGI request verifies the inference interface.\n\nThe training cutoff permits 77 mature labels, while forty later decisions form the declared evaluation cohort. The program independently checks that historical feature retrieval reproduces the expected source values and identifiers. Online inference also checks feature age before use. This makes the feature store an actual part of the computation rather than an unrelated demonstration next to the model.\n\nThe ordinary pad remains a bounded fresh-process investigation. The separate complete local-system project adds persistent owned state and a real loopback HTTP server. Its checker covers training, input errors, monitoring, activation/rollback, stale features, corrupted model bytes and predictor replacement without retraining. Those are actual local deployment observations, with external production populations, scale and organizational controls kept separate.",
+      "syntax": "Run the complete reference in the data-engineering pad to inspect source-bound JSON reports. The first report records actual training/evaluation, feature-store and inference evidence; the second explains a deliberately blocked publication decision. For the longer-lived workflow, copy projects/local-system to an owned work directory and use its README/run.sh. Its state is separate from the classroom's saved code and notes.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Connect the actual data and model boundaries",
+          "explanation": "The first case retrieves all 120 historical decisions through Feast, fits on 77 eligible rows, evaluates 40 later rows, materializes online features and submits an in-process HTTP request. MLflow readback checks the recorded metric, and the classroom report retains the contract and outcome.",
+          "expected": "All 120 requests reconcile, model input/output is valid, and the report identifies actual local tools and the no-external-deployment boundary."
+        },
+        {
+          "title": "Block a candidate with inadequate evidence",
+          "explanation": "The second case has valid schema and artifact identity but only 0.1 mature-label coverage against a required 0.8. Publication is rejected and the accepted version remains v1. This demonstrates that structural success alone is insufficient.",
+          "expected": "The publication decision is false with an explicit coverage reason and retained accepted version."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Trace the training features",
+          "task": "Identify where the actual training values came from.",
+          "check": "They came through the registered Feast historical retrieval.",
+          "hint": "Follow identifiers and time boundaries.",
+          "answer": "Compare them with the independent prepared source and verify complete request coverage. A separate successful store demo would not prove this connection."
+        },
+        {
+          "title": "Review label maturity",
+          "task": "Explain why only 77 rows enter fitting.",
+          "check": "The training cutoff excludes labels not yet known.",
+          "hint": "The retrospective table contains future outcomes.",
+          "answer": "Preserve the cutoff and included identities. Do not select training rows merely because their prediction times are earlier."
+        },
+        {
+          "title": "Inspect the saved report",
+          "task": "Read the feature contract, age, metric and source identity.",
+          "check": "Each claim has a defined local scope.",
+          "hint": "A report should be evidence, not a success slogan.",
+          "answer": "Verify actual readback and distinguish package execution, numerical assertions, evaluation interpretation and deployment qualification."
+        },
+        {
+          "title": "Run the real local service",
+          "task": "Use the copied project and its Docker-only instructions.",
+          "check": "The loopback HTTP endpoint predicts from durable owned state.",
+          "hint": "The pad itself does not keep a server alive.",
+          "answer": "The project has explicit training, serving and control roles. Its checker proves declared local lifecycle behavior and cleans only its owned resources."
+        },
+        {
+          "title": "Exercise rollback and stale inputs",
+          "task": "Activate the candidate, restorev 1 and test stale-feature rejection in the project.",
+          "check": "Versioned predictions and diagnostics follow the contract.",
+          "hint": "Do not change timestamps merely to hide stale data.",
+          "answer": "Retain accepted artifacts, preserve true feature age and record the operational decision. Monitoring and publication are part of the product."
+        },
+        {
+          "title": "Write the final acceptance argument",
+          "task": "State what supports release and what remains external.",
+          "check": "It separates local evidence from broader deployment claims.",
+          "hint": "Every assertion has a scope.",
+          "answer": "Cite the data/interface contracts, actual tool results, diagnostics, persistent state and rollback checks. Identify additional scale, security, population and governance qualification required for a real use."
+        }
+      ],
+      "diagnosis": "If any boundary fails, diagnose the earliest mismatched contract rather than relabeling the whole pipeline successful. Check request coverage, clocks, feature identity, preprocessing, model version, artifact bytes and actual service responses. Keep candidate output separate from accepted publication and preserve meaningful failure evidence.",
+      "transfer": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Use the owned service project to test persistent HTTP operation and recovery, then specify the additional evidence needed before adapting the design to a real organization and population.",
+      "lab": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "references": [
+        [
+          "Feast documentation: A connected local ML product and real service lifecycle",
+          "https://docs.feast.dev/getting-started"
+        ]
+      ]
+    }
+  ],
+  "project_readme": "projects/local-system/README.md",
+  "project_summary": "The owned local-system project adds a real loopback HTTP prediction service with explicit Docker training, persistent local Feast/MLflow/model state, monitoring, controlled activation and rollback. Its lifecycle is separate from the bounded classroom pad; copy and operate it through the documented owner-aware launcher."
+}

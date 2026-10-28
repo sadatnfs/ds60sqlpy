@@ -260,19 +260,19 @@ Selection-source admission: blocked</code></pre>
 <ol>
 <li><strong>Complete a manifest.</strong> Documentd1 is authored for the lesson, familyF1, training;d2 is an authored evaluation question, familyF2,test. Fill required fields. <strong>Expected:</strong> both rows have source,permission,split,family,hash. <strong>Verify:</strong> Save the reasoning table for exercise 1, including both rows have source,permission,split,family,hash.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Flag a benchmark answer.</strong> A candidate training document reproduces the answer tod2. Decide how to treat it before fitting. <strong>Expected:</strong> exclude from training and selection sources pending contamination review. <strong>Verify:</strong> Save the reasoning table for exercise 2, including exclude from training and selection sources pending contamination review.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Follow a paraphrase family.</strong> d4 rewritesd3 without sharing an exact hash. Assign a family and audit. <strong>Expected:</strong> d4 remains in evaluation-derived familyF2. <strong>Verify:</strong> Save the reasoning table for exercise 3, including d4 remains in evaluation-derived familyF2.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Separate permission and cleanliness.</strong> A source has explicit permission but contains evaluation answers. Is it suitable training data for this assessment? <strong>Expected:</strong> permission alone does not resolve contamination. <strong>Verify:</strong> Save the reasoning table for exercise 4, including permission alone does not resolve contamination.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Audit preprocessing inputs.</strong> A tokenizer is fitted on train+test although model gradients use only train. Identify the boundary failure. <strong>Expected:</strong> test information influenced the fitted tokenizer. <strong>Verify:</strong> Save the reasoning table for exercise 5, including test information influenced the fitted tokenizer.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Record an unresolved source.</strong> d5 has unknown origin and unspecified permission. Write its manifest status without inventing approval. <strong>Expected:</strong> origin unresolved; permission unresolved; admission blocked. <strong>Verify:</strong> Save the reasoning table for exercise 6, including origin unresolved; permission unresolved; admission blocked.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

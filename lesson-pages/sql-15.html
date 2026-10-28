@@ -404,12 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-15-phase-1-project-multi-dimensional-revenue-report-companion-guide">Day 15: Phase 1 Project: Multi-Dimensional Revenue Report (Companion Guide)<a class="heading-anchor" href="#guide--day-15-phase-1-project-multi-dimensional-revenue-report-companion-guide" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Foundation (beginner)</li>
-<li><strong>Prerequisites:</strong> <a href="sql-14.html#guide">Day 14; numeric types and casting</a> and the complete Day 01–14 foundation sequence</li>
-<li><strong>Artifacts:</strong> <a href="sql-15.html#learner">learner SQL</a> · <a href="sql-15.html#solution-1">solution reasoning</a> · <a href="sql-15.html#solution-2">executable solution</a></li>
-</ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-15</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -425,12 +419,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-15</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Foundation (beginner)</li>
+<li><strong>Prerequisites:</strong> <a href="sql-14.html#guide">Day 14; numeric types and casting</a> and the complete Day 01–14 foundation sequence</li>
+<li><strong>Artifacts:</strong> <a href="sql-15.html#learner">learner SQL</a> · <a href="sql-15.html#solution-1">solution reasoning</a> · <a href="sql-15.html#solution-2">executable solution</a></li>
+</ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Metric contract, Dimensional report, Control total. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>, <code>customers</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels. The expected contract is that One row per customer. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day15_phase1_project.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/postgres-60day/day15_phase1_project.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
@@ -601,7 +601,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/day15_phase1_project.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -613,13 +613,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 15: Phase 1 Project - Complex Report</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-15: Phase1 Project</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-15: Phase1 Project</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day15_phase1_project.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-15/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-15.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -632,6 +632,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: All monetary summaries identify stored totals versus computed net line revenue. Reporting month uses UTC and empty populations remain visible where required.</span></span>
@@ -678,6 +679,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>country</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">200</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
@@ -1040,7 +1042,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/solutions/day15_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1069,6 +1071,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: All monetary summaries identify stored totals versus computed net line revenue. Reporting month uses UTC and empty populations remain visible where required.</span></span>
@@ -1104,6 +1107,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  stored_revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Create a product profitability table from net order-line revenue and catalog cost.</span></span>
@@ -1135,6 +1139,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  gross_profit <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Build a UTC monthly order-status report with counts and stored revenue.</span></span>
@@ -1161,6 +1166,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  utc_month<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: Debugging</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Reconcile stored order total, computed line total, and paid total without multiplying details.</span></span>
@@ -1208,6 +1214,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> lt<span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: Prediction</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Compare monthly budgets with actual expenses and preserve missing sides.</span></span>
@@ -1259,6 +1266,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">    <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">    category<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments.</span></span>
@@ -1307,6 +1315,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> order_kpis <span class="syntax-keyword">AS</span> o</span>
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> line_kpis <span class="syntax-keyword">AS</span> l</span>
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> payment_kpis <span class="syntax-keyword">AS</span> p<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>

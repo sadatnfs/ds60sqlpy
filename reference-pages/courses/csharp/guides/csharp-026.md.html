@@ -297,19 +297,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Predict what round-trip equality establishes and what it does not.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Add a clearly versioned optional description field.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Write a decoder returning explicit validation errors for missing name and negative quantity.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose trusting default values from missing JSON fields.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test malformed JSON, JSON null and an extra unknown field.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design a migration from a renamed quantity field while retaining old saved records.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

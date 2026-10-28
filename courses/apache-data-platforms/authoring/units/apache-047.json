@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-046", "apache-006"],
+  "concepts": ["ValueState", "TimerService", "per-key isolation", "cleanup", "operator identity"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Flink managed state",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/fault-tolerance/state/"
+    ],
+    [
+      "Flink process functions and timers",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/operators/process_function/"
+    ]
+  ]
+}

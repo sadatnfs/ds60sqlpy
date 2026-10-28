@@ -362,19 +362,19 @@ caches<span class="syntax-operator">=</span><span class="syntax-punctuation">{</
 <ol>
 <li><strong>Define unequal requests.</strong> Use requestA tokens2,5,7 and B tokens1,3 with separate cache keys. <strong>Expected:</strong> lengths3 and2;distinct keys. <strong>Verify:</strong> Save the assertion results for exercise 1, including lengths3 and2;distinct keys.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Interleave bounded work.</strong> ProcessA0,B0,A1,B1,A2 with independent caches. <strong>Expected:</strong> cache lengthsA3,B2. <strong>Verify:</strong> Save the assertion results for exercise 2, including cache lengthsA3,B2.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare independent inference.</strong> Run each complete request without a cache and compare its concatenated incremental logits. <strong>Expected:</strong> both requests match within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 3, including both requests match within 1e-6.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Invalidate a tokenizer change.</strong> Look upA under tokenizerv2 rather thanv1. <strong>Expected:</strong> no cached state found. <strong>Verify:</strong> Save the assertion results for exercise 4, including no cached state found.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Invalidate a model change.</strong> Look upA under modelv2 with the same tokenizer. <strong>Expected:</strong> no cached state found. <strong>Verify:</strong> Save the assertion results for exercise 5, including no cached state found.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Respect independent caps.</strong> Set capsA3,B2 and verify scheduled counts; reject one extraB token. <strong>Expected:</strong> A and B at their own caps;B cannot advance. <strong>Verify:</strong> Save the assertion results for exercise 6, including A and B at their own caps;B cannot advance.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

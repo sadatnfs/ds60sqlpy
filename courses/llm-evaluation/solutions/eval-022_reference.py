@@ -1,0 +1,85 @@
+import torch
+
+torch.set_num_threads(1)
+DTYPE = torch.float64
+
+
+def fit_policy(reward_rows, outer_steps=24):
+    reward = torch.tensor(reward_rows, dtype=DTYPE)
+    if reward.shape != (2, 2):
+        raise ValueError("Two contexts and two actions required")
+    logits = torch.nn.Parameter(torch.zeros((2, 2), dtype=DTYPE))
+    values = torch.nn.Parameter(torch.zeros(2, dtype=DTYPE))
+    reference = torch.full((2, 2), 0.5, dtype=DTYPE)
+    optimizer = torch.optim.SGD([logits, values], lr=0.8)
+    initial = float((torch.softmax(logits, dim=-1) * reward).sum(1).mean().detach())
+    for _ in range(outer_steps):
+        old = torch.softmax(logits.detach(), dim=-1).clone()
+        frozen = old.clone()
+        advantage = (reward - values.detach()[:, None]).clone()
+        weights = old / 2
+        assert not old.requires_grad and not advantage.requires_grad
+        for _ in range(3):
+            probability = torch.softmax(logits, dim=-1)
+            ratio = probability / old
+            surrogate = torch.minimum(ratio * advantage, torch.clamp(ratio, 0.8, 1.2) * advantage)
+            kl = (probability * (torch.log(probability) - torch.log(reference))).sum(1).mean()
+            critic = (weights * (values[:, None] - reward).square()).sum()
+            loss = -(weights * surrogate).sum() + 0.05 * kl + 0.5 * critic
+            optimizer.zero_grad()
+            loss.backward()
+            assert all(
+                p.grad is not None and torch.isfinite(p.grad).all() for p in (logits, values)
+            )
+            optimizer.step()
+            torch.testing.assert_close(old, frozen, rtol=0, atol=0)
+    probability = torch.softmax(logits.detach(), dim=-1)
+    final = float((probability * reward).sum(1).mean())
+    return probability, initial, final, values.detach()
+
+
+# === EXAMPLE A ===
+def worked_a():
+    probability, initial, final, values = fit_policy([[1, 0], [0, 1]])
+    assert initial == 0.5 and final > 0.9
+    torch.testing.assert_close(probability.sum(1), torch.ones(2, dtype=DTYPE))
+    assert torch.isfinite(values).all() and probability.device.type == "cpu"
+    print("Task reward:", initial, final, "policy:", probability.tolist())
+
+
+# === EXAMPLE B ===
+def worked_b():
+    probability, initial, proxy_final, _ = fit_policy([[0, 1], [1, 0]])
+    utility = torch.tensor([[1, 0], [0, 1]], dtype=DTYPE)
+    true_final = float((probability * utility).sum(1).mean())
+    assert proxy_final > 0.9 and true_final < 0.1
+    print("Proxy reward:", initial, proxy_final, "independent task utility:", true_final)
+
+
+# === EXERCISES ===
+def exercise_checks():
+    probability, initial, final, _ = fit_policy([[1, 0], [0, 1]], outer_steps=12)
+    assert final > initial
+    torch.testing.assert_close(probability[0], probability[1].flip(0), atol=1e-12, rtol=1e-12)
+    assert (probability > 0).all() and (probability < 1).all()
+    old = torch.full((2, 2), 0.5, dtype=DTYPE)
+    weights = old / 2
+    assert float(weights.sum()) == 1
+    try:
+        fit_policy([[1, 0, 1]])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Malformed environment accepted")
+
+
+# === MAIN ===
+def main():
+    worked_a()
+    worked_b()
+    exercise_checks()
+    print("eval-022: all reference checks passed")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 60,
+  "prerequisites": ["apache-004"],
+  "concepts": ["hash partitioning", "skew", "mergeable state"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    ["DataFusion partitions", "https://datafusion.apache.org/python/user-guide/basics.html"],
+    ["Kafka ordering and partition semantics", "https://kafka.apache.org/44/design/design/"]
+  ]
+}

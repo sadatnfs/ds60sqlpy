@@ -1,17 +1,5 @@
 # Day 16: Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Intermediate
-- **Direct prerequisite:** [SQL-FOUND-01; Relational design, DDL, and integrity
-  constraints](../../professional/companion-guides/sql_found_01_relational_design.md).
-  That module follows [Day 15; Phase 1 project](day15_phase1_project.md), so
-  you should already be comfortable with grouped aggregates and declared
-  result grain.
-- **Artifacts:** [learner SQL](../day16_window_functions_fundamentals.sql) ·
-  [solution reasoning](../solutions/day16_solutions.md) ·
-  [executable solution](../solutions/day16_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -76,6 +64,18 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Direct prerequisite:** [SQL-FOUND-01; Relational design, DDL, and integrity
+  constraints](../../professional/companion-guides/sql_found_01_relational_design.md).
+  That module follows [Day 15; Phase 1 project](day15_phase1_project.md), so
+  you should already be comfortable with grouped aggregates and declared
+  result grain.
+- **Artifacts:** [learner SQL](../day16_window_functions_fundamentals.sql) ·
+  [solution reasoning](../solutions/day16_solutions.md) ·
+  [executable solution](../solutions/day16_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -99,7 +99,7 @@ business question requires.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day16_window_functions_fundamentals.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day16_window_functions_fundamentals.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "groups": [
+    {
+      "id": "python-core",
+      "profiles": ["python-core"]
+    },
+    {
+      "id": "cpp",
+      "profiles": ["cpp20"]
+    },
+    {
+      "id": "java",
+      "profiles": ["java21"]
+    },
+    {
+      "id": "php",
+      "profiles": ["php-cli"]
+    },
+    {
+      "id": "c-go",
+      "profiles": ["c17", "go"]
+    },
+    {
+      "id": "csharp",
+      "profiles": ["csharp-dotnet"]
+    },
+    {
+      "id": "swift",
+      "profiles": ["swift-linux"]
+    },
+    {
+      "id": "javascript-typescript",
+      "profiles": ["javascript-node", "typescript-node"]
+    },
+    {
+      "id": "scala-spark",
+      "profiles": ["scala-jvm", "spark-local-scala", "spark-local-python"]
+    },
+    {
+      "id": "tensorflow",
+      "profiles": ["tensorflow-cpu"]
+    },
+    {
+      "id": "pytorch",
+      "profiles": ["llm-torch-cpu"]
+    },
+    {
+      "id": "data-engineering",
+      "profiles": ["data-engineering", "dbt-duckdb"]
+    },
+    {
+      "id": "stan",
+      "profiles": ["stan-cpu"]
+    },
+    {
+      "id": "julia",
+      "profiles": ["julia"]
+    },
+    {
+      "id": "jax",
+      "profiles": ["jax-cpu"]
+    },
+    {
+      "id": "bayesian",
+      "profiles": ["bayesian-cpu"]
+    },
+    {
+      "id": "r",
+      "profiles": ["r-statistics"]
+    },
+    {
+      "id": "data-platforms",
+      "profiles": ["data-platforms-python", "rust-stable"]
+    }
+  ]
+}

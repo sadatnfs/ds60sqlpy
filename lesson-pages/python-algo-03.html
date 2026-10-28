@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-algo-03.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-algo-03.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_algo_03.py</code></pre>
 <p>Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-algo-03.html#solution-1">explanatory solutions</a> and <a href="python-algo-03.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -440,23 +440,23 @@ via_c_cost <span class="syntax-operator">=</span> graph<span class="syntax-punct
 <li><strong>Validate the shortest-path assumptions.</strong> Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.</li>
 </ol>
 <p><strong>Expected:</strong> a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to absent z fails.</p>
-<ol>
+<ol start="2">
 <li><strong>Find minimum edge counts.</strong> Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.</li>
 </ol>
 <p><strong>Expected:</strong> For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated d is absent; an unknown start raises ValueError.</p>
-<ol>
+<ol start="3">
 <li><strong>Use cumulative cost and skip stale entries.</strong> Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.</li>
 </ol>
 <p><strong>Expected:</strong> In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The earlier direct b cost 10 must not overwrite the improved cost 2.</p>
-<ol>
+<ol start="4">
 <li><strong>Verify a route rather than only its score.</strong> Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.</li>
 </ol>
 <p><strong>Expected:</strong> Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle x-&gt;y-&gt;x raises ValueError rather than looping.</p>
-<ol>
+<ol start="5">
 <li><strong>Order dependencies and expose cycles.</strong> Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.</li>
 </ol>
 <p><strong>Expected:</strong> a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target. a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</p>
-<ol>
+<ol start="6">
 <li><strong>Transfer priority-queue reasoning to a stream.</strong> Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.</li>
 </ol>
 <p><strong>Expected:</strong> [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0 yields []; NaN raises ValueError.</p>

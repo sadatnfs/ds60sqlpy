@@ -270,19 +270,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Trace plus versus numeric conversion.</strong> Compare 2+3, 2+string 3, and Number(string 3)+2. <strong>Expected:</strong> 5, string 23, and 5. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect absence and NaN.</strong> Compare typeof null, undefined and Number.isNaN results. <strong>Expected:</strong> null reports object; undefined reports undefined; only numeric NaN passes isNaN. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare equality contracts.</strong> Use NaN, +0 and -0 with strict equality and Object.is. <strong>Expected:</strong> NaN!==NaN; Object.is(NaN, NaN) is true; +0===-0; Object.is distinguishes zeros. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose floating-point approximation.</strong> Add 0.1 and 0.2 and compare with 0.3 under an explicit tolerance. <strong>Expected:</strong> strict equality false; absolute error below 1e-15. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Protect integer identity.</strong> Compare the two integers just beyond Number.MAX_SAFE_INTEGER and then use BigInt. <strong>Expected:</strong> Number collapses a difference; BigInt preserves it. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject ambiguous numeric input.</strong> Validate finite nonblank numeric text and reject blank, Infinity and mixed BigInt arithmetic. <strong>Expected:</strong> valid 12 accepted; invalid cases throw. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

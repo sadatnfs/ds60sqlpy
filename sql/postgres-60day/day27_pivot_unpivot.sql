@@ -1,11 +1,11 @@
 -- Day 27: PIVOT / UNPIVOT (PostgreSQL approaches)
--- BEGINNER WORKFLOW — sql-27: Pivot Unpivot
+-- BEGINNER WORKFLOW - sql-27: Pivot Unpivot
 -- Guide: sql/postgres-60day/companion-guides/day27_pivot_unpivot.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-27/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-27.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
 -- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.
@@ -40,6 +41,7 @@ GROUP BY
   p.category
 ORDER BY
   p.category;
+
 -- Approach 2: crosstab (requires the optional tablefunc extension; an
 -- authorized database role must install it before this query is used)
 -- SELECT * FROM crosstab(
@@ -92,6 +94,7 @@ FROM
 ORDER BY
   wide.category,
   month_value.month_name;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

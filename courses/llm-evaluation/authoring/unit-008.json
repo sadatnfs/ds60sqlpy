@@ -1,0 +1,61 @@
+{
+  "number": 8,
+  "title": "Retrieval evaluation and ranking denominators",
+  "concepts": ["recall at k", "MRR", "nDCG", "judgment pools", "candidate generation"],
+  "outcome": "Evaluate retrieval separately from answer quality with explicit relevance grades, duplicate handling and unjudged-document policy.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-005", "eval-006"],
+  "exercises": [
+    {
+      "title": "Separate recall from nDCG",
+      "task": "Explain why case A has nDCG 1 but recall 2/3.",
+      "expected": "An ideal top two still omits one relevant document.",
+      "hint": "Compare the denominators.",
+      "answer": "nDCG evaluates the quality of the available ranking positions. Recall asks what fraction of all known relevant documents was retrieved."
+    },
+    {
+      "title": "Return no relevant hit",
+      "task": "Rank only the irrelevant document at depth 1.",
+      "expected": "Recall, reciprocal rank and nDCG are 0.",
+      "hint": "The relevant denominator remains positive.",
+      "answer": "Zero is meaningful here because relevant documents exist in the judged corpus but none was retrieved."
+    },
+    {
+      "title": "Repeat a document",
+      "task": "Put the same relevant ID in two result positions.",
+      "expected": "The fixture rejects duplicates.",
+      "hint": "Evidence identity is part of the ranking contract.",
+      "answer": "Counting duplicates as new hits can inflate recall or distort position metrics."
+    },
+    {
+      "title": "Add an unjudged document",
+      "task": "Return a document absent from the relevance map.",
+      "expected": "The calculation rejects it.",
+      "hint": "Unknown relevance is not proven irrelevance.",
+      "answer": "A separate assessment or a declared missing-judgment policy is needed before comparing systems fairly."
+    },
+    {
+      "title": "Empty relevant set",
+      "task": "Evaluate a query for which every judged document has grade 0.",
+      "expected": "Recall and nDCG are reported as missing.",
+      "hint": "The denominator lacks relevant evidence.",
+      "answer": "Report the affected query count and its interpretation instead of silently mixing undefined scores into a mean."
+    },
+    {
+      "title": "Preserve target weights",
+      "task": "Compare equal-query and traffic-weighted averages.",
+      "expected": "They can differ without a coding error.",
+      "hint": "Carry forward the estimand contract.",
+      "answer": "The weighting rule defines whose query distribution the result represents; it should be shared by every compared retriever."
+    }
+  ],
+  "sources": [
+    ["RAG evaluation dimensions", "https://arxiv.org/abs/2309.15217"],
+    [
+      "scikit-learn nDCG definition",
+      "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ndcg_score.html"
+    ]
+  ]
+}

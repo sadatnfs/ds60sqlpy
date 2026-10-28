@@ -1,6 +1,7 @@
 -- SQL-QUALITY-01: Bag Reconciliation and Join Fanout
 -- Guide: sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md
--- Use Create/open guided SQL notebook and the ignored learner copy.
+-- Use ./classroom -> PostgreSQL -> sql-quality-01 and its saved learner copy.
+-- Select "Whole SQL lesson (psql)"; Docker supplies the client.
 -- Run the complete file with psql -X -v ON_ERROR_STOP=1.
 -- Only the local disposable advanced_sql_training database is permitted.
 -- Setup is supplied. Write attempts before the final ROLLBACK.
@@ -12,74 +13,91 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE quality_source (
   invoice_id integer PRIMARY KEY,
   amount numeric
 ) ON COMMIT DROP;
+
 CREATE TEMP TABLE quality_target (
   invoice_id integer PRIMARY KEY,
   amount numeric
 ) ON COMMIT DROP;
+
 INSERT INTO quality_source
 VALUES
   (1, 100),
   (2, 50),
   (3, 0),
   (4, 80);
+
 INSERT INTO quality_target
 VALUES
   (1, 100),
   (2, 40),
   (3, 0),
   (5, 90);
+
 CREATE TEMP TABLE quality_sent (
   invoice_id integer,
   amount numeric
 ) ON COMMIT DROP;
+
 CREATE TEMP TABLE quality_received (
   invoice_id integer,
   amount numeric
 ) ON COMMIT DROP;
+
 INSERT INTO quality_sent
 VALUES
   (1, 100),
   (1, 100),
   (2, 50);
+
 INSERT INTO quality_received
 VALUES
   (1, 100),
   (2, 50),
   (2, 50);
+
 CREATE TEMP TABLE quality_orders (
   order_id integer PRIMARY KEY
 ) ON COMMIT DROP;
+
 CREATE TEMP TABLE quality_lines (
   line_id integer PRIMARY KEY,
   order_id integer,
   amount numeric
 ) ON COMMIT DROP;
+
 CREATE TEMP TABLE quality_attempts (
   attempt_id integer PRIMARY KEY,
   order_id integer,
   amount numeric
 ) ON COMMIT DROP;
+
 INSERT INTO quality_orders
 VALUES
   (1),
   (2),
   (3);
+
 INSERT INTO quality_lines
 VALUES
   (11, 1, 60),
   (12, 1, 40),
   (21, 2, 50);
+
 INSERT INTO quality_attempts
 VALUES
   (101, 1, 100),
   (102, 1, 100),
   (201, 2, 50);
+
 -- Example 1: Equal summaries conceal changed identities
 -- Expected: Two summary rows keyed by origin, columns origin, row_count, amount_total. Both totals equal 230 and both counts equal 4.
 SELECT
@@ -97,6 +115,7 @@ FROM
   quality_target
 ORDER BY
   origin;
+
 -- Example 2: Aggregate separate children before joining
 -- Expected: Three order rows; columns order_id, line_total, attempted_total: (1,100,200),(2,50,50),(3,0,0).
 WITH lines AS (
@@ -127,6 +146,7 @@ FROM
   LEFT JOIN attempts AS a ON a.order_id = o.order_id
 ORDER BY
   o.order_id;
+
 -- Exercises
 -- Keep predictions and attempts in your own working copy.
 -- 1. Disprove summary equality.

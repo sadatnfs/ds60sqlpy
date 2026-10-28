@@ -1,0 +1,22 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-067", "apache-063"],
+  "concepts": ["schema migration", "backup", "restore", "version verification"],
+  "evidence": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates.",
+  "sources": [
+    ["Hive4.2.1 preparation and components", "https://hive.apache.org/development/quickstart/"],
+    ["Hive DDL", "https://hive.apache.org/docs/latest/language/languagemanual-ddl/"],
+    [
+      "Hive Metastore administration",
+      "https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/"
+    ],
+    ["Hive/Iceberg integration", "https://iceberg.apache.org/docs/latest/hive/"],
+    [
+      "Pinned schema tool source",
+      "https://github.com/apache/hive/tree/rel/release-4.2.1/standalone-metastore/metastore-server/src/main/java/org/apache/hadoop/hive/metastore/tools/schematool"
+    ]
+  ]
+}

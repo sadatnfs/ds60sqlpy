@@ -559,7 +559,7 @@ importance <span class="syntax-operator">=</span> permutation_importance<span cl
 <li>Plot tree depth versus accuracy.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
-<ol>
+<ol start="2">
 <li>Inspect feature importances and discuss their reliability.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
@@ -571,19 +571,19 @@ importance <span class="syntax-operator">=</span> permutation_importance<span cl
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Pruning implementation:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation. <strong>Progressive hint:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</li>
 </ol>
 <p><strong>Verify:</strong> Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
-<ol>
+<ol start="4">
 <li><strong>Out-of-bag reasoning:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance. <strong>Progressive hint:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</li>
 </ol>
 <p><strong>Verify:</strong> Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
-<ol>
+<ol start="5">
 <li><strong>Imbalance debugging:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>. <strong>Progressive hint:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</li>
 </ol>
 <p><strong>Verify:</strong> Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
-<ol>
+<ol start="6">
 <li><strong>Correlated-importance edge case:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change. <strong>Progressive hint:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</li>
 </ol>
 <p><strong>Verify:</strong> Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>
@@ -804,7 +804,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Plot tree depth versus accuracy.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
-<ol>
+<ol start="2">
 <li>Inspect feature importances and discuss their reliability.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
@@ -816,19 +816,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Pruning implementation:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation. <strong>Progressive hint:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</li>
 </ol>
 <p><strong>Verify:</strong> Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
-<ol>
+<ol start="4">
 <li><strong>Out-of-bag reasoning:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance. <strong>Progressive hint:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</li>
 </ol>
 <p><strong>Verify:</strong> Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
-<ol>
+<ol start="5">
 <li><strong>Imbalance debugging:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>. <strong>Progressive hint:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</li>
 </ol>
 <p><strong>Verify:</strong> Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
-<ol>
+<ol start="6">
 <li><strong>Correlated-importance edge case:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change. <strong>Progressive hint:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</li>
 </ol>
 <p><strong>Verify:</strong> Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>

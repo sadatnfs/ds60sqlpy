@@ -400,7 +400,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Install the <code>nlp</code> dependency group while connected.</li>
 </ul>
 <h4 id="guide--network-and-offline-contract">Network and offline contract<a class="heading-anchor" href="#guide--network-and-offline-contract" aria-label="Link to this section">#</a></h4>
-<p>The notebook&#x27;s first <code>pipeline(&quot;sentiment-analysis&quot;)</code> call may download a default model and tokenizer. <code>en_core_web_sm</code> is also a separate spaCy model download. Cache intentional assets during connected setup; do not assume they exist on another machine.</p>
+<p>The default notebook never requests a pretrained model. <code>RUN_CACHED_SENTIMENT</code> is false until a trusted, pinned model/tokenizer snapshot is deliberately placed in <code>artifacts/day49/prepared/sentiment</code>. Both loaders use <code>local_files_only=True</code>; missing assets fail locally. The package install alone does not provide those assets. <code>en_core_web_sm</code> is another separately installed model; if it is absent, the notebook uses a blank tokenizer and explicitly reports that trained POS/NER are unavailable. Read each model card, license and exact revision before a separate connected preparation. No example should send private text to a service.</p>
 <p>Offline fallbacks:</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> spacy
 
@@ -448,22 +448,26 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 </tbody></table></div>
 <p>Different tokenizers solve different problems. spaCy typically exposes linguistic document objects; Transformers tokenizers produce model-specific subword IDs and masks.</p>
 <h4 id="guide--worked-example-make-the-model-choice-explicit">Worked example: make the model choice explicit<a class="heading-anchor" href="#guide--worked-example-make-the-model-choice-explicit" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> pipeline
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> AutoTokenizer<span class="syntax-punctuation">,</span> AutoModelForSequenceClassification<span class="syntax-punctuation">,</span> pipeline
 
-<span class="syntax-comment"># This identifier should already be cached for an offline run.</span>
-sentiment <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span>
-    <span class="syntax-string">&quot;</span><span class="syntax-string">sentiment-analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
-    model<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">distilbert/distilbert-base-uncased-finetuned-sst-2-english</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+model_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day49/prepared/sentiment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+tokenizer <span class="syntax-operator">=</span> AutoTokenizer<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>model_dir<span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>
+    model_dir<span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span> sentiment<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+sentiment <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sentiment-analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> model<span class="syntax-operator">=</span>model<span class="syntax-punctuation">,</span> tokenizer<span class="syntax-operator">=</span>tokenizer<span class="syntax-punctuation">,</span> device<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sentiment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Record the exact model identifier and package version. A confidence-like score is not automatically calibrated probability, and sentiment labels may fail on sarcasm, dialect, negation, or domain-specific language.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Default Docker classroom:</strong> open <code>python-49</code> for its guide, notebook and capability notice. The default Core does not include the <code>nlp</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
+<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/nlp/guides/nlp-001.md.html">offline NLP course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
+<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>nlp</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p>The default tokenizer examples need spaCy; they do not contain a trained sentiment or POS model. Cached Transformers inference and the IMDB training reference are explicitly enabled local-asset extensions. Prepare Torch as well as the nlp extra for those extensions.</p>
 <p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 49 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
 <li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
@@ -479,7 +483,7 @@ sentiment <span class="syntax-operator">=</span> pipeline<span class="syntax-pun
 <h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong><code>spacy.blank(&#x27;en&#x27;)</code>:</strong> creates an offline tokenizer without a downloaded statistical pipeline.</li>
-<li><strong><code>pipeline(task, model=..., local_files_only=...)</code>:</strong> bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.</li>
+<li><strong><code>from_pretrained(..., local_files_only=True)</code>:</strong> bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.</li>
 <li><strong>token offsets and truncation:</strong> connect tokens back to original text and define what content the model actually saw.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
@@ -545,7 +549,7 @@ token_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>Try a zero-shot-classification pipeline with your own candidate labels.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; tokenization contracts, cached NLP models, and sensitive-text evaluation; when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
-<ol>
+<ol start="2">
 <li>Compare tokenization from spaCy with a Hugging Face tokenizer.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; tokenization contracts, cached NLP models, and sensitive-text evaluation; for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
@@ -554,23 +558,23 @@ token_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>This is an optional connected/cached path. Keep the text and label list small, record the chosen model ID, and test at least one ambiguous sentence.</li>
 <li>Print token text for spaCy; for Transformers, inspect <code>tokenize</code>, encoded IDs, and decoded output. Use contractions and punctuation to expose differences.</li>
 </ol>
-<p>The reference solution extends the topic with a 20-step DistilBERT smoke fine-tune and a spaCy matcher. That path downloads dataset/model assets unless cached and is intentionally not the default offline exercise.</p>
+<p>The reference solution extends the topic with a 20-step DistilBERT smoke fine-tune and a spaCy matcher. That local project requires separately prepared dataset/model snapshots and is not the default offline exercise. It reads those local assets without Hub requests. IMDB is an external dataset with its own provenance; it is not one of the course&#x27;s original synthetic fixtures.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat tokenization, model identity, cache state, evaluation boundaries, and sensitive text handling as first-class NLP pipeline metadata.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Truncation debugging:</strong> Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost. <strong>Progressive hint:</strong> Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.</li>
 </ol>
 <p><strong>Verify:</strong> Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
-<ol>
+<ol start="4">
 <li><strong>Model-provenance contract:</strong> Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state. <strong>Progressive hint:</strong> Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.</li>
 </ol>
 <p><strong>Verify:</strong> Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
-<ol>
+<ol start="5">
 <li><strong>Evaluation leakage:</strong> Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation. <strong>Progressive hint:</strong> Group by source/document/entity and use normalized hashes or similarity checks before splitting.</li>
 </ol>
 <p><strong>Verify:</strong> Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
-<ol>
+<ol start="6">
 <li><strong>Sensitive-text boundary:</strong> Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis. <strong>Progressive hint:</strong> Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.</li>
 </ol>
 <p><strong>Verify:</strong> Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p>
@@ -624,7 +628,7 @@ token_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-49` — Day 49 — NLP Basics with Hugging Face and spaCy.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-49` : Day 49 : NLP Basics with Hugging Face and spaCy.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tokenization contracts, cached NLP models, and sensitive-text evaluation. Use exactly these maintained learner materials:
@@ -677,31 +681,51 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-49-nlp-basics-with-hugging-face-spacy">Day 49 — NLP basics with Hugging Face / spaCy<a class="heading-anchor" href="#learner--cell-1--day-49-nlp-basics-with-hugging-face-spacy" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-49-nlp-basics-with-hugging-face-spacy">Day 49 : NLP basics with Hugging Face / spaCy<a class="heading-anchor" href="#learner--cell-1--day-49-nlp-basics-with-hugging-face-spacy" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Tokenization concepts and embeddings.</li>
 <li>Quick sentiment classifier via HF pipelines.</li>
 <li>spaCy tokenization demo.</li>
-</ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> pipeline</span>
+</ul>
+<h4 id="learner--cell-1--execution-boundary">Execution boundary<a class="heading-anchor" href="#learner--cell-1--execution-boundary" aria-label="Link to this section">#</a></h4>
+<p>The default Docker Core does not include the <code>nlp</code> extra needed by this complete legacy notebook. Opening it in the classroom supports reading and capability checks; it does not install missing packages. Use the separately prepared environment in the companion guide, or the <a href="../reference-pages/courses/nlp/guides/nlp-001.md.html">offline NLP course</a> for its declared browser runtime.</p>
+<p>The default tokenizer examples need spaCy; they do not contain a trained sentiment or POS model. Cached Transformers inference and the IMDB training reference are explicitly enabled local-asset extensions. Prepare Torch as well as the nlp extra for those extensions.</p>
+<p>Small generated examples and the disclosed teaching fixtures illustrate methods, not population evidence.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
 <span class="source-line"></span>
-<span class="source-line">clf <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sentiment-analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">clf<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> clf<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
+<span class="source-line">RUN_CACHED_SENTIMENT <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> RUN_CACHED_SENTIMENT<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> AutoTokenizer<span class="syntax-punctuation">,</span> AutoModelForSequenceClassification<span class="syntax-punctuation">,</span> pipeline</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment"># A trusted, pinned model/tokenizer snapshot must already be in this directory.</span></span>
+<span class="source-line">    model_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day49/prepared/sentiment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> model_dir<span class="syntax-operator">.</span>is_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> FileNotFoundError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepare the model snapshot separately first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tokenizer <span class="syntax-operator">=</span> AutoTokenizer<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>model_dir<span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        model_dir<span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    clf <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sentiment-analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> model<span class="syntax-operator">=</span>model<span class="syntax-punctuation">,</span> tokenizer<span class="syntax-operator">=</span>tokenizer<span class="syntax-punctuation">,</span> device<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>clf<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Cached sentiment extension skipped; no model or tokenizer was fetched.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> spacy</span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># python -m spacy download en_core_web_sm (run once)</span></span>
 <span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">    nlp <span class="syntax-operator">=</span> spacy<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">en_core_web_sm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Natural Language Processing is fun.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">.</span>text<span class="syntax-punctuation">,</span> t<span class="syntax-operator">.</span>pos_<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> doc<span class="syntax-punctuation">]</span></span>
+<span class="source-line">    nlp <span class="syntax-operator">=</span> spacy<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">en_core_web_sm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># separately installed local model</span></span>
+<span class="source-line">    has_pos <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span></span>
 <span class="source-line"><span class="syntax-keyword">except</span> OSError<span class="syntax-punctuation">:</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Install spaCy model: python -m spacy download en_core_web_sm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
+<span class="source-line">    nlp <span class="syntax-operator">=</span> spacy<span class="syntax-operator">.</span>blank<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">en</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    has_pos <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Local blank tokenizer only; trained POS and entity components are absent.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Natural Language Processing is fun.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">trained_pos</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> has_pos<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tokens</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">.</span>text<span class="syntax-punctuation">,</span> t<span class="syntax-operator">.</span>pos_<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> doc<span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-4--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-4--concept-lab-tokenization-contracts-cached-nlp-models-and-sensitive-text-evaluation">Concept lab — tokenization contracts, cached NLP models, and sensitive-text evaluation<a class="heading-anchor" href="#learner--cell-4--concept-lab-tokenization-contracts-cached-nlp-models-and-sensitive-text-evaluation" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-4--concept-lab-tokenization-contracts-cached-nlp-models-and-sensitive-text-evaluation">Concept lab : tokenization contracts, cached NLP models, and sensitive-text evaluation<a class="heading-anchor" href="#learner--cell-4--concept-lab-tokenization-contracts-cached-nlp-models-and-sensitive-text-evaluation" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-4--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-4--mental-model" aria-label="Link to this section">#</a></h5>
 <p>Natural-language processing begins with a tokenizer contract. A token is a model-specific unit, not necessarily a word; subword models split rare words into reusable pieces and map them to integer IDs. A pipeline then combines preprocessing, model logits, and postprocessing labels.</p>
 <p>Different tokenizers produce different boundaries and offsets. Model output depends on truncation, maximum length, label mapping, model card, language/domain, and version. Raw text may contain personal or secret information, so examples, logs, caches, and evaluation artifacts need a privacy boundary.</p>
@@ -712,7 +736,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong>token offsets and truncation:</strong> connect tokens back to original text and define what content the model actually saw.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-5--focused-example-a-inspect-an-offline-spacy-token-boundary">Focused example A — inspect an offline spaCy token boundary<a class="heading-anchor" href="#learner--cell-5--focused-example-a-inspect-an-offline-spacy-token-boundary" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-5--focused-example-a-inspect-an-offline-spacy-token-boundary">Focused example A : inspect an offline spaCy token boundary<a class="heading-anchor" href="#learner--cell-5--focused-example-a-inspect-an-offline-spacy-token-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The blank English tokenizer supplies lexical boundaries only; it has no trained part-of-speech or entity component.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> spacy</span>
@@ -725,7 +749,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Punctuation and the contraction receive tokenizer-specific boundaries while offsets reconstruct the original text.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-b-make-vocabulary-and-unknown-token-behavior-visible">Focused example B — make vocabulary and unknown-token behavior visible<a class="heading-anchor" href="#learner--cell-8--focused-example-b-make-vocabulary-and-unknown-token-behavior-visible" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-b-make-vocabulary-and-unknown-token-behavior-visible">Focused example B : make vocabulary and unknown-token behavior visible<a class="heading-anchor" href="#learner--cell-8--focused-example-b-make-vocabulary-and-unknown-token-behavior-visible" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> This tiny whitespace vocabulary demonstrates the contract and is not a substitute for a trained tokenizer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">vocabulary <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">[UNK]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">science</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">helps</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span></span>
@@ -776,11 +800,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Try a zero-shot-classification pipeline with your own candidate labels.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — tokenization contracts, cached NLP models, and sensitive-text evaluation — when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 1 : tokenization contracts, cached NLP models, and sensitive-text evaluation : when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
+<ol start="2">
 <li>Compare tokenization from spaCy with a Hugging Face tokenizer.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — tokenization contracts, cached NLP models, and sensitive-text evaluation — for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
+<p><strong>Verify:</strong> Practice 2 : tokenization contracts, cached NLP models, and sensitive-text evaluation : for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
 <h5 id="learner--cell-11--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-11--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>This is an optional connected/cached path. Keep the text and label list small, record the chosen model ID, and test at least one ambiguous sentence.</li>
@@ -790,38 +814,38 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat tokenization, model identity, cache state, evaluation boundaries, and sensitive text handling as first-class NLP pipeline metadata.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Truncation debugging:</strong> Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost. <strong>Progressive hint:</strong> Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.</li>
 </ol>
-<p><strong>Verify:</strong> Truncation debugging — print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
-<ol>
+<p><strong>Verify:</strong> Truncation debugging : print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
+<ol start="4">
 <li><strong>Model-provenance contract:</strong> Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state. <strong>Progressive hint:</strong> Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.</li>
 </ol>
-<p><strong>Verify:</strong> Model-provenance contract — write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
-<ol>
+<p><strong>Verify:</strong> Model-provenance contract : write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
+<ol start="5">
 <li><strong>Evaluation leakage:</strong> Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation. <strong>Progressive hint:</strong> Group by source/document/entity and use normalized hashes or similarity checks before splitting.</li>
 </ol>
-<p><strong>Verify:</strong> Evaluation leakage — group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
-<ol>
+<p><strong>Verify:</strong> Evaluation leakage : group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
+<ol start="6">
 <li><strong>Sensitive-text boundary:</strong> Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis. <strong>Progressive hint:</strong> Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.</li>
 </ol>
-<p><strong>Verify:</strong> Sensitive-text boundary — run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p>
+<p><strong>Verify:</strong> Sensitive-text boundary : run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
 <span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
 <span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 3 — Truncation debugging</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 3 : Truncation debugging</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 4 — Model-provenance contract</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 : Model-provenance contract</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 5 — Evaluation leakage</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 : Evaluation leakage</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 6 — Sensitive-text boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 : Sensitive-text boundary</span></span>
 <span class="source-line"></span></code></pre>
 </article></div>
       </section>
@@ -865,11 +889,15 @@ merely ran is not evidence of mastery.</code></pre></div>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">Skipped the optional cached fine-tuning extension. </span><span class="syntax-string">&quot;</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the </span><span class="syntax-string">&quot;</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">dataset, tokenizer, model, and metric are cached.</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">local dataset and pinned tokenizer/model snapshots are prepared.</span><span class="syntax-string">&quot;</span>
     <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># Local assets must have been prepared from a trusted pinned revision.</span>
+    <span class="syntax-comment"># Runtime makes no Hub requests, even when this extension is enabled.</span>
+    os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">HF_HUB_OFFLINE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
+    os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">HF_DATASETS_OFFLINE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
     <span class="syntax-comment"># 1) Imports</span>
-    <span class="syntax-keyword">from</span> datasets <span class="syntax-keyword">import</span> load_dataset
+    <span class="syntax-keyword">from</span> datasets <span class="syntax-keyword">import</span> load_from_disk
     <span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
         AutoTokenizer<span class="syntax-punctuation">,</span>
         AutoModelForSequenceClassification<span class="syntax-punctuation">,</span>
@@ -877,14 +905,17 @@ merely ran is not evidence of mastery.</code></pre></div>
         Trainer<span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
-    <span class="syntax-keyword">import</span> evaluate
     <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
-    <span class="syntax-comment"># 2) Data: use IMDB for demo</span>
-    ds <span class="syntax-operator">=</span> load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">imdb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-comment"># 2) Data: separately prepared local IMDB snapshot, not a runtime download.</span>
+    assets <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day49/prepared</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    ds <span class="syntax-operator">=</span> load_from_disk<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>assets <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">imdb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    model_dir <span class="syntax-operator">=</span> assets <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distilbert</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ds<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">256</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ds<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">test</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">128</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepared dataset is smaller than the declared bounded example</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
     <span class="syntax-comment"># 3) Tokenizer and encoding</span>
-    tok <span class="syntax-operator">=</span> AutoTokenizer<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">distilbert-base-uncased</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    tok <span class="syntax-operator">=</span> AutoTokenizer<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>model_dir<span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
     <span class="syntax-keyword">def</span> <span class="syntax-function">encode</span><span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">return</span> tok<span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> truncation<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> padding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_length</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> max_length<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">)</span>
@@ -896,16 +927,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 
     <span class="syntax-comment"># 4) Model</span>
     model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">distilbert-base-uncased</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span>
+        model_dir<span class="syntax-punctuation">,</span> num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span>
     <span class="syntax-punctuation">)</span>
 
     <span class="syntax-comment"># 5) Metrics</span>
-    accuracy <span class="syntax-operator">=</span> evaluate<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
     <span class="syntax-keyword">def</span> <span class="syntax-function">compute_metrics</span><span class="syntax-punctuation">(</span>eval_pred<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         logits<span class="syntax-punctuation">,</span> labels <span class="syntax-operator">=</span> eval_pred
         preds <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accuracy<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span>predictions<span class="syntax-operator">=</span>preds<span class="syntax-punctuation">,</span> references<span class="syntax-operator">=</span>labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>preds <span class="syntax-operator">==</span> labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
 
     <span class="syntax-comment"># 6) Training args and trainer</span>
     args <span class="syntax-operator">=</span> TrainingArguments<span class="syntax-punctuation">(</span>
@@ -916,6 +946,8 @@ merely ran is not evidence of mastery.</code></pre></div>
         per_device_train_batch_size<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span>
         per_device_eval_batch_size<span class="syntax-operator">=</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span>
         logging_steps<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+        report_to<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> use_cpu<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> dataloader_num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+        save_strategy<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">no</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span> data_seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
     trainer <span class="syntax-operator">=</span> Trainer<span class="syntax-punctuation">(</span>
         model<span class="syntax-operator">=</span>model<span class="syntax-punctuation">,</span>
@@ -943,7 +975,7 @@ merely ran is not evidence of mastery.</code></pre></div>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">Skipped the optional cached fine-tuning extension. </span><span class="syntax-string">&quot;</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the </span><span class="syntax-string">&quot;</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">dataset, tokenizer, model, and metric are cached.</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">local dataset and pinned tokenizer/model snapshots are prepared.</span><span class="syntax-string">&quot;</span>
     <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Suppose your dataset has imbalance; compute class weights</span>
@@ -983,8 +1015,8 @@ merely ran is not evidence of mastery.</code></pre></div>
             <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> outputs<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> return_outputs <span class="syntax-keyword">else</span> loss
 
     weighted_model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">distilbert-base-uncased</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
-        num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+        model_dir<span class="syntax-punctuation">,</span>
+        num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
     trainer_weighted <span class="syntax-operator">=</span> WeightedTrainer<span class="syntax-punctuation">(</span>
         model<span class="syntax-operator">=</span>weighted_model<span class="syntax-punctuation">,</span>
@@ -1129,7 +1161,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-49-solutions-nlp-basics-with-hugging-face-and-spacy">Day 49 — Solutions: NLP Basics with Hugging Face and spaCy<a class="heading-anchor" href="#solution-2--cell-1--day-49-solutions-nlp-basics-with-hugging-face-and-spacy" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-49-solutions-nlp-basics-with-hugging-face-and-spacy">Day 49: Solutions: NLP Basics with Hugging Face and spaCy<a class="heading-anchor" href="#solution-2--cell-1--day-49-solutions-nlp-basics-with-hugging-face-and-spacy" aria-label="Link to this section">#</a></h3>
 <p>We build a sentiment classifier with Transformers, handle class imbalance with weights, and create a spaCy rule‑based matcher. Detailed explanations follow each block.</p>
 <p>Contents</p>
 <ul>
@@ -1138,7 +1170,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <li>Exercise 3: Use spaCy matcher to extract domain patterns</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Fine‑tune DistilBERT for sentiment</p>
+<p>Worked reference for Exercise 1; Fine‑tune DistilBERT for sentiment</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day49_nlp_basics_hf_spacy/day49_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> os</span>
 <span class="source-line"></span>
@@ -1146,11 +1178,15 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Skipped the optional cached fine-tuning extension. </span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the </span><span class="syntax-string">&quot;</span></span>
-<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">dataset, tokenizer, model, and metric are cached.</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">local dataset and pinned tokenizer/model snapshots are prepared.</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-comment"># Local assets must have been prepared from a trusted pinned revision.</span></span>
+<span class="source-line">    <span class="syntax-comment"># Runtime makes no Hub requests, even when this extension is enabled.</span></span>
+<span class="source-line">    os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">HF_HUB_OFFLINE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">HF_DATASETS_OFFLINE</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">    <span class="syntax-comment"># 1) Imports</span></span>
-<span class="source-line">    <span class="syntax-keyword">from</span> datasets <span class="syntax-keyword">import</span> load_dataset</span>
+<span class="source-line">    <span class="syntax-keyword">from</span> datasets <span class="syntax-keyword">import</span> load_from_disk</span>
 <span class="source-line">    <span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">        AutoTokenizer<span class="syntax-punctuation">,</span></span>
 <span class="source-line">        AutoModelForSequenceClassification<span class="syntax-punctuation">,</span></span>
@@ -1158,14 +1194,17 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">        Trainer<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
-<span class="source-line">    <span class="syntax-keyword">import</span> evaluate</span>
 <span class="source-line">    <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment"># 2) Data: use IMDB for demo</span></span>
-<span class="source-line">    ds <span class="syntax-operator">=</span> load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">imdb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment"># 2) Data: separately prepared local IMDB snapshot, not a runtime download.</span></span>
+<span class="source-line">    assets <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day49/prepared</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    ds <span class="syntax-operator">=</span> load_from_disk<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>assets <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">imdb</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    model_dir <span class="syntax-operator">=</span> assets <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distilbert</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ds<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">256</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>ds<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">test</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">128</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepared dataset is smaller than the declared bounded example</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment"># 3) Tokenizer and encoding</span></span>
-<span class="source-line">    tok <span class="syntax-operator">=</span> AutoTokenizer<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">distilbert-base-uncased</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tok <span class="syntax-operator">=</span> AutoTokenizer<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>model_dir<span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">encode</span><span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-keyword">return</span> tok<span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> truncation<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> padding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_length</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> max_length<span class="syntax-operator">=</span><span class="syntax-number">128</span><span class="syntax-punctuation">)</span></span>
@@ -1177,16 +1216,15 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment"># 4) Model</span></span>
 <span class="source-line">    model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">distilbert-base-uncased</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span></span>
+<span class="source-line">        model_dir<span class="syntax-punctuation">,</span> num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment"># 5) Metrics</span></span>
-<span class="source-line">    accuracy <span class="syntax-operator">=</span> evaluate<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">compute_metrics</span><span class="syntax-punctuation">(</span>eval_pred<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        logits<span class="syntax-punctuation">,</span> labels <span class="syntax-operator">=</span> eval_pred</span>
 <span class="source-line">        preds <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">,</span> axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> accuracy<span class="syntax-operator">.</span>compute<span class="syntax-punctuation">(</span>predictions<span class="syntax-operator">=</span>preds<span class="syntax-punctuation">,</span> references<span class="syntax-operator">=</span>labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>preds <span class="syntax-operator">==</span> labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment"># 6) Training args and trainer</span></span>
 <span class="source-line">    args <span class="syntax-operator">=</span> TrainingArguments<span class="syntax-punctuation">(</span></span>
@@ -1197,6 +1235,12 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">        per_device_train_batch_size<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        per_device_eval_batch_size<span class="syntax-operator">=</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        logging_steps<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        report_to<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        use_cpu<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        dataloader_num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        save_strategy<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">no</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        data_seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line">    trainer <span class="syntax-operator">=</span> Trainer<span class="syntax-punctuation">(</span></span>
 <span class="source-line">        model<span class="syntax-operator">=</span>model<span class="syntax-punctuation">,</span></span>
@@ -1218,14 +1262,14 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <li>TrainingArguments: 20-step laptop smoke run; remove <code>max_steps</code> only for an intentional full experiment</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Class weights for imbalance</p></article>
+<p>Worked reference for Exercise 2; Class weights for imbalance</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> os</span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> os<span class="syntax-operator">.</span>environ<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_RUN_CACHED_NLP_EXTENSION</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Skipped the optional cached fine-tuning extension. </span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the </span><span class="syntax-string">&quot;</span></span>
-<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">dataset, tokenizer, model, and metric are cached.</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">local dataset and pinned tokenizer/model snapshots are prepared.</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-comment"># Suppose your dataset has imbalance; compute class weights</span></span>
@@ -1265,8 +1309,10 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">,</span> outputs<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> return_outputs <span class="syntax-keyword">else</span> loss</span>
 <span class="source-line"></span>
 <span class="source-line">    weighted_model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">distilbert-base-uncased</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        model_dir<span class="syntax-punctuation">,</span></span>
 <span class="source-line">        num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line">    trainer_weighted <span class="syntax-operator">=</span> WeightedTrainer<span class="syntax-punctuation">(</span></span>
 <span class="source-line">        model<span class="syntax-operator">=</span>weighted_model<span class="syntax-punctuation">,</span></span>
@@ -1286,7 +1332,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <li>This biases the learner to pay more attention to the minority class</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — spaCy matcher</p></article>
+<p>Worked reference for Exercise 3; spaCy matcher</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> spacy</span>
 <span class="source-line"><span class="syntax-keyword">from</span> spacy.matcher <span class="syntax-keyword">import</span> Matcher</span>
 <span class="source-line"></span>
@@ -1349,44 +1395,44 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a zero-shot-classification pipeline with your own candidate labels.</p>
 <p><strong>How to reason about it:</strong> Zero-shot classification is an optional cached/connected extension. Record model ID, revision, candidate-label wording, hypothesis template, and an ambiguous case because each can alter scores.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — tokenization contracts, cached NLP models, and sensitive-text evaluation — when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
-<h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; tokenization contracts, cached NLP models, and sensitive-text evaluation; when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
+<h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare tokenization from spaCy with a Hugging Face tokenizer.</p>
 <p><strong>How to reason about it:</strong> spaCy and Transformer tokenizers optimize different representations. Inspect text, tokens, IDs, decoded output, punctuation, Unicode, and truncation rather than declaring one tokenization universally correct.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — tokenization contracts, cached NLP models, and sensitive-text evaluation — for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
-<h5 id="solution-2--cell-7--exercise-3-truncation-debugging">Exercise 3 — Truncation debugging<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-truncation-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; tokenization contracts, cached NLP models, and sensitive-text evaluation; for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
+<h5 id="solution-2--cell-7--exercise-3-truncation-debugging">Exercise 3: Truncation debugging<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-truncation-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.</p>
 <p><strong>Reasoning before implementation:</strong> Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.</p>
 <p>Silent right-side truncation can remove the decisive sentence. Record original character/token length, retained span, strategy, stride, and model maximum. For document tasks, compare head-only, tail-aware, and sliding-window aggregation on labeled validation examples.</p>
 <p>Do not set an arbitrarily huge max length: the model has a positional limit and attention memory cost grows rapidly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Truncation debugging — print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
-<h5 id="solution-2--cell-7--exercise-4-model-provenance-contract">Exercise 4 — Model-provenance contract<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-model-provenance-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
+<h5 id="solution-2--cell-7--exercise-4-model-provenance-contract">Exercise 4: Model-provenance contract<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-model-provenance-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.</p>
 <p><strong>Reasoning before implementation:</strong> Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.</p>
 <p>Store model and tokenizer identifiers together; mixing compatible-looking versions can change vocabulary and special-token behavior. For spaCy, record pipeline package name/version and enabled components.</p>
 <p>Do not store developer-specific absolute cache paths. Record a portable cache status and the connected preload command, then verify an offline load with network disabled.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Model-provenance contract — write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
-<h5 id="solution-2--cell-7--exercise-5-evaluation-leakage">Exercise 5 — Evaluation leakage<a class="heading-anchor" href="#solution-2--cell-7--exercise-5-evaluation-leakage" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
+<h5 id="solution-2--cell-7--exercise-5-evaluation-leakage">Exercise 5: Evaluation leakage<a class="heading-anchor" href="#solution-2--cell-7--exercise-5-evaluation-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.</p>
 <p><strong>Reasoning before implementation:</strong> Group by source/document/entity and use normalized hashes or similarity checks before splitting.</p>
-<p>Random row splits over fragments can make validation measure memorization of source wording. Define the deployment unit—new document, author, customer, or future period—and keep that group disjoint.</p>
+<p>Random row splits over fragments can make validation measure memorization of source wording. Define the deployment unit, new document, author, customer, or future period, and keep that group disjoint.</p>
 <p>Run exact normalized-hash checks first, then bounded near-duplicate detection. Keep deduplication rules inside the data-version manifest so results can be reconstructed.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Evaluation leakage — group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
-<h5 id="solution-2--cell-7--exercise-6-sensitive-text-boundary">Exercise 6 — Sensitive-text boundary<a class="heading-anchor" href="#solution-2--cell-7--exercise-6-sensitive-text-boundary" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
+<h5 id="solution-2--cell-7--exercise-6-sensitive-text-boundary">Exercise 6: Sensitive-text boundary<a class="heading-anchor" href="#solution-2--cell-7--exercise-6-sensitive-text-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.</p>
 <p><strong>Reasoning before implementation:</strong> Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.</p>
 <p>Raw free text can contain identifiers even when the dataset has no “email” column. Restrict access, minimize retained fields, and never send lesson data to an optional external service without explicit authorization.</p>
 <p>PII detection is imperfect; document false-positive and false-negative risks. For error analysis, retain only the minimum redacted context needed and route incidents through the project&#x27;s security process.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Sensitive-text boundary — run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p></article></div>
+<p><strong>Verify:</strong> Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p></article></div>
       </section>
 
 
@@ -1401,7 +1447,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-49` — Day 49 — NLP Basics with Hugging Face and spaCy.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-49` : Day 49 : NLP Basics with Hugging Face and spaCy.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tokenization contracts, cached NLP models, and sensitive-text evaluation. Use exactly these maintained learner materials:

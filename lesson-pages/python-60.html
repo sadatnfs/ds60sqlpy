@@ -484,16 +484,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 </tbody></table></div>
 <p>If a gate fails, label the capstone as a prototype and list the missing evidence. Do not weaken the gate after seeing the result.</p>
-<h4 id="guide--reproduction-commands">Reproduction commands<a class="heading-anchor" href="#guide--reproduction-commands" aria-label="Link to this section">#</a></h4>
-<p>Adapt module names to your project and run from its root.</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell">py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv <span class="syntax-punctuation">.</span>venv
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip install -e <span class="syntax-punctuation">.</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest -q
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m capstone<span class="syntax-punctuation">.</span>data
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m capstone<span class="syntax-punctuation">.</span>train
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m capstone<span class="syntax-punctuation">.</span>evaluate</code></pre>
-<p>macOS/Linux:</p>
+<h4 id="guide--optional-contributor-project-reproduction">Optional contributor-project reproduction<a class="heading-anchor" href="#guide--optional-contributor-project-reproduction" aria-label="Link to this section">#</a></h4>
+<p>These commands belong to a separately prepared capstone project whose own package modules are <code>capstone.data</code>, <code>capstone.train</code> and <code>capstone.evaluate</code>. They are not classroom startup commands or code-pad commands. Ordinary learners start the classroom with <code>./classroom</code>; no host Python installation is needed. For this optional contributor recipe, use the prepared POSIX environment on macOS/Linux or Ubuntu in Windows WSL 2, from the capstone project&#x27;s root.</p>
 <pre class="highlighted-code"><code class="language-bash">python3.12 -m venv .venv
 .venv/bin/python -m pip install -e .
 .venv/bin/python -m pytest -q
@@ -506,22 +498,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Decision and stakes:</strong> stakeholder, action, and constraints.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Data:</strong> row unit, source/license, quality, target timing, and exclusions.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Evaluation:</strong> split/backtest, baseline, primary metric, and guardrails.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Result:</strong> final versus baseline with variability, not only the best number.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Error analysis:</strong> representative false positives/negatives or residual segments, with privacy-safe examples.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Operations and risk:</strong> latency/resources, monitoring, security, fairness, rollback, and out-of-scope uses.</li>
 </ol>
-<ol>
+<ol start="7">
 <li><strong>Recommendation:</strong> what should happen next and what evidence is still needed.</li>
 </ol>
 <h5 id="guide--presentation-quality-criteria">Presentation quality criteria<a class="heading-anchor" href="#guide--presentation-quality-criteria" aria-label="Link to this section">#</a></h5>
@@ -632,19 +624,19 @@ missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <li>Finalize the data and training/evaluation pipeline.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; release evidence, cold-start reproducibility, presentation claims, and handoff; from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.</p>
-<ol>
+<ol start="2">
 <li>Produce a results notebook and README with exact reproduction steps.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; release evidence, cold-start reproducibility, presentation claims, and handoff; have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.</p>
-<ol>
+<ol start="3">
 <li>Save artifacts under an ignored <code>artifacts/</code> path and retain dependency metadata/lock.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; release evidence, cold-start reproducibility, presentation claims, and handoff; write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.</p>
-<ol>
+<ol start="4">
 <li>Prepare presentation-ready visuals and the short story above.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 4; release evidence, cold-start reproducibility, presentation claims, and handoff; export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.</p>
-<ol>
+<ol start="5">
 <li>Write three takeaways and one open question.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 5; release evidence, cold-start reproducibility, presentation claims, and handoff; write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.</p>
@@ -659,23 +651,23 @@ missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Finish with cold-start reproduction, evidence-backed claims, failure-tolerant demonstration, ownership, and honest limits. Completion means another person can rerun and assess the work.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="6">
 <li><strong>Cold-start reproduction:</strong> Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage. <strong>Progressive hint:</strong> Use a clean environment and no notebook state. Verify the documented offline path after the one connected bootstrap.</li>
 </ol>
 <p><strong>Verify:</strong> Cold-start reproduction; from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.</p>
-<ol>
+<ol start="7">
 <li><strong>Claim-to-evidence matrix:</strong> Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner. <strong>Progressive hint:</strong> Remove or soften claims with no direct evidence. Distinguish predictive association, operational estimate, and causal conclusion.</li>
 </ol>
 <p><strong>Verify:</strong> Claim-to-evidence matrix; for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.</p>
-<ol>
+<ol start="8">
 <li><strong>Failure-tolerant demo:</strong> Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service. <strong>Progressive hint:</strong> The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.</li>
 </ol>
 <p><strong>Verify:</strong> Failure-tolerant demo; record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.</p>
-<ol>
+<ol start="9">
 <li><strong>Operational handoff:</strong> Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria. <strong>Progressive hint:</strong> Name roles and cadences, not personal credentials. Connect each maintenance action to a test or acceptance gate.</li>
 </ol>
 <p><strong>Verify:</strong> Operational handoff; name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.</p>
-<ol>
+<ol start="10">
 <li><strong>Retrospective and next experiment:</strong> Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule. <strong>Progressive hint:</strong> The next experiment should resolve the highest-value uncertainty, not simply try a more complex model.</li>
 </ol>
 <p><strong>Verify:</strong> Retrospective and next experiment; write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment&#x27;s population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.</p>
@@ -934,19 +926,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Finalize the data and training/evaluation pipeline.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — release evidence, cold-start reproducibility, presentation claims, and handoff — from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.</p>
-<ol>
+<ol start="2">
 <li>Produce a results notebook and README with exact reproduction steps.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — release evidence, cold-start reproducibility, presentation claims, and handoff — have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.</p>
-<ol>
+<ol start="3">
 <li>Save artifacts under an ignored <code>artifacts/</code> path and retain dependency metadata/lock.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — release evidence, cold-start reproducibility, presentation claims, and handoff — write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.</p>
-<ol>
+<ol start="4">
 <li>Prepare presentation-ready visuals and the short story above.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 4 — release evidence, cold-start reproducibility, presentation claims, and handoff — export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.</p>
-<ol>
+<ol start="5">
 <li>Write three takeaways and one open question.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 5 — release evidence, cold-start reproducibility, presentation claims, and handoff — write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.</p>
@@ -961,23 +953,23 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Finish with cold-start reproduction, evidence-backed claims, failure-tolerant demonstration, ownership, and honest limits. Completion means another person can rerun and assess the work.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="6">
 <li><strong>Cold-start reproduction:</strong> Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage. <strong>Progressive hint:</strong> Use a clean environment and no notebook state. Verify the documented offline path after the one connected bootstrap.</li>
 </ol>
 <p><strong>Verify:</strong> Cold-start reproduction — from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.</p>
-<ol>
+<ol start="7">
 <li><strong>Claim-to-evidence matrix:</strong> Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner. <strong>Progressive hint:</strong> Remove or soften claims with no direct evidence. Distinguish predictive association, operational estimate, and causal conclusion.</li>
 </ol>
 <p><strong>Verify:</strong> Claim-to-evidence matrix — for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.</p>
-<ol>
+<ol start="8">
 <li><strong>Failure-tolerant demo:</strong> Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service. <strong>Progressive hint:</strong> The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.</li>
 </ol>
 <p><strong>Verify:</strong> Failure-tolerant demo — record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.</p>
-<ol>
+<ol start="9">
 <li><strong>Operational handoff:</strong> Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria. <strong>Progressive hint:</strong> Name roles and cadences, not personal credentials. Connect each maintenance action to a test or acceptance gate.</li>
 </ol>
 <p><strong>Verify:</strong> Operational handoff — name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.</p>
-<ol>
+<ol start="10">
 <li><strong>Retrospective and next experiment:</strong> Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule. <strong>Progressive hint:</strong> The next experiment should resolve the highest-value uncertainty, not simply try a more complex model.</li>
 </ol>
 <p><strong>Verify:</strong> Retrospective and next experiment — write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment&#x27;s population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.</p>

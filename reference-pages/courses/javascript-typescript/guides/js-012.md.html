@@ -268,19 +268,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Trace executor and reaction ordering.</strong> Record executor, synchronous continuation and then reaction. <strong>Expected:</strong> executor, sync, reaction. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compose values and rejection recovery.</strong> Double a value, throw an error, then recover through catch. <strong>Expected:</strong> recovered message is bad value 8. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Preserve input order in Promise.all.</strong> Resolve the second deferred Promise first, then the first. <strong>Expected:</strong> result remains first,second. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect every outcome with allSettled.</strong> Combine fulfillment 2 with rejection offline. <strong>Expected:</strong> statuses fulfilled/rejected with their original value and reason. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Demonstrate that race does not cancel losers.</strong> Race an already fulfilled result against a deferred operation, then settle the deferred operation. <strong>Expected:</strong> winner fast; deferred operation still completes later. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Observe FIFO microtasks before an awaited timer.</strong> Queue one Promise reaction and one queueMicrotask callback, then await a timer. <strong>Expected:</strong> sync,promise,microtask,timer. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

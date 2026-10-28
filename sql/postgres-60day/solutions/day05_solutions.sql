@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.
 -- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.
@@ -42,6 +43,7 @@ FROM
   LEFT JOIN employees AS m ON m.employee_id = e.manager_id
 ORDER BY
   e.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find employees who manage nobody.
@@ -65,6 +67,7 @@ WHERE
   report.employee_id IS NULL
 ORDER BY
   e.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Build a complete grid of six recent months and all expense categories.
@@ -98,6 +101,7 @@ FROM
 ORDER BY
   c.category,
   m.month_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.
@@ -119,6 +123,7 @@ SELECT
 FROM
   departments AS d
   CROSS JOIN months AS m;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: List unique employee pairs in the same department without self-pairs or mirrored duplicates.
@@ -143,6 +148,7 @@ FROM
     left_employee.department_id,
     left_employee.employee_id,
     right_employee.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Show each employee, their manager, and their manager's manager.
@@ -166,5 +172,6 @@ FROM
   LEFT JOIN employees AS grandmanager ON grandmanager.employee_id = manager.manager_id
 ORDER BY
   e.employee_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

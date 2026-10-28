@@ -109,7 +109,9 @@ reference does not establish understanding.
 
 The [content contract](docs/content-authoring.md) specifies the detailed rules.
 Legacy lessons retain immutable practice baselines; modules use their subject
-contracts. The statistics/ML tutorial deliberately has worked theory and code
+contracts. Track-level `learning_mode` defaults to `practice`; `tutorial` is
+validated and exposes complete answers, as in Applied Science and Bayesian
+Computing. The statistics/ML tutorial deliberately has worked theory and code
 without exams, problem sets or hidden solutions. Do not impose practice rules
 on that book.
 
@@ -139,8 +141,10 @@ drift and exits unsuccessfully when changes are needed, without modifying
 tracked source files. `make format` and `make format-check` are equivalent.
 `make lint` runs the shared static checks. `make check` includes both formatting
 and linting before its other source gates.
-The formatter builds its dedicated tool image on first use, with visible build
-logs, then reuses the local image. Use `./scripts/format-repo --build` after
+R and Julia use their own pinned tool images; the remaining adapters use the
+main formatting image. Stan sources use the stanc adapter; dbt SQL/Jinja uses
+SQLfmt instead of PostgreSQL formatting. The tool wrapper prepares missing
+images on first use, with visible build logs, then reuses them. Use `./scripts/format-repo --build` after
 changing the toolchain or when deliberately rebuilding that image. It does not
 rebuild or restart classroom services or change their saved volumes.
 If the default npm registry is unreachable during tool-image preparation, set
@@ -153,6 +157,11 @@ DS60_FORMAT_NPM_REGISTRY=https://registry.yarnpkg.com ./scripts/format-repo --bu
 Package integrity remains checked against the lockfile. The override accepts no
 embedded credentials or query parameters and applies only while building tools;
 formatting and lint checks themselves run without network access.
+
+The owned Hive project's `.hql` files use Hive grammar. Their two explicit
+preservation entries keep reviewed layout and identify the native Hive lifecycle
+checker as their grammar/behavior gate. They remain highlighted readable source;
+they do not use the PostgreSQL parser or create another ordinary pad executor.
 
 Use `./scripts/format-repo --list` to inspect the actual coverage and
 `./scripts/format-repo --language python` to narrow an iteration. Repeat
@@ -189,9 +198,11 @@ This records formatting equivalence, not a new successful execution. Future
 behavior changes still require fresh runtime evidence. Canonical regeneration
 checks apply the pinned formatter before comparing executable output bytes.
 
-For generated subjects, edit the durable authoring source and run that subject's
-generator first. Then format the resulting maintained source and refresh the
-shared generated views. The full formatting entrypoint coordinates its owned
+For generated subjects, edit the durable authoring source, run its generator
+and format the maintained executable source. Applied Science, Bayesian Computing,
+Julia and LLM evaluation embed complete programs in their guides; rerun their
+documented builders after formatting so code fences remain exact. Refresh the
+shared generated views only after those subject checks pass. The full formatting entrypoint coordinates its owned
 generated views; subject-specific prose generation remains a separate authoring
 step. Review both source and generated diffs, then run relevant runtime and
 content checks. Never manually reformat generated HTML to conceal source drift.
@@ -324,3 +335,26 @@ after proving that the Python syntax trees and literal values agree. Other
 fences and teaching strings retain their authored content. SQL formatting
 preserves quoted values and entire dollar-quoted routine bodies exactly, and
 checks PostgreSQL syntax trees plus psql controls before writing.
+
+## Scientific and data-system contributions
+
+Read the [scientist roadmap](docs/scientist-roadmap.md) for existing coverage
+before proposing another route. `data-engineering`, `dbt-duckdb`, `stan-cpu`
+and `julia` are ordinary Docker profiles, with their own dependency and source
+contracts. The full dbt retail project and local ML service are separately
+owned workshops. Keep their databases, generated project artifacts and trained
+state outside maintained source and learner volumes.
+
+Use meaningful numerical oracles, changed-condition examples and actual package
+execution for scientific claims. Explain short-chain uncertainty and diagnostic
+failures. Add `figure-contracts.json` when a reference must produce a table,
+report or chart; tests must fail when that declared output is lost. Storage
+warnings must not replace the real computation status. See [result publishing](docs/plotting.md)
+and [runtime contracts](docs/modules-runtime.md).
+
+A portable source payload must include new `.jl`, `.stan`, dbt `.sql`/YAML,
+Julia project/manifest files, local fixtures, owned project scripts and teaching
+sources through the reviewed packaging rules. It must exclude trained state,
+built model executables, databases, target/log directories and credentials.
+Check both a complete fresh extraction and exclusions. Do not publish images
+or add a personal commit email as part of an ordinary source change.

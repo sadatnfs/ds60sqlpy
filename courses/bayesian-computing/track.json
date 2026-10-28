@@ -1,0 +1,460 @@
+{
+  "schema_version": 1,
+  "id": "bayesian-computing",
+  "title": "Bayesian computing: exact inference, PyMC and Stan",
+  "summary": "A complete worked route from probability and exact oracles through actual PyMC computation and self-contained Stan compilation, sampling, diagnostics and decisions.",
+  "learning_mode": "tutorial",
+  "lessons": [
+    {
+      "id": "bayes-001",
+      "title": "Generative questions, conditioning and repeated evidence",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "statistics-003"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "generative model",
+        "conditioning",
+        "likelihood ratio"
+      ],
+      "outcome": "Explain and reproduce generative questions, conditioning and repeated evidence, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-001 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-002",
+      "title": "Log densities, normalization and exact numerical oracles",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-001"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "logsumexp",
+        "normalization",
+        "quadrature"
+      ],
+      "outcome": "Explain and reproduce log densities, normalization and exact numerical oracles, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-002 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-003",
+      "title": "Conjugacy, posterior prediction and duplicated observations",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-002"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "conjugacy",
+        "beta-binomial",
+        "predictive variance"
+      ],
+      "outcome": "Explain and reproduce conjugacy, posterior prediction and duplicated observations, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-003 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-004",
+      "title": "Probability transformations and Jacobian accounting",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-002"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Jacobian",
+        "constraint",
+        "density"
+      ],
+      "outcome": "Explain and reproduce probability transformations and jacobian accounting, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-004 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-005",
+      "title": "Posterior decisions, loss and regret",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-003",
+        "bayes-004"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "utility",
+        "posterior risk",
+        "regret"
+      ],
+      "outcome": "Explain and reproduce posterior decisions, loss and regret, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-005 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-006",
+      "title": "Markov chains, autocorrelation and deceptive acceptance rates",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-002"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "MCMC",
+        "autocorrelation",
+        "ESS"
+      ],
+      "outcome": "Explain and reproduce markov chains, autocorrelation and deceptive acceptance rates, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-006 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-007",
+      "title": "Hamiltonian geometry, integration and NUTS motivation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-006",
+        "statistics-002"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Hamiltonian",
+        "leapfrog",
+        "NUTS"
+      ],
+      "outcome": "Explain and reproduce hamiltonian geometry, integration and nuts motivation, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-007 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-008",
+      "title": "Simulation-based calibration and tests that can miss errors",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "bayes-003",
+        "bayes-006"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "SBC",
+        "rank",
+        "conditional validation"
+      ],
+      "outcome": "Explain and reproduce simulation-based calibration and tests that can miss errors, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-008 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-009",
+      "title": "An actual PyMC regression and its diagnostic record",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-005",
+        "bayes-007"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "PyMC",
+        "InferenceData",
+        "posterior predictive"
+      ],
+      "outcome": "Explain and reproduce an actual pymc regression and its diagnostic record, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-009 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-010",
+      "title": "Centered and noncentered hierarchical computation",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-009"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "hierarchy",
+        "noncentered",
+        "funnel"
+      ],
+      "outcome": "Explain and reproduce centered and noncentered hierarchical computation, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-010 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-011",
+      "title": "Robust likelihoods and predictive criticism",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-009"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "Student-t",
+        "outlier",
+        "robustness"
+      ],
+      "outcome": "Explain and reproduce robust likelihoods and predictive criticism, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-011 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-012",
+      "title": "Count models, exposure and overdispersion",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-009"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "count",
+        "exposure",
+        "negative binomial"
+      ],
+      "outcome": "Explain and reproduce count models, exposure and overdispersion, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-012 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-013",
+      "title": "Posterior geometry with weakly identified predictors",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-009",
+        "statistics-learning-006"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "geometry",
+        "identification",
+        "correlated predictors"
+      ],
+      "outcome": "Explain and reproduce posterior geometry with weakly identified predictors, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-013 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-014",
+      "title": "Pointwise predictive evaluation, PSIS and the held-out unit",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-009",
+        "bayes-011"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "LOO",
+        "Pareto k",
+        "evaluation unit"
+      ],
+      "outcome": "Explain and reproduce pointwise predictive evaluation, psis and the held-out unit, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-014 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-015",
+      "title": "Bayesian resource decisions and Monte Carlo uncertainty",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-005",
+        "bayes-014"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "Bayes action",
+        "predictive uncertainty",
+        "Monte Carlo"
+      ],
+      "outcome": "Explain and reproduce bayesian resource decisions and monte carlo uncertainty, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-015 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-016",
+      "title": "Gaussian processes and conditional versus integrated uncertainty",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-009",
+        "statistics-026"
+      ],
+      "runtime": "bayesian-cpu",
+      "concepts": [
+        "Gaussian process",
+        "kernel",
+        "total variance"
+      ],
+      "outcome": "Explain and reproduce gaussian processes and conditional versus integrated uncertainty, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-016 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-017",
+      "title": "Stan blocks and a conjugate reference model",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-003",
+        "bayes-009"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "Stan blocks",
+        "normal-normal",
+        "generated quantities"
+      ],
+      "outcome": "Explain and reproduce stan blocks and a conjugate reference model, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-017 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-018",
+      "title": "Stan matrix regression and typed shape contracts",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-017",
+        "bayes-013"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "matrix",
+        "type",
+        "posterior prediction"
+      ],
+      "outcome": "Explain and reproduce stan matrix regression and typed shape contracts, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-018 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-019",
+      "title": "Stan constraints, log-rate transformations and Jacobians",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-017",
+        "bayes-004"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "constraint",
+        "Jacobian",
+        "Poisson"
+      ],
+      "outcome": "Explain and reproduce stan constraints, log-rate transformations and jacobians, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-019 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-020",
+      "title": "Stan noncentered hierarchies and prediction targets",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-018",
+        "bayes-010"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "partial pooling",
+        "noncentered",
+        "new group"
+      ],
+      "outcome": "Explain and reproduce stan noncentered hierarchies and prediction targets, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-020 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-021",
+      "title": "Stan logistic likelihoods and separation-aware priors",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-018",
+        "bayes-014"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "Bernoulli logit",
+        "separation",
+        "prior"
+      ],
+      "outcome": "Explain and reproduce stan logistic likelihoods and separation-aware priors, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-021 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-022",
+      "title": "Stan marginalized mixtures and label conventions",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-018",
+        "bayes-011"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "mixture",
+        "log_mix",
+        "label switching"
+      ],
+      "outcome": "Explain and reproduce stan marginalized mixtures and label conventions, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-022 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-023",
+      "title": "Stan stationary dynamics and multi-step prediction",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-018",
+        "bayes-016"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "AR1",
+        "stationarity",
+        "forecast"
+      ],
+      "outcome": "Explain and reproduce stan stationary dynamics and multi-step prediction, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-023 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "bayes-024",
+      "title": "Stan censored survival workflow and decision dossier",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "bayes-019",
+        "bayes-020",
+        "bayes-014",
+        "bayes-015",
+        "science-011"
+      ],
+      "runtime": "stan-cpu",
+      "concepts": [
+        "censoring",
+        "left truncation",
+        "Weibull AFT"
+      ],
+      "outcome": "Explain and reproduce stan censored survival workflow and decision dossier, with explicit computational and scientific limits.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound bayes-024 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    }
+  ]
+}

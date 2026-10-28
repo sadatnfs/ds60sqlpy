@@ -31,6 +31,11 @@ Always repeat your custom `--project NAME` if you use one.
 | `python-core` | Python source / supported notebook-style cells | Python, NumPy, pandas, statistics, NLP and CPU models |
 | `jax-cpu` | `main.py`, pinned CPU JAX/JAXLIB | Numerical transformations, autodiff, JIT and scientific models |
 | `bayesian-cpu` | `main.py`, pinned PyMC 5/ArviZ 0.23 | Hierarchical fitting, predictive checks and sampling diagnostics |
+| `data-engineering` | `main.py`, prepared Polars/Arrow/DuckDB, dbt and ML tools | Data transformations, complete local dbt workflows and ML engineering examples |
+| `data-platforms-python` | `main.py`, prepared PyArrow, DataFusion and PyIceberg | Arrow/Parquet processing, actual SQL execution and embedded local Iceberg tables |
+| `dbt-duckdb` | `model.sql`, SQL/Jinja in a fixed local dbt project | Beginner SQL-model variants with actual compilation, build and result tables |
+| `stan-cpu` | `main.stan`, CmdStan 2.40.0 | Native probabilistic models, bounded sampling and captured diagnostics |
+| `julia` | `main.jl`, Julia 1.13.3 with prepared packages | Dispatch, data analysis, numerical methods and scientific computing |
 | `r-statistics` | `main.R`, Rscript | Statistical programming, S3/S4/R6/S7, base/ggplot2/Plotly graphics |
 | `cpp20` | `main.cpp`, C++20 | C++ language and bounded systems examples |
 | `c17` | `main.c`, C17 | C, memory and POSIX examples |
@@ -68,6 +73,13 @@ instructions. CPU workers remain CPU environments on a GPU-equipped host.
 Kubernetes uses a separately prepared owned cluster and scoped capabilities.
 The classroom receives neither the engine socket nor an ambient cluster
 configuration. Follow [Kubernetes setup](modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab).
+
+The dbt SQL pad has a fixed five-order fixture. Project configuration,
+incrementals and snapshots use the full Python/CLI route or the
+[owned retail project](../courses/dbt/projects/retail/README.md). The
+[ML service](../courses/ml-engineering/projects/local-system/README.md) runs
+through its own Docker lifecycle, with separate persistent state and a predictor
+that mounts that state read-only. Ordinary pad runs are fresh bounded processes.
 
 Real web servers, multi-file C++ projects, Apple app development, long model
 training and larger Spark clusters are explicit project workflows. A
@@ -128,9 +140,19 @@ tables; it has no worker to build. HTML/CSS and JavaScript/D3/Plotly use the bun
 browser preview. For a scientific subset, choose:
 
 ```sh
-./classroom --profile jax-cpu --profile bayesian-cpu --profile r-statistics
+./classroom --profile jax-cpu --profile bayesian-cpu --profile stan-cpu --profile r-statistics --profile julia
 ```
 
 Python Core is included by the launcher. This replaces the saved selection with
 Core and the named profiles. Existing projects preserve their previous selection
 on an ordinary resume; use `--all` when deliberately adding the full current set.
+
+For the data and analytics engineering routes, select both the Python project
+runtime and the beginner SQL-model runtime:
+
+```sh
+./classroom --profile data-engineering --profile dbt-duckdb
+```
+
+The [scientist roadmap](scientist-roadmap.md) maps subjects to these execution
+surfaces. Selecting these profiles does not start the separate ML service.

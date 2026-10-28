@@ -260,6 +260,55 @@ def _control_signature(text: str) -> list[Any]:
     return signature
 
 
+def _statement_chunks(text: str) -> list[str]:
+    """Reset formatter state at complete PostgreSQL statement boundaries.
+
+    PostgreSQL reports UTF-8 byte offsets. Replace psql variables with a valid
+    token and padding of the same byte width solely to discover those offsets;
+    their original spelling is still protected and checked during formatting.
+    Parsing, rather than splitting on semicolons, keeps routine bodies and
+    BEGIN ATOMIC blocks intact. Leading/trailing comments remain in the slices.
+    """
+    parse_sql_json = importlib.import_module("pglast.parser").parse_sql_json
+
+    parser_parts: list[str] = []
+    for kind, value in sql_parts(text):
+        if kind == "psql":
+            raise SQLFormatError("Split psql control lines before statement formatting")
+        if kind == "variable":
+            if value.startswith(":'"):
+                replacement = "'x'"
+            elif value.startswith(':"'):
+                replacement = '"x"'
+            else:
+                replacement = "x"
+            padding = len(value.encode("utf-8")) - len(replacement)
+            parser_parts.append(replacement + " " * padding)
+        else:
+            parser_parts.append(value)
+    statements = json.loads(parse_sql_json("".join(parser_parts))).get("stmts", [])
+    source = text.encode("utf-8")
+    boundaries = [0]
+    for item in statements[1:]:
+        offset = item["stmt_location"]
+        # Assign separator whitespace to the preceding complete statement. This
+        # keeps identity formatters from introducing a second newline while
+        # retaining comments with the following statement and preserving bytes.
+        while source[offset : offset + 1] in (b" ", b"\t", b"\r", b"\n", b"\f", b"\v"):
+            offset += 1
+        boundaries.append(offset)
+    boundaries.append(len(source))
+    if boundaries != sorted(set(boundaries)):
+        # Empty/comment-only buffers have coincident start/end offsets.
+        if source or statements:
+            raise SQLFormatError("Unexpected PostgreSQL statement offsets")
+        return []
+    return [
+        source[start:end].decode("utf-8")
+        for start, end in zip(boundaries[:-1], boundaries[1:], strict=True)
+    ]
+
+
 def format_sql_bytes(source: bytes) -> bytes:
     """Return formatted UTF-8 bytes only after semantic preservation checks."""
     parse_sql_json = importlib.import_module("pglast.parser").parse_sql_json
@@ -273,18 +322,23 @@ def format_sql_bytes(source: bytes) -> bytes:
         chunk.clear()
         if not text.strip():
             return
-        protected, replacements = protect_sql(text)
-        command = list(SQL_COMMAND)
-        if replacements:
-            # pgFormatter otherwise parses AS bodies internally. Keep our
-            # opaque markers intact during that rewriting as well.
-            pattern = "(?:" + "|".join(re.escape(marker) for marker, _ in replacements) + ")"
-            command.extend(["--placeholder", pattern])
-        result = subprocess.run(command, input=protected.encode(), capture_output=True, check=False)
-        if result.returncode:
-            raise SQLFormatError(result.stderr.decode("utf-8", errors="replace").strip())
-        restored = restore_sql(result.stdout.decode("utf-8"), replacements)
-        output.append(restored if restored.endswith("\n") else restored + "\n")
+        # An opaque CREATE FUNCTION body leaves pgFormatter 5.11's routine
+        # indentation state active. A fresh invocation for each complete
+        # statement prevents that state leaking into unrelated later queries.
+        for statement in _statement_chunks(text):
+            protected, replacements = protect_sql(statement)
+            command = list(SQL_COMMAND)
+            if replacements:
+                # Keep AS bodies opaque as well as ordinary quoted values.
+                pattern = "(?:" + "|".join(re.escape(marker) for marker, _ in replacements) + ")"
+                command.extend(["--placeholder", pattern])
+            result = subprocess.run(
+                command, input=protected.encode(), capture_output=True, check=False
+            )
+            if result.returncode:
+                raise SQLFormatError(result.stderr.decode("utf-8", errors="replace").strip())
+            restored = restore_sql(result.stdout.decode("utf-8"), replacements)
+            output.append(restored if restored.endswith("\n") else restored + "\n")
 
     # A psql command owns the rest of its physical line. Format the SQL buffers
     # on either side independently, retaining the control line outside the

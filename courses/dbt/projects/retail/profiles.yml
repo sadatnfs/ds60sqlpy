@@ -1,0 +1,19 @@
+learning_retail:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: target/warehouse.duckdb
+      schema: dev
+      threads: 1
+      settings:
+        threads: 2
+        memory_limit: 256MB
+    review:
+      type: duckdb
+      path: target/warehouse.duckdb
+      schema: review
+      threads: 1
+      settings:
+        threads: 2
+        memory_limit: 256MB

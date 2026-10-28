@@ -1,0 +1,18 @@
+{
+  "tableName": "ds60_orders",
+  "tableType": "OFFLINE",
+  "segmentsConfig": {
+    "replication": "1",
+    "timeColumnName": "event_ts",
+    "timeType": "MILLISECONDS"
+  },
+  "tableIndexConfig": {
+    "invertedIndexColumns": ["region"],
+    "rangeIndexColumns": ["amount"]
+  },
+  "tenants": {
+    "broker": "DefaultTenant",
+    "server": "DefaultTenant"
+  },
+  "metadata": {}
+}

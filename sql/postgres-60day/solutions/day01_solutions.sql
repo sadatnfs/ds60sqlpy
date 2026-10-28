@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
 -- Assumptions: Timestamps are `timestamptz`; relative-date exercises use the database clock. A result is stable only when its final sort key breaks ties.
@@ -43,6 +44,7 @@ ORDER BY
   o.order_date DESC,
   o.order_id DESC
 LIMIT 20;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find the 10 most expensive products created in the last 90 days.
@@ -69,6 +71,7 @@ ORDER BY
   p.price DESC,
   p.product_id
 LIMIT 10;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show customers from GB or DE created in the last year, newest first.
@@ -94,6 +97,7 @@ WHERE
 ORDER BY
   c.created_at DESC,
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Predict which rows survive `email = NULL`, then write a query that counts missing and present emails correctly.
@@ -111,6 +115,7 @@ SELECT
   COUNT(*) AS customer_count
 FROM
   customers AS c;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a top-price query that uses `LIMIT 10` without `ORDER BY` and explain why the original is nondeterministic.
@@ -133,43 +138,17 @@ ORDER BY
   p.price DESC,
   p.product_id
 LIMIT 10;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
--- Prompt: Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
--- Why: Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order.
--- Expected: Up to 10 rows strictly after the first page with no overlap.
--- Review the selected keys, grain, NULL behavior, and ordering before
--- treating the output as evidence.
+-- Prompt: Return the second page of 10 newest orders using the same deterministic order, LIMIT 10 and OFFSET 10.
+-- Why: Sort by order_date DESC and order_id DESC; skip the first ten ordered rows and keep the next ten.
+-- Expected: At most 10 rows, one row per order, equal to positions 11 through 20 of the unchanged ordered input.
 -- Clause-by-clause reading:
--- - `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
--- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
--- - `FROM`: establishes the starting relation and therefore the initial row grain.
--- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
--- - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
--- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
--- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
-WITH first_page AS (
-  SELECT
-    o.order_id,
-    o.order_date
-  FROM
-    orders AS o
-  ORDER BY
-    o.order_date DESC,
-    o.order_id DESC
-  LIMIT 10
-),
-cursor_row AS (
-  SELECT
-    fp.order_date,
-    fp.order_id
-  FROM
-    first_page AS fp
-  ORDER BY
-    fp.order_date,
-    fp.order_id
-  LIMIT 1
-)
+-- FROM supplies order rows, SELECT retains their identity and values, and
+-- ORDER BY defines newest first with order_id as the unique tie-breaker.
+-- OFFSET skips ten ordered rows; LIMIT returns at most ten after that skip.
+-- Check against the final ten IDs of the first twenty ordered source rows.
 SELECT
   o.order_id,
   o.customer_id,
@@ -177,11 +156,10 @@ SELECT
   o.order_date
 FROM
   orders AS o
-  CROSS JOIN cursor_row AS cursor
-WHERE (o.order_date, o.order_id) < (cursor.order_date, cursor.order_id)
 ORDER BY
   o.order_date DESC,
   o.order_id DESC
-LIMIT 10;
+LIMIT 10 OFFSET 10;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

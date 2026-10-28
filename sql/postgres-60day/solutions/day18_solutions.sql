@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.
 -- Assumptions: Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.
@@ -44,6 +45,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate days since each customer's previous order.
@@ -78,6 +80,7 @@ ORDER BY
   customer_id,
   order_date,
   order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show each promotion with the next promotion start date for the same product.
@@ -102,6 +105,7 @@ ORDER BY
   pr.product_id,
   pr.start_date,
   pr.promotion_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Identify first rows in each customer partition using a NULL lag without replacing it with a fake date.
@@ -135,6 +139,7 @@ WHERE
   previous_order_id IS NULL
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Compute month-over-month stored-revenue change after aggregating to month grain.
@@ -176,6 +181,7 @@ FROM
   compared
 ORDER BY
   month_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Compare each product price with the next higher price in its category.
@@ -200,5 +206,6 @@ ORDER BY
   p.category,
   p.price,
   p.product_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

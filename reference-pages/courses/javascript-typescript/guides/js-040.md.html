@@ -379,19 +379,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Create and retrieve an item over real HTTP.</strong> POST item A with value 2, then GET the list. <strong>Expected:</strong> 201 created; subsequent 200 list contains exactly A. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject malformed data before changing state.</strong> Send malformed JSON and a wrong-shaped object, then inspect the repository through GET. <strong>Expected:</strong> both 400; list remains empty. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Preserve original state on duplicate creation.</strong> Create A with value 2, then try A with value 9. <strong>Expected:</strong> second request 409; stored value remains 2. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Enforce body and media-type contracts.</strong> Send 513 body bytes, then a text/plain payload. <strong>Expected:</strong> 413 for size and 415 for media type. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Distinguish unknown routes and unsupported methods.</strong> Request an absent path and DELETE on the item route. <strong>Expected:</strong> 404 and 405 respectively. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Correlate safe events and prove listener cleanup.</strong> Request health, inspect its request id and event keys, then check the server after the helper exits. <strong>Expected:</strong> matching id and status; server no longer listening. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

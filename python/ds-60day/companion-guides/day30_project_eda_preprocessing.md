@@ -1,5 +1,8 @@
 # Day 30: Project: Reproducible EDA and Preprocessing
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate checkpoint
 
 This checkpoint combines loading, profiling, cleaning, visualization, schema
@@ -297,8 +300,8 @@ figures, concise findings, decision log, and explicit limitations.
   validation/reconciliation for each material change.
 - **Schema runs only on a toy fixture:** validate the actual final frame
   immediately before saving.
-- **A first-use dataset fails offline:** prime the documented cache online or
-  use local/constructed data.
+- **A teaching fixture fails to load:** verify the reviewed course root and
+  fixture digest. The maintained loader does not download a replacement.
 - **Target leakage inflates results:** fit learned preprocessing only on
   training data and keep evaluation data untouched.
 - **Machine-specific files appear in Git:** keep `.venv`, caches, `.env`, and

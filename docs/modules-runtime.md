@@ -27,6 +27,11 @@ upload channel or durable storage.
 | `python-core` | `main.py` | Fresh Python process with the prepared Core dependencies |
 | `jax-cpu` | `main.py` | Pinned CPU JAX/JAXLIB, including real JIT and autodiff startup checks |
 | `bayesian-cpu` | `main.py` | Pinned PyMC/ArviZ with the tutorial's InferenceData contract and CPU sampling |
+| `data-engineering` | `main.py` | Fresh Python with prepared Polars, Arrow, DuckDB, dbt Core/adapter and ML engineering tools |
+| `data-platforms-python` | `main.py` | PyArrow, DataFusion SQL and PyIceberg with an embedded local SQLite catalog; temporary files are discarded after each run |
+| `dbt-duckdb` | `model.sql` | Real SQL/Jinja compilation and dbt seed/build in a fixed local DuckDB project; bounded result table and metadata |
+| `stan-cpu` | `main.stan` | CmdStan 2.40.0 translation/compilation and two seeded chains, each with 100 warmup and 100 retained draws |
+| `julia` | `main.jl` | Julia 1.13.3 fresh process, two threads, read-only prepared project/depot and scientific packages |
 | `r-statistics` | `main.R` | Rscript with base/recommended statistics, ggplot2, Plotly and S3/S4/R6/S7 support |
 | `cpp20` | `main.cpp` | C++20 compile and link, then execute; pthread support and compiler warnings enabled |
 | `c17` | `main.c` | C17 compile and link, then execute; pthread and math libraries available |
@@ -62,7 +67,55 @@ includes. Preparing the `training` schema is a deliberate reset of disposable
 course tables. See [PostgreSQL setup](setup/postgresql.md) and
 [classroom controls](classroom-experience.md).
 
-## Offline drafts and saved figures
+## Data and scientific project boundaries
+
+The `data-engineering` environment is separate from Python Core. It supplies
+Polars/Arrow/DuckDB, real dbt and the packages required by the ML engineering
+route, including skops for the prepared MLflow scikit-learn serializer. The lesson must declare its actual profile; a Python filename alone does
+not select those dependencies. Downloads and package installation are not part
+of a Run operation.
+
+The `data-platforms-python` profile owns separately locked PyArrow, DataFusion
+and PyIceberg versions, plus pandas and offline plotting packages. The readiness
+probe executes real DataFusion SQL and an Iceberg append/read through a local
+SQLite catalog. These are actual library operations, not distributed-service
+claims. Persistent Flight, Ballista and other platform workshops have separate
+owned projects. Ordinary Run cannot start a persistent service, install packages
+or retain arbitrary Parquet/catalog files between runs.
+
+The `dbt-duckdb` pad accepts a single SQL/Jinja model with a fixed synthetic
+orders/customers fixture. It performs actual dbt compilation and materialization
+and captures a bounded table plus run metadata. SQL-model variants at
+`dbt-001`, `dbt-002`, `dbt-003` and `dbt-007` provide the focused entry route.
+The canonical Python lessons construct and inspect complete local projects;
+the [retail project](../courses/dbt/projects/retail/README.md) adds an owned CLI
+workspace for configuration, snapshots and incremental/state workflows.
+The browser does not provide an arbitrary multi-file dbt editor.
+
+Stan pads accept self-contained native model source. Put small teaching fixtures
+in `transformed data`; an absent or empty `data` block is appropriate. There is
+no second JSON-data editor. The operation fixes sampling settings and captures
+an actual summary table and two-chain trace. Short chains do not establish
+convergence; constant quantities can have undefined diagnostics. Use the
+[normal-mean project](../courses/bayesian-computing/projects/normal-mean/README.md)
+for a standard model/data.json/CmdStanPy 1.3.0 workflow with explicit saved outputs.
+
+Julia uses `/opt/julia-env` and `/opt/julia-depot`, with prepared CSV, DataFrames,
+Distributions, ForwardDiff, Optim and JSON3 packages. Each Run starts a fresh
+process with two threads. The source cannot install packages into the read-only
+depot. JuliaFormatter belongs to the prepared authoring toolchain; formatting a
+source file does not execute it or establish numerical correctness.
+
+The [owned ML system](../courses/ml-engineering/projects/local-system/README.md)
+trains from actual local Feast historical features, records MLflow evidence and
+serves predictions through real loopback HTTP. Its explicit CLI starts, stops,
+resumes and activates model versions. Predictor state is mounted read-only;
+training and administrative changes are separate operations. Its `state/`
+directory is separate from classroom volumes. This is a synthetic local learning
+project, with no cloud account, external production qualification or server
+lifecycle hidden inside an ordinary pad.
+
+## Offline drafts and saved outputs
 
 DAX uses the `dax-offline` editing capability, not a launcher profile or compiler.
 Its `main.dax` draft and notes are saved per lesson. A worked comparison checks
@@ -70,9 +123,14 @@ the reference source and model hashes and shows bounded hand-derived tables.
 Editing the pad does not recompute those tables. Both service and job entrypoints
 reject execution requests for this capability.
 
-Python/R workers can attach at most two bounded PNG or Plotly artifacts to their
-source-bound result. Plotly data is rendered in a separate opaque offline frame;
-metadata descriptions and small tables remain accessible in the classroom.
+Supported workers can attach at most two outputs in total: PNG, Plotly, table
+or JSON report. Payloads are bounded by 180,000 bytes, and the combined
+serialized document by 384,000 bytes. The PNG payload limit applies to decoded
+image bytes; see the output guide for exact per-kind rules. Tables allow at most 12 columns and 100 rows. Unsafe
+large JSON integers must be encoded as strings to preserve their exact values.
+Python, R and Julia capture paths retain the job destination even if code changes
+its working directory. Plotly renders in a separate opaque offline frame;
+reports and tables remain ordinary accessible data, never trusted HTML.
 Opening a saved result renders that saved data without rerunning the program.
 A storage/capture warning is separate from runtime success or failure. See
 [plotting](plotting.md) for supported operations and limits.

@@ -269,19 +269,19 @@ held<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</
 <ol>
 <li><strong>Construct transparent representations.</strong> Use features[-2,0],[-1,1],[1,0],[2,1] and labels 0,0,1,1. <strong>Expected:</strong> first-coordinate sign predicts all four labels. <strong>Verify:</strong> Save the assertion results for exercise 1, including first-coordinate sign predicts all four labels.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Use a held-out fixture.</strong> Evaluate the same fixed threshold on new representations[-3,1],[3,0]. <strong>Expected:</strong> two correct held-out predictions. <strong>Verify:</strong> Save the assertion results for exercise 2, including two correct held-out predictions.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Add shuffled-label control.</strong> Compare predictions against shuffled labels 0,1,0,1. <strong>Expected:</strong> 2 of4 correct. <strong>Verify:</strong> Save the assertion results for exercise 3, including 2 of4 correct.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Protect frozen state.</strong> Clone features, compute a probe loss using a separate trainable weight, and inspect gradients. <strong>Expected:</strong> probe gradient exists; features have no gradient. <strong>Verify:</strong> Save the assertion results for exercise 4, including probe gradient exists; features have no gradient.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose family leakage.</strong> Mark rows0 and 1 as versions of familyA and place them on opposite sides of a split. <strong>Expected:</strong> familyA crosses partitions. <strong>Verify:</strong> Save the assertion results for exercise 5, including familyA crosses partitions.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Bound the interpretation.</strong> Write a result with heldout_count2,control_accuracy.5 and causal_use_establishedFalse. <strong>Expected:</strong> report distinguishes decodability from causal use. <strong>Verify:</strong> Save the assertion results for exercise 6, including report distinguishes decodability from causal use.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

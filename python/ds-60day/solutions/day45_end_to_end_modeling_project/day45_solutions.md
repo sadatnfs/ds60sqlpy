@@ -1,5 +1,8 @@
 # Day 45: Solutions: End-to-End Modeling Project
 
+**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 We deliver a reproducible baseline solution: clean data pipeline with validation and features, model training with CV/tuning, holdout evaluation with thresholding, saved artifacts, and a minimal FastAPI service.
 
 Contents
@@ -143,7 +146,7 @@ verification:
 
 **Trade-off:** A richer model can improve metrics while increasing data, compute, monitoring, privacy, and operational obligations.
 
-**Edge case to test:** Missing categories, changed schema, data drift, tiny slices, artifact incompatibility, and unavailable first-run Seaborn cache need explicit behavior.
+**Edge case to test:** Missing categories, changed schema, data drift, tiny slices, artifact incompatibility, and unavailable offline need explicit behavior.
 
 **Evidence of correctness:** Reproduce from a fresh environment, validate data and split hashes, beat a same-split baseline, reload the complete pipeline, test slices, and connect every claim to an artifact.
 

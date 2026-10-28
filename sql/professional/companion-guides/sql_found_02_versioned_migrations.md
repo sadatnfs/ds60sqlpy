@@ -1,30 +1,5 @@
 # SQL-FOUND-02: Versioned Schema Migrations and Safe Evolution
 
-## Level and prerequisites
-
-- **Level:** Intermediate
-- **Catalog prerequisites:** `sql-found-01`; [SQL-FOUND-01; relational design](sql_found_01_relational_design.md);
-  `sql-39`; [SQL Day 39; locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md)
-- **Prerequisites:** [SQL-FOUND-01; relational design](sql_found_01_relational_design.md),
-  the transaction/locking sequence through SQL Day 39, constraints, and
-  permission to create/drop an isolated schema in `advanced_sql_training`.
-- **Artifacts:** [learner SQL](../lessons/sql_found_02_versioned_migrations.sql) ·
-  [fixture migrations](../fixtures/migrations/README.md) ·
-  [solution reasoning](../solutions/sql_found_02_versioned_migrations_solutions.md) ·
-  [executable solution](../solutions/sql_found_02_versioned_migrations_solutions.sql)
-
-Run from the repository root in Windows PowerShell, macOS, or Linux:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql
-```
-
-That command drops and recreates only `pro_migration_lab`, upgrades it through
-five versions, verifies it, and drops it on normal completion. If you interrupt
-the script, run the explicit
-[`cleanup.sql`](../fixtures/migrations/cleanup.sql) command shown in the
-[professional-track README](../README.md).
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -89,6 +64,31 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Catalog prerequisites:** `sql-found-01`; [SQL-FOUND-01; relational design](sql_found_01_relational_design.md);
+  `sql-39`; [SQL Day 39; locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md)
+- **Prerequisites:** [SQL-FOUND-01; relational design](sql_found_01_relational_design.md),
+  the transaction/locking sequence through SQL Day 39, constraints, and
+  permission to create/drop an isolated schema in `advanced_sql_training`.
+- **Artifacts:** [learner SQL](../lessons/sql_found_02_versioned_migrations.sql) ·
+  [fixture migrations](../fixtures/migrations/README.md) ·
+  [solution reasoning](../solutions/sql_found_02_versioned_migrations_solutions.md) ·
+  [executable solution](../solutions/sql_found_02_versioned_migrations_solutions.sql)
+
+Run from the repository root in Windows PowerShell, macOS, or Linux:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql
+```
+
+That command drops and recreates only `pro_migration_lab`, upgrades it through
+five versions, verifies it, and drops it on normal completion. If you interrupt
+the script, run the explicit
+[`cleanup.sql`](../fixtures/migrations/cleanup.sql) command shown in the
+[professional-track README](../README.md).
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -108,7 +108,7 @@ The first runnable example has a concrete contract: Example 1 returns one row pe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_found_02_versioned_migrations.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_found_02_versioned_migrations.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

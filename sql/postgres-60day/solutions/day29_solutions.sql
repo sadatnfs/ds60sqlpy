@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.
 -- Assumptions: PostgreSQL `LIKE` is case-sensitive, `ILIKE` is case-insensitive, and POSIX regex operators use `~`/`~*`. Collation can affect text behavior.
@@ -42,6 +43,7 @@ WHERE
   c.full_name ILIKE 'Customer 1%'
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find emails that match the course's simple lowercase example.com pattern.
@@ -64,6 +66,7 @@ WHERE
   c.email ~ '^customer[0-9]+@example[.]com$'
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Return event paths under `/p/` using JSON extraction and an anchored pattern.
@@ -86,6 +89,7 @@ WHERE
   e.metadata ->> 'path' LIKE '/p/%'
 ORDER BY
   e.event_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.
@@ -111,6 +115,7 @@ WHERE
     OR value LIKE '%\_%' ESCAPE '\'
   ORDER BY
     value;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.
@@ -133,6 +138,7 @@ WHERE
   c.full_name ~ '^Customer [0-9]+$'
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.
@@ -162,5 +168,6 @@ FROM
   customers AS c
 ORDER BY
   c.customer_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

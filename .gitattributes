@@ -10,6 +10,11 @@
 *.ps1 text eol=crlf
 *.cmd text eol=crlf
 *.ipynb text eol=lf
+*.jl text eol=lf
+*.stan text eol=lf
+*.dax text eol=lf
+*.R text eol=lf
+*.csv text eol=lf
 
 *.png binary
 *.jpg binary

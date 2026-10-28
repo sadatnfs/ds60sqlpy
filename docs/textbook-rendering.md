@@ -68,3 +68,17 @@ licenses and checksums are retained beside the vendored assets. Source reference
 [KaTeX server rendering](https://katex.org/docs/node),
 [KaTeX options](https://katex.org/docs/options), and
 [Latin Modern](https://ctan.org/pkg/lm).
+
+## Scientific and data-language sources
+
+New Julia, Stan and dbt SQL/Jinja sources use their accurate lexer and extension
+labels. Typesetting a Stan model or highlighting Jinja does not compile it.
+Applied Science and Bayesian Computing use tutorial mode with complete answers;
+their generators embed the exact maintained programs before shared TeX and
+reader generation. Formula review still needs dimensional, numerical and
+assumption checks independent of successful KaTeX output.
+
+Tables and JSON reports from actual runs are rendered as escaped structured data,
+not converted into mathematical prose or executable HTML. Keep literal decimals,
+identifiers, compiler messages and source characters intact. See
+[the output contract](plotting.md) for limits and saved-result semantics.

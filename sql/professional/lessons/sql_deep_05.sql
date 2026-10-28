@@ -9,8 +9,11 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep5_jobs (
   job_id integer PRIMARY KEY,
   tenant_id integer NOT NULL,
@@ -19,6 +22,7 @@ CREATE TEMP TABLE deep5_jobs (
   attempts integer NOT NULL,
   version integer NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep5_jobs
 VALUES
   (1, 1, 'ready', 10, 0, 1),
@@ -28,14 +32,17 @@ VALUES
   (5, 1, 'blocked', 100, 0, 3),
   (6, 1, 'ready', 5, 0, 1),
   (7, 1, NULL, 1000, 0, 1);
+
 CREATE INDEX deep5_ready_idx ON deep5_jobs (tenant_id, priority DESC, job_id)
 WHERE
   status = 'ready';
+
 CREATE TEMP TABLE deep5_requests (
   request_key text PRIMARY KEY,
   job_id integer NOT NULL,
   delta integer NOT NULL
 ) ON COMMIT DROP;
+
 -- Worked example 1
 SELECT
   job_id,
@@ -48,6 +55,7 @@ WHERE
   job_id IN (1, 5, 7)
 ORDER BY
   job_id;
+
 -- Worked example 2
 SELECT
   job_id,
@@ -60,6 +68,7 @@ WHERE
 ORDER BY
   priority DESC,
   job_id;
+
 -- Exercises
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 -- 1. State the exact eligible queue predicate
@@ -71,8 +80,8 @@ ORDER BY
 -- Expected result/shape: For sql-deep-05 Exercise 2, Only job 5 with status blocked is returned. Unknown status is not selected by ordinary inequality and is not silently classified as ready.
 -- Verify: For sql-deep-05 Exercise 2, project both the original and rewritten predicates on the same rows; retain the counterexample where their truth values differ instead of relying on coincidentally equal counts.
 -- 3. Inspect index existence without inventing a plan guarantee
--- Inputs/evidence: For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary deep 5_ready_idx. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
--- Expected result/shape: For sql-deep-05 Exercise 3, The row is deep 5_ready_idx, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
+-- Inputs/evidence: For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary `deep5_ready_idx`. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
+-- Expected result/shape: For sql-deep-05 Exercise 3, The row is `deep5_ready_idx`, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
 -- Verify: For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.
 -- 4. Apply a version-checked mutation and inspect its receipt
 -- Inputs/evidence: For sql-deep-05 Exercise 4, Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.

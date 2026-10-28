@@ -558,11 +558,11 @@ splitter <span class="syntax-operator">=</span> GroupKFold<span class="syntax-pu
 <li>Evaluate the pipeline with <code>accuracy</code>, <code>f1</code>, and <code>roc_auc</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; metrics, resampling design, and honest generalization estimates; on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.</p>
-<ol>
+<ol start="2">
 <li>Compare the variability from 5-fold and 10-fold cross-validation.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; metrics, resampling design, and honest generalization estimates; use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.</p>
-<ol>
+<ol start="3">
 <li>Explain leakage risks and how placing preprocessing in a pipeline helps.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; metrics, resampling design, and honest generalization estimates; show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.</p>
@@ -575,15 +575,15 @@ splitter <span class="syntax-operator">=</span> GroupKFold<span class="syntax-pu
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Match metrics and resampling to the decision being modeled. Keep thresholds, groups, time, and hyperparameter selection inside honest validation boundaries.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Threshold analysis:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged. <strong>Progressive hint:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</li>
 </ol>
 <p><strong>Verify:</strong> Threshold analysis; for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.</p>
-<ol>
+<ol start="5">
 <li><strong>Grouped resampling:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation. <strong>Progressive hint:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</li>
 </ol>
 <p><strong>Verify:</strong> Grouped resampling; print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
-<ol>
+<ol start="6">
 <li><strong>Selection-bias debugging:</strong> Explain why reporting <code>GridSearchCV.best_score_</code> as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model. <strong>Progressive hint:</strong> The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.</li>
 </ol>
 <p><strong>Verify:</strong> Selection-bias debugging; print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p>
@@ -797,11 +797,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Evaluate the pipeline with <code>accuracy</code>, <code>f1</code>, and <code>roc_auc</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.</p>
-<ol>
+<ol start="2">
 <li>Compare the variability from 5-fold and 10-fold cross-validation.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.</p>
-<ol>
+<ol start="3">
 <li>Explain leakage risks and how placing preprocessing in a pipeline helps.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.</p>
@@ -814,15 +814,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Match metrics and resampling to the decision being modeled. Keep thresholds, groups, time, and hyperparameter selection inside honest validation boundaries.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Threshold analysis:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged. <strong>Progressive hint:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</li>
 </ol>
 <p><strong>Verify:</strong> Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.</p>
-<ol>
+<ol start="5">
 <li><strong>Grouped resampling:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation. <strong>Progressive hint:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</li>
 </ol>
 <p><strong>Verify:</strong> Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
-<ol>
+<ol start="6">
 <li><strong>Selection-bias debugging:</strong> Explain why reporting <code>GridSearchCV.best_score_</code> as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model. <strong>Progressive hint:</strong> The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.</li>
 </ol>
 <p><strong>Verify:</strong> Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p>

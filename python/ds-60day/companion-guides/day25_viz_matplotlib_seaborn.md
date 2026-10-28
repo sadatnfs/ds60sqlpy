@@ -1,5 +1,8 @@
 # Day 25: Visualization with Matplotlib and Seaborn
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 A chart is an encoding of data into position, color, shape, and size. Choose the
@@ -228,9 +231,8 @@ notebook sessions.
 
 ## Dataset note
 
-The notebook uses Seaborn's `tips` sample. First uncached use downloads it; later
-runs use Seaborn's cache. Prime the cache while online or substitute a
-constructed/local frame.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 ## Exercises and progressive hints
 

@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.
 -- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.
@@ -46,6 +47,7 @@ WHERE
   e.event_type = 'support'
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Return customer IDs that have both an order and a support event.
@@ -72,6 +74,7 @@ WHERE
   e.event_type = 'support'
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Return customers who have no orders.
@@ -95,6 +98,7 @@ FROM
   orders AS o
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.
@@ -151,6 +155,7 @@ FROM
   combined_distinct
 ORDER BY
   operation;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.
@@ -176,6 +181,7 @@ FROM
   expenses AS e
 ORDER BY
   measure;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Return the symmetric difference between customers with orders and customers with support events.
@@ -240,5 +246,6 @@ FROM
 ORDER BY
   customer_id,
   source;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

@@ -1,0 +1,64 @@
+{
+  "number": 11,
+  "title": "Multiple dispatch and method specificity",
+  "concepts": [
+    "multiple dispatch",
+    "abstract type",
+    "method specificity",
+    "ambiguity",
+    "type ownership"
+  ],
+  "outcome": "Design generic operations over owned types and resolve overlapping method signatures explicitly.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-010"],
+  "sources": [
+    ["Julia methods and ambiguities", "https://docs.julialang.org/en/v1/manual/methods/"],
+    ["Julia interfaces", "https://docs.julialang.org/en/v1/manual/interfaces/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Add a zero-size shape",
+      "task": "Construct a circle with radius 0.",
+      "expected": "Its area is 0.",
+      "hint": "Check the boundary without rejecting a valid degenerate shape.",
+      "answer": "The constructor permits nonnegative dimensions, including zero."
+    },
+    {
+      "title": "Reject an invalid dimension",
+      "task": "Use a negative rectangle side.",
+      "expected": "Construction raises ArgumentError.",
+      "hint": "Dispatch does not replace domain validation.",
+      "answer": "A method for the right type can still receive scientifically invalid values unless its contract prevents them."
+    },
+    {
+      "title": "Trace both arguments",
+      "task": "Call classify with an integer in each position separately.",
+      "expected": "Different methods handle the two cases.",
+      "hint": "Method selection uses the positional type tuple.",
+      "answer": "There is no requirement that one argument be a special receiver."
+    },
+    {
+      "title": "Resolve the overlap",
+      "task": "Call classify with two integers.",
+      "expected": "The explicit intersection method is selected.",
+      "hint": "Neither one-sided signature alone expresses the complete overlap rule.",
+      "answer": "An intersection method documents behavior and prevents ambiguity."
+    },
+    {
+      "title": "Keep an unsupported case visible",
+      "task": "Pass two floating-point values to classify.",
+      "expected": "A MethodError is raised.",
+      "hint": "No method promises that case.",
+      "answer": "A catch-all fallback should be added only when its semantics are defined."
+    },
+    {
+      "title": "Extend an owned interface",
+      "task": "Sketch another Shape subtype and an area method.",
+      "expected": "The generic total can use the operation if its laws hold.",
+      "hint": "An abstract type does not implement the behavior itself.",
+      "answer": "Test the new method and invariants rather than assuming subtype membership proves interface correctness."
+    }
+  ]
+}

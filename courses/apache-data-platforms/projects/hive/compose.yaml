@@ -1,0 +1,77 @@
+x-labels: &labels
+  org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Use run.sh}
+  org.ds60.workshop.kind: apache-hive
+x-hive: &hive
+  image: ${DS60_HIVE_IMAGE:?Use run.sh}
+  labels: *labels
+  pull_policy: never
+  restart: "no"
+  pids_limit: 256
+  cpus: 1.0
+  mem_limit: 1536m
+  user: "0:0"
+  environment:
+    HADOOP_CLIENT_OPTS: -Xms128m -Xmx768m
+  networks: [private]
+  volumes:
+    [
+      ".:/project:ro",
+      "warehouse:/warehouse",
+      "./conf:/workshop-conf:ro",
+      "./.workshop/postgresql.jar:/opt/hive/lib/postgres.jar:ro",
+    ]
+services:
+  postgres:
+    image: ${DS60_POSTGRES_IMAGE:?Use run.sh}
+    labels: *labels
+    pull_policy: never
+    cpus: 0.5
+    mem_limit: 512m
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: ds60_fixture_only
+    volumes: ["metadata:/var/lib/postgresql/data"]
+    networks: [private]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U hive -d metastore"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+  metastore:
+    <<: *hive
+    entrypoint: [bash, /project/service.sh, metastore]
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'echo > /dev/tcp/127.0.0.1/9083'"]
+      interval: 3s
+      timeout: 2s
+      retries: 60
+  hiveserver2:
+    <<: *hive
+    entrypoint: [bash, /project/service.sh, hiveserver2]
+    depends_on:
+      metastore: { condition: service_healthy }
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'echo > /dev/tcp/127.0.0.1/10000'"]
+      interval: 3s
+      timeout: 2s
+      retries: 60
+  admin:
+    <<: *hive
+    entrypoint: [bash, /project/service.sh]
+  fixture:
+    image: ${DS60_PLATFORM_IMAGE:?Use run.sh}
+    labels: *labels
+    pull_policy: never
+    entrypoint: [python3, /project/fixture.py]
+    cpus: 0.5
+    mem_limit: 256m
+    volumes: [".:/project:ro", "warehouse:/warehouse"]
+    networks: [private]
+volumes:
+  metadata: { labels: *labels }
+  warehouse: { labels: *labels }
+networks:
+  private: { internal: true, labels: *labels }

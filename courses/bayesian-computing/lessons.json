@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "track_id": "bayesian-computing",
+  "lessons": [
+    {
+      "id": "bayes-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-001.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-002.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-003.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-004.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-004.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-005.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-006.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-007.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/bayesian-computing/guides/bayes-008.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-009.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-010.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-011.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-012.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-013.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-013.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-014.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-014.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-015.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-015.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "bayesian-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-016.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-016.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-017",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-017.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-017.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-018",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-018.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-018.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-019",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-019.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-019.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-020",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-020.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-020.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-021",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-021.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-021.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-022",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-022.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-022.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-023",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-023.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-023.stan",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "bayes-024",
+      "status": "authored",
+      "language": "stan",
+      "runtime_profile": "stan-cpu",
+      "guide_path": "courses/bayesian-computing/guides/bayes-024.md",
+      "source_path": "courses/bayesian-computing/examples/bayes-024.stan",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

@@ -289,8 +289,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><code>solutions/&lt;stem&gt;_solutions.md</code> explains the reasoning, alternatives, and edge cases.</li>
 </ul>
 <p>Work in the classroom&#x27;s saved learner pad while attempting a lesson. Tracked starter and solution files remain separate from your Docker-volume work.</p>
+<h3 id="language-mechanics-and-lifecycle">Language mechanics and lifecycle<a class="heading-anchor" href="#language-mechanics-and-lifecycle" aria-label="Link to this section">#</a></h3>
+<p>The additional standard-library path teaches mechanisms that affect real program behavior:</p>
+<ul>
+<li><a href="../../../lesson-pages/python-lang-02.html#guide">Scope, closures and decorators</a> traces lexical lookup, binding time, captured state and callable metadata.</li>
+<li><a href="../../../lesson-pages/python-lang-03.html#guide">Iterators, generators and resource lifetime</a> distinguishes a consumable stream from a reusable container and makes cleanup ownership explicit.</li>
+<li><a href="../../../lesson-pages/python-lang-04.html#guide">Structured asyncio and cancellation</a> teaches bounded concurrent work, deadlines, grouped failures and context restoration.</li>
+</ul>
+<p>Follow each unit&#x27;s direct catalog prerequisites. These are separate learning units with saved pads and explained references, using the existing Core runtime.</p>
 <h3 id="deeper-arrays-tables-and-algorithms">Deeper arrays, tables and algorithms<a class="heading-anchor" href="#deeper-arrays-tables-and-algorithms" aria-label="Link to this section">#</a></h3>
-<p>The catalog also includes <code>python-numpy-01</code> through <code>python-numpy-04</code>, <code>python-pandas-01</code> through <code>python-pandas-04</code>, and <code>python-algo-01</code> through <code>python-algo-04</code>. These expand shapes and broadcasting, numerical behavior, table grain and joins, data cleaning, collection design and algorithmic cost. Use their actual prerequisite chains rather than treating the numbered route as a mandatory completion barrier.</p>
+<p>The catalog includes <code>python-numpy-01</code> through <code>python-numpy-08</code>, <code>python-pandas-01</code> through <code>python-pandas-07</code>, and <code>python-algo-01</code> through <code>python-algo-07</code>. These expand shapes and broadcasting, numerical behavior, table grain and joins, data cleaning, collection design and algorithmic cost. Use their actual prerequisite chains rather than treating the numbered route as a mandatory completion barrier.</p>
 <h3 id="run-and-preserve-an-attempt">Run and preserve an attempt<a class="heading-anchor" href="#run-and-preserve-an-attempt" aria-label="Link to this section">#</a></h3>
 <p>Run <code>./classroom --starter</code> from the repository root, choose Python and select the unit by stable ID. Read its capability notice, edit the learner pad and inspect saved run output. Standard-library examples are local and bounded. Modules using packages such as Arrow, DuckDB or Hypothesis declare them; a fallback example does not establish the behavior of an unavailable package.</p>
 <p>The packaging fixture disables build isolation to avoid unplanned downloads. Other projects use injected transports, local fixtures and temporary directories where their guides specify them. Read each lesson&#x27;s exact limitations before claiming a network service, production release or performance improvement.</p>
@@ -305,7 +313,8 @@ uv run --no-sync python -m pytest python/professional/tests tests/test_python_ex
 <li>Build distributions, installed packages, Parquet files, and partitions go into a temporary directory or an ignored learner directory.</li>
 <li>The HTTP lesson uses an injected scripted transport; authentication examples use placeholders and redact sensitive headers.</li>
 <li>Process-pool code always lives behind a <code>if __name__ == &quot;__main__&quot;:</code> guard so it is safe with Windows&#x27; <code>spawn</code> process start method.</li>
-</ul></article>
+</ul>
+<p>The later deepening units include explicit dtype/promotion and overflow policies, owned random streams and checkpoints, weighted least squares/SVD, and window/FFT mechanics. Table work adds compound identity and lossless reshape, actual DST and calendar boundaries, and exact typed CSV/Parquet/domain checks. Algorithms add trees/tries, disjoint sets/minimum spanning forests, and one-pass summaries, medians and reservoir sampling. The catalog owns exact prerequisites and paths.</p></article>
   </main>
 </body>
 </html>

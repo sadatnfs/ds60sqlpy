@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+action=${1:-help}
+if [[ $# -gt 1 ]]; then
+  printf '%s\n' 'Use one action; configuration is described in README.md.' >&2
+  exit 2
+fi
+if [[ "$action" == help || "$action" == --help ]]; then
+  cat <<'HELP'
+Inference lifecycle workshop (owned copy, Docker required)
+  ./workshop prepare   Build the small HTTP image and train local assets once
+  ./workshop start     Create/start from existing image and saved model
+  ./workshop stop      Stop these containers; retain model, token and history
+  ./workshop resume    Start the exact existing containers, without building
+  ./workshop replace   Replace these containers from the existing image; retain files
+  ./workshop build     Rebuild the project HTTP image explicitly, retaining assets
+  ./workshop status    Show this project's containers
+  ./workshop logs      Follow this project's service logs
+Initial settings: WORKSHOP_PORT=8892 WORKSHOP_PROJECT=ds60-inference
+WORKSHOP_BASE_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.0.0
+WORKSHOP_PACING=0 (optional pedagogical seconds per token, at most 0.2)
+No action publishes an image or deletes model/history files.
+HELP
+  exit 0
+fi
+case "$action" in prepare | start | stop | resume | replace | build | status | logs) ;; *)
+  printf '%s\n' 'Unknown action. Use ./workshop help.' >&2
+  exit 2
+  ;;
+esac
+command -v docker >/dev/null || {
+  printf '%s\n' 'Install/start a Linux Docker engine. Windows uses WSL 2.' >&2
+  exit 1
+}
+docker info >/dev/null
+if [[ -L .workshop ]]; then
+  printf '%s\n' '.workshop cannot be a symlink.' >&2
+  exit 1
+fi
+if [[ ! -f .workshop/settings.env ]]; then
+  if [[ "$action" != prepare ]]; then
+    printf '%s\n' 'Run ./workshop prepare in your owned project copy first.' >&2
+    exit 1
+  fi
+  umask 077
+  mkdir -p .workshop/state
+  project=${WORKSHOP_PROJECT:-ds60-inference}
+  port=${WORKSHOP_PORT:-8892}
+  base=${WORKSHOP_BASE_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:1.0.0}
+  pacing=${WORKSHOP_PACING:-0}
+  [[ "$project" =~ ^[a-z0-9][a-z0-9_-]{2,50}$ ]] || {
+    printf '%s\n' 'Invalid WORKSHOP_PROJECT.' >&2
+    exit 2
+  }
+  [[ "$port" =~ ^[1-9][0-9]{3,4}$ && "$port" -le 65535 ]] || {
+    printf '%s\n' 'Choose a port from 1024 through 65535.' >&2
+    exit 2
+  }
+  [[ "$port" -ge 1024 ]] || exit 2
+  [[ "$base" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/:@-]+$ ]] || {
+    printf '%s\n' 'Invalid WORKSHOP_BASE_IMAGE.' >&2
+    exit 2
+  }
+  [[ "$pacing" =~ ^(0|0\.[01][0-9]{0,2}|0\.20{0,2})$ ]] || {
+    printf '%s\n' 'Pacing must be a decimal from zero through 0.2.' >&2
+    exit 2
+  }
+  image="${project}-image:1.0.0"
+  printf '%s\n' "WORKSHOP_PROJECT=$project" "WORKSHOP_PORT=$port" "WORKSHOP_BASE_IMAGE=$base" "WORKSHOP_PACING=$pacing" "WORKSHOP_IMAGE=$image" "WORKSHOP_UID=$(id -u)" "WORKSHOP_GID=$(id -g)" >.workshop/settings.env
+fi
+[[ ! -L .workshop/settings.env ]] || {
+  printf '%s\n' 'Settings cannot be a symlink.' >&2
+  exit 1
+}
+# Parse fixed keys as data. Never source a learner-writable shell file.
+seen='|'
+while IFS='=' read -r key value; do
+  [[ "$seen" != *"|$key|"* ]] || {
+    printf '%s\n' 'Duplicate saved setting.' >&2
+    exit 1
+  }
+  seen="$seen$key|"
+  case "$key" in
+    WORKSHOP_PROJECT) project=$value ;; WORKSHOP_PORT) port=$value ;;
+    WORKSHOP_BASE_IMAGE) base=$value ;; WORKSHOP_PACING) pacing=$value ;;
+    WORKSHOP_IMAGE) image=$value ;; WORKSHOP_UID) owner_uid=$value ;; WORKSHOP_GID) owner_gid=$value ;;
+    *)
+      printf '%s\n' 'Unexpected saved settings key.' >&2
+      exit 1
+      ;;
+  esac
+done <.workshop/settings.env
+[[ "${project:-}" =~ ^[a-z0-9][a-z0-9_-]{2,50}$ && "${port:-}" =~ ^[1-9][0-9]{3,4}$ && "$port" -ge 1024 && "$port" -le 65535 ]] || {
+  printf '%s\n' 'Saved project/port is invalid.' >&2
+  exit 1
+}
+[[ "${base:-}" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/:@-]+$ && "${image:-}" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/:@-]+$ && "${owner_uid:-}" =~ ^[0-9]+$ && "${owner_gid:-}" =~ ^[0-9]+$ && "${pacing:-}" =~ ^(0|0\.[01][0-9]{0,2}|0\.20{0,2})$ ]] || {
+  printf '%s\n' 'Saved image/user/pacing configuration is invalid.' >&2
+  exit 1
+}
+# Do not let the caller's environment silently override this project's saved selection.
+export WORKSHOP_PROJECT="$project" WORKSHOP_PORT="$port" WORKSHOP_BASE_IMAGE="$base" WORKSHOP_IMAGE="$image" WORKSHOP_UID="$owner_uid" WORKSHOP_GID="$owner_gid" WORKSHOP_PACING="$pacing"
+[[ ! -L .workshop/model && ! -L .workshop/state && ! -L .workshop/token ]] || {
+  printf '%s\n' 'Model, state and token paths cannot be symlinks.' >&2
+  exit 1
+}
+owned_containers="$(docker ps --all --filter "label=com.docker.compose.project=$project" --format '{{.ID}}|{{.Label "ds60.workshop"}}')" || {
+  printf '%s\n' 'Could not verify existing workshop ownership; no action taken.' >&2
+  exit 1
+}
+while IFS= read -r ownership; do
+  [[ -n "$ownership" ]] || continue
+  [[ "$ownership" == *'|inference-service' ]] || {
+    printf '%s\n' 'This project name belongs to unrelated containers. Choose a new owned copy/project.' >&2
+    exit 1
+  }
+done <<<"$owned_containers"
+compose=(docker compose --project-name "$project" --env-file .workshop/settings.env -f compose.yaml)
+if [[ "$action" == build || "$action" == prepare ]]; then
+  docker image inspect "$base" >/dev/null 2>&1 || {
+    printf '%s\n' "Prepare the CPU Torch classroom image first: $base" 'From the classroom root: ./classroom build --profile llm-torch-cpu --local-build --tag 1.0.0' >&2
+    exit 1
+  }
+  docker build --pull=false --progress plain --build-arg "BASE_IMAGE=$base" --tag "$image" .
+fi
+if [[ "$action" == prepare ]]; then
+  [[ ! -L .workshop/model && ! -L .workshop/state && ! -L .workshop/token ]] || {
+    printf '%s\n' 'Model, state and token paths cannot be symlinks.' >&2
+    exit 1
+  }
+  if [[ ! -f .workshop/token ]]; then
+    docker run --rm --pull never --network none --read-only --user "$owner_uid:$owner_gid" --cap-drop ALL --security-opt no-new-privileges --entrypoint python --mount "type=bind,src=$PWD/.workshop,dst=/prepared" "$image" -c 'from pathlib import Path;import secrets; p=Path("/prepared/token");p.write_text(secrets.token_hex(32)+"\n");p.chmod(0o600)'
+  fi
+  if [[ ! -e .workshop/model ]]; then
+    docker run --rm --pull never --network none --read-only --user "$owner_uid:$owner_gid" --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 2g --pids-limit 128 --tmpfs /tmp:rw,nosuid,exec,size=128m --mount "type=bind,src=$PWD/.workshop,dst=/prepared" --entrypoint python "$image" prepare.py --output /prepared/model
+  else
+    docker run --rm --pull never --network none --read-only --user "$owner_uid:$owner_gid" --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 2g --pids-limit 128 --tmpfs /tmp:rw,nosuid,exec,size=128m --mount "type=bind,src=$PWD/.workshop/model,dst=/model,readonly" --entrypoint python "$image" -c 'from pathlib import Path;from serving_checkpoint import load_checkpoint,verify_cache; m,t,_=load_checkpoint(Path("/model"));print(verify_cache(m,t))'
+  fi
+  printf '%s\n' 'Preparation complete. Start with ./workshop start.'
+elif [[ "$action" == start ]]; then
+  [[ -f .workshop/model/manifest.json && -f .workshop/token ]] || {
+    printf '%s\n' 'Model preparation is incomplete. Run ./workshop prepare.' >&2
+    exit 1
+  }
+  "${compose[@]}" up -d --no-build --pull never --wait --wait-timeout 90
+  printf '%s\n' "Open http://127.0.0.1:$port"
+elif [[ "$action" == resume ]]; then
+  original_ids="$("${compose[@]}" ps --all --quiet | LC_ALL=C sort)"
+  [[ -n "$original_ids" ]] || {
+    printf '%s\n' 'No existing containers. Use ./workshop start to create from the saved image.' >&2
+    exit 1
+  }
+  # Compose 2.28 supports start without --wait. Inspect the exact original
+  # containers rather than creating replacements or relying on newer options.
+  "${compose[@]}" start
+  for container in $original_ids; do
+    deadline=$((SECONDS + 90))
+    while :; do
+      state="$(docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container")"
+      read -r status health extra <<<"$state"
+      [[ -z "${extra:-}" ]] || {
+        echo 'Unexpected container state.' >&2
+        exit 1
+      }
+      case "$status:$health" in
+        running:healthy | running:none) break ;;
+        running:starting | created:* | restarting:*) ;;
+        *)
+          printf 'Existing container is %s (health %s); retained state was preserved.\n' "$status" "$health" >&2
+          exit 1
+          ;;
+      esac
+      [[ $SECONDS -lt $deadline ]] || {
+        echo 'Timed out waiting for the existing container.' >&2
+        exit 1
+      }
+      sleep 1
+    done
+  done
+  [[ "$("${compose[@]}" ps --all --quiet | LC_ALL=C sort)" == "$original_ids" ]] || {
+    echo 'Container identity changed unexpectedly during resume.' >&2
+    exit 1
+  }
+  printf '%s\n' "Open http://127.0.0.1:$port"
+elif [[ "$action" == replace ]]; then
+  "${compose[@]}" up -d --no-build --pull never --force-recreate --wait --wait-timeout 90
+  printf '%s\n' "Open http://127.0.0.1:$port; existing model and request files retained."
+elif [[ "$action" == stop ]]; then
+  "${compose[@]}" stop
+elif [[ "$action" == status ]]; then
+  "${compose[@]}" ps --all
+elif [[ "$action" == logs ]]; then
+  "${compose[@]}" logs --follow --tail 80
+fi

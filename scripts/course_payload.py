@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import fnmatch
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -32,6 +33,27 @@ def toolchain_output_directory(parent: Path, name: str) -> bool:
         path = parent / filename
         return not is_content_link(path) and path.is_file()
 
+    if manifest("dbt_project.yml") and (
+        name in {"target", "logs", "dbt_packages"} or name.endswith(".duckdb.tmp")
+    ):
+        return True
+    ml_marker = parent / ".ds60-ml-project.json"
+    if name == "state" and is_content_link(ml_marker):
+        raise ValueError("Owned ML project marker must not be a link")
+    if name == "state" and manifest(".ds60-ml-project.json"):
+        marker_path = parent / ".ds60-ml-project.json"
+        if marker_path.stat().st_size > 1000:
+            raise ValueError("ML project marker exceeds its metadata limit")
+        marker = json.loads(marker_path.read_text("utf-8"))
+        if (
+            not isinstance(marker, dict)
+            or set(marker) != {"schema_version", "kind"}
+            or type(marker.get("schema_version")) is not int
+            or marker["schema_version"] != 1
+            or marker.get("kind") != "local-ml-service"
+        ):
+            raise ValueError("Invalid owned ML project marker")
+        return True
     if name == "target" and manifest("Cargo.toml"):
         return True
     if name in {".build", ".swiftpm"} and manifest("Package.swift"):
@@ -45,6 +67,17 @@ def toolchain_output_directory(parent: Path, name: str) -> bool:
         return True
     return name == "xcuserdata" and any(
         ancestor.suffix in {".xcodeproj", ".xcworkspace"} for ancestor in (parent, *parent.parents)
+    )
+
+
+def toolchain_output_file(parent: Path, name: str) -> bool:
+    marker = parent / "dbt_project.yml"
+    if is_content_link(marker):
+        raise ValueError("dbt project marker must not be a link")
+    return (
+        not is_content_link(marker)
+        and marker.is_file()
+        and (name == ".user.yml" or name.endswith((".duckdb", ".duckdb.wal")))
     )
 
 
@@ -78,7 +111,10 @@ def ignore_private_files(directory: str, names: list[str]) -> set[str]:
         "mlruns",
         "wandb",
         "classroom-runs",
+        "ds60-figures.json",
+        ".ds60-output-*",
         ".learning",
+        ".workshop",
         ".classroom",
         ".venv",
         ".env",
@@ -106,6 +142,7 @@ def ignore_private_files(directory: str, names: list[str]) -> set[str]:
         if (
             is_content_link(Path(directory) / name)
             or toolchain_output_directory(Path(directory), name)
+            or toolchain_output_file(Path(directory), name)
             or (
                 name.casefold() != ".env.example"
                 and any(fnmatch.fnmatchcase(name.casefold(), pattern) for pattern in patterns)

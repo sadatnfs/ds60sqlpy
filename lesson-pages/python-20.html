@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day20_pandas_merging_joins.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day20_pandas_merging_joins.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -503,16 +503,16 @@ priced <span class="syntax-operator">=</span> items<span class="syntax-operator"
 <ol>
 <li>Join product, order-item, and customer tables to compute revenue per customer. <strong>Before code:</strong> write each table&#x27;s row grain and key uniqueness. <strong>Sequence:</strong> many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. <strong>Expected behavior:</strong> one output row per customer with orders. <strong>Verify:</strong> assert both merges pass their declared <code>validate</code> relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. <strong>Expected behavior:</strong> the unmatched right row survives with missing order fields. <strong>Then:</strong> swap table order and reproduce the result with a left join. <strong>Verify:</strong> compare sorted keys and explain why left joins are often easier to read from a chosen primary table.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Create data where a supposedly unique dimension key is duplicated, then use the correct <code>validate</code> relationship to raise <code>MergeError</code>. <strong>Constraints:</strong> state which side should be one and which may be many; do not de-duplicate merely to silence the error. <strong>Verify:</strong> repair the fixture or data contract and show the validated merge succeeds without row multiplication.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Declare each table&#x27;s grain and key cardinality before merging. Use validation and reconciliation to make row loss or multiplication visible.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. <strong>Progressive hint:</strong> A many-to-many match forms every pair: left count × right count. <strong>Verify:</strong> Build the 2-by-3 fixture and assert exactly six rows for that key; compare with <code>validate</code> rejecting the unintended many-to-many relationship.</li>
 <li><strong>Tracing:</strong> Trace an outer merge with <code>indicator=True</code> and classify <code>left_only</code>, <code>right_only</code>, and <code>both</code> rows. <strong>Progressive hint:</strong> The indicator is a compact reconciliation tool. <strong>Verify:</strong> Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.</li>
 <li><strong>Implementation:</strong> Implement an anti-join returning left rows whose key has no right match. <strong>Progressive hint:</strong> Use a left merge with indicator, then filter <code>left_only</code>. <strong>Verify:</strong> Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.</li>
@@ -653,16 +653,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Join product, order-item, and customer tables to compute revenue per customer. <strong>Before code:</strong> write each table&#x27;s row grain and key uniqueness. <strong>Sequence:</strong> many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. <strong>Expected behavior:</strong> one output row per customer with orders. <strong>Verify:</strong> assert both merges pass their declared <code>validate</code> relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. <strong>Expected behavior:</strong> the unmatched right row survives with missing order fields. <strong>Then:</strong> swap table order and reproduce the result with a left join. <strong>Verify:</strong> compare sorted keys and explain why left joins are often easier to read from a chosen primary table.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Create data where a supposedly unique dimension key is duplicated, then use the correct <code>validate</code> relationship to raise <code>MergeError</code>. <strong>Constraints:</strong> state which side should be one and which may be many; do not de-duplicate merely to silence the error. <strong>Verify:</strong> repair the fixture or data contract and show the validated merge succeeds without row multiplication.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Declare each table&#x27;s grain and key cardinality before merging. Use validation and reconciliation to make row loss or multiplication visible.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. <strong>Progressive hint:</strong> A many-to-many match forms every pair: left count × right count. <strong>Verify:</strong> Build the 2-by-3 fixture and assert exactly six rows for that key; compare with <code>validate</code> rejecting the unintended many-to-many relationship.</li>
 <li><strong>Tracing:</strong> Trace an outer merge with <code>indicator=True</code> and classify <code>left_only</code>, <code>right_only</code>, and <code>both</code> rows. <strong>Progressive hint:</strong> The indicator is a compact reconciliation tool. <strong>Verify:</strong> Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.</li>
 <li><strong>Implementation:</strong> Implement an anti-join returning left rows whose key has no right match. <strong>Progressive hint:</strong> Use a left merge with indicator, then filter <code>left_only</code>. <strong>Verify:</strong> Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.</li>

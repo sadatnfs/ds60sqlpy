@@ -288,19 +288,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Await and narrow a result.</strong> Look up a known id and an absent id. <strong>Expected:</strong> known value 7; absent error not_found. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Show a failure result does not invoke catch.</strong> Attach catch to a lookup returning a not_found value. <strong>Expected:</strong> catch count 0; result still not_found. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Translate recognized cancellation.</strong> Abort a real timer-backed operation. <strong>Expected:</strong> failure result cancelled. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect an unknown rejection reason.</strong> Reject with a string and normalize it at a reporting boundary. <strong>Expected:</strong> diagnostic unclassified failure. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve every batch outcome.</strong> Summarize one fulfilled value and one rejected task. <strong>Expected:</strong> value:2 and error:offline. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject unresolved and unnarrowed access.</strong> Demonstrate both errors in an uncalled compile-time check. <strong>Expected:</strong> expected diagnostics for value before await or before narrowing. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

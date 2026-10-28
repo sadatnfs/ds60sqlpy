@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day29_data_validation_schemas.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day29_data_validation_schemas.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -513,13 +513,13 @@ validated <span class="syntax-operator">=</span> ReadingSchema<span class="synta
 <ol>
 <li>Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</li>
 <li><strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</li>
 <li><strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</li>
@@ -685,13 +685,13 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</li>
 <li><strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</li>
 <li><strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</li>

@@ -240,19 +240,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Uniform class uncertainty.</strong> Compute sparse cross entropy for target1 and three zero logits. <strong>Expected:</strong> loss <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span>. <strong>Verify:</strong> Save the assertion results for exercise 1, including loss <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span>.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Independent labels.</strong> Calculate sigmoid probabilities for three zero logits and labels[1,0,1]. <strong>Expected:</strong> three probabilities.5 with total1.5. <strong>Verify:</strong> Save the assertion results for exercise 2, including three probabilities.5 with total1.5.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Contrast target shapes.</strong> Build sparse targets[2,0] and multilabel targets[[1,0,1],[0,1,0]]. <strong>Expected:</strong> shapes(2,) and(2,3). <strong>Verify:</strong> Save the assertion results for exercise 3, including shapes(2,) and(2,3).</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Verify softmax mass.</strong> Apply softmax to[[2,0,-2]] and compare its sum with sigmoid output. <strong>Expected:</strong> softmax sum1; sigmoid sum1.5. <strong>Verify:</strong> Save the assertion results for exercise 4, including softmax sum1; sigmoid sum1.5.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Choose the denominator.</strong> Compute binary cross entropy for two three-label rows of zero logits; compare sum with entry mean. <strong>Expected:</strong> sum6log2; meanlog2. <strong>Verify:</strong> Save the assertion results for exercise 5, including sum6log2; meanlog2.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject an impossible class.</strong> Validate a sparse class index before lookup in a three-class vocabulary. <strong>Expected:</strong> index3 is outside legal indices0,1,2. <strong>Verify:</strong> Save the assertion results for exercise 6, including index3 is outside legal indices0,1,2.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

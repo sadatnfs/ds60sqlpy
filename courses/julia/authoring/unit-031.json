@@ -1,0 +1,58 @@
+{
+  "number": 31,
+  "title": "Expressions, hygienic macros and C interoperability",
+  "concepts": ["Expr", "macro hygiene", "single evaluation", "ccall", "ABI", "UTF8"],
+  "outcome": "Inspect syntax without evaluating untrusted text, implement a hygienic single-evaluation macro and call a precisely typed Linux C function.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-003", "julia-010", "julia-027"],
+  "sources": [
+    ["Julia metaprogramming", "https://docs.julialang.org/en/v1/manual/metaprogramming/"],
+    ["Calling C and Fortran", "https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Inspect syntax",
+      "task": "Identify the head and first argument of parsed 1+2.",
+      "expected": "The head is:call and the function symbol is:+.",
+      "hint": "Parsing constructs syntax.",
+      "answer": "The representation describes a call; this inspection does not evaluate arbitrary input."
+    },
+    {
+      "title": "Detect duplicate evaluation",
+      "task": "Explain what the counter would show if the macro evaluated its argument twice.",
+      "expected": "The counter would be 2.",
+      "hint": "Store the caller expression once.",
+      "answer": "The test protects against duplicated side effects in generated syntax."
+    },
+    {
+      "title": "Check name ownership",
+      "task": "Explain why the caller result variable stays 99.",
+      "expected": "The macro-local binding is hygienic.",
+      "hint": "Only the caller expression is escaped.",
+      "answer": "Generated temporary names must not capture unrelated caller bindings."
+    },
+    {
+      "title": "Trace UTF 8 bytes",
+      "task": "Compare strlen and length for the accented character.",
+      "expected": "The byte count is 2 and character count is 1.",
+      "hint": "The C API operates on bytes.",
+      "answer": "Unicode text has multiple valid units; choose the unit required by the interface."
+    },
+    {
+      "title": "Reject embedded zeros",
+      "task": "Explain why the wrapper rejects a zero byte inside a string.",
+      "expected": "C strlen would stop at the first zero.",
+      "hint": "The complete-string contract would be violated.",
+      "answer": "Explicit validation prevents a truncated prefix from being mistaken for the full length."
+    },
+    {
+      "title": "Review a native API",
+      "task": "List the extra facts needed before calling a function that stores a pointer.",
+      "expected": "ABI, lifetime, ownership, thread safety and release rules.",
+      "hint": "The argument must outlive the native use.",
+      "answer": "A successful synchronous call does not establish a safe retained-pointer integration."
+    }
+  ]
+}

@@ -243,19 +243,19 @@ mean<span class="syntax-operator">=</span><span class="syntax-builtin">float</sp
 <ol>
 <li><strong>Freeze six records.</strong> Create the three-feature fixture below, assign IDs0..3 to train and 4..5 to holdout, and calculate targets. <strong>Expected:</strong> targets[0,2,-1,1,2,4], disjoint IDs. <strong>Verify:</strong> Save the assertion results for exercise 1, including targets[0,2,-1,1,2,4], disjoint IDs.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Measure the baseline.</strong> Use the training mean to predict both held-out targets and compute squared error. <strong>Expected:</strong> training mean.5; holdout MSE7.25. <strong>Verify:</strong> Save the assertion results for exercise 2, including training mean.5; holdout MSE7.25.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Train a bounded model.</strong> Initialize a three-by-one kernel at zero and make exactly100 full-training SGD updates at rate 0.1. <strong>Expected:</strong> 100 updates; finite weights; training error below its initial value. <strong>Verify:</strong> Save the assertion results for exercise 3, including 100 updates; finite weights; training error below its initial value.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Open the holdout once.</strong> Compute held-out MSE after the fixed100 updates and compare it with the frozen baseline. <strong>Expected:</strong> holdout error below7.25 on the two supplied records. <strong>Verify:</strong> Save the assertion results for exercise 4, including holdout error below7.25 on the two supplied records.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve arithmetic evidence.</strong> Derive a one-feature pilot update from x = [1, 2, 3] and target2x at w = 0,rate 0.1. <strong>Expected:</strong> weight28/15 and loss56/675. <strong>Verify:</strong> Save the assertion results for exercise 5, including weight28/15 and loss56/675.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject a false conclusion.</strong> Construct a report containing split IDs, errors, step count and limitations; refuse a production-quality claim from two holdout rows. <strong>Expected:</strong> report names2 holdout records and makes no population guarantee. <strong>Verify:</strong> Save the assertion results for exercise 6, including report names2 holdout records and makes no population guarantee.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

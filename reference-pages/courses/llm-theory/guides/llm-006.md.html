@@ -256,19 +256,19 @@ decomposed <span class="syntax-operator">=</span> <span class="syntax-string">&q
 <ol>
 <li><strong>Trace the encoding units.</strong> Calculate code-point and UTF-8 byte counts for cat, café and 🙂 before running the example. <strong>Expected:</strong> Counts (3,3), (4,5) and (1,4), respectively. <strong>Verify:</strong> Assert all six counts and retain each encoded byte sequence as hex for inspection.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Construct a strict round trip.</strong> Implement encode_record(text,policy) with none/NFC policies and a matching strict decoder. <strong>Expected:</strong> With policy none, every fixture returns exactly its original string and bytes. <strong>Verify:</strong> Assert decode(encode(text)) equality and compare raw payload hex rather than relying on visual appearance.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Diagnose canonical duplicates.</strong> Compare é and e+combining-accent under raw and NFC identity. <strong>Expected:</strong> Raw counts are 1 versus 2 code points and 2 versus 3 bytes; NFC strings and normalized hashes match. <strong>Verify:</strong> Inspect raw hashes separately from normalized hashes and preserve the original strings.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject malformed UTF-8.</strong> Strictly decode byte 0xff, then compare an explicit errors=replace diagnostic. <strong>Expected:</strong> Strict decoding raises UnicodeDecodeError; replacement produces U+FFFD and cannot reproduce the original 0xff byte. <strong>Verify:</strong> Capture the named exception and assert replacement re-encoding differs from the original bytes.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Handle empty and unknown policies.</strong> Round-trip the empty string and request policy mystery. <strong>Expected:</strong> Empty text maps to empty bytes and returns empty text; unknown policy raises ValueError. <strong>Verify:</strong> Assert the empty values and capture the unsupported-policy exception without selecting a fallback silently.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Choose identity before splitting.</strong> Use documents café, cafe+combining-accent and tea. Compare raw versus NFC distinct counts before assigning source families. <strong>Expected:</strong> Three raw strings but two NFC identities; the two café spellings must not be presented as independent unseen canonical sources. <strong>Verify:</strong> Record raw and normalized hashes for all three documents and assert the duplicate normalized pair is grouped before partitioning.</li>
 </ol>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>

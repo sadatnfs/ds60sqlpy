@@ -1,0 +1,458 @@
+{
+  "schema_version": 1,
+  "id": "applied-science",
+  "title": "Applied science: identification, prediction and decisions",
+  "summary": "Connected worked tutorials in causal inference, forecasting, survival, ranking, optimization, synthesis, spatial analysis and survey/high-dimensional reasoning.",
+  "learning_mode": "tutorial",
+  "lessons": [
+    {
+      "id": "science-001",
+      "title": "From a scientific question to a transported estimand",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "statistics-001",
+        "statistics-015"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "estimand",
+        "transport",
+        "effect modification"
+      ],
+      "outcome": "Explain and independently reproduce from a scientific question to a transported estimand, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-001 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-002",
+      "title": "Overlap, weighting and the population a result describes",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "science-001",
+        "statistics-science-001"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "positivity",
+        "overlap",
+        "effective sample size"
+      ],
+      "outcome": "Explain and independently reproduce overlap, weighting and the population a result describes, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-002 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-003",
+      "title": "Sensitivity analysis and negative-control reasoning",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "science-001",
+        "science-002"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "sensitivity",
+        "negative control",
+        "measurement error"
+      ],
+      "outcome": "Explain and independently reproduce sensitivity analysis and negative-control reasoning, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-003 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-004",
+      "title": "Staggered adoption and uncontaminated group-time contrasts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "science-001",
+        "statistics-016"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "staggered DiD",
+        "group-time ATT",
+        "parallel trends"
+      ],
+      "outcome": "Explain and independently reproduce staggered adoption and uncontaminated group-time contrasts, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-004 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-005",
+      "title": "Longitudinal interventions and the sequential g-formula",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "science-001",
+        "statistics-science-008"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "g-formula",
+        "dynamic regime",
+        "mediator"
+      ],
+      "outcome": "Explain and independently reproduce longitudinal interventions and the sequential g-formula, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-005 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-006",
+      "title": "Target-trial alignment and sequential treatment weights",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "science-002",
+        "science-005"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "target trial",
+        "IPW",
+        "time zero"
+      ],
+      "outcome": "Explain and independently reproduce target-trial alignment and sequential treatment weights, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-006 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-007",
+      "title": "Forecast vintages, revision histories and overlapping origins",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "statistics-science-003"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "vintage",
+        "availability",
+        "overlapping horizons"
+      ],
+      "outcome": "Explain and independently reproduce forecast vintages, revision histories and overlapping origins, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-007 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-008",
+      "title": "Coherent hierarchical forecasts and covariance-weighted reconciliation",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "science-007"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "MinT",
+        "coherence",
+        "covariance"
+      ],
+      "outcome": "Explain and independently reproduce coherent hierarchical forecasts and covariance-weighted reconciliation, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-008 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-009",
+      "title": "Forecast calibration, quantiles and operational decision loss",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "science-007",
+        "statistics-027"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "pinball loss",
+        "calibration",
+        "newsvendor"
+      ],
+      "outcome": "Explain and independently reproduce forecast calibration, quantiles and operational decision loss, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-009 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-010",
+      "title": "Survival risk sets, delayed entry and partial likelihood",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "statistics-science-004"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "risk set",
+        "left truncation",
+        "partial likelihood"
+      ],
+      "outcome": "Explain and independently reproduce survival risk sets, delayed entry and partial likelihood, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-010 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-011",
+      "title": "Censoring-aware likelihoods, AFT models and time scales",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "science-010"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "censoring",
+        "AFT",
+        "Weibull"
+      ],
+      "outcome": "Explain and independently reproduce censoring-aware likelihoods, aft models and time scales, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-011 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-012",
+      "title": "Competing risks and proportional-hazards diagnostics",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "science-010",
+        "science-011"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "cumulative incidence",
+        "competing risk",
+        "PH diagnostics"
+      ],
+      "outcome": "Explain and independently reproduce competing risks and proportional-hazards diagnostics, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-012 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-013",
+      "title": "Candidate generation, cold start and retrieval ceilings",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "statistics-032"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "retrieval",
+        "cold start",
+        "candidate recall"
+      ],
+      "outcome": "Explain and independently reproduce candidate generation, cold start and retrieval ceilings, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-013 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-014",
+      "title": "Pairwise learned ranking and defensible negative sampling",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "science-013",
+        "statistics-learning-003"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "BPR",
+        "negative sampling",
+        "temporal leakage"
+      ],
+      "outcome": "Explain and independently reproduce pairwise learned ranking and defensible negative sampling, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-014 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-015",
+      "title": "Logged-policy evaluation, support and variance control",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "science-013",
+        "statistics-science-005"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "IPS",
+        "doubly robust",
+        "support"
+      ],
+      "outcome": "Explain and independently reproduce logged-policy evaluation, support and variance control, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-015 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-016",
+      "title": "Optimization duality and the scope of shadow prices",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "statistics-036"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "duality",
+        "shadow price",
+        "KKT"
+      ],
+      "outcome": "Explain and independently reproduce optimization duality and the scope of shadow prices, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-016 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-017",
+      "title": "Integer decisions, relaxation bounds and solver certificates",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "science-016"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "MILP",
+        "integrality",
+        "relaxation"
+      ],
+      "outcome": "Explain and independently reproduce integer decisions, relaxation bounds and solver certificates, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-017 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-018",
+      "title": "Scenario decisions, minimax policies and information value",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "science-009",
+        "science-016"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "scenario",
+        "robust optimization",
+        "EVPI"
+      ],
+      "outcome": "Explain and independently reproduce scenario decisions, minimax policies and information value, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-018 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-019",
+      "title": "Estimated heterogeneity and prediction in research synthesis",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "statistics-science-006"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "heterogeneity",
+        "random effects",
+        "prediction interval"
+      ],
+      "outcome": "Explain and independently reproduce estimated heterogeneity and prediction in research synthesis, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-019 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-020",
+      "title": "Dependent effects, missing studies and synthesis sensitivity",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "science-019"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "dependent effects",
+        "GLS",
+        "missing studies"
+      ],
+      "outcome": "Explain and independently reproduce dependent effects, missing studies and synthesis sensitivity, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-020 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-021",
+      "title": "Spatial dependence, permutation reference sets and blocked validation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "statistics-030"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Moran I",
+        "spatial validation",
+        "permutation"
+      ],
+      "outcome": "Explain and independently reproduce spatial dependence, permutation reference sets and blocked validation, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-021 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-022",
+      "title": "Survey inclusion weights, clustering and population targets",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "statistics-003",
+        "statistics-008"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Horvitz-Thompson",
+        "design effect",
+        "survey"
+      ],
+      "outcome": "Explain and independently reproduce survey inclusion weights, clustering and population targets, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-022 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-023",
+      "title": "High-dimensional identification, regularization and validation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "statistics-learning-006",
+        "statistics-learning-007"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "identification",
+        "ridge",
+        "high dimension"
+      ],
+      "outcome": "Explain and independently reproduce high-dimensional identification, regularization and validation, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-023 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    },
+    {
+      "id": "science-024",
+      "title": "A scientific decision dossier with explicit rollback conditions",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "science-006",
+        "science-009",
+        "science-015",
+        "science-018",
+        "science-020"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "decision dossier",
+        "rollback",
+        "uncertainty"
+      ],
+      "outcome": "Explain and independently reproduce a scientific decision dossier with explicit rollback conditions, including a contrasting assumption or failure case.",
+      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
+      "verification": "Complete source-bound science-024 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+    }
+  ]
+}

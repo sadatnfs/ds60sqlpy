@@ -19,7 +19,9 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Literal
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "data" / "sales.csv"
+from ds60sqlpy.teaching_data import teaching_fixture
+
+FIXTURE = teaching_fixture("professional-sales")
 PARTITION_VALUE = re.compile(r"^[a-z0-9-]+$")
 
 

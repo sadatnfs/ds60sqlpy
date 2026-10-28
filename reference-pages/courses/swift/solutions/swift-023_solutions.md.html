@@ -202,19 +202,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> State what the round-trip check proves.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Add an optional description field and test missing versus present data.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Write a decoder that validates before returning a trusted item.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose assuming synthesized Codable enforces business invariants.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test malformed JSON, missing required fields and unknown fields.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Plan migration of a renamed field without discarding existing saved records.</li>
 </ol>
 <p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>

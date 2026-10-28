@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 CREATE VIEW v_dq_customers_solution AS
 SELECT
   COUNT(*) AS total_rows,
@@ -23,6 +24,7 @@ SELECT
   COUNT(*) FILTER (WHERE trim(full_name) = '') AS invalid_name
 FROM
   customers;
+
 CREATE VIEW v_customer_ltv_solution AS
 SELECT
   c.customer_id,
@@ -34,6 +36,7 @@ FROM
 GROUP BY
   c.customer_id,
   c.country;
+
 CREATE VIEW v_monthly_revenue_solution AS
 WITH monthly AS (
   SELECT
@@ -50,11 +53,13 @@ SELECT
   ROUND((revenue - LAG(revenue) OVER (ORDER BY month)) / NULLIF (LAG(revenue) OVER (ORDER BY month), 0), 4) AS month_over_month_growth
 FROM
   monthly;
+
 -- DQ sign-off and business-view reconciliation.
 SELECT
   *
 FROM
   v_dq_customers_solution;
+
 SELECT
   (
     SELECT
@@ -75,12 +80,18 @@ SELECT
       ROUND(SUM(total_amount), 2)
     FROM
       orders) AS difference;
+
 -- Candidate production indexes remain rolled back in this tutorial answer.
 CREATE INDEX idx_orders_date_day60_solution ON orders (order_date);
+
 CREATE INDEX idx_orders_customer_day60_solution ON orders (customer_id);
+
 CREATE INDEX idx_order_items_order_day60_solution ON order_items (order_id);
+
 CREATE INDEX idx_expenses_date_day60_solution ON expenses (expense_date);
+
 CREATE INDEX idx_budgets_period_day60_solution ON budgets (period);
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -92,6 +103,7 @@ FROM
 ORDER BY
   month DESC
 LIMIT 12;
+
 -- The written capstone should record these sign-off items and measured values.
 SELECT
   item
@@ -101,6 +113,7 @@ FROM (
     ('before/after EXPLAIN evidence'),
     ('freshness versus performance tradeoffs'),
     ('known limitations and next steps')) AS checklist (item);
+
 -- Exercise 1: clock-dependent queries need an as-of value for reproducibility.
 SELECT
   *
@@ -108,6 +121,7 @@ FROM (
   VALUES ('v_dq_customers_solution', 'snapshot-independent'),
     ('v_customer_ltv_solution', 'snapshot-independent'),
     ('trailing/current-period reports', 'clock-dependent: bind as_of_date')) AS reproducibility (object_name, clock_contract);
+
 -- Exercise 2: every sign-off row carries observed/expected values, severity, and
 -- remediation. PASS is computed, never typed by hand.
 WITH checks AS (
@@ -141,6 +155,7 @@ FROM
 ORDER BY
   severity,
   check_name;
+
 -- Exercise 3: compute LAG once in `with_previous`, then use that named value.
 -- The first month intentionally retains NULL growth because no comparison exists.
 CREATE VIEW v_monthly_revenue_refactored_solution AS
@@ -168,12 +183,14 @@ SELECT
   ROUND((revenue - previous_month) / NULLIF (previous_month, 0), 4) AS month_over_month_growth
 FROM
   with_previous;
+
 SELECT
   *
 FROM
   v_monthly_revenue_refactored_solution
 ORDER BY
   month;
+
 -- Exercise 4: flag the open calendar month instead of comparing it as if it
 -- were complete. A production report should bind an explicit as-of date.
 SELECT
@@ -184,6 +201,7 @@ FROM
   v_monthly_revenue_refactored_solution
 ORDER BY
   month DESC;
+
 -- Exercise 5: structured plan evidence records estimates, actuals, buffers, and
 -- timing. Results remain specific to this server, seed, and cache state.
 EXPLAIN (
@@ -198,6 +216,7 @@ FROM
 ORDER BY
   month DESC
 LIMIT 12;
+
 -- Exercise 6: ownership and operations are part of release readiness.
 SELECT
   *
@@ -208,6 +227,7 @@ FROM (
     ('monitoring and alerts', 'review required', 'operations'),
     ('data contracts', 'executable checks above', 'data owner'),
     ('known limits', 'synthetic seed and local plans', 'analytics owner')) AS release_check (item, evidence, owner);
+
 -- Exercise 7: lineage states source, transformation grain, and its validation.
 SELECT
   *
@@ -215,6 +235,7 @@ FROM (
   VALUES ('customer_ltv', 'customers + orders', 'customer', 'SUM(ltv) = SUM(orders.total_amount)'),
     ('monthly_revenue', 'orders', 'calendar month', 'SUM(month revenue) = SUM(order totals)'),
     ('customer_dq', 'customers', 'one snapshot summary', 'invalid counts are zero or approved exceptions')) AS lineage (metric_name, source_tables, transformation_grain, validation_query);
+
 -- Exercise 8: dashboard monthly revenue must equal the simpler source control.
 SELECT
   (
@@ -236,6 +257,7 @@ SELECT
       ROUND(SUM(total_amount), 2)
     FROM
       orders) AS difference;
+
 -- Exercise 9: explicit miniature fixtures make boundary assumptions reviewable
 -- without corrupting the canonical training data.
 WITH edge_fixture (
@@ -253,6 +275,7 @@ SELECT
   COUNT(amount) AS nonnull_amount_rows
 FROM
   edge_fixture;
+
 -- Exercise 10: NOT_RUN is distinct from FAIL. Only executed evidence can PASS.
 SELECT
   criterion,
@@ -281,4 +304,5 @@ FROM (
       ('Windows CI bootstrap', false, NULL::numeric, NULL::numeric)) AS acceptance (criterion, executed, observed, expected)
 ORDER BY
   criterion;
+
 ROLLBACK;

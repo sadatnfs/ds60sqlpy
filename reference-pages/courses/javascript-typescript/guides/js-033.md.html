@@ -295,19 +295,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Perform bounded CPU work in a real worker.</strong> Sum integers 1 through 10000 in a worker and inspect its thread id. <strong>Expected:</strong> sum 50005000; worker thread id positive. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Transfer a buffer and observe detachment.</strong> Send an ArrayBuffer by transfer list, modify its first byte in the worker and return the bytes. <strong>Expected:</strong> parent byteLength 0; returned bytes 9,2,3. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Distinguish cloning from shared mutation.</strong> Send an object, mutate the worker copy and compare the original. <strong>Expected:</strong> worker returns 9; parent remains 1. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Propagate an actual worker exception.</strong> Run an authored worker that throws a fixture error. <strong>Expected:</strong> parent Promise rejects with worker fixture failed. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Terminate an owned worker that remains alive.</strong> Start a worker that reports ready and keeps an interval open, then terminate it. <strong>Expected:</strong> ready observed; terminate resolves with an exit code. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject data that cannot be cloned.</strong> Try to pass a function through workerData. <strong>Expected:</strong> DataCloneError before useful worker execution. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

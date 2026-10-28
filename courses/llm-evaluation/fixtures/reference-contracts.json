@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "references": [
+    {
+      "id": "eval-001",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-001_reference.py",
+      "source_sha256": "fa7044a178492699bdbf185e7f5296194f9c807e90dcdece3ed7e9da0c9ff0ec",
+      "expected_output": "eval-001: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-002",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-002_reference.py",
+      "source_sha256": "59d9b0a5b2e53da80e53d2452a81349d0bd6f46e639246f8c590968241a648ff",
+      "expected_output": "eval-002: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-003",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-003_reference.py",
+      "source_sha256": "f2402f440624f77789744b5d95a1fb5c5ab37977e285c65cb4685373309e9573",
+      "expected_output": "eval-003: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-004",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-004_reference.py",
+      "source_sha256": "60c3fcb6346162d000a35e31c122deb9e4cfd19cdcd8ab51cbfaa36b5a0c64fd",
+      "expected_output": "eval-004: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-005",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-005_reference.py",
+      "source_sha256": "96708f1b4f053ac10c3f01396fb6871bde40f28e6ef7c457d7254733477885d3",
+      "expected_output": "eval-005: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-006",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-006_reference.py",
+      "source_sha256": "7b8974acaa77987eb888513779b2a9941fe2cb3044f1d3d6e2503eb5cd5d21e3",
+      "expected_output": "eval-006: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-007",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-007_reference.py",
+      "source_sha256": "a9874fc26e3da64068d575e2be63b343157622c9b51735ce6598ee7c8eeff858",
+      "expected_output": "eval-007: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-008",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-008_reference.py",
+      "source_sha256": "e3d93ab29ca5c306e82ae3012ce248b5d12ac21627233d9426ee8c8960ffa525",
+      "expected_output": "eval-008: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-009",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-009_reference.py",
+      "source_sha256": "dee621caa5e318804b89d4356eed95fba504819e4bfb39a6691196bd9295ba1e",
+      "expected_output": "eval-009: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-010@plotly",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-010_plotly_reference.py",
+      "source_sha256": "f4ee7f9e0a59ed86f2a07982a3cd47c9590924b19d93479d3cd3d911cb06f937",
+      "expected_output": "eval-010 Plotly curve complete",
+      "artifacts": [
+        "plotly"
+      ],
+      "evidence": "authored assertions and a bounded chart, not an independent worker verifier"
+    },
+    {
+      "id": "eval-010",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-010_reference.py",
+      "source_sha256": "beb6aee485535bc352f1a1edced4294db6443218b9f2b1f1255c433e65218645",
+      "expected_output": "eval-010: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-011@plotly",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-011_plotly_reference.py",
+      "source_sha256": "33989f9d29f4b6b5ab15c03813dd3e99e22bfbdaf2fd73c1cd2bdd72c99badeb",
+      "expected_output": "eval-011 Plotly curve complete",
+      "artifacts": [
+        "plotly"
+      ],
+      "evidence": "authored assertions and a bounded chart, not an independent worker verifier"
+    },
+    {
+      "id": "eval-011",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-011_reference.py",
+      "source_sha256": "39813cbdf89d4beab26fb7fb84cea9e5d9bb3c4cb0f58871799cf029c447c8ae",
+      "expected_output": "eval-011: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-012",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-012_reference.py",
+      "source_sha256": "bf317c29077c6ccdd30612dc7573acaf03cb07fa30eb3355beb277d10f7b3af4",
+      "expected_output": "eval-012: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-013",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-013_reference.py",
+      "source_sha256": "a45dc2c861d5df52e303935085c3314e3146561d2612f5c369cfa91e783992da",
+      "expected_output": "eval-013: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-014",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-014_reference.py",
+      "source_sha256": "46b77b26051e79b30c96dda67a1f4133aef51900b8d152c1508c20cf485fa54d",
+      "expected_output": "eval-014: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-015",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-015_reference.py",
+      "source_sha256": "3f8b6711ccaa8f22ab4e013fea7e76c6e198fd11b0d7616b28ebc5f316692b60",
+      "expected_output": "eval-015: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-016",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-016_reference.py",
+      "source_sha256": "6797d8d5284e62a7cc76187091d4ca8e600c1754e6f15527bb340debf109b461",
+      "expected_output": "eval-016: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-017",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-017_reference.py",
+      "source_sha256": "5f165303570cbebaa298746bec4d4eeeaf9cf3e58ebf89bd06372fef70813471",
+      "expected_output": "eval-017: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-018",
+      "profile": "llm-torch-cpu",
+      "reference": "courses/llm-evaluation/solutions/eval-018_reference.py",
+      "source_sha256": "17e32e2843dab583d89c24f531f6090615cef69eed61905842095a94f7d66142",
+      "expected_output": "eval-018: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-019@plotly",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-019_plotly_reference.py",
+      "source_sha256": "8c6393721f280ed924ee64b0a57df31d18864040358e3f4fd982a571b7e5e2b5",
+      "expected_output": "eval-019 Plotly curve complete",
+      "artifacts": [
+        "plotly"
+      ],
+      "evidence": "authored assertions and a bounded chart, not an independent worker verifier"
+    },
+    {
+      "id": "eval-019",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-019_reference.py",
+      "source_sha256": "27c81b200b5baabbaac0b5de5887e0373f351aa43b68ed502ac3318e49cc1eb4",
+      "expected_output": "eval-019: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-020",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-020_reference.py",
+      "source_sha256": "c4ba240177ea6068b2b1bba584a3f62379777b1aa58e18cb64f02af60c83c31e",
+      "expected_output": "eval-020: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-021",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-021_reference.py",
+      "source_sha256": "c03f3db54b756adee000b99f0844e0a54ff4e148862734066838e283eece4bbc",
+      "expected_output": "eval-021: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-022",
+      "profile": "llm-torch-cpu",
+      "reference": "courses/llm-evaluation/solutions/eval-022_reference.py",
+      "source_sha256": "af2856a531a662079143d01119e82b3cdea16a707a64353b75404e7da18eb729",
+      "expected_output": "eval-022: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-023",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-023_reference.py",
+      "source_sha256": "6dec8a0648cf40f09044478d92aebe5170976a1df41b315ff4c25e4777e122e0",
+      "expected_output": "eval-023: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    },
+    {
+      "id": "eval-024",
+      "profile": "python-core",
+      "reference": "courses/llm-evaluation/solutions/eval-024_reference.py",
+      "source_sha256": "b590c944416645a535c0338c55dee800d1fbfeab20055a529dd33ca5ad25665a",
+      "expected_output": "eval-024: all reference checks passed",
+      "evidence": "authored assertions, not an independent worker verifier"
+    }
+  ]
+}

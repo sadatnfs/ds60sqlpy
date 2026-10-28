@@ -29,6 +29,9 @@ from scripts.check_public_release import CREDENTIAL_DIRECTORY  # noqa: E402
 LANGUAGES = (
     "python",
     "r",
+    "julia",
+    "stan",
+    "dbt",
     "web",
     "java",
     "c",
@@ -50,6 +53,8 @@ LANGUAGES = (
 SUFFIXES = {
     ".py": "python",
     ".r": "r",
+    ".jl": "julia",
+    ".stan": "stan",
     ".pyi": "python",
     ".ipynb": "python",
     ".js": "web",
@@ -97,6 +102,7 @@ SUFFIXES = {
 IGNORED_DIRS = {
     ".git",
     ".learning",
+    ".workshop",
     ".classroom",
     ".venv",
     ".module-runtime",
@@ -128,12 +134,20 @@ IGNORED_DIRS = {
 
 
 def language_for(path: str) -> str | None:
+    if path.startswith("courses/dbt/") and path.endswith(".sql"):
+        return "dbt"
     name = Path(path).name
     if name == "Dockerfile" or name.startswith("Dockerfile."):
         return "docker"
     if name == "CMakeLists.txt":
         return "cmake"
-    if path in {"classroom", "scripts/format-repo", "scripts/lint-repo", "scripts/publish-images"}:
+    if path in {
+        "classroom",
+        "scripts/format-repo",
+        "scripts/lint-repo",
+        "scripts/publish-images",
+        "courses/data-ml-engineering/projects/inference-service/workshop",
+    }:
         return "shell"
     return SUFFIXES.get(Path(path).suffix.lower())
 
@@ -306,6 +320,34 @@ def run_formatter(command: list[str], paths: list[str], root: Path, check: bool)
 
 def format_group(language: str, paths: list[str], root: Path, check: bool) -> bool:
     config = root / "docker/formatting"
+    if language == "dbt":
+        return streamed(
+            [sys.executable, str(root / "scripts/dbt_source_tools.py"), "format"],
+            paths,
+            root,
+            check,
+        )
+    if language == "julia":
+        return streamed(
+            [
+                "julia",
+                "--startup-file=no",
+                "--compiled-modules=existing",
+                "--project=/opt/julia-env",
+                str(root / "scripts/julia_source_tools.jl"),
+                "format",
+            ],
+            paths,
+            root,
+            check,
+        )
+    if language == "stan":
+        return streamed(
+            [sys.executable, str(root / "scripts/stan_source_tools.py"), "format"],
+            paths,
+            root,
+            check,
+        )
     if language == "r":
         return streamed(
             ["Rscript", "--vanilla", str(root / "scripts/r_source_tools.R"), "format"],
@@ -540,6 +582,9 @@ def main(argv: list[str] | None = None) -> int:
     required = {
         "python": "ruff",
         "r": "Rscript",
+        "julia": "julia",
+        "stan": "stanc",
+        "dbt": "sqlfmt",
         "web": "prettier",
         "java": "prettier",
         "c": "clang-format",

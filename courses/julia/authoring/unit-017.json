@@ -1,0 +1,61 @@
+{
+  "number": 17,
+  "title": "Typed CSV input and round-trip data contracts",
+  "concepts": ["CSV", "schema", "strict parsing", "identifier", "round trip"],
+  "outcome": "Parse and export bounded CSV data using explicit types and missingness rules rather than accidental inference.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-015", "julia-016"],
+  "sources": [
+    [
+      "CSV 0.10.17 reading source",
+      "https://github.com/JuliaData/CSV.jl/blob/v0.10.17/docs/src/reading.md"
+    ],
+    ["DataFrames IO", "https://dataframes.juliadata.org/stable/man/importing_and_exporting/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Preserve a textual ID",
+      "task": "Read 001 as a declared string.",
+      "expected": "Its leading zeros remain.",
+      "hint": "Identity is not necessarily a measurement.",
+      "answer": "Numeric-looking keys can lose meaning when inference converts them to integers."
+    },
+    {
+      "title": "Declare missingness",
+      "task": "Parse the authored NA amount marker.",
+      "expected": "The second amount is missing.",
+      "hint": "Use the agreed source-format policy.",
+      "answer": "A missing marker should not silently become a valid numeric zero."
+    },
+    {
+      "title": "Reject a wrong type",
+      "task": "Parse 1.5 as a strict integer field.",
+      "expected": "The parser raises its typed-input error.",
+      "hint": "A decimal value violates this declared schema.",
+      "answer": "Changing the schema or using a repair policy requires an explicit decision."
+    },
+    {
+      "title": "Retain quoted content",
+      "task": "Round-trip a string containing a comma or quotation marks.",
+      "expected": "The restored field values agree.",
+      "hint": "Use the CSV writer instead of hand-concatenating fields.",
+      "answer": "Correct quoting preserves structure without promising byte-identical formatting to every original file."
+    },
+    {
+      "title": "Handle buffer position",
+      "task": "Write to an IOBuffer and then read its contents.",
+      "expected": "Reset or take the bytes explicitly.",
+      "hint": "The buffer has state.",
+      "answer": "An empty read after a write can reflect the current position rather than missing source data."
+    },
+    {
+      "title": "Separate parsing and meaning",
+      "task": "A file parses successfully but has duplicate entity IDs.",
+      "expected": "The relational data contract still needs validation.",
+      "hint": "Parsing proves only part of the input boundary.",
+      "answer": "Types and delimiters do not establish grain, units or scientific validity."
+    }
+  ]
+}

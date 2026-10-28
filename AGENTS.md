@@ -42,6 +42,7 @@ given for the current task rather than asking repeatedly.
 | Concern | Source |
 | --- | --- |
 | Startup, resume and image selection | `classroom`, `scripts/classroom.sh`, `scripts/classroom_images.sh`, `docker/classroom-images.tsv` |
+| Image publication | `.github/workflows/publish-images.yml`, `scripts/docker_release.py`, `./classroom publish`, `docker/classroom-images.tsv` |
 | Product composition and runtime preparation | `compose.classroom.yaml`, `compose.modules.yaml`, `docker/workers/`, reviewed optional overlays |
 | Unified directory, editor and preview | `classroom.py`, `assets/classroom.*`, `browser_runs.py` |
 | Historical Python/SQL/bridge identity | `catalog_builder.py`, source artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
@@ -49,7 +50,11 @@ given for the current task rather than asking repeatedly.
 | Additive subjects and variants | `courses/<subject>/track.json`, `lessons.json`, `modules.py`, `module_extensions.py` |
 | Statistics tutorial | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters, examples and additive `tutorials/index.json` |
 | Jobs, execution and results | `module_jobs.py`, `module_service.py`, `worker_operations.py`, `classroom_runs.py`, `lab.py` |
+| Integrated engineering book and projects | `courses/data-ml-engineering/authoring/` and its subject's `projects/data-product/`, `projects/inference-service/` guidance |
+| Apache and open-data platforms | `courses/apache-data-platforms/authoring/`, project launchers and the maintained qualification ledger |
 | Static/live reading | `lesson_reader.py`, `reader_math.py`, `reader_tex.py`, `reader_content.py`, `scripts/compile_lesson_tex.py`, `classroom_http.py` |
+| Scientific runtime adapters | `dbt_runner.py`, `stan_runner.py`, `worker_figures.jl`, prepared worker locks |
+| Reviewed Python fixtures | `teaching_data.py`, `python/fixtures/manifest.json`, `python/authoring/build_teaching_fixtures.py` |
 | Offline drafts and figures | `module_drafts.py`, `plot_artifacts.py`, `plot_capture.py`, `worker_figures.py`, `worker_figures.R` |
 | Tutoring and legacy progress | `mcp_server.py`, `coaching.py`, `study_plan.py`, repository skills |
 | Portable source packaging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` |
@@ -72,8 +77,13 @@ paragraphs that merely satisfy a heading or exercise counter.
 Keep stable lesson IDs, prerequisite relationships, variant aliases and saved
 state namespaces. The legacy practice baseline is immutable; additions use its
 separate expansion registry. Modern modules use their own admission contracts.
-The statistics book is a tutorial with complete examples and answered discussion,
-not a practice module with hidden answers or mandatory problem sets.
+The statistics book and additive tutorial tracks expose complete examples and
+answered discussion without mandatory problem sets or hidden answers. Additive
+`track.json` supports only `learning_mode: practice|tutorial`, defaulting to
+practice. Applied Science, Bayesian Computing and Data and ML Engineering
+demonstrate tutorial authoring.
+Use [the scientist roadmap](docs/scientist-roadmap.md) to place new work without
+describing existing subjects as missing.
 
 Read the subject's `authoring/README.md` when present. Edit its durable source,
 run only the relevant generator, format generated executable code, then refresh
@@ -106,10 +116,16 @@ such as Swift/Xcode, have their own documented boundaries.
 
 `./classroom` is resume-first: reuse saved selection and existing images and
 containers, preparing only missing images. `resume` and `--no-build` never build
-or pull. `--rebuild` deliberately installs source/configuration updates; `build`
-prepares images without starting. Hub mode pulls its declared version and never
-falls back to a local build. Keep the same custom `--project NAME` on later
-commands. Do not change a project or engine to hide a startup defect.
+or pull. `build` prepares local images without startup. Hub `--rebuild` pulls
+and applies updates without compiling; keep the same project and volumes.
+
+New `--from-hub` selections use combined release tags: app `VERSION`, workers
+`VERSION-<catalog suffix>`. Explicit `latest` resolves to the app's concrete
+version after the project lock, must match the source checkout, and is saved
+as that concrete version before worker selection. Bare resume never follows
+latest. Manual publisher tags need `--architecture-tags`; old three-field saved
+Hub settings retain that legacy layout. Validate native Linux architecture,
+preserve progress outside images, and do not switch projects to hide a defect.
 
 Launcher preferences under `.classroom/<project>/` are separate from named
 learning, PostgreSQL and private-runtime volumes. Preserve all learner state.
@@ -145,11 +161,42 @@ never call those tables execution output. JAX defaults to CPU. Bayesian tutorial
 use their pinned PyMC/ArviZ API, and R uses prepared Rscript packages. Keep their
 runtime dependencies separate from the core environment.
 
-Python/R plotting captures bounded figures. Plotly metadata and tables are data,
-never trusted page HTML. Validate animation frames and image sources as well as
+Python/R/Julia plotting and structured reports share a two-output budget: PNG,
+Plotly, table or JSON; 180,000 bytes each and 384,000 bytes combined. Tables allow
+12 columns and 100 rows. Encode integers beyond JavaScript exact range as strings.
+`publish_table` and `publish_report` belong to `plot_artifacts.py`; declared
+`figure-contracts.json` expectations are checked by the reference corpus.
+Plotly metadata and tables are data, never trusted page HTML. Validate animation frames and image sources as well as
 the top-level figure, preserve the source-bound receipt, and keep capture/storage
 warnings separate from execution. Plain Python must not eagerly import plotting
 libraries. Browser charts remain opaque offline observations.
+
+Saved Plotly receipts from earlier versions may require a display-only precision
+projection. Preserve original receipt bytes, source/output/status and valid
+sibling figures. Withhold unsafe-number figures with an explicit warning and
+offer exact raw JSON text downloads without browser parsing or numeric rounding.
+Keep all new-write validation strict and derived readback metadata out of stored
+receipts; malformed artifacts and receipt/path violations still fail normally.
+
+Polars, real dbt and ML engineering use `data-engineering`; dbt SQL-model
+variants use the fixed `dbt-duckdb` project. Do not imply a multi-file browser
+editor. `stan-cpu` compiles native `main.stan` with tiny transformed-data fixtures
+and fixed two-chain sampling. Its standard-data CmdStanPy project has separate
+explicit data/output files. `julia` runs `main.jl` with a read-only prepared
+project/depot and two threads. Keep package preparation outside lesson execution.
+The ML service project has an explicit Docker lifecycle and separate persistent
+state, with a read-only predictor mount; it is not a cloud service or ordinary pad.
+The engineering book adds owned data-product and inference-service projects.
+Keep raw/publication/recovery state and model/request history outside the source
+payload, and read completed receipts without replay. Their HTTP failure, exact
+resume and retained-state replacement gates are distinct from ordinary examples.
+
+`data-platforms-python` supplies separately locked Arrow, DataFusion and PyIceberg
+library operations. Ballista and persistent platform services have separately
+prepared environments, not implicit worker dependencies. Read the Apache
+qualification ledger and each project's guidance. Prepared Atlas/Delta Sharing
+clients are not accepted servers; native architecture and complete topology
+checks remain distinct. Ordinary workers never receive an engine socket.
 
 The classroom runs trusted local learner code, not arbitrary hosted tenants.
 Preserve Host, origin, token, path, request/output-size, process and resource
@@ -208,9 +255,35 @@ unvalidated commits. A skipped check is not a passed check.
 Portable payloads exclude learner state, credentials, caches, local logs and Git
 history. Preserve source licenses and use neutral public/synthetic examples.
 Review the chosen repository-local public commit identity without exposing
-private identity values. Git pushes do not authorize Docker Hub publication.
-The publisher previews by default; the manual publication workflow requires all
-image qualification before its protected publish phase. See [Docker Hub](docs/dockerhub.md).
+private identity values. Git-push authorization alone does not authorize adding
+a publication marker. The CI publication workflow builds/uploads only for a
+push to `main` with `[publish-docker]` in the HEAD message, using repository
+secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. There is no extra enable
+variable or protected-environment requirement. Keep secret values out of source,
+logs, build arguments and reports.
+
+Grouped Docker CI requires the owned data-product gate in data engineering,
+the inference/SSE/browser gate in PyTorch, Flight/Rust IPC in data platforms and
+Kafka semantics/lifecycle in Java. Keep `scripts/ci_classroom.py` required check
+sets and source-bound publication receipt validation aligned when changing them.
+
+Native AMD64/ARM64 seed and worker jobs upload commit-specific staging images
+and small evidence receipts. Promote only after every required check succeeds:
+worker version tags before the app version, then latest aliases with app latest
+last. Refuse conflicting existing source versions; use a consistent checked-in
+patch bump instead of registry-only renumbering or overwriting released tags.
+Successful earlier-attempt receipts may be reused only within the same run
+and revision, with exact app/Core seed bindings; cross-run or mismatched-seed
+reuse is rejected. Failed promotion retries retain original qualified digests.
+Staging uploads and completed release promotion are distinct evidence.
+
+The manual `./classroom publish --to-hub USER --tag VERSION` remains a
+preview-first publisher of existing images for one architecture. Only `--push`
+uploads; the operator authenticates separately. The default is app plus all
+ordinary catalog images. Its exact `--profile` selection has no implicit app/Core;
+`--namespace`/`--version` aliases remain supported. It cannot fabricate a second
+architecture or combined index. See [Docker Hub](docs/dockerhub.md) for both
+layouts, version pinning, publication limits and learner setup.
 Cleanup only owned task resources, and retain learner volumes unless their
 deletion was explicitly requested. Do not prune unrelated resources or rewrite
 history as incidental cleanup.

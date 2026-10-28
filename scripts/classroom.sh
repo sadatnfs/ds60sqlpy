@@ -5,13 +5,16 @@ repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_dir"
 action=up
 if [ "$#" -gt 0 ]; then
-  case "$1" in up | start | resume | build | pull | stop | status | logs | doctor)
+  case "$1" in up | start | resume | build | pull | stop | status | logs | doctor | publish)
     action="$1"
     shift
     ;;
   esac
 fi
 [ "$action" != start ] || action=up
+if [ "$action" = publish ]; then
+  exec bash "$repo_dir/scripts/publish-images" "$@"
+fi
 registry=mirrors
 registry_explicit=0
 no_browser=0
@@ -23,13 +26,13 @@ requested_port=''
 requested_db_port=''
 gpu_device=''
 profiles=()
-all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics)
-all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker jax-worker bayesian-worker r-worker)
+all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics data-engineering data-platforms-python stan-cpu julia dbt-duckdb)
+all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker jax-worker bayesian-worker r-worker data-engineering-worker data-platforms-worker stan-worker julia-worker dbt-worker)
 known_profiles=("${all_profiles[@]}" cuda-cpp cuda-python pytorch-cuda tensorflow-cuda)
 known_services=("${all_services[@]}" cuda-cpp-worker cuda-python-worker pytorch-cuda-worker tensorflow-cuda-worker)
 usage() {
   cat <<'HELP'
-Usage: ./classroom [up|resume|build|pull|stop|status|logs|doctor] [options]
+Usage: ./classroom [up|resume|build|pull|stop|status|logs|doctor|publish] [options]
 
 With no arguments: resume this project's containers and saved profile selection.
 A first launch prepares all ordinary workers, building only missing images.
@@ -42,8 +45,9 @@ Windows: use Ubuntu in WSL 2 with your Docker engine's integration enabled.
   --profile PROFILE         Add a selected profile (repeatable; includes Core)
   --no-build                Like resume: never build or pull missing images
   --rebuild                 Rebuild local images, or refresh Hub images; apply updates
-  --from-hub USER           Pull matching architecture tags from USER/ds60sqlpy
-  --tag VERSION             Select a published/local release (default: 0.5.0)
+  --from-hub USER            Pull native multi-platform images from USER/ds60sqlpy
+  --tag VERSION             Select a release; Hub latest resolves to a saved version
+  --architecture-tags       Use manual/legacy per-architecture Hub tags
   --local-build             Return this project to locally built images
   --gpu-device ID           Explicit NVIDIA device index/UUID for optional CUDA profiles
   --no-browser              Print the ready URL without opening it
@@ -60,9 +64,14 @@ Examples:
   ./classroom resume
   ./classroom --rebuild
   ./classroom stop
+  ./classroom publish --to-hub YOUR_DOCKERHUB_USER
+  ./classroom publish --to-hub YOUR_DOCKERHUB_USER --push
+
+Publishing has its own options: ./classroom publish --help. It previews the
+complete ordinary image set by default and requires --push for registry writes.
 
 Kubernetes owned-cluster preparation and optional pretrained-model downloads
-remain explicit workflows in the course guides. Nothing is pushed or pruned.
+remain explicit workflows in the course guides. Startup never publishes or prunes.
 HELP
 }
 fail() {
@@ -89,6 +98,11 @@ while [ "$#" -gt 0 ]; do
       ;;
     --no-build)
       no_build=1
+      shift
+      ;;
+    --architecture-tags)
+      image_layout=architecture
+      image_layout_explicit=1
       shift
       ;;
     --no-browser)
@@ -142,7 +156,7 @@ for port in "$requested_port" "$requested_db_port"; do
 done
 if [ -n "$project_option" ] && ! [[ "$project_option" =~ ^[a-z0-9][a-z0-9_-]{0,48}$ ]]; then fail 'Use a lowercase project name with letters, digits, hyphens or underscores.'; fi
 case "$action" in resume) no_build=1 ;; build | pull) rebuild=1 ;; esac
-validate_image_selection
+validate_image_selection pending
 [ "$no_build" -eq 0 ] || [ "$rebuild" -eq 0 ] || fail 'Use resume/--no-build or --rebuild/build, not both.'
 # Reject misspelled profiles before contacting the engine.
 for profile in ${profiles[@]+"${profiles[@]}"}; do
@@ -295,10 +309,16 @@ if [ -n "$gpu_device" ]; then
 fi
 for profile in "${selected_profiles[@]}"; do
   case "$profile:$action" in
-    cuda-*:up | cuda-*:resume | pytorch-cuda:up | pytorch-cuda:resume | tensorflow-cuda:up | tensorflow-cuda:resume)
-      [ -n "$gpu_device" ] || fail 'CUDA execution needs an explicitly chosen NVIDIA GPU. Add --gpu-device 0 or its GPU UUID. CPU/reading variants need no GPU.'
+    cuda-*:up | cuda-*:resume | cuda-*:build | cuda-*:pull | pytorch-cuda:up | pytorch-cuda:resume | pytorch-cuda:build | pytorch-cuda:pull | tensorflow-cuda:up | tensorflow-cuda:resume | tensorflow-cuda:build | tensorflow-cuda:pull)
       gpu_arch="$("$docker_cli" info --format '{{.Architecture}}')"
-      case "$gpu_arch" in amd64 | x86_64) ;; *) fail 'Optional CUDA workers currently target Linux amd64 NVIDIA hosts. Use the CPU/reading route here; Apple GPUs are not CUDA devices.' ;; esac
+      case "$gpu_arch" in
+        amd64 | x86_64) ;;
+        *) fail 'Optional CUDA images currently target Linux amd64 NVIDIA hosts. On ARM, use --starter or the llm-torch-cpu/tensorflow-cpu profiles and the CUDA CPU-model lessons. See docs/cuda-classroom.md for explicit native NVIDIA preparation. No CUDA image will be built or downloaded here.' ;;
+      esac
+      case "$action" in up | resume)
+        [ -n "$gpu_device" ] || fail 'CUDA execution needs an explicitly chosen NVIDIA GPU. Add --gpu-device 0 or its GPU UUID. CPU/reading variants need no GPU.'
+        ;;
+      esac
       ;;
   esac
 done
@@ -388,17 +408,22 @@ if [ "$action" = stop ]; then
   printf 'Classroom stopped. All project learning/database volumes were retained.\n'
   exit 0
 fi
+save_profile_selection() {
+  local selection_temp profile_csv
+  selection_temp="$(mktemp "$state_dir/selection.XXXXXX")"
+  profile_csv="$(
+    IFS=,
+    printf '%s' "${selected_profiles[*]}"
+  )"
+  printf 'DS60_PROFILES=%s\nDS60_REGISTRY=%s\n' "$profile_csv" "$registry" >"$selection_temp"
+  mv -f "$selection_temp" "$state_dir/selection.env"
+}
+resolve_latest_hub_release
 printf '\nDS60 Classroom | %s\nProfiles: %s\n' "$project_name" "${selected_profiles[*]}"
 printf 'Images: %s (release %s)\n' "$image_source" "$image_tag"
 # Persist the chosen intent before preparation so Ctrl+C or a failed download does
 # not lose a small selection. Writes remain atomic and protected by the project lock.
-selection_temp="$(mktemp "$state_dir/selection.XXXXXX")"
-profile_csv="$(
-  IFS=,
-  printf '%s' "${selected_profiles[*]}"
-)"
-printf 'DS60_PROFILES=%s\nDS60_REGISTRY=%s\n' "$profile_csv" "$registry" >"$selection_temp"
-mv -f "$selection_temp" "$state_dir/selection.env"
+save_profile_selection
 save_image_selection
 if [ -n "$gpu_device" ]; then
   gpu_temp="$(mktemp "$state_dir/gpu.XXXXXX")"
@@ -534,6 +559,7 @@ for service in ${build_services[@]+"${build_services[@]}"}; do
     "${compose[@]}" build "$service"
   fi
 done
+verify_hub_prepared_images
 if [ "$action" = build ] || [ "$action" = pull ]; then
   printf 'Selected images are ready. Use ./classroom --rebuild to apply an update, or ./classroom resume to retain existing containers.\n'
   exit 0

@@ -73,25 +73,16 @@ from ds60sqlpy.notebook_execution import execute_python_file, python_cells
 
 runtime = Path(sys.argv[2])
 import json
-from ds60sqlpy.plot_artifacts import validate_artifacts
+from ds60sqlpy import plot_artifacts
+from ds60sqlpy.plot_artifacts import publish_artifact
+plot_artifacts._OUTPUT_DIRECTORY = runtime
 from ds60sqlpy.plot_capture import install_display_hooks
-plotly_figures = []
 def patch_plotly(pio):
     def show_plotly(figure, *args, **kwargs):
-        if len(plotly_figures) >= 2:
-            print("Figure limit reached: the first two Plotly figures are retained.",
-                  file=sys.stderr)
-            return
         try:
-            artifact = {"kind": "plotly", "figure": json.loads(pio.to_json(figure))}
-            checked = validate_artifacts([*plotly_figures, artifact])
-            (runtime / "ds60-figures.json").write_text(
-                json.dumps(checked, allow_nan=False), "utf-8"
-            )
+            publish_artifact({"kind": "plotly", "figure": json.loads(pio.to_json(figure))})
         except (OSError, ValueError, TypeError, RecursionError) as exc:
             print("Figure omitted: " + str(exc), file=sys.stderr)
-            return
-        plotly_figures[:] = checked
     pio.show = show_plotly
 install_display_hooks(patch_plotly)
 captured = set()
@@ -150,14 +141,45 @@ SQL_WORKER = (
     + repr(COURSE_ROLE_QUERY)
     + "\n"
     + r"""
-import json, os, sys
+import json, math, os, sys
+from decimal import Decimal
 from pathlib import Path
 try:
     import psycopg
+    from psycopg.types.json import set_json_loads
 except ImportError:
     print(json.dumps({"error_type": "ImportError", "sqlstate": None,
-        "message": "Install the Core/bridge profile in the selected Python backend."}))
+        "message": "Install the Core/bridge profile in the selected Python backend."},
+        allow_nan=False))
     sys.exit(1)
+
+def json_float(token):
+    value = float(token)
+    # Keep familiar floats unless decimal digits, underflow or overflow would be lost.
+    if math.isfinite(value) and Decimal(str(value)) == Decimal(token):
+        return value
+    return Decimal(token)
+
+def load_json(value):
+    return json.loads(value, parse_float=json_float)
+
+def transport_value(value):
+    if value is None or isinstance(value, (bool, str)):
+        return value
+    if isinstance(value, int):
+        return value if -(2**53 - 1) <= value <= 2**53 - 1 else str(value)
+    if isinstance(value, float):
+        if math.isnan(value):
+            return "NaN"
+        if math.isinf(value):
+            return "Infinity" if value > 0 else "-Infinity"
+        return value
+    if isinstance(value, dict):
+        return {key: transport_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [transport_value(item) for item in value]
+    # Preserve the existing default=str policy for dates, Decimal and other scalars.
+    return value
 
 query = Path(sys.argv[1]).read_text(encoding="utf-8")
 class CourseRoleError(ValueError):
@@ -174,6 +196,7 @@ try:
                 "SQL pads require a limited course login. "
                 "See docs/setup/postgresql.md for role setup."
             )
+        set_json_loads(load_json, context=conn)
         started = conn.execute(
             'SELECT backend_start::text FROM pg_stat_activity WHERE pid=pg_backend_pid()'
         ).fetchone()[0]
@@ -191,22 +214,45 @@ try:
                     results.append({"status": cur.statusmessage})
                 if not cur.nextset():
                     break
-    print(json.dumps({"results": results,
-        "transaction": "Committed success; explicit COMMIT/ROLLBACK change boundaries."},
-        default=str))
 except Exception as exc:
+    sqlstate = getattr(exc, "sqlstate", None)
+    statement_failure = (isinstance(exc, psycopg.Error) and isinstance(sqlstate, str)
+        and len(sqlstate) == 5 and sqlstate != "40003"
+        and not sqlstate.startswith(("08", "57P0")))
+    rollback_known = isinstance(exc, CourseRoleError) or statement_failure
     position = getattr(getattr(exc, 'diag', None), 'statement_position', None)
     error_line = (query[:int(position)-1].count('\n')+1
         if isinstance(position, str) and position.isdecimal()
             and 1 <= int(position) <= len(query)+1 else None)
     print(json.dumps({"error_type": type(exc).__name__,
-        "sqlstate": getattr(exc, "sqlstate", None),
+        "sqlstate": sqlstate,
         "error_line": error_line,
-        "message": str(exc).splitlines()[0] if isinstance(exc, CourseRoleError)
-            or isinstance(exc, psycopg.Error) and getattr(exc, "sqlstate", None)
-            else "SQL backend unavailable or input rejected.",
-        "transaction": "Current transaction rolled back; earlier explicit commits are preserved."}))
+        "message": str(exc).splitlines()[0] if rollback_known
+            else "SQL transaction outcome is unknown. "
+                "Do not automatically rerun; inspect the database state first.",
+        "transaction": (
+            "Current transaction rolled back; earlier explicit commits are preserved."
+            if rollback_known else
+            "Transaction outcome is unknown; earlier explicit commits may be preserved. "
+            "Do not automatically rerun; inspect the database state first.")},
+        allow_nan=False))
     sys.exit(1)
+
+# Only encode after the connection context has completed its commit successfully.
+# A transport failure cannot roll back that completed query or justify replaying it.
+try:
+    encoded = json.dumps({"results": transport_value(results),
+        "transaction": "Committed success; explicit COMMIT/ROLLBACK change boundaries."},
+        default=str, allow_nan=False)
+except Exception as exc:
+    print(json.dumps({"error_type": type(exc).__name__, "sqlstate": None,
+        "error_line": None,
+        "message": "Query committed, but its output could not be represented. "
+            "Do not automatically rerun it; inspect the database state first.",
+        "transaction": "Committed success; explicit COMMIT/ROLLBACK change boundaries."},
+        allow_nan=False))
+    sys.exit(1)
+print(encoded)
 """
 )
 

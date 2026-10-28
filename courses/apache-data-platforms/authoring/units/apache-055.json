@@ -1,0 +1,27 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-054", "apache-051"],
+  "concepts": ["lightweight transaction", "Storage Attached Index", "selectivity"],
+  "evidence": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project.",
+  "sources": [
+    [
+      "Cassandra 5 CQL data definition",
+      "https://cassandra.apache.org/doc/5.0/cassandra/developing/cql/ddl.html"
+    ],
+    [
+      "Cassandra data guarantees",
+      "https://cassandra.apache.org/doc/5.0/cassandra/architecture/guarantees.html"
+    ],
+    [
+      "Cassandra backups",
+      "https://cassandra.apache.org/doc/5.0/cassandra/managing/operating/backups.html"
+    ],
+    [
+      "Cassandra Storage Attached Indexing",
+      "https://cassandra.apache.org/doc/5.0/cassandra/developing/cql/indexing/sai/sai-overview.html"
+    ]
+  ]
+}

@@ -296,19 +296,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Distinguish the Task&lt;int&gt; handle from its awaited integer.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Combine three completed tasks and predict output ordering.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Write an async method returning a validated total.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose forgetting to await an operation whose failure matters.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test successful, failed and empty WhenAll inputs.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Explain when CPU work might need scheduling separately from an asynchronous I/O API.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

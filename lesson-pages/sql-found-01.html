@@ -404,15 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--sql-found-01-relational-design-ddl-and-integrity-constraints">SQL-FOUND-01: Relational Design, DDL, and Integrity Constraints<a class="heading-anchor" href="#guide--sql-found-01-relational-design-ddl-and-integrity-constraints" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Intermediate</li>
-<li><strong>Catalog prerequisite:</strong> <code>sql-15</code>; <a href="sql-15.html#guide">SQL Day 15; Phase 1 Project</a></li>
-<li><strong>Prerequisites:</strong> Complete SQL Days 1–15 so you can query, join, aggregate, modify, and verify the supplied training schema before designing one of your own. PostgreSQL setup and the disposable database are also required.</li>
-<li><strong>Artifacts:</strong> <a href="sql-found-01.html#learner">learner SQL</a> · <a href="sql-found-01.html#solution-1">solution reasoning</a> · <a href="sql-found-01.html#solution-2">executable solution</a></li>
-</ul>
-<p>Use the Docker classroom workflow below for this cataloged script. The optional contributor route requires its own prepared interpreter, psql client and explicit disposable-database connection.</p>
-<p>The file creates <code>pro_relational_lab</code> inside a transaction and rolls it back. Expected constraint failures are caught as notices; any unexpected error still stops the script.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-found-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -428,12 +419,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-found-01</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Intermediate</li>
+<li><strong>Catalog prerequisite:</strong> <code>sql-15</code>; <a href="sql-15.html#guide">SQL Day 15; Phase 1 Project</a></li>
+<li><strong>Prerequisites:</strong> Complete SQL Days 1–15 so you can query, join, aggregate, modify, and verify the supplied training schema before designing one of your own. PostgreSQL setup and the disposable database are also required.</li>
+<li><strong>Artifacts:</strong> <a href="sql-found-01.html#learner">learner SQL</a> · <a href="sql-found-01.html#solution-1">solution reasoning</a> · <a href="sql-found-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Use the Docker classroom workflow below for this cataloged script. The optional contributor route requires its own prepared interpreter, psql client and explicit disposable-database connection.</p>
+<p>The file creates <code>pro_relational_lab</code> inside a transaction and rolls it back. Expected constraint failures are caught as notices; any unexpected error still stops the script.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Grain, Cardinality, Natural key, Surrogate key, Primary key, Foreign key. Its worked SQL reads or creates <code>pro_relational_lab.members</code>, <code>pro_relational_lab.equipment_categories</code>, <code>pro_relational_lab.equipment_items</code>, <code>pro_relational_lab.loans</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: The example begins with four requirements and turns each into a grain: The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_relational_lab.members</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_found_01_relational_design.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/professional/lessons/sql_found_01_relational_design.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>members <span class="syntax-punctuation">(</span>
     member_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
@@ -573,7 +573,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_found_01_relational_design.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -585,13 +585,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-FOUND-01: Relational design, DDL, and integrity constraints</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-found-01: Relational Design, DDL, and Integrity Constraints</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-found-01: Relational Design, DDL, and Integrity Constraints</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_found_01_relational_design.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-found-01/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-found-01.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -612,7 +612,9 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">\echo <span class="syntax-string">&#x27;SQL-FOUND-01: building a disposable equipment-lending model&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_relational_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Requirement: one row represents one person who can borrow equipment.</span></span>
 <span class="source-line"><span class="syntax-comment">-- The row grain is &quot;one member&quot;, and member_id is its surrogate key.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>members <span class="syntax-punctuation">(</span></span>
@@ -622,12 +624,14 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  backup_contact <span class="syntax-builtin">text</span> <span class="syntax-keyword">UNIQUE</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  joined_on <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_DATE</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Requirement: one row represents one reusable category, not one physical item.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_categories <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  category_code <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  display_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  standard_loan_days <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>standard_loan_days <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Requirement: one row represents one physical item.</span></span>
 <span class="source-line"><span class="syntax-comment">-- The foreign key encodes many items belonging to one category.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-punctuation">(</span></span>
@@ -640,6 +644,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  item_condition <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-string">&#x27;ready&#x27;</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>item_condition <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;on_loan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;maintenance&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;retired&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  catalog_label <span class="syntax-builtin">text</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>asset_tag <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27; - &#x27;</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> description<span class="syntax-punctuation">)</span> STORED</span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Requirement: one row represents one checkout of one item to one member.</span></span>
 <span class="source-line"><span class="syntax-comment">-- A member can have many loans; an item can appear in many historical loans.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>loans <span class="syntax-punctuation">(</span></span>
@@ -658,20 +663,24 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">CONSTRAINT</span> loans_return_after_checkout_ck <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>returned_on <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> returned_on <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checked_out_on<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">CONSTRAINT</span> loans_item_checkout_uk <span class="syntax-keyword">UNIQUE</span> <span class="syntax-punctuation">(</span>item_id<span class="syntax-punctuation">,</span> checked_out_on<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_categories <span class="syntax-punctuation">(</span>category_code<span class="syntax-punctuation">,</span> display_name<span class="syntax-punctuation">,</span> standard_loan_days<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;AUDIO&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Audio equipment&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;TOOL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Hand tools&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- PostgreSQL&#x27;s ordinary UNIQUE constraint permits multiple NULL values because</span></span>
 <span class="source-line"><span class="syntax-comment">-- NULL means &quot;unknown&quot;, and two unknowns are not considered equal.</span></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>members <span class="syntax-punctuation">(</span>display_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> backup_contact<span class="syntax-punctuation">,</span> joined_on<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Avery Chen&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;avery@example.test&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-10&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Morgan Diaz&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;morgan@example.test&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-12&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-punctuation">(</span>asset_tag<span class="syntax-punctuation">,</span> category_code<span class="syntax-punctuation">,</span> description<span class="syntax-punctuation">,</span> replacement_cost<span class="syntax-punctuation">,</span> daily_fee<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;AUD-001&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;AUDIO&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Portable recorder&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">180</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">.</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;TOL-001&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;TOOL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Torque wrench&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">95</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>loans <span class="syntax-punctuation">(</span>item_id<span class="syntax-punctuation">,</span> member_id<span class="syntax-punctuation">,</span> checked_out_on<span class="syntax-punctuation">,</span> due_on<span class="syntax-punctuation">,</span> daily_fee_at_checkout<span class="syntax-punctuation">,</span> notes<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">,</span></span>
@@ -685,6 +694,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> pro_relational_lab<span class="syntax-punctuation">.</span>members <span class="syntax-keyword">AS</span> m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>email <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;avery@example.test&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>asset_tag <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;AUD-001&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;A normalized join reconstructs a useful loan description&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  l<span class="syntax-punctuation">.</span>loan_id<span class="syntax-punctuation">,</span></span>
@@ -1066,7 +1076,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_found_01_relational_design_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1094,7 +1104,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- Creates and removes only pro_relational_lab.</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_relational_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- The worked baseline and the exercises use the same core identities. Keeping</span></span>
 <span class="source-line"><span class="syntax-comment">-- them here makes the solution&#x27;s catalog audit cover the same relationships a</span></span>
 <span class="source-line"><span class="syntax-comment">-- learner sees before beginning the numbered work.</span></span>
@@ -1103,10 +1115,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  display_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>btrim<span class="syntax-punctuation">(</span>display_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  email <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_categories <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  category_code <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  display_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  item_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  asset_tag <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span><span class="syntax-punctuation">,</span></span>
@@ -1114,16 +1128,20 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  description <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>btrim<span class="syntax-punctuation">(</span>description<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  current_daily_fee <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>current_daily_fee <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_categories <span class="syntax-punctuation">(</span>category_code<span class="syntax-punctuation">,</span> display_name<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;AUDIO&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Audio equipment&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;TOOL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Hand tools&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>members <span class="syntax-punctuation">(</span>display_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Avery Chen&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;avery@example.test&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-punctuation">(</span>asset_tag<span class="syntax-punctuation">,</span> category_code<span class="syntax-punctuation">,</span> description<span class="syntax-punctuation">,</span> current_daily_fee<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;AUD-001&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;AUDIO&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Portable recorder&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;TOL-001&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;TOOL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Torque wrench&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: one row is one maintenance visit for one physical item.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  visit_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
@@ -1141,6 +1159,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> STORED<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">CONSTRAINT</span> maintenance_completion_order_ck <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>completed_on <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> completed_on <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> opened_on<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: one valid visit.</span></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-punctuation">(</span>item_id<span class="syntax-punctuation">,</span> opened_on<span class="syntax-punctuation">,</span> completed_on<span class="syntax-punctuation">,</span> provider_name<span class="syntax-punctuation">,</span> service_note<span class="syntax-punctuation">,</span> cost<span class="syntax-punctuation">,</span> external_reference<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1159,6 +1178,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  visit_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  item_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  cost<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: safely prove that the database rejects a negative cost.</span></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
@@ -1185,6 +1205,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: two NULL external references are valid with ordinary UNIQUE.</span></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-punctuation">(</span>item_id<span class="syntax-punctuation">,</span> opened_on<span class="syntax-punctuation">,</span> provider_name<span class="syntax-punctuation">,</span> service_note<span class="syntax-punctuation">,</span> cost<span class="syntax-punctuation">,</span> external_reference<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1199,6 +1220,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;AUD-001&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-05-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Cleaned controls&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;TOL-001&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-05-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Checked calibration&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dates <span class="syntax-punctuation">(</span>asset_tag<span class="syntax-punctuation">,</span> opened_on<span class="syntax-punctuation">,</span> service_note<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> dates<span class="syntax-punctuation">.</span>asset_tag <span class="syntax-operator">=</span> i<span class="syntax-punctuation">.</span>asset_tag<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>visit_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>asset_tag<span class="syntax-punctuation">,</span></span>
@@ -1212,6 +1234,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-keyword">AS</span> i <span class="syntax-keyword">ON</span> i<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> mv<span class="syntax-punctuation">.</span>item_id</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>visit_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">DECLARE</span></span>
 <span class="source-line">    visit_count <span class="syntax-builtin">integer</span><span class="syntax-punctuation">;</span></span>
@@ -1231,6 +1254,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: daily_fee_at_checkout belongs on a loan because it is the quoted</span></span>
 <span class="source-line"><span class="syntax-comment">-- historical value. A later equipment price change must not rewrite it.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>loans <span class="syntax-punctuation">(</span></span>
@@ -1240,6 +1264,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  checked_out_on <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  daily_fee_at_checkout <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>daily_fee_at_checkout <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>loans <span class="syntax-punctuation">(</span>item_id<span class="syntax-punctuation">,</span> member_id<span class="syntax-punctuation">,</span> checked_out_on<span class="syntax-punctuation">,</span> daily_fee_at_checkout<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">,</span></span>
@@ -1251,12 +1276,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> pro_relational_lab<span class="syntax-punctuation">.</span>members <span class="syntax-keyword">AS</span> m</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>asset_tag <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;AUD-001&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">  pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-keyword">AS</span> i</span>
 <span class="source-line"><span class="syntax-keyword">SET</span></span>
 <span class="source-line">  current_daily_fee <span class="syntax-operator">=</span> <span class="syntax-number">15</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>asset_tag <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;AUD-001&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  l<span class="syntax-punctuation">.</span>loan_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>asset_tag<span class="syntax-punctuation">,</span></span>
@@ -1267,31 +1294,37 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> pro_relational_lab<span class="syntax-punctuation">.</span>equipment_items <span class="syntax-keyword">AS</span> i <span class="syntax-keyword">ON</span> i<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> l<span class="syntax-punctuation">.</span>item_id</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  l<span class="syntax-punctuation">.</span>loan_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;daily_fee_at_checkout&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;deliberate denormalization&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;one immutable quoted fee per loan&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;What fee did the borrower agree to at checkout?&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> classification <span class="syntax-punctuation">(</span>attribute_name<span class="syntax-punctuation">,</span> classification<span class="syntax-punctuation">,</span> invariant<span class="syntax-punctuation">,</span> historical_question<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: names become referenced entities; the bridge grain is one</span></span>
 <span class="source-line"><span class="syntax-comment">-- technician assignment to one maintenance visit.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>providers <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  provider_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  provider_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>btrim<span class="syntax-punctuation">(</span>provider_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>technicians <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  technician_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  technician_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>btrim<span class="syntax-punctuation">(</span>technician_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>visit_technicians <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  visit_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-punctuation">(</span>visit_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">CASCADE</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  technician_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> pro_relational_lab<span class="syntax-punctuation">.</span>technicians <span class="syntax-punctuation">(</span>technician_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">RESTRICT</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>visit_id<span class="syntax-punctuation">,</span> technician_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- One visit has one provider in this model, while one provider can serve many</span></span>
 <span class="source-line"><span class="syntax-comment">-- visits. A PRIMARY KEY on visit_id enforces that one-provider-per-visit rule.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>visit_providers <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  visit_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-keyword">REFERENCES</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-punctuation">(</span>visit_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">CASCADE</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  provider_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> pro_relational_lab<span class="syntax-punctuation">.</span>providers <span class="syntax-punctuation">(</span>provider_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">DELETE</span> <span class="syntax-keyword">RESTRICT</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>providers <span class="syntax-punctuation">(</span>provider_name<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>provider_name</span>
@@ -1299,10 +1332,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-keyword">AS</span> mv</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>provider_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>technicians <span class="syntax-punctuation">(</span>technician_name<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Riley Chen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Sam Rivera&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>visit_providers <span class="syntax-punctuation">(</span>visit_id<span class="syntax-punctuation">,</span> provider_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>visit_id<span class="syntax-punctuation">,</span></span>
@@ -1310,10 +1345,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-keyword">AS</span> mv</span>
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> pro_relational_lab<span class="syntax-punctuation">.</span>providers <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>provider_name <span class="syntax-operator">=</span> mv<span class="syntax-punctuation">.</span>provider_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- The bridge is now the source of truth. Keeping a mutable provider_name on</span></span>
 <span class="source-line"><span class="syntax-comment">-- the visit would permit it to disagree with provider_id.</span></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits</span>
 <span class="source-line">  <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">COLUMN</span> provider_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_relational_lab<span class="syntax-punctuation">.</span>visit_technicians <span class="syntax-punctuation">(</span>visit_id<span class="syntax-punctuation">,</span> technician_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>visit_id<span class="syntax-punctuation">,</span></span>
@@ -1323,6 +1360,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> pro_relational_lab<span class="syntax-punctuation">.</span>technicians <span class="syntax-keyword">AS</span> t</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>external_reference <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;VISIT-100&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
@@ -1332,6 +1370,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;visit_technicians&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;one technician assignment per visit&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;visit_id + technician_id&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> grain_map <span class="syntax-punctuation">(</span>relation_name<span class="syntax-punctuation">,</span> row_grain<span class="syntax-punctuation">,</span> key_columns<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  relation_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>visit_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>provider_name<span class="syntax-punctuation">,</span></span>
@@ -1348,6 +1387,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  mv<span class="syntax-punctuation">.</span>visit_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  t<span class="syntax-punctuation">.</span>technician_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: count a nullable-side key, not COUNT(*), so never-loaned items</span></span>
 <span class="source-line"><span class="syntax-comment">-- correctly report zero. A loan-side date predicate would belong in ON.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1364,6 +1404,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>asset_tag<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  i<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 7: compare the intended referential action with the action actually</span></span>
 <span class="source-line"><span class="syntax-comment">-- stored in pg_constraint. RESTRICT preserves historical facts; CASCADE is</span></span>
 <span class="source-line"><span class="syntax-comment">-- limited to assignment rows that have no meaning without their parent visit.</span></span>
@@ -1424,6 +1465,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">    e<span class="syntax-punctuation">.</span>child_table<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    e<span class="syntax-punctuation">.</span>parent_table<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 8: inspect semantic catalog properties instead of generated names.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  con<span class="syntax-punctuation">.</span>conname<span class="syntax-punctuation">,</span></span>
@@ -1438,6 +1480,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">AND</span> rel<span class="syntax-punctuation">.</span>relname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;maintenance_visits&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  con<span class="syntax-punctuation">.</span>conname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  a<span class="syntax-punctuation">.</span>attname <span class="syntax-keyword">AS</span> <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  a<span class="syntax-punctuation">.</span>attgenerated<span class="syntax-punctuation">,</span></span>
@@ -1455,6 +1498,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> a<span class="syntax-punctuation">.</span>attisdropped</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  a<span class="syntax-punctuation">.</span>attnum<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  idx<span class="syntax-punctuation">.</span>indisunique<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  idx<span class="syntax-punctuation">.</span>indnullsnotdistinct<span class="syntax-punctuation">,</span></span>
@@ -1471,6 +1515,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>attnum <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span>idx<span class="syntax-punctuation">.</span>indkey<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  idx<span class="syntax-punctuation">.</span>indexrelid<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-045", "apache-007"],
+  "concepts": ["event time", "watermarks", "tumbling windows", "late side output"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Flink event time and watermarks",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/event-time/generating_watermarks/"
+    ],
+    [
+      "Flink windows and allowed lateness",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/operators/windows/"
+    ]
+  ]
+}

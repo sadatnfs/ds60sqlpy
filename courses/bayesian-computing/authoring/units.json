@@ -1,0 +1,399 @@
+[
+  {
+    "id": "bayes-001",
+    "title": "Generative questions, conditioning and repeated evidence",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["statistics-003"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["generative model", "conditioning", "likelihood ratio"],
+    "outcome": "Explain and reproduce generative questions, conditioning and repeated evidence, with explicit computational and scientific limits.",
+    "sources": [
+      ["Stan Bayesian workflow and modeling guide", "https://mc-stan.org/docs/stan-users-guide/"]
+    ]
+  },
+  {
+    "id": "bayes-002",
+    "title": "Log densities, normalization and exact numerical oracles",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-001"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["logsumexp", "normalization", "quadrature"],
+    "outcome": "Explain and reproduce log densities, normalization and exact numerical oracles, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "SciPy log-sum-exp reference",
+        "https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.logsumexp.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-003",
+    "title": "Conjugacy, posterior prediction and duplicated observations",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-002"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["conjugacy", "beta-binomial", "predictive variance"],
+    "outcome": "Explain and reproduce conjugacy, posterior prediction and duplicated observations, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan posterior and prior predictive checks",
+        "https://mc-stan.org/docs/stan-users-guide/ppcs.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-004",
+    "title": "Probability transformations and Jacobian accounting",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-002"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Jacobian", "constraint", "density"],
+    "outcome": "Explain and reproduce probability transformations and jacobian accounting, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan reference manual, transforms and constraints",
+        "https://mc-stan.org/docs/reference-manual/"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-005",
+    "title": "Posterior decisions, loss and regret",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-003", "bayes-004"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["utility", "posterior risk", "regret"],
+    "outcome": "Explain and reproduce posterior decisions, loss and regret, with explicit computational and scientific limits.",
+    "sources": [["Stan decision-analysis guide", "https://mc-stan.org/docs/stan-users-guide/"]]
+  },
+  {
+    "id": "bayes-006",
+    "title": "Markov chains, autocorrelation and deceptive acceptance rates",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-002"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["MCMC", "autocorrelation", "ESS"],
+    "outcome": "Explain and reproduce markov chains, autocorrelation and deceptive acceptance rates, with explicit computational and scientific limits.",
+    "sources": [
+      ["Stan MCMC diagnostics", "https://mc-stan.org/docs/reference-manual/analysis.html"]
+    ]
+  },
+  {
+    "id": "bayes-007",
+    "title": "Hamiltonian geometry, integration and NUTS motivation",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-006", "statistics-002"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Hamiltonian", "leapfrog", "NUTS"],
+    "outcome": "Explain and reproduce hamiltonian geometry, integration and nuts motivation, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Betancourt, conceptual introduction to Hamiltonian Monte Carlo",
+        "https://arxiv.org/abs/1701.02434"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-008",
+    "title": "Simulation-based calibration and tests that can miss errors",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["bayes-003", "bayes-006"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["SBC", "rank", "conditional validation"],
+    "outcome": "Explain and reproduce simulation-based calibration and tests that can miss errors, with explicit computational and scientific limits.",
+    "sources": [
+      ["Talts and colleagues, simulation-based calibration", "https://arxiv.org/abs/1804.06788"],
+      ["Modrak and colleagues, SBC test-quantity sensitivity", "https://arxiv.org/abs/2211.02383"]
+    ]
+  },
+  {
+    "id": "bayes-009",
+    "title": "An actual PyMC regression and its diagnostic record",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-005", "bayes-007"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["PyMC", "InferenceData", "posterior predictive"],
+    "outcome": "Explain and reproduce an actual pymc regression and its diagnostic record, with explicit computational and scientific limits.",
+    "sources": [["PyMC example gallery", "https://www.pymc.io/projects/examples/en/latest/"]]
+  },
+  {
+    "id": "bayes-010",
+    "title": "Centered and noncentered hierarchical computation",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-009"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["hierarchy", "noncentered", "funnel"],
+    "outcome": "Explain and reproduce centered and noncentered hierarchical computation, with explicit computational and scientific limits.",
+    "sources": [["Betancourt, hierarchical model geometry", "https://arxiv.org/abs/1312.0906"]]
+  },
+  {
+    "id": "bayes-011",
+    "title": "Robust likelihoods and predictive criticism",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-009"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Student-t", "outlier", "robustness"],
+    "outcome": "Explain and reproduce robust likelihoods and predictive criticism, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "PyMC Student-t distribution",
+        "https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.StudentT.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-012",
+    "title": "Count models, exposure and overdispersion",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-009"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["count", "exposure", "negative binomial"],
+    "outcome": "Explain and reproduce count models, exposure and overdispersion, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "PyMC negative-binomial distribution",
+        "https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.NegativeBinomial.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-013",
+    "title": "Posterior geometry with weakly identified predictors",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-009", "statistics-learning-006"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["geometry", "identification", "correlated predictors"],
+    "outcome": "Explain and reproduce posterior geometry with weakly identified predictors, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan problematic posteriors",
+        "https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-014",
+    "title": "Pointwise predictive evaluation, PSIS and the held-out unit",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-009", "bayes-011"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["LOO", "Pareto k", "evaluation unit"],
+    "outcome": "Explain and reproduce pointwise predictive evaluation, psis and the held-out unit, with explicit computational and scientific limits.",
+    "sources": [
+      ["Vehtari and colleagues, LOO and WAIC", "https://arxiv.org/abs/1507.04544"],
+      [
+        "ArviZ InferenceData-era LOO interface",
+        "https://python.arviz.org/en/v0.19.0/api/generated/arviz.loo.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-015",
+    "title": "Bayesian resource decisions and Monte Carlo uncertainty",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-005", "bayes-014"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Bayes action", "predictive uncertainty", "Monte Carlo"],
+    "outcome": "Explain and reproduce bayesian resource decisions and monte carlo uncertainty, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan posterior prediction",
+        "https://mc-stan.org/docs/stan-users-guide/posterior-prediction.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-016",
+    "title": "Gaussian processes and conditional versus integrated uncertainty",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["bayes-009", "statistics-026"],
+    "runtime": "bayesian-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Gaussian process", "kernel", "total variance"],
+    "outcome": "Explain and reproduce gaussian processes and conditional versus integrated uncertainty, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "PyMC Gaussian-process marginal prediction",
+        "https://www.pymc.io/projects/docs/en/stable/api/gp/generated/classmethods/pymc.gp.Marginal.predict.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-017",
+    "title": "Stan blocks and a conjugate reference model",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-003", "bayes-009"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["Stan blocks", "normal-normal", "generated quantities"],
+    "outcome": "Explain and reproduce stan blocks and a conjugate reference model, with explicit computational and scientific limits.",
+    "sources": [
+      ["Stan language reference", "https://mc-stan.org/docs/reference-manual/"],
+      ["CmdStan sampling configuration", "https://mc-stan.org/docs/cmdstan-guide/mcmc_config.html"]
+    ]
+  },
+  {
+    "id": "bayes-018",
+    "title": "Stan matrix regression and typed shape contracts",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-017", "bayes-013"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["matrix", "type", "posterior prediction"],
+    "outcome": "Explain and reproduce stan matrix regression and typed shape contracts, with explicit computational and scientific limits.",
+    "sources": [
+      ["Stan regression models", "https://mc-stan.org/docs/stan-users-guide/regression.html"]
+    ]
+  },
+  {
+    "id": "bayes-019",
+    "title": "Stan constraints, log-rate transformations and Jacobians",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-017", "bayes-004"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["constraint", "Jacobian", "Poisson"],
+    "outcome": "Explain and reproduce stan constraints, log-rate transformations and jacobians, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan change-of-variable accounting",
+        "https://mc-stan.org/docs/stan-users-guide/reparameterization.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-020",
+    "title": "Stan noncentered hierarchies and prediction targets",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-018", "bayes-010"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["partial pooling", "noncentered", "new group"],
+    "outcome": "Explain and reproduce stan noncentered hierarchies and prediction targets, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan regression and hierarchical models",
+        "https://mc-stan.org/docs/stan-users-guide/regression.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-021",
+    "title": "Stan logistic likelihoods and separation-aware priors",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-018", "bayes-014"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["Bernoulli logit", "separation", "prior"],
+    "outcome": "Explain and reproduce stan logistic likelihoods and separation-aware priors, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan logistic and probit regression",
+        "https://mc-stan.org/docs/stan-users-guide/regression.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-022",
+    "title": "Stan marginalized mixtures and label conventions",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-018", "bayes-011"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["mixture", "log_mix", "label switching"],
+    "outcome": "Explain and reproduce stan marginalized mixtures and label conventions, with explicit computational and scientific limits.",
+    "sources": [
+      [
+        "Stan marginalized finite mixtures",
+        "https://mc-stan.org/docs/stan-users-guide/finite-mixtures.html"
+      ]
+    ]
+  },
+  {
+    "id": "bayes-023",
+    "title": "Stan stationary dynamics and multi-step prediction",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-018", "bayes-016"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["AR1", "stationarity", "forecast"],
+    "outcome": "Explain and reproduce stan stationary dynamics and multi-step prediction, with explicit computational and scientific limits.",
+    "sources": [
+      ["Stan time-series models", "https://mc-stan.org/docs/stan-users-guide/time-series.html"]
+    ]
+  },
+  {
+    "id": "bayes-024",
+    "title": "Stan censored survival workflow and decision dossier",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["bayes-019", "bayes-020", "bayes-014", "bayes-015", "science-011"],
+    "runtime": "stan-cpu",
+    "language": "stan",
+    "suffix": ".stan",
+    "concepts": ["censoring", "left truncation", "Weibull AFT"],
+    "outcome": "Explain and reproduce stan censored survival workflow and decision dossier, with explicit computational and scientific limits.",
+    "sources": [["Stan survival models", "https://mc-stan.org/docs/stan-users-guide/survival.html"]]
+  }
+]

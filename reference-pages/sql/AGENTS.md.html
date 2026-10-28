@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="dialect-and-environment">Dialect and environment<a class="heading-anchor" href="#dialect-and-environment" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Target PostgreSQL 16 or newer.</li>
-<li>Canonical automation uses PostgreSQL 17.</li>
+<li>Canonical automation uses PostgreSQL 17. The <code>sql-write-01</code> and <code>sql-json-01</code> extensions explicitly require PostgreSQL 17 or newer and check the server version before using version-specific syntax.</li>
 <li>Run against the disposable <code>advanced_sql_training</code> database.</li>
 <li>Use the <code>training</code> schema unless a lesson explicitly creates another disposable schema.</li>
 <li>Execute files with <code>psql -X -v ON_ERROR_STOP=1</code>.</li>

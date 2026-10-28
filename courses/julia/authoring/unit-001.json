@@ -1,0 +1,58 @@
+{
+  "number": 1,
+  "title": "First Julia scripts, values and observable output",
+  "concepts": ["script", "expression", "binding", "type", "compilation"],
+  "outcome": "Run a complete Julia script, trace bindings and distinguish a computed value from printed output.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": [],
+  "sources": [
+    ["Julia getting started", "https://docs.julialang.org/en/v1/manual/getting-started/"],
+    ["Julia variables", "https://docs.julialang.org/en/v1/manual/variables/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Change a count",
+      "task": "Use accepted 20 and rejected 3.",
+      "expected": "The total is 23.",
+      "hint": "Change one input and recompute the arithmetic.",
+      "answer": "The output follows the current source values. A previous Run does not supply hidden counts."
+    },
+    {
+      "title": "Keep a scalar snapshot",
+      "task": "Bind y to x=4, then rebind x to 10.",
+      "expected": "y remains 4.",
+      "hint": "Trace bindings separately.",
+      "answer": "Integers are immutable values; rebinding x does not rewrite the earlier value associated with y."
+    },
+    {
+      "title": "Print deliberately",
+      "task": "Compare a bare arithmetic expression with println in a script.",
+      "expected": "Only explicit output is guaranteed to appear in the script transcript.",
+      "hint": "Separate computation from presentation.",
+      "answer": "The REPL has display behavior that is not equivalent to running a source file."
+    },
+    {
+      "title": "Inspect a type",
+      "task": "Compare typeof(2) and typeof(2.5).",
+      "expected": "They are the environment integer type and Float64.",
+      "hint": "A literal selects a representation.",
+      "answer": "The type describes the value representation and available methods, not whether the value is scientifically meaningful."
+    },
+    {
+      "title": "Diagnose a name",
+      "task": "Misspell a variable in an owned copy of the program.",
+      "expected": "An undefined-variable error identifies the failed name and source location.",
+      "hint": "Inspect the first relevant submitted line.",
+      "answer": "The diagnostic is evidence about a missing binding, not a reason to reinstall the runtime."
+    },
+    {
+      "title": "Explain first-call timing",
+      "task": "Time a first and repeated call in one process.",
+      "expected": "Their costs can include different amounts of compilation.",
+      "hint": "The classroom starts a new process for each Run.",
+      "answer": "Report the timing protocol; a cold call is not interchangeable with steady-state performance."
+    }
+  ]
+}

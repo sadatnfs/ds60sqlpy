@@ -240,19 +240,19 @@ recombined<span class="syntax-operator">=</span><span class="syntax-builtin">sum
 <ol>
 <li><strong>Weight shard means.</strong> Combine means2,6 with counts1,3 and compare equal shard averaging. <strong>Expected:</strong> global5; naive4. <strong>Verify:</strong> Save the assertion results for exercise 1, including global5; naive4.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Recover a full-batch mean.</strong> Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct their mean. <strong>Expected:</strong> both full and reconstructed means5. <strong>Verify:</strong> Save the assertion results for exercise 2, including both full and reconstructed means5.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Accumulate squared-loss gradients.</strong> At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradient with sum-then-divide microbatches. <strong>Expected:</strong> gradient-30 for both. <strong>Verify:</strong> Save the assertion results for exercise 3, including gradient-30 for both.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Apply exactly one update.</strong> Use rate 0.01 with accumulated global gradient-30. <strong>Expected:</strong> updated weight.3. <strong>Verify:</strong> Save the assertion results for exercise 4, including updated weight.3.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose per-batch updates.</strong> Update separately for the two microbatches and compare the final weight with.3. <strong>Expected:</strong> endpoint differs from.3. <strong>Verify:</strong> Save the assertion results for exercise 5, including endpoint differs from.3.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Handle an empty shard.</strong> Combine an empty shard and the four real gradients using sums and counts; reject a globally empty batch. <strong>Expected:</strong> empty shard contributes0; total remains5. <strong>Verify:</strong> Save the assertion results for exercise 6, including empty shard contributes0; total remains5.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

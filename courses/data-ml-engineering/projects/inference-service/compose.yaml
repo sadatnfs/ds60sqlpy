@@ -1,0 +1,42 @@
+services:
+  inference:
+    image: ${WORKSHOP_IMAGE:?Run ./workshop prepare first}
+    pull_policy: never
+    init: true
+    user: "${WORKSHOP_UID}:${WORKSHOP_GID}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    cpus: 2
+    mem_limit: 2g
+    stop_grace_period: 25s
+    ports:
+      - "127.0.0.1:${WORKSHOP_PORT}:8080"
+    environment:
+      DS60_PUBLIC_ORIGIN: "http://127.0.0.1:${WORKSHOP_PORT}"
+      DS60_TOKEN_FILE: /private/token
+      DS60_MODEL_DIR: /model
+      DS60_STATE_DIR: /state
+      DS60_DEVICE: cpu
+      DS60_PACING_SECONDS: "${WORKSHOP_PACING}"
+    volumes:
+      - ./.workshop/model:/model:ro
+      - ./.workshop/state:/state
+      - ./.workshop/token:/private/token:ro
+    tmpfs:
+      - /tmp:rw,nosuid,exec,size=128m
+    labels:
+      ds60.workshop: inference-service
+    healthcheck:
+      test:
+        [
+          CMD,
+          python,
+          -c,
+          "import os,urllib.request; origin=os.environ['DS60_PUBLIC_ORIGIN']; req=urllib.request.Request('http://127.0.0.1:8080/healthz',headers={'Host':origin.removeprefix('http://')}); urllib.request.urlopen(req,timeout=2).read()",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 20s

@@ -1,0 +1,6 @@
+{
+  "share": "ds60_fixture",
+  "schema": "tutorial",
+  "table": "orders",
+  "version": 0
+}

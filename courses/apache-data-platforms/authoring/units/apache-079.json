@@ -1,0 +1,25 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-078", "apache-075"],
+  "concepts": ["capability negotiation", "history", "change feed", "native client"],
+  "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
+  "sources": [
+    ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],
+    [
+      "Reference server and client examples",
+      "https://github.com/delta-io/delta-sharing/blob/v1.4.1/README.md"
+    ],
+    [
+      "Reference server configuration",
+      "https://github.com/delta-io/delta-sharing/blob/v1.4.1/server/src/universal/conf/delta-sharing-server.yaml.template"
+    ],
+    [
+      "Actual cloud signing implementation",
+      "https://github.com/delta-io/delta-sharing/blob/v1.4.1/server/src/main/scala/io/delta/sharing/server/common/CloudFileSigner.scala"
+    ],
+    ["Current Python package dependencies", "https://pypi.org/project/delta-sharing/1.4.2/"]
+  ]
+}

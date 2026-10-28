@@ -492,35 +492,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 1, Two summary rows keyed by origin, columns origin, row_count, amount_total; final ORDER BY origin. Both counts are 4 and totals are 230 despite differing invoice contents.</p>
 <p><strong>Verify:</strong> For sql-quality-01 Exercise 1, Inspect changed invoice 2 and the replacement of identity 4 by 5 while confirming both summaries still report four rows and amount_total 230.</p>
 <p><strong>Progressive hint:</strong> Keep the aggregate as a control, then inspect invoice 2 and identities 4 and 5.</p>
-<ol>
+<ol start="2">
 <li><strong>Report keyed mismatches in both directions.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 2, Use FULL OUTER JOIN on invoice_id and NULL-safe amount comparison. Return invoice_id, source_amount, target_amount, difference_kind with missing_target, missing_source, or changed.</p>
 <p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 2, Three invoice rows keyed by invoice_id, columns invoice_id, source_amount, target_amount, difference_kind; final ORDER BY invoice_id: 2 changed (50,40), 4 missing_target (80,NULL), 5 missing_source (NULL,90).</p>
 <p><strong>Verify:</strong> For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2,4,5 with kinds changed,missing_target,missing_source and amounts (50,40),(80,NULL),(NULL,90). Matching keys 1 and 3 are absent.</p>
 <p><strong>Progressive hint:</strong> Use key presence to classify an absent row before comparing its amount.</p>
-<ol>
+<ol start="3">
 <li><strong>Preserve duplicate multiplicity.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 3, Compare quality_sent and quality_received as bags on invoice_id, amount using two EXCEPT ALL branches labeled sent_only and received_only. Explain why ordinary EXCEPT would miss this difference.</p>
 <p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 3, Two unmatched occurrence rows, columns direction, invoice_id, amount; final ORDER BY direction, invoice_id, amount: received_only (2,50), sent_only (1,100). An occurrence has no independent ID; (direction,invoice_id,amount) is a value tuple and may repeat in larger bags.</p>
 <p><strong>Verify:</strong> For sql-quality-01 Exercise 3, Count one sent-only occurrence (1,100) and one received-only occurrence (2,50). Repeat with ordinary EXCEPT and explain why its empty difference hides the changed multiplicities.</p>
 <p><strong>Progressive hint:</strong> Run both directions before adding UNION ALL; do not insert DISTINCT.</p>
-<ol>
+<ol start="4">
 <li><strong>Repair independent-child fanout.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 4, Return order_id, line_total, attempted_total for all quality_orders. Aggregate quality_lines and quality_attempts separately before joining. Diagnose the raw two-child join on order 1.</p>
 <p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 4, Three order rows, columns order_id, line_total, attempted_total; final ORDER BY order_id: (1,100,200),(2,50,50),(3,0,0). The raw order-1 join has four pairs and incorrectly sums lines to 200.</p>
 <p><strong>Verify:</strong> For sql-quality-01 Exercise 4, Check all three order_id values survive, reconcile each metric with a separate child-only sum, and expose the raw order-1 join with four pairs and incorrect line sum 200.</p>
 <p><strong>Progressive hint:</strong> A parent with two rows in each independent child has 2 x 2 matched pairs.</p>
-<ol>
+<ol start="5">
 <li><strong>Detect a missingness transition.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 5, Compare a source invoice (6,NULL::numeric) with target invoice (6,0::numeric). Return invoice_id, source_amount, target_amount only when the amounts differ under a missingness-sensitive contract.</p>
 <p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 5, One invoice row keyed by invoice_id, columns invoice_id, source_amount, target_amount; final ORDER BY invoice_id: (6,NULL,0). The keyed row exists on both sides.</p>
 <p><strong>Verify:</strong> For sql-quality-01 Exercise 5, Inspect the one row with NULL source and known zero target. Coalescing both sides to zero hides the mismatch, while ordinary inequality fails to qualify it.</p>
 <p><strong>Progressive hint:</strong> Replacing both values with zero before comparison destroys this diagnostic.</p>
-<ol>
+<ol start="6">
 <li><strong>Gate a keyed comparison on valid identity.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 6, For quality_sent, return invoice_id, occurrences only for duplicate keys. Explain why a keyed reconciliation must stop before joining this fixture to another nonunique extract.</p>
@@ -584,7 +584,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_quality_01_bags_and_fanout.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -597,7 +597,8 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-QUALITY-01: Bag Reconciliation and Join Fanout</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use ./classroom -&gt; PostgreSQL -&gt; sql-quality-01 and its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Select &quot;Whole SQL lesson (psql)&quot;; Docker supplies the client.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
@@ -609,74 +610,91 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_source <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_target <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_source</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_target</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_sent <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_received <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_sent</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_received</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_orders <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_lines <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  line_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_attempts <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  attempt_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_orders</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_lines</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_attempts</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">101</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">102</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">201</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 1: Equal summaries conceal changed identities</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Two summary rows keyed by origin, columns origin, row_count, amount_total. Both totals equal 230 and both counts equal 4.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -694,6 +712,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  quality_target</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  origin<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 2: Aggregate separate children before joining</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Three order rows; columns order_id, line_total, attempted_total: (1,100,200),(2,50,50),(3,0,0).</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
@@ -724,6 +743,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Disprove summary equality.</span></span>
@@ -859,7 +879,7 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -879,74 +899,91 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_source <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_target <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_source</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_target</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_sent <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_received <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_sent</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_received</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_orders <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_lines <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  line_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_attempts <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  attempt_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_orders</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_lines</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_attempts</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">101</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">102</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">201</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -958,48 +995,55 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Disprove summary equality</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    quality_source</span>
-<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    quality_target</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    origin<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Disprove summary equality</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  quality_source</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  quality_target</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  origin<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  quality_source</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  quality_target</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  origin<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      quality_source</span>
-<span class="source-line">    <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      quality_target</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      origin<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>amount_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">230</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>amount_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">230</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>amount_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">230</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>amount_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">230</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Report keyed mismatches in both directions</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invoice_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span></span>
@@ -1020,17 +1064,18 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invoice_id<span class="syntax-punctuation">,</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">      <span class="syntax-string">&#x27;missing_source&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">WHEN</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">      <span class="syntax-string">&#x27;missing_target&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">      <span class="syntax-string">&#x27;changed&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> difference_kind</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    quality_source <span class="syntax-keyword">AS</span> s</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invoice_id<span class="syntax-punctuation">,</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;missing_source&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;missing_target&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;changed&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> difference_kind</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  quality_source <span class="syntax-keyword">AS</span> s</span>
 <span class="source-line">  <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> quality_target <span class="syntax-keyword">AS</span> t <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
@@ -1038,15 +1083,20 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        array_agg<span class="syntax-punctuation">(</span>invoice_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>difference_kind <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;changed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;missing_target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;missing_source&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>invoice_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>difference_kind <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;changed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;missing_target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;missing_source&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Preserve duplicate multiplicity</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">,</span></span>
@@ -1084,19 +1134,20 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  direction<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      invoice_id<span class="syntax-punctuation">,</span> amount</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      quality_sent</span>
-<span class="source-line">    <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      invoice_id<span class="syntax-punctuation">,</span> amount</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      quality_received<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing</span>
+<span class="source-line">    invoice_id<span class="syntax-punctuation">,</span> amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    quality_sent</span>
+<span class="source-line">  <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    invoice_id<span class="syntax-punctuation">,</span> amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    quality_received<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing</span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;received_only&#x27;</span><span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount</span>
@@ -1112,31 +1163,36 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">    quality_sent<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> extra</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  direction<span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_3</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      direction <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;sent_only&#x27;</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> invoice_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> amount <span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
 <span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">        <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">      <span class="syntax-keyword">FROM</span> solution_answer_3</span>
-<span class="source-line">      <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">        direction <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;sent_only&#x27;</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> invoice_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> amount <span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_3</span>
-<span class="source-line">      <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">        direction <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;received_only&#x27;</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> invoice_id <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> amount <span class="syntax-operator">=</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      direction <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;received_only&#x27;</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> invoice_id <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> amount <span class="syntax-operator">=</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Repair independent-child fanout</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
@@ -1165,15 +1221,16 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      quality_lines</span>
-<span class="source-line">    <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      order_id</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    quality_lines</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    order_id</span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1192,16 +1249,21 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        array_agg<span class="syntax-punctuation">(</span>order_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>line_total <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>attempted_total <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>order_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>line_total <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>attempted_total <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Detect a missingness transition</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> s <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount</span>
@@ -1223,12 +1285,13 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> s <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    invoice_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    amount</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> s <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  invoice_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  amount</span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">t <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">,</span> amount</span>
@@ -1243,18 +1306,23 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> bool_and<span class="syntax-punctuation">(</span>source_amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> target_amount <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> bool_and<span class="syntax-punctuation">(</span>source_amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> target_amount <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Gate a keyed comparison on valid identity</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> occurrences</span>
@@ -1266,25 +1334,30 @@ attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation"
 <span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    invoice_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> occurrences</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    quality_sent</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    invoice_id</span>
-<span class="source-line">  <span class="syntax-keyword">HAVING</span></span>
-<span class="source-line">    <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  invoice_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> occurrences</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  quality_sent</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  invoice_id</span>
+<span class="source-line"><span class="syntax-keyword">HAVING</span></span>
+<span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  invoice_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>occurrences<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>occurrences<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

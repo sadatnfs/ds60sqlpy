@@ -22,28 +22,31 @@ import matplotlib.pyplot as plt
 # 2) Device and reproducibility
 torch.manual_seed(0)
 np.random.seed(0)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.set_num_threads(2)
+device = torch.device("cpu")  # Select a qualified GPU explicitly for that extension.
 
 # 3) Data: simple classification problem
-X, y = make_classification(n_samples=5000, n_features=20, n_informative=10,
-                           class_sep=1.0, random_state=0)
+X, y = make_classification(
+    n_samples=5000, n_features=20, n_informative=10, class_sep=1.0, random_state=0
+)
 Xtr, Xva, ytr, yva = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
 tr_ds = TensorDataset(torch.tensor(Xtr, dtype=torch.float32), torch.tensor(ytr, dtype=torch.long))
 va_ds = TensorDataset(torch.tensor(Xva, dtype=torch.float32), torch.tensor(yva, dtype=torch.long))
 tr_dl = DataLoader(tr_ds, batch_size=128, shuffle=True)
 va_dl = DataLoader(va_ds, batch_size=256)
 
+
 # 4) Model
 class MLP(nn.Module):
     def __init__(self, inp, hid, out):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(inp, hid), nn.ReLU(),
-            nn.Linear(hid, hid), nn.ReLU(),
-            nn.Linear(hid, out)
+            nn.Linear(inp, hid), nn.ReLU(), nn.Linear(hid, hid), nn.ReLU(), nn.Linear(hid, out)
         )
+
     def forward(self, x):
         return self.net(x)
+
 
 model = MLP(20, 128, 2).to(device)
 loss_fn = nn.CrossEntropyLoss()
@@ -62,45 +65,71 @@ Worked reference for Exercise 1; Early stopping on validation loss
 class EarlyStopper:
     def __init__(self, patience=10, min_delta=0.0):
         self.patience, self.min_delta = patience, min_delta
-        self.best = float('inf'); self.bad = 0
+        self.best = float("inf")
+        self.bad = 0
+
     def step(self, metric):
         if metric < self.best - self.min_delta:
-            self.best = metric; self.bad = 0; return False  # keep training
+            self.best = metric
+            self.bad = 0
+            return False  # keep training
         self.bad += 1
         return self.bad >= self.patience  # True => stop
 
+
 def train_one_epoch(model, dl, opt, loss_fn):
-    model.train(); total=0; correct=0; loss_sum=0.0
+    model.train()
+    total = 0
+    correct = 0
+    loss_sum = 0.0
     for xb, yb in dl:
         xb, yb = xb.to(device), yb.to(device)
-        opt.zero_grad(); logits = model(xb)
-        loss = loss_fn(logits, yb); loss.backward(); opt.step()
-        loss_sum += loss.item()*xb.size(0)
-        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
-    return loss_sum/total, correct/total
+        opt.zero_grad()
+        logits = model(xb)
+        loss = loss_fn(logits, yb)
+        loss.backward()
+        opt.step()
+        loss_sum += loss.item() * xb.size(0)
+        correct += (logits.argmax(1) == yb).sum().item()
+        total += xb.size(0)
+    return loss_sum / total, correct / total
+
 
 @torch.no_grad()
 def evaluate(model, dl, loss_fn):
-    model.eval(); total=0; correct=0; loss_sum=0.0
+    model.eval()
+    total = 0
+    correct = 0
+    loss_sum = 0.0
     for xb, yb in dl:
         xb, yb = xb.to(device), yb.to(device)
-        logits = model(xb); loss = loss_fn(logits, yb)
-        loss_sum += loss.item()*xb.size(0)
-        correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
-    return loss_sum/total, correct/total
+        logits = model(xb)
+        loss = loss_fn(logits, yb)
+        loss_sum += loss.item() * xb.size(0)
+        correct += (logits.argmax(1) == yb).sum().item()
+        total += xb.size(0)
+    return loss_sum / total, correct / total
+
 
 # Training loop with early stopping
 stopper = EarlyStopper(patience=8, min_delta=1e-4)
-hist = {'tr_loss':[], 'va_loss':[], 'va_acc':[]}
+hist = {"tr_loss": [], "va_loss": [], "va_acc": []}
 for epoch in range(200):
     tr_loss, _ = train_one_epoch(model, tr_dl, opt, loss_fn)
     va_loss, va_acc = evaluate(model, va_dl, loss_fn)
-    hist['tr_loss'].append(tr_loss); hist['va_loss'].append(va_loss); hist['va_acc'].append(va_acc)
+    hist["tr_loss"].append(tr_loss)
+    hist["va_loss"].append(va_loss)
+    hist["va_acc"].append(va_acc)
     if stopper.step(va_loss):
-        print(f"Early stopped at epoch {epoch}"); break
+        print(f"Early stopped at epoch {epoch}")
+        break
 
-plt.plot(hist['tr_loss'], label='train'); plt.plot(hist['va_loss'], label='valid')
-plt.yscale('log'); plt.legend(); plt.title('Loss'); plt.show()
+plt.plot(hist["tr_loss"], label="train")
+plt.plot(hist["va_loss"], label="valid")
+plt.yscale("log")
+plt.legend()
+plt.title("Loss")
+plt.show()
 print(f"Best val acc: {max(hist['va_acc']):.3f}")
 ```
 Line‑by‑line
@@ -122,11 +151,15 @@ tr2, va2 = [], []
 for epoch in range(60):
     tr_loss, _ = train_one_epoch(model2, tr_dl, opt2, loss_fn)
     va_loss, _ = evaluate(model2, va_dl, loss_fn)
-    tr2.append(tr_loss); va2.append(va_loss)
+    tr2.append(tr_loss)
+    va2.append(va_loss)
     sched.step()
 
-plt.plot(va2, label='SGD+StepLR val loss'); plt.yscale('log'); plt.legend(); plt.show()
-print('Final LR:', sched.get_last_lr()[0])
+plt.plot(va2, label="SGD+StepLR val loss")
+plt.yscale("log")
+plt.legend()
+plt.show()
+print("Final LR:", sched.get_last_lr()[0])
 ```
 Explanation
 - SGD benefits from higher initial LR, then LR decay to refine
@@ -136,27 +169,43 @@ Explanation
 
 Worked reference for Exercise 3; Mixed precision training
 ```python
-scaler = torch.cuda.amp.GradScaler(enabled=(device.type=='cuda'))
-model3 = MLP(20, 128, 2).to(device)
-opt3 = torch.optim.Adam(model3.parameters(), lr=1e-3)
+# The modern AMP extension requires PyTorch 2.3 or newer. Some optional
+# Intel macOS environments retain 2.2; their earlier FP32 examples still work.
+if not (hasattr(torch, "amp") and hasattr(torch.amp, "GradScaler")):
+    print("AMP extension skipped: prepare PyTorch 2.3+ for this API")
+else:
+    scaler = torch.amp.GradScaler("cuda", enabled=(device.type == "cuda"))
+    model3 = MLP(20, 128, 2).to(device)
+    opt3 = torch.optim.Adam(model3.parameters(), lr=1e-3)
 
-tr3 = []
-for epoch in range(20):
-    model3.train(); loss_sum=0.0; n=0
-    for xb, yb in tr_dl:
-        xb, yb = xb.to(device), yb.to(device)
-        opt3.zero_grad()
-        with torch.cuda.amp.autocast(enabled=(device.type=='cuda')):
-            logits = model3(xb)
-            loss = loss_fn(logits, yb)
-        scaler.scale(loss).backward()
-        scaler.step(opt3)
-        scaler.update()
-        loss_sum += loss.item()*xb.size(0); n += xb.size(0)
-    tr3.append(loss_sum/n)
+    tr3 = []
+    for epoch in range(20):
+        model3.train()
+        loss_sum = 0.0
+        n = 0
+        for xb, yb in tr_dl:
+            xb, yb = xb.to(device), yb.to(device)
+            opt3.zero_grad()
+            with torch.amp.autocast(device_type=device.type, enabled=(device.type == "cuda")):
+                logits = model3(xb)
+                loss = loss_fn(logits, yb)
+            scaler.scale(loss).backward()
+            scaler.step(opt3)
+            scaler.update()
+            loss_sum += loss.item() * xb.size(0)
+            n += xb.size(0)
+        tr3.append(loss_sum / n)
 
-plt.plot(tr3); plt.yscale('log'); plt.title('AMP training loss'); plt.show()
+    plt.plot(tr3)
+    plt.yscale("log")
+    plt.title("AMP training loss")
+    plt.show()
 ```
+The default is CPU: this cell leaves scaling and autocast disabled and checks
+the same optimizer sequence. CUDA AMP requires an explicitly selected,
+qualified CUDA device. The [current PyTorch AMP API](https://docs.pytorch.org/docs/2.9/amp.html)
+uses `torch.amp`, with a device argument, rather than `torch.cuda.amp`.
+
 Line‑by‑line
 - GradScaler and autocast enable float16 math on CUDA with safe dynamic loss scaling
 - scaler.scale(loss).backward and scaler.step handle underflow/overflow automatically

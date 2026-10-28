@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 50,
+  "prerequisites": ["apache-009"],
+  "concepts": ["nested types", "dictionary encoding", "schema"],
+  "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
+  "sources": [
+    ["Arrow nested data model", "https://arrow.apache.org/docs/python/data.html"],
+    ["Arrow dictionary and list layout", "https://arrow.apache.org/docs/format/Columnar.html"]
+  ]
+}

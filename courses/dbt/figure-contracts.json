@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "dbt-026",
+      "kind": "json",
+      "count": 2,
+      "description_required": true
+    }
+  ]
+}

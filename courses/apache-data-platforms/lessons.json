@@ -1,0 +1,886 @@
+{
+  "schema_version": 1,
+  "track_id": "apache-data-platforms",
+  "lessons": [
+    {
+      "id": "apache-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-001.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-002.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-003.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-004",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-004.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-004.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-005.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-006.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-007.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-008.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-009.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-010.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-011.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-012.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-013.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-013.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-014",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-014.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-014.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-015.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-015.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-016.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-016.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-017.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-017.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-018.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-018.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-019.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-019.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-020.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-020.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-021",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-021.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-021.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-022",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-022.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-022.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-023",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-023.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-023.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-024",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-024.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-024.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-025",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-025.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-025.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-026",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-026.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-026.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-027",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-027.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-027.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-028",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-028.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-028.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-029",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-029.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-029.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-030.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-030.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-031",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-031.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-031.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-032",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-032.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-032.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-033",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-033.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-033.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-034",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-034.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-034.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-035",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-035.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-035.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-036",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-036.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-036.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-037",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-037.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-037.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-038",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-038.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-038.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-039",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-039.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-039.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-040",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-040.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-040.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-041",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-041.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-041.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-042",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-042.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-042.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-043",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-043.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-043.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-044",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-platforms-python",
+      "guide_path": "courses/apache-data-platforms/guides/apache-044.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-044.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-045",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-045.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-045.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-046",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-046.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-046.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-047",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-047.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-047.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-048",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-048.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-048.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-049",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-049.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-049.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-050",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-050.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-050.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-051",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-051.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-051.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-052",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-052.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-052.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-053",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-053.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-053.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-054",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-054.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-054.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-055",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-055.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-055.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-056",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-056.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-056.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-057",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-057.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-057.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-058",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-058.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-058.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-059",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-059.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-059.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-060",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-060.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-060.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-061",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-061.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-061.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-062",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-062.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-062.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-063",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-063.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-063.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-064",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-064.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-064.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-065",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-065.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-065.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-066",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-066.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-066.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-067",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-067.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-067.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-068",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-068.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-068.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-069",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-069.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-069.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-070",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-070.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-070.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-071",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-071.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-071.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-072",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-072.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-072.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-073",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-073.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-073.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-074",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-074.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-074.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-075",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-075.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-075.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-076",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-076.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-076.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-077",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-077.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-077.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-078",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-078.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-078.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-079",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-079.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-079.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-080",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-080.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-080.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-081",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-081.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-081.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-082",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-082.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-082.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-083",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-083.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-083.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-084",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-084.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-084.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-085",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-085.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-085.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-086",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-086.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-086.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-087",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-087.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-087.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "apache-088",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/apache-data-platforms/guides/apache-088.md",
+      "source_path": "courses/apache-data-platforms/examples/apache-088.md",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

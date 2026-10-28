@@ -14,8 +14,10 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 1: create and test an index on products(category).
 CREATE INDEX idx_products_category_solution ON products (category);
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -28,8 +30,10 @@ FROM
   products
 WHERE
   category = 'Electronics';
+
 -- Exercise 2: compare the plan without and with the course-owned index.
 DROP INDEX idx_products_category_solution;
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -42,7 +46,9 @@ FROM
   products
 WHERE
   category = 'Electronics';
+
 CREATE INDEX idx_products_category_solution ON products (category);
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -55,6 +61,7 @@ FROM
   products
 WHERE
   category = 'Electronics';
+
 -- On a 300-row table PostgreSQL may rationally choose a sequential scan.
 -- Exercise 3: frequency supplies the selectivity evidence behind that choice.
 SELECT
@@ -67,6 +74,7 @@ GROUP BY
 ORDER BY
   products DESC,
   category;
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -77,9 +85,11 @@ FROM
   products
 WHERE
   category = 'Electronics';
+
 -- Exercise 4: B-tree indexes support bounded range predicates. Half-open
 -- bounds avoid double-counting a timestamp at an adjacent window boundary.
 CREATE INDEX idx_payments_date_solution ON payments (payment_date);
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -92,8 +102,10 @@ FROM
 WHERE
   payment_date >= CURRENT_TIMESTAMP - interval '180 days'
   AND payment_date < CURRENT_TIMESTAMP;
+
 -- Exercise 5: lower(country) needs an index on that same expression.
 CREATE INDEX idx_customers_lower_country_solution ON customers (lower(country));
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -104,6 +116,7 @@ FROM
   customers
 WHERE
   lower(country) = 'us';
+
 -- Exercise 6: only the second query promises order. The first is intentionally
 -- a control whose apparent order must not be treated as an API contract.
 SELECT
@@ -112,6 +125,7 @@ SELECT
 FROM
   customers
 LIMIT 10;
+
 SELECT
   customer_id,
   country
@@ -121,4 +135,5 @@ ORDER BY
   country,
   customer_id
 LIMIT 10;
+
 ROLLBACK;

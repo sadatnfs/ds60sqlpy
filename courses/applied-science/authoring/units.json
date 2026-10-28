@@ -1,0 +1,424 @@
+[
+  {
+    "id": "science-001",
+    "title": "From a scientific question to a transported estimand",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["statistics-001", "statistics-015"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["estimand", "transport", "effect modification"],
+    "outcome": "Explain and independently reproduce from a scientific question to a transported estimand, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
+    ]
+  },
+  {
+    "id": "science-002",
+    "title": "Overlap, weighting and the population a result describes",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["science-001", "statistics-science-001"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["positivity", "overlap", "effective sample size"],
+    "outcome": "Explain and independently reproduce overlap, weighting and the population a result describes, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
+    ]
+  },
+  {
+    "id": "science-003",
+    "title": "Sensitivity analysis and negative-control reasoning",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["science-001", "science-002"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["sensitivity", "negative control", "measurement error"],
+    "outcome": "Explain and independently reproduce sensitivity analysis and negative-control reasoning, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
+    ]
+  },
+  {
+    "id": "science-004",
+    "title": "Staggered adoption and uncontaminated group-time contrasts",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["science-001", "statistics-016"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["staggered DiD", "group-time ATT", "parallel trends"],
+    "outcome": "Explain and independently reproduce staggered adoption and uncontaminated group-time contrasts, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Callaway and Sant Anna, group-time identification", "https://arxiv.org/abs/1803.09015"],
+      ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
+    ]
+  },
+  {
+    "id": "science-005",
+    "title": "Longitudinal interventions and the sequential g-formula",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["science-001", "statistics-science-008"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["g-formula", "dynamic regime", "mediator"],
+    "outcome": "Explain and independently reproduce longitudinal interventions and the sequential g-formula, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
+    ]
+  },
+  {
+    "id": "science-006",
+    "title": "Target-trial alignment and sequential treatment weights",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["science-002", "science-005"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["target trial", "IPW", "time zero"],
+    "outcome": "Explain and independently reproduce target-trial alignment and sequential treatment weights, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
+    ]
+  },
+  {
+    "id": "science-007",
+    "title": "Forecast vintages, revision histories and overlapping origins",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["statistics-science-003"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["vintage", "availability", "overlapping horizons"],
+    "outcome": "Explain and independently reproduce forecast vintages, revision histories and overlapping origins, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "Forecasting: Principles and Practice, reconciliation",
+        "https://otexts.com/fpp3/reconciliation.html"
+      ],
+      ["Forecasting principles, accuracy", "https://otexts.com/fpp3/accuracy.html"]
+    ]
+  },
+  {
+    "id": "science-008",
+    "title": "Coherent hierarchical forecasts and covariance-weighted reconciliation",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["science-007"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["MinT", "coherence", "covariance"],
+    "outcome": "Explain and independently reproduce coherent hierarchical forecasts and covariance-weighted reconciliation, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "Forecasting: Principles and Practice, reconciliation",
+        "https://otexts.com/fpp3/reconciliation.html"
+      ],
+      ["Forecasting principles, accuracy", "https://otexts.com/fpp3/accuracy.html"]
+    ]
+  },
+  {
+    "id": "science-009",
+    "title": "Forecast calibration, quantiles and operational decision loss",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["science-007", "statistics-027"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["pinball loss", "calibration", "newsvendor"],
+    "outcome": "Explain and independently reproduce forecast calibration, quantiles and operational decision loss, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "Forecasting: Principles and Practice, reconciliation",
+        "https://otexts.com/fpp3/reconciliation.html"
+      ],
+      ["Forecasting principles, accuracy", "https://otexts.com/fpp3/accuracy.html"]
+    ]
+  },
+  {
+    "id": "science-010",
+    "title": "Survival risk sets, delayed entry and partial likelihood",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["statistics-science-004"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["risk set", "left truncation", "partial likelihood"],
+    "outcome": "Explain and independently reproduce survival risk sets, delayed entry and partial likelihood, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "statsmodels proportional-hazards regression",
+        "https://www.statsmodels.org/stable/generated/statsmodels.duration.hazard_regression.PHReg.html"
+      ]
+    ]
+  },
+  {
+    "id": "science-011",
+    "title": "Censoring-aware likelihoods, AFT models and time scales",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["science-010"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["censoring", "AFT", "Weibull"],
+    "outcome": "Explain and independently reproduce censoring-aware likelihoods, aft models and time scales, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "statsmodels proportional-hazards regression",
+        "https://www.statsmodels.org/stable/generated/statsmodels.duration.hazard_regression.PHReg.html"
+      ]
+    ]
+  },
+  {
+    "id": "science-012",
+    "title": "Competing risks and proportional-hazards diagnostics",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["science-010", "science-011"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["cumulative incidence", "competing risk", "PH diagnostics"],
+    "outcome": "Explain and independently reproduce competing risks and proportional-hazards diagnostics, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "statsmodels proportional-hazards regression",
+        "https://www.statsmodels.org/stable/generated/statsmodels.duration.hazard_regression.PHReg.html"
+      ]
+    ]
+  },
+  {
+    "id": "science-013",
+    "title": "Candidate generation, cold start and retrieval ceilings",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["statistics-032"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["retrieval", "cold start", "candidate recall"],
+    "outcome": "Explain and independently reproduce candidate generation, cold start and retrieval ceilings, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Rendle and colleagues, Bayesian Personalized Ranking", "https://arxiv.org/abs/1205.2618"],
+      ["Dudik and colleagues, doubly robust policy evaluation", "https://arxiv.org/abs/1103.4601"]
+    ]
+  },
+  {
+    "id": "science-014",
+    "title": "Pairwise learned ranking and defensible negative sampling",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["science-013", "statistics-learning-003"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["BPR", "negative sampling", "temporal leakage"],
+    "outcome": "Explain and independently reproduce pairwise learned ranking and defensible negative sampling, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Rendle and colleagues, Bayesian Personalized Ranking", "https://arxiv.org/abs/1205.2618"],
+      ["Dudik and colleagues, doubly robust policy evaluation", "https://arxiv.org/abs/1103.4601"]
+    ]
+  },
+  {
+    "id": "science-015",
+    "title": "Logged-policy evaluation, support and variance control",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["science-013", "statistics-science-005"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["IPS", "doubly robust", "support"],
+    "outcome": "Explain and independently reproduce logged-policy evaluation, support and variance control, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Rendle and colleagues, Bayesian Personalized Ranking", "https://arxiv.org/abs/1205.2618"],
+      ["Dudik and colleagues, doubly robust policy evaluation", "https://arxiv.org/abs/1103.4601"]
+    ]
+  },
+  {
+    "id": "science-016",
+    "title": "Optimization duality and the scope of shadow prices",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["statistics-036"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["duality", "shadow price", "KKT"],
+    "outcome": "Explain and independently reproduce optimization duality and the scope of shadow prices, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "SciPy mixed-integer optimization",
+        "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html"
+      ],
+      [
+        "SciPy linear programming and marginal values",
+        "https://docs.scipy.org/doc/scipy/reference/optimize.linprog-highs.html"
+      ]
+    ]
+  },
+  {
+    "id": "science-017",
+    "title": "Integer decisions, relaxation bounds and solver certificates",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["science-016"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["MILP", "integrality", "relaxation"],
+    "outcome": "Explain and independently reproduce integer decisions, relaxation bounds and solver certificates, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "SciPy mixed-integer optimization",
+        "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html"
+      ],
+      [
+        "SciPy linear programming and marginal values",
+        "https://docs.scipy.org/doc/scipy/reference/optimize.linprog-highs.html"
+      ]
+    ]
+  },
+  {
+    "id": "science-018",
+    "title": "Scenario decisions, minimax policies and information value",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["science-009", "science-016"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["scenario", "robust optimization", "EVPI"],
+    "outcome": "Explain and independently reproduce scenario decisions, minimax policies and information value, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "SciPy mixed-integer optimization",
+        "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html"
+      ],
+      [
+        "SciPy linear programming and marginal values",
+        "https://docs.scipy.org/doc/scipy/reference/optimize.linprog-highs.html"
+      ]
+    ]
+  },
+  {
+    "id": "science-019",
+    "title": "Estimated heterogeneity and prediction in research synthesis",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["statistics-science-006"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["heterogeneity", "random effects", "prediction interval"],
+    "outcome": "Explain and independently reproduce estimated heterogeneity and prediction in research synthesis, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "Cochrane handbook, analysis and meta-analysis",
+        "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-10"
+      ]
+    ]
+  },
+  {
+    "id": "science-020",
+    "title": "Dependent effects, missing studies and synthesis sensitivity",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["science-019"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["dependent effects", "GLS", "missing studies"],
+    "outcome": "Explain and independently reproduce dependent effects, missing studies and synthesis sensitivity, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "Cochrane handbook, analysis and meta-analysis",
+        "https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-10"
+      ]
+    ]
+  },
+  {
+    "id": "science-021",
+    "title": "Spatial dependence, permutation reference sets and blocked validation",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["statistics-030"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Moran I", "spatial validation", "permutation"],
+    "outcome": "Explain and independently reproduce spatial dependence, permutation reference sets and blocked validation, including a contrasting assumption or failure case.",
+    "sources": [
+      ["PySAL ESDA Moran documentation", "https://pysal.org/esda/stable/generated/esda.Moran.html"]
+    ]
+  },
+  {
+    "id": "science-022",
+    "title": "Survey inclusion weights, clustering and population targets",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["statistics-003", "statistics-008"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Horvitz-Thompson", "design effect", "survey"],
+    "outcome": "Explain and independently reproduce survey inclusion weights, clustering and population targets, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "Statistics Canada, survey estimation and weighting",
+        "https://www150.statcan.gc.ca/n1/pub/12-539-x/steps-etapes/4147790-eng.htm"
+      ]
+    ]
+  },
+  {
+    "id": "science-023",
+    "title": "High-dimensional identification, regularization and validation",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["statistics-learning-006", "statistics-learning-007"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["identification", "ridge", "high dimension"],
+    "outcome": "Explain and independently reproduce high-dimensional identification, regularization and validation, including a contrasting assumption or failure case.",
+    "sources": [
+      ["Statistical Learning, author-maintained resources", "https://www.statlearning.com/"]
+    ]
+  },
+  {
+    "id": "science-024",
+    "title": "A scientific decision dossier with explicit rollback conditions",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["science-006", "science-009", "science-015", "science-018", "science-020"],
+    "runtime": "python-core",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["decision dossier", "rollback", "uncertainty"],
+    "outcome": "Explain and independently reproduce a scientific decision dossier with explicit rollback conditions, including a contrasting assumption or failure case.",
+    "sources": [
+      [
+        "SciPy mixed-integer optimization",
+        "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html"
+      ],
+      [
+        "SciPy linear programming and marginal values",
+        "https://docs.scipy.org/doc/scipy/reference/optimize.linprog-highs.html"
+      ]
+    ]
+  }
+]

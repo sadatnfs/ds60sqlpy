@@ -564,7 +564,7 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 <li>Use <code>RandomizedSearchCV</code> with a wider parameter space.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.</p>
-<ol>
+<ol start="2">
 <li>Implement nested cross-validation and compare its result with the non-nested search score.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.</p>
@@ -576,19 +576,19 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat tuning as a finite experimental budget with a declared search space, selection metric, resampling design, and reproducible result table.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Search-budget calculation:</strong> For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running. <strong>Progressive hint:</strong> Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.</li>
 </ol>
 <p><strong>Verify:</strong> Search-budget calculation; show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.</p>
-<ol>
+<ol start="4">
 <li><strong>Multi-metric selection:</strong> Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan. <strong>Progressive hint:</strong> Pass a scoring dictionary and set <code>refit</code> to a metric name. Selection changes when metrics rank candidates differently.</li>
 </ol>
 <p><strong>Verify:</strong> Multi-metric selection; configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.</p>
-<ol>
+<ol start="5">
 <li><strong>Results-table diagnosis:</strong> Turn <code>cv_results_</code> into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates. <strong>Progressive hint:</strong> Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.</li>
 </ol>
 <p><strong>Verify:</strong> Results-table diagnosis; emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.</p>
-<ol>
+<ol start="6">
 <li><strong>Reproducibility debugging:</strong> A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison. <strong>Progressive hint:</strong> Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.</li>
 </ol>
 <p><strong>Verify:</strong> Reproducibility debugging; run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.</p>
@@ -814,7 +814,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Use <code>RandomizedSearchCV</code> with a wider parameter space.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.</p>
-<ol>
+<ol start="2">
 <li>Implement nested cross-validation and compare its result with the non-nested search score.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.</p>
@@ -826,19 +826,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat tuning as a finite experimental budget with a declared search space, selection metric, resampling design, and reproducible result table.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Search-budget calculation:</strong> For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running. <strong>Progressive hint:</strong> Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.</li>
 </ol>
 <p><strong>Verify:</strong> Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.</p>
-<ol>
+<ol start="4">
 <li><strong>Multi-metric selection:</strong> Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan. <strong>Progressive hint:</strong> Pass a scoring dictionary and set <code>refit</code> to a metric name. Selection changes when metrics rank candidates differently.</li>
 </ol>
 <p><strong>Verify:</strong> Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.</p>
-<ol>
+<ol start="5">
 <li><strong>Results-table diagnosis:</strong> Turn <code>cv_results_</code> into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates. <strong>Progressive hint:</strong> Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.</li>
 </ol>
 <p><strong>Verify:</strong> Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.</p>
-<ol>
+<ol start="6">
 <li><strong>Reproducibility debugging:</strong> A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison. <strong>Progressive hint:</strong> Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.</li>
 </ol>
 <p><strong>Verify:</strong> Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.</p>

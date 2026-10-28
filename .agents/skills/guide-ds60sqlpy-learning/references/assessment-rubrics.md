@@ -191,8 +191,9 @@ comparison. One trained example does not qualify GPU behavior or distributed
 training. For NLP, relate tokenization and representation to the selected task,
 baseline, split and error analysis instead of rewarding fluent text alone.
 
-The statistics/ML book is a tutorial without exams or problem sets. If a learner
-asks for a discussion of readiness, use their explanations and volunteered
+Statistics/ML, Applied Science, Bayesian Computing, Data and ML Engineering
+and the Apache/open-data route are tutorials without exams or problem sets.
+If a learner asks for a discussion of readiness, use their explanations and volunteered
 examples. Do not impose a hidden test or withhold its worked answers. Reading
 markers remain personal progress rather than certification.
 
@@ -207,3 +208,25 @@ Return:
 5. the conditions for reassessment.
 
 Do not assign a numeric grade unless the learner requests one.
+
+## Scientific and data-system review examples
+
+Use these only for a requested discussion or practice review, never as a hidden
+gate on tutorial answers.
+
+- Bayesian computation: explain the generative model and prior/predictive checks;
+  compare an exact oracle, sampler diagnostics and decision uncertainty. Zero
+  divergences in a tiny run is insufficient evidence of convergence.
+- Applied science: identify the estimand, data availability, censoring or
+  inclusion mechanism, assumptions and a counterexample before selecting a method.
+- Polars/dbt: state grain, key cardinality, null and time policies; distinguish
+  an optimized plan or successful build from correct metrics and publication.
+- ML systems: trace feature availability through training and serving, validate
+  artifacts, and explain a reversible release decision and actual rollback.
+- Julia: explain dispatch, shapes, aliasing, numerical error and thread ownership;
+  support performance claims with equivalent completed work and measurements.
+- LLM evaluation: distinguish sampled populations, correlated uncertainty,
+  contamination, judge bias, preference optimization and held-out utility.
+
+Recommend actual stable lesson IDs from the current catalog and preserve source,
+notes and result history. Do not manufacture a score from lesson completion.

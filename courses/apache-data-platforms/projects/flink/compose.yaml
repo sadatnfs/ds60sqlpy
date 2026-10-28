@@ -1,0 +1,64 @@
+x-base: &base
+  image: ${DS60_FLINK_IMAGE:?Use the copied launcher}
+  pull_policy: never
+  entrypoint: [bash]
+  working_dir: /project
+  user: "1000:1000"
+  volumes:
+    - .:/project:ro
+    - state:/state
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,exec,size=256m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  cpus: 1.0
+  mem_limit: 1g
+  environment:
+    FLINK_HOME: /opt/flink
+    FLINK_CONF_DIR: /project/conf
+    PYTHONDONTWRITEBYTECODE: "1"
+  labels:
+    org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Use the copied launcher}
+    org.ds60.workshop.kind: apache-flink
+services:
+  initialize:
+    <<: *base
+    user: "0:0"
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    entrypoint: [python3]
+    command: [/project/project_state.py]
+  jobmanager:
+    <<: *base
+    command: [/project/start-flink.sh, jobmanager]
+    depends_on:
+      initialize: { condition: service_completed_successfully }
+    healthcheck:
+      test: [CMD, python3, /project/workshop.py, health-jm]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 3s
+  taskmanager:
+    <<: *base
+    command: [/project/start-flink.sh, taskmanager]
+    mem_limit: 1536m
+    depends_on:
+      jobmanager: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, python3, /project/workshop.py, health-tm]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 3s
+volumes:
+  state:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Use the copied launcher}
+      org.ds60.workshop.kind: apache-flink
+networks:
+  default:
+    internal: true
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Use the copied launcher}
+      org.ds60.workshop.kind: apache-flink

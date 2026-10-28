@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "stan_version": "2.40.0",
+  "julia_version": "1.13.3",
+  "assets": {
+    "amd64": {
+      "stan": {
+        "url": "https://github.com/stan-dev/cmdstan/releases/download/v2.40.0/cmdstan-2.40.0.tar.gz",
+        "sha256": "26d21c9737b35728e926f9b7a5d7362b38dc23e2e7d5e166c890e1fa74dac90c"
+      },
+      "julia": {
+        "url": "https://julialang-s3.julialang.org/bin/linux/x64/1.13/julia-1.13.3-linux-x86_64.tar.gz",
+        "sha256": "5c61cb4b40332cb5a3504e7779e2f5dac093caa4a1116ded19f01413f85c63e4"
+      }
+    },
+    "arm64": {
+      "stan": {
+        "url": "https://github.com/stan-dev/cmdstan/releases/download/v2.40.0/cmdstan-2.40.0-linux-arm64.tar.gz",
+        "sha256": "c31e9f45a701c47f547381080ee804bf7e2428aace68eff68d4262b5c406aa63"
+      },
+      "julia": {
+        "url": "https://julialang-s3.julialang.org/bin/linux/aarch64/1.13/julia-1.13.3-linux-aarch64.tar.gz",
+        "sha256": "9ceb053bee6dfb8189bd40afd6925de3a9b7ff8fac8d01a5fcdd84af171ddf03"
+      }
+    }
+  }
+}

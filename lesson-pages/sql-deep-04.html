@@ -472,31 +472,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 1, Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 1, Rows a, b, c, d, e, g appear once each; isolated f is absent. No arbitrary depth cap is required for this finite identity-state traversal.</p>
 <p><strong>Verify:</strong> For sql-deep-04 Exercise 1, compare the distinct returned vertices with a hand traversal from the start; confirm the cycle does not produce an unbounded growing recursion state.</p>
-<ol>
+<ol start="2">
 <li><strong>Enumerate simple routes to a target.</strong> Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.</p>
 <p><strong>Verify:</strong> For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.</p>
-<ol>
+<ol start="3">
 <li><strong>Emit one cycle-closing step as evidence.</strong> Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.</p>
 <p><strong>Verify:</strong> For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.</p>
-<ol>
+<ol start="4">
 <li><strong>Report a truncated search honestly.</strong> Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.</p>
 <p><strong>Verify:</strong> For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.</p>
-<ol>
+<ol start="5">
 <li><strong>Return cheapest path evidence for every vertex.</strong> Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.</p>
 <p><strong>Verify:</strong> For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.</p>
-<ol>
+<ol start="6">
 <li><strong>Separate processed dependencies from cyclic or blocked vertices.</strong> Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 6, Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</p>
@@ -538,7 +538,7 @@ Done when all six projected-result contracts and their counterexamples have insp
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_deep_04.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -560,11 +560,15 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_vertices <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  vertex <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_vertices</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -574,12 +578,14 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;f&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_edges <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">source</span> <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  target <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  cost <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>cost <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_edges</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -589,6 +595,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Worked example 1</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> sequence <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  value</span>
@@ -609,11 +616,13 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  sequence</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  value<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Worked example 2</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;b&#x27;</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revisits_b<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> extended_path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Write attempts in your ignored working copy before the final ROLLBACK.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Compute reachability with a finite identity state</span></span>
@@ -786,7 +795,7 @@ Done when all six projected-result contracts and their counterexamples have insp
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_deep_04_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -806,11 +815,15 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_vertices <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  vertex <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_vertices</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -820,12 +833,14 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;f&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_edges <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">source</span> <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  target <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  cost <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>cost <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span><span class="syntax-punctuation">,</span> target<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_edges</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -835,6 +850,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -846,43 +862,50 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Compute reachability with a finite identity state</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> reachable <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    vertex</span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Compute reachability with a finite identity state</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> reachable <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  vertex</span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-keyword">UNION</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      e<span class="syntax-punctuation">.</span>target</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      reachable <span class="syntax-keyword">AS</span> r</span>
-<span class="source-line">      <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span> <span class="syntax-operator">=</span> r<span class="syntax-punctuation">.</span>vertex</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    vertex</span>
+<span class="source-line">    e<span class="syntax-punctuation">.</span>target</span>
 <span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    reachable</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    reachable <span class="syntax-keyword">AS</span> r</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span> <span class="syntax-operator">=</span> r<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  vertex</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  reachable</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  vertex</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_1</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      vertex</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      answer_1</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      vertex<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;}, {&quot;vertex&quot;: &quot;b&quot;}, {&quot;vertex&quot;: &quot;c&quot;}, {&quot;vertex&quot;: &quot;d&quot;}, {&quot;vertex&quot;: &quot;e&quot;}, {&quot;vertex&quot;: &quot;g&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;}, {&quot;vertex&quot;: &quot;b&quot;}, {&quot;vertex&quot;: &quot;c&quot;}, {&quot;vertex&quot;: &quot;d&quot;}, {&quot;vertex&quot;: &quot;e&quot;}, {&quot;vertex&quot;: &quot;g&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Enumerate simple routes to a target</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
@@ -908,24 +931,30 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  vertex <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;d&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  path<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    path<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    total_cost<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    hops</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_2</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_cost<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  hops</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_2</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;], &quot;total_cost&quot;: 3, &quot;hops&quot;: 3}, {&quot;path&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;d&quot;], &quot;total_cost&quot;: 5, &quot;hops&quot;: 2}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;], &quot;total_cost&quot;: 3, &quot;hops&quot;: 3}, {&quot;path&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;d&quot;], &quot;total_cost&quot;: 5, &quot;hops&quot;: 2}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Emit one cycle-closing step as evidence</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> walks <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
@@ -954,24 +983,30 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  is_cycle</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  cycle_path<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    cycle_path<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    repeated_vertex<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    cycle_cost</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_3</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    cycle_path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  cycle_path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  repeated_vertex<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  cycle_cost</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_3</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  cycle_path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cycle_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;cycle_path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;b&quot;], &quot;repeated_vertex&quot;: &quot;b&quot;, &quot;cycle_cost&quot;: 4}, {&quot;cycle_path&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;d&quot;, &quot;b&quot;, &quot;c&quot;], &quot;repeated_vertex&quot;: &quot;c&quot;, &quot;cycle_cost&quot;: 7}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cycle_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;cycle_path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;b&quot;], &quot;repeated_vertex&quot;: &quot;b&quot;, &quot;cycle_cost&quot;: 4}, {&quot;cycle_path&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;d&quot;, &quot;b&quot;, &quot;c&quot;], &quot;repeated_vertex&quot;: &quot;c&quot;, &quot;cycle_cost&quot;: 7}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Report a truncated search honestly</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
@@ -1012,6 +1047,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>truncated</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  min_hops<span class="syntax-punctuation">,</span></span>
@@ -1020,16 +1056,21 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  answer_4</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;min_hops&quot;: 0, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;b&quot;, &quot;min_hops&quot;: 1, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;c&quot;, &quot;min_hops&quot;: 1, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;d&quot;, &quot;min_hops&quot;: 2, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;e&quot;, &quot;min_hops&quot;: 2, &quot;search_truncated&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;min_hops&quot;: 0, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;b&quot;, &quot;min_hops&quot;: 1, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;c&quot;, &quot;min_hops&quot;: 1, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;d&quot;, &quot;min_hops&quot;: 2, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;e&quot;, &quot;min_hops&quot;: 2, &quot;search_truncated&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Return cheapest path evidence for every vertex</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
@@ -1068,6 +1109,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> best <span class="syntax-keyword">AS</span> b <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>vertex <span class="syntax-operator">=</span> v<span class="syntax-punctuation">.</span>vertex</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  total_cost<span class="syntax-punctuation">,</span></span>
@@ -1076,16 +1118,21 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  answer_5</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;total_cost&quot;: 0, &quot;path&quot;: [&quot;a&quot;]}, {&quot;vertex&quot;: &quot;b&quot;, &quot;total_cost&quot;: 1, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;]}, {&quot;vertex&quot;: &quot;c&quot;, &quot;total_cost&quot;: 2, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]}, {&quot;vertex&quot;: &quot;d&quot;, &quot;total_cost&quot;: 3, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]}, {&quot;vertex&quot;: &quot;e&quot;, &quot;total_cost&quot;: 6, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;e&quot;]}, {&quot;vertex&quot;: &quot;f&quot;, &quot;total_cost&quot;: null, &quot;path&quot;: null}, {&quot;vertex&quot;: &quot;g&quot;, &quot;total_cost&quot;: 4, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;g&quot;]}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;total_cost&quot;: 0, &quot;path&quot;: [&quot;a&quot;]}, {&quot;vertex&quot;: &quot;b&quot;, &quot;total_cost&quot;: 1, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;]}, {&quot;vertex&quot;: &quot;c&quot;, &quot;total_cost&quot;: 2, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]}, {&quot;vertex&quot;: &quot;d&quot;, &quot;total_cost&quot;: 3, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]}, {&quot;vertex&quot;: &quot;e&quot;, &quot;total_cost&quot;: 6, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;e&quot;]}, {&quot;vertex&quot;: &quot;f&quot;, &quot;total_cost&quot;: null, &quot;path&quot;: null}, {&quot;vertex&quot;: &quot;g&quot;, &quot;total_cost&quot;: 4, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;g&quot;]}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Separate processed dependencies from cyclic or blocked vertices</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> steps <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  done</span>
@@ -1131,6 +1178,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">AS</span> f</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  processed<span class="syntax-punctuation">,</span></span>
@@ -1139,14 +1187,18 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  answer_6</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  vertex<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;processed&quot;: true, &quot;cyclic_or_blocked&quot;: false}, {&quot;vertex&quot;: &quot;b&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;c&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;d&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;e&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;f&quot;, &quot;processed&quot;: true, &quot;cyclic_or_blocked&quot;: false}, {&quot;vertex&quot;: &quot;g&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;processed&quot;: true, &quot;cyclic_or_blocked&quot;: false}, {&quot;vertex&quot;: &quot;b&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;c&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;d&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;e&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;f&quot;, &quot;processed&quot;: true, &quot;cyclic_or_blocked&quot;: false}, {&quot;vertex&quot;: &quot;g&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-04 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

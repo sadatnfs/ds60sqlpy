@@ -1,14 +1,5 @@
 # Day 07: Week 1 Project: From Questions to Queries (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 06; set operations](day06_set_operations.md) and the
-  joins and aggregates from Days 01–05
-- **Artifacts:** [learner SQL](../day07_week1_project.sql) ·
-  [solution reasoning](../solutions/day07_solutions.md) ·
-  [executable solution](../solutions/day07_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -73,6 +64,15 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Prerequisites:** [Day 06; set operations](day06_set_operations.md) and the
+  joins and aggregates from Days 01–05
+- **Artifacts:** [learner SQL](../day07_week1_project.sql) ·
+  [solution reasoning](../solutions/day07_solutions.md) ·
+  [executable solution](../solutions/day07_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -96,7 +96,7 @@ business question requires.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day07_week1_project.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day07_week1_project.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

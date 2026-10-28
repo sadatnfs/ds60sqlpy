@@ -274,19 +274,19 @@ validation <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <ol>
 <li><strong>Trace the first candidate counts.</strong> Use ab and ac as training words and calculate every neighboring pair count before a merge. <strong>Expected:</strong> Four pairs each have count one, and the selected pair is ((97,),(98,)). <strong>Verify:</strong> Inspect the explicit pair-count table and assert the chosen rule under the declared lexical tie policy.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Construct a one-step trainer.</strong> Implement fit_bpe(words,limit) and learn exactly one merge from ab and ac. <strong>Expected:</strong> The ordered rule list contains only a+b; encoded ab is [(97,98),(256,)]. <strong>Verify:</strong> Assert the exact rule tuple, encoded tokens and decoded ab round trip.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Diagnose overlapping replacement.</strong> Apply the a+a pair to aaaa. Consume matched positions once from left to right. <strong>Expected:</strong> The result is two (97,97) tokens followed by the end marker, not overlapping triple coverage. <strong>Verify:</strong> Assert the output token list and reconstruct exactly four original a bytes.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Freeze validation encoding.</strong> Encode ad with the one-rule tokenizer and compare its serialized merge hash before and after. <strong>Expected:</strong> Tokens [(97,),(100,),(256,)] and an unchanged merge hash. <strong>Verify:</strong> Assert the complete token sequence and hash equality; no fit call may occur in the encoding path.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Handle a bounded or absent fit.</strong> Use merge limit zero, an empty training collection and a negative limit. <strong>Expected:</strong> Zero limit returns no rules; empty training and negative limit raise ValueError. <strong>Verify:</strong> Capture both exceptions and assert zero-limit byte encoding still round-trips ab.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer to UTF-8 text.</strong> Encode and decode é with the frozen one-rule tokenizer. Explain why its two bytes are not two Unicode characters. <strong>Expected:</strong> Base byte IDs 195 and 169 plus the end marker; decoding returns one code point é. <strong>Verify:</strong> Assert token byte contents and strict decoded equality without changing the learned rules.</li>
 </ol>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>

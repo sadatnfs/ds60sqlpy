@@ -54,7 +54,7 @@ ENV PATH=/opt/formatters/venv/bin:${PATH} \
     PYTHONUNBUFFERED=1 \
     HOME=/tmp \
     RUFF_CACHE_DIR=/tmp/ruff-cache
-RUN ruff --version && prettier --version && clang-format --version \
+RUN stanc --version && ruff --version && prettier --version && clang-format --version \
     && rustfmt --version && swift-format --version && scalafmt --version \
     && pg_format --version && shfmt --version && dockerfmt version \
     && cmake-format --version

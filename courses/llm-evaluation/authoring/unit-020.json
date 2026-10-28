@@ -1,0 +1,61 @@
+{
+  "number": 20,
+  "title": "Direct Preference Optimization from ratios to gradients",
+  "concepts": ["DPO", "reference log probability", "Bradley-Terry", "sequence likelihood", "beta"],
+  "outcome": "Derive the DPO loss from a regularized preference model and distinguish sequence log probabilities, temperature effects and held-out evaluation.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-019", "llm-applied-015"],
+  "exercises": [
+    {
+      "title": "Evaluate the reference",
+      "task": "Set policy and reference log odds equal for any positive beta.",
+      "expected": "The loss for a positive preference is log 2.",
+      "hint": "Both reference-relative log ratios cancel.",
+      "answer": "The initial classifier is indifferent under the pairwise parameterization."
+    },
+    {
+      "title": "Differentiate the two-action loss",
+      "task": "Use beta 2 and zero reference-relative log-odds shift.",
+      "expected": "The derivative is -1.",
+      "hint": "Differentiate softplus(-beta times the shift).",
+      "answer": "The result includes the beta scale and the logistic residual; it should agree with finite differences."
+    },
+    {
+      "title": "Compare beta optima",
+      "task": "Fit a3:1 preference ratio with beta 0.5,1 and 2 under a uniform reference.",
+      "expected": "Preferred-action probabilities are 0.9,0.75 and approximately 0.634.",
+      "hint": "The optimum policy-logit shift is log 3 divided by beta.",
+      "answer": "Initial gradient magnitude and final optimum displacement are different properties of the objective."
+    },
+    {
+      "title": "Change length normalization",
+      "task": "Use the token log-ratio arrays in the reference exercise.",
+      "expected": "The sequence-sum margin is negative while the mean-token margin is positive.",
+      "hint": "Chosen and rejected sequences have different lengths.",
+      "answer": "Normalizing each sequence by its own length changes its relative contribution and therefore the objective."
+    },
+    {
+      "title": "Protect the reference",
+      "task": "Update the reference parameters while retaining the same loss label.",
+      "expected": "The objective has changed.",
+      "hint": "The reference is part of the training specification.",
+      "answer": "Reference refresh can be a deliberate algorithmic choice, but it is not the same fixed-reference DPO problem."
+    },
+    {
+      "title": "Bound the claim",
+      "task": "Observe a lower training DPO loss.",
+      "expected": "Conclude improved fit to the declared preference objective only.",
+      "hint": "Separate training labels from independent task outcomes.",
+      "answer": "Task utility, robustness, calibration and critical constraints still need their own held-out evaluation."
+    }
+  ],
+  "sources": [
+    ["Direct Preference Optimization", "https://arxiv.org/abs/2305.18290"],
+    [
+      "Existing causal decoder training mechanics",
+      "../../../courses/llm-applied/guides/llm-applied-015.md"
+    ]
+  ]
+}

@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-pandas-02.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-pandas-02.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_pandas_02.py</code></pre>
 <p>Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-pandas-02.html#solution-1">explanatory solutions</a> and <a href="python-pandas-02.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -450,23 +450,23 @@ joined <span class="syntax-operator">=</span> pd<span class="syntax-operator">.<
 <li><strong>Require one real identity per dimension row.</strong> Validate that key exists, contains no missing values and is unique. Raise ValueError for a missing column, null key or repeated key. An empty frame with the key column is a valid empty dimension.</li>
 </ol>
 <p><strong>Expected:</strong> Keys[a, b] pass; [a, a], [a, None] and a frame without key fail. An empty customer_id column passes.</p>
-<ol>
+<ol start="2">
 <li><strong>Preserve event grain during enrichment.</strong> Require unique nonmissing event_id and a valid customer_id dimension. Left-join dimension segment onto event_id, customer_id, amount events with many-to-one validation and a match indicator. Preserve input event order and do not mutate either frame.</li>
 </ol>
 <p><strong>Expected:</strong> Events for customers a, c, b keep all three event_id values in input order; c has missing segment and left_only status. Duplicate dimension a raises ValueError.</p>
-<ol>
+<ol start="3">
 <li><strong>Separate absent identifiers from unknown identifiers.</strong> Return one diagnostic row per unmatched event with columns event_id and reason, sorted by event_id. Label null customer identifiers missing_key and nonnull identifiers absent from the dimension unknown_key. Validate event and dimension identities first.</li>
 </ol>
 <p><strong>Expected:</strong> Events 1:a,2:None,3:z with dimension[a] yield (2, missing_key),(3, unknown_key). A fully matched event yields an empty frame with both output columns.</p>
-<ol>
+<ol start="4">
 <li><strong>Look backward within a freshness limit.</strong> For a single history, attach the latest available_at, value no later than each request at time, within a nonnegative tolerance. Require unique request_id and unique history available_at, with nonmissing timezone-aware UTC time columns. Return original request order and preserve unmatched values as missing.</li>
 </ol>
 <p><strong>Expected:</strong> Requests at 10:30 and 15:00 with history at 10:00, value 10 and 12:00, value 20, tolerance 2 hours, yield 10 and missing. Unsorted requests are restored to their original order; naive times fail.</p>
-<ol>
+<ol start="5">
 <li><strong>Reject overlapping validity versions.</strong> Validate a single version history with unique version_id and finite UTC start, end times satisfying start&lt;end. Return it sorted by start. Reject any overlap, while permitting adjacent intervals where one end equals the next start.</li>
 </ol>
 <p><strong>Expected:</strong> Versions[10:00,11:00) and [11:00,12:00) pass; changing the second start to 10:59 raises ValueError. A zero-width interval also fails.</p>
-<ol>
+<ol start="6">
 <li><strong>Assign an instant to at most one version.</strong> Use validated single-history half-open intervals to attach version_id, value to uniquely identified events at UTC instants. Return event_id, version_id, value in input event order. Preserve uncovered events with missing version/value and reject ambiguous histories.</li>
 </ol>
 <p><strong>Expected:</strong> Events at 10:00,11:00,12:00 against adjacent hourly versions 1,2 yield version 1, version 2, missing. The exact final end is excluded; gaps are not filled by nearest lookup.</p>

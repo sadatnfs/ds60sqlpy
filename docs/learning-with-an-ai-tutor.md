@@ -59,9 +59,9 @@ predict a result, try a small change, inspect the observed evidence and explain
 why it happened. A full reference is available when you ask; the tutor should
 not overwrite your attempt or mark completion merely because the reference runs.
 
-The statistics/ML book is a different mode: it exposes theory, complete Python
-examples, use cases and answered interview discussion without exams or hidden
-answers. Ask questions at any depth. Reading progress is a personal marker,
+Statistics/ML, Applied Science and Bayesian Computing use tutorial mode:
+theory, complete examples, use cases and answered discussions remain available
+without exams or hidden answers. Ask questions at any depth. Reading progress is a personal marker,
 not a claim of mastery.
 
 If you are missing a prerequisite, ask for its stable lesson ID and one concrete
@@ -117,3 +117,10 @@ ID and the gap. For a requested curriculum improvement, the companion can switch
 to the [authoring skill](../.agents/skills/add-learning-path/SKILL.md), update the
 durable source and verify it. Tutoring and course implementation remain distinct
 roles, and the course should become clearer for the next learner too.
+
+For scientific placement, use [the maintained roadmap](scientist-roadmap.md).
+A companion should distinguish PyMC from the native Stan pad, the Stan JSON-data
+project from its single-source pad, dbt SQL models from a full project, and the
+ML service's persisted state from classroom progress. Ask it to identify the
+actual source and evidence behind a saved chart, table or JSON report. None of
+these tools grants automatic access to your private project state.

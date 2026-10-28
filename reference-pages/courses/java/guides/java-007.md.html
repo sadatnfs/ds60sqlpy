@@ -259,19 +259,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Create independent accounts.</strong> Construct accounts with 100 and 100 cents,deposit 50 into the first. <strong>Expected:</strong> balances 150 and 100. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with balances 150 and 100.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Withdraw within the contract.</strong> Withdraw40 cents from the first account. <strong>Expected:</strong> balance110. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with balance110.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject overdraft atomically.</strong> Attempt to withdraw111 from balance110. <strong>Expected:</strong> IllegalArgumentException;balance still110. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IllegalArgumentException;balance still110.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject negative input.</strong> Attempt a deposit of-1. <strong>Expected:</strong> IllegalArgumentException;balance unchanged. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IllegalArgumentException;balance unchanged.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject invalid construction.</strong> Construct an account with-1 cents. <strong>Expected:</strong> constructor throwsIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with constructor throwsIllegalArgumentException.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Protect against overflow.</strong> Create an account atInteger.MAX_VALUE and deposit1. <strong>Expected:</strong> ArithmeticException;original maximum balance preserved. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with ArithmeticException;original maximum balance preserved.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

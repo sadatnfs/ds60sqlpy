@@ -254,19 +254,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Preserve an instant across zones.</strong> Parse <code>2024-01-01T00:00:00Z</code> and view it in UTC and America/New_York. <strong>Expected:</strong> same instant; New York local date 2023-12-31. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with same instant; New York local date 2023-12-31.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compare calendar and elapsed days.</strong> Start at noon before the2024New York spring transition and compareplusDays1 withplusHours24. <strong>Expected:</strong> calendar next noon is23 elapsed hours later;24hours reaches13:00. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with calendar next noon is23 elapsed hours later;24hours reaches13:00.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Detect a nonexistent local time.</strong> Ask for valid offsets at2024-03-10 02:30 in New York. <strong>Expected:</strong> zero valid offsets. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with zero valid offsets.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect an ambiguous local time.</strong> Ask for offsets at2024-11-03 01:30 in New York. <strong>Expected:</strong> two valid offsets. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with two valid offsets.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Parse a strict calendar date.</strong> Parse 2024-02-29 and reject 2023-02-29 with ISO_LOCAL_DATE. <strong>Expected:</strong> leap-day accepted only for2024. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with leap-day accepted only for2024.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Use a half-open time window.</strong> Include an instant at the start and exclude an instant exactly at the end of a one-hour window. <strong>Expected:</strong> start included; end excluded. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with start included; end excluded.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

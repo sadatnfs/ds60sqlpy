@@ -350,6 +350,11 @@ def wrapper(tmp_path: Path) -> Any:
     put(root, "docker/formatting/Dockerfile.r", "FROM r-example\n")
     put(root, "docker/workers/r/packages.lock.json", '{"schema_version": 1}\n')
     put(root, "docker/workers/r/install_packages.py", "# locked installer\n")
+    put(root, "docker/workers/Dockerfile.julia", "FROM julia-example\n")
+    put(root, "docker/workers/native/releases.lock.json", '{"schema_version": 1}\n')
+    put(root, "docker/workers/native/install_native.py", "# verified installer\n")
+    put(root, "docker/workers/julia/Project.toml", "[deps]\n")
+    put(root, "docker/workers/julia/Manifest.toml", 'julia_version = "1.13.3"\n')
     binaries = tmp_path / "fake-tools"
     binaries.mkdir()
     calls = tmp_path / "docker-calls.jsonl"
@@ -418,7 +423,7 @@ def test_wrapper_reuses_cached_image_and_mounts_checks_readonly(wrapper: Any, op
     assert result.returncode == 0, result.stderr
     assert not any(command[0] == "build" for command in calls)
     runs = [command for command in calls if command[0] == "run"]
-    assert len(runs) == (1 if option == "--list" else 2)
+    assert len(runs) == (1 if option == "--list" else 3)
     for run in runs:
         assert "--network=none" in run and "--read-only" in run and "--cap-drop=ALL" in run
         mount = run[run.index("--mount") + 1]
@@ -432,9 +437,11 @@ def test_wrapper_prepares_missing_tools_with_visible_logs_then_formats(wrapper: 
     result, calls = invoke(settings={"FORMAT_TEST_IMAGE": "missing"})
     assert result.returncode == 0, result.stderr
     builds = [command for command in calls if command[0] == "build"]
-    assert len(builds) == 2 and all("--progress=plain" in build for build in builds)
+    assert len(builds) == 3 and all("--progress=plain" in build for build in builds)
     assert builds[0][-1] == str(root)
-    assert builds[1][-1] == str(root / "docker/formatting")
+    assert builds[1][-1] == str(root)
+    assert "--target" in builds[1] and "toolchain" in builds[1]
+    assert builds[2][-1] == str(root / "docker/formatting")
     run = next(command for command in calls if command[0] == "run")
     assert not run[run.index("--mount") + 1].endswith(",readonly")
 

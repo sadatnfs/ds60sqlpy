@@ -269,19 +269,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Count code units and codepoints.</strong> Inspect A followed by one emoji. <strong>Expected:</strong> length 3; spread count 2. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compare canonical spellings.</strong> Compare composed é with e plus combining acute before and after NFC. <strong>Expected:</strong> raw strings differ; normalized strings equal. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Match a literal regex fragment.</strong> Escape a.b+ and match it exactly rather than interpreting dot and plus. <strong>Expected:</strong> literal accepted; axbb rejected. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Observe global regex cursor state.</strong> Call /a/g repeatedly on aa and inspect lastIndex. <strong>Expected:</strong> matches at 0 then 1; third call false resets cursor 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Use Unicode-aware dot matching.</strong> Compare <code>/^.$/</code> and <code>/^.$/u</code> on one emoji. <strong>Expected:</strong> without u false; with u true. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Bound a text-validation input.</strong> Reject a string longer than 20 code units before applying an anchored ASCII identifier pattern. <strong>Expected:</strong> item_1 accepted; oversized input rejected. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

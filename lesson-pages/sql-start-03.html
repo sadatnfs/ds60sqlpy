@@ -482,35 +482,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 1, Two task rows with columns task_id, team, status, effort; final ORDER BY task_id: IDs 1 and 5. The Red-only checkpoint has IDs 1,2,5.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 1, Inspect the Red-only stage IDs 1,2,5, then confirm only 1,5 remain after the status filter. Task 2 is the closed negative control.</p>
 <p><strong>Progressive hint:</strong> Add one AND restriction after confirming the first filter.</p>
-<ol>
+<ol start="2">
 <li><strong>Repair alias scope.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 2, Repair SELECT task_id, effort * 2 AS doubled_effort FROM start_tasks WHERE doubled_effort &gt;= 6. Return task_id, doubled_effort in ascending task_id order without introducing a subquery.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 2, Three task rows, columns task_id, doubled_effort; final ORDER BY task_id: (2,10),(4,6),(5,6). The original same-level alias reference produces undefined_column, SQLSTATE 42703.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 2, Inspect pairs (2,10),(4,6),(5,6), preserving both inclusive boundary values of 6. The original alias attempt reports undefined_column SQLSTATE 42703.</p>
 <p><strong>Progressive hint:</strong> WHERE sees input columns; SELECT creates the alias later in the logical model.</p>
-<ol>
+<ol start="3">
 <li><strong>Repair Boolean grouping.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 3, Return Red tasks whose status is open or blocked, with task_id, team, status. Diagnose the unparenthesized predicate team = &#x27;Red&#x27; AND status = &#x27;open&#x27; OR status = &#x27;blocked&#x27;.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 3, Two task rows with columns task_id, team, status; final ORDER BY task_id: IDs 1 and 5. The faulty predicate also returns Blue blocked task 6.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 3, Trace Blue blocked task 6 through the faulty and repaired predicates. It appears only before grouping the status alternatives; the repaired IDs are 1,5.</p>
 <p><strong>Progressive hint:</strong> Trace task 6 through each part of the original expression.</p>
-<ol>
+<ol start="4">
 <li><strong>Separate spelling from meaning.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 4, Diagnose SELECT task_id, effrot FROM start_tasks and repair it to return task_id, effort for every task. State the error category before changing code.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 4, Six rows with columns task_id, effort; final ORDER BY task_id. The misspelled input name produces undefined_column, SQLSTATE 42703; the corrected result includes ID 3 with NULL effort.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 4, Capture undefined_column SQLSTATE 42703 for the misspelling in a separate attempted run, then inspect six corrected task identities and the retained NULL effort at ID 3.</p>
 <p><strong>Progressive hint:</strong> Compare the requested column against the fixture declaration.</p>
-<ol>
+<ol start="5">
 <li><strong>Debug a threshold boundary.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 5, Return open tasks with known effort at least 3, projecting task_id, effort. Explain the difference between &gt;= 3 and &gt; 3 on this fixture.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 5, Two task rows, columns task_id, effort; final ORDER BY task_id: (4,3),(5,3). The strict &gt; 3 version returns zero rows; missing effort does not qualify.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 5, Require IDs 4 and 5 with effort 3. Independently try the strict comparison and observe zero qualifying open rows; closed ID 2 remains excluded in either case.</p>
 <p><strong>Progressive hint:</strong> At least includes the boundary value itself.</p>
-<ol>
+<ol start="6">
 <li><strong>Combine a small reporting contract.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 6, Return the first two open tasks ranked by largest effort, keeping unknown effort last, with task_id, team, effort. Explain every clause and its logical role.</p>
@@ -569,7 +569,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_start_03_query_debugging.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -582,7 +582,8 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-START-03: Query Construction and Debugging</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_start_03_query_debugging.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use ./classroom -&gt; PostgreSQL -&gt; sql-start-03 and its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Select &quot;Whole SQL lesson (psql)&quot;; Docker supplies the client.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
@@ -594,14 +595,18 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> start_tasks <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  task_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  team <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  status <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  effort <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> start_tasks <span class="syntax-punctuation">(</span>task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> effort<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Red&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -610,6 +615,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Blue&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Red&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Blue&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 1: Watch a predicate narrow the identities</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Four rows, columns task_id, team, status, effort; IDs 1,3,4,5. ID 3 still has NULL effort.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -623,6 +629,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 2: Compute a label without using it too early</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Three rows with columns task_id, doubled_effort: (2,10), (4,6), (5,6).</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -635,6 +642,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  doubled_effort <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Build a stage.</span></span>
@@ -750,7 +758,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_start_03_query_debugging_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -770,14 +778,18 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> start_tasks <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  task_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  team <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  status <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  effort <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> start_tasks <span class="syntax-punctuation">(</span>task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> effort<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Red&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -786,6 +798,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Blue&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Red&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Blue&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -797,40 +810,47 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Build a checkpoint</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    team<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    status<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    effort</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_tasks</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Build a checkpoint</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  team<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  effort</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_tasks</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> effort</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_tasks</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> effort</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      start_tasks</span>
-<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">      team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      task_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Repair alias scope</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort</span>
@@ -840,24 +860,30 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">,</span> effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_tasks</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">,</span> effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_tasks</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>doubled_effort <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>doubled_effort <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Repair Boolean grouping</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  team<span class="syntax-punctuation">,</span></span>
@@ -870,26 +896,32 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">    <span class="syntax-keyword">OR</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_tasks</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
-<span class="source-line">      <span class="syntax-keyword">OR</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_tasks</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Separate spelling from meaning</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  effort</span>
@@ -897,23 +929,29 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  start_tasks</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">,</span> effort</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_tasks</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">,</span> effort</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_tasks</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>effort<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>effort<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Debug a threshold boundary</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  effort</span>
@@ -924,26 +962,32 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">AND</span> effort <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">,</span> effort</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_tasks</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">AND</span> effort <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">,</span> effort</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_tasks</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> effort <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  task_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>effort<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>effort<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>effort<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>effort<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Combine a small reporting contract</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  team<span class="syntax-punctuation">,</span></span>
@@ -956,6 +1000,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  effort <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  task_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> effort</span>
@@ -966,13 +1011,17 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  effort <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> task_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">      array_agg<span class="syntax-punctuation">(</span>task_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> effort <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> task_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-03 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1013,7 +1062,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-start-02.html"><small>Previous lesson</small><strong>sql-start-02</strong><span>Values NULL and Deterministic Order</span></a>
-        <a class="nav-card next" href="sql-01.html"><small>Next lesson</small><strong>sql-01</strong><span>Select Where Orderby</span></a>
+        <a class="nav-card next" href="sql-01.html"><small>Next lesson</small><strong>sql-01</strong><span>SELECT, WHERE, ORDER BY and LIMIT</span></a>
       </nav>
     </div>
   </main>

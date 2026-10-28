@@ -155,13 +155,25 @@ def test_browser_exclusions_have_complete_real_ui_qualification_and_retained_rep
     assert all(
         "real Chromium D3 and Plotly workflows" in row["reason"] for row in excluded.values()
     )
+    from scripts.ci_classroom import CORE_BROWSER
+
     workflow = (ROOT / ".github/workflows/app-build.yml").read_text()
-    assert "scripts/check_d3_browser.py --url" in workflow
-    assert "--report work/d3-browser-receipts.json --check-persistence" in workflow
-    assert "work/d3-browser-receipts.json" in workflow.split("Retain runtime receipts", 1)[1]
-    assert "scripts/check_plotly_browser.py --url" in workflow
-    assert "--report work/plotly-browser-receipts.json --check-persistence" in workflow
-    assert "work/plotly-browser-receipts.json" in workflow.split("Retain runtime receipts", 1)[1]
+    required = {
+        "scripts/check_classroom_browser.py": "browser-receipts.json",
+        "courses/web-development/authoring/check_browser.py": "web-browser-receipts.json",
+        "courses/web-development/authoring/check_live_preview.py": "live-preview-receipts.json",
+        "scripts/check_d3_browser.py": "d3-browser-receipts.json",
+        "scripts/check_plotly_browser.py": "plotly-browser-receipts.json",
+    }
+    assert dict(CORE_BROWSER) == required
+    assert "ci_classroom.py qualify" in workflow
+    assert "work/*receipts.json" in workflow.split("Retain bounded runtime reports", 1)[1]
+    # Execution-level CI tests separately assert these exact D3/Plotly calls
+    # run again in read-only persistence mode after container replacement.
+    assert CORE_BROWSER[-2:] == (
+        ("scripts/check_d3_browser.py", "d3-browser-receipts.json"),
+        ("scripts/check_plotly_browser.py", "plotly-browser-receipts.json"),
+    )
 
 
 @pytest.mark.parametrize(

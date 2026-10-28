@@ -329,19 +329,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Compare bidirectional and causal mixtures.</strong> Use zero queries/keys and values[[2, 0], [0, 2], [6, 6]] under all-allowed and causal masks. <strong>Expected:</strong> encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3]. <strong>Verify:</strong> Save the assertion results for exercise 1, including encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3].</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Trace rectangular cross-attention.</strong> Use two zero target queries, three zero source keys and the same source values. <strong>Expected:</strong> score/weight shape(2, 3); output shape(2, 2); both outputs[8/3, 8/3]. <strong>Verify:</strong> Save the assertion results for exercise 2, including score/weight shape(2, 3); output shape(2, 2); both outputs[8/3, 8/3].</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Build shifted decoder targets.</strong> For target IDs[5, 7, 3], prepend BOS 1 and form input/label pairs. <strong>Expected:</strong> inputs[1, 5, 7]; labels[5, 7, 3]; diagonal allowed without seeing the target itself. <strong>Verify:</strong> Save the assertion results for exercise 3, including inputs[1, 5, 7]; labels[5, 7, 3]; diagonal allowed without seeing the target itself.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Separate masked-token supervision.</strong> Corrupt source[2, 5, 7] at the middle position with MASK 0 and supervise only that original token. <strong>Expected:</strong> input[2, 0, 7]; one active label 5; bidirectional context remains allowed. <strong>Verify:</strong> Save the assertion results for exercise 4, including input[2, 0, 7]; one active label 5; bidirectional context remains allowed.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Perturb future target values.</strong> Change only the third value vector and compare the first two encoder/decoder outputs. <strong>Expected:</strong> encoder prefix changes; causal decoder prefix stays fixed. <strong>Verify:</strong> Save the assertion results for exercise 5, including encoder prefix changes; causal decoder prefix stays fixed.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Combine source padding with cross-attention.</strong> Mark the third source position as padding for both target queries. <strong>Expected:</strong> both cross outputs[1, 1]; padded source weight 0. <strong>Verify:</strong> Save the assertion results for exercise 6, including both cross outputs[1, 1]; padded source weight 0.</li>
 </ol>
 <h3 id="controlled-case-study">Controlled case study<a class="heading-anchor" href="#controlled-case-study" aria-label="Link to this section">#</a></h3>

@@ -1,5 +1,8 @@
 # Day 28: Feature Engineering with scikit-learn
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 Feature engineering turns raw columns into model inputs. Any transformation
@@ -223,8 +226,9 @@ data receives only `transform`.
 
 ## Dataset note
 
-The notebook uses Seaborn's Titanic sample, with the same first-use cache
-behavior as earlier lessons. A constructed DataFrame keeps practice offline.
+The notebook uses the original synthetic passenger-outcomes fixture. The
+reviewed loader performs no network request; the generated outcomes support
+programming practice and do not describe historical passengers.
 
 ## Exercises and progressive hints
 

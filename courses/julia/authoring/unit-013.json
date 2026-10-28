@@ -1,0 +1,58 @@
+{
+  "number": 13,
+  "title": "Broadcasting, axes and mutation order",
+  "concepts": ["broadcast", "dot syntax", "fusion", "shape", "aliasing"],
+  "outcome": "Use broadcasting with explicit axes and distinguish an elementwise formula from a mutation-order-dependent algorithm.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-007", "julia-012"],
+  "sources": [
+    ["Julia dot syntax", "https://docs.julialang.org/en/v1/manual/functions/"],
+    ["Julia array broadcasting", "https://docs.julialang.org/en/v1/manual/arrays/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Choose the axis",
+      "task": "Add one offset per column to a matrix.",
+      "expected": "Reshape the offsets into a one-row array.",
+      "hint": "Write the indexed formula first.",
+      "answer": "The explicit singleton axis documents the intended broadcast alignment."
+    },
+    {
+      "title": "Reject incompatible axes",
+      "task": "Broadcast a length 4 vector with the 2-by -3 fixture.",
+      "expected": "A DimensionMismatch occurs.",
+      "hint": "Compatible axes are not determined by total element count.",
+      "answer": "Shape validation prevents a silent interpretation of an unintended operation."
+    },
+    {
+      "title": "Update in place",
+      "task": "Apply 2x+1 elementwise to a floating vector using dotted assignment.",
+      "expected": "The destination values change to the expected affine result.",
+      "hint": "Each output depends only on the corresponding old element.",
+      "answer": "This dependence pattern makes the specific self-update straightforward to reason about."
+    },
+    {
+      "title": "Trace a manual recurrence",
+      "task": "Shift a vector left-to-right by reading the preceding updated element.",
+      "expected": "The example becomes[1,1,1,1].",
+      "hint": "A later read sees an earlier write.",
+      "answer": "The loop implements a recurrence, not a simultaneous snapshot assignment."
+    },
+    {
+      "title": "Preserve a snapshot",
+      "task": "Read the shift input from an explicit copy.",
+      "expected": "The example becomes[1,1,2,3].",
+      "hint": "Separate source and destination storage.",
+      "answer": "The copy changes the read/write dependency and therefore the algorithm."
+    },
+    {
+      "title": "Choose a destination type",
+      "task": "Write 0.5 into an integer element through dotted assignment.",
+      "expected": "The incompatible conversion is rejected.",
+      "hint": "Mutation does not make the destination representation arbitrary.",
+      "answer": "Allocate a representation that can express the intended result."
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 -- Day 31: Query Execution Plans (EXPLAIN/ANALYZE)
--- BEGINNER WORKFLOW — sql-31: Explain Analyze
+-- BEGINNER WORKFLOW - sql-31: EXPLAIN and EXPLAIN ANALYZE
 -- Guide: sql/postgres-60day/companion-guides/day31_explain_analyze.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-31/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-31.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Baseline query
 EXPLAIN
 SELECT
@@ -27,6 +28,7 @@ FROM
   orders o
 WHERE
   o.total_amount > 500;
+
 EXPLAIN ANALYZE
 SELECT
   o.order_id,
@@ -36,6 +38,7 @@ FROM
 WHERE
   o.total_amount > 500
 LIMIT 100;
+
 -- Join with filter
 EXPLAIN
 SELECT
@@ -51,6 +54,7 @@ GROUP BY
   c.country
 ORDER BY
   qty DESC;
+
 -- Using an index candidate (to be added on Day 32) and compare
 -- Rerun EXPLAIN after creating indexes in Day 32 to observe plan changes.
 -- Exercises

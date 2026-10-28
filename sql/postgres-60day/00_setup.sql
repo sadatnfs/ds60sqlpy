@@ -4,8 +4,11 @@
 BEGIN;
 -- Clean slate
 DROP SCHEMA IF EXISTS training CASCADE;
+
 CREATE SCHEMA training;
+
 SET search_path TO training, public;
+
 -- Core entities
 CREATE TABLE customers (
   customer_id SERIAL PRIMARY KEY,
@@ -16,6 +19,7 @@ CREATE TABLE customers (
   segment TEXT,
   attributes JSONB DEFAULT '{}'::jsonb
 );
+
 CREATE TABLE products (
   product_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
@@ -24,6 +28,7 @@ CREATE TABLE products (
   cost NUMERIC(10, 2) NOT NULL CHECK (cost >= 0),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
 CREATE TABLE orders (
   order_id SERIAL PRIMARY KEY,
   customer_id INT NOT NULL REFERENCES customers (customer_id),
@@ -31,6 +36,7 @@ CREATE TABLE orders (
   status TEXT NOT NULL DEFAULT 'placed',
   total_amount NUMERIC(12, 2) NOT NULL DEFAULT 0
 );
+
 CREATE TABLE order_items (
   order_item_id SERIAL PRIMARY KEY,
   order_id INT NOT NULL REFERENCES orders (order_id) ON DELETE CASCADE,
@@ -39,6 +45,7 @@ CREATE TABLE order_items (
   unit_price NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0),
   discount NUMERIC(5, 2) NOT NULL DEFAULT 0 CHECK (discount BETWEEN 0 AND 1)
 );
+
 CREATE TABLE payments (
   payment_id SERIAL PRIMARY KEY,
   order_id INT NOT NULL REFERENCES orders (order_id) ON DELETE CASCADE,
@@ -46,11 +53,13 @@ CREATE TABLE payments (
   amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
   method TEXT NOT NULL CHECK (method IN ('card', 'paypal', 'bank', 'credit'))
 );
+
 -- Organization / HR for hierarchies & self-joins
 CREATE TABLE departments (
   department_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE
 );
+
 CREATE TABLE employees (
   employee_id SERIAL PRIMARY KEY,
   full_name TEXT NOT NULL,
@@ -59,6 +68,7 @@ CREATE TABLE employees (
   hire_date DATE NOT NULL DEFAULT CURRENT_DATE,
   salary NUMERIC(10, 2) NOT NULL CHECK (salary >= 0)
 );
+
 -- Events with JSONB payloads for semi-structured queries
 CREATE TABLE events (
   event_id BIGSERIAL PRIMARY KEY,
@@ -67,6 +77,7 @@ CREATE TABLE events (
   event_type TEXT NOT NULL,
   metadata JSONB NOT NULL DEFAULT '{}'::jsonb
 );
+
 -- Finance helpers
 CREATE TABLE expenses (
   expense_id SERIAL PRIMARY KEY,
@@ -74,12 +85,14 @@ CREATE TABLE expenses (
   amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
   expense_date DATE NOT NULL
 );
+
 CREATE TABLE budgets (
   budget_id SERIAL PRIMARY KEY,
   category TEXT NOT NULL,
   period DATE NOT NULL, -- first day of month
   amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0)
 );
+
 CREATE TABLE promotions (
   promotion_id SERIAL PRIMARY KEY,
   product_id INT NOT NULL REFERENCES products (product_id),
@@ -88,12 +101,14 @@ CREATE TABLE promotions (
   discount_rate NUMERIC(4, 3) NOT NULL CHECK (discount_rate BETWEEN 0 AND 1),
   CHECK (end_date >= start_date)
 );
+
 -- XML sample table
 CREATE TABLE xml_docs (
   doc_id SERIAL PRIMARY KEY,
   payload XML NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
 -- Seed data
 --
 -- The course data is intentionally deterministic. Relationships are derived
@@ -112,6 +127,7 @@ FROM
   generate_series(1, 500) AS g (gs)
 ORDER BY
   gs;
+
 WITH product_seed AS (
   SELECT
     gs,
@@ -142,6 +158,7 @@ FROM
   product_seed
 ORDER BY
   gs;
+
 INSERT INTO departments (name)
 SELECT
   name
@@ -150,6 +167,7 @@ FROM
   WITH ORDINALITY AS d (name, position)
 ORDER BY
   position;
+
 INSERT INTO employees (full_name, manager_id, department_id, hire_date, salary)
 SELECT
   'Employee ' || employee_no,
@@ -165,6 +183,7 @@ FROM
   generate_series(1, 100) AS e (employee_no)
 ORDER BY
   employee_no;
+
 -- Customers outside BR receive 4-16 orders, all after signup and spread across
 -- the customer's observed lifetime. BR is intentionally an event-only
 -- customer market, so outer-join, EXCEPT, and anti-join exercises return
@@ -196,6 +215,7 @@ FROM
 ORDER BY
   customer_id,
   order_no;
+
 -- Each order receives 1-5 distinct products drawn from products 1-275.
 -- Products 276-300 intentionally remain unsold for outer/anti-join exercises;
 -- all six categories are still represented among sold products.
@@ -228,6 +248,7 @@ FROM
 ORDER BY
   gi.order_id,
   gi.item_no;
+
 UPDATE
   orders o
 SET
@@ -242,6 +263,7 @@ FROM (
     order_id) AS totals
 WHERE
   totals.order_id = o.order_id;
+
 -- Placed orders remain unpaid. Other orders receive one or two payments, with
 -- a deterministic subset intentionally left partially paid.
 WITH payment_plan AS (
@@ -287,6 +309,7 @@ FROM
 ORDER BY
   order_id,
   part_no;
+
 -- Forty events per customer provide complete overlap between behavioral and
 -- transactional cohorts while retaining varied event types and metadata.
 INSERT INTO events (customer_id, event_time, event_type, metadata)
@@ -301,6 +324,7 @@ FROM
 ORDER BY
   c.customer_id,
   event_no;
+
 INSERT INTO expenses (category, amount, expense_date)
 SELECT
   (ARRAY['COGS', 'Marketing', 'Payroll', 'Infrastructure', 'G&A'])[((gs - 1) % 5) + 1],
@@ -310,6 +334,7 @@ FROM
   generate_series(1, 10000) AS g (gs)
 ORDER BY
   gs;
+
 INSERT INTO budgets (category, period, amount)
 SELECT
   category,
@@ -326,6 +351,7 @@ FROM
 ORDER BY
   month_no,
   category_no;
+
 WITH promotion_seed AS (
   SELECT
     gs,
@@ -352,6 +378,7 @@ FROM
   adjusted_promotions
 ORDER BY
   gs;
+
 INSERT INTO xml_docs (payload)
 SELECT
   xmlparse (document '<order><id>' || o.order_id || '</id><status>' || o.status || '</status></order>')
@@ -360,4 +387,5 @@ FROM
 ORDER BY
   o.order_id
 LIMIT 1000;
+
 COMMIT;

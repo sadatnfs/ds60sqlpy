@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "datasets": {
+    "restaurant-bills": {
+      "kind": "synthetic",
+      "rows": 240,
+      "sha256": "244cfa79392c8a8c3866388d69c83d8de65b5e7121d3ab2c9923a68184f639dd"
+    },
+    "passenger-outcomes": {
+      "kind": "synthetic",
+      "rows": 360,
+      "sha256": "19de1d28b405a868e76b2ba6c287eec9a8f08565e5f8ef989a9e22f6191c6df5"
+    },
+    "bird-measurements": {
+      "kind": "synthetic",
+      "rows": 180,
+      "sha256": "93ac7f47fbf7a471d0c3110ea9caec79a418d443706e139731709ded1d29b915"
+    }
+  }
+}

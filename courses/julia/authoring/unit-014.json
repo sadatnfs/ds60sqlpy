@@ -1,0 +1,58 @@
+{
+  "number": 14,
+  "title": "Missing values, absence and nonfinite measurements",
+  "concepts": ["missing", "nothing", "NaN", "Union", "coverage"],
+  "outcome": "Keep missingness and numerical failure distinct and report the denominator used by each aggregation policy.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-004", "julia-012"],
+  "sources": [
+    ["Julia missing-value semantics", "https://docs.julialang.org/en/v1/manual/missing/"],
+    ["Statistics standard library", "https://docs.julialang.org/en/v1/stdlib/Statistics/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Retain the denominator",
+      "task": "Summarize 1,missing,3 using observed values.",
+      "expected": "Total 3, observed 2 and mean 2.",
+      "hint": "Keep counts alongside the statistic.",
+      "answer": "The result describes the observed measurements, not an assumed completed dataset."
+    },
+    {
+      "title": "Replace explicitly",
+      "task": "Fill the missing value with zero.",
+      "expected": "The mean becomes 4/3.",
+      "hint": "Recalculate the denominator and numerator.",
+      "answer": "The replacement policy changes the quantity being summarized."
+    },
+    {
+      "title": "Reject numerical failure",
+      "task": "Include NaN among otherwise observed values.",
+      "expected": "The finite-value guard rejects it.",
+      "hint": "skipmissing does not remove NaN.",
+      "answer": "Unknown data and undefined floating arithmetic need distinct handling."
+    },
+    {
+      "title": "Handle all-missing data",
+      "task": "Summarize two missing observations.",
+      "expected": "The observed count is 0 and estimate is missing.",
+      "hint": "Do not fabricate a mean from an empty observed set.",
+      "answer": "The output preserves unavailable information while retaining the eligible count."
+    },
+    {
+      "title": "Distinguish absence",
+      "task": "Compare something(nothing,7) with coalesce(nothing,7).",
+      "expected": "The former returns 7; the latter retains nothing.",
+      "hint": "The helpers target different sentinel meanings.",
+      "answer": "An absent return and a missing measurement should not be conflated accidentally."
+    },
+    {
+      "title": "Assess a real policy",
+      "task": "Choose deletion or imputation for a scientific dataset.",
+      "expected": "State assumptions, affected population and uncertainty.",
+      "hint": "Correct manipulation does not prove valid inference.",
+      "answer": "The missingness mechanism and decision target determine which policy is defensible."
+    }
+  ]
+}

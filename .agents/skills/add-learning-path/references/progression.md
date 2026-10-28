@@ -39,6 +39,15 @@ worked reasoning and complete examples instead of an exam or hidden answer.
 | R | Vectors, missing values, indexing, factors, functions and environments | Data frames, joins, functional workflows, S3/S4/R6/S7, packages and reproducibility | Statistical models, diagnostics, resampling, time/censoring, base/ggplot2/Plotly and analytical delivery |
 | JAX | Array shapes/dtypes, pure functions, explicit state and PRNG keys | grad/JVP/VJP, jit, control flow, vmap, objectives and optimizers | Scientific differentiation, custom derivatives, memory/performance, checkpoint boundaries and explicit hardware qualification |
 | DAX | Model grain, relationships, measures, queries and row/filter context | CALCULATE, iterators, virtual tables, time intelligence and nonadditive totals | Window/context behavior, security semantics, performance reasoning and bounded analytical capstones using offline worked references |
+| Julia | Values, arrays, scope, functions, errors and observable scripts | Multiple dispatch, parametric types, DataFrames, missingness and linear algebra | Differentiation, optimization, numerical stability, allocation, tasks/threads and reproducible scientific evidence |
+| Polars | Schemas, expressions, contexts, nulls and exact values | Joins, windows, lazy plans, Parquet/Arrow and nested data | Availability-aware joins, streaming, UDF boundaries, measured performance and validated publication |
+| dbt | Actual project stages, seeds, staging, ref/source and SQL-model results | Tests, Jinja, incremental state, snapshots and schema contracts | Selection/state/defer, publication gates, diagnostics, governance and owned CLI projects |
+| Bayesian Computing | Generative reasoning, conditioning, exact oracles, transformations and posterior decisions | Actual PyMC fitting, hierarchy, robust/count models, diagnostic evidence and predictive comparison | Native Stan models, HMC geometry, mixtures, dynamics, survival and explicit data/output projects |
+| Applied Science | Scientific targets, overlap, sensitivity and assumption-led comparisons | Longitudinal/forecast/survival workflows, retrieval/ranking and solver decisions | Synthesis dependence, spatial/survey/high-dimensional methods and auditable decision dossiers |
+| ML engineering | Data/feature/time contracts and baseline evidence | Tracking, training/serving consistency, artifacts and release decisions | Owned local feature/service lifecycle, delayed labels, monitoring, rollback and governance limits |
+| Data and ML Engineering | Records, units, SQL grain, contracts, tests and reproducibility | Ingestion, time, storage, orchestration, feature/training state and model decisions | Owned data publication/recovery, reliability, portfolio cases and the complete LLM admission-to-SSE lifecycle |
+| Apache and open-data platforms | Columnar data, protocols, process/service boundaries and library APIs | Separately prepared services, partition/state semantics, catalogs, transactions and failure | Source-bound component checks, exact retained-state recovery and selected integration dossiers; do not infer an unexecuted topology |
+| LLM evaluation | Populations, sampling, annotation, agreement and paired uncertainty | Retrieval/support, abstention, judges, holdouts and release decisions | Preference models, DPO/PPO/GRPO, policy support and actual bounded training evidence |
 | Plotly comparison | Figure/data semantics and labeled source tables | Aggregation, uncertainty, filtering and subplot comparisons | Evaluation graphics, bounded data reduction, accessibility, export and source-bound saved figures |
 | D3 specialization | SVG, selections, joins, scales, axes and data validation | Statistical graphics, missingness, reusable components and accessible interaction | Brush/zoom, hierarchy/network/geo layouts, Canvas, coordinated dashboards and actual browser acceptance |
 | HTML/CSS/PHP | Semantic document structure, cascade/layout, forms, PHP values/functions and output | Accessibility, responsive design, contextual escaping, prepared SQLite values and bounded request models | Real owned HTTP/session project, CSRF/ownership, integration, debugging and deployment boundaries |
@@ -89,3 +98,11 @@ For systems, explain ownership, isolation, observation, cleanup and recovery.
 Reading-only lessons can use traces, diagrams, counterexamples and derivations
 without inventing code execution. Tutorial chapters expose their full examples
 and discussions directly when the chosen learning mode calls for it.
+
+For statistical tutorials, a complete worked case includes the question, data
+unit, assumptions, derivation, implementation, diagnostic failure and bounded
+interpretation. Optional discussion is useful; mandatory exercises or hidden
+answers contradict tutorial mode. For scientific practice languages, preserve
+separate learner/reference artifacts and use independent oracles rather than
+assertions that merely restate implementation. The [scientist roadmap](../../../../docs/scientist-roadmap.md)
+shows existing depth before a new route is proposed.

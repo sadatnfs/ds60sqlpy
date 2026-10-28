@@ -1,27 +1,5 @@
 # SQL-OPS-02: Backup, Restore, and Recovery Rehearsals
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-43` and `sql-ops-01`
-- **Prerequisites:** [SQL Day 43 backup and recovery](../../postgres-60day/companion-guides/day43_backup_recovery.md),
-  [SQL-OPS-01](sql_ops_01_indexes_statistics_maintenance.md), constraints, and
-  a disposable `advanced_sql_training` database.
-- **Default artifact:** [learner SQL](../lessons/sql_ops_02_backup_restore_recovery.sql)
-  runs offline and rolls back a restore-verification simulation.
-- **Solutions:** [reasoning](../solutions/sql_ops_02_backup_restore_recovery_solutions.md) ·
-  [executable SQL](../solutions/sql_ops_02_backup_restore_recovery_solutions.sql)
-
-Run the safe default on Windows, macOS, or Linux:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql
-```
-
-It creates no files, databases, roles, extensions, or configuration changes.
-The optional command-line rehearsal below requires explicit authority, disk
-space, and an exact disposable target.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -86,6 +64,28 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-43` and `sql-ops-01`
+- **Prerequisites:** [SQL Day 43 backup and recovery](../../postgres-60day/companion-guides/day43_backup_recovery.md),
+  [SQL-OPS-01](sql_ops_01_indexes_statistics_maintenance.md), constraints, and
+  a disposable `advanced_sql_training` database.
+- **Default artifact:** [learner SQL](../lessons/sql_ops_02_backup_restore_recovery.sql)
+  runs offline and rolls back a restore-verification simulation.
+- **Solutions:** [reasoning](../solutions/sql_ops_02_backup_restore_recovery_solutions.md) ·
+  [executable SQL](../solutions/sql_ops_02_backup_restore_recovery_solutions.sql)
+
+Run the safe default on Windows, macOS, or Linux:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql
+```
+
+It creates no files, databases, roles, extensions, or configuration changes.
+The optional command-line rehearsal below requires explicit authority, disk
+space, and an exact disposable target.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -105,7 +105,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

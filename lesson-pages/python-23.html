@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day23_data_pipelines_generators.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -515,13 +515,13 @@ result <span class="syntax-operator">=</span> <span class="syntax-builtin">list<
 <ol>
 <li>Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. <strong>Constraints:</strong> use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. <strong>Verify:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Compose separate generator stages to filter, map, and batch clean rows. <strong>Contract:</strong> every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. <strong>Verify:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration. <strong>Verify:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</li>
 <li><strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically. <strong>Verify:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence.</li>
 <li><strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield. <strong>Verify:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</li>
@@ -695,13 +695,13 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. <strong>Constraints:</strong> use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. <strong>Verify:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Compose separate generator stages to filter, map, and batch clean rows. <strong>Contract:</strong> every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. <strong>Verify:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration. <strong>Verify:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</li>
 <li><strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically. <strong>Verify:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.</li>
 <li><strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield. <strong>Verify:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</li>

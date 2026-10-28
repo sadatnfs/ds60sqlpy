@@ -81,11 +81,23 @@ Each module has four deliberately separate artifacts:
 Work in the classroom's saved learner pad while attempting a lesson.
 Tracked starter and solution files remain separate from your Docker-volume work.
 
+## Language mechanics and lifecycle
+
+The additional standard-library path teaches mechanisms that affect real
+program behavior:
+
+- [Scope, closures and decorators](companion-guides/py_lang_02.md) traces lexical lookup, binding time, captured state and callable metadata.
+- [Iterators, generators and resource lifetime](companion-guides/py_lang_03.md) distinguishes a consumable stream from a reusable container and makes cleanup ownership explicit.
+- [Structured asyncio and cancellation](companion-guides/py_lang_04.md) teaches bounded concurrent work, deadlines, grouped failures and context restoration.
+
+Follow each unit's direct catalog prerequisites. These are separate learning
+units with saved pads and explained references, using the existing Core runtime.
+
 ## Deeper arrays, tables and algorithms
 
-The catalog also includes `python-numpy-01` through `python-numpy-04`,
-`python-pandas-01` through `python-pandas-04`, and `python-algo-01` through
-`python-algo-04`. These expand shapes and broadcasting, numerical behavior,
+The catalog includes `python-numpy-01` through `python-numpy-08`,
+`python-pandas-01` through `python-pandas-07`, and `python-algo-01` through
+`python-algo-07`. These expand shapes and broadcasting, numerical behavior,
 table grain and joins, data cleaning, collection design and algorithmic cost.
 Use their actual prerequisite chains rather than treating the numbered route
 as a mandatory completion barrier.
@@ -127,3 +139,10 @@ parallel checks and their evidence scope.
   use placeholders and redact sensitive headers.
 - Process-pool code always lives behind a `if __name__ == "__main__":` guard so
   it is safe with Windows' `spawn` process start method.
+
+The later deepening units include explicit dtype/promotion and overflow policies,
+owned random streams and checkpoints, weighted least squares/SVD, and window/FFT
+mechanics. Table work adds compound identity and lossless reshape, actual DST
+and calendar boundaries, and exact typed CSV/Parquet/domain checks. Algorithms
+add trees/tries, disjoint sets/minimum spanning forests, and one-pass summaries,
+medians and reservoir sampling. The catalog owns exact prerequisites and paths.

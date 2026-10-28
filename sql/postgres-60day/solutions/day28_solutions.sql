@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
 -- Assumptions: JSON text extraction with `->>` returns text or NULL. XML XPath results are arrays. Course metadata keys are small and deterministic.
@@ -39,6 +40,7 @@ FROM
   customers AS c
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find mobile-channel customers using JSONB containment.
@@ -61,6 +63,7 @@ WHERE
   c.attributes @> '{"channel": "mobile"}'::jsonb
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Count event rows with missing device metadata separately from present values.
@@ -78,6 +81,7 @@ SELECT
   COUNT(*) AS all_events
 FROM
   events AS e;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
@@ -111,6 +115,7 @@ GROUP BY
   customer_id
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Extract order ID and status text from XML documents without assuming XPath returns a scalar.
@@ -130,6 +135,7 @@ FROM
   xml_docs AS xd
 ORDER BY
   xd.doc_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
@@ -159,5 +165,6 @@ SELECT
   END AS safe_amount
 FROM
   payloads;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

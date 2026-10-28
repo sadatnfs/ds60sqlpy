@@ -1,0 +1,40 @@
+services:
+  initialize-two:
+    extends:
+      file: compose.yaml
+      service: initialize
+    volumes: ["state-two:/state"]
+  initialize-three:
+    extends:
+      file: compose.yaml
+      service: initialize
+    volumes: ["state-three:/state"]
+  cassandra-two:
+    extends:
+      file: compose.yaml
+      service: cassandra
+    environment:
+      DS60_CASSANDRA_NODE: cassandra-two
+    volumes: [".:/project:ro", "state-two:/state"]
+    depends_on:
+      initialize-two:
+        condition: service_completed_successfully
+  cassandra-three:
+    extends:
+      file: compose.yaml
+      service: cassandra
+    environment:
+      DS60_CASSANDRA_NODE: cassandra-three
+    volumes: [".:/project:ro", "state-three:/state"]
+    depends_on:
+      initialize-three:
+        condition: service_completed_successfully
+volumes:
+  state-two:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-cassandra
+  state-three:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-cassandra

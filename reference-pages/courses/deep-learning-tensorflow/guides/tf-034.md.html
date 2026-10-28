@@ -239,19 +239,19 @@ repeated<span class="syntax-operator">=</span>rows<span class="syntax-operator">
 <ol>
 <li><strong>Count errors by group.</strong> Use groupsA,A,B with predictions1,0,0 and truth1,1,0. <strong>Expected:</strong> A1/2 errors; B0/1. <strong>Verify:</strong> Save the assertion results for exercise 1, including A1/2 errors; B0/1.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Expose duplicate confidence.</strong> Repeat the groupB row five times and compare row count with unique IDs. <strong>Expected:</strong> 8 rows but only3 unique IDs. <strong>Verify:</strong> Save the assertion results for exercise 2, including 8 rows but only3 unique IDs.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Evaluate fixed perturbations.</strong> Use f(x)=x&gt;=0 with base1 and perturbations-.1,-.9,-1.1. <strong>Expected:</strong> first two retain class1; final perturbation changes to0. <strong>Verify:</strong> Save the assertion results for exercise 3, including first two retain class1; final perturbation changes to0.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Keep severities separate.</strong> Record one severe failure and nine minor passes; count severe failures independently of total pass rate. <strong>Expected:</strong> 90percent passes and 1 severe failure. <strong>Verify:</strong> Save the assertion results for exercise 4, including 90percent passes and 1 severe failure.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Write bounded claims.</strong> Create a model card naming the three unique units and untested conditions. <strong>Expected:</strong> card includes count3 and an untested future-population condition. <strong>Verify:</strong> Save the assertion results for exercise 5, including card includes count3 and an untested future-population condition.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject an empty group rate.</strong> Compute a rate only when its group has observations. <strong>Expected:</strong> empty group producesNone, not0. <strong>Verify:</strong> Save the assertion results for exercise 6, including empty group producesNone, not0.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

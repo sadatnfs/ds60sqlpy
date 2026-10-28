@@ -1,0 +1,58 @@
+{
+  "number": 7,
+  "title": "Arrays, shapes, copies and views",
+  "concepts": ["array shape", "column major", "copy", "view", "aliasing"],
+  "outcome": "Trace array storage and indexing while choosing deliberately between copies and shared views.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-006"],
+  "sources": [
+    ["Julia arrays", "https://docs.julialang.org/en/v1/manual/arrays/"],
+    ["Array interfaces", "https://docs.julialang.org/en/v1/manual/interfaces/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Read a shape",
+      "task": "Compare a length 2 vector with a2-by -1 matrix.",
+      "expected": "Their sizes are(2,) and(2,1).",
+      "hint": "Element count does not determine the number of axes.",
+      "answer": "Operations can dispatch or broadcast differently for these shapes."
+    },
+    {
+      "title": "Trace column order",
+      "task": "Locate value 5 in the reshaped matrix.",
+      "expected": "It is at row 1,column 3.",
+      "hint": "Follow columns through the input vector.",
+      "answer": "The storage order is explicit and should not be confused with the scientific interpretation of axes."
+    },
+    {
+      "title": "Take a snapshot",
+      "task": "Mutate an ordinary slice from a vector.",
+      "expected": "The original scalar-element vector is unchanged.",
+      "hint": "The slice has copied storage.",
+      "answer": "A snapshot protects later reads from this mutation, with an allocation cost."
+    },
+    {
+      "title": "Use a shared window",
+      "task": "Mutate a view of the same range.",
+      "expected": "The original array changes.",
+      "hint": "A view refers to existing storage.",
+      "answer": "A view is useful when shared mutation or avoided copying is intended."
+    },
+    {
+      "title": "Copy nested state",
+      "task": "Compare copy and deepcopy on a vector of vectors.",
+      "expected": "A shallow copy shares inner vectors; a deep copy does not in this fixture.",
+      "hint": "Inspect both outer and inner identities.",
+      "answer": "The required independence level depends on the data structure and algorithm."
+    },
+    {
+      "title": "Retain a bound check",
+      "task": "Read index 0 from a standard two-element vector.",
+      "expected": "A BoundsError is raised.",
+      "hint": "The valid standard indices start at 1.",
+      "answer": "Bounds checking makes a violated indexing contract observable before considering lower-level optimizations."
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import posixpath
 import re
 from dataclasses import replace
@@ -125,7 +126,10 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
 
     assert "Code cell 1" in python_reader
     assert "Readable preview." in python_reader
-    assert "1 + 1" in _visible_text(python_reader)
+    notebook = json.loads(catalog.resolve(catalog.get("python-01").lesson_path).read_text())
+    first_code = next(cell["source"] for cell in notebook["cells"] if cell["cell_type"] == "code")
+    literal_source = "".join(first_code) if isinstance(first_code, list) else first_code
+    assert literal_source.strip() in _visible_text(python_reader)
     assert 'class="source-code language-sql"' in sql_reader
     assert "SELECT customer_id" in _visible_text(sql_reader)
     assert "psql -X -v ON_ERROR_STOP=1" in sql_reader
@@ -230,7 +234,20 @@ def test_math_in_tables_keeps_conditional_probability_and_superscripts() -> None
 
 @pytest.mark.parametrize(
     "suffix",
-    [".cpp", ".scala", ".java", ".mjs", ".mts", ".yaml", ".json", ".csv", ".txt", ".toml", ".lock"],
+    [
+        ".cpp",
+        ".scala",
+        ".java",
+        ".mjs",
+        ".mts",
+        ".yaml",
+        ".json",
+        ".csv",
+        ".txt",
+        ".toml",
+        ".lock",
+        ".hql",
+    ],
 )
 def test_authored_text_reference_is_escaped_and_rendered(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, suffix: str

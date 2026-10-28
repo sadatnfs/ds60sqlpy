@@ -1,11 +1,11 @@
 -- Day 60: Final Capstone - Integrated Data Challenge (Part 3)
--- BEGINNER WORKFLOW — sql-60: Final Capstone Part3
+-- BEGINNER WORKFLOW - sql-60: Final Capstone Part 3
 -- Guide: sql/postgres-60day/companion-guides/day60_final_capstone_part3.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-60/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-60.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -23,6 +23,7 @@
 --  - Clear documentation of choices and optimizations
 BEGIN;
 SET search_path TO training, public;
+
 -- 1. DQ Summary Views (re-usable) ------------------------------------------
 CREATE OR REPLACE VIEW v_dq_customers AS
 SELECT
@@ -50,6 +51,7 @@ SELECT
     END) AS invalid_name
 FROM
   customers;
+
 CREATE OR REPLACE VIEW v_dq_orders AS
 SELECT
   COUNT(*) AS total,
@@ -67,14 +69,17 @@ SELECT
     END) AS missing_customer
 FROM
   orders;
+
 SELECT
   *
 FROM
   v_dq_customers;
+
 SELECT
   *
 FROM
   v_dq_orders;
+
 -- 2. Core Business Views ----------------------------------------------------
 -- Lifetime value per customer.
 --
@@ -98,6 +103,7 @@ GROUP BY
   c.full_name,
   c.country,
   c.segment;
+
 -- Control 1: zero-order customers must still appear in the view.
 SELECT
   COUNT(*) AS customers_missing_from_ltv
@@ -106,6 +112,7 @@ FROM
   LEFT JOIN v_customer_ltv l USING (customer_id)
 WHERE
   l.customer_id IS NULL;
+
 -- Control 2: customer-level LTV must reconcile to the authoritative order
 -- header total. Expected `difference` is 0.00 on the course seed.
 SELECT
@@ -122,6 +129,7 @@ SELECT
       orders) AS difference
 FROM
   v_customer_ltv;
+
 -- Monthly revenue and MoM growth
 CREATE OR REPLACE VIEW v_monthly_revenue AS
 WITH m AS (
@@ -140,6 +148,7 @@ SELECT
   ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month), 0)) / NULLIF (LAG(m.revenue) OVER (ORDER BY m.month), 0), 4) AS mom_growth
 FROM
   m;
+
 -- 3. Stakeholder-ready Queries ---------------------------------------------
 -- Finance: Budget vs Actual by month/category (YTD)
 WITH exp AS (
@@ -182,6 +191,7 @@ ORDER BY
   month DESC,
   category
 LIMIT 120;
+
 -- Marketing: Cohort retention for the latest 6 signup cohorts.
 --
 -- A cohort is the customer's signup month. An active customer has at least one
@@ -261,6 +271,7 @@ FROM
 ORDER BY
   cohort_month DESC,
   month_offset;
+
 -- Operations: Top slow queries to optimize (use EXPLAIN ANALYZE in-session)
 EXPLAIN
 SELECT
@@ -276,14 +287,21 @@ GROUP BY
   p.category
 ORDER BY
   qty DESC;
+
 -- 4. Performance Checklist ---------------------------------------------------
 -- Indexes helpful for above queries (will be rolled back unless COMMIT)
 CREATE INDEX IF NOT EXISTS idx_orders_date ON orders (order_date);
+
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders (customer_id);
+
 CREATE INDEX IF NOT EXISTS idx_oi_order ON order_items (order_id);
+
 CREATE INDEX IF NOT EXISTS idx_products_category ON products (category);
+
 CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses (expense_date);
+
 CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets (period);
+
 -- Validate plan improvements quickly
 EXPLAIN ANALYZE
 SELECT
@@ -293,6 +311,7 @@ FROM
 ORDER BY
   month DESC
 LIMIT 12;
+
 -- 5. Documentation Hints ----------------------------------------------------
 -- Include in your write-up:
 --  - Data quality findings (from v_dq_*) and remediation steps

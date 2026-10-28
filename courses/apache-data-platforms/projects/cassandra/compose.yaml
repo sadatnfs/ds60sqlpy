@@ -1,0 +1,61 @@
+x-base: &base
+  image: ds60-apache-cassandra-binary:5.0.9
+  pull_policy: never
+  working_dir: /project
+  entrypoint: [python3]
+  volumes: [".:/project:ro"]
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,exec,size=256m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  cpus: 2.0
+  mem_limit: 2g
+  labels:
+    org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+    org.ds60.workshop.kind: apache-cassandra
+services:
+  initialize:
+    <<: *base
+    user: "0:0"
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    command:
+      [
+        "-c",
+        "import os; from pathlib import Path; root=Path('/state'); [p.mkdir(exist_ok=True) for p in [root/'data',root/'commitlog',root/'saved_caches',root/'hints',root/'cdc_raw',root/'logs']]; [(os.chown(p,1000,1000),p.chmod(0o700)) for p in [root,*root.iterdir()]]",
+      ]
+    volumes: ["state:/state"]
+  cassandra:
+    <<: *base
+    user: "1000:1000"
+    entrypoint: [bash, /project/start-server.sh]
+    stop_grace_period: 30s
+    command: []
+    volumes: [".:/project:ro", "state:/state"]
+    depends_on:
+      initialize:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python3, /project/client.py, --health]
+      interval: 10s
+      timeout: 12s
+      retries: 18
+      start_period: 20s
+  client:
+    <<: *base
+    user: "1000:1000"
+    profiles: [tools]
+    mem_limit: 512m
+    cpus: 1.0
+    command: [/project/client.py]
+volumes:
+  state:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-cassandra
+networks:
+  default:
+    internal: true
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-cassandra

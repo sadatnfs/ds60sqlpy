@@ -20,17 +20,25 @@ concurrency:
 
 jobs:
   source-quality:
-    name: Source formatting and lint (Linux Docker)
+    name: Source formatting and lint (${{ matrix.toolchain }}, Linux Docker)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        toolchain: [main, r, julia]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Check every maintained language with the pinned formatter image
-        run: ./scripts/format-repo --check
-      - name: Lint maintained source with the shared toolchain
-        run: ./scripts/lint-repo
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Check and lint every maintained language through its isolated toolchain
+        env:
+          TOOLCHAIN: ${{ matrix.toolchain }}
+        run: python scripts/ci_source_quality.py --toolchain "$TOOLCHAIN"
       - name: Verify source checks left the checkout unchanged
         run: git diff --exit-code
 
@@ -111,6 +119,10 @@ jobs:
         run: git diff --exit-code -- docs/lesson-depth-report.md
       - name: Check reviewed prose and mathematical typesetting inputs
         run: uv run --no-sync python scripts/normalize_lesson_prose.py
+      - name: Check complete source and generated example-fence coverage
+        run: |
+          uv run --no-sync python scripts/ci_profiles.py
+          uv run --no-sync python scripts/sync_example_fences.py --check
       - name: Check maintained documentation and repository skills
         run: uv run --no-sync python scripts/check_repository_guidance.py
       - name: Check compiled TeX and offline font integrity

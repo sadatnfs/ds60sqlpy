@@ -1,0 +1,58 @@
+{
+  "number": 18,
+  "title": "Dates, availability time and historical features",
+  "concepts": ["Dates", "calendar period", "duration", "point-in-time", "tie rule"],
+  "outcome": "Use calendar arithmetic deliberately and reconstruct features using both event and availability time.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-017"],
+  "sources": [
+    ["Julia Dates", "https://docs.julialang.org/en/v1/stdlib/Dates/"],
+    ["Existing point-in-time data workflows", "../../../python/professional/README.md"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Choose a calendar window",
+      "task": "Compare one month with thirty days from January 31 in the fixture.",
+      "expected": "They end on February 29 and March 1.",
+      "hint": "A month is not a fixed day duration.",
+      "answer": "The window definition changes which observations belong to a period."
+    },
+    {
+      "title": "Inspect repeated month addition",
+      "task": "Compare two successive month additions with one two-month addition.",
+      "expected": "The fixture ends on March 29 versus March 31.",
+      "hint": "End-of-month clamping affects the intermediate state.",
+      "answer": "Calendar operations should follow the intended business rule rather than an assumed arithmetic identity."
+    },
+    {
+      "title": "Exclude a future correction",
+      "task": "Look up the feature on January 3.",
+      "expected": "The available value is 10.",
+      "hint": "Filter availability as well as event time.",
+      "answer": "A correction about a past event can still be future information."
+    },
+    {
+      "title": "State cutoff equality",
+      "task": "Look up at the exact availability timestamp.",
+      "expected": "The inclusive fixture admits the row.",
+      "hint": "Use the declared boundary policy.",
+      "answer": "Real ingestion timing may require another rule, which must be documented and tested."
+    },
+    {
+      "title": "Preserve entity identity",
+      "task": "Look up an absent entity.",
+      "expected": "The result is missing.",
+      "hint": "Do not choose the latest row from another entity.",
+      "answer": "An information boundary also needs the correct relational key."
+    },
+    {
+      "title": "Handle local civil time",
+      "task": "Receive a daylight-saving-ambiguous local timestamp.",
+      "expected": "The standard fixture does not resolve it.",
+      "hint": "Dates alone does not supply timezone identity.",
+      "answer": "Use a separately prepared timezone-aware policy rather than silently labeling a local clock value as UTC."
+    }
+  ]
+}

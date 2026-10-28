@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -125,9 +126,9 @@ def test_formatter_never_sees_escape_literals_or_dollar_body(
     )
     observed = fake_formatter(monkeypatch, lambda value: value)
     assert sql_style.format_sql_bytes(source) == source
-    assert len(observed) == 1
-    assert b"ESCAPE '\\'" not in observed[0]
-    assert b"BEGIN RAISE NOTICE" not in observed[0]
+    assert len(observed) == 3
+    assert all(b"ESCAPE '\\'" not in statement for statement in observed)
+    assert all(b"BEGIN RAISE NOTICE" not in statement for statement in observed)
 
 
 def test_sql_formatter_rejects_semantic_change_in_unprotected_expression(
@@ -208,3 +209,54 @@ def test_extra_statement_terminator_before_psql_gset_is_rejected(
     fake_formatter(monkeypatch, lambda value: value.rstrip() + b";\n")
     with pytest.raises(sql_style.SQLFormatError):
         sql_style.format_sql_bytes(source)
+
+
+def test_statement_boundaries_preserve_unicode_variables_and_trailing_comments() -> None:
+    source = (
+        "-- café 名;\nSELECT :'valeuré', :\"列\", :n AS result;\n"
+        "/* comment ; /* nested ; */ retained */\nSELECT '🐍;é';\n"
+        "-- final comment without a newline"
+    )
+    chunks = sql_style._statement_chunks(source)
+    assert len(chunks) == 2
+    assert "".join(chunks) == source
+    assert chunks[0].endswith(";\n")
+    assert chunks[1].endswith("-- final comment without a newline")
+    assert "SELECT '🐍;é';" in chunks[1]
+
+
+def test_statement_boundaries_keep_atomic_routine_and_quoted_semicolons_intact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = (
+        "CREATE FUNCTION f(x integer) RETURNS integer LANGUAGE SQL BEGIN ATOMIC\n"
+        "SELECT x + 1; SELECT x + 2; END;\n"
+        "DO $body$ BEGIN RAISE NOTICE 'café; :x'; END $body$;\n"
+        "SELECT 3; -- retained tail\n"
+    ).encode()
+    observed = fake_formatter(monkeypatch, lambda value: value)
+    assert sql_style.format_sql_bytes(source) == source
+    assert len(observed) == 3
+    assert b"SELECT x + 1; SELECT x + 2; END;" in observed[0]
+    assert b"BEGIN RAISE NOTICE" not in observed[1]
+    assert b"retained tail" in observed[2]
+
+
+@pytest.mark.skipif(
+    shutil.which("pg_format") is None, reason="Requires the prepared pgFormatter tool"
+)
+def test_real_formatter_does_not_indent_queries_after_an_opaque_routine() -> None:
+    body = "$body$\nBEGIN\n  RAISE NOTICE 'café; \\gset :hidden';\n  RETURN 1;\nEND\n$body$"
+    source = (
+        "-- Unicode before parser offsets: café 名 🐍\n"
+        "CREATE FUNCTION pg_temp.example() RETURNS integer LANGUAGE plpgsql AS "
+        + body
+        + ";\nSELECT 1;\nSELECT :'é' AS value;\n"
+        "-- retained comment before psql\n\\echo finished\n"
+    ).encode()
+    formatted = sql_style.format_sql_bytes(source)
+    assert body.encode() in formatted
+    assert formatted.count(b"\nSELECT\n") == 2
+    assert b"-- retained comment before psql" in formatted
+    assert formatted.endswith(b"\\echo finished\n")
+    assert sql_style.format_sql_bytes(formatted) == formatted

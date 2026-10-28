@@ -1,11 +1,11 @@
 -- Day 46: Project 1 - E-commerce Analytics (Part 1)
--- BEGINNER WORKFLOW — sql-46: Project1 Ecommerce Part1
+-- BEGINNER WORKFLOW - sql-46: Project 1 Ecommerce Part 1
 -- Guide: sql/postgres-60day/companion-guides/day46_project1_ecommerce_part1.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-46/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-46.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Topics: Customer segmentation by lifetime value, cohort setup
 BEGIN;
 SET search_path TO training, public;
+
 -- Lifetime Value (LTV)
 WITH order_values AS (
   SELECT
@@ -52,6 +53,7 @@ FROM
 ORDER BY
   l.ltv DESC
 LIMIT 100;
+
 -- Cohort setup by signup month
 SELECT
   date_trunc('month', created_at)::date AS cohort_month,
@@ -62,6 +64,7 @@ GROUP BY
   1
 ORDER BY
   cohort_month DESC;
+
 -- Exercises
 -- 1. Create LTV segments (gold/silver/bronze) based on thresholds and analyze by country.
 --    Inputs: For sql-46 Exercise 1, read from `customers`, and `orders`. Build the answer toward `country`, `ltv_segment`, `customers`, `avg_ltv`, and `total_ltv`; keep `country`, and `ltv_segment` visible whenever the result has row-level grain.

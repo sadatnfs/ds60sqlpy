@@ -350,19 +350,19 @@ count<span class="syntax-operator">=</span><span class="syntax-builtin">sum</spa
 <ol>
 <li><strong>Build an explicit SFT batch.</strong> Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target. <strong>Expected:</strong> inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. <strong>Verify:</strong> Save the assertion results for exercise 1, including inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Measure the initial state.</strong> Calculate initial training loss and a held-out prompt loss before any update; count trainable parameters. <strong>Expected:</strong> both losses finite; all model parameters trainable; count below 50000. <strong>Verify:</strong> Save the assertion results for exercise 2, including both losses finite; all model parameters trainable; count below 50000.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Perform actual full fine-tuning.</strong> Run 20 Adam updates at learning rate 0.01, clearing gradients each time. <strong>Expected:</strong> 20 finite losses; training loss decreases; an embedding parameter changes. <strong>Verify:</strong> Save the assertion results for exercise 3, including 20 finite losses; training loss decreases; an embedding parameter changes.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect the mask derivative.</strong> Differentiate cross entropy with respect to fresh zero logits under the same labels. <strong>Expected:</strong> ignored prompt positions have zero gradient; answer positions do not. <strong>Verify:</strong> Save the assertion results for exercise 4, including ignored prompt positions have zero gradient; answer positions do not.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Evaluate the frozen held-out prompt.</strong> After the declared 20 updates, evaluate the held-out sequence without another optimizer step. <strong>Expected:</strong> finite held-out loss and unchanged weights during evaluation; no promised improvement. <strong>Verify:</strong> Save the assertion results for exercise 5, including finite held-out loss and unchanged weights during evaluation; no promised improvement.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Write an honest adaptation receipt.</strong> Record update count, active training targets, train/heldout losses and the literal-token limitation. <strong>Expected:</strong> receipt says 20 updates, 4 active training targets and no natural-language competence claim. <strong>Verify:</strong> Save the assertion results for exercise 6, including receipt says 20 updates, 4 active training targets and no natural-language competence claim.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

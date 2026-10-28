@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS ds60 LOCATION 'file:///warehouse/ds60.db';
+CREATE EXTERNAL TABLE IF NOT EXISTS ds60.orders (id INT, region STRING, amount INT)
+PARTITIONED BY (day STRING) STORED AS PARQUET LOCATION 'file:///warehouse/orders';
+ALTER TABLE ds60.orders ADD IF NOT EXISTS PARTITION (day='2026-01-01') LOCATION 'file:///warehouse/orders/day=2026-01-01';

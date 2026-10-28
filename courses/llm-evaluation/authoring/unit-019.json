@@ -1,0 +1,64 @@
+{
+  "number": 19,
+  "title": "KL-regularized policies and reward exploitation",
+  "concepts": [
+    "KL regularization",
+    "reference policy",
+    "finite policy",
+    "reward hacking",
+    "policy gradient"
+  ],
+  "outcome": "Derive an exact finite-policy optimum and show why improving a proxy reward can reduce independently defined task utility.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-017", "eval-016"],
+  "exercises": [
+    {
+      "title": "Add a reward constant",
+      "task": "Add 100 to every action reward.",
+      "expected": "The optimal distribution is unchanged.",
+      "hint": "The common exponential factor cancels in normalization.",
+      "answer": "Only relative action rewards influence the finite-policy optimum under a fixed reference."
+    },
+    {
+      "title": "Rescale reward and beta",
+      "task": "Multiply both by 2.",
+      "expected": "The optimal distribution is unchanged.",
+      "hint": "Inspect the ratio reward/beta.",
+      "answer": "The objective scale changes but the reward-to-regularization tradeoff does not."
+    },
+    {
+      "title": "Inspect the gradient sum",
+      "task": "Sum the two logit-gradient components.",
+      "expected": "The sum is approximately zero.",
+      "hint": "A common logit shift leaves softmax probabilities unchanged.",
+      "answer": "This invariance checks the centered gradient through the probability parameterization."
+    },
+    {
+      "title": "Handle large rewards",
+      "task": "Use rewards 1000 and 999.",
+      "expected": "Stable normalization returns finite probabilities.",
+      "hint": "Subtract the maximum log weight before exponentiation.",
+      "answer": "The subtraction preserves normalized ratios while avoiding unnecessary overflow."
+    },
+    {
+      "title": "Identify missing support",
+      "task": "Give a useful action zero reference probability.",
+      "expected": "The bounded helper rejects the unsupported objective.",
+      "hint": "KL in this direction is infinite for positive mass outside reference support.",
+      "answer": "Adding a probability floor creates another reference distribution and must be treated as a modeling change."
+    },
+    {
+      "title": "Test independent utility",
+      "task": "Optimize the authored proxy from case B.",
+      "expected": "Proxy reward rises while independent task utility falls.",
+      "hint": "Keep the evaluation utility outside the training objective.",
+      "answer": "KL regularization can limit distribution change, but it cannot validate the reward model or rule out exploitation of a proxy."
+    }
+  ],
+  "sources": [
+    ["Preference-based reinforcement learning", "https://arxiv.org/abs/1706.03741"],
+    ["DPO derivation of the regularized policy", "https://arxiv.org/abs/2305.18290"]
+  ]
+}

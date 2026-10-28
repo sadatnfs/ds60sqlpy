@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "track_id": "llm-evaluation",
+  "lessons": [
+    {
+      "id": "eval-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-001.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-001.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-001_reference.py",
+        "courses/llm-evaluation/solutions/eval-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-002.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-002.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-002_reference.py",
+        "courses/llm-evaluation/solutions/eval-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-003.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-003.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-003_reference.py",
+        "courses/llm-evaluation/solutions/eval-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-004.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-004.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-004_reference.py",
+        "courses/llm-evaluation/solutions/eval-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-005.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-005.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-005_reference.py",
+        "courses/llm-evaluation/solutions/eval-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-006.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-006.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-006_reference.py",
+        "courses/llm-evaluation/solutions/eval-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-007.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-007.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-007_reference.py",
+        "courses/llm-evaluation/solutions/eval-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-008.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-008.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-008_reference.py",
+        "courses/llm-evaluation/solutions/eval-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-009.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-009.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-009_reference.py",
+        "courses/llm-evaluation/solutions/eval-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-010.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-010.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-010_reference.py",
+        "courses/llm-evaluation/solutions/eval-010_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "plotly",
+          "title": "Interactive Plotly",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/llm-evaluation/lessons/eval-010_plotly.py",
+          "solution_paths": [
+            "courses/llm-evaluation/solutions/eval-010_plotly_reference.py",
+            "courses/llm-evaluation/solutions/eval-010_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "eval-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-011.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-011.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-011_reference.py",
+        "courses/llm-evaluation/solutions/eval-011_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "plotly",
+          "title": "Interactive Plotly",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/llm-evaluation/lessons/eval-011_plotly.py",
+          "solution_paths": [
+            "courses/llm-evaluation/solutions/eval-011_plotly_reference.py",
+            "courses/llm-evaluation/solutions/eval-011_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "eval-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-012.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-012.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-012_reference.py",
+        "courses/llm-evaluation/solutions/eval-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-013.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-013.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-013_reference.py",
+        "courses/llm-evaluation/solutions/eval-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-014.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-014.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-014_reference.py",
+        "courses/llm-evaluation/solutions/eval-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-015.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-015.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-015_reference.py",
+        "courses/llm-evaluation/solutions/eval-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-016.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-016.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-016_reference.py",
+        "courses/llm-evaluation/solutions/eval-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-017.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-017.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-017_reference.py",
+        "courses/llm-evaluation/solutions/eval-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-evaluation/guides/eval-018.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-018.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-018_reference.py",
+        "courses/llm-evaluation/solutions/eval-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-019.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-019.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-019_reference.py",
+        "courses/llm-evaluation/solutions/eval-019_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "plotly",
+          "title": "Interactive Plotly",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/llm-evaluation/lessons/eval-019_plotly.py",
+          "solution_paths": [
+            "courses/llm-evaluation/solutions/eval-019_plotly_reference.py",
+            "courses/llm-evaluation/solutions/eval-019_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "eval-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-020.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-020.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-020_reference.py",
+        "courses/llm-evaluation/solutions/eval-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-021.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-021.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-021_reference.py",
+        "courses/llm-evaluation/solutions/eval-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-evaluation/guides/eval-022.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-022.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-022_reference.py",
+        "courses/llm-evaluation/solutions/eval-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-023.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-023.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-023_reference.py",
+        "courses/llm-evaluation/solutions/eval-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "eval-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-evaluation/guides/eval-024.md",
+      "source_path": "courses/llm-evaluation/lessons/eval-024.py",
+      "solution_paths": [
+        "courses/llm-evaluation/solutions/eval-024_reference.py",
+        "courses/llm-evaluation/solutions/eval-024_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

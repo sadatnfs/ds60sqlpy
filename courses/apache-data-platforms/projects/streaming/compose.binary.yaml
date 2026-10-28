@@ -1,0 +1,5 @@
+# Explicit alternative. This is a local image built from verified Apache binaries,
+# not the upstream apache/kafka container image.
+services:
+  kafka:
+    image: ds60-apache-kafka-binary:4.4.0

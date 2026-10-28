@@ -1,0 +1,27 @@
+{
+  "schemaName": "ds60_orders",
+  "dimensionFieldSpecs": [
+    {
+      "name": "id",
+      "dataType": "INT"
+    },
+    {
+      "name": "region",
+      "dataType": "STRING"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "amount",
+      "dataType": "INT"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "event_ts",
+      "dataType": "LONG",
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}

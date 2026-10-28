@@ -1,0 +1,25 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-048", "apache-049"],
+  "concepts": [
+    "savepoints",
+    "operator UIDs",
+    "serializer compatibility",
+    "rollback",
+    "state ownership"
+  ],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Flink savepoints",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/ops/state/savepoints/"
+    ],
+    [
+      "Flink state schema evolution",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/fault-tolerance/serialization/schema_evolution/"
+    ]
+  ]
+}

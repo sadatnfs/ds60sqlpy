@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 1: longest-running active statements, excluding this session.
 SELECT
   pid,
@@ -32,6 +33,7 @@ WHERE
   AND pid <> pg_backend_pid()
 ORDER BY
   runtime DESC NULLS LAST;
+
 -- Exercise 2: pg_stat_statements is optional. Dynamic SQL keeps this file
 -- runnable when the extension is not installed.
 CREATE TEMP TABLE top_statement_stats (
@@ -46,6 +48,7 @@ CREATE TEMP TABLE top_statement_stats (
   mean_exec_time double precision,
   total_exec_time double precision
 );
+
 DO $optional_pg_stat_statements$
 BEGIN
   IF to_regclass('public.pg_stat_statements') IS NOT NULL THEN
@@ -102,6 +105,7 @@ BEGIN
   END IF;
 END
 $optional_pg_stat_statements$;
+
 SELECT
   *
 FROM
@@ -109,6 +113,7 @@ FROM
 ORDER BY
   ranking,
   rank_position;
+
 -- Exercise 3: transaction age can exceed statement age, especially for
 -- idle-in-transaction sessions.
 SELECT
@@ -124,6 +129,7 @@ WHERE
   AND state <> 'idle'
 ORDER BY
   transaction_age DESC NULLS LAST;
+
 -- Exercise 4: aggregate rather than exposing full statement text.
 SELECT
   datname,
@@ -140,6 +146,7 @@ ORDER BY
   datname,
   usename,
   state;
+
 -- Exercise 5: retain both rankings. Mean identifies costly calls; total time
 -- captures cumulative workload impact.
 SELECT
@@ -158,6 +165,7 @@ FROM
 ORDER BY
   ranking,
   rank_position;
+
 -- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.
 SELECT
   pid,
@@ -172,4 +180,5 @@ WHERE
   state = 'idle in transaction'
 ORDER BY
   transaction_age DESC NULLS LAST;
+
 ROLLBACK;

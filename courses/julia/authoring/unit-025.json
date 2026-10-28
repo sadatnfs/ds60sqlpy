@@ -1,0 +1,59 @@
+{
+  "number": 25,
+  "title": "Inference, profiling and measured performance",
+  "concepts": ["inference", "specialization", "warm measurements", "allocation", "profiling"],
+  "outcome": "Explain which work a timing includes, inspect type inference and measure a small kernel without turning machine-dependent timing into a correctness assertion.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-012", "julia-019"],
+  "sources": [
+    ["Julia performance tips", "https://docs.julialang.org/en/v1/manual/performance-tips/"],
+    ["Julia profiling", "https://docs.julialang.org/en/v1/manual/profile/"],
+    ["InteractiveUtils", "https://docs.julialang.org/en/v1/stdlib/InteractiveUtils/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Trace the accumulator",
+      "task": "Trace total after each element of [1.0,2.0,3.0].",
+      "expected": "The values are 1,5,14.",
+      "hint": "Square each item before adding.",
+      "answer": "The accumulator is Float64 throughout; the final value is 14."
+    },
+    {
+      "title": "Preserve precision",
+      "task": "Run sum_squares on Float32[1,2].",
+      "expected": "The result is Float32(5).",
+      "hint": "Inspect typeof as well as value.",
+      "answer": "zero(T) and floating multiplication preserve the specified small-case element arithmetic."
+    },
+    {
+      "title": "Change workload size",
+      "task": "Measure lengths 100 and 10000 after warmup.",
+      "expected": "Both return four times their length; observed time may vary.",
+      "hint": "Do not assert which individual call is faster.",
+      "answer": "A larger workload changes the experiment. Multiple observations are needed to compare scaling."
+    },
+    {
+      "title": "Diagnose invalid science",
+      "task": "Pass [NaN] and explain why inference still succeeds.",
+      "expected": "The numerical result is NaN.",
+      "hint": "A known type is not a finite value.",
+      "answer": "Inference concerns types. Scientific input validation is a separate contract."
+    },
+    {
+      "title": "Design a benchmark record",
+      "task": "List the fields needed to reproduce a timing claim.",
+      "expected": "Include input, versions, threads, cold/warm boundary and repetitions.",
+      "hint": "Keep correctness results with the timings.",
+      "answer": "A benchmark record identifies environment and work; a number without these cannot support a transferable claim."
+    },
+    {
+      "title": "Transfer to a data pipeline",
+      "task": "Identify which parsing, fitting and plotting boundaries you would measure.",
+      "expected": "Separate phases plus end-to-end time.",
+      "hint": "Avoid double-counting nested boundaries.",
+      "answer": "Phase measurements explain bottlenecks while end-to-end time captures the actual user experience."
+    }
+  ]
+}

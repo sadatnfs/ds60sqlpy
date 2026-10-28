@@ -202,19 +202,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Predict the matched arm for zero, positive integer, empty text and nonempty text.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Add a nonempty string arm without shadowing the empty case.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Model a loading, ready and failed operation with separate payloads.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose a broad object arm placed before a more specific case.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test an unexpected subclass and explain the fallback policy.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Replace several loosely related flags in a program with explicit states and justify which impossible combinations disappear.</li>
 </ol>
 <p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>

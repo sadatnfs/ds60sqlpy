@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Integrate foundational SELECT, aggregation, joins, NULL handling, and set reasoning into reconciled business outputs.
 -- Assumptions: Revenue means exact net line revenue unless a prompt explicitly asks for stored order totals. Every ranked output has a deterministic tie-breaker.
@@ -45,6 +46,7 @@ GROUP BY
 ORDER BY
   revenue DESC,
   o.status;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Return the 20 products with the highest net line revenue.
@@ -75,6 +77,7 @@ ORDER BY
   net_revenue DESC,
   p.product_id
 LIMIT 20;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Create a customer summary that retains customers with no orders.
@@ -105,6 +108,7 @@ GROUP BY
 ORDER BY
   stored_order_total DESC,
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Debugging
 -- Prompt: Reconcile stored order totals, computed line totals, and payments without multiplying item and payment rows.
@@ -153,6 +157,7 @@ FROM
 ORDER BY
   ABS(o.total_amount - it.line_total) DESC,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Prediction
 -- Prompt: Build a monthly order trend and explain which months are absent rather than zero.
@@ -176,6 +181,7 @@ GROUP BY
   date_trunc('month', o.order_date)
 ORDER BY
   order_month;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Create a compact one-row audit of customer, order, item, and payment coverage.
@@ -221,5 +227,6 @@ SELECT
           orders AS o
         WHERE
           o.customer_id = c.customer_id)) AS customers_without_orders;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

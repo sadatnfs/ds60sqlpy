@@ -255,19 +255,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Trace row selection.</strong> Calculate the output for IDs [2,0,2] from the supplied four-row table. <strong>Expected:</strong> Output [[2,2],[1,0],[2,2]], shape (3,2). <strong>Verify:</strong> Assert the entire matrix and explain why vocabulary size four is not an output axis here.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Construct a lookup guard.</strong> Implement lookup(table,ids) and compare its result with a one-hot matrix product. <strong>Expected:</strong> np.eye(4)[ids] @ table matches the lookup exactly. <strong>Verify:</strong> Assert both matrices and inspect the one-hot shape (3,4) before multiplication.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject invalid IDs.</strong> Test IDs [-1], [4] and [1.5] without allowing negative wrap or rounding. <strong>Expected:</strong> Negative/out-of-range IDs raise ValueError; noninteger IDs raise TypeError. <strong>Verify:</strong> Capture each exception independently and confirm the original valid lookup still works.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Handle an empty token list.</strong> Look up [] in the same nonempty table and state which later stage must decide whether empty text is acceptable. <strong>Expected:</strong> The lookup returns shape (0,2), while the later attention contract rejects an empty sequence. <strong>Verify:</strong> Assert both dimensions of the empty output rather than calling its size-zero result a successful attention run.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve table ownership.</strong> Change output[0,0] to 999 after lookup, then inspect the original table and the repeated third output row. <strong>Expected:</strong> The table remains unchanged and output[2] remains [2,2]. <strong>Verify:</strong> Assert a saved table copy still matches exactly and the repeated result row was not aliased to the modified row.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer across a vocabulary permutation.</strong> Reorder table rows using [2,0,3,1]. Remap the original IDs [2,0,2] so their feature vectors stay identical. <strong>Expected:</strong> Remapped IDs are [0,1,0], and the result equals the original lookup. <strong>Verify:</strong> Assert the unchanged feature matrix and explain why storing a tokenizer hash/version with the table prevents a silent row-order mismatch.</li>
 </ol>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>

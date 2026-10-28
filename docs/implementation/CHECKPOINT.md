@@ -48,9 +48,17 @@ receipts. Manual runs and explicit observation saves do, and navigation cancels
 queued or stale work. Reload restores the draft without enabling execution.
 
 Image distribution supports local builds or explicit Docker Hub selection.
-Per-project `images.env` stores source, namespace and version; architecture tags
-match the engine. Resume never pulls or builds. Publication is an explicit
-separate script and optional manual workflow, not a side effect of startup.
+Per-project `images.env` stores the source, namespace, tag layout and concrete
+version. New Hub selections use combined AMD64/ARM64 release indexes; manual
+architecture tags remain explicit and older saved settings retain that layout.
+Explicit latest resolves to a source-matching concrete version for worker
+selection and later resume. Resume never pulls or builds.
+
+Publication is opt-in: a push to main with [publish-docker] in HEAD builds and stages native
+images, then promotes combined versions and latest after qualification. It uses
+two repository secrets, with no extra enable flag or protected environment.
+The separate local publisher previews one architecture and requires --push for
+upload. Ordinary startup never publishes or transfers saved progress.
 
 The shared renderer provides build-compiled TeX, accessible MathML, bundled
 Latin Modern typography and syntax highlighting. Reviewed
@@ -62,8 +70,10 @@ loaded by `module_plans.load_core_plans`. Contributor `ds60 serve` exposes the
 same classroom shell using its actual prepared local capabilities.
 
 Practice lessons have progressive exercises, hints and separate solutions.
-The statistics book is a theory-and-code tutorial with directly available
-worked examples and answered interview discussions. Reading markers and
+The statistics book, Applied Science and Bayesian Computing are theory-and-code
+tutorials with directly available worked examples and answered discussions.
+Additive tracks validate `learning_mode: practice|tutorial`, defaulting to
+practice; tutorial sources are complete and may have empty solution paths. Reading markers and
 learner-confirmed completion do not certify understanding.
 
 ## Additional scientific and offline workspaces
@@ -81,8 +91,10 @@ requests. Reference tables are never converted to run receipts.
 The statistics book's original chapter manifest and topic outline remain stable.
 Additional worked tutorials use tutorials/index.json and validated direct
 prerequisites. The paired data-visualization subject reuses Python Core and the
-browser JavaScript profile. Python and R figure documents are bounded and
-validated before storage; Plotly data renders in an opaque offline iframe.
+browser JavaScript profile. PNG, Plotly, table and JSON outputs share a two-item
+budget: 180,000 bytes per payload and 384,000 bytes combined. Tables allow up to
+12 columns and 100 rows; unsafe large JSON integers reject. Python/R/Julia
+capture destinations remain anchored to the job. Documents are validated before storage; Plotly data renders in an opaque offline iframe.
 History displays stored figures without rerunning the source. See
 [plotting](../plotting.md) and [textbook rendering](../textbook-rendering.md).
 
@@ -242,3 +254,68 @@ No file here implies that a background process, acceptance project or automation
 is running. Discover current runtime state through `./classroom status` and the
 container engine before acting on it. No claim of Windows, Linux, architecture
 or optional-runtime acceptance follows merely from a Dockerfile or workflow.
+
+## Data and scientific integration in 1.0
+
+[The scientist roadmap](../scientist-roadmap.md) maps the earlier review to
+implemented subjects. Polars, dbt, ML engineering, LLM evaluation, Applied
+Science, Bayesian Computing, Julia, Apache/Open Data Platforms and the
+Data and ML Engineering book join the same catalog, chooser, editor,
+notes and saved-job contracts. Metadata and closest subject guidance own exact
+counts and prerequisites. Authoring scripts preserve complete source fences;
+run their documented generators after formatting and before shared TeX/readers.
+
+New ordinary profiles include `data-engineering`, `data-platforms-python`,
+`dbt-duckdb`, `stan-cpu` and `julia`. Existing saved selections are unchanged until deliberately replaced.
+The data environment supplies actual Polars/Arrow/DuckDB, dbt and ML engineering
+packages. SQL-model variants use a fixed real dbt project; full configuration and
+incrementals belong to the complete Python/CLI project route. Native Stan stages
+`main.stan`, compiles with CmdStan 2.40.0 and samples two chains of 100 warmup plus
+100 retained draws. Classroom fixtures live in `transformed data`; the separate
+CmdStanPy 1.3.0 project accepts actual JSON data and an explicit output directory.
+Julia 1.13.3 uses `main.jl`, two threads and a read-only prepared project/depot.
+
+`plot_artifacts.py` exposes `publish_table` and `publish_report` alongside chart
+capture. Optional publication failures in fixed Stan/dbt adapters remain visible
+warnings without replacing computation status. Subject `figure-contracts.json`
+files are independently checked during reference execution. Rendering old data
+must not rerun its source. Semantic numerical tests, actual runtime checks and
+saved-result browser/persistence checks remain distinct.
+
+The full dbt retail project and real local ML service have explicit owned Docker
+workflows and separate persistent state. The ML service uses local Feast and
+MLflow, validates bounded JSON models, exposes loopback prediction and mounts
+predictor state read-only. It has no cloud deployment claim or implicit worker
+server lifecycle. Package preparation, source packaging and cleanup preserve
+these boundaries. JuliaFormatter, stanc and SQLfmt provide source adapters;
+formatting or parsing cannot qualify runtime behavior or scientific conclusions.
+
+
+## Owned data-platform and engineering projects
+
+The Apache/Open Data Platforms route admits 88 tutorials. Ordinary Python
+examples use the prepared `data-platforms-python` profile for real Arrow,
+DataFusion and Iceberg operations. The same subject's separately prepared
+projects teach owned persistent services through Docker-only launchers. Each
+project declares the supported native architecture, source/image identity,
+private state directory, resource ownership and bounded cleanup. A portable
+client, reading exercise or prepared source route is distinct from an executed
+distributed service. Atlas and Delta Sharing server alternatives retain their
+documented compatibility and preparation boundaries.
+
+The 72-chapter Data and ML Engineering book reuses existing ordinary runtimes.
+It includes two additional owned projects. The data product separates accepted
+raw events, immutable Parquet versions, a published pointer and a control
+journal. Its explicit failure/recovery exercises distinguish accepted input,
+prepared output, visible publication and rollback high-water state. The
+inference service loads a locally trained tiny causal Transformer from a
+validated weight manifest and teaches bounded admission, decoding, KV caching,
+SSE delivery, cancellation and persistent request evidence. Its CPU results do
+not qualify GPU kernels or a production-scale serving deployment.
+
+Owned project scripts are separate from ordinary coding pads and never grant
+workers access to the container engine. Learner state remains outside images;
+normal resume does not rebuild, republish or replay requests. Maintained native
+CI gates require Arrow Flight/Rust IPC, Kafka, the ML service, the data product
+and inference lifecycle checks for their corresponding image groups. Consult
+[validation](../validation.md) for exact entrypoints and receipt requirements.

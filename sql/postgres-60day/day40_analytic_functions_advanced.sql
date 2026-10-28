@@ -1,11 +1,11 @@
 -- Day 40: Analytic Functions - Advanced (statistics and distributions)
--- BEGINNER WORKFLOW — sql-40: Analytic Functions Advanced
+-- BEGINNER WORKFLOW - sql-40: Analytic Functions Advanced
 -- Guide: sql/postgres-60day/companion-guides/day40_analytic_functions_advanced.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-40/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-40.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Statistical aggregates over windows
 WITH daily AS (
   SELECT
@@ -39,6 +40,7 @@ FROM
 ORDER BY
   d DESC
 LIMIT 60;
+
 -- Percentiles using PERCENTILE_CONT (continuous) within month
 WITH monthly AS (
   SELECT
@@ -59,6 +61,7 @@ GROUP BY
 ORDER BY
   m DESC
 LIMIT 12;
+
 -- Ratio to total (ratio_to_report equivalent)
 WITH cat AS (
   SELECT
@@ -78,6 +81,7 @@ FROM
   cat
 ORDER BY
   revenue DESC;
+
 -- Exercises
 -- 1. Compute z-score for daily revenue: (rev - avg15)/sd15.
 --    Inputs: For sql-40 Exercise 1, read from `orders`. Compute `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.

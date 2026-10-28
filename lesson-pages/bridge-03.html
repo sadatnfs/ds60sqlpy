@@ -481,63 +481,63 @@ cursor<span class="syntax-operator">.</span>execute<span class="syntax-punctuati
 <li><strong>Progressive hint:</strong> Left join orders, aggregate at customer grain, and keep two <code>%s</code> placeholders unquoted.</li>
 <li><strong>Verify:</strong> Inspect <code>FIND_CUSTOMERS_SQL</code>: it selects customer ID/name, uses <code>LEFT JOIN</code>, <code>COALESCE</code>, <code>GROUP BY</code>, and <code>HAVING</code>, contains exactly two <code>%s</code> placeholders, and orders by lifetime value descending then customer ID.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Implementation:</strong> Implement <code>find_customers()</code> with two bound parameters and map rows to <code>Customer</code> while preserving <code>Decimal</code> money.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Execute once, fetch once, and make row conversion explicit at the application boundary.</li>
 <li><strong>Verify:</strong> Configure rows with integer/string/Decimal fields; assert one execute call receives <code>(country, minimum_lifetime_value)</code> and the returned tuple contains exact typed <code>Customer</code> objects with <code>Decimal</code> money.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Security testing:</strong> Use a recording cursor and an injection-shaped country to prove values never enter SQL text.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Assert both halves: placeholder remains in structure and hostile text appears only in parameters.</li>
 <li><strong>Verify:</strong> Use country <code>US&#x27; OR TRUE --</code>; assert that sentinel is absent from SQL text, appears unchanged as the first bound parameter, and cannot add rows to the fake result.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Identifier safety:</strong> Implement <code>build_count_query()</code> for only <code>customers</code>, <code>orders</code>, and <code>order_items</code> using <code>psycopg.sql.Identifier</code>.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Allowlist first, import Psycopg inside the optional boundary, then compose schema and table identifiers.</li>
 <li><strong>Verify:</strong> Assert each of <code>customers</code>, <code>orders</code>, and <code>order_items</code> composes through <code>sql.Identifier</code>, while <code>users</code> and an injection-shaped name raise <code>ValueError</code> before cursor execution.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Reasoning:</strong> Explain why an allowlist remains valuable when <code>Identifier</code> already quotes safely.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Quoting protects syntax; authorization controls which valid object may be selected.</li>
 <li><strong>Verify:</strong> Show that <code>Identifier</code> quotes a syntactically valid but unauthorized name, whereas the allowlist rejects it; record authorization and quoting as separate guarantees.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Prediction:</strong> Predict the result for a customer with no orders and explain the roles of <code>LEFT JOIN</code>, <code>COALESCE</code>, <code>GROUP BY</code>, and <code>HAVING</code>.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Track row preservation first, then aggregation, then threshold filtering.</li>
 <li><strong>Verify:</strong> For a customer with no orders and minimum total zero, predict and assert lifetime value <code>Decimal(&#x27;0&#x27;)</code>; explain that the left join retains the row and <code>COALESCE</code> supplies zero before <code>HAVING</code> evaluates it.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Boundary testing:</strong> Test rows containing integer, string, and already-Decimal values plus an empty result; document conversion failures.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Mapping is application validation, not a blind cast after trust.</li>
 <li><strong>Verify:</strong> Assert integer, numeric string, and <code>Decimal</code> money rows map predictably, an empty fetch returns <code>()</code>, and malformed ID or money data raises the documented conversion exception.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Debugging:</strong> Repair queries that use <code>f&quot;...{country}...&quot;</code> or <code>WHERE country = &#x27;%s&#x27;</code> and explain both failures.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Placeholders are driver syntax and must not be interpolated or quoted.</li>
 <li><strong>Verify:</strong> Show the f-string version embeds the sentinel and the quoted-placeholder version sends literal <code>%s</code>; after repair, SQL stays static and the sentinel exists only in parameters.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Protocol testing:</strong> Verify that <code>find_customers()</code> does not depend on the return value of <code>execute()</code> and calls <code>fetchall()</code> exactly once.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Model only the cursor behavior the consumer uses.</li>
 <li><strong>Verify:</strong> Use an <code>execute()</code> method that returns <code>None</code>; assert <code>find_customers()</code> still succeeds, <code>execute</code> is called once, and <code>fetchall</code> is called exactly once.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Optional integration:</strong> Design a bounded, read-only PostgreSQL smoke test gated by <code>DS60_DATABASE_URL</code> without importing Psycopg during normal fake tests.</li>
 </ol>
 <ul>

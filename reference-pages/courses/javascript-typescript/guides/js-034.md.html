@@ -285,19 +285,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Measure only a checked computation.</strong> Sum a fixed numeric range and record elapsed duration. <strong>Expected:</strong> correct sum 50005000; finite nonnegative elapsed time. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Preserve repeated samples and summarize them.</strong> Measure five checked runs and compute their median. <strong>Expected:</strong> five finite samples; median lies between minimum and maximum. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Release owned references without claiming immediate RSS change.</strong> Populate and clear a Map while recording memory counters. <strong>Expected:</strong> entry count 100 then 0; valid counters, with no asserted memory drop. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Use and clear only owned performance entries.</strong> Create named marks and one measure around a checked operation. <strong>Expected:</strong> one nonnegative duration; owned entries removed afterward. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Inspect event-loop utilization as a bounded observation.</strong> Take a baseline, yield through a timer, then inspect the interval delta. <strong>Expected:</strong> finite utilization between 0 and 1; no speed or CPU-percentage claim. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Enable and disable a real delay monitor.</strong> Collect a short delay-monitor interval and report whether samples exist. <strong>Expected:</strong> monitor disabled afterward; sample count reported honestly. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

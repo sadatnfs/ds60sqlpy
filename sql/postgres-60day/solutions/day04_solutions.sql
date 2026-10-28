@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
 -- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.
@@ -46,6 +47,7 @@ GROUP BY
 ORDER BY
   order_count DESC,
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find products that have never appeared in an order item.
@@ -70,6 +72,7 @@ WHERE
   oi.order_item_id IS NULL
 ORDER BY
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Compare monthly budgets and expenses by category with a full outer join.
@@ -120,6 +123,7 @@ FROM
   ORDER BY
     period,
     category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.
@@ -147,6 +151,7 @@ GROUP BY
 ORDER BY
   delivered_orders DESC,
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.
@@ -170,6 +175,7 @@ GROUP BY
   c.customer_id
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.
@@ -193,5 +199,6 @@ SELECT
 FROM
   products AS p
   FULL JOIN order_items AS oi ON oi.product_id = p.product_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

@@ -1,283 +1,327 @@
-# Build locally, publish deliberately, and pull a classroom release
+# Publish and install a classroom release
 
-The classroom still builds locally by default. Docker Hub is an optional way
-to distribute an already reviewed image set. Nothing in `./classroom` uploads
-images, signs in to an account, deletes volumes or changes Docker Hub settings.
+Docker Hub distribution is optional. Ordinary `./classroom` startup, builds,
+pulls and resumes never upload images. There are two explicit publication routes:
 
-The publisher uses **one repository**, `YOUR_DOCKERHUB_USER/ds60sqlpy`, with a
-separate tag for each image and CPU architecture. For example:
+- **GitHub Actions:** a push to `main` whose HEAD commit message contains
+  `[publish-docker]` builds and qualifies Linux AMD64 and ARM64 images, then
+  promotes combined release tags.
+- **Local publisher:** `./classroom publish` previews already built images.
+  Adding `--push` uploads the selected images for their one actual architecture.
 
-```text
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-lab-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-worker-python-core-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-worker-php-cli-arm64
-```
+Both use one repository, `YOUR_DOCKERHUB_USER/ds60sqlpy`. Replace the placeholder
+with the actual lowercase username or organization namespace. The app and every
+ordinary worker have separate tags. PostgreSQL keeps its upstream/mirror image;
+GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
-Use your actual lowercase Docker Hub username wherever this guide says
-`YOUR_DOCKERHUB_USER`. GitHub and Docker Hub are separate accounts. A private
-GitHub repository does not make a Docker Hub repository private. A public image
-contains the shipped application and course sources, so choose repository
-visibility deliberately before uploading. The build excludes learner state,
-Git history and private runtime credentials; still review the release payload.
+## Tag layouts
+
+| Publication route | App tag | Example worker tag |
+| --- | --- | --- |
+| Combined CI release | `1.0.0`, with `latest` pointing to a completed release | `1.0.0-worker-python-core` |
+| Manual architecture set | `1.0.0-lab-arm64` or `1.0.0-lab-amd64` | `1.0.0-worker-python-core-arm64` or `1.0.0-worker-python-core-amd64` |
+
+Each combined release tag points to an image index containing Linux
+`amd64` and `arm64` variants. Docker selects the variant matching the engine. This is the default `--from-hub` layout.
+Manual architecture tags require the consumer's explicit `--architecture-tags`
+option. Publishing ARM64 images from a Mac does not create AMD64 images for a
+typical Windows/WSL machine, and the local publisher does not create a combined
+manifest. [Docker multi-platform images](https://docs.docker.com/build/building/multi-platform/)
 
 ## 1. Build and try the release on your machine
 
-Run these commands in the repository folder using Terminal on macOS, a Linux
-terminal, or Ubuntu inside WSL 2 on Windows. Start your Linux-container engine
-first. The following command shows the build logs, starts the classroom and
-opens the browser:
+The CI route builds its own images on native runners. The commands in this
+section prepare a local installation or the manual publisher's input images.
+Use Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows.
+
+Build the complete ordinary set with visible logs and start the classroom:
 
 ```sh
-./classroom --all --local-build --tag 0.5.0 --rebuild
+./classroom --all --local-build --tag 1.0.0 --rebuild
 ```
 
-This includes the app, PostgreSQL and the ordinary runtime workers. HTML
-and CSS previews run in the browser. PHP has its own worker. Optional NVIDIA
-workers are excluded from `--all` and from the normal publisher; see
-[CUDA classroom setup](cuda-classroom.md) before choosing them.
-
-Use `--project NAME` on this and every later command if your existing workspace
-has a custom name. The default project is `ds60-classroom`. A new project has
-its own saved work; changing its name is not a way to recover previous progress.
-
-For a build without starting anything, use:
+To build without starting services:
 
 ```sh
-./classroom build --all --local-build --tag 0.5.0
+./classroom build --all --local-build --tag 1.0.0
 ```
 
-Check representative reading and runnable lessons, compiler errors, switching
-between subjects, saved drafts and prior results. Verify the normal lifecycle:
+Already built and tested the matching image set? No rebuild is required merely
+to publish it manually. Check actual lessons, compiler diagnostics, figures,
+saved drafts and prior results, then verify stop/resume:
 
 ```sh
 ./classroom stop
 ./classroom resume
 ```
 
-The repository's [validation guide](validation.md) describes contributor checks
-and runtime acceptance. Passing a finite test suite is useful release evidence;
-it cannot prove zero defects or qualify hardware that was never tested. Keep a
-record of the Git revision, image set, architecture and checks used for release.
+Keep the same `--project NAME` on later commands if you chose a custom project.
+Use [validation](validation.md) to distinguish source checks, actual runtime
+execution, browser behavior and platform qualification. A finite test pass
+does not establish that every workload or hardware configuration is correct.
 
 ## 2. Prepare your Docker Hub account
 
-Sign in through Docker Hub and create a repository called `ds60sqlpy`. Choose
-public or private visibility according to who should be able to download it.
-Check your current account's repository and transfer limits before sharing a
-large image set. A private repository requires learners to authenticate too.
+Create a repository named `ds60sqlpy` in the intended namespace. Choose its
+visibility deliberately: a private GitHub repository does not make the Hub
+repository private. The published app image includes the shipped course and
+application sources. The provided build excludes learner state, Git history
+and private runtime credentials.
 
-Authenticate the local Docker CLI:
-
-```sh
-docker login --username YOUR_DOCKERHUB_USER
-```
-
-At the password prompt, use a Docker Hub personal access token with the needed
-read/write permission. Do not put a token in a command, `.env`, Git, a screenshot
-or a lesson. Docker's credential helper stores authentication separately from
-the classroom. [Docker access-token documentation](https://docs.docker.com/security/access-tokens/)
-
-## 3. Review the complete image mapping, then publish
-
-The first command only inspects local images and prints their destination tags:
+For CI, configure the two **repository Actions secrets** described in
+[section 5](#5-github-actions-publication). No local Docker login is required
+for that workflow. For manual publication, the operator authenticates on the
+publishing machine if it is not already logged in:
 
 ```sh
-./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version 0.5.0
+docker login
 ```
 
-It requires the complete ordinary image set to exist locally and checks that
-the images are Linux images for one consistent architecture. It captures their
-immutable local IDs before any upload. It does not rebuild missing images or
-infer that an image passed the test suite.
+Docker Hub normally uses a device-code/browser sign-in flow. An interactive
+username-and-token login is available through
+`docker login --username YOUR_LOGIN_USERNAME`. Keep credentials in Docker's
+configured credential store and out of source files, commands, screenshots and
+lessons. Organization destinations need write access from the authenticated
+account. The local publisher never logs in or reads a password.
+[Docker login](https://docs.docker.com/reference/cli/docker/login/),
+[access tokens](https://docs.docker.com/security/access-tokens/).
 
-After reviewing that output and your release checks, explicitly publish:
+## 3. Review the complete image mapping, then publish manually
+
+Preview the complete local image set without tagging or uploading:
 
 ```sh
-./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version 0.5.0 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
 
-The script tags the inspected local IDs and pushes them sequentially. PostgreSQL
-is pulled from its existing upstream/mirror source and is not republished as
-your own image. GPU worker publication is excluded because it needs separate
-hardware qualification. The Docker Hub Tags page lets you confirm the uploaded
-set. [Docker image publishing](https://docs.docker.com/docker-hub/repos/manage/hub-images/push/)
+Omitting a selection, or adding `--all`, includes the app and every ordinary
+worker in `docker/classroom-images.tsv`. All selected images must exist and
+agree on one Linux architecture before any tag or push operation. The tag
+defaults to the checked-in source version; an explicit version must match it.
+Each invocation inspects the current local images and pins their immutable IDs.
+It neither builds missing images nor proves that existing images passed tests.
 
-An interrupted upload can leave a partial release. Repeat the same command to
-finish its missing layers, but do not announce that release until every image
-has uploaded successfully. Treat released tags as immutable: use a new version
-when contents change, rather than silently overwriting a tag other learners use.
+After reviewing the mapping and your local qualification, upload deliberately:
 
-### Architecture matters
+```sh
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --push
+```
 
-A normal build on Apple Silicon produces Linux `arm64` images. A normal build
-on an Intel/AMD computer produces Linux `amd64` images. These are different from
-the host OS name: Windows WSL 2 usually uses Linux `amd64` containers.
+Keep the tested image set unchanged between review and upload. A missing image
+stops preflight before any selected image is tagged or pushed. Prepare the
+complete set first, or explicitly select a smaller distribution.
 
-The publisher adds the actual image architecture to every tag. The launcher
-selects the suffix matching the Docker engine. Publishing an `arm64` set does
-not provide an `amd64` set automatically. To serve both, build and qualify the
-same release on both architectures, or use the optional native-runner workflow
-below separately for each architecture. A missing platform tag fails visibly;
-the launcher will not silently rebuild or run an emulated release instead.
+For a starter-only set, preview both necessary images:
+
+```sh
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --profile app --profile python-core
+```
+
+Append `--push` only when ready to upload that same selection. Repeated
+`--profile` options select exact images, with no implicit app or Core.
+`--all` and `--profile` cannot be combined. A partial set cannot serve a full
+`--all` installation. The older `./scripts/publish-images` entrypoint and
+`--namespace`/`--version` aliases remain supported; supply one spelling per
+namespace/version option.
+
+This route creates architecture tags only. A learner on that architecture uses:
+
+```sh
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --architecture-tags
+```
+
+Use `--starter` instead of `--all` for the explicitly published starter set.
+There is no manual `latest` shortcut. Treat released architecture tags as
+immutable and use a new checked-in version when image content changes.
 
 ## 4. Start from published images
 
-The learner still needs a matching checkout or starter ZIP for the launcher
-and Compose files. After you have published the required architecture, they run:
+Download the checkout or starter ZIP matching the release for its launcher
+and Compose files. After CI has completed publication, pull and start the
+combined release:
 
 ```sh
-./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
 
-This pulls missing classroom images, starts the services and opens the browser.
-It never falls back to a local build in Hub mode. A smaller installation is:
+Hub mode pulls the selected images and validates their native Linux platform
+before creating or refreshing services. It never falls back to local builds
+or silently emulates a mismatched architecture. Private repositories require
+Docker authentication. Use `--starter` for a smaller prepared installation.
+
+### Choosing latest safely
+
+For the current completed CI release:
 
 ```sh
-./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag latest
 ```
 
-The project saves its source, namespace and version in
-`.classroom/PROJECT/images.env`. These are declarative preferences, not shell
-code and not the learning database. Subsequent commands retain that selection:
+The launcher resolves the app's `latest` tag to a concrete release, requires
+that release to match the source checkout, and uses its immutable versioned
+worker tags. It saves the concrete version for the project. A mismatch asks
+you to update the checkout or starter ZIP before continuing. `latest` works
+only with the combined Hub layout, not local builds or `--architecture-tags`.
+
+Later `./classroom` and `./classroom resume` retain the saved concrete version;
+they do not follow a moving `latest` tag automatically. No worker is selected
+from an independently moving latest alias.
+
+### Pull-only setup and strict resume
+
+For a new project, separate downloading from startup:
 
 ```sh
-./classroom stop
+./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ./classroom resume
 ```
 
-`resume` and `--no-build` never build or pull, including in Hub mode. Missing
-containers may be recreated from matching local images while keeping volumes.
-If an image is missing, ordinary `./classroom` can prepare it according to the
-saved image source; `resume` instead explains what is missing.
+The project records the namespace, layout, profiles and concrete release.
+`resume` and `--no-build` never pull or build. Ordinary startup can prepare
+missing images from the saved source. Pull-only preparation leaves existing
+containers unchanged.
 
-To download the selected images without starting services:
+Existing saved Hub settings from older versions retain their architecture-tag
+layout. A new explicit `--from-hub` selection defaults to the combined layout;
+add `--architecture-tags` when selecting a manual/older architecture release.
 
-```sh
-./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
-```
+### Apply an update while retaining progress
 
-To switch an existing locally built project to the published release, explicitly
-apply the configuration change while preserving its volumes:
-
-```sh
-./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0 --rebuild
-```
-
-In Hub mode, `--rebuild` refreshes the selected published images and applies the
-update. It does not compile them. To return to local development:
+For an existing local project, an architecture-layout project moving to CI
+tags, or an intentional Hub version update, keep the project name and apply
+the intended release explicitly:
 
 ```sh
-./classroom --local-build --tag 0.5.0 --rebuild
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --rebuild
 ```
 
-Always use the matching source release and image tag. Preserve a learning backup
-before a version upgrade. Keep your project name unchanged. Do not delete named
-volumes as an image-update step.
+Use the matching new source version when upgrading. To deliberately follow
+`latest` again, update the checkout/ZIP and use `--tag latest --rebuild`.
+In Hub mode, `--rebuild` pulls and applies images; it never compiles locally.
+A new download alone does not replace running containers.
 
-## 5. Optional GitHub Actions publication
+To return to local development:
 
-The repository includes **Publish classroom images (manual)**. It has no push,
-tag or scheduled trigger. Its default is a build/validation rehearsal without
-publishing. It runs only from `main`, checks the requested version and bounded
-architecture choice, and requires successful push runs of
-`.github/workflows/ci.yml` and `.github/workflows/app-build.yml` on `main` for the
-exact same Git revision. It checks the latest matching run and attempt, not a
-workflow's display name or an older successful commit.
+```sh
+./classroom --local-build --tag 1.0.0 --rebuild
+```
 
-Publication has two separate phases:
+Keep the same custom `--project NAME` on every command. Images contain runtime
+tools and course sources, not saved drafts, notes, receipts or database state.
+Named volumes retain that state. Moving machines requires the separate
+[backup and transfer procedure](one-command-classroom.md#backup-and-transfer).
 
-1. **Build and qualify every image.** All ordinary runtime images and the app image are built
-   and exercised on the selected native architecture, with at most two image
-   jobs running together. Each worker writes a source-bound runtime receipt.
-   No job in this phase receives the Docker Hub token or logs in to Docker Hub.
-2. **Publish only after the entire build matrix succeeds.** The publish matrix
-   depends on both the initial gate and all image jobs. If any image build,
-   qualification or required archive upload fails, no publish job can begin.
-   The `dockerhub` environment and its secret are used only in this phase.
+## 5. GitHub Actions publication
 
-With `publish` **false**, the workflow does not export or upload large Docker
-image archives, log in to Docker Hub, or push images. It can retain small
-validation receipts. This is the recommended first run.
+The publication workflow runs only for a **push to `main` whose HEAD commit
+message contains `[publish-docker]`**. HEAD is the newest commit in that push. An unmarked push, a pull request, a
+tag push, or a marker only on an earlier commit does not opt in. Routine validation
+workflows retain their own configured triggers. Any occurrence of the marker
+in the HEAD message opts in, so leave it out of ordinary checkpoint messages,
+including descriptions of this publishing feature, unless publication is intended.
 
-With `publish` **true**, each qualified image is saved by its immutable image ID
-into an archive with SHA-256, file size, platform, source tag, profile, release,
-namespace, Git revision and workflow-run metadata. These checked-image artifacts
-have a **one-day retention period**. The publish jobs download only the selected
-profile/architecture artifact from the **same workflow run ID** using GitHub CLI.
-They verify the metadata and archive hash before loading, then inspect the loaded
-image ID and platform before registry login. The existing publisher tags the
-verified local ID and pushes it. This is an integrity and provenance handoff;
-it is not a cryptographic image-signing or supply-chain attestation service.
+Set these two repository secrets under **Settings → Secrets and variables →
+Actions → Repository secrets**:
 
-No Docker Hub secret, account configuration or hosted publication has been set
-up for you. When you are ready:
+| Secret | Purpose |
+| --- | --- |
+| `DOCKERHUB_USERNAME` | The destination Docker Hub account/namespace used by the workflow |
+| `DOCKERHUB_TOKEN` | A token authorized to push to that repository |
 
-1. Create a Docker Hub access token with read/write permission. Keep the value
-   private and revoke it if exposed.
-2. In GitHub repository **Settings → Secrets and variables → Actions**, add the
-   repository variable `DOCKERHUB_USERNAME` with your lowercase Docker Hub namespace.
-3. Create the GitHub environment **dockerhub** under repository settings. Add
-   `DOCKERHUB_TOKEN` as an **environment secret**, not a plain variable. Do not
-   place this token in the build jobs or commit it to the repository.
-4. If your GitHub plan supports the relevant environment protection rules,
-   require a reviewer and restrict the environment to the release branch. If
-   environments or the required protections are unavailable for your repository,
-   retain the local publication route rather than assuming a protection exists.
-5. First run the workflow with `publish` left **false**, choosing `0.5.0` and
-   one architecture. Review all build jobs and validation receipts. This needs
-   available Actions runners and a successful exact-revision CI result.
-6. When ready to upload, deliberately set the repository variable
-   `DOCKERHUB_PUBLISH_ENABLED` to the exact value `true`. Its absence or any other
-   value blocks publication. The publish phase checks the flag again before
-   downloading or authenticating.
-7. Run the workflow with `publish` **true**. Every image is built and qualified
-   before the publication phase becomes eligible. Approve the environment only
-   after reviewing the complete matrix. Tokens pass through standard input.
-   Repeat for the other architecture only if you intend to support and qualify it.
+No additional repository variables, enable flag or protected-environment
+configuration is required. Never commit the secret values or print them in
+workflow logs. The workflow handles authentication on its runners.
 
-### Storage, time and retry expectations
+After local checks, stage the reviewed release changes on `main` and create
+the opt-in commit, for example:
 
-A full image set can consume many gigabytes of **temporary Actions artifact
-storage**. Each archived image can repeat base layers, so the total archive size
-can exceed the final registry's deduplicated storage. One-day retention limits
-how long these archives remain; it does not make their upload, download or
-storage free. Small validation receipts use seven-day retention. The separate
-publish jobs also consume runner minutes while downloading, hashing, loading
-and pushing. Check current account allowances and billing settings before a
-publication run, especially for a private repository. The local publisher avoids
-this GitHub artifact-transfer route.
-[GitHub Actions billing](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions)
+```sh
+git commit -m "Release 1.0.0 [publish-docker]"
+git push origin main
+```
 
-Environment approval can take long enough for a one-day artifact to expire.
-An expired, missing, ambiguous or mismatched artifact fails safely before login.
-Start a fresh complete qualification run when required archives have expired.
-Within one workflow run, retries select the latest unexpired artifact attempt
-for each exact profile and architecture and verify that attempt's metadata.
-They cannot silently fetch an archive from another workflow run or revision.
-[GitHub artifact downloads](https://cli.github.com/manual/gh_run_download)
+The source version is `1.0.0` for this release. The workflow reads the checked-in
+version rather than inventing a registry-only version. Do not combine a
+publication commit with a CI-skip marker.
 
-The build gate prevents a failed qualification from publishing a partial set.
-**Registry transport is still not atomic across image tags.** An upload failure,
-expired credential or interruption during the later publish matrix can leave
-some already uploaded tags. Do not announce the release until every publish job
-succeeds and the architecture's complete tag set is visible in Docker Hub.
-Retry failed publication jobs while their verified archives remain available;
-otherwise perform a fresh complete run for the same intended revision. Preserve
-released tags when contents change by choosing a new version.
+### Native builds, staging and promotion
 
-GPU images remain outside this workflow because they need real hardware
-qualification. Hosted CI, a dry run, archive verification and a successful
-registry push are separate observations. None establishes that all possible
-hardware or user workloads are defect free.
+The gate waits for the exact revision's source validation and Docker starter
+checks, and promotion rechecks that qualification before canonical tag writes.
+The ordinary Docker runtime matrix is skipped for this marked main push because
+the publication workflow performs the native runtime qualification itself.
+
+1. Native Linux AMD64 and ARM64 runners build and qualify their app and Python
+   Core seed images, then the ordinary worker groups. Builds and runtime
+   qualification are real work and can take substantial time.
+2. Images are uploaded under commit-specific staging tags in the same Hub
+   repository. Small receipts bind source revision, profile, platform,
+   immutable image identity and qualification evidence. Image layers move
+   through the registry; the workflow does not transfer giant Docker image
+   archives through Actions artifacts.
+3. Promotion requires the complete ordinary image set for both architectures
+   and all required checks to succeed. It publishes and validates the worker
+   version tags first, then the app version tag. Worker latest aliases follow,
+   and the app `latest` pointer moves last.
+
+Staging uploads can occur before the full matrix completes. A staging tag is
+not a completed release. Normal installation uses the completed app/version
+pointer and its concrete worker version tags. This order avoids selecting a
+new app before its required worker versions are available.
+
+### Retrying an interrupted run
+
+Registry operations across multiple tags are not a transaction. **Re-run failed
+jobs** can reuse successful receipts from earlier attempts of the same workflow
+run and source revision. The selected receipts must be unique and valid, and
+worker receipts must bind the exact app/Core seed digests they used. Receipts
+from another run or revision are rejected; rebuilt seeds cannot silently be
+combined with old worker results.
+
+A failed promotion can complete matching partial version tags using those
+original image identities, without rewriting completed matching tags. A new
+commit or a full rebuild that encounters partial or conflicting immutable tags
+must finish the original failed promotion or use a consistent checked-in patch
+bump, such as `1.0.1`. No registry-only version is invented.
+
+A complete same-revision release can be recognized without rebuilding or used
+to finish missing latest aliases. Older reruns cannot move latest backward.
+Do not delete or overwrite a published version merely to make a run succeed.
+
+Review the actual workflow result, receipts and published manifests before
+announcing availability. Local tests, source configuration, staging pushes
+and successful final promotion are different evidence. This guide does not
+claim that a particular registry upload has completed.
+
+### Transfer and account limits
+
+The first upload includes the app and ordinary worker set for both
+architectures and can be large. Later pushes can reuse unchanged registry
+layers, but changed layers still transfer and qualification still consumes
+runner time. Staging tags can remain after a failed or interrupted run.
+
+Docker currently lists **200 pulls per 6 hours for authenticated Personal
+accounts**, subject to its usage rules. Do not promise unlimited free pulls,
+transfer or storage. Docker's fair-use policy permits restrictions or charges
+for excessive usage. Check the current account limits and GitHub runner
+allowances before scheduling repeated full builds.
+[Docker Hub pull limits](https://docs.docker.com/docker-hub/usage/pulls/),
+[Docker Hub fair use](https://docs.docker.com/docker-hub/usage/).
+
+GPU hardware, optional cluster operations and external services remain separate
+qualification paths. Combined Linux image tags do not establish host-engine
+setup, GPU readiness or correctness for every possible workload.
 
 ## Troubleshooting without losing progress
 
-| Observation | Smallest useful next step |
+| Observation | Next step |
 | --- | --- |
-| `manifest unknown` | Check namespace, release, image suffix and engine architecture. Confirm publication finished. |
-| `unauthorized` or `denied` | Check repository visibility and Docker login in this terminal. Keep tokens out of logs. |
-| Hub rate or account limit | Check the current Docker Hub account limits; local-build mode remains available. |
-| Configuration mismatch during resume | Keep the project name and volumes; use the explicit matching-version update command. |
-| Missing local image during resume | Run ordinary `./classroom` to prepare missing images from the saved source. |
-| Snapshot/layer extraction errors | Inspect the engine's storage health. Source changes and tag retries do not repair corrupted storage. Back up saved work before destructive engine recovery. |
-| GPU worker unavailable | Use CPU/reading variants and the separate CUDA setup guide. Ordinary Hub images do not establish GPU readiness. |
+| No publication run | Check the branch, push event and exact marker in the HEAD commit message. |
+| Version conflict | Preserve the published tags; update the source release consistently and requalify. |
+| `latest` differs from the checkout | Obtain the matching source release or starter ZIP, then retry explicitly. |
+| Missing image tag | Check release completion, namespace and whether combined or architecture layout was selected. |
+| Wrong Linux architecture | Publish and qualify the missing native platform; renaming a tag does not convert it. |
+| Unauthorized or denied | Check the operator's Docker login or the two repository secrets, without exposing values. |
+| Pull-rate or usage limit | Review current provider limits and avoid repeated unnecessary pulls. |
+| Missing image during strict resume | Use ordinary startup to prepare the saved release, or the deliberate update path. |
+| Progress appears missing | Return to the original project/engine and verify its volumes; an image pull does not transfer progress. |

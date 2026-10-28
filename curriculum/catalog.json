@@ -482,7 +482,7 @@
         "python/ds-60day/solutions/day17_pandas_intro/day17_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -503,7 +503,7 @@
         "python/ds-60day/solutions/day18_pandas_io_cleaning/day18_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -524,7 +524,7 @@
         "python/ds-60day/solutions/day19_pandas_groupby_pivot/day19_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -587,7 +587,7 @@
         "python/ds-60day/solutions/day22_advanced_pandas_apply_query_eval/day22_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -629,7 +629,7 @@
         "python/ds-60day/solutions/day24_eda_best_practices/day24_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -650,7 +650,7 @@
         "python/ds-60day/solutions/day25_viz_matplotlib_seaborn/day25_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -671,7 +671,7 @@
         "python/ds-60day/solutions/day26_viz_plotly_altair/day26_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -713,7 +713,7 @@
         "python/ds-60day/solutions/day28_feature_engineering/day28_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -1070,7 +1070,7 @@
         "python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -1196,7 +1196,7 @@
         "python/ds-60day/solutions/day51_advanced_feature_engineering_target_encoding/day51_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -1301,7 +1301,7 @@
         "python/ds-60day/solutions/day56_orchestration_prefect_intro/day56_solutions.ipynb"
       ],
       "dependency_group": "production",
-      "network": "first-run-seaborn-cache",
+      "network": "offline",
       "runner": "python"
     },
     {
@@ -1342,7 +1342,7 @@
         "python/ds-60day/solutions/day58_code_review_refactor_tests/day58_solutions.md",
         "python/ds-60day/solutions/day58_code_review_refactor_tests/day58_solutions.ipynb"
       ],
-      "dependency_group": "data",
+      "dependency_group": "quality",
       "network": "offline",
       "runner": "python"
     },
@@ -2030,6 +2030,402 @@
       ]
     },
     {
+      "id": "python-lang-02",
+      "track": "python",
+      "day": 86,
+      "title": "Scope, Closures, and Observable Decorator Contracts",
+      "level": "advanced",
+      "phase": "Python language mechanics and structured execution",
+      "estimated_minutes": 180,
+      "prerequisites": [
+        "python-lang-01",
+        "python-11"
+      ],
+      "lesson_path": "python/professional/lessons/py_lang_02.py",
+      "guide_path": "python/professional/companion-guides/py_lang_02.md",
+      "solution_paths": [
+        "python/professional/solutions/py_lang_02_solutions.md",
+        "python/professional/solutions/py_lang_02_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "scope",
+        "closures",
+        "binding",
+        "nonlocal",
+        "decorators",
+        "metadata"
+      ]
+    },
+    {
+      "id": "python-lang-03",
+      "track": "python",
+      "day": 87,
+      "title": "Iterators, Generator Pipelines, and Resource Lifetime",
+      "level": "advanced",
+      "phase": "Python language mechanics and structured execution",
+      "estimated_minutes": 180,
+      "prerequisites": [
+        "python-lang-02",
+        "python-08"
+      ],
+      "lesson_path": "python/professional/lessons/py_lang_03.py",
+      "guide_path": "python/professional/companion-guides/py_lang_03.md",
+      "solution_paths": [
+        "python/professional/solutions/py_lang_03_solutions.md",
+        "python/professional/solutions/py_lang_03_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "iterators",
+        "generators",
+        "laziness",
+        "ownership",
+        "closing",
+        "cleanup"
+      ]
+    },
+    {
+      "id": "python-lang-04",
+      "track": "python",
+      "day": 88,
+      "title": "Structured Asyncio, Cancellation, and Context Ownership",
+      "level": "advanced",
+      "phase": "Python language mechanics and structured execution",
+      "estimated_minutes": 210,
+      "prerequisites": [
+        "python-lang-03",
+        "python-pro-02"
+      ],
+      "lesson_path": "python/professional/lessons/py_lang_04.py",
+      "guide_path": "python/professional/companion-guides/py_lang_04.md",
+      "solution_paths": [
+        "python/professional/solutions/py_lang_04_solutions.md",
+        "python/professional/solutions/py_lang_04_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "asyncio",
+        "taskgroup",
+        "cancellation",
+        "timeout",
+        "exceptiongroup",
+        "contextvars"
+      ]
+    },
+    {
+      "id": "python-numpy-05",
+      "track": "python",
+      "day": 89,
+      "title": "NumPy Dtypes, Promotion, and Overflow Contracts",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": [
+        "python-16",
+        "python-numpy-01"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_05.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_05.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_05_solutions.md",
+        "python/professional/solutions/py_numpy_05_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "dtype inspection",
+        "NumPy 2 scalar promotion",
+        "checked integer arithmetic",
+        "exact accumulation",
+        "float64 representability"
+      ]
+    },
+    {
+      "id": "python-numpy-06",
+      "track": "python",
+      "day": 90,
+      "title": "Reproducible Random Streams and Simulation State",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": [
+        "python-numpy-05",
+        "python-31"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_06.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_06.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_06_solutions.md",
+        "python/professional/solutions/py_numpy_06_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "Generator and PCG64",
+        "SeedSequence child streams",
+        "task identity",
+        "simulation state",
+        "checkpoint replay"
+      ]
+    },
+    {
+      "id": "python-numpy-07",
+      "track": "python",
+      "day": 91,
+      "title": "SVD, Weighted Least Squares, and Low-Rank Approximation",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": [
+        "python-33",
+        "python-numpy-02",
+        "python-numpy-04"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_07.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_07.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_07_solutions.md",
+        "python/professional/solutions/py_numpy_07_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "reduced SVD",
+        "rank tolerance",
+        "prewhitening",
+        "weighted least squares",
+        "low-rank error",
+        "augmented ridge"
+      ]
+    },
+    {
+      "id": "python-numpy-08",
+      "track": "python",
+      "day": 92,
+      "title": "Sliding Windows, Convolution, and FFT Boundaries",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": [
+        "python-numpy-01",
+        "python-21",
+        "python-33"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_08.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_08.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_08_solutions.md",
+        "python/professional/solutions/py_numpy_08_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "sliding_window_view",
+        "weight orientation",
+        "padding boundaries",
+        "real FFT normalization",
+        "one-sided amplitude",
+        "linear versus circular convolution"
+      ]
+    },
+    {
+      "id": "python-pandas-05",
+      "track": "python",
+      "day": 93,
+      "title": "MultiIndex and Lossless Reshaping Contracts",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 180,
+      "prerequisites": [
+        "python-pandas-01",
+        "python-19"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_05.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_05.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_05_solutions.md",
+        "python/professional/solutions/py_pandas_05_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "pandas",
+        "MultiIndex",
+        "label alignment",
+        "missingness",
+        "reshape",
+        "identity",
+        "export encoding"
+      ]
+    },
+    {
+      "id": "python-pandas-06",
+      "track": "python",
+      "day": 94,
+      "title": "Timezones, DST, and Calendar Boundaries",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 180,
+      "prerequisites": [
+        "python-21",
+        "python-pandas-02",
+        "python-data-02"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_06.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_06.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_06_solutions.md",
+        "python/professional/solutions/py_pandas_06_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "pandas",
+        "timezone",
+        "DST",
+        "UTC",
+        "calendar windows",
+        "resampling",
+        "coverage"
+      ]
+    },
+    {
+      "id": "python-pandas-07",
+      "track": "python",
+      "day": 95,
+      "title": "Typed I/O, Text, and Categorical Domains",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 180,
+      "prerequisites": [
+        "python-18",
+        "python-pandas-01",
+        "python-pandas-03"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_07.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_07.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_07_solutions.md",
+        "python/professional/solutions/py_pandas_07_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "pandas",
+        "CSV",
+        "nullable integers",
+        "text validation",
+        "categorical domains",
+        "Arrow",
+        "Parquet"
+      ]
+    },
+    {
+      "id": "python-algo-05",
+      "track": "python",
+      "day": 96,
+      "title": "Binary Trees, Tries, and Structural Invariants",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-12",
+        "python-algo-03"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_05.py",
+      "guide_path": "python/professional/companion-guides/py_algo_05.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_05_solutions.md",
+        "python/professional/solutions/py_algo_05_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "tree ownership versus DAGs",
+        "iterative traversal",
+        "height",
+        "strict BST bounds",
+        "trie terminal markers",
+        "Unicode code-point prefixes"
+      ]
+    },
+    {
+      "id": "python-algo-06",
+      "track": "python",
+      "day": 97,
+      "title": "Disjoint Sets and Minimum Spanning Forests",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-algo-02",
+        "python-algo-03"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_06.py",
+      "guide_path": "python/professional/companion-guides/py_algo_06.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_06_solutions.md",
+        "python/professional/solutions/py_algo_06_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "parent forest invariant",
+        "path compression",
+        "union by size",
+        "connectivity partitions",
+        "Kruskal edge selection",
+        "spanning versus minimum evidence"
+      ]
+    },
+    {
+      "id": "python-algo-07",
+      "track": "python",
+      "day": 98,
+      "title": "Streaming Summaries, Order Statistics, and Sampling",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-31",
+        "python-algo-02",
+        "python-algo-03"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_07.py",
+      "guide_path": "python/professional/companion-guides/py_algo_07.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_07_solutions.md",
+        "python/professional/solutions/py_algo_07_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "Welford moments",
+        "mergeable summary state",
+        "sample variance",
+        "stable bounded top-k",
+        "exact two-heap medians",
+        "reservoir inclusion probabilities"
+      ]
+    },
+    {
       "id": "sql-start-01",
       "track": "sql",
       "day": -4,
@@ -2094,7 +2490,7 @@
       "id": "sql-01",
       "track": "sql",
       "day": 1,
-      "title": "Select Where Orderby",
+      "title": "SELECT, WHERE, ORDER BY and LIMIT",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2115,7 +2511,7 @@
       "id": "sql-02",
       "track": "sql",
       "day": 2,
-      "title": "Aggregates Groupby Having",
+      "title": "Aggregates, GROUP BY and HAVING",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2220,7 +2616,7 @@
       "id": "sql-07",
       "track": "sql",
       "day": 7,
-      "title": "Week1 Project",
+      "title": "Week 1 Project",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2451,7 +2847,7 @@
       "id": "sql-17",
       "track": "sql",
       "day": 17,
-      "title": "Rank Functions",
+      "title": "ROW_NUMBER, RANK and DENSE_RANK",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2472,7 +2868,7 @@
       "id": "sql-18",
       "track": "sql",
       "day": 18,
-      "title": "Lag Lead",
+      "title": "LAG and LEAD",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2514,7 +2910,7 @@
       "id": "sql-20",
       "track": "sql",
       "day": 20,
-      "title": "First Last Value",
+      "title": "FIRST_VALUE and LAST_VALUE",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2577,7 +2973,7 @@
       "id": "sql-23",
       "track": "sql",
       "day": 23,
-      "title": "CTEs Intro",
+      "title": "Common Table Expressions",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2619,7 +3015,7 @@
       "id": "sql-25",
       "track": "sql",
       "day": 25,
-      "title": "Multiple CTEs Hierarchies",
+      "title": "Multiple CTEs and Hierarchies",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2640,7 +3036,7 @@
       "id": "sql-26",
       "track": "sql",
       "day": 26,
-      "title": "CTEs with Windows",
+      "title": "CTEs with Window Functions",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2745,7 +3141,7 @@
       "id": "sql-31",
       "track": "sql",
       "day": 31,
-      "title": "Explain Analyze",
+      "title": "EXPLAIN and EXPLAIN ANALYZE",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3082,7 +3478,7 @@
       "id": "sql-46",
       "track": "sql",
       "day": 46,
-      "title": "Project1 Ecommerce Part1",
+      "title": "Project 1 Ecommerce Part 1",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3103,7 +3499,7 @@
       "id": "sql-47",
       "track": "sql",
       "day": 47,
-      "title": "Project1 Ecommerce Part2",
+      "title": "Project 1 Ecommerce Part 2",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3124,7 +3520,7 @@
       "id": "sql-48",
       "track": "sql",
       "day": 48,
-      "title": "Project1 Ecommerce Part3",
+      "title": "Project 1 Ecommerce Part 3",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3145,7 +3541,7 @@
       "id": "sql-49",
       "track": "sql",
       "day": 49,
-      "title": "Project2 Finance Part1",
+      "title": "Project 2 Finance Part 1",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3166,7 +3562,7 @@
       "id": "sql-50",
       "track": "sql",
       "day": 50,
-      "title": "Project2 Finance Part2",
+      "title": "Project 2 Finance Part 2",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3187,7 +3583,7 @@
       "id": "sql-51",
       "track": "sql",
       "day": 51,
-      "title": "Project2 Finance Part3",
+      "title": "Project 2 Finance Part 3",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3208,7 +3604,7 @@
       "id": "sql-52",
       "track": "sql",
       "day": 52,
-      "title": "Project3 DWH Part1",
+      "title": "Project 3 DWH Part 1",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3230,7 +3626,7 @@
       "id": "sql-53",
       "track": "sql",
       "day": 53,
-      "title": "Project3 DWH Part2 SCD",
+      "title": "Project 3 DWH Part 2 SCD",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3252,7 +3648,7 @@
       "id": "sql-54",
       "track": "sql",
       "day": 54,
-      "title": "Project3 DWH Part3 Aggregations",
+      "title": "Project 3 DWH Part 3 Aggregations",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3274,7 +3670,7 @@
       "id": "sql-55",
       "track": "sql",
       "day": 55,
-      "title": "Project4 BI Part1",
+      "title": "Project 4 BI Part 1",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3295,7 +3691,7 @@
       "id": "sql-56",
       "track": "sql",
       "day": 56,
-      "title": "Project4 BI Part2",
+      "title": "Project 4 BI Part 2",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3316,7 +3712,7 @@
       "id": "sql-57",
       "track": "sql",
       "day": 57,
-      "title": "Project4 BI Part3",
+      "title": "Project 4 BI Part 3",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3337,7 +3733,7 @@
       "id": "sql-58",
       "track": "sql",
       "day": 58,
-      "title": "Final Capstone Part1",
+      "title": "Final Capstone Part 1",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3358,7 +3754,7 @@
       "id": "sql-59",
       "track": "sql",
       "day": 59,
-      "title": "Final Capstone Part2",
+      "title": "Final Capstone Part 2",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3379,7 +3775,7 @@
       "id": "sql-60",
       "track": "sql",
       "day": 60,
-      "title": "Final Capstone Part3",
+      "title": "Final Capstone Part 3",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3872,6 +4268,69 @@
         "and",
         "point-in-time",
         "quality"
+      ]
+    },
+    {
+      "id": "sql-write-01",
+      "track": "sql",
+      "day": 80,
+      "title": "PostgreSQL 17 Change Application: MERGE and ON CONFLICT",
+      "level": "advanced",
+      "phase": "Current PostgreSQL change and document contracts",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-found-02",
+        "sql-deep-05"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_write_01_merge_and_upsert.sql",
+      "guide_path": "sql/professional/companion-guides/sql_write_01_merge_and_upsert.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_write_01_solutions.md",
+        "sql/professional/solutions/sql_write_01_solutions.sql"
+      ],
+      "dependency_group": "postgres",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "PostgreSQL 17",
+        "MERGE",
+        "ON CONFLICT",
+        "RETURNING",
+        "source cardinality",
+        "snapshots",
+        "mutation contracts"
+      ]
+    },
+    {
+      "id": "sql-json-01",
+      "track": "sql",
+      "day": 81,
+      "title": "PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain",
+      "level": "advanced",
+      "phase": "Current PostgreSQL change and document contracts",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-types-01",
+        "sql-deep-02"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_json_01_json_table.sql",
+      "guide_path": "sql/professional/companion-guides/sql_json_01_json_table.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_json_01_solutions.md",
+        "sql/professional/solutions/sql_json_01_solutions.sql"
+      ],
+      "dependency_group": "postgres",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "PostgreSQL 17",
+        "JSON_TABLE",
+        "SQL/JSON",
+        "typed projection",
+        "ordinality",
+        "NULL",
+        "grain",
+        "coverage"
       ]
     },
     {

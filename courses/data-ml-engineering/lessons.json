@@ -1,0 +1,726 @@
+{
+  "schema_version": 1,
+  "track_id": "data-ml-engineering",
+  "lessons": [
+    {
+      "id": "dme-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-001.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-002.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-003.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-004.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-004.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-005.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-006.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-007.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-008.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-009.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-010.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-011.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-012.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-013.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-013.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-014.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-014.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-015.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-015.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-016.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-016.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-017.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-017.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-018.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-018.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/data-ml-engineering/guides/dme-019.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-019.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-020.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-020.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-021.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-021.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-022.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-022.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-023.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-023.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-024.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-024.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-025.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-025.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-026.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-026.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-027",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-027.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-027.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-028",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-028.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-028.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-029",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-029.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-029.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-030",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-030.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-030.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-031",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-031.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-031.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-032",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-032.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-032.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-033",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-033.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-033.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-034",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-034.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-034.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-035",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-035.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-035.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-036",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-036.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-036.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-037",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-037.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-037.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-038",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-038.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-038.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-039",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-039.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-039.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-040",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-040.md",
+      "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-040.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-041",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-041.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-041.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-042",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-042.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-042.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-043",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-043.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-043.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-044",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-044.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-044.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-045",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-045.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-045.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-046",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-046.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-046.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-047",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-047.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-047.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-048",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-048.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-048.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-049",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-049.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-049.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-050",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-050.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-050.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-051",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-051.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-051.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-052",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-052.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-052.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-053",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-053.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-053.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-054",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/data-ml-engineering/guides/dme-054.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-054.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-055",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-055.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-055.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-056",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-056.md",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-056.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-057",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-057.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-057.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-058",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-058.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-058.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-059",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-059.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-059.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-060",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-060.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-060.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-061",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/data-ml-engineering/guides/dme-061.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-061.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-062",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-062.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-062.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-063",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/data-ml-engineering/guides/dme-063.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-063.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-064",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-064.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-064.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-065",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-065.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-065.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-066",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-066.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-066.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-067",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-067.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-067.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-068",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-068.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-068.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-069",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-069.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-069.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-070",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-070.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-070.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-071",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-071.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-071.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "dme-072",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/data-ml-engineering/guides/dme-072.md",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-072.py",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

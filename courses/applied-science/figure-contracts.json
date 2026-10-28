@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "science-003",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "science-008",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "science-009",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "science-019",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "science-021",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    }
+  ]
+}

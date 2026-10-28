@@ -1,0 +1,64 @@
+{
+  "number": 17,
+  "title": "Preference data and Bradley-Terry reward models",
+  "concepts": [
+    "Bradley-Terry",
+    "pairwise likelihood",
+    "identifiability",
+    "comparison graph",
+    "preference heterogeneity"
+  ],
+  "outcome": "Derive a pairwise reward likelihood, test its invariances and identify what comparison data cannot determine.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-003", "eval-011", "llm-applied-020"],
+  "exercises": [
+    {
+      "title": "Equal scores",
+      "task": "Evaluate a positive comparison when both scores are zero.",
+      "expected": "Preference probability 0.5 and loss log 2.",
+      "hint": "Use the logistic link and softplus form.",
+      "answer": "Equal scores express no preference under the model; observing a chosen response still incurs positive negative log likelihood."
+    },
+    {
+      "title": "Shift both rewards",
+      "task": "Add 100 to both responses.",
+      "expected": "Loss and score gradient remain unchanged.",
+      "hint": "Only the difference is identified.",
+      "answer": "Pairwise labels cannot determine a common reward offset, including prompt-specific offsets when comparisons stay within prompts."
+    },
+    {
+      "title": "Reverse empirical counts",
+      "task": "Use one win and three losses.",
+      "expected": "The fitted preference probability is 0.25.",
+      "hint": "The MLE difference is log(wins/losses).",
+      "answer": "Reversing labels changes the sign of the fitted log odds, while finite counts still imply uncertainty."
+    },
+    {
+      "title": "All wins and no losses",
+      "task": "Fit an unregularized pair with four wins and zero losses.",
+      "expected": "No finite maximum-likelihood difference exists.",
+      "hint": "Log odds diverge at a boundary probability.",
+      "answer": "Regularization or a prior can produce a finite estimate, but it changes the model and must be stated."
+    },
+    {
+      "title": "Test numerical stability",
+      "task": "Use scores-1000 and 1000 for the preferred/rejected pair.",
+      "expected": "Loss remains finite at 2000.",
+      "hint": "Avoid log(sigmoid(delta)) computed naively.",
+      "answer": "Stable softplus arithmetic preserves the large finite loss without underflowing a probability to zero first."
+    },
+    {
+      "title": "Interpret a preference cycle",
+      "task": "Observe A>B, B>C and C>A across labels.",
+      "expected": "A deterministic scalar ordering cannot satisfy all three.",
+      "hint": "Add the three proposed positive score differences.",
+      "answer": "Their sum would need to be positive while algebraically equaling zero. Investigate stochasticity, annotator heterogeneity and multiple criteria."
+    }
+  ],
+  "sources": [
+    ["Preference-based reward learning", "https://arxiv.org/abs/1706.03741"],
+    ["Direct Preference Optimization model assumptions", "https://arxiv.org/abs/2305.18290"]
+  ]
+}

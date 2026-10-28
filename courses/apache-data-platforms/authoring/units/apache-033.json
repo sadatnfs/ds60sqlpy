@@ -1,0 +1,13 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 70,
+  "prerequisites": ["apache-005", "apache-004"],
+  "concepts": ["partitioned log", "keyed records", "consumer groups"],
+  "evidence": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad.",
+  "sources": [
+    ["Kafka design and delivery contracts", "https://kafka.apache.org/44/design/design/"],
+    ["Kafka operations", "https://kafka.apache.org/44/operations/"]
+  ]
+}

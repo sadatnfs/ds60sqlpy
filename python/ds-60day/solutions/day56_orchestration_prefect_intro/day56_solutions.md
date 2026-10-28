@@ -1,4 +1,9 @@
+**Execution boundary:** The default flag only defines a synthetic ETL skeleton. Prefect is an optional package, and actual runs require a deliberately selected loopback API. The learner notebook contains the separate model-training exercise. Serving a deployment is a blocking local project extension.
+
 # Day 56: Solutions: Orchestration with Prefect 3
+
+**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
 
 We convert a small offline ETL job into a Prefect 3 flow, add retries and a local
 failure hook, and serve it from a self-hosted local scheduler.
@@ -47,7 +52,15 @@ def etl_flow(run_date: str | None = None) -> dict[str, int | str]:
     clean = transform(raw)
     return load(clean)
 
-if __name__ == "__main__":
+RUN_LOCAL_PREFECT_FLOW = False
+if RUN_LOCAL_PREFECT_FLOW:
+    from urllib.parse import urlsplit
+    from prefect.settings import PREFECT_API_URL
+
+    endpoint = urlsplit(PREFECT_API_URL.value() or "")
+    if (endpoint.scheme != "http" or endpoint.hostname not in {"localhost", "127.0.0.1"}
+            or endpoint.username or endpoint.password):
+        raise RuntimeError("Prepare a loopback Prefect API before running this extension")
     print(etl_flow(run_date="2026-01-15"))
 ```
 This one-off run is local and deterministic. It needs no Prefect Cloud account,
@@ -84,6 +97,13 @@ Notes
 Worked reference for Exercise 3; Parameters and a local daily schedule
 ```python
 def serve_daily() -> None:
+    from urllib.parse import urlsplit
+    from prefect.settings import PREFECT_API_URL
+
+    endpoint = urlsplit(PREFECT_API_URL.value() or "")
+    if (endpoint.scheme != "http" or endpoint.hostname not in {"localhost", "127.0.0.1"}
+            or endpoint.username or endpoint.password):
+        raise RuntimeError("Prepare a loopback Prefect API before serving this extension")
     # serve() creates a deployment and then blocks while listening for work.
     etl_flow.serve(
         name="etl-daily-local",

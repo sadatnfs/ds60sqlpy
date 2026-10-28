@@ -467,36 +467,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The result grain is one snapshot day, with columns day and units_at_day, ordered by day. Totals are 30 and 29. Adding those two totals to 59 does not describe inventory at either day; it sums repeated state measurements across time. The example makes the dimension along which summation is meaningful explicit.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
-<li><strong>Preserve undefined customer ratios.</strong> Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</li>
+<li><strong>Preserve undefined customer ratios.</strong> Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from <code>deep2_usage</code>, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</li>
 </ol>
-<p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from <code>deep2_usage</code>, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.</p>
 <p><strong>Verify:</strong> For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.</p>
-<ol>
+<ol start="2">
 <li><strong>Compare ratio weighting and population counts.</strong> Return one row keyed by metric_id=all_customers with columns metric_id, customer_count, defined_ratio_count, ratio_of_totals, mean_customer_ratio. Compute both ratio targets from the same source, retaining the denominator policy from Exercise 1.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 2, Return one row keyed by metric_id=all_customers with columns metric_id, customer_count, defined_ratio_count, ratio_of_totals, mean_customer_ratio. Compute both ratio targets from the same source, retaining the denominator policy from Exercise 1.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-02 Exercise 2, The row is all_customers,3,2,25,20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.</p>
 <p><strong>Verify:</strong> For sql-deep-02 Exercise 2, calculate the pooled numerator divided by the pooled denominator independently of the average of defined customer ratios; report how many customer ratios each calculation includes.</p>
-<ol>
+<ol start="3">
 <li><strong>Choose one state per product at a cutoff.</strong> As of 2026-01-02, return product_id, snapshot_day, units from the latest eligible stock snapshot per product. Break same-day ties by greatest snapshot_id. One row represents one product and final order is product_id. Exclude the future January 3 snapshot.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 3, As of 2026-01-02, return product_id, snapshot_day, units from the latest eligible stock snapshot per product. Break same-day ties by greatest snapshot_id. One row represents one product and final order is product_id. Exclude the future January 3 snapshot.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-02 Exercise 3, Product 1 uses January 2 units 12 and product 2 uses January 2 units 17. Their as-of total is 29; product 1 future units 99 must not enter.</p>
 <p><strong>Verify:</strong> For sql-deep-02 Exercise 3, check the chosen timestamp is at or before the cutoff and no later eligible snapshot exists for the same product; sum only those chosen states.</p>
-<ol>
+<ol start="4">
 <li><strong>Audit allocation conservation before aggregation.</strong> Return order_id, weight_sum only for orders whose total bridge weight is not exactly 1, including orders with no bridge rows. Preserve one diagnostic row per invalid order and order by order_id. Use exact numeric weights from the fixture.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 4, Return order_id, weight_sum only for orders whose total bridge weight is not exactly 1, including orders with no bridge rows. Preserve one diagnostic row per invalid order and order by order_id. Use exact numeric weights from the fixture.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-02 Exercise 4, Only order 3 appears with weight_sum0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.</p>
 <p><strong>Verify:</strong> For sql-deep-02 Exercise 4, sum the bridge weights separately for each source identity before multiplying amounts; inspect the per-source weight-sum output to identify the source whose weights fail conservation.</p>
-<ol>
+<ol start="5">
 <li><strong>Repair and reconcile a weighted allocation.</strong> Within this exercise savepoint, change order 3 direct weight to 0.3. Return channel, allocated_amount ordered by channel, requiring every order weight total to equal 1 before producing any allocations. Verify that channel amounts sum to original order total 200.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 5, Within this exercise savepoint, change order 3 direct weight to 0.3. Return channel, allocated_amount ordered by channel, requiring every order weight total to equal 1 before producing any allocations. Verify that channel amounts sum to original order total 200.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-02 Exercise 5, Rows are direct 12, email 120, search 68. A failed global weight gate would return no allocation rows rather than silently exclude the invalid order. Roll back the repair after the case.</p>
 <p><strong>Verify:</strong> For sql-deep-02 Exercise 5, compare the repaired source-level weight sums with one and reconcile the allocated total to the original source total; inspect the named destination allocation as well.</p>
-<ol>
+<ol start="6">
 <li><strong>Expose temporal dimension ambiguity without multiplying events.</strong> For every event return event_id, match_count, segment, match_status. Match customer history over valid_from&lt;=occurred_at&lt;valid_to. Only exactly one version supplies segment; zero matches is missing and multiple matches is ambiguous. One row per event, ordered by event_id.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 6, For every event return event_id, match_count, segment, match_status. Match customer history over valid_from&lt;=occurred_at&lt;valid_to. Only exactly one version supplies segment; zero matches is missing and multiple matches is ambiguous. One row per event, ordered by event_id.</p>
@@ -538,7 +538,7 @@ Done when all six projected-result contracts and their counterexamples have insp
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_deep_02.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -560,24 +560,30 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_usage <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  customer_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  revenue <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  visits <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>visits <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_usage</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_stock <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  snapshot_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  product_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  snapshot_day <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  units <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_stock</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -585,21 +591,25 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">17</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_orders <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_orders</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_bridge <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  channel <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  weight <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>weight <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> weight <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">,</span> channel<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_bridge</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -607,6 +617,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;search&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;direct&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_history <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  version_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  customer_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -615,23 +626,27 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  segment <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>valid_from <span class="syntax-operator">&lt;</span> valid_to<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_history</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;basic&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-03T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;premium&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-03T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;alpha&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">22</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-04T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;beta&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  customer_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_events</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Worked example 1</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> groups <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  group_id<span class="syntax-punctuation">,</span></span>
@@ -646,6 +661,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  round<span class="syntax-punctuation">(</span><span class="syntax-keyword">avg</span><span class="syntax-punctuation">(</span>successes <span class="syntax-operator">/</span> trials<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> equal_group_rate</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  groups<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Worked example 2</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> states <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">day</span><span class="syntax-punctuation">,</span></span>
@@ -665,10 +681,11 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">day</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">day</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Write attempts in your ignored working copy before the final ROLLBACK.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Preserve undefined customer ratios</span></span>
-<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from `deep2_usage`, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Compare ratio weighting and population counts</span></span>
@@ -722,8 +739,8 @@ Done when all six projected-result contracts and their counterexamples have insp
 <p>Read <a href="sql-deep-02.html#guide">Metric Algebra Across Grains, Snapshots, and Weighted Bridges</a> and attempt its six queries before comparing. The <a href="sql-deep-02.html#solution-2">complete reference script</a> recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.</p>
 <h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-preserve-undefined-customer-ratios">Exercise 1: Preserve undefined customer ratios<a class="heading-anchor" href="#solution-1--exercise-1-preserve-undefined-customer-ratios" aria-label="Link to this section">#</a></h4>
-<p>Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</p>
-<p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</p>
+<p>Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from <code>deep2_usage</code>, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from <code>deep2_usage</code>, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.</p>
 <p><strong>Verify:</strong> For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>revenue<span class="syntax-punctuation">,</span>visits<span class="syntax-punctuation">,</span>revenue<span class="syntax-operator">/</span><span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>visits<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_per_visit<span class="syntax-punctuation">,</span>
@@ -806,7 +823,7 @@ Done when all six projected-result contracts and their counterexamples have insp
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_deep_02_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -826,24 +843,30 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_usage <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  customer_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  revenue <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  visits <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>visits <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_usage</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_stock <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  snapshot_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  product_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  snapshot_day <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  units <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_stock</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -851,21 +874,25 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">17</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_orders <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  amount <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_orders</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_bridge <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  channel <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  weight <span class="syntax-builtin">numeric</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>weight <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> weight <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">,</span> channel<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_bridge</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -873,6 +900,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;search&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;direct&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_history <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  version_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  customer_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -881,23 +909,27 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  segment <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>valid_from <span class="syntax-operator">&lt;</span> valid_to<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_history</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;basic&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-03T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;premium&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-03T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;alpha&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">22</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-04T00:00Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;beta&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep2_events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  customer_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep2_events</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-01T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T00:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026-01-02T12:00Z&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -909,61 +941,74 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Preserve undefined customer ratios</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    customer_id<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> visits<span class="syntax-punctuation">,</span> revenue <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>visits<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_per_visit<span class="syntax-punctuation">,</span> visits <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> ratio_defined</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    deep2_usage</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Preserve undefined customer ratios</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> visits<span class="syntax-punctuation">,</span> revenue <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>visits<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_per_visit<span class="syntax-punctuation">,</span> visits <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> ratio_defined</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  deep2_usage</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  visits<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue_per_visit<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ratio_defined</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_1</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      visits<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      revenue_per_visit<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      ratio_defined</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      answer_1</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      customer_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;customer_id&quot;: 1, &quot;revenue&quot;: 10, &quot;visits&quot;: 1, &quot;revenue_per_visit&quot;: 10, &quot;ratio_defined&quot;: true}, {&quot;customer_id&quot;: 2, &quot;revenue&quot;: 90, &quot;visits&quot;: 3, &quot;revenue_per_visit&quot;: 30, &quot;ratio_defined&quot;: true}, {&quot;customer_id&quot;: 3, &quot;revenue&quot;: 0, &quot;visits&quot;: 0, &quot;revenue_per_visit&quot;: null, &quot;ratio_defined&quot;: false}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;customer_id&quot;: 1, &quot;revenue&quot;: 10, &quot;visits&quot;: 1, &quot;revenue_per_visit&quot;: 10, &quot;ratio_defined&quot;: true}, {&quot;customer_id&quot;: 2, &quot;revenue&quot;: 90, &quot;visits&quot;: 3, &quot;revenue_per_visit&quot;: 30, &quot;ratio_defined&quot;: true}, {&quot;customer_id&quot;: 3, &quot;revenue&quot;: 0, &quot;visits&quot;: 0, &quot;revenue_per_visit&quot;: null, &quot;ratio_defined&quot;: false}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Compare ratio weighting and population counts</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;all_customers&#x27;</span> <span class="syntax-keyword">AS</span> metric_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_count<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>visits<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> defined_ratio_count<span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>visits<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ratio_of_totals<span class="syntax-punctuation">,</span> <span class="syntax-keyword">avg</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>visits<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mean_customer_ratio</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  deep2_usage<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    metric_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    customer_count<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    defined_ratio_count<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    ratio_of_totals<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    mean_customer_ratio</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_2</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    metric_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  metric_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  defined_ratio_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ratio_of_totals<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  mean_customer_ratio</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_2</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  metric_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> metric_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;metric_id&quot;: &quot;all_customers&quot;, &quot;customer_count&quot;: 3, &quot;defined_ratio_count&quot;: 2, &quot;ratio_of_totals&quot;: 25, &quot;mean_customer_ratio&quot;: 20}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> metric_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;metric_id&quot;: &quot;all_customers&quot;, &quot;customer_count&quot;: 3, &quot;defined_ratio_count&quot;: 2, &quot;ratio_of_totals&quot;: 25, &quot;mean_customer_ratio&quot;: 20}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Choose one state per product at a cutoff</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  product_id<span class="syntax-punctuation">,</span> snapshot_day<span class="syntax-punctuation">,</span> units</span>
@@ -977,24 +1022,30 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">    product_id<span class="syntax-punctuation">,</span> snapshot_day <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> snapshot_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> latest</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  product_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    snapshot_day<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    units</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_3</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  snapshot_day<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  units</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_3</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  product_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> product_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;product_id&quot;: 1, &quot;snapshot_day&quot;: &quot;2026-01-02&quot;, &quot;units&quot;: 12}, {&quot;product_id&quot;: 2, &quot;snapshot_day&quot;: &quot;2026-01-02&quot;, &quot;units&quot;: 17}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> product_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;product_id&quot;: 1, &quot;snapshot_day&quot;: &quot;2026-01-02&quot;, &quot;units&quot;: 12}, {&quot;product_id&quot;: 2, &quot;snapshot_day&quot;: &quot;2026-01-02&quot;, &quot;units&quot;: 17}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Audit allocation conservation before aggregation</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>weight<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> weight_sum</span>
@@ -1007,23 +1058,29 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>weight<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    weight_sum</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_4</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  weight_sum</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_4</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;order_id&quot;: 3, &quot;weight_sum&quot;: 0.9}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;order_id&quot;: 3, &quot;weight_sum&quot;: 0.9}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Repair and reconcile a weighted allocation</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">  deep2_bridge</span>
 <span class="source-line"><span class="syntax-keyword">SET</span></span>
@@ -1031,13 +1088,14 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  order_id <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> channel <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;direct&#x27;</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> weights <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>weight<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> weight_sum</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      deep2_orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> weights <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>weight<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> weight_sum</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    deep2_orders <span class="syntax-keyword">AS</span> o</span>
 <span class="source-line">    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> deep2_bridge <span class="syntax-keyword">AS</span> b <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">    o<span class="syntax-punctuation">.</span>order_id</span>
@@ -1059,23 +1117,29 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  b<span class="syntax-punctuation">.</span>channel</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  b<span class="syntax-punctuation">.</span>channel<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    channel<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    allocated_amount</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_5</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    channel<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  channel<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  allocated_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_5</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  channel<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> channel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;channel&quot;: &quot;direct&quot;, &quot;allocated_amount&quot;: 12}, {&quot;channel&quot;: &quot;email&quot;, &quot;allocated_amount&quot;: 120}, {&quot;channel&quot;: &quot;search&quot;, &quot;allocated_amount&quot;: 68}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> channel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;channel&quot;: &quot;direct&quot;, &quot;allocated_amount&quot;: 12}, {&quot;channel&quot;: &quot;email&quot;, &quot;allocated_amount&quot;: 120}, {&quot;channel&quot;: &quot;search&quot;, &quot;allocated_amount&quot;: 68}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Expose temporal dimension ambiguity without multiplying events</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>h<span class="syntax-punctuation">.</span>version_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> match_count<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>h<span class="syntax-punctuation">.</span>version_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">THEN</span></span>
@@ -1096,23 +1160,28 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    match_count<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    segment<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    match_status</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_6</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  match_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  match_status</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_6</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;event_id&quot;: 1, &quot;match_count&quot;: 1, &quot;segment&quot;: &quot;basic&quot;, &quot;match_status&quot;: &quot;matched&quot;}, {&quot;event_id&quot;: 2, &quot;match_count&quot;: 1, &quot;segment&quot;: &quot;premium&quot;, &quot;match_status&quot;: &quot;matched&quot;}, {&quot;event_id&quot;: 3, &quot;match_count&quot;: 2, &quot;segment&quot;: null, &quot;match_status&quot;: &quot;ambiguous&quot;}, {&quot;event_id&quot;: 4, &quot;match_count&quot;: 0, &quot;segment&quot;: null, &quot;match_status&quot;: &quot;missing&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;event_id&quot;: 1, &quot;match_count&quot;: 1, &quot;segment&quot;: &quot;basic&quot;, &quot;match_status&quot;: &quot;matched&quot;}, {&quot;event_id&quot;: 2, &quot;match_count&quot;: 1, &quot;segment&quot;: &quot;premium&quot;, &quot;match_status&quot;: &quot;matched&quot;}, {&quot;event_id&quot;: 3, &quot;match_count&quot;: 2, &quot;segment&quot;: null, &quot;match_status&quot;: &quot;ambiguous&quot;}, {&quot;event_id&quot;: 4, &quot;match_count&quot;: 0, &quot;segment&quot;: null, &quot;match_status&quot;: &quot;missing&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-02 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

@@ -254,19 +254,19 @@ first <span class="syntax-operator">=</span> f<span class="syntax-operator">.</s
 <ol>
 <li><strong>Check eager arithmetic.</strong> Evaluate <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>⋅</mo><mi>x</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x\cdot x+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4445em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> at float32[1,2]. <strong>Expected:</strong> output[2,5]. <strong>Verify:</strong> Save the assertion results for exercise 1, including output[2,5].</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Trace a graph and compare.</strong> Wrap the expression in plain tf.function, run it and inspect the initial trace count. <strong>Expected:</strong> Graph output equals eager output; at least one trace exists. No XLA compilation is requested. <strong>Verify:</strong> Save the assertion results for exercise 2, including Graph output equals eager output; at least one trace exists. No XLA compilation is requested.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reuse an equal signature.</strong> Call with float32[3,4] and inspect trace count. <strong>Expected:</strong> output[10,17]; trace count unchanged. <strong>Verify:</strong> Save the assertion results for exercise 3, including output[10,17]; trace count unchanged.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Change dtype deliberately.</strong> Call with float64[1,2] and inspect trace count and output dtype. <strong>Expected:</strong> float64 result[2,5]; at least one new trace. <strong>Verify:</strong> Save the assertion results for exercise 4, including float64 result[2,5]; at least one new trace.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Measure only warmed calls.</strong> Warm the float32 graph, time ten completed calls, then check every collected result. <strong>Expected:</strong> Ten finite [2,5] results and a nonnegative measured interval, without a speed-ranking claim. <strong>Verify:</strong> Save the assertion results for exercise 5, including Ten finite [2,5] results and a nonnegative measured interval, without a speed-ranking claim.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Separate shape contracts.</strong> Reuse a variable-length float32 vector signature at lengths two and three, then reject wrong rank and dtype. <strong>Expected:</strong> One declared trace is reused for both lengths; incompatible rank or dtype is rejected. <strong>Verify:</strong> Save the assertion results for exercise 6, including One declared trace is reused for both lengths; incompatible rank or dtype is rejected.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

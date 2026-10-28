@@ -3,6 +3,7 @@
 BEGIN;
 SELECT
   pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0));
+
 DO $preflight$
 DECLARE
     id_exists boolean;
@@ -52,6 +53,7 @@ BEGIN
     );
 END
 $preflight$;
+
 SELECT
   pg_catalog.current_setting('ds60.migration_applied')::boolean AS migration_applied
 \gset

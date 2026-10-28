@@ -250,19 +250,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Use a FIFO queue.</strong> Add a,b,c to an ArrayDeque and remove from the front. <strong>Expected:</strong> a,b,c order. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with a,b,c order.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Use a LIFO stack.</strong> Push1,2,3 onto a Deque and pop all values. <strong>Expected:</strong> 3,2,1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 3,2,1.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Poll a priority queue.</strong> Insert5,1,4,2 and repeatedly poll. <strong>Expected:</strong> 1,2,4,5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 1,2,4,5.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Count linear-search work.</strong> Search for the final item in arrays oflength4 and8 using a comparison counter. <strong>Expected:</strong> 4 and8 comparisons. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 4 and8 comparisons.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve duplicate priorities.</strong> Insert tasks with equal priority and a stable sequence tie-breaker. <strong>Expected:</strong> earlier sequence removed first. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with earlier sequence removed first.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Handle empty removal explicitly.</strong> CompareDeque.pollFirst withremoveFirst on an empty queue. <strong>Expected:</strong> poll returns null; remove throws NoSuchElementException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with poll returns null; remove throws NoSuchElementException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

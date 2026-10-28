@@ -1,0 +1,679 @@
+{
+  "schema_version": 1,
+  "id": "julia",
+  "title": "Julia language and scientific computing",
+  "summary": "Julia from first scripts and data types to multiple dispatch, data workflows, numerical methods, optimization, performance and concurrent scientific programs, with offline executable examples.",
+  "lessons": [
+    {
+      "title": "First Julia scripts, values and observable output",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "concepts": [
+        "script",
+        "expression",
+        "binding",
+        "type",
+        "compilation"
+      ],
+      "outcome": "Run a complete Julia script, trace bindings and distinguish a computed value from printed output.",
+      "id": "julia-001",
+      "runtime": "julia",
+      "lab": "Use accepted 20 and rejected 3.",
+      "verification": "The complete reference prints 'julia-001: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Numbers, promotion, overflow and exactness",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-001"
+      ],
+      "concepts": [
+        "integer overflow",
+        "Float64",
+        "Rational",
+        "BigInt",
+        "promotion"
+      ],
+      "outcome": "Choose and validate numeric representations while distinguishing exact arithmetic, overflow and floating-point approximation.",
+      "id": "julia-002",
+      "runtime": "julia",
+      "lab": "Compute quotient and remainder for 7 divided by 2.",
+      "verification": "The complete reference prints 'julia-002: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Strings, Unicode and indexing boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-001"
+      ],
+      "concepts": [
+        "UTF-8",
+        "code unit",
+        "code point",
+        "grapheme",
+        "normalization"
+      ],
+      "outcome": "Process text without confusing byte positions, Unicode characters and visible grapheme clusters.",
+      "id": "julia-003",
+      "runtime": "julia",
+      "lab": "Move from the first to the second character in the UTF -8 fixture.",
+      "verification": "The complete reference prints 'julia-003: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Conditions, equality and explicit missing decisions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-002"
+      ],
+      "concepts": [
+        "Boolean",
+        "short circuit",
+        "identity",
+        "isequal",
+        "missing condition"
+      ],
+      "outcome": "Write explicit Boolean decisions and select equality semantics appropriate to numeric values and data keys.",
+      "id": "julia-004",
+      "runtime": "julia",
+      "lab": "Compare rates 0/5 and 0/0 under the helper policy.",
+      "verification": "The complete reference prints 'julia-004: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Loops, ranges, comprehensions and scope",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-004"
+      ],
+      "concepts": [
+        "iteration",
+        "range",
+        "comprehension",
+        "generator",
+        "function scope"
+      ],
+      "outcome": "Trace finite iteration and scope rules while using explicit empty-input and indexing policies.",
+      "id": "julia-005",
+      "runtime": "julia",
+      "lab": "List values from 1:3.",
+      "verification": "The complete reference prints 'julia-005: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Functions, keywords, closures and argument sharing",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-005"
+      ],
+      "concepts": [
+        "function",
+        "keyword argument",
+        "closure",
+        "higher-order function",
+        "mutation"
+      ],
+      "outcome": "Write reusable functions with explicit contracts and distinguish local rebinding from mutation of a passed object.",
+      "id": "julia-006",
+      "runtime": "julia",
+      "lab": "Call affine on 5 without keywords.",
+      "verification": "The complete reference prints 'julia-006: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Arrays, shapes, copies and views",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-006"
+      ],
+      "concepts": [
+        "array shape",
+        "column major",
+        "copy",
+        "view",
+        "aliasing"
+      ],
+      "outcome": "Trace array storage and indexing while choosing deliberately between copies and shared views.",
+      "id": "julia-007",
+      "runtime": "julia",
+      "lab": "Compare a length 2 vector with a2-by -1 matrix.",
+      "verification": "The complete reference prints 'julia-007: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Tuples, named records, dictionaries and sets",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-004",
+        "julia-007"
+      ],
+      "concepts": [
+        "tuple",
+        "NamedTuple",
+        "dictionary",
+        "set",
+        "key equality"
+      ],
+      "outcome": "Choose collection representations according to identity, ordering, mutability and lookup needs.",
+      "id": "julia-008",
+      "runtime": "julia",
+      "lab": "Represent a single integer as a tuple.",
+      "verification": "The complete reference prints 'julia-008: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Errors, tests and explicit input contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "julia-006",
+        "julia-008"
+      ],
+      "concepts": [
+        "ArgumentError",
+        "DomainError",
+        "test set",
+        "boundary case",
+        "rethrow"
+      ],
+      "outcome": "Validate scientific inputs, test expected failures and preserve unexpected errors instead of turning them into successful results.",
+      "id": "julia-009",
+      "runtime": "julia",
+      "lab": "Calculate the mean of -1 and 1.",
+      "verification": "The complete reference prints 'julia-009: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Composite types, constructors and nested mutability",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-009"
+      ],
+      "concepts": [
+        "struct",
+        "constructor",
+        "mutable struct",
+        "invariant",
+        "nested state"
+      ],
+      "outcome": "Use owned types to represent data contracts and distinguish immutable bindings from recursively immutable state.",
+      "id": "julia-010",
+      "runtime": "julia",
+      "lab": "Attempt to construct a measurement with an unsupported unit.",
+      "verification": "The complete reference prints 'julia-010: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Multiple dispatch and method specificity",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-010"
+      ],
+      "concepts": [
+        "multiple dispatch",
+        "abstract type",
+        "method specificity",
+        "ambiguity",
+        "type ownership"
+      ],
+      "outcome": "Design generic operations over owned types and resolve overlapping method signatures explicitly.",
+      "id": "julia-011",
+      "runtime": "julia",
+      "lab": "Construct a circle with radius 0.",
+      "verification": "The complete reference prints 'julia-011: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Parametric types and generic numerical code",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-011"
+      ],
+      "concepts": [
+        "parametric type",
+        "where",
+        "invariance",
+        "AbstractVector",
+        "type stability"
+      ],
+      "outcome": "Express useful type relationships without confusing subtype relations, storage representation or a method signature.",
+      "id": "julia-012",
+      "runtime": "julia",
+      "lab": "Sum 1//3 and 2//3.",
+      "verification": "The complete reference prints 'julia-012: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Broadcasting, axes and mutation order",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-007",
+        "julia-012"
+      ],
+      "concepts": [
+        "broadcast",
+        "dot syntax",
+        "fusion",
+        "shape",
+        "aliasing"
+      ],
+      "outcome": "Use broadcasting with explicit axes and distinguish an elementwise formula from a mutation-order-dependent algorithm.",
+      "id": "julia-013",
+      "runtime": "julia",
+      "lab": "Add one offset per column to a matrix.",
+      "verification": "The complete reference prints 'julia-013: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Missing values, absence and nonfinite measurements",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-004",
+        "julia-012"
+      ],
+      "concepts": [
+        "missing",
+        "nothing",
+        "NaN",
+        "Union",
+        "coverage"
+      ],
+      "outcome": "Keep missingness and numerical failure distinct and report the denominator used by each aggregation policy.",
+      "id": "julia-014",
+      "runtime": "julia",
+      "lab": "Summarize 1,missing,3 using observed values.",
+      "verification": "The complete reference prints 'julia-014: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "DataFrames transformations and grouped summaries",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-013",
+        "julia-014"
+      ],
+      "concepts": [
+        "DataFrames",
+        "column selection",
+        "ByRow",
+        "groupby",
+        "row accounting"
+      ],
+      "outcome": "Transform a typed table and compute grouped summaries while preserving names, missingness and row counts.",
+      "id": "julia-015",
+      "runtime": "julia",
+      "lab": "Scale the score column by 10 using ByRow.",
+      "verification": "The complete reference prints 'julia-015: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Joins, key validation and duplicate fanout",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-015"
+      ],
+      "concepts": [
+        "join grain",
+        "key uniqueness",
+        "fanout",
+        "missing keys",
+        "aggregation"
+      ],
+      "outcome": "Validate relational assumptions in DataFrames joins and reconcile totals before and after a merge.",
+      "id": "julia-016",
+      "runtime": "julia",
+      "lab": "Join the duplicated right-side entity 1 observations.",
+      "verification": "The complete reference prints 'julia-016: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Typed CSV input and round-trip data contracts",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-015",
+        "julia-016"
+      ],
+      "concepts": [
+        "CSV",
+        "schema",
+        "strict parsing",
+        "identifier",
+        "round trip"
+      ],
+      "outcome": "Parse and export bounded CSV data using explicit types and missingness rules rather than accidental inference.",
+      "id": "julia-017",
+      "runtime": "julia",
+      "lab": "Read 001 as a declared string.",
+      "verification": "The complete reference prints 'julia-017: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Dates, availability time and historical features",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-017"
+      ],
+      "concepts": [
+        "Dates",
+        "calendar period",
+        "duration",
+        "point-in-time",
+        "tie rule"
+      ],
+      "outcome": "Use calendar arithmetic deliberately and reconstruct features using both event and availability time.",
+      "id": "julia-018",
+      "runtime": "julia",
+      "lab": "Compare one month with thirty days from January 31 in the fixture.",
+      "verification": "The complete reference prints 'julia-018: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Linear algebra, conditioning and nonunique solutions",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-012",
+        "julia-013"
+      ],
+      "concepts": [
+        "linear solve",
+        "factorization",
+        "rank",
+        "pseudoinverse",
+        "adjoint"
+      ],
+      "outcome": "Solve small linear systems, inspect residuals and distinguish a fitted prediction from an identified coefficient vector.",
+      "id": "julia-019",
+      "runtime": "julia",
+      "lab": "Multiply the computed vector by the original matrix.",
+      "verification": "The complete reference prints 'julia-019: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Distributions, random state and Monte Carlo evidence",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-014",
+        "julia-019"
+      ],
+      "concepts": [
+        "Random",
+        "Distributions",
+        "Monte Carlo",
+        "tail probability",
+        "Plotly"
+      ],
+      "outcome": "Use explicit random generators, compare simulation with analytic quantities and preserve the distinction between numerical and sampling uncertainty.",
+      "id": "julia-020",
+      "runtime": "julia",
+      "lab": "Construct Normal(2,3).",
+      "verification": "The complete reference prints 'julia-020: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Regression fitting, regularization and held-out assessment",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-018",
+        "julia-019",
+        "julia-020"
+      ],
+      "concepts": [
+        "design matrix",
+        "ridge",
+        "QR solve",
+        "validation",
+        "leakage"
+      ],
+      "outcome": "Fit a small regression procedure with stable linear algebra and select regularization without using final outcomes.",
+      "id": "julia-021",
+      "runtime": "julia",
+      "lab": "Fit the exact line without a penalty.",
+      "verification": "The complete reference prints 'julia-021: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Forward-mode automatic differentiation",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-012",
+        "julia-019"
+      ],
+      "concepts": [
+        "ForwardDiff",
+        "dual number",
+        "gradient",
+        "Jacobian",
+        "generic storage"
+      ],
+      "outcome": "Differentiate supported numerical functions and validate derivatives while preserving the numeric representation carried by dual numbers.",
+      "id": "julia-022",
+      "runtime": "julia",
+      "lab": "Compute the gradient of x1 squared plus 3x2 squared at[2,3].",
+      "verification": "The complete reference prints 'julia-022: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Optimization objectives, constraints and convergence",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-021",
+        "julia-022"
+      ],
+      "concepts": [
+        "Optim",
+        "BFGS",
+        "gradient",
+        "bounded optimization",
+        "convergence"
+      ],
+      "outcome": "Use a prepared optimization library while checking the objective, feasible set and independent convergence evidence.",
+      "id": "julia-023",
+      "runtime": "julia",
+      "lab": "Replace a minimization objective with its negative.",
+      "verification": "The complete reference prints 'julia-023: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Numerical methods, stability and error contracts",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-019",
+        "julia-020",
+        "julia-023"
+      ],
+      "concepts": [
+        "Euler method",
+        "stability",
+        "bisection",
+        "quadrature",
+        "error budget"
+      ],
+      "outcome": "Compare explicit numerical approximations with known solutions and distinguish stability, positivity, residuals and position error.",
+      "id": "julia-024",
+      "runtime": "julia",
+      "lab": "Compare Euler with 4 and 20 steps for rate 1.",
+      "verification": "The complete reference prints 'julia-024: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Inference, profiling and measured performance",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-012",
+        "julia-019"
+      ],
+      "concepts": [
+        "inference",
+        "specialization",
+        "warm measurements",
+        "allocation",
+        "profiling"
+      ],
+      "outcome": "Explain which work a timing includes, inspect type inference and measure a small kernel without turning machine-dependent timing into a correctness assertion.",
+      "id": "julia-025",
+      "runtime": "julia",
+      "lab": "Trace total after each element of [1.0,2.0,3.0].",
+      "verification": "The complete reference prints 'julia-025: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Allocation, mutation and alias-safe numerical work",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-007",
+        "julia-013",
+        "julia-025"
+      ],
+      "concepts": [
+        "preallocation",
+        "mul!",
+        "views",
+        "aliasing",
+        "storage reuse"
+      ],
+      "outcome": "Implement a preallocated matrix step, explain ownership and aliasing, and compare semantic results before measuring storage behavior.",
+      "id": "julia-026",
+      "runtime": "julia",
+      "lab": "Compute the two entries before running the first case.",
+      "verification": "The complete reference prints 'julia-026: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Modules, source loading and reproducible projects",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-009",
+        "julia-011"
+      ],
+      "concepts": [
+        "modules",
+        "exports",
+        "include",
+        "package layout",
+        "Project.toml",
+        "Manifest.toml"
+      ],
+      "outcome": "Separate namespaces from source files, execute a tiny owned multi-file project offline, and distinguish locked dependencies from code loading.",
+      "id": "julia-027",
+      "runtime": "julia",
+      "lab": "Call LocalStats.center on[2,4].",
+      "verification": "The complete reference prints 'julia-027: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Property testing and reproducible numerical evidence",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-009",
+        "julia-020",
+        "julia-027"
+      ],
+      "concepts": [
+        "Test",
+        "properties",
+        "metamorphic checks",
+        "random seeds",
+        "invariants"
+      ],
+      "outcome": "Combine hand-derived cases, generated inputs and invariants so that a plausible but incorrect transformation cannot pass by comparing only to itself.",
+      "id": "julia-028",
+      "runtime": "julia",
+      "lab": "Compute probabilities for[2,5,3] by hand.",
+      "verification": "The complete reference prints 'julia-028: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Tasks, channels and bounded asynchronous pipelines",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-005",
+        "julia-009",
+        "julia-027"
+      ],
+      "concepts": [
+        "Task",
+        "Channel",
+        "backpressure",
+        "closure",
+        "failure propagation"
+      ],
+      "outcome": "Build a bounded producer-consumer pipeline, join its work and explain how asynchronous scheduling differs from simultaneous CPU execution.",
+      "id": "julia-029",
+      "runtime": "julia",
+      "lab": "Describe what happens when a producer fills a capacity-two buffer.",
+      "verification": "The complete reference prints 'julia-029: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Threads, ownership and deterministic reductions",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-026",
+        "julia-029"
+      ],
+      "concepts": [
+        "Threads.@spawn",
+        "race conditions",
+        "locks",
+        "task migration",
+        "reductions"
+      ],
+      "outcome": "Run independent chunks on the prepared two-thread runtime, combine results deterministically and protect shared state with an explicit lock.",
+      "id": "julia-030",
+      "runtime": "julia",
+      "lab": "Compute the sum of squares through 100 from the closed-form formula.",
+      "verification": "The complete reference prints 'julia-030: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Expressions, hygienic macros and C interoperability",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-003",
+        "julia-010",
+        "julia-027"
+      ],
+      "concepts": [
+        "Expr",
+        "macro hygiene",
+        "single evaluation",
+        "ccall",
+        "ABI",
+        "UTF8"
+      ],
+      "outcome": "Inspect syntax without evaluating untrusted text, implement a hygienic single-evaluation macro and call a precisely typed Linux C function.",
+      "id": "julia-031",
+      "runtime": "julia",
+      "lab": "Identify the head and first argument of parsed 1+2.",
+      "verification": "The complete reference prints 'julia-031: all reference checks passed' after its numerical and failure-case checks."
+    },
+    {
+      "title": "Scientific capstone: an auditable offline modeling report",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "julia-016",
+        "julia-017",
+        "julia-018",
+        "julia-021",
+        "julia-024",
+        "julia-028"
+      ],
+      "concepts": [
+        "data contracts",
+        "availability time",
+        "validation selection",
+        "holdout",
+        "provenance",
+        "Plotly"
+      ],
+      "outcome": "Execute a complete synthetic modeling workflow from typed CSV to a source-identified decision record, exact numerical checks and an accessible Plotly report.",
+      "id": "julia-032",
+      "runtime": "julia",
+      "lab": "Explain what one row and one ID represent.",
+      "verification": "The complete reference prints 'julia-032: all reference checks passed' after its numerical and failure-case checks."
+    }
+  ]
+}

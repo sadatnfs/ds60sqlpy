@@ -486,35 +486,35 @@ RETURNING sku<span class="syntax-punctuation">,</span>available<span class="synt
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 1, One updated SKU row, columns sku, available, version: (A,3,2). After savepoint rollback, A is (A,5,1). No final ORDER BY is needed for the unique sku update.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 1, Inspect RETURNING (A,3,2), then inspect restored A state (5,1) after savepoint rollback. A successful command tag alone does not establish the version and capacity outcome.</p>
 <p><strong>Progressive hint:</strong> Put version and capacity conditions in WHERE, not only in an earlier SELECT.</p>
-<ol>
+<ol start="2">
 <li><strong>Reject a stale expected version.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 2, Try reserving one A unit with expected version 99. Return sku, available, version for any successful update and inspect the row afterward.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.</p>
 <p><strong>Progressive hint:</strong> A failed precondition is an ordinary zero-row outcome.</p>
-<ol>
+<ol start="3">
 <li><strong>Reject insufficient capacity independently.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 3, Try reserving two B units with correct expected version 1. Return sku, available, version on success and inspect B afterward.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.</p>
 <p><strong>Progressive hint:</strong> Use a boundary that differs from the stale-version example.</p>
-<ol>
+<ol start="4">
 <li><strong>Model two callers sharing an old version.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 4, Inside one savepoint, apply caller One reserving two A units at version 1, then caller Two reserving one A unit with the same old version. Return caller, affected_rows from both attempts.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 4, Two model-trace rows keyed by caller, columns caller, affected_rows; final ORDER BY caller: One affects 1, Two affects 0. A is temporarily (A,3,2), then rollback restores the fixture. This is a sequential model, not a concurrent trace.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 4, Inspect trace One=1 affected row and Two=0, plus temporary A state (3,2). Rollback restores (5,1). Label the result a sequential model rather than a concurrent execution trace.</p>
 <p><strong>Progressive hint:</strong> Execute the two writes in distinct statements and save their actual returned counts.</p>
-<ol>
+<ol start="5">
 <li><strong>Verify a no-change read result.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 5, Return sku, available, version for both initial stock rows, ordered by sku. State what a single-session read proves and what a two-session isolation claim additionally needs.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 5, Two SKU rows, columns sku, available, version; final ORDER BY sku: (A,5,1),(B,1,1). A genuine isolation trace also needs session names, isolation level, ordered statements, commit boundary, and observations.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 5, Inspect initial rows (A,5,1),(B,1,1). A separate isolation claim requires actual A-session reads, B-session write/commit order, and the selected isolation level from the optional lab.</p>
 <p><strong>Progressive hint:</strong> The SELECT verifies current fixture state, not the visibility of another transaction.</p>
-<ol>
+<ol start="6">
 <li><strong>Transfer the guard to an atomic replenishment.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 6, Inside a savepoint, add three B units using expected version 1, increment version, and return sku, available, version. Then retry the same old expectation and prove it affects zero rows.</p>
@@ -604,7 +604,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -617,7 +617,8 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-CONCURRENCY-01: Isolation Traces and Optimistic Concurrency</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_concurrency_01_isolation_and_versions.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use ./classroom -&gt; PostgreSQL -&gt; sql-concurrency-01 and its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Select &quot;Whole SQL lesson (psql)&quot;; Docker supplies the client.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
@@ -629,20 +630,26 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> concurrency_stock <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  sku <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> concurrency_stock</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 1: Guard an update and inspect its result</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: One updated row, columns sku, available, version: (A,3,2). After rollback the fixture is (A,5,1).</span></span>
 <span class="source-line">SAVEPOINT worked_success<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">  concurrency_stock</span>
 <span class="source-line"><span class="syntax-keyword">SET</span></span>
@@ -656,6 +663,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT worked_success<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT worked_success<span class="syntax-punctuation">;</span></span>
@@ -813,7 +821,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_concurrency_01_isolation_and_versions_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -833,17 +841,22 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> concurrency_stock <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  sku <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> concurrency_stock</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -855,59 +868,68 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Perform a guarded reservation</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Perform a guarded reservation</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">      concurrency_stock</span>
-<span class="source-line">    <span class="syntax-keyword">SET</span></span>
-<span class="source-line">      available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
-<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">      sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">    RETURNING</span>
-<span class="source-line">      sku<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      available<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_answer_1</span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    concurrency_stock</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span></span>
+<span class="source-line">    available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">  RETURNING</span>
 <span class="source-line">    sku<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    available<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">version</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_answer_1</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  available<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  available<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  solution_answer_1</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      sku<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      available<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-keyword">version</span></span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      solution_answer_1</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      sku<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Reject a stale expected version</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">    concurrency_stock</span>
@@ -929,35 +951,42 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">version</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  changed<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    available<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">version</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    solution_answer_2</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  available<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  solution_answer_2</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          available <span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> concurrency_stock</span>
-<span class="source-line">        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">          sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      available <span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> concurrency_stock</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Reject insufficient capacity independently</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">    concurrency_stock</span>
@@ -979,34 +1008,41 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">version</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  changed<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    available<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">version</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    solution_answer_3</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  available<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  solution_answer_3</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          available <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> concurrency_stock</span>
-<span class="source-line">        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">          sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      available <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> concurrency_stock</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Model two callers sharing an old version</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> model_trace <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  caller <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  affected_rows <span class="syntax-builtin">bigint</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">    concurrency_stock</span>
@@ -1025,57 +1061,65 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  changed<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">      concurrency_stock</span>
-<span class="source-line">    <span class="syntax-keyword">SET</span></span>
-<span class="source-line">      available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
-<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">      sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">    RETURNING</span>
-<span class="source-line">      sku<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace</span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    concurrency_stock</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span></span>
+<span class="source-line">    available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  RETURNING</span>
+<span class="source-line">    sku<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  changed<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  caller<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  affected_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  model_trace</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  caller<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  caller<span class="syntax-punctuation">,</span> affected_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  model_trace<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      caller<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>affected_rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">      affected_rows</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      model_trace</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      caller<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        caller<span class="syntax-punctuation">,</span> affected_rows</span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">        model_trace<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">              <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">            <span class="syntax-keyword">AND</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>affected_rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">              affected_rows</span>
-<span class="source-line">            <span class="syntax-keyword">FROM</span> solution_answer_4</span>
-<span class="source-line">            <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">              caller <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">              affected_rows</span>
-<span class="source-line">            <span class="syntax-keyword">FROM</span> solution_answer_4</span>
-<span class="source-line">          <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">            caller <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_4</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      caller <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      affected_rows</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_4</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    caller <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Verify a no-change read result</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available<span class="syntax-punctuation">,</span></span>
@@ -1084,28 +1128,35 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  concurrency_stock</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  sku<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">,</span> available<span class="syntax-punctuation">,</span> <span class="syntax-keyword">version</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    concurrency_stock</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span> available<span class="syntax-punctuation">,</span> <span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  concurrency_stock</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>sku <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>available <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>sku <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;B&#x27;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>available <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Transfer the guard to an atomic replenishment</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  sku <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  available <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">version</span> <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">    concurrency_stock</span>
@@ -1126,40 +1177,46 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">version</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  changed<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    available<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    <span class="syntax-keyword">version</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    solution_answer_6</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  available<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">version</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  solution_answer_6</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">WITH</span> repeated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">          concurrency_stock</span>
-<span class="source-line">        <span class="syntax-keyword">SET</span></span>
-<span class="source-line">          available <span class="syntax-operator">=</span> available <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">          <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
-<span class="source-line">        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">          sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">        RETURNING</span>
-<span class="source-line">          sku</span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>sku<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-concurrency-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> repeated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    concurrency_stock</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span></span>
+<span class="source-line">    available <span class="syntax-operator">=</span> available <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  RETURNING</span>
+<span class="source-line">    sku</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> repeated<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;old replenishment version rejected&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> repeated<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;old replenishment version rejected&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

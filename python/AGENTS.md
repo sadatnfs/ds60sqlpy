@@ -60,9 +60,35 @@ Jupyter workflows, not a second learner installer. Windows uses WSL 2.
 - Keep core, advanced/heavy, and development dependencies separate.
 - Do not assume a package is present because another dependency happens to install it.
 - Prefer local, generated, or package-bundled datasets.
-- Seaborn first-run dataset downloads are allowed when disclosed and cached.
+- Default historical examples use the reviewed original offline fixtures through
+  `ds60sqlpy.teaching_data`. Preserve their synthetic provenance and do not
+  describe their results as historical or population evidence. A real external
+  dataset/model is a separate explicitly prepared route, with its source,
+  license, cache and availability assumptions stated.
 - Tag pretrained model or other network downloads and offer an offline fallback.
 - CPU execution is the default; GPU work must be optional.
+
+## Source and fixture boundaries
+
+The named language, NumPy, pandas and algorithm units are directly authored
+four-artifact bundles. Their six tasks need complete code references and
+explained answers; code-comment labels alone do not establish implementation
+coverage. Use the actual shared depth and practice gates before admission.
+The new legacy IDs live in `curriculum/extensions/python-modernization.json`
+with their separate practice expansion targets. Preserve established IDs,
+filenames, prerequisites and learner state.
+
+Use `teaching_fixture` or `load_teaching_frame` for their fixed reviewed names.
+A copied pad's `__file__` identifies a temporary submission, not the course root.
+The thin Core worker has an explicit helper COPY and uses the fixed reviewed
+course assets; do not relax its sanitized environment to discover them. Other
+profiles need their own reviewed import/data preparation before using this API.
+
+`python/authoring/` maintains only the synthetic fixture generator, not the
+whole Python curriculum. Read its guide before regenerating data. Its exact
+UTF-8 byte contract must agree with the loader's digest, including line endings.
+Do not replace earlier execution receipts when a later prose or format change
+is validated by a separately recorded parity mapping.
 
 ## Validation
 

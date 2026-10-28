@@ -404,12 +404,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day07_strings_regex_pathlib.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day07_strings_regex_pathlib.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -497,13 +497,13 @@ report <span class="syntax-operator">=</span> Path<span class="syntax-punctuatio
 <ol>
 <li>From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. <strong>Constraints:</strong> use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. <strong>Verify:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. <strong>Rules:</strong> normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. <strong>Verify:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Use ordinary string operations for fixed syntax, regular expressions for patterns, and <code>pathlib</code> for portable path semantics.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Compare <code>&quot;\n&quot;</code> with <code>r&quot;\n&quot;</code> and predict their lengths and printed representations. <strong>Progressive hint:</strong> A raw string preserves the backslash needed by many regex patterns. <strong>Verify:</strong> Record <code>len</code>, <code>repr</code>, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.</li>
 <li><strong>Tracing:</strong> Trace named regex groups while parsing <code>order-2048.csv</code>; distinguish <code>group(0)</code> from the named capture. <strong>Progressive hint:</strong> The whole match and captured subparts are different values. <strong>Verify:</strong> Assert <code>group(0)</code> is <code>&#x27;order-2048.csv&#x27;</code> while the named ID capture is <code>&#x27;2048&#x27;</code>; add a nonmatching filename returning no match.</li>
 <li><strong>Implementation:</strong> Implement <code>parse_report_name(Path)</code> returning a date and region for names like <code>sales_2025-07-01_west.csv</code>, rejecting mismatches. <strong>Progressive hint:</strong> Use <code>fullmatch</code> so extra suffix text cannot pass silently. <strong>Verify:</strong> Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.</li>
@@ -649,13 +649,13 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. <strong>Constraints:</strong> use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. <strong>Verify:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. <strong>Rules:</strong> normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. <strong>Verify:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Use ordinary string operations for fixed syntax, regular expressions for patterns, and <code>pathlib</code> for portable path semantics.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Compare <code>&quot;\n&quot;</code> with <code>r&quot;\n&quot;</code> and predict their lengths and printed representations. <strong>Progressive hint:</strong> A raw string preserves the backslash needed by many regex patterns. <strong>Verify:</strong> Record <code>len</code>, <code>repr</code>, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.</li>
 <li><strong>Tracing:</strong> Trace named regex groups while parsing <code>order-2048.csv</code>; distinguish <code>group(0)</code> from the named capture. <strong>Progressive hint:</strong> The whole match and captured subparts are different values. <strong>Verify:</strong> Assert <code>group(0)</code> is <code>&#x27;order-2048.csv&#x27;</code> while the named ID capture is <code>&#x27;2048&#x27;</code>; add a nonmatching filename returning no match.</li>
 <li><strong>Implementation:</strong> Implement <code>parse_report_name(Path)</code> returning a date and region for names like <code>sales_2025-07-01_west.csv</code>, rejecting mismatches. <strong>Progressive hint:</strong> Use <code>fullmatch</code> so extra suffix text cannot pass silently. <strong>Verify:</strong> Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.</li>

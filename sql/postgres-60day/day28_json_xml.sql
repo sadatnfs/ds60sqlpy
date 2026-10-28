@@ -1,11 +1,11 @@
 -- Day 28: JSON/XML Handling
--- BEGINNER WORKFLOW — sql-28: JSON XML
+-- BEGINNER WORKFLOW - sql-28: JSON XML
 -- Guide: sql/postgres-60day/companion-guides/day28_json_xml.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-28/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-28.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
 -- Assumptions: JSON text extraction with `->>` returns text or NULL. XML XPath results are arrays. Course metadata keys are small and deterministic.
@@ -35,6 +36,7 @@ FROM
 ORDER BY
   event_id DESC
 LIMIT 50;
+
 -- JSONB: filter and aggregate
 SELECT
   metadata ->> 'device' AS device,
@@ -48,6 +50,7 @@ GROUP BY
 ORDER BY
   cnt DESC,
   device NULLS LAST;
+
 -- JSONB: array expansion example (simulate array in metadata)
 -- SELECT e.event_id, x AS tag
 -- FROM events e,
@@ -62,6 +65,7 @@ FROM
 ORDER BY
   doc_id
 LIMIT 20;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

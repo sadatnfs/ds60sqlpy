@@ -9,24 +9,30 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep2_usage (
   customer_id integer PRIMARY KEY,
   revenue numeric NOT NULL,
   visits integer NOT NULL CHECK (visits >= 0)
 ) ON COMMIT DROP;
+
 INSERT INTO deep2_usage
 VALUES
   (1, 10, 1),
   (2, 90, 3),
   (3, 0, 0);
+
 CREATE TEMP TABLE deep2_stock (
   snapshot_id integer PRIMARY KEY,
   product_id integer NOT NULL,
   snapshot_day date NOT NULL,
   units integer NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep2_stock
 VALUES
   (1, 1, '2026-01-01', 10),
@@ -34,21 +40,25 @@ VALUES
   (3, 2, '2026-01-01', 20),
   (4, 2, '2026-01-02', 17),
   (5, 1, '2026-01-03', 99);
+
 CREATE TEMP TABLE deep2_orders (
   order_id integer PRIMARY KEY,
   amount numeric NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep2_orders
 VALUES
   (1, 100),
   (2, 60),
   (3, 40);
+
 CREATE TEMP TABLE deep2_bridge (
   order_id integer NOT NULL,
   channel text NOT NULL,
   weight numeric NOT NULL CHECK (weight >= 0 AND weight <= 1),
   PRIMARY KEY (order_id, channel)
 ) ON COMMIT DROP;
+
 INSERT INTO deep2_bridge
 VALUES
   (1, 'email', 0.6),
@@ -56,6 +66,7 @@ VALUES
   (2, 'email', 1.0),
   (3, 'search', 0.7),
   (3, 'direct', 0.2);
+
 CREATE TEMP TABLE deep2_history (
   version_id integer PRIMARY KEY,
   customer_id integer NOT NULL,
@@ -64,23 +75,27 @@ CREATE TEMP TABLE deep2_history (
   segment text NOT NULL,
   CHECK (valid_from < valid_to)
 ) ON COMMIT DROP;
+
 INSERT INTO deep2_history
 VALUES
   (11, 1, '2026-01-01T00:00Z', '2026-01-02T00:00Z', 'basic'),
   (12, 1, '2026-01-02T00:00Z', '2026-01-03T00:00Z', 'premium'),
   (21, 2, '2026-01-01T00:00Z', '2026-01-03T00:00Z', 'alpha'),
   (22, 2, '2026-01-02T00:00Z', '2026-01-04T00:00Z', 'beta');
+
 CREATE TEMP TABLE deep2_events (
   event_id integer PRIMARY KEY,
   customer_id integer NOT NULL,
   occurred_at timestamptz NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep2_events
 VALUES
   (1, 1, '2026-01-01T12:00Z'),
   (2, 1, '2026-01-02T00:00Z'),
   (3, 2, '2026-01-02T12:00Z'),
   (4, 3, '2026-01-02T12:00Z');
+
 -- Worked example 1
 WITH groups (
   group_id,
@@ -95,6 +110,7 @@ SELECT
   round(avg(successes / trials), 3) AS equal_group_rate
 FROM
   groups;
+
 -- Worked example 2
 WITH states (
   day,
@@ -114,10 +130,11 @@ GROUP BY
   day
 ORDER BY
   day;
+
 -- Exercises
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 -- 1. Preserve undefined customer ratios
--- Inputs/evidence: For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.
+-- Inputs/evidence: For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from `deep2_usage`, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.
 -- Expected result/shape: For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.
 -- Verify: For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.
 -- 2. Compare ratio weighting and population counts

@@ -12,7 +12,6 @@ from ds60sqlpy.curriculum_framework import infer_runner, load_extensions
 from ds60sqlpy.study_plan import LEARNING_PATHS
 
 DAY_PATTERN = re.compile(r"^day(?P<day>\d{2})_(?P<slug>.+)$")
-SEABORN_CACHE_DAYS = {17, 18, 19, 22, 24, 25, 26, 28, 45, 51, 56}
 MODEL_DOWNLOAD_DAYS = {48, 49}
 GEO_DOWNLOAD_DAYS = {27}
 PYTHON_DEPENDENCY_OVERRIDES = {
@@ -41,7 +40,7 @@ PYTHON_DEPENDENCY_OVERRIDES = {
     55: "production",
     56: "production",
     57: "data",
-    58: "data",
+    58: "quality",
 }
 
 PROFESSIONAL_LESSON_SPECS: tuple[dict[str, Any], ...] = (
@@ -898,8 +897,6 @@ def _python_lessons(root: Path) -> list[dict[str, Any]]:
             network = "optional-model-download"
         elif day in GEO_DOWNLOAD_DAYS:
             network = "optional-map-download"
-        elif day in SEABORN_CACHE_DAYS:
-            network = "first-run-seaborn-cache"
         else:
             network = "offline"
 
@@ -934,6 +931,23 @@ def _python_lessons(root: Path) -> list[dict[str, Any]]:
     return lessons
 
 
+def _sql_title(slug: str) -> str:
+    """Use readable SQL terminology while retaining the historical file and ID."""
+    titles = {
+        "select_where_orderby": "SELECT, WHERE, ORDER BY and LIMIT",
+        "aggregates_groupby_having": "Aggregates, GROUP BY and HAVING",
+        "rank_functions": "ROW_NUMBER, RANK and DENSE_RANK",
+        "lag_lead": "LAG and LEAD",
+        "first_last_value": "FIRST_VALUE and LAST_VALUE",
+        "ctes_intro": "Common Table Expressions",
+        "multiple_ctes_hierarchies": "Multiple CTEs and Hierarchies",
+        "ctes_with_windows": "CTEs with Window Functions",
+        "explain_analyze": "EXPLAIN and EXPLAIN ANALYZE",
+    }
+    title = titles.get(slug, _title(slug))
+    return re.sub(r"\b(Week|Project|Part)([0-9]+)\b", r"\1 \2", title)
+
+
 def _sql_lessons(root: Path) -> list[dict[str, Any]]:
     lesson_dir = root / "sql" / "postgres-60day"
     guide_dir = lesson_dir / "companion-guides"
@@ -960,7 +974,7 @@ def _sql_lessons(root: Path) -> list[dict[str, Any]]:
                 "id": f"sql-{day:02d}",
                 "track": "sql",
                 "day": day,
-                "title": _title(slug),
+                "title": _sql_title(slug),
                 "level": level,
                 "phase": phase,
                 "estimated_minutes": minutes,

@@ -293,19 +293,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Inspect a platform module.</strong> Read <code>String.class</code> module and package names. <strong>Expected:</strong> module <code>java.base</code>;package <code>java.lang</code>. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with module <code>java.base</code>;package <code>java.lang</code>.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect the classroom classpath context.</strong> ReadMain.class module metadata. <strong>Expected:</strong> Main belongs to the unnamed module in the standard classpath launch. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with Main belongs to the unnamed module in the standard classpath launch.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compile two real modules.</strong> Create the owned greeting/application fixture and compile both with--module-source-path. <strong>Expected:</strong> compiler exit 0 andmodule-info.class files present. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with compiler exit 0 andmodule-info.class files present.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect declared dependencies and exports.</strong> Read the compiled descriptors with ModuleFinder. <strong>Expected:</strong> app requirescourse.greeting;library exportsedu.example.greeting. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with app requirescourse.greeting;library exportsedu.example.greeting.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Run the modular application.</strong> Launch the compiled app in a fresh childJVM with the fixed module path. <strong>Expected:</strong> stdoutHello, modules! andexit0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with stdoutHello, modules! andexit0.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject a missing module dependency.</strong> Compile an app requiringcourse.missing instead ofcourse.greeting. <strong>Expected:</strong> nonzero compiler exit and captured diagnostic. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with nonzero compiler exit and captured diagnostic.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

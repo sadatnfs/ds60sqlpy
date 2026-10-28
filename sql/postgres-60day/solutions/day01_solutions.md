@@ -263,60 +263,50 @@ cardinality contract.
 
 ## Exercise 6: Extension
 
-**Prompt:** Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
+**Prompt:** Return the second page of 10 newest orders using the same deterministic order, LIMIT 10 and OFFSET 10.
 
-**Reasoning:** Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order.
+**Reasoning:** A page is a bounded segment of a defined order. Start from the
+same order as page one. The order timestamp alone can tie, so include the unique
+order ID. On an unchanged fixture, skipping exactly ten rows and keeping ten
+more produces the second page.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
+- `FROM orders AS o` supplies one row per order.
+- `SELECT` keeps the order identity, customer identity, amount and timestamp.
+- `ORDER BY o.order_date DESC, o.order_id DESC` defines a unique newest-first order.
+- `OFFSET 10` skips ten rows in that order.
+- `LIMIT 10` caps the rows remaining after the skip.
 
 ```sql
-WITH first_page AS (
-  SELECT o.order_id,
-         o.order_date
-  FROM orders AS o
-  ORDER BY o.order_date DESC, o.order_id DESC
-  LIMIT 10
-), cursor_row AS (
-  SELECT fp.order_date,
-         fp.order_id
-  FROM first_page AS fp
-  ORDER BY fp.order_date, fp.order_id
-  LIMIT 1
-)
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       o.order_date
-FROM orders AS o
-CROSS JOIN cursor_row AS cursor
-WHERE (o.order_date, o.order_id) < (cursor.order_date, cursor.order_id)
-ORDER BY o.order_date DESC, o.order_id DESC
-LIMIT 10;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  o.order_date
+FROM
+  orders AS o
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC
+LIMIT 10 OFFSET 10;
 ```
 
-**Expected shape:** Up to 10 rows strictly after the first page with no overlap.
-
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
+**Expected shape:** At most 10 rows, one row per order, equal to positions 11 through 20 of the unchanged ordered input. The projected columns remain `order_id`,
+`customer_id`, `total_amount` and `order_date`; pagination does not aggregate
+orders or change what an output row means.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 6, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-01 Exercise 6, expected output: Up to 10 rows strictly after the first page with no overlap. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-- **Independent verification:** For sql-01 Exercise 6, assert no more than 10 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, `customer_id`, `total_amount`, and `order_date` came from the same source rows. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-01 Exercise 6, run `first_page`, and `cursor_row` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-01 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `total_amount`, and `order_date` ordered by `o.order_date DESC, o.order_id DESC`.
-- **Alternative/trade-off:** For sql-01 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order. Evaluate another form against the concrete expected result (Up to 10 rows strictly after the first page with no overlap) and the verification above.
-- **Edge case:** Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-01 Exercise 6, read from `orders` at one row per `order_id` and compare pages only on an unchanged fixture.
+- **Expected result/shape:** For sql-01 Exercise 6, return at most 10 rows equal to positions 11 through 20 of the unchanged ordered input, one row per `order_id`. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+- **Verify:** For sql-01 Exercise 6, display the first 20 ordered IDs and compare the page with positions 11 through 20. Assert at most 10 unique `order_id` values, no overlap with page one, and projected values matching those source IDs.
+- **Uniqueness and overlap:** Check that no order ID repeats within the page or appears on both pages. When fewer than twenty source rows exist, the second page is shorter or empty.
+- **Tie case:** Give two orders equal timestamps and different IDs. The ID tie-breaker still fixes their order.
+- **Alternative/trade-off:** An offset is easy to reason about for this stable fixture. Large offsets require the database to find and discard preceding rows. Changes between page requests can also shift positions. The later `sql-scale-01` workshop teaches keyset cursors after their prerequisites.
+
+No joins, subqueries or CTEs are needed to express this first pagination task.
+Those mechanisms are introduced in their own lessons.
 
 ## Final self-check
 

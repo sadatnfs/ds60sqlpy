@@ -483,35 +483,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 1, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 6,3. Cursor is (11:00 UTC on January 1 2024,3).</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 1, Inspect page IDs 6,3 and save both values from the last returned row, timestamp 11:00 UTC and ID 3. A separately computed maximum ID is not this cursor.</p>
 <p><strong>Progressive hint:</strong> The cursor comes from the last row actually returned.</p>
-<ol>
+<ol start="2">
 <li><strong>Traverse a timestamp tie without overlap.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 2, Continue after (2024-01-01 11:00+00,3) for two known-timestamp rows, projecting event_id, occurred_at. Use a strict compound boundary.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 2, Two rows keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1. Neither appears on page one; both timestamp ties survive.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 2, Compare ordered IDs 2,1, require no overlap with first-page IDs 6,3, and retain both equal 10:00 timestamps. A timestamp-only or non-strict boundary fails these controls.</p>
 <p><strong>Progressive hint:</strong> Compare the row pair in the same direction as the final sort.</p>
-<ol>
+<ol start="3">
 <li><strong>Cross into the unknown-timestamp phase.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 3, Continue after the last known boundary (2024-01-01 09:00+00,5) and include the NULL tail. Return event_id, occurred_at. Explain the follow-on predicate after a NULL cursor at ID 4.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 3, One event row keyed by event_id, columns event_id, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: ID 4 with NULL. After that NULL cursor, occurred_at IS NULL AND event_id &lt; 4 returns zero rows.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 3, Require ID 4 with occurred_at NULL, then inspect the follow-on NULL-only identity predicate and confirm it returns zero rows for this fixture.</p>
 <p><strong>Progressive hint:</strong> A known boundary admits its earlier known rows plus the NULL phase.</p>
-<ol>
+<ol start="4">
 <li><strong>Expose positional drift after an insertion.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 4, Model inserting event 7 at 13:00 after page one. Compare an OFFSET 2 page with the original compound cursor page. Return path, event_id, occurred_at for both two-row pages.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 4, Four path-event rows identified by (path,event_id), columns path, event_id, occurred_at; final ORDER BY path, occurred_at DESC NULLS LAST, event_id DESC. cursor gives 2,1; offset gives 3,2, repeating page-one ID 3.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 4, Compare offset page IDs 3,2 with cursor page IDs 2,1. Only the offset result repeats first-page ID 3, and a separate source count still equals six.</p>
 <p><strong>Progressive hint:</strong> Use a CTE that UNION ALL adds event 7 without changing the fixture.</p>
-<ol>
+<ol start="5">
 <li><strong>Exclude a late arrival with a declared sealed prefix.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 5, Add an illustrative event 7 received_seq 7 with event timestamp 10:30. Continue after (11:00,3) under the sealed received_seq &lt;= 6 fence, including NULLs. Return event_id, received_seq, occurred_at.</p>
 <p><strong>Expected result/shape:</strong> For sql-scale-01 Exercise 5, Four event rows keyed by event_id, columns event_id, received_seq, occurred_at; final ORDER BY occurred_at DESC NULLS LAST, event_id DESC: IDs 2,1,5,4. Late event 7 is excluded despite fitting the time cursor.</p>
 <p><strong>Verify:</strong> For sql-scale-01 Exercise 5, Inspect returned event_id values 2,1,5,4 under the sealed prefix and confirm incoming ID 7 is excluded despite fitting the timestamp cursor. Explain why allocated sequence order is not committed-prefix completeness.</p>
 <p><strong>Progressive hint:</strong> Apply membership and continuation as separate AND conditions; group the OR continuation cases.</p>
-<ol>
+<ol start="6">
 <li><strong>Prove bounded traversal covers the static fixture.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-scale-01 Exercise 6, Build a deterministic batch manifest over all six rows with a batch size of two using row_number only as a validation oracle. Return batch_no, event_ids, row_count. Explain why this oracle is not the production cursor algorithm.</p>
@@ -577,7 +577,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_scale_01_cursors_and_batches.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -590,7 +590,8 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-SCALE-01: Cursor Pagination and Bounded Batches</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_scale_01_cursors_and_batches.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use ./classroom -&gt; PostgreSQL -&gt; sql-scale-01 and its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Select &quot;Whole SQL lesson (psql)&quot;; Docker supplies the client.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
@@ -602,13 +603,17 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> scale_events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  received_seq <span class="syntax-builtin">integer</span> <span class="syntax-keyword">UNIQUE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at timestamptz</span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> scale_events</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -617,7 +622,9 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 12:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">ON</span> scale_events <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 1: Save the whole boundary from the first page</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Two event rows, columns event_id, occurred_at: IDs 6 then 3; cursor (2024-01-01 11:00+00,3).</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -629,6 +636,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_id <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 2: Continue across a tied timestamp</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Two event rows, columns event_id, occurred_at: IDs 2 then 1, both 10:00 UTC.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -641,6 +649,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_id <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Record an exact first-page boundary.</span></span>
@@ -781,7 +790,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_scale_01_cursors_and_batches_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -801,13 +810,17 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> scale_events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  received_seq <span class="syntax-builtin">integer</span> <span class="syntax-keyword">UNIQUE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at timestamptz</span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> scale_events</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -816,7 +829,9 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 09:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 12:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">ON</span> scale_events <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -828,35 +843,42 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Record an exact first-page boundary</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    occurred_at</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    scale_events</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    event_id <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    event_id<span class="syntax-punctuation">,</span> occurred_at</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    scale_events</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Record an exact first-page boundary</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  occurred_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  scale_events</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  event_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  event_id<span class="syntax-punctuation">,</span> occurred_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  scale_events</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Traverse a timestamp tie without overlap</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  event_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at</span>
@@ -867,6 +889,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_id <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  event_id<span class="syntax-punctuation">,</span> occurred_at</span>
@@ -876,6 +899,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
@@ -887,10 +911,14 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_2</span>
 <span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">      event_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Cross into the unknown-timestamp phase</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  event_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at</span>
@@ -905,6 +933,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_id <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  event_id<span class="syntax-punctuation">,</span> occurred_at</span>
@@ -918,6 +947,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
@@ -932,10 +962,14 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">      occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line">      <span class="syntax-keyword">AND</span> event_id <span class="syntax-operator">&lt;</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Expose positional drift after an insertion</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
@@ -989,17 +1023,18 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  path<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      event_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      occurred_at</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      scale_events</span>
-<span class="source-line">    <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      <span class="syntax-number">7</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 13:00+00&#x27;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    occurred_at</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    scale_events</span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-number">7</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 13:00+00&#x27;</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">positional <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1037,23 +1072,28 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  continuation</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  path<span class="syntax-punctuation">,</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_4</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      path <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;cursor&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">        array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">      <span class="syntax-keyword">FROM</span> solution_answer_4</span>
 <span class="source-line">      <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">        path <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;cursor&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_4</span>
-<span class="source-line">        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">          path <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;offset&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        path <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;offset&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Exclude a late arrival with a declared sealed prefix</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> incoming <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
@@ -1082,43 +1122,49 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> incoming <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      event_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      received_seq<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      occurred_at</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      scale_events</span>
-<span class="source-line">    <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      <span class="syntax-number">7</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-number">7</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:30+00&#x27;</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> incoming <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    event_id<span class="syntax-punctuation">,</span> received_seq<span class="syntax-punctuation">,</span> occurred_at</span>
+<span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    received_seq<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    occurred_at</span>
 <span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    incoming</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    received_seq <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
-<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span> event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    scale_events</span>
+<span class="source-line">  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-number">7</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-number">7</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 10:30+00&#x27;</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  event_id<span class="syntax-punctuation">,</span> received_seq<span class="syntax-punctuation">,</span> occurred_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  incoming</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  received_seq <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">,</span> event_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span>TIMESTAMPTZ <span class="syntax-string">&#x27;2024-01-01 11:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> occurred_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>received_seq<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>received_seq<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Prove bounded traversal covers the static fixture</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> ordered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
@@ -1137,48 +1183,53 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  batch_no<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> ordered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      event_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">        event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span></span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      scale_events</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> ordered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> batch_no<span class="syntax-punctuation">,</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_ids<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span></span>
+<span class="source-line">    event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    row_number<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> occurred_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      event_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span></span>
 <span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    ordered</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    batch_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line">    scale_events</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> batch_no<span class="syntax-punctuation">,</span> array_agg<span class="syntax-punctuation">(</span>event_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> event_ids<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  ordered</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">position</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  batch_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          event_ids</span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_6</span>
-<span class="source-line">        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">          batch_no <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          event_ids</span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_6</span>
-<span class="source-line">      <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">        batch_no <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        event_ids</span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span> solution_answer_6</span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      event_ids</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_6</span>
 <span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">      batch_no <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      batch_no <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      event_ids</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_6</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    batch_no <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    event_ids</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span> solution_answer_6</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  batch_no <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-scale-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

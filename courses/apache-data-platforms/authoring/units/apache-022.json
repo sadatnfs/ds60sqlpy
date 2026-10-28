@@ -1,0 +1,16 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-021", "apache-003"],
+  "concepts": ["filesystem visibility", "plan versus action", "immutable source identity"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Ballista deployment",
+      "https://datafusion.apache.org/ballista/user-guide/deployment/index.html"
+    ],
+    ["DataFusion Parquet input", "https://datafusion.apache.org/python/user-guide/io/parquet.html"]
+  ]
+}

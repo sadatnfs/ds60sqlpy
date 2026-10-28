@@ -1,0 +1,422 @@
+{
+  "schema_version": 1,
+  "track_id": "julia",
+  "lessons": [
+    {
+      "id": "julia-001",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-001.md",
+      "source_path": "courses/julia/lessons/julia-001.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-001_reference.jl",
+        "courses/julia/solutions/julia-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-002",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-002.md",
+      "source_path": "courses/julia/lessons/julia-002.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-002_reference.jl",
+        "courses/julia/solutions/julia-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-003",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-003.md",
+      "source_path": "courses/julia/lessons/julia-003.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-003_reference.jl",
+        "courses/julia/solutions/julia-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-004",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-004.md",
+      "source_path": "courses/julia/lessons/julia-004.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-004_reference.jl",
+        "courses/julia/solutions/julia-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-005",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-005.md",
+      "source_path": "courses/julia/lessons/julia-005.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-005_reference.jl",
+        "courses/julia/solutions/julia-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-006",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-006.md",
+      "source_path": "courses/julia/lessons/julia-006.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-006_reference.jl",
+        "courses/julia/solutions/julia-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-007",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-007.md",
+      "source_path": "courses/julia/lessons/julia-007.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-007_reference.jl",
+        "courses/julia/solutions/julia-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-008",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-008.md",
+      "source_path": "courses/julia/lessons/julia-008.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-008_reference.jl",
+        "courses/julia/solutions/julia-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-009",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-009.md",
+      "source_path": "courses/julia/lessons/julia-009.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-009_reference.jl",
+        "courses/julia/solutions/julia-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-010",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-010.md",
+      "source_path": "courses/julia/lessons/julia-010.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-010_reference.jl",
+        "courses/julia/solutions/julia-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-011",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-011.md",
+      "source_path": "courses/julia/lessons/julia-011.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-011_reference.jl",
+        "courses/julia/solutions/julia-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-012",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-012.md",
+      "source_path": "courses/julia/lessons/julia-012.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-012_reference.jl",
+        "courses/julia/solutions/julia-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-013",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-013.md",
+      "source_path": "courses/julia/lessons/julia-013.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-013_reference.jl",
+        "courses/julia/solutions/julia-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-014",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-014.md",
+      "source_path": "courses/julia/lessons/julia-014.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-014_reference.jl",
+        "courses/julia/solutions/julia-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-015",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-015.md",
+      "source_path": "courses/julia/lessons/julia-015.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-015_reference.jl",
+        "courses/julia/solutions/julia-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-016",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-016.md",
+      "source_path": "courses/julia/lessons/julia-016.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-016_reference.jl",
+        "courses/julia/solutions/julia-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-017",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-017.md",
+      "source_path": "courses/julia/lessons/julia-017.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-017_reference.jl",
+        "courses/julia/solutions/julia-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-018",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-018.md",
+      "source_path": "courses/julia/lessons/julia-018.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-018_reference.jl",
+        "courses/julia/solutions/julia-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-019",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-019.md",
+      "source_path": "courses/julia/lessons/julia-019.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-019_reference.jl",
+        "courses/julia/solutions/julia-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-020",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-020.md",
+      "source_path": "courses/julia/lessons/julia-020.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-020_reference.jl",
+        "courses/julia/solutions/julia-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-021",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-021.md",
+      "source_path": "courses/julia/lessons/julia-021.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-021_reference.jl",
+        "courses/julia/solutions/julia-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-022",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-022.md",
+      "source_path": "courses/julia/lessons/julia-022.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-022_reference.jl",
+        "courses/julia/solutions/julia-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-023",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-023.md",
+      "source_path": "courses/julia/lessons/julia-023.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-023_reference.jl",
+        "courses/julia/solutions/julia-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-024",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-024.md",
+      "source_path": "courses/julia/lessons/julia-024.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-024_reference.jl",
+        "courses/julia/solutions/julia-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-025",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-025.md",
+      "source_path": "courses/julia/lessons/julia-025.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-025_reference.jl",
+        "courses/julia/solutions/julia-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-026",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-026.md",
+      "source_path": "courses/julia/lessons/julia-026.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-026_reference.jl",
+        "courses/julia/solutions/julia-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-027",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-027.md",
+      "source_path": "courses/julia/lessons/julia-027.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-027_reference.jl",
+        "courses/julia/solutions/julia-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-028",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-028.md",
+      "source_path": "courses/julia/lessons/julia-028.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-028_reference.jl",
+        "courses/julia/solutions/julia-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-029",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-029.md",
+      "source_path": "courses/julia/lessons/julia-029.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-029_reference.jl",
+        "courses/julia/solutions/julia-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-030",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-030.md",
+      "source_path": "courses/julia/lessons/julia-030.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-030_reference.jl",
+        "courses/julia/solutions/julia-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-031",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-031.md",
+      "source_path": "courses/julia/lessons/julia-031.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-031_reference.jl",
+        "courses/julia/solutions/julia-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "julia-032",
+      "status": "authored",
+      "language": "julia",
+      "runtime_profile": "julia",
+      "guide_path": "courses/julia/guides/julia-032.md",
+      "source_path": "courses/julia/lessons/julia-032.jl",
+      "solution_paths": [
+        "courses/julia/solutions/julia-032_reference.jl",
+        "courses/julia/solutions/julia-032_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

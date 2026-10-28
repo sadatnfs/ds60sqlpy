@@ -1,0 +1,61 @@
+{
+  "number": 29,
+  "title": "Tasks, channels and bounded asynchronous pipelines",
+  "concepts": ["Task", "Channel", "backpressure", "closure", "failure propagation"],
+  "outcome": "Build a bounded producer-consumer pipeline, join its work and explain how asynchronous scheduling differs from simultaneous CPU execution.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-005", "julia-009", "julia-027"],
+  "sources": [
+    [
+      "Asynchronous programming",
+      "https://docs.julialang.org/en/v1/manual/asynchronous-programming/"
+    ],
+    ["Tasks and channels", "https://docs.julialang.org/en/v1/base/parallel/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Trace the queue",
+      "task": "Describe what happens when a producer fills a capacity-two buffer.",
+      "expected": "The next put! waits until space is available.",
+      "hint": "Backpressure limits queued values.",
+      "answer": "The consumer drains a value, allowing the producer to continue without unbounded queue growth."
+    },
+    {
+      "title": "Preserve output meaning",
+      "task": "Predict the output for[-2,0,3].",
+      "expected": "The result is[4,0,9].",
+      "hint": "One producer preserves this input order.",
+      "answer": "Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering."
+    },
+    {
+      "title": "Inject a failure",
+      "task": "Set fail_after=0 on a nonempty list.",
+      "expected": "A CompositeException reaches the caller.",
+      "hint": "The finally block still closes the channel.",
+      "answer": "No shortened result is mislabeled success; joining propagates the producer failure."
+    },
+    {
+      "title": "Drain a closed channel",
+      "task": "Put 7 into a channel, close it, then collect it.",
+      "expected": "The buffered value is still returned.",
+      "hint": "Closure means no future puts, not immediate deletion.",
+      "answer": "Buffered values can be drained before iteration terminates."
+    },
+    {
+      "title": "Identify an unsupported generalization",
+      "task": "Explain what can go wrong if an arbitrary consumer callback throws.",
+      "expected": "A producer can remain blocked without coordinated cancellation.",
+      "hint": "Inspect who closes and who waits.",
+      "answer": "The bounded example proves its stated simple consumer path; a generic pipeline needs both failure directions designed."
+    },
+    {
+      "title": "Transfer to file processing",
+      "task": "Specify identifiers and completion evidence for concurrent files.",
+      "expected": "Use stable file IDs and explicit per-file outcomes.",
+      "hint": "A printed line is not a durable acknowledgment.",
+      "answer": "Define ordering, retries and partial failure semantics before introducing concurrency."
+    }
+  ]
+}

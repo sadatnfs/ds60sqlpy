@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 50,
+  "prerequisites": ["apache-001"],
+  "concepts": ["decimal", "nullability", "schema compatibility"],
+  "evidence": "Exact real-library outputs checked against small independent records, with explicit rejected inputs.",
+  "sources": [
+    ["Arrow type definitions", "https://arrow.apache.org/docs/python/data.html"],
+    [
+      "Arrow decimal128 API",
+      "https://arrow.apache.org/docs/python/generated/pyarrow.decimal128.html"
+    ]
+  ]
+}

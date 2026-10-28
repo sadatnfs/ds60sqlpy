@@ -1,0 +1,1716 @@
+{
+  "schema_version": 1,
+  "id": "apache-data-platforms",
+  "title": "Apache and open data platforms",
+  "summary": "Mechanisms and worked projects for columnar data, query engines, orchestration, streaming, catalogs, analytical serving and open sharing.",
+  "learning_mode": "tutorial",
+  "lessons": [
+    {
+      "id": "apache-001",
+      "title": "A platform is a set of contracts",
+      "level": "beginner",
+      "minutes": 50,
+      "prerequisites": [],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "platform boundaries",
+        "data contract",
+        "independent oracle"
+      ],
+      "outcome": "Separate storage, transport, execution, catalog and governance responsibilities",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Exact real-library outputs checked against small independent records, with explicit rejected inputs."
+    },
+    {
+      "id": "apache-002",
+      "title": "Rows, columns, types and missing values",
+      "level": "beginner",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-001"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "decimal",
+        "nullability",
+        "schema compatibility"
+      ],
+      "outcome": "Define logical types and physical representation before choosing a format",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Exact real-library outputs checked against small independent records, with explicit rejected inputs."
+    },
+    {
+      "id": "apache-003",
+      "title": "Files, objects and tables",
+      "level": "beginner",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-002"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "Parquet",
+        "Iceberg snapshot",
+        "catalog"
+      ],
+      "outcome": "Distinguish bytes, files, partitions, table metadata and atomic commits",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Exact real-library outputs checked against small independent records, with explicit rejected inputs."
+    },
+    {
+      "id": "apache-004",
+      "title": "Processes, networks and ownership",
+      "level": "beginner",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-003"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "network namespaces",
+        "Compose DNS",
+        "listeners",
+        "bounded RPC"
+      ],
+      "outcome": "Trace a connection through client, DNS, listener and advertised endpoint",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-005",
+      "title": "Partitioning, ordering and skew",
+      "level": "beginner",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-004"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "hash partitioning",
+        "skew",
+        "mergeable state"
+      ],
+      "outcome": "Explain partition-local ordering and the cost of a shuffle",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-006",
+      "title": "Delivery, retries and idempotence",
+      "level": "beginner",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-005"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "idempotence",
+        "atomic receipts",
+        "retry boundaries"
+      ],
+      "outcome": "Specify the boundary at which a duplicate is suppressed",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-007",
+      "title": "Time, history and reproducibility",
+      "level": "beginner",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-006"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "event time",
+        "as-of revisions",
+        "late corrections"
+      ],
+      "outcome": "Record source version, clock and query assumptions",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-008",
+      "title": "Evidence and operational experiments",
+      "level": "beginner",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-007"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "independent oracles",
+        "negative checks",
+        "evidence boundaries"
+      ],
+      "outcome": "Design positive, negative and recovery checks without overclaiming production readiness",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-009",
+      "title": "Arrays, buffers and null bitmaps",
+      "level": "beginner",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-008"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "buffers",
+        "validity",
+        "offsets"
+      ],
+      "outcome": "Explain why logical length, buffer length and offset differ",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
+    },
+    {
+      "id": "apache-010",
+      "title": "Schemas, nested data and dictionaries",
+      "level": "beginner",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-009"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "nested types",
+        "dictionary encoding",
+        "schema"
+      ],
+      "outcome": "Choose a schema that preserves missingness and semantic units",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
+    },
+    {
+      "id": "apache-011",
+      "title": "Compute kernels and chunked tables",
+      "level": "intermediate",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-010"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "compute kernels",
+        "chunks",
+        "null policy"
+      ],
+      "outcome": "Use vector kernels without confusing a chunk boundary with a partition",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
+    },
+    {
+      "id": "apache-012",
+      "title": "IPC, streams and ownership",
+      "level": "intermediate",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-011"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "IPC",
+        "schema",
+        "record batch"
+      ],
+      "outcome": "Compare zero-copy opportunities with allocations at conversion boundaries",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
+    },
+    {
+      "id": "apache-013",
+      "title": "Parquet datasets and predicate pruning",
+      "level": "intermediate",
+      "minutes": 50,
+      "prerequisites": [
+        "apache-012"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "Parquet",
+        "partition pruning",
+        "residual filter"
+      ],
+      "outcome": "Inspect metadata and distinguish pruning from proof of row-level correctness",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
+    },
+    {
+      "id": "apache-014",
+      "title": "Language boundaries and Flight",
+      "level": "intermediate",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-012",
+        "apache-004",
+        "rust-042"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "IPC interoperability",
+        "C Data Interface ownership",
+        "Flight transport",
+        "Rust Arrow"
+      ],
+      "outcome": "Explain C Data Interface lifetime and Flight transport without calling either a database",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-015",
+      "title": "SessionContext, SQL and DataFrames",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-013"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "session",
+        "SQL",
+        "DataFrame"
+      ],
+      "outcome": "Separate plan construction from execution and materialization",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums."
+    },
+    {
+      "id": "apache-016",
+      "title": "Logical and physical plans",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-015"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "logical plan",
+        "predicate pushdown",
+        "HAVING"
+      ],
+      "outcome": "Read operators and explain why plan text is evidence rather than a stable API",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums."
+    },
+    {
+      "id": "apache-017",
+      "title": "Joins, SQL nulls and cardinality",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-015"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "join cardinality",
+        "dimension uniqueness",
+        "SQL nulls"
+      ],
+      "outcome": "Predict join output multiplicity and missing-key semantics",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums."
+    },
+    {
+      "id": "apache-018",
+      "title": "Partitions, memory and spill",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-016",
+        "apache-005"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "execution partitions",
+        "memory pools",
+        "spill evidence"
+      ],
+      "outcome": "Explain why more partitions can increase overhead and peak memory",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-019",
+      "title": "UDFs and engine extension boundaries",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-015",
+        "apache-011"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "typed scalar UDF",
+        "volatility",
+        "vectorization",
+        "null semantics"
+      ],
+      "outcome": "Explain volatility, types and optimizer visibility",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-020",
+      "title": "Embedding an analytical engine",
+      "level": "advanced",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-017",
+        "apache-018",
+        "apache-019"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "embedded engine",
+        "fixed query API",
+        "resource limits",
+        "source-bound results"
+      ],
+      "outcome": "Define a bounded engine API with reproducible source and resource settings",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-021",
+      "title": "From an engine to a distributed scheduler",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-020",
+        "apache-014"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "scheduler",
+        "executor",
+        "plan serialization",
+        "embedded control"
+      ],
+      "outcome": "Trace plan serialization, scheduling and Arrow Flight data movement",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-022",
+      "title": "Cluster configuration and shared data paths",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-021",
+        "apache-003"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "filesystem visibility",
+        "plan versus action",
+        "immutable source identity"
+      ],
+      "outcome": "Distinguish logical paths from filesystem visibility across processes",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-023",
+      "title": "Stages, shuffle and task placement",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-021",
+        "apache-005",
+        "apache-011"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "stages",
+        "shuffle",
+        "partial aggregates",
+        "skew"
+      ],
+      "outcome": "Explain stage barriers, shuffle files and scheduler decisions",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-024",
+      "title": "Clients and supported language APIs",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-021",
+        "apache-019",
+        "rust-001"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "language bindings",
+        "native Rust API",
+        "version compatibility",
+        "lazy actions"
+      ],
+      "outcome": "Respect protocol and release compatibility instead of assuming Spark API parity",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-025",
+      "title": "Failure, retry and retained evidence",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-021",
+        "apache-008",
+        "apache-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "executor outage",
+        "scheduler state",
+        "unknown outcomes",
+        "retained receipts"
+      ],
+      "outcome": "Report precisely what recovered and what needs resubmission",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-026",
+      "title": "Capacity and operational decisions",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-023",
+        "apache-025",
+        "apache-018"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "capacity experiments",
+        "critical path",
+        "bounded collect",
+        "measurement limits"
+      ],
+      "outcome": "Choose an embedded engine or a cluster from workload evidence",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-027",
+      "title": "DAGs, tasks and data intervals",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-008",
+        "apache-007"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "DAG",
+        "TaskFlow",
+        "data intervals",
+        "logical date",
+        "XCom references"
+      ],
+      "outcome": "Distinguish scheduler time, logical date and data interval",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-028",
+      "title": "Dependencies, retries and idempotent tasks",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-027",
+        "apache-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "task attempts",
+        "retry policy",
+        "idempotent partition writes",
+        "atomic replacement"
+      ],
+      "outcome": "Keep side effects safe across retries and task clearing",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-029",
+      "title": "Scheduling, catchup and backfills",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-027",
+        "apache-028"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "catchup",
+        "historical intervals",
+        "targeted correction",
+        "reprocessing identity"
+      ],
+      "outcome": "Choose a backfill plan with explicit completeness semantics",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-030",
+      "title": "Assets, mapping and bounded concurrency",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-027",
+        "apache-029"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "asset events",
+        "dynamic mapping",
+        "pools",
+        "source-version readback"
+      ],
+      "outcome": "Separate orchestration metadata from bulk data transfer",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-031",
+      "title": "Connections, providers and security",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-027",
+        "apache-004"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "connection identifiers",
+        "SDK runtime lookup",
+        "providers",
+        "redacted diagnostics"
+      ],
+      "outcome": "Keep parse-time side effects and credentials outside authored code",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-032",
+      "title": "Operations and recovery",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-028",
+        "apache-030",
+        "apache-031"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "component health",
+        "task states",
+        "persistent metadata",
+        "recovery evidence"
+      ],
+      "outcome": "Recover the owned installation without deleting orchestration history",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-033",
+      "title": "The log, topics and partitions",
+      "level": "intermediate",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-005",
+        "apache-004"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "partitioned log",
+        "keyed records",
+        "consumer groups"
+      ],
+      "outcome": "Distinguish a durable log from a destructive queue",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-034",
+      "title": "Producer acknowledgements and idempotence",
+      "level": "intermediate",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-033",
+        "apache-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "producer acknowledgements",
+        "idempotence scope",
+        "ambiguous outcomes"
+      ],
+      "outcome": "Explain producer IDs, sequence numbers and the scope of deduplication",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-035",
+      "title": "Consumers, offsets and rebalances",
+      "level": "intermediate",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-033",
+        "apache-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "consumer positions",
+        "committed next offsets",
+        "replay",
+        "rebalance boundaries"
+      ],
+      "outcome": "Explain at-least-once processing with a concrete offset timeline",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-036",
+      "title": "Transactions and isolation",
+      "level": "intermediate",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-034",
+        "apache-035"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "transactions",
+        "isolation",
+        "control records",
+        "fencing scope"
+      ],
+      "outcome": "State exactly which Kafka operations are atomic",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-037",
+      "title": "Retention, compaction and schemas",
+      "level": "intermediate",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-033",
+        "apache-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "retention",
+        "compaction",
+        "schema evolution",
+        "reader contracts"
+      ],
+      "outcome": "Distinguish latest state from event history and schema compatibility",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-038",
+      "title": "KRaft, networking and operations",
+      "level": "advanced",
+      "minutes": 70,
+      "prerequisites": [
+        "apache-033",
+        "apache-035",
+        "apache-036"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "KRaft",
+        "advertised listeners",
+        "retained logs",
+        "operational evidence"
+      ],
+      "outcome": "Diagnose connectivity, consumer lag and disk bounds without claiming single-node HA",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
+    },
+    {
+      "id": "apache-039",
+      "title": "Snapshots and the table abstraction",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-003",
+        "apache-013"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "snapshots",
+        "catalog pointers",
+        "manifest references"
+      ],
+      "outcome": "Explain metadata files, manifests and data-file references",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-040",
+      "title": "Field IDs and schema evolution",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-039",
+        "apache-010"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "field IDs",
+        "schema evolution",
+        "nullability"
+      ],
+      "outcome": "Distinguish identity from column position or display name",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-041",
+      "title": "Hidden partitioning and evolution",
+      "level": "intermediate",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-039",
+        "apache-013"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "hidden partitioning",
+        "partition specs",
+        "residual predicates"
+      ],
+      "outcome": "Explain residual predicates across multiple partition specs",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-042",
+      "title": "Concurrency and optimistic commits",
+      "level": "advanced",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-040",
+        "apache-006"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "optimistic concurrency",
+        "catalog requirements",
+        "retry semantics"
+      ],
+      "outcome": "Identify the catalog compare-and-swap boundary",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-043",
+      "title": "Deletes, maintenance and retention",
+      "level": "advanced",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-039",
+        "apache-042"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "logical deletion",
+        "snapshot expiration",
+        "retention boundaries"
+      ],
+      "outcome": "Separate logical deletion, physical cleanup and rollback promises",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-044",
+      "title": "Catalogs and cross-engine reads",
+      "level": "advanced",
+      "minutes": 60,
+      "prerequisites": [
+        "apache-039",
+        "apache-015",
+        "apache-042"
+      ],
+      "runtime": "data-platforms-python",
+      "concepts": [
+        "catalog protocols",
+        "Arrow materialization",
+        "cross-engine evidence"
+      ],
+      "outcome": "Verify engine/version capabilities instead of treating all catalog protocols as interchangeable",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
+    },
+    {
+      "id": "apache-045",
+      "title": "Streams, operators and a running job",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-008",
+        "apache-004",
+        "java-001"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "execution graph",
+        "JobManager",
+        "TaskManager",
+        "boundedness",
+        "stream versus table"
+      ],
+      "outcome": "Trace source, transformation, sink and execution graph",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-046",
+      "title": "Event time and watermarks",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-045",
+        "apache-007"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "event time",
+        "watermarks",
+        "tumbling windows",
+        "late side output"
+      ],
+      "outcome": "Explain that watermarks estimate completeness rather than guarantee it",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-047",
+      "title": "Keyed state and timers",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-046",
+        "apache-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "ValueState",
+        "TimerService",
+        "per-key isolation",
+        "cleanup",
+        "operator identity"
+      ],
+      "outcome": "Distinguish operator state, keyed state and timer semantics",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-048",
+      "title": "Checkpoints and end-to-end guarantees",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-047",
+        "apache-036"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "checkpoint barriers",
+        "source recovery",
+        "sink commits",
+        "exactly-once scope"
+      ],
+      "outcome": "Bound exactly-once claims by source, state and sink participation",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-049",
+      "title": "Backpressure and capacity",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-048",
+        "apache-005"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "backpressure",
+        "busy/idle metrics",
+        "capacity",
+        "state-compatible rescale"
+      ],
+      "outcome": "Explain bottleneck propagation, slots and partition skew",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-050",
+      "title": "Savepoints and schema evolution",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-048",
+        "apache-049"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "savepoints",
+        "operator UIDs",
+        "serializer compatibility",
+        "rollback",
+        "state ownership"
+      ],
+      "outcome": "Treat upgrades as state migrations with a rollback plan",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
+    },
+    {
+      "id": "apache-051",
+      "title": "Query-first modeling and CQL",
+      "level": "intermediate",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-004",
+        "apache-008"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "query-first design",
+        "partition key",
+        "clustering order"
+      ],
+      "outcome": "Choose primary and clustering keys from access patterns",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
+    },
+    {
+      "id": "apache-052",
+      "title": "Writes, SSTables and reads",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-051"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "write timestamp",
+        "commitlog",
+        "memtable",
+        "SSTable"
+      ],
+      "outcome": "Explain commit log, memtable, SSTable and read reconciliation",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
+    },
+    {
+      "id": "apache-053",
+      "title": "Replication and consistency levels",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-052",
+        "apache-051"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "replication",
+        "ONE",
+        "QUORUM",
+        "availability"
+      ],
+      "outcome": "Apply quorum reasoning only with its replication and failure assumptions",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
+    },
+    {
+      "id": "apache-054",
+      "title": "Tombstones, TTL and compaction",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-053",
+        "apache-051"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "TTL",
+        "tombstone",
+        "repair",
+        "garbage collection"
+      ],
+      "outcome": "Connect tombstones and compaction to resurrection risk",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
+    },
+    {
+      "id": "apache-055",
+      "title": "Transactions, indexes and drivers",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-054",
+        "apache-051"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "lightweight transaction",
+        "Storage Attached Index",
+        "selectivity"
+      ],
+      "outcome": "Distinguish LWT, batch atomicity and ordinary last-write-wins semantics",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
+    },
+    {
+      "id": "apache-056",
+      "title": "Repair, backup and operations",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-055",
+        "apache-051"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "snapshot",
+        "SSTable restore",
+        "retained state",
+        "recovery"
+      ],
+      "outcome": "Explain repair scope, consistency and restore boundaries",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
+    },
+    {
+      "id": "apache-057",
+      "title": "Segments and serving topology",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-004",
+        "apache-038"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "segments",
+        "broker",
+        "controller",
+        "server",
+        "coordination"
+      ],
+      "outcome": "Explain controller, broker, server, segment and ZooKeeper roles",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
+    },
+    {
+      "id": "apache-058",
+      "title": "Kafka ingestion and real-time segments",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Kafka ingestion and real-time segments"
+      ],
+      "outcome": "Trace consuming segments into committed segments",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
+    },
+    {
+      "id": "apache-059",
+      "title": "Indexes and query plans",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-058",
+        "apache-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Indexes and query plans"
+      ],
+      "outcome": "Explain index selection and memory/storage tradeoffs",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
+    },
+    {
+      "id": "apache-060",
+      "title": "Time boundaries, hybrid tables and upserts",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-059",
+        "apache-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Time boundaries, hybrid tables and upserts"
+      ],
+      "outcome": "Prevent overlap double-counting and define late-update semantics",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
+    },
+    {
+      "id": "apache-061",
+      "title": "Multistage queries and capacity",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-060",
+        "apache-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Multistage queries and capacity"
+      ],
+      "outcome": "Separate analytical serving latency from batch throughput",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
+    },
+    {
+      "id": "apache-062",
+      "title": "Operations, recovery and data verification",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-061",
+        "apache-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Operations, recovery and data verification"
+      ],
+      "outcome": "Diagnose segment, schema and consumption failures without deleting state",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
+    },
+    {
+      "id": "apache-063",
+      "title": "Warehouse, catalog and execution",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-003",
+        "apache-008",
+        "apache-039"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "HiveServer2",
+        "Metastore",
+        "warehouse"
+      ],
+      "outcome": "Separate HiveServer2, Metastore and storage responsibilities",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
+    },
+    {
+      "id": "apache-064",
+      "title": "Schemas, partitions and serialization",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "SerDe",
+        "partition registration",
+        "physical schema"
+      ],
+      "outcome": "Explain SerDe, physical files and partition discovery",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
+    },
+    {
+      "id": "apache-065",
+      "title": "Metastore durability and clients",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-064",
+        "apache-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Thrift",
+        "PostgreSQL",
+        "metadata persistence"
+      ],
+      "outcome": "Trace Thrift metadata calls without confusing them with data reads",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
+    },
+    {
+      "id": "apache-066",
+      "title": "Hive SQL and execution plans",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-065",
+        "apache-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "EXPLAIN",
+        "statistics",
+        "join cardinality"
+      ],
+      "outcome": "Teach cost, statistics and execution-engine boundaries",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
+    },
+    {
+      "id": "apache-067",
+      "title": "Transactional tables and Iceberg integration",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-066",
+        "apache-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Hive ACID",
+        "Iceberg snapshots",
+        "reader compatibility"
+      ],
+      "outcome": "Treat formats and commit protocols as explicit contracts",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
+    },
+    {
+      "id": "apache-068",
+      "title": "Catalog upgrades and operational recovery",
+      "level": "advanced",
+      "minutes": 80,
+      "prerequisites": [
+        "apache-067",
+        "apache-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "schema migration",
+        "backup",
+        "restore",
+        "version verification"
+      ],
+      "outcome": "Plan metadata upgrades without assuming a rollback of binaries rolls back schema",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
+    },
+    {
+      "id": "apache-069",
+      "title": "Types, entities and metadata identity",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-008",
+        "apache-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "types",
+        "GUID",
+        "qualified name",
+        "entity identity"
+      ],
+      "outcome": "Distinguish a type, entity, relationship and classification",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
+    },
+    {
+      "id": "apache-070",
+      "title": "Lineage as recorded relationships",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-069"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "recorded lineage",
+        "process inputs/outputs",
+        "instrumentation scope"
+      ],
+      "outcome": "Explain that recorded lineage is evidence only for instrumented operations",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
+    },
+    {
+      "id": "apache-071",
+      "title": "Classifications and discovery",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-070",
+        "apache-069"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "classification",
+        "discovery",
+        "index lag",
+        "enforcement"
+      ],
+      "outcome": "Separate metadata labels from enforcement in a data engine",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
+    },
+    {
+      "id": "apache-072",
+      "title": "Hooks, notifications and integration",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-071",
+        "apache-069"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "hook",
+        "notification",
+        "idempotency",
+        "provenance"
+      ],
+      "outcome": "Define provenance and delivery boundaries of metadata ingestion",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
+    },
+    {
+      "id": "apache-073",
+      "title": "Authorization and governance workflows",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-072",
+        "apache-069"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "authentication",
+        "authorization",
+        "policy enforcement",
+        "governance"
+      ],
+      "outcome": "Keep policy intention distinct from actual enforcement",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
+    },
+    {
+      "id": "apache-074",
+      "title": "Graph, indexes and recovery",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-073",
+        "apache-069"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "graph persistence",
+        "search index",
+        "backup consistency",
+        "recovery"
+      ],
+      "outcome": "Understand graph storage, search indexes and backup consistency",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
+    },
+    {
+      "id": "apache-075",
+      "title": "An open sharing protocol",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-008",
+        "apache-039",
+        "apache-073"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Delta Sharing",
+        "Delta Lake/Linux Foundation",
+        "recipient",
+        "discovery"
+      ],
+      "outcome": "Distinguish Delta Sharing from an Apache project and from Delta table storage",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
+    },
+    {
+      "id": "apache-076",
+      "title": "Metadata, file URLs and read paths",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-075"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "control plane",
+        "signed URL",
+        "Parquet data plane"
+      ],
+      "outcome": "Trace control-plane authorization and data-plane retrieval",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
+    },
+    {
+      "id": "apache-077",
+      "title": "Snapshots, predicates and consistency",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-076",
+        "apache-075"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "snapshot version",
+        "predicate hint",
+        "correctness"
+      ],
+      "outcome": "Keep predicate pushdown and access control conceptually separate",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
+    },
+    {
+      "id": "apache-078",
+      "title": "Recipients and credential boundaries",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-077",
+        "apache-075"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "credential boundary",
+        "rotation",
+        "revocation"
+      ],
+      "outcome": "Avoid embedding recipient credentials in notebooks or published source",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
+    },
+    {
+      "id": "apache-079",
+      "title": "History, changes and compatible readers",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-078",
+        "apache-075"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "capability negotiation",
+        "history",
+        "change feed",
+        "native client"
+      ],
+      "outcome": "Negotiate capabilities rather than assuming every client reads every Delta feature",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
+    },
+    {
+      "id": "apache-080",
+      "title": "Operating a bounded sharing service",
+      "level": "advanced",
+      "minutes": 75,
+      "prerequisites": [
+        "apache-079",
+        "apache-075"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "reference server",
+        "retained version",
+        "failure diagnosis",
+        "recovery"
+      ],
+      "outcome": "Distinguish persisted data, share configuration and client retry behavior",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
+    },
+    {
+      "id": "apache-081",
+      "title": "Batch lakehouse with reproducible snapshots",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-020",
+        "apache-044"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "versioned batch",
+        "source identity",
+        "Arrow materialization"
+      ],
+      "outcome": "Produce an evidence bundle with schema, snapshot and result identity",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-082",
+      "title": "Streaming analytical serving",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-038",
+        "apache-050",
+        "apache-062"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "end-to-end streaming",
+        "event identity",
+        "sink participation"
+      ],
+      "outcome": "Document the guarantee at each source/state/sink boundary",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-083",
+      "title": "Orchestrated backfills and live data",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-032",
+        "apache-050",
+        "apache-081"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "backfill",
+        "logical interval",
+        "event time",
+        "publication"
+      ],
+      "outcome": "Separate orchestration intervals from event-time semantics",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-084",
+      "title": "Catalog and governance integration",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-068",
+        "apache-074"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "catalog identity",
+        "recorded governance",
+        "enforcement"
+      ],
+      "outcome": "Show where governance information ends and enforcement begins",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-085",
+      "title": "Sharing a versioned data product",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-080",
+        "apache-081",
+        "apache-084"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "versioned data product",
+        "consumer contract",
+        "revocation scope"
+      ],
+      "outcome": "Specify a consumer contract with provenance and revocation limits",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-086",
+      "title": "Failure and recovery game day",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-038",
+        "apache-056",
+        "apache-062"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "owned failure injection",
+        "read-only recovery",
+        "unknown outcome"
+      ],
+      "outcome": "Write a recovery report distinguishing loss, duplication and unavailability",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-087",
+      "title": "Capacity, costs and architectural tradeoffs",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-020",
+        "apache-049",
+        "apache-061"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "measured capacity",
+        "configured limit",
+        "architectural tradeoff"
+      ],
+      "outcome": "Extrapolate carefully and separate measured results from capacity forecasts",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    },
+    {
+      "id": "apache-088",
+      "title": "An auditable data-platform capstone",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "apache-081",
+        "apache-082",
+        "apache-083",
+        "apache-084",
+        "apache-085",
+        "apache-086",
+        "apache-087"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "evidence dossier",
+        "source-bound acceptance",
+        "native platform",
+        "owned lifecycle"
+      ],
+      "outcome": "Deliver a reproducible design, implementation, runbook and evidence dossier",
+      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
+    }
+  ]
+}

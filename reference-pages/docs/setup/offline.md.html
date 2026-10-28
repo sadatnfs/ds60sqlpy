@@ -244,7 +244,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>See <a href="../dockerhub.md.html">Docker Hub distribution</a> for image names and architecture tags, and <a href="../one-command-classroom.md.html#backup-and-transfer">backup and transfer</a> for saved learning data. Do not include private runtime credentials or model cache credentials in a shared archive.</p>
 <h3 id="static-reading-without-an-engine">Static reading without an engine<a class="heading-anchor" href="#static-reading-without-an-engine" aria-label="Link to this section">#</a></h3>
 <p>Open <code>START_HERE.html</code> from the extracted source folder for the generated reading library. Keep the folder structure intact so local links work. Static readers display content; they do not execute programs or connect to a database. Return to <code>./classroom</code> when you want the interactive workspace.</p>
-<p>An optional AI tutor has its own connectivity requirements. The curriculum and MCP content server do not bundle an offline language model.</p></article>
+<p>An optional AI tutor has its own connectivity requirements. The curriculum and MCP content server do not bundle an offline language model.</p>
+<h3 id="scientific-and-data-system-preparation">Scientific and data-system preparation<a class="heading-anchor" href="#scientific-and-data-system-preparation" aria-label="Link to this section">#</a></h3>
+<p>Julia packages, native Stan/CmdStanPy and Polars/dbt/ML tools are prepared in their selected images. Ordinary lesson execution does not install additional packages. Existing projects retain their earlier profile selection; choose the new profiles explicitly or use <code>--all</code> while connected, then use strict resume when offline. Read <a href="../modules-runtime.md.html">runtime contracts</a> before relying on a library that belongs to another worker.</p>
+<p>The full dbt retail project, local ML service and Stan JSON-data project have separate owned working copies. Preserve their output/state directories when returning to them. Their source fixtures are included in the course, but a source archive does not contain your trained state, database or posterior CSVs.</p></article>
   </main>
 </body>
 </html>

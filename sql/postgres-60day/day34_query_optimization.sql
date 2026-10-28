@@ -1,11 +1,11 @@
 -- Day 34: Query Optimization Techniques
--- BEGINNER WORKFLOW — sql-34: Query Optimization
+-- BEGINNER WORKFLOW - sql-34: Query Optimization
 -- Guide: sql/postgres-60day/companion-guides/day34_query_optimization.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-34/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-34.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Predicate pushdown by filtering early in CTE
 WITH filtered_orders AS (
   SELECT
@@ -38,6 +39,7 @@ GROUP BY
   c.country
 ORDER BY
   COUNT(*) DESC;
+
 -- Avoid SELECT * and unnecessary columns to reduce I/O
 EXPLAIN ANALYZE
 SELECT
@@ -47,6 +49,7 @@ FROM
   orders o
 WHERE
   o.order_date >= now() - interval '7 days';
+
 -- Join order rewrite (ensure correct join conditions, indexes)
 EXPLAIN
 SELECT
@@ -60,6 +63,7 @@ WHERE
   o.status IN ('paid', 'shipped', 'delivered')
 GROUP BY
   p.category;
+
 -- Exercises
 -- 1. Replace subqueries with joins and compare plans.
 --    Inputs: For sql-34 Exercise 1, run the underlying read-only query over `orders`, `order_items`, and `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.

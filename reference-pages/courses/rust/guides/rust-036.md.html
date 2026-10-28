@@ -245,19 +245,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Explain edition, compiler version and dependency version separately.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Build InventoryLab with its checked-in lockfile.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Run its tests and inspect a deliberately changed public contract.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose offline mode failing because a dependency was never prepared.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Remove only owned target output and perform a clean build.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

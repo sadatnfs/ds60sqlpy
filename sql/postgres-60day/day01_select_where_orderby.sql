@@ -1,11 +1,11 @@
 -- Day 1: SELECT, WHERE, ORDER BY, LIMIT
--- BEGINNER WORKFLOW - sql-01: Select Where Orderby
+-- BEGINNER WORKFLOW - sql-01: SELECT, WHERE, ORDER BY and LIMIT
 -- Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -20,6 +20,7 @@
 -- Focus: Query execution order and basic filtering/sorting
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
 -- Assumptions: Timestamps are `timestamptz`; relative-date exercises use the database clock. A result is stable only when its final sort key breaks ties.
@@ -40,6 +41,7 @@ ORDER BY
   created_at DESC,
   customer_id DESC
 LIMIT 10;
+
 -- Example 2: Derived column and alias
 SELECT
   product_id,
@@ -57,6 +59,7 @@ ORDER BY
   price DESC,
   product_id
 LIMIT 15;
+
 -- Example 3: Basic filtering with patterns
 SELECT
   *
@@ -67,6 +70,7 @@ WHERE
   AND full_name ILIKE 'customer %1_'
 ORDER BY
   customer_id;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -100,10 +104,10 @@ ORDER BY
 --    Expected result/shape: For sql-01 Exercise 5, expected output: At most 10 rows, highest prices first, stable across repeated runs on unchanged data. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
 --    Verify: For sql-01 Exercise 5, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, and `price` came from the same source rows. Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
 --    Hint ladder, rung 1: For sql-01 Exercise 5, check `p.price DESC, p.product_id` before applying the row cap.
--- 6. [Extension] Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
---    Hint: Use the last `(order_date, order_id)` pair from page one and compare row values in the same descending order.
---    Inputs: For sql-01 Exercise 6, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-01 Exercise 6, expected output: Up to 10 rows strictly after the first page with no overlap. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
---    Verify: For sql-01 Exercise 6, assert no more than 10 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, `customer_id`, `total_amount`, and `order_date` came from the same source rows. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
---    Hint ladder, rung 1: For sql-01 Exercise 6, run `first_page`, and `cursor_row` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+-- 6. [Extension] Return the second page of 10 newest orders using the same deterministic order, LIMIT 10 and OFFSET 10.
+--    Hint: Sort by order_date DESC and order_id DESC; skip the first ten ordered rows and keep the next ten.
+--    Inputs: For sql-01 Exercise 6, read from `orders` at one row per `order_id` and compare pages only on an unchanged fixture.
+--    Expected result/shape: For sql-01 Exercise 6, return at most 10 rows equal to positions 11 through 20 of the unchanged ordered input, one row per `order_id`. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+--    Verify: For sql-01 Exercise 6, display the first 20 ordered IDs and compare the page with positions 11 through 20. Assert at most 10 unique `order_id` values, no overlap with page one, and projected values matching those source IDs.
+--    Hint ladder, rung 1: Write the ordered first page, then add OFFSET 10 without changing its ORDER BY.
 ROLLBACK;

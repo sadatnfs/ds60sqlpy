@@ -44,12 +44,13 @@ its external data. Keep the lesson's offline fallback available.
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the
-shared workspace, read its capability notice and use its supported coding or
-reading workflow. The [classroom guide](../../../docs/classroom-experience.md)
-explains saved work, runtimes and switching subjects. No host notebook setup
-is needed for this route.
+**Default Docker classroom:** open `python-27` for its guide, notebook and capability notice. The default Core does not include the `geo` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [data and ML engineering course](../../../courses/data-ml-engineering/guides/dme-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `geo` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The first two geometry examples are offline after installing GeoPandas. Natural Earth and map tiles are separate external assets; the connected data example is disabled by default. NetworkX also requires the declared optional group.
 
 ### Optional contributor notebook route
 
@@ -250,7 +251,7 @@ not city boundaries.
 
 ## Download/cache note
 
-The notebook's `geodatasets.get_path(...)` example downloads and caches Natural
+Only enabling `RUN_CONNECTED_GEODATA` allows `geodatasets.get_path(...)` to download and cache Natural
 Earth data on first use. `contextily` basemaps also require tile-network access
 unless separately cached. Prime approved caches while online, use a local
 GeoJSON file, or choose the NetworkX exercise for fully offline work.
@@ -331,7 +332,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-27`
-(Day 27 — Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
+(Day 27 : Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
 I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 Read `python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md` and use the learner notebook
 `python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb`. Do not open or quote anything under `solutions/` unless

@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.
 -- Assumptions: Monthly reporting uses UTC. Window order always includes chronological keys; revenue uses exact numeric and is rounded only in final output.
@@ -61,6 +62,7 @@ FROM
   compared
 ORDER BY
   month_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Rank product categories by net revenue within each UTC order month.
@@ -102,6 +104,7 @@ ORDER BY
   month_start,
   revenue_rank,
   category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Return the top three category revenue levels per month.
@@ -153,6 +156,7 @@ ORDER BY
   month_start,
   revenue_rank,
   category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Calculate each category's cumulative share of monthly revenue in descending contribution order.
@@ -196,6 +200,7 @@ ORDER BY
   month_start,
   revenue DESC,
   category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Calculate a three-month moving average after building a dense month calendar.
@@ -251,6 +256,7 @@ FROM
   dense
 ORDER BY
   month_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Reconcile the final cumulative monthly revenue with the independent order total.
@@ -303,5 +309,6 @@ FROM
   CROSS JOIN orders AS o
 GROUP BY
   final.cumulative_revenue;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

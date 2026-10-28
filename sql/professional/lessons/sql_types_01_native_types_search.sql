@@ -1,11 +1,11 @@
 -- SQL-TYPES-01: PostgreSQL-native types and searchable documents
--- BEGINNER WORKFLOW — sql-types-01: PostgreSQL-Native Types and Searchable Documents
+-- BEGINNER WORKFLOW - sql-types-01: PostgreSQL-Native Types and Searchable Documents
 -- Guide: sql/professional/companion-guides/sql_types_01_native_types_search.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-types-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-types-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -21,13 +21,17 @@
 \echo 'SQL-TYPES-01: disposable native-type and search lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_types_lab;
+
 CREATE DOMAIN pro_types_lab.email_address AS text CHECK (VALUE ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$');
+
 CREATE TYPE pro_types_lab.document_state AS ENUM (
   'draft',
   'published',
   'retired'
 );
+
 CREATE TABLE pro_types_lab.documents (
   document_id uuid PRIMARY KEY,
   owner_email pro_types_lab.email_address NOT NULL,
@@ -40,16 +44,22 @@ CREATE TABLE pro_types_lab.documents (
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(metadata) = 'object'),
   search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE(title, '')), 'A') || setweight(to_tsvector('english'::regconfig, COALESCE(body, '')), 'B')) STORED
 );
+
 INSERT INTO pro_types_lab.documents (document_id, owner_email, state, title, body, tags, availability, blackout_windows, metadata)
 VALUES
   ('00000000-0000-0000-0000-000000000101', 'avery@example.test', 'published', 'Safe schema migrations', 'Plan additive changes, backfill data, verify invariants, and contract later.', ARRAY['postgresql', 'sql', 'operations'], daterange(DATE '2026-01-01', DATE '2027-01-01', '[)'), datemultirange (daterange(DATE '2026-07-01', DATE '2026-07-08', '[)')), '{"audience":["developer","operator"],"difficulty":"advanced","minutes":45}'),
   ('00000000-0000-0000-0000-000000000102', 'morgan@example.test', 'published', 'Analytical SQL patterns', 'Use windows and explicit grain for sessions, funnels, and retention.', ARRAY['postgresql', 'sql', 'analytics'], daterange(DATE '2026-03-01', DATE '2026-10-01', '[)'), '{}'::datemultirange, '{"audience":["analyst"],"difficulty":"intermediate","minutes":35}'),
   ('00000000-0000-0000-0000-000000000103', 'taylor@example.test', 'draft', 'Python service notes', 'Validate configuration and add request identifiers to structured logs.', ARRAY['python', 'services'], daterange(DATE '2026-05-01', DATE '2026-12-01', '[)'), datemultirange (daterange(DATE '2026-08-10', DATE '2026-08-12', '[)'), daterange(DATE '2026-09-03', DATE '2026-09-05', '[)')), '{"audience":["developer"],"difficulty":"intermediate","minutes":25}');
+
 -- Operator-compatible indexes. Index presence does not promise planner use.
 CREATE INDEX documents_tags_gin ON pro_types_lab.documents USING gin (tags);
+
 CREATE INDEX documents_metadata_path_gin ON pro_types_lab.documents USING gin (metadata jsonb_path_ops);
+
 CREATE INDEX documents_search_vector_gin ON pro_types_lab.documents USING gin (search_vector);
+
 CREATE INDEX documents_availability_gist ON pro_types_lab.documents USING gist (availability);
+
 \echo 'Arrays: containment and scalar membership are different questions'
 SELECT
   d.document_id,

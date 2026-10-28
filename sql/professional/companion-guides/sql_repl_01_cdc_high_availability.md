@@ -1,27 +1,5 @@
 # SQL-REPL-01: Replication, CDC, and High Availability
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-ops-02`, `sql-prog-01`, and `sql-test-01`
-- **Prerequisites:** [SQL-OPS-02; recovery](sql_ops_02_backup_restore_recovery.md),
-  [SQL-PROG-01](sql_prog_01_routines_triggers.md),
-  [SQL-TEST-01](sql_test_01_contracts_migrations.md), transactions, locking,
-  idempotency, RPO, and RTO.
-- **Artifacts:** [learner SQL](../lessons/sql_repl_01_cdc_high_availability.sql) ·
-  [solution reasoning](../solutions/sql_repl_01_cdc_high_availability_solutions.md) ·
-  [executable solution](../solutions/sql_repl_01_cdc_high_availability_solutions.sql)
-
-Run the single-database offline simulation:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_repl_01_cdc_high_availability.sql
-```
-
-It reads capability/count catalogs and rolls back local tables. It never changes
-`wal_level`, creates publications/subscriptions/slots, promotes a server, or
-contacts another node.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -86,6 +64,28 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-ops-02`, `sql-prog-01`, and `sql-test-01`
+- **Prerequisites:** [SQL-OPS-02; recovery](sql_ops_02_backup_restore_recovery.md),
+  [SQL-PROG-01](sql_prog_01_routines_triggers.md),
+  [SQL-TEST-01](sql_test_01_contracts_migrations.md), transactions, locking,
+  idempotency, RPO, and RTO.
+- **Artifacts:** [learner SQL](../lessons/sql_repl_01_cdc_high_availability.sql) ·
+  [solution reasoning](../solutions/sql_repl_01_cdc_high_availability_solutions.md) ·
+  [executable solution](../solutions/sql_repl_01_cdc_high_availability_solutions.sql)
+
+Run the single-database offline simulation:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_repl_01_cdc_high_availability.sql
+```
+
+It reads capability/count catalogs and rolls back local tables. It never changes
+`wal_level`, creates publications/subscriptions/slots, promotes a server, or
+contacts another node.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -105,7 +105,7 @@ The first runnable example has a concrete contract: Example 1 returns one row pe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_repl_01_cdc_high_availability.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_repl_01_cdc_high_availability.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

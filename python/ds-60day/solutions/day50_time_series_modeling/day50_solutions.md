@@ -1,6 +1,8 @@
 # Day 50: Solutions: Time Series Modeling
 
-We implement seasonal naive baselines, leakage‑safe feature engineering with TimeSeriesSplit, and evaluation with MAPE including error visualization.
+We compare a seasonal-naive baseline and recursive lag models on the same
+fixed 14-step forecast horizon. Four development origins select a candidate
+before one final holdout evaluation. All values are course-authored synthetic data.
 
 Contents
 - Exercise 1: Seasonal naive baseline and beat it
@@ -11,32 +13,47 @@ Contents
 
 Setup
 ```python
-import pandas as pd, numpy as np
+import numpy as np
+import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import mean_absolute_percentage_error as MAPE
 import matplotlib.pyplot as plt
 
-# Example daily data with weekly seasonality
-rng = pd.date_range('2020-01-01', periods=400, freq='D')
-np.random.seed(0)
-y = 10 + 2*np.sin(2*np.pi*rng.dayofyear/7) + np.random.normal(0,0.8,len(rng))
-df = pd.DataFrame({'ds': rng, 'y': y}).set_index('ds')
+# Course-authored synthetic daily values, not observed business data.
+dates = pd.date_range("2020-01-01", periods=400, freq="D")
+rng = np.random.default_rng(50)
+values = 10 + 2 * np.sin(2 * np.pi * np.arange(len(dates)) / 7)
+values = values + rng.normal(0, 0.8, len(dates))
+df = pd.DataFrame({"y": values}, index=dates)
+H = 14
+# Reserve the final window before feature fitting, CV, or model selection.
+development = df["y"].iloc[:-H].copy()
+test = df["y"].iloc[-H:].copy()
+assert development.index.max() < test.index.min()
+assert (df["y"] > 0).all()  # MAPE is suitable for this positive fixture only.
 ```
 
 Worked reference for Exercise 1; Seasonal naive baseline
 ```python
-# 7-day seasonal naive: forecast y_t = y_{t-7}
-H = 14  # horizon
-df['y_lag7'] = df['y'].shift(7)
-valid = df.iloc[-(H+7):]  # ensure lag available
-baseline_fc = valid['y_lag7'].iloc[-H:]
-truth = valid['y'].iloc[-H:]
-base_mape = MAPE(truth, baseline_fc)
-print({'baseline_MAPE': float(base_mape)})
+def seasonal_naive_forecast(history, future_index, season=7):
+    """Repeat the final observed season from one fixed forecast origin."""
+    if len(history) < season or season < 1:
+        raise ValueError("a complete positive-length season is required")
+    if len(future_index) and history.index[-1] >= future_index[0]:
+        raise ValueError("forecast timestamps must follow the observed history")
+    repeated = np.resize(history.iloc[-season:].to_numpy(), len(future_index))
+    return pd.Series(repeated, index=future_index, name="seasonal_naive")
+
+
+baseline_fc = seasonal_naive_forecast(development, test.index)
+assert baseline_fc.index.equals(test.index)
+# Days 8-14 repeat the same observed week, never actual values from days 1-7.
+np.testing.assert_array_equal(baseline_fc.iloc[:7], baseline_fc.iloc[7:])
 ```
 Explanation
-- Use last week’s value as forecast; compute MAPE on final horizon
-- Always align lags to avoid peeking into the future
+- Repeat only the final observed week for the entire 14-step horizon.
+- The baseline and candidate use the same origin and target timestamps.
+- Actual test targets are read only when scoring or plotting the final forecasts.
 
 ---
 
@@ -45,60 +62,116 @@ Worked reference for Exercise 2; TimeSeriesSplit and models
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 
-# Feature engineering with leakage‑safe lags and rolling means
-df['lag1'] = df['y'].shift(1)
-df['lag7'] = df['y'].shift(7)
-df['roll7'] = df['y'].shift(1).rolling(7).mean()
-df = df.dropna()
+FEATURES = ["lag1", "lag7", "roll7"]
 
-X = df[['lag1','lag7','roll7']].values
-y = df['y'].values
 
-split = TimeSeriesSplit(n_splits=5)
-res = []
-for tr, va in split.split(X):
-    Xtr, Xva = X[tr], X[va]
-    ytr, yva = y[tr], y[va]
-    # Models
-    lr = LinearRegression().fit(Xtr, ytr)
-    rf = RandomForestRegressor(n_estimators=300, random_state=0).fit(Xtr, ytr)
-    # Predictions
-    p_lr = lr.predict(Xva); p_rf = rf.predict(Xva)
-    res.append({
-        'mape_lr': MAPE(yva, p_lr),
-        'mape_rf': MAPE(yva, p_rf)
-    })
+def make_lag_table(history):
+    return pd.DataFrame(
+        {
+            "lag1": history.shift(1),
+            "lag7": history.shift(7),
+            "roll7": history.shift(1).rolling(7).mean(),
+            "target": history,
+        }
+    ).dropna()
 
-cv = pd.DataFrame(res)
-print(cv.describe().loc[['mean','std']])
+
+def recursive_forecast(model, history, future_index):
+    """Feed prior predictions back as lags; future actuals are not an input."""
+    if len(history) < 7:
+        raise ValueError("at least seven observed values are required")
+    if len(future_index) and history.index[-1] >= future_index[0]:
+        raise ValueError("forecast timestamps must follow the observed history")
+    known = history.to_numpy(dtype=float).tolist()
+    predictions = []
+    for timestamp in future_index:
+        features = pd.DataFrame(
+            [{"lag1": known[-1], "lag7": known[-7], "roll7": np.mean(known[-7:])}],
+            index=[timestamp],
+        )
+        prediction = float(model.predict(features[FEATURES])[0])
+        if not np.isfinite(prediction):
+            raise ValueError("model produced a nonfinite prediction")
+        predictions.append(prediction)
+        known.append(prediction)
+    return pd.Series(predictions, index=future_index, name="forecast")
+
+
+model_factories = {
+    "linear": LinearRegression,
+    "forest": lambda: RandomForestRegressor(
+        n_estimators=80, max_depth=6, random_state=50, n_jobs=1
+    ),
+}
+# Four 14-step expanding origins stay entirely inside the development window.
+split = TimeSeriesSplit(n_splits=4, test_size=H)
+results = []
+for train_positions, valid_positions in split.split(development):
+    history = development.iloc[train_positions]
+    truth = development.iloc[valid_positions]
+    assert history.index.max() < truth.index.min() < test.index.min()
+    training = make_lag_table(history)
+    for name, factory in model_factories.items():
+        candidate = factory().fit(training[FEATURES], training["target"])
+        forecast = recursive_forecast(candidate, history, truth.index)
+        results.append({"model": name, "origin": history.index[-1], "mape": MAPE(truth, forecast)})
+    naive = seasonal_naive_forecast(history, truth.index)
+    results.append(
+        {"model": "seasonal_naive", "origin": history.index[-1], "mape": MAPE(truth, naive)}
+    )
+cv = pd.DataFrame(results)
+mean_mape = cv.groupby("model")["mape"].mean()
+# Choose between candidates using development origins, never final test metrics.
+selected_name = mean_mape.loc[list(model_factories)].idxmin()
+print({"development_mape": mean_mape.to_dict(), "selected_model": selected_name})
 ```
-Line‑by‑line
-- shift(1) on rolling mean prevents leakage (uses only past values)
-- TimeSeriesSplit preserves order; no shuffling
-- Compare models with average MAPE over folds
+Line by line
+- Shifted features are constructed from each training prefix only.
+- Each recursive step uses observations before the origin or earlier predictions.
+  A shifted test feature table would instead assume newly observed test targets.
+- [TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html)
+  supplies four expanding development prefixes; each following window has 14 targets.
+- The final 14 rows are outside every selection fold. Mean development MAPE
+  chooses a candidate; the seasonal baseline remains a separate comparison.
 
 ---
 
 Worked reference for Exercise 3; Final fit and error visualization
 ```python
-# Fit best model on full train and forecast last H steps using a walk‑forward loop
-H = 14
-train = df.iloc[:-H].copy(); test = df.iloc[-H:].copy()
-
-model = RandomForestRegressor(n_estimators=500, random_state=0).fit(train[['lag1','lag7','roll7']], train['y'])
-fc = model.predict(test[['lag1','lag7','roll7']])
-print('Test MAPE vs baseline:', MAPE(test['y'], fc), 'vs', base_mape)
+training = make_lag_table(development)
+model = model_factories[selected_name]().fit(training[FEATURES], training["target"])
+fc = recursive_forecast(model, development, test.index)
+assert fc.index.equals(test.index) and baseline_fc.index.equals(test.index)
+base_mape = MAPE(test, baseline_fc)
+print(
+    {
+        "forecast_origin": str(development.index[-1]),
+        "horizon": H,
+        "selected_model": selected_name,
+        "test_mape": float(MAPE(test, fc)),
+        "seasonal_naive_mape": float(base_mape),
+    }
+)
 
 plt.figure(figsize=(8, 3))
-plt.plot(df.index[-120:], df['y'].iloc[-120:], label='actual')
-plt.plot(test.index, fc, label='forecast')
-plt.legend(); plt.title('Forecast vs actual'); plt.tight_layout(); plt.show()
+plt.plot(df.index[-120:], df["y"].iloc[-120:], label="actual")
+plt.plot(test.index, fc, label="recursive forecast")
+plt.plot(test.index, baseline_fc, label="seasonal naive")
+plt.legend()
+plt.title("Fourteen-step forecasts from one fixed origin")
+plt.tight_layout()
+plt.show()
 
-# Error over time
-err = pd.Series(fc, index=test.index) - test['y']
-err.plot(title='Forecast error'); plt.axhline(0,color='k',lw=1); plt.show()
+err = fc - test
+plt.figure(figsize=(8, 3))
+plt.plot(err.index, err.to_numpy())
+plt.title("Forecast error by target timestamp")
+plt.axhline(0, color="k", lw=1)
+plt.show()
 ```
 Notes
+- A candidate is not guaranteed to beat the baseline; retain both scores.
+- MAPE is used only because this fixture stays strictly away from zero.
 - Prefer pinball/quantile loss for asymmetric costs
 - For multi-step forecasting, compare direct and recursive strategies with
   validated ARIMA or lag-feature baselines before adding a heavier model

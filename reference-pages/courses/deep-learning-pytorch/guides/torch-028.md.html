@@ -301,19 +301,19 @@ torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">
 <ol>
 <li><strong>Create nontrivial training state.</strong> Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x. <strong>Expected:</strong> optimizer step 2 and positive weight. <strong>Verify:</strong> Save the assertion results for exercise 1, including optimizer step 2 and positive weight.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Save the complete local contract.</strong> Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint. <strong>Expected:</strong> file exists and metadata position 2. <strong>Verify:</strong> Save the assertion results for exercise 2, including file exists and metadata position 2.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Record uninterrupted continuation.</strong> Draw three random values, then a small target perturbation, and perform the third update. <strong>Expected:</strong> finite weight, step 3, and saved three-value random probe. <strong>Verify:</strong> Save the assertion results for exercise 3, including finite weight, step 3, and saved three-value random probe.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Restore in a fresh interpreter.</strong> Recreate model and Adam, restore all state, repeat the same draws and update. <strong>Expected:</strong> probe matches and next weight agrees within 1e-6; position 3. <strong>Verify:</strong> Save the assertion results for exercise 4, including probe matches and next weight agrees within 1e-6; position 3.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose a weights-only restart.</strong> Restore only the saved model into fresh Adam and take the same third batch update. <strong>Expected:</strong> next weight differs from full-state continuation. <strong>Verify:</strong> Save the assertion results for exercise 5, including next weight differs from full-state continuation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Verify cleanup and bounded claims.</strong> Remove the owned checkpoint directory and report that the literal CPU batch contract was tested. <strong>Expected:</strong> directory absent; no distributed-loader claim. <strong>Verify:</strong> Save the assertion results for exercise 6, including directory absent; no distributed-loader claim.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -305,3 +305,104 @@ def test_interactive_gui_event_loops_fail_with_a_clear_boundary(tmp_path: Path) 
     assert result.returncode != 0
     assert "Interactive GUI event loops are unavailable" in result.stdout
     assert json.loads((runtime / "execution.json").read_text()) == {"error_line": 2}
+
+
+@pytest.mark.parametrize("interactive", [False, True])
+def test_argparse_receives_only_the_submitted_source_path(
+    tmp_path: Path, interactive: bool
+) -> None:
+    if interactive:
+        pytest.importorskip("IPython")
+    source = (
+        ("# %%\n" if interactive else "") + "import argparse, json, sys\n"
+        "parser = argparse.ArgumentParser()\n"
+        "parser.add_argument('--with-processes', action='store_true')\n"
+        "arguments = parser.parse_args()\n"
+        "assert sys.argv == [__file__]\n"
+        "print(json.dumps({'arguments': sys.argv[1:], 'processes': arguments.with_processes}))\n"
+    )
+    result, _ = child(tmp_path, source)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert json.loads(result.stdout.strip()) == {"arguments": [], "processes": False}
+
+
+@pytest.mark.parametrize("interactive", [False, True])
+@pytest.mark.parametrize("outcome", ["success", "error", "exit-zero", "exit-seven"])
+def test_caller_argv_object_and_values_are_restored_on_every_execution_outcome(
+    tmp_path: Path, interactive: bool, outcome: str
+) -> None:
+    if interactive:
+        pytest.importorskip("IPython")
+    endings = {
+        "success": "print('source completed')\n",
+        "error": "raise ValueError('expected learner failure')\n",
+        "exit-zero": "raise SystemExit(0)\n",
+        "exit-seven": "raise SystemExit(7)\n",
+    }
+    source = (
+        ("# %%\n" if interactive else "") + "import sys\nassert sys.argv == [__file__]\n"
+        "sys.argv.append('learner-only')\nsys.argv = ['learner rebound argv']\n" + endings[outcome]
+    )
+    program = tmp_path / "submitted.py"
+    program.write_text(source, encoding="utf-8")
+    runtime = tmp_path / "private-runtime"
+    # Keep the source path outside argv so the caller list contains only its
+    # actual private worker options, and retain an alias to test object identity.
+    driver = (
+        "import json, sys\nfrom pathlib import Path\n"
+        "from ds60sqlpy.notebook_execution import execute_python_file\n"
+        "caller = ['worker', '--snapshot', 'private/source.py', '--figures', 'private/figures']\n"
+        "expected = caller[:]\nsys.argv = caller\n"
+        "result = None\nerror = None\n"
+        "try:\n"
+        f"    result = execute_python_file(Path({str(program)!r}), Path({str(runtime)!r}))\n"
+        "except BaseException as exc:\n"
+        "    error = type(exc).__name__\n"
+        "    result = exc.code if isinstance(exc, SystemExit) else 1\n"
+        "assert sys.argv is caller\nassert caller == expected\n"
+        "print('CALLER_RESTORED:' + json.dumps({'result': result, 'error': error}))\n"
+    )
+    environment = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+    result = subprocess.run(
+        [sys.executable, "-c", driver],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=25,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    record = json.loads(result.stdout.rsplit("CALLER_RESTORED:", 1)[1].strip())
+    expected_status = {"success": 0, "error": 1, "exit-zero": 0, "exit-seven": 7}[outcome]
+    assert record["result"] == expected_status
+    assert record["error"] == (
+        None
+        if interactive or outcome == "success"
+        else "ValueError"
+        if outcome == "error"
+        else "SystemExit"
+    )
+
+
+@pytest.mark.parametrize("interactive", [False, True])
+def test_real_pad_runner_does_not_forward_private_worker_arguments(
+    tmp_path: Path, interactive: bool
+) -> None:
+    if interactive:
+        pytest.importorskip("IPython")
+    from dataclasses import replace
+
+    from ds60sqlpy.catalog import Catalog
+    from ds60sqlpy.execution import PadRunner
+
+    lesson = replace(Catalog.load().get("python-01"), prerequisites=())
+    runner = PadRunner(Catalog(tmp_path, (lesson,)), python=sys.executable)
+    source = (
+        ("# %%\n" if interactive else "") + "import argparse, json, sys\n"
+        "arguments = argparse.ArgumentParser().parse_args()\n"
+        "assert sys.argv == [__file__]\n"
+        "print('PAD_ARGUMENTS:' + json.dumps(sys.argv[1:]))\n"
+    )
+    result = runner.run("python-01", "python", source)
+    assert result["returncode"] == 0, result["output"]
+    assert "PAD_ARGUMENTS:[]" in result["output"]

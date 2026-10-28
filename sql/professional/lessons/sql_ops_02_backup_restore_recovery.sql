@@ -1,11 +1,11 @@
 -- SQL-OPS-02: Backup, restore, and recovery rehearsals
--- BEGINNER WORKFLOW — sql-ops-02: Backup, Restore, and Recovery Rehearsals
+-- BEGINNER WORKFLOW - sql-ops-02: Backup, Restore, and Recovery Rehearsals
 -- Guide: sql/professional/companion-guides/sql_ops_02_backup_restore_recovery.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-ops-02/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-ops-02.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -23,12 +23,15 @@
 \echo 'SQL-OPS-02: disposable restore-verification simulation'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_recovery_lab;
+
 CREATE TABLE pro_recovery_lab.source_accounts (
   account_id bigint PRIMARY KEY,
   account_key text NOT NULL UNIQUE,
   display_name text NOT NULL
 );
+
 CREATE TABLE pro_recovery_lab.source_entries (
   entry_id bigint PRIMARY KEY,
   account_id bigint NOT NULL REFERENCES pro_recovery_lab.source_accounts (account_id),
@@ -36,15 +39,18 @@ CREATE TABLE pro_recovery_lab.source_entries (
   occurred_at timestamptz NOT NULL,
   note text NOT NULL
 );
+
 INSERT INTO pro_recovery_lab.source_accounts
 VALUES
   (1, 'ACC-100', 'Operations'),
   (2, 'ACC-101', 'Learning');
+
 INSERT INTO pro_recovery_lab.source_entries
 VALUES
   (101, 1, 25.00, TIMESTAMPTZ '2026-03-01 10:00:00+00', 'Initial allocation'),
   (102, 1, -5.00, TIMESTAMPTZ '2026-03-02 11:00:00+00', 'Adjustment'),
   (103, 2, 12.50, TIMESTAMPTZ '2026-03-03 12:00:00+00', 'Reference material');
+
 CREATE TABLE pro_recovery_lab.backup_manifest (
   backup_id text PRIMARY KEY,
   backup_kind text NOT NULL CHECK (backup_kind IN ('logical', 'physical')),
@@ -57,6 +63,7 @@ CREATE TABLE pro_recovery_lab.backup_manifest (
   accounts_checksum text NOT NULL,
   entries_checksum text NOT NULL
 );
+
 WITH account_digest AS (
   SELECT
     md5(string_agg(concat_ws('|', a.account_id, a.account_key, a.display_name), E'\n' ORDER BY a.account_id)) AS checksum
@@ -91,17 +98,21 @@ SELECT
 FROM
   account_digest
   CROSS JOIN entry_digest;
+
 -- A restore rehearsal must create independent target relations. LIKE INCLUDING
 -- ALL copies many properties, but foreign keys are added explicitly and the
 -- later contract checks must prove the actual result.
 CREATE TABLE pro_recovery_lab.restored_accounts (
   LIKE pro_recovery_lab.source_accounts INCLUDING ALL
 );
+
 CREATE TABLE pro_recovery_lab.restored_entries (
   LIKE pro_recovery_lab.source_entries INCLUDING ALL
 );
+
 ALTER TABLE pro_recovery_lab.restored_entries
   ADD CONSTRAINT restored_entries_account_fk FOREIGN KEY (account_id) REFERENCES pro_recovery_lab.restored_accounts (account_id);
+
 INSERT INTO pro_recovery_lab.restored_accounts
 SELECT
   a.*
@@ -109,6 +120,7 @@ FROM
   pro_recovery_lab.source_accounts AS a
 ORDER BY
   a.account_id;
+
 INSERT INTO pro_recovery_lab.restored_entries
 SELECT
   e.*
@@ -116,12 +128,14 @@ FROM
   pro_recovery_lab.source_entries AS e
 ORDER BY
   e.entry_id;
+
 CREATE TABLE pro_recovery_lab.restore_results (
   check_name text PRIMARY KEY,
   expected_value text NOT NULL,
   observed_value text NOT NULL,
   passed boolean NOT NULL
 );
+
 WITH observed AS (
   SELECT
     COUNT(*)::integer AS row_count,
@@ -146,6 +160,7 @@ SELECT
 FROM
   pro_recovery_lab.backup_manifest AS bm
   CROSS JOIN observed;
+
 WITH observed AS (
   SELECT
     COUNT(*)::integer AS row_count,
@@ -170,6 +185,7 @@ SELECT
 FROM
   pro_recovery_lab.backup_manifest AS bm
   CROSS JOIN observed;
+
 \echo 'Restore evidence: data checks plus structural constraints'
 SELECT
   rr.check_name,

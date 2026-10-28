@@ -1,6 +1,7 @@
 -- SQL-CONCURRENCY-01: Isolation Traces and Optimistic Concurrency
 -- Guide: sql/professional/companion-guides/sql_concurrency_01_isolation_and_versions.md
--- Use Create/open guided SQL notebook and the ignored learner copy.
+-- Use ./classroom -> PostgreSQL -> sql-concurrency-01 and its saved learner copy.
+-- Select "Whole SQL lesson (psql)"; Docker supplies the client.
 -- Run the complete file with psql -X -v ON_ERROR_STOP=1.
 -- Only the local disposable advanced_sql_training database is permitted.
 -- Setup is supplied. Write attempts before the final ROLLBACK.
@@ -12,20 +13,26 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE concurrency_stock (
   sku text PRIMARY KEY,
   available integer NOT NULL CHECK (available >= 0),
   version integer NOT NULL CHECK (version > 0)
 ) ON COMMIT DROP;
+
 INSERT INTO concurrency_stock
 VALUES
   ('A', 5, 1),
   ('B', 1, 1);
+
 -- Example 1: Guard an update and inspect its result
 -- Expected: One updated row, columns sku, available, version: (A,3,2). After rollback the fixture is (A,5,1).
 SAVEPOINT worked_success;
+
 UPDATE
   concurrency_stock
 SET
@@ -39,6 +46,7 @@ RETURNING
   sku,
   available,
   version;
+
 ROLLBACK TO SAVEPOINT worked_success;
 
 RELEASE SAVEPOINT worked_success;

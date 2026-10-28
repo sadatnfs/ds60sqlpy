@@ -367,19 +367,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Retry transient failures with deterministic full jitter.</strong> Fail twice transiently, then succeed, using random value 0.5 and a recording wait. <strong>Expected:</strong> three attempts; delays 50 and 100; result ready. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Stop on permanent failure and on exhausted attempts.</strong> Use one permanent failure, then an always-transient operation with a three-attempt budget. <strong>Expected:</strong> permanent attempted once; transient attempted three times and still rejects. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reuse a completed idempotent result.</strong> Submit the same key and payload twice to the local store. <strong>Expected:</strong> one side effect; identical returned receipt. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject conflicting reuse of an idempotency key.</strong> Reuse one key for amounts 5 and 7. <strong>Expected:</strong> conflict error; effects remains 1. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Bound active work while preserving input order.</strong> Map four values with concurrency 2 and observe active-operation counts. <strong>Expected:</strong> results 2,4,6,8; peak active at most 2; active returns to 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Honor cancellation before the first attempt.</strong> Abort a signal before calling retry and track attempted work. <strong>Expected:</strong> original reason rejects; attempts remain 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

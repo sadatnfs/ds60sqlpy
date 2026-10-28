@@ -1,0 +1,68 @@
+x-base: &base
+  image: ${DS60_AIRFLOW_IMAGE:?Prepare the owned Airflow image}
+  pull_policy: never
+  entrypoint: [python3]
+  working_dir: /project
+  volumes:
+    - .:/project:ro
+    - state:/state
+  user: "50000:0"
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,noexec,size=256m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 384
+  cpus: 2.0
+  mem_limit: 2g
+  environment:
+    AIRFLOW_HOME: /state/airflow
+    AIRFLOW__CORE__DAGS_FOLDER: /project/dags
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__PARALLELISM: "2"
+    AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "2"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: learner:admin
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_FILE: /state/passwords.json
+    AIRFLOW__API__WORKERS: "1"
+    AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES: "1"
+    AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "5"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////state/airflow/airflow.db
+    AIRFLOW_CONN_CLASSROOM_FIXTURE: '{"conn_type":"generic","host":"127.0.0.1","extra":{"dataset":"orders"}}'
+    PYTHONPATH: /project
+    PYTHONDONTWRITEBYTECODE: "1"
+    HOME: /state/home
+    USER: airflow
+    LOGNAME: airflow
+  labels:
+    org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+    org.ds60.workshop.kind: apache-airflow
+services:
+  initialize:
+    <<: *base
+    user: "0:0"
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    command: [project_data.py]
+  airflow:
+    <<: *base
+    command: [start.py]
+    ports:
+      - "127.0.0.1:${DS60_AIRFLOW_PORT:?Missing loopback port}:8080"
+    depends_on:
+      initialize:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python3, /project/health.py]
+      interval: 5s
+      timeout: 8s
+      retries: 36
+      start_period: 10s
+volumes:
+  state:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-airflow
+networks:
+  default:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-airflow

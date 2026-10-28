@@ -311,19 +311,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Cancel a pending timer.</strong> Start a timer with a signal, abort it, and inspect the rejection. <strong>Expected:</strong> AbortError with the original reason as cause. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject an already aborted request before work.</strong> Abort before calling the custom operation. <strong>Expected:</strong> the exact reason is rejected; no timer starts. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Complete normally and clean up once.</strong> Run the custom operation without aborting, then abort its signal after completion. <strong>Expected:</strong> value 7; started,completed,cleaned exactly once. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Cancel custom work and release its timer.</strong> Start the custom operation and immediately abort. <strong>Expected:</strong> rejected reason; started,aborted,cleaned. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Keep the first abort reason.</strong> Abort a controller twice and call throwIfAborted. <strong>Expected:</strong> the first reason remains authoritative. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Combine caller and deadline signals.</strong> Combine two controllers and abort the deadline controller. <strong>Expected:</strong> combined signal is aborted with deadline reason. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

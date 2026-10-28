@@ -1483,6 +1483,8 @@ await test("all registered subject accents meet text contrast in both appearance
   assert.deepEqual(
     new Set(Object.keys(palette)),
     new Set([
+      "apache-data-platforms",
+      "data-ml-engineering",
       "python",
       "sql",
       "bridge",
@@ -1509,6 +1511,13 @@ await test("all registered subject accents meet text contrast in both appearance
       "dax",
       "r",
       "data-visualization",
+      "polars",
+      "dbt",
+      "ml-engineering",
+      "llm-evaluation",
+      "applied-science",
+      "bayesian-computing",
+      "julia",
     ]),
   );
   const luminance = (hex) => {

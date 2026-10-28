@@ -439,37 +439,37 @@ same_meaning_new_bytes <span class="syntax-operator">=</span> <span class="synta
 </ol>
 <p><strong>Verify:</strong> A valid two-record file returns two rows and its exact bytes; <code>true</code> as quantity, a blank line, or an extra field raises ValueError before state publication.</p>
 <p><strong>Hint:</strong> In Python bool is an int subclass, so an integer-only check needs an explicit bool exclusion.</p>
-<ol>
+<ol start="2">
 <li><strong>Declare replay and conflict behavior.</strong> Test A/2, A/2, B/5 versus A/2, A/3. Reject a conflicting identity before publishing any prefix.</li>
 </ol>
 <p><strong>Verify:</strong> Identical replays produce unique count 2 and total 7 after three source rows; the conflict snapshot raises ValueError and creates no checkpoint.</p>
 <p><strong>Hint:</strong> Identity equality and content equality are both required for an idempotent replay.</p>
-<ol>
+<ol start="3">
 <li><strong>Derive inspectable prefix state.</strong> Implement <code>state_for_prefix</code> with version, hash, byte size, next_row, quantities, total, and completion. Validate the offset and preserve exact accounting.</li>
 </ol>
 <p><strong>Verify:</strong> For A/2, A/2, B/5 at next_row 2, total is 2, unique count is 1, and complete is False; at 3, total is 7 and complete is True.</p>
 <p><strong>Hint:</strong> The offset counts source rows; the aggregate counts unique ids.</p>
-<ol>
+<ol start="4">
 <li><strong>Publish one complete state.</strong> Implement <code>atomic_write_state</code> with a same-directory temporary file, flush/fsync, close, and replace. Add a before_replace test hook.</li>
 </ol>
 <p><strong>Verify:</strong> A failure injected before replacement leaves the prior target bytes unchanged and no temporary file from that attempt. A successful replacement parses as complete JSON.</p>
 <p><strong>Hint:</strong> A temp file plus a target file is safe only when the target name changes after the temp is complete.</p>
-<ol>
+<ol start="5">
 <li><strong>Resume after a failed candidate.</strong> Implement <code>run_pipeline</code> with batch_size 2. Use five unique records and inject failure before committing offset 4, then resume without failure.</li>
 </ol>
 <p><strong>Verify:</strong> After failure, committed next_row remains 2; after resume it is 5, complete is True, and total matches a clean run with no double counting.</p>
 <p><strong>Hint:</strong> Resume from the published prefix, not from the last value a local variable reached.</p>
-<ol>
+<ol start="6">
 <li><strong>Reject stale or corrupt state.</strong> Resume after changing source bytes, then separately tamper the saved total or next_row. Preserve the original evidence in temporary copies.</li>
 </ol>
 <p><strong>Verify:</strong> Changed source hash, invalid offset, and inconsistent prefix total each raise ValueError; none silently resets or overwrites the checkpoint.</p>
 <p><strong>Hint:</strong> A valid JSON file can still violate the checkpoint contract.</p>
-<ol>
+<ol start="7">
 <li><strong>Prove repeat and empty behavior.</strong> Run a completed source again and compare checkpoint bytes. Then process a new empty source with a separate checkpoint and test invalid batch sizes.</li>
 </ol>
 <p><strong>Verify:</strong> A completed rerun leaves bytes unchanged; empty input commits a complete zero-row/zero-total state; zero, negative, and bool batch sizes raise ValueError.</p>
 <p><strong>Hint:</strong> Check idempotent external state separately from how many times internal code executes.</p>
-<ol>
+<ol start="8">
 <li><strong>Write an honest guarantee.</strong> Write a short runbook containing source identity, one-writer ownership, retry command, state inspection fields, failure test, and filesystem limits.</li>
 </ol>
 <p><strong>Verify:</strong> The runbook artifact includes the checkpoint path, source hash, inspected next_row after failure, and one-file publication policy. Its guarantee table marks multi-writer and power-loss durability as unverified.</p>

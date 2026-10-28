@@ -558,15 +558,15 @@ report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <li>Build a DataFrame PII scanner covering column names and free text.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; data minimization, privacy boundaries, fairness evidence, and accountable controls; run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.</p>
-<ol>
+<ol start="2">
 <li>Add a function that masks email addresses and phone numbers in text.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; data minimization, privacy boundaries, fairness evidence, and accountable controls; assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.</p>
-<ol>
+<ol start="3">
 <li>Simulate subgroup precision and recall for a classifier and compare groups.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; data minimization, privacy boundaries, fairness evidence, and accountable controls; for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.</p>
-<ol>
+<ol start="4">
 <li>Draft a one-page data-ethics checklist for your project.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 4; data minimization, privacy boundaries, fairness evidence, and accountable controls; save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.</p>
@@ -580,19 +580,19 @@ report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Combine data minimization, access control, threat modeling, privacy limits, fairness uncertainty, and incident response. Detection or masking alone is not protection.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="5">
 <li><strong>Threat modeling:</strong> Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner. <strong>Progressive hint:</strong> Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.</li>
 </ol>
 <p><strong>Verify:</strong> Threat modeling; save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.</p>
-<ol>
+<ol start="6">
 <li><strong>Re-identification reasoning:</strong> Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information. <strong>Progressive hint:</strong> Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.</li>
 </ol>
 <p><strong>Verify:</strong> Re-identification reasoning; print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.</p>
-<ol>
+<ol start="7">
 <li><strong>Fairness uncertainty:</strong> Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group&#x27;s denominator is nearly zero. <strong>Progressive hint:</strong> Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.</li>
 </ol>
 <p><strong>Verify:</strong> Fairness uncertainty; with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.</p>
-<ol>
+<ol start="8">
 <li><strong>Incident response:</strong> Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps. <strong>Progressive hint:</strong> Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.</li>
 </ol>
 <p><strong>Verify:</strong> Incident response; produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.</p>
@@ -865,15 +865,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Build a DataFrame PII scanner covering column names and free text.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.</p>
-<ol>
+<ol start="2">
 <li>Add a function that masks email addresses and phone numbers in text.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.</p>
-<ol>
+<ol start="3">
 <li>Simulate subgroup precision and recall for a classifier and compare groups.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.</p>
-<ol>
+<ol start="4">
 <li>Draft a one-page data-ethics checklist for your project.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.</p>
@@ -887,19 +887,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-14--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-14--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Combine data minimization, access control, threat modeling, privacy limits, fairness uncertainty, and incident response. Detection or masking alone is not protection.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="5">
 <li><strong>Threat modeling:</strong> Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner. <strong>Progressive hint:</strong> Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.</li>
 </ol>
 <p><strong>Verify:</strong> Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.</p>
-<ol>
+<ol start="6">
 <li><strong>Re-identification reasoning:</strong> Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information. <strong>Progressive hint:</strong> Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.</li>
 </ol>
 <p><strong>Verify:</strong> Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.</p>
-<ol>
+<ol start="7">
 <li><strong>Fairness uncertainty:</strong> Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group&#x27;s denominator is nearly zero. <strong>Progressive hint:</strong> Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.</li>
 </ol>
 <p><strong>Verify:</strong> Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.</p>
-<ol>
+<ol start="8">
 <li><strong>Incident response:</strong> Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps. <strong>Progressive hint:</strong> Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.</li>
 </ol>
 <p><strong>Verify:</strong> Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.</p>

@@ -1,11 +1,11 @@
 -- Day 53: Project 3 - Data Warehouse Design (Part 2)
--- BEGINNER WORKFLOW — sql-53: Project3 DWH Part2 SCD
+-- BEGINNER WORKFLOW - sql-53: Project 3 DWH Part 2 SCD
 -- Guide: sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-53/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-53.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Topics: Slowly Changing Dimensions (Type 2) for customers/products
 BEGIN;
 SET search_path TO dwh, training, public;
+
 -- Example SCD Type 2 upsert for dim_customer
 -- Assumption: source-of-truth is training.customers; we detect changes by comparing attributes
 -- Steps per changed business key:
@@ -40,6 +41,7 @@ FROM
 ORDER BY
   c.customer_id
 LIMIT 10;
+
 -- Detect current rows that differ from source attributes
 WITH current_dim AS (
   SELECT
@@ -87,6 +89,7 @@ SELECT
   TRUE
 FROM
   diffs d;
+
 -- Verify multiple versions per customer
 SELECT
   customer_id,
@@ -101,6 +104,7 @@ ORDER BY
   versions DESC,
   customer_id
 LIMIT 10;
+
 -- SCD Type 2 for dim_product (similar pattern)
 CREATE TEMP TABLE changed_products AS
 SELECT
@@ -114,6 +118,7 @@ FROM
 ORDER BY
   p.product_id
 LIMIT 10;
+
 WITH current_p AS (
   SELECT
     *
@@ -159,6 +164,7 @@ SELECT
   TRUE
 FROM
   diffs d;
+
 -- Fact table joins should point to is_current at load time; for historical facts you would key by date to choose appropriate SCD version.
 -- Exercises
 -- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from <= order_date <= coalesce(valid_to,'infinity')).

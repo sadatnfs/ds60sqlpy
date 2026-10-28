@@ -1,0 +1,8 @@
+version: 2
+sources:
+  - name: raw
+    schema: "{{ target.schema }}"
+    tables:
+      - name: orders
+        identifier: raw_orders
+        description: Historical synthetic fixture. No current freshness claim is made.

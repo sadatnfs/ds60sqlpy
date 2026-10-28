@@ -82,8 +82,10 @@ $solution$;
 BEGIN;
 ALTER TABLE pro_migration_lab.service_requests
   ADD COLUMN assigned_team text;
+
 INSERT INTO pro_migration_lab.schema_migrations (migration_id, migration_name, content_tag)
   VALUES (6, 'expand_assigned_team', 'course-solution-006-v1');
+
 COMMIT;
 
 SELECT
@@ -106,6 +108,7 @@ SET
   END
 WHERE
   sr.assigned_team IS NULL;
+
 DO $solution$
 BEGIN
     IF EXISTS (
@@ -117,8 +120,10 @@ BEGIN
     END IF;
 END
 $solution$;
+
 INSERT INTO pro_migration_lab.schema_migrations (migration_id, migration_name, content_tag)
   VALUES (7, 'backfill_assigned_team', 'course-solution-007-v1');
+
 COMMIT;
 
 -- Exercise 3, migration 008: contract after compatible writers are deployed.
@@ -126,10 +131,13 @@ BEGIN;
 ALTER TABLE pro_migration_lab.service_requests
   ALTER COLUMN assigned_team SET DEFAULT 'general',
   ALTER COLUMN assigned_team SET NOT NULL;
+
 ALTER TABLE pro_migration_lab.service_requests
   ADD CONSTRAINT service_requests_assigned_team_ck CHECK (assigned_team IN ('general', 'response'));
+
 INSERT INTO pro_migration_lab.schema_migrations (migration_id, migration_name, content_tag)
   VALUES (8, 'contract_assigned_team', 'course-solution-008-v1');
+
 COMMIT;
 
 SELECT

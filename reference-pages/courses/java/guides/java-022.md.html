@@ -256,19 +256,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Retrieve a bounded result.</strong> Submit a callable returning 42 and get it within 2 seconds. <strong>Expected:</strong> result 42. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with result 42.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Preserve task failure identity.</strong> Submit a callable throwing IllegalArgumentException and inspectFuture.get. <strong>Expected:</strong> ExecutionException cause isIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with ExecutionException cause isIllegalArgumentException.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Separate wait timeout from task completion.</strong> Hold a task on a latch,wait with a short timeout,then release and obtain the result. <strong>Expected:</strong> TimeoutException first;later result7. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with TimeoutException first;later result7.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Cancel cooperatively.</strong> Cancel a running latch-waiting task with interruption and observe its exit signal. <strong>Expected:</strong> Future cancelled and task catches interruption. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with Future cancelled and task catches interruption.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject work after shutdown.</strong> Shut down an idle executor and submit another task. <strong>Expected:</strong> RejectedExecutionException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with RejectedExecutionException.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Enforce a bounded queue.</strong> Use one worker and one queue slot,hold the worker,fill the queue,then submit a third task. <strong>Expected:</strong> third submission rejected; admitted tasks finish after release. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with third submission rejected; admitted tasks finish after release.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -618,161 +618,161 @@ unit: currency units</code></pre>
 <li><strong>Progressive hint:</strong> Validate the complete key tuple and report only safe row position/key metadata.</li>
 <li><strong>Verify:</strong> For each producer contract, load one unique fixture successfully, duplicate its primary-key tuple, and assert validation fails with the source/grain named before DuckDB insertion.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>DAG:</strong> Draw dependencies and implement deterministic topological order with missing-dependency and cycle detection.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Break ties by stable model name so valid independent branches are reproducible.</li>
 <li><strong>Verify:</strong> Assert raw sources precede dependent staging/intermediate/mart models with stable name ordering; an unknown dependency and a two-model cycle each raise <code>ValueError</code> listing unresolved names.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Staging:</strong> Implement the three staging models without aggregation or <code>DISTINCT</code> and state each row grain.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Staging should rename/cast, not hide duplicate producer rows.</li>
 <li><strong>Verify:</strong> Compare staging row counts with their raw sources, assert no <code>DISTINCT</code>/aggregation, and record grains <code>customer_id</code>, <code>order_id</code>, and <code>(order_id, line_number)</code> with typed/normalized columns.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Intermediate model:</strong> Declare <code>int_order_revenue</code> grain, predict row count, then implement its join and aggregate.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Aggregate line items to one row per order before joining other facts.</li>
 <li><strong>Verify:</strong> Predict and assert one row per order in <code>int_order_revenue</code>, with exact summed item revenue and retained customer/status/date fields; row count equals raw orders, including orders without matching items per policy.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Mart:</strong> Build <code>mart_daily_revenue</code> and document exact status exclusions and UTC/date semantics.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Every selected non-aggregate must belong to the daily grain.</li>
 <li><strong>Verify:</strong> Assert one row per UTC order date, only the documented completed/paid statuses contribute, revenue/order/customer measures match fixtures, and output is ordered by date.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Identifier safety:</strong> Validate trusted model names before using them in generated DDL.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Parameters cannot bind identifiers; constrain structure with a strict grammar/allowlist.</li>
 <li><strong>Verify:</strong> Pass every checked-in model name and injection-shaped/uppercase/punctuated names; assert only names matching the trusted identifier policy reach generated DDL.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Schema contract:</strong> Compare <code>DESCRIBE</code> output with <code>MART_CONTRACT</code>; make separate name and type drift fixtures.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Check position, normalized type prefix, and nullability according to declared policy.</li>
 <li><strong>Verify:</strong> Compare exact <code>DESCRIBE</code> column order/type compatibility with <code>MART_CONTRACT</code>; separate fixtures must report name drift and type drift distinctly before publication.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Data tests:</strong> Write zero-row violation queries for uniqueness, not-null, accepted status, relationships, and positive money/quantity rules.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A test query returns violating rows; passing means count zero.</li>
 <li><strong>Verify:</strong> Execute each violation query against valid fixtures and assert zero rows; inject one uniqueness, null, status, relationship, money, and quantity violation and assert its named test returns evidence rows.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Reconciliation:</strong> Write an independent reconciliation for mart revenue, orders, and customers by day.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not reuse the mart&#x27;s exact transformation path for its check.</li>
 <li><strong>Verify:</strong> Independently recompute daily revenue/order/customer measures from order grain and full-outer compare; assert zero mismatches, then perturb each mart measure and observe a dated mismatch row.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Semantic metric:</strong> Define one extra metric with aggregation, grain, time dimension, unit, exclusions, and denominator.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A metric definition is a contract, not merely a SQL expression.</li>
 <li><strong>Verify:</strong> Define an additional metric with model, expression, aggregation, grain, time dimension, unit, exclusions, and denominator; calculate one fixture date and compare the exact value.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Idempotency:</strong> Run the project twice in one connection and prove identical ordered snapshots.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Rebuild semantics should replace trusted models rather than append.</li>
 <li><strong>Verify:</strong> Run the project twice in one connection; assert identical ordered snapshots, row counts, test results, and reconciliation, with no duplicate append state.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Impact analysis:</strong> Add one deterministic source row, predict every downstream change, then update tests without weakening contracts.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Write expected deltas before executing the rebuild.</li>
 <li><strong>Verify:</strong> Add one source row and write predicted staging/intermediate/mart row and measure deltas first; assert the actual snapshot matches every predicted change and existing contracts remain unchanged.</li>
 </ul>
-<ol>
+<ol start="13">
 <li><strong>Freshness:</strong> Add a producer freshness contract with an injected as-of time and distinguish stale from missing data.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Time-based tests must not call the wall clock directly.</li>
 <li><strong>Verify:</strong> With an injected as-of instant, assert a present old source is reported stale, an absent source missing, and a recent source current using the declared threshold.</li>
 </ul>
-<ol>
+<ol start="14">
 <li><strong>Build strategy:</strong> Compare full rebuild and incremental processing for this local project and state what evidence is missing for incrementality.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Idempotent full rebuild is the reference correctness baseline.</li>
 <li><strong>Verify:</strong> Provide a comparison of full rebuild versus incremental state, keys, late updates, delete handling, and atomic publication; mark incrementality unproved until change-capture and replay tests exist.</li>
 </ul>
-<ol>
+<ol start="15">
 <li><strong>Money correctness:</strong> Trace exact revenue from producer Decimal through DuckDB type, aggregation, Python snapshot, and reconciliation.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Reject silent float conversion and premature rounding.</li>
 <li><strong>Verify:</strong> Trace one exact Decimal from source tuple through DuckDB <code>DECIMAL</code>, order aggregation, mart aggregation, Python snapshot, and reconciliation; assert equality at every boundary without float conversion.</li>
 </ul>
-<ol>
+<ol start="16">
 <li><strong>NULL semantics:</strong> Choose behavior for missing dimension labels and prove it does not change fact row count or measure totals.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> An <code>unknown</code> label is a business rule; a filtering join is a data-loss bug unless declared.</li>
 <li><strong>Verify:</strong> Inject a missing dimension label; assert the declared replacement/NULL policy, unchanged fact row count, and unchanged revenue/order totals.</li>
 </ul>
-<ol>
+<ol start="17">
 <li><strong>Time semantics:</strong> Define daily boundaries for timezone-aware source instants and test an order around midnight.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Convert the instant to the reporting zone before deriving its date.</li>
 <li><strong>Verify:</strong> Place timezone-aware orders immediately before and after the declared UTC midnight; assert they land on the two expected dates and no local-machine timezone changes the snapshot.</li>
 </ul>
-<ol>
+<ol start="18">
 <li><strong>Late data:</strong> Model a late-arriving order for a previously built day and compare full rebuild with an incremental repair.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Watermarks based only on event time can miss late records.</li>
 <li><strong>Verify:</strong> Add a late order to an already-built date; assert full rebuild corrects that date and the proposed incremental repair reprocesses the same affected partition to an identical result.</li>
 </ul>
-<ol>
+<ol start="19">
 <li><strong>Snapshot determinism:</strong> Require explicit ordering and stable serialization for mart snapshots across platforms.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Database row order is undefined without final <code>ORDER BY</code>.</li>
 <li><strong>Verify:</strong> Assert mart queries include a complete unique order, serialize dates/Decimals with the documented stable format, and produce byte-identical snapshots across repeated runs.</li>
 </ul>
-<ol>
+<ol start="20">
 <li><strong>Performance:</strong> Inspect a bounded <code>EXPLAIN</code> for the intermediate/mart build and identify one optimization that preserves grain.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Optimize after contracts and reconciliation pass.</li>
 <li><strong>Verify:</strong> Capture bounded <code>EXPLAIN</code> output for intermediate and mart builds, identify scan/join/aggregate operators, and propose one optimization whose post-change grain, counts, and reconciliation remain identical.</li>
 </ul>
-<ol>
+<ol start="21">
 <li><strong>Lineage:</strong> Produce a compact source-to-metric lineage table from <code>depends_on</code> and metric definitions.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Lineage should be derivable from checked-in contracts rather than hand-maintained prose alone.</li>
 <li><strong>Verify:</strong> Generate lineage rows from every raw source through models to each metric; assert all declared dependencies appear, no orphan/cycle exists, and <code>gross_revenue</code> terminates at <code>mart_daily_revenue</code>.</li>
 </ul>
-<ol>
+<ol start="22">
 <li><strong>Transaction:</strong> Design build publication so readers do not observe half-rebuilt models after a failure.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Check DuckDB transaction/DDL semantics rather than assuming atomicity.</li>
 <li><strong>Verify:</strong> Inject failure before publication and assert readers retain the prior complete mart; the design must stage or transact replacement so no partial model set becomes visible.</li>
 </ul>
-<ol>
+<ol start="23">
 <li><strong>Failure policy:</strong> Make any contract, data-test, or reconciliation failure stop publication while retaining inspectable results.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not continue to a green artifact after a red quality gate.</li>
 <li><strong>Verify:</strong> Force producer-contract, table-contract, data-test, and reconciliation failures separately; assert each blocks publication while retaining the named failing query/result for diagnosis.</li>
 </ul>
-<ol>
+<ol start="24">
 <li><strong>Portable artifact:</strong> Export a deterministic local result with manifest, metric definitions, test evidence, and cleanup instructions.</li>
 </ol>
 <ul>

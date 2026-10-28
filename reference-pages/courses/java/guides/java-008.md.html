@@ -260,19 +260,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Normalize at construction.</strong> Create an Order with ID &quot; A &quot; and item x. <strong>Expected:</strong> ID A and items[x]. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with ID A and items[x].</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Copy caller-owned collections.</strong> Create an Order from a mutable list,then append to the original list. <strong>Expected:</strong> record retains its original single item. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with record retains its original single item.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Use value equality.</strong> Construct another Order with normalizedA and item x. <strong>Expected:</strong> equals true and equalhashCode. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with equals true and equalhashCode.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject blank identity.</strong> Construct an Order with an all-space ID. <strong>Expected:</strong> IllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IllegalArgumentException.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Protect the exposed collection.</strong> Attempt to add toorder.items(). <strong>Expected:</strong> UnsupportedOperationException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with UnsupportedOperationException.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject null collection members.</strong> Try creating an Order whose items contains null. <strong>Expected:</strong> NullPointerException from the declared copy policy. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with NullPointerException from the declared copy policy.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "airflow": "3.3.2",
+  "upstream_image": "apache/airflow:3.3.2-python3.12@sha256:9df9c8be4096b9cc626bd7cb1f2b8c712eef66c59c615f8c7e6200871ca10bd1",
+  "constraints_source": "https://raw.githubusercontent.com/apache/airflow/constraints-3.3.2/constraints-3.12.txt",
+  "complete_constraints_sha256": "821effd0f491975682f2774fca3427d7bc2f59ca6de68dcb413ad2c8f890e58c",
+  "constraints_selection": "Only distributions selected by the complete minimal Airflow lock are retained in constraints-3.12.txt.",
+  "native_wheel_resolution": ["linux/arm64", "linux/amd64"],
+  "actual_execution": "Linux ARM64 standalone SQLite/Core-fallback scheduler, task, browser and retained-state gates qualified; upstream image descriptor-only",
+  "fallback": "Explicit existing Core image with isolated hash-locked virtual environment"
+}

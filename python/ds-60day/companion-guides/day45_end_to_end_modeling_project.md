@@ -1,6 +1,9 @@
 # Day 45: End-to-End Modeling Mini-Project
 
-**Lesson ID:** `python-45` · **Level:** intermediate · **Dependencies:** `data` · **Network:** first-run Seaborn cache
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
+**Lesson ID:** `python-45` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
 This checkpoint integrates data loading, leak-safe preprocessing, validation,
 evaluation, and a saved pipeline. The objective is reproducible evidence, not the
@@ -24,10 +27,8 @@ By the end of the project, you can:
 
 ## Dataset and offline contract
 
-The learner notebook calls `seaborn.load_dataset("titanic")`. That first call
-may download the small dataset and place it in Seaborn's local cache. This
-one-time connected bootstrap is accepted. Once cached, the project can run
-offline on that machine.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 The separate reference solution uses scikit-learn's package-bundled
 breast-cancer dataset to demonstrate the same engineering gates without a

@@ -267,19 +267,19 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <ol>
 <li><strong>Predict a valid batch.</strong> Use float32 CPU rows 1, 2 and 3, 4. <strong>Expected:</strong> outputs 0, 2 with shape(2, ). <strong>Verify:</strong> Save the assertion results for exercise 1, including outputs 0, 2 with shape(2, ).</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Check per-record batching parity.</strong> Predict each row alone and concatenate. <strong>Expected:</strong> same values as batch prediction. <strong>Verify:</strong> Save the assertion results for exercise 2, including same values as batch prediction.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject empty and oversized batches.</strong> Pass shapes 0 x2 and 5 x2. <strong>Expected:</strong> ValueError naming batch limit. <strong>Verify:</strong> Save the assertion results for exercise 3, including ValueError naming batch limit.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject shape and dtype ambiguity.</strong> Pass a vector, a3-feature matrix and an int64 matrix. <strong>Expected:</strong> shape ValueErrors and dtype TypeError. <strong>Verify:</strong> Save the assertion results for exercise 4, including shape ValueErrors and dtype TypeError.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject nonfinite values.</strong> Pass aN aN feature and inspect the failure. <strong>Expected:</strong> ValueError for finite-value contract. <strong>Verify:</strong> Save the assertion results for exercise 5, including ValueError for finite-value contract.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Preserve caller data.</strong> Mutate the returned output and compare the original input. <strong>Expected:</strong> input unchanged. <strong>Verify:</strong> Save the assertion results for exercise 6, including input unchanged.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

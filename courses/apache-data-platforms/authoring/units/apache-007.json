@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 60,
+  "prerequisites": ["apache-006"],
+  "concepts": ["event time", "as-of revisions", "late corrections"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    [
+      "Flink time attributes",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/table/concepts/time_attributes/"
+    ],
+    ["Iceberg reliability and snapshots", "https://iceberg.apache.org/docs/latest/reliability/"]
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "format": "delivery-snapshot-v1",
+  "batch_id": "corrected",
+  "generation": 2,
+  "expected_rows": 3,
+  "records": [
+    {
+      "delivery_id": "A",
+      "route_id": 10,
+      "packages": 4
+    },
+    {
+      "delivery_id": "B",
+      "route_id": 10,
+      "packages": 3
+    },
+    {
+      "delivery_id": "C",
+      "route_id": 20,
+      "packages": 1
+    }
+  ]
+}

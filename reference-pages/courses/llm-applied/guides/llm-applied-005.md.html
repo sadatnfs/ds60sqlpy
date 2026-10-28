@@ -280,19 +280,19 @@ text<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</sp
 <ol>
 <li><strong>Split a fixed document.</strong> Chunk one two three four five six seven with size 3 and overlap 1. <strong>Expected:</strong> chunks one two three, three four five and five six seven. <strong>Verify:</strong> Save the assertion results for exercise 1, including chunks one two three, three four five and five six seven.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Verify citation offsets.</strong> For every chunk, slice the original text using its start and end offsets. <strong>Expected:</strong> every source slice equals the stored chunk text. <strong>Verify:</strong> Save the assertion results for exercise 2, including every source slice equals the stored chunk text.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Preserve unusual whitespace.</strong> Chunk alpha, two spaces, beta, a newline and gamma with size 2 and overlap 0. <strong>Expected:</strong> first chunk retains the double space; second chunk is gamma. <strong>Verify:</strong> Save the assertion results for exercise 3, including first chunk retains the double space; second chunk is gamma.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Measure overlap duplication.</strong> Count total stored chunk token occurrences versus original source token positions in the first fixture. <strong>Expected:</strong> 9 stored token occurrences versus 7 source positions. <strong>Verify:</strong> Save the assertion results for exercise 4, including 9 stored token occurrences versus 7 source positions.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject invalid policies.</strong> Try overlap equal to window size, negative overlap and size 0. <strong>Expected:</strong> all policies raise ValueError before iteration. <strong>Verify:</strong> Save the assertion results for exercise 5, including all policies raise ValueError before iteration.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Handle empty and short sources.</strong> Chunk empty text and a two-token string with size 5. <strong>Expected:</strong> empty list for empty text; one short chunk for the two-token source. <strong>Verify:</strong> Save the assertion results for exercise 6, including empty list for empty text; one short chunk for the two-token source.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

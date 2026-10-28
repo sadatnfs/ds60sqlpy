@@ -1,0 +1,2 @@
+# Optional external-project interface; CmdStan itself is prepared separately.
+cmdstanpy==1.3.0

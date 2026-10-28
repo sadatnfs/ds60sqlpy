@@ -1,0 +1,64 @@
+{
+  "number": 1,
+  "title": "Evaluation contracts, populations and estimands",
+  "concepts": [
+    "estimand",
+    "sampling unit",
+    "target population",
+    "missing labels",
+    "critical errors"
+  ],
+  "outcome": "Define which population, unit, loss and decision an evaluation estimates, and demonstrate why a different denominator can reverse its conclusion.",
+  "level": "beginner",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["python-08", "llm-001"],
+  "exercises": [
+    {
+      "title": "Reverse the comparison",
+      "task": "Compute B minus A and then A minus B for one success gained by B.",
+      "expected": "The values are +1 and -1.",
+      "hint": "Write the sign convention next to the subtraction.",
+      "answer": "An improvement sign is a convention. Correctness B minus A favors B when positive; swapping systems negates the result."
+    },
+    {
+      "title": "Change the target mix",
+      "task": "Reweight the worked families to 75% metrics and 25% policy.",
+      "expected": "The weighted improvement is 0.5.",
+      "hint": "Use family means +1 and -1.",
+      "answer": "0.75(1)+0.25(-1)=0.5. The weights describe the target population, not a correction that is always preferable."
+    },
+    {
+      "title": "Duplicate an identifier",
+      "task": "Append an existing request with the same ID.",
+      "expected": "The paired-data validator rejects it.",
+      "hint": "The number of rows must equal the number of unique IDs.",
+      "answer": "Counting an accidental duplicate twice changes both weights and apparent precision; reject it before estimation."
+    },
+    {
+      "title": "Require complete gates",
+      "task": "Omit the access-policy result from an otherwise favorable packet.",
+      "expected": "The result remains no-go.",
+      "hint": "Check the required field set as well as values.",
+      "answer": "An absent result is unknown. Explicit completeness prevents an all([]) or missing-key success."
+    },
+    {
+      "title": "Show missing-label coverage",
+      "task": "Add a second unjudged row to case B.",
+      "expected": "Observed accuracy stays 1 while label coverage falls to 0.5.",
+      "hint": "Keep eligibility and judged denominators separately.",
+      "answer": "The unchanged accuracy does not imply unchanged evidence. Half the eligible population now lacks labels."
+    },
+    {
+      "title": "Define an empty population",
+      "task": "Evaluate no eligible requests.",
+      "expected": "Raise an error instead of returning perfect accuracy.",
+      "hint": "A zero denominator is not a high score.",
+      "answer": "An empty evaluation cannot support a deployment claim; the program rejects it and the report should identify why coverage is empty."
+    }
+  ],
+  "sources": [
+    ["HELM evaluation framework", "https://arxiv.org/abs/2211.09110"],
+    ["Existing task-contract route", "../../../courses/llm-applied/guides/llm-applied-001.md"]
+  ]
+}

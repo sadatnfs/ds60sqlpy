@@ -1,0 +1,65 @@
+{
+  "number": 21,
+  "title": "Temporal credit, GAE and the PPO clipped objective",
+  "concepts": [
+    "GAE",
+    "termination",
+    "truncation",
+    "PPO clipping",
+    "old policy",
+    "reference policy"
+  ],
+  "outcome": "Compute temporal advantages with correct episode boundaries and inspect PPO clipping for both positive and negative advantages.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-019", "torch-004"],
+  "exercises": [
+    {
+      "title": "Remove the trace",
+      "task": "Set lambda 0 in case A.",
+      "expected": "Advantages reduce to residuals 0.86 and 1.6.",
+      "hint": "No later residual receives positive trace weight.",
+      "answer": "This isolates the one-step residual calculation and its terminal mask."
+    },
+    {
+      "title": "Terminate the first step",
+      "task": "Mark both steps terminal in the arithmetic helper.",
+      "expected": "The first result is 0.5 and does not inherit the second residual.",
+      "hint": "A terminal boundary cuts both bootstrap and trace.",
+      "answer": "The array illustrates boundary behavior; separate episodes should otherwise be processed with explicit episode structure."
+    },
+    {
+      "title": "Positive advantage outside the interval",
+      "task": "Use ratio 1.5 and advantage 1 with epsilon 0.2.",
+      "expected": "The clipped term is 1.2.",
+      "hint": "Take the minimum of the two products.",
+      "answer": "The surrogate stops rewarding that favorable increase beyond the upper boundary."
+    },
+    {
+      "title": "Negative advantage outside the interval",
+      "task": "Use ratio 1.5 and advantage-1.",
+      "expected": "The term is -1.5, not-1.2.",
+      "hint": "Multiplication reverses the relevant ordering.",
+      "answer": "The bad-direction probability increase still receives its larger penalty."
+    },
+    {
+      "title": "Check an unobserved action",
+      "task": "Compare the two policies in case B.",
+      "expected": "Their sampled terms agree while global KL differs.",
+      "hint": "Only action 0 appears in the hypothetical sampled batch.",
+      "answer": "Clipping a finite sampled objective cannot by itself bound every unobserved action probability or full-distribution divergence."
+    },
+    {
+      "title": "Freeze rollout quantities",
+      "task": "Explain which tensors should be detached during policy optimization.",
+      "expected": "Stored old log probabilities and computed advantages are fixed.",
+      "hint": "The old collector and reference policy have different roles.",
+      "answer": "Gradients through old probabilities or an unintended baseline optimize another objective and can destroy the interpretation of the ratio estimator."
+    }
+  ],
+  "sources": [
+    ["Proximal Policy Optimization Algorithms", "https://arxiv.org/abs/1707.06347"],
+    ["Generalized Advantage Estimation", "https://arxiv.org/abs/1506.02438"]
+  ]
+}

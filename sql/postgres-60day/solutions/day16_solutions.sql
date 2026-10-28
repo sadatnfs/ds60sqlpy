@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
 -- Assumptions: Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.
@@ -44,6 +45,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Show each employee salary with department average, minimum, and maximum.
@@ -69,6 +71,7 @@ FROM
 ORDER BY
   e.department_id,
   e.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate every order's share of its customer's stored revenue.
@@ -94,6 +97,7 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.
@@ -139,6 +143,7 @@ FROM
   windowed
 ORDER BY
   method;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Return orders above their customer average without placing a window function in `WHERE`.
@@ -174,6 +179,7 @@ ORDER BY
   customer_id,
   total_amount DESC,
   order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Show order count and revenue context at both customer and country levels in the same row.
@@ -203,5 +209,6 @@ ORDER BY
   o.customer_id,
   o.order_date,
   o.order_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

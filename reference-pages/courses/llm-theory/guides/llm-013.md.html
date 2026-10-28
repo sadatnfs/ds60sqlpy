@@ -245,19 +245,19 @@ copied<span class="syntax-operator">=</span>inputs<span class="syntax-operator">
 <ol>
 <li><strong>Construct next-token pairs.</strong> Shift IDs[2,5,7,3] into input and label arrays. <strong>Expected:</strong> inputs[2,5,7],labels[5,7,3]. <strong>Verify:</strong> Save the assertion results for exercise 1, including inputs[2,5,7],labels[5,7,3].</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Expose identity labels.</strong> Compare copied-input labels with the proper shifted targets. <strong>Expected:</strong> all three copied labels differ from the target fixture. <strong>Verify:</strong> Save the assertion results for exercise 2, including all three copied labels differ from the target fixture.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Detect exact duplicates.</strong> Hash texts alpha beta and an identical copy placed in another split. <strong>Expected:</strong> same SHA256 despite different filenames. <strong>Verify:</strong> Save the assertion results for exercise 3, including same SHA256 despite different filenames.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect family leakage.</strong> Assign documentsa andb to familyF across train and validation. <strong>Expected:</strong> family intersection containsF. <strong>Verify:</strong> Save the assertion results for exercise 4, including family intersection containsF.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Freeze a vocabulary.</strong> Fit a vocabulary from training words alpha,beta and encode validation-only gamma without adding it. <strong>Expected:</strong> vocabulary remains alpha,beta; gamma is unknown. <strong>Verify:</strong> Save the assertion results for exercise 5, including vocabulary remains alpha,beta; gamma is unknown.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Count active targets.</strong> Count targets across documents of lengths4 and2 without creating a transition between documents. <strong>Expected:</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">3+1=4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> targets, not5. <strong>Verify:</strong> Save the assertion results for exercise 6, including <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">3+1=4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> targets, not5.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -1,0 +1,203 @@
+# mle-011: explained reference
+
+Publish and resolve a model artifact with an explicit trusted interface.
+
+The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+
+
+## 1. Record feature order
+
+Validate names, order and transformations before inference. A column permutation can change predictions without producing a type error.
+
+**Expected:** A consumer can reconstruct the expected interface.
+
+## 2. Test a byte change
+
+Retain a trusted expected identity and fail clearly on mismatch. Do not merely recompute and overwrite the expected hash.
+
+**Expected:** Integrity verification rejects the changed bytes.
+
+## 3. Reject untrusted loading
+
+Use an appropriate trusted publication mechanism and safe supported model formats. Never load arbitrary remote pickle/joblib content as a convenience.
+
+**Expected:** It does not establish authenticity or safe code.
+
+## 4. Inspect registry resolution
+
+Record the resolved version used for a decision. A mutable label alone is not a complete provenance record.
+
+**Expected:** It matches the intended registered artifact and run.
+
+## 5. Change the feature meaning
+
+Version the feature interface and evaluate a compatible model. Do not silently retarget an old artifact to changed units.
+
+**Expected:** The contract marks the incompatibility.
+
+## 6. Define promotion evidence
+
+Keep the actual acceptance policy and responsible review with the version. The later rollout and service project demonstrate controlled activation separately.
+
+**Expected:** It includes compatibility, quality, operational and rollback evidence.
+
+## Complete reference
+
+```python
+"""mle-011: local, bounded ML engineering investigation."""
+
+import hashlib
+import json
+import os
+import tempfile
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+
+def configure_local_tools():
+    os.environ.update(
+        FEAST_USAGE="False",
+        DO_NOT_TRACK="true",
+        MLFLOW_ENABLE_TELEMETRY="false",
+        MLFLOW_DISABLE_AGENT_HINT="1",
+        DBT_SEND_ANONYMOUS_USAGE_STATS="false",
+    )
+
+
+def digest(data):
+    return hashlib.sha256(
+        json.dumps(data, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+
+
+def dataset():
+    rng = np.random.default_rng(17)
+    n = 120
+    usage = rng.uniform(1, 100, n)
+    tickets = rng.poisson(2, n)
+    region = np.where(np.arange(n) % 2 == 0, "north", "south")
+    logit = 0.9 * tickets - 0.035 * usage + (region == "north") * 0.3
+    probability = 1 / (1 + np.exp(-logit))
+    label = (rng.random(n) < probability).astype(int)
+    cutoff = np.arange(n) + 100
+    return pd.DataFrame(
+        {
+            "id": np.arange(n),
+            "customer_id": np.arange(n) % 12,
+            "cutoff": cutoff,
+            "available_at": cutoff - 2,
+            "label_available_at": cutoff + 4,
+            "usage": usage,
+            "tickets": tickets,
+            "region": region,
+            "label": label,
+        }
+    )
+
+
+def fit_pipeline(frame):
+    from sklearn.compose import ColumnTransformer
+    from sklearn.impute import SimpleImputer
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+    numeric = Pipeline([("impute", SimpleImputer(strategy="median")), ("scale", StandardScaler())])
+    transform = ColumnTransformer(
+        [
+            ("numeric", numeric, ["usage", "tickets"]),
+            ("region", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["region"]),
+        ]
+    )
+    model = Pipeline(
+        [("features", transform), ("classifier", LogisticRegression(max_iter=200, random_state=17))]
+    )
+    model.fit(frame[["usage", "tickets", "region"]], frame["label"])
+    return model
+
+
+def tracker(directory):
+    configure_local_tools()
+    from mlflow.tracking import MlflowClient
+
+    root = Path(directory)
+    root.mkdir(parents=True, exist_ok=True)
+    client = MlflowClient(
+        tracking_uri="sqlite:///" + str(root / "tracking.db"),
+        registry_uri="sqlite:///" + str(root / "tracking.db"),
+    )
+    experiment = client.create_experiment(
+        "local-quality-investigation", artifact_location=(root / "artifacts").as_uri()
+    )
+    return client, experiment
+
+
+def example_one():
+    frame = dataset()
+    train = frame[frame.label_available_at <= 180]
+    model = fit_pipeline(train)
+    import joblib
+
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "trusted-model.joblib"
+        joblib.dump(model, path)
+        expected = hashlib.sha256(path.read_bytes()).hexdigest()
+        contract = {
+            "features": ["usage", "tickets", "region"],
+            "schema_version": 1,
+            "artifact_sha256": expected,
+        }
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == contract["artifact_sha256"]
+        restored = joblib.load(path)
+        sample = frame.iloc[[90]][contract["features"]]
+        assert np.allclose(restored.predict_proba(sample), model.predict_proba(sample))
+        client, experiment = tracker(Path(d) / "tracking")
+        run = client.create_run(experiment)
+        client.log_artifact(run.info.run_id, str(path), "model")
+        client.create_registered_model("customer-model")
+        version = client.create_model_version(
+            "customer-model",
+            source=f"runs:/{run.info.run_id}/model/{path.name}",
+            run_id=run.info.run_id,
+        )
+        client.set_registered_model_alias("customer-model", "candidate", version.version)
+        registered = client.get_model_version_by_alias("customer-model", "candidate")
+        assert registered.version == version.version and registered.run_id == run.info.run_id
+        client.set_terminated(run.info.run_id)
+        return {
+            "own_trusted_artifact_round_trip": True,
+            "contract": contract,
+            "registry_version": registered.version,
+            "registry_linked_run": True,
+        }
+
+
+def example_two():
+    contract = {"features": ["usage", "tickets", "region"], "unit": "hours", "version": 1}
+    incompatible = {**contract, "unit": "minutes", "version": 2}
+    assert digest(contract) != digest(incompatible)
+    payload = b"accepted model"
+    expected = hashlib.sha256(payload).hexdigest()
+    changed = payload + b"changed"
+    assert hashlib.sha256(changed).hexdigest() != expected
+    return {
+        "same_names_do_not_prove_semantic_compatibility": True,
+        "tamper_detected_before_deserialization": True,
+    }
+
+
+def main():
+    print(example_one())
+    print(example_two())
+    print("mle-011 reference checks passed")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## Interpretation
+
+Publish and resolve a model artifact with an explicit trusted interface. Verify real registry linkage and prediction parity while keeping integrity, authenticity and deployment acceptance distinct. Prefer a safe bounded representation at a local demonstration service boundary.

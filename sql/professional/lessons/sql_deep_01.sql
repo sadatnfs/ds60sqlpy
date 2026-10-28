@@ -9,28 +9,36 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep1_values (
   row_id integer PRIMARY KEY,
   value integer
 ) ON COMMIT DROP;
+
 INSERT INTO deep1_values
 VALUES
   (1, 1),
   (2, 2),
   (3, NULL);
+
 CREATE TEMP TABLE deep1_blocklist (
   value integer
 ) ON COMMIT DROP;
+
 INSERT INTO deep1_blocklist
 VALUES
   (2),
   (NULL);
+
 CREATE TEMP TABLE deep1_people (
   person_id integer PRIMARY KEY,
   person_name text NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep1_people
 VALUES
   (1, 'Ada'),
@@ -38,17 +46,21 @@ VALUES
   (3, 'Cy'),
   (4, 'Dee'),
   (5, 'Eli');
+
 CREATE TEMP TABLE deep1_required (
   skill text PRIMARY KEY
 ) ON COMMIT DROP;
+
 INSERT INTO deep1_required
 VALUES
   ('sql'),
   ('python');
+
 CREATE TEMP TABLE deep1_skills (
   person_id integer NOT NULL,
   skill text NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep1_skills
 VALUES
   (1, 'sql'),
@@ -59,6 +71,7 @@ VALUES
   (4, 'sql'),
   (4, 'python'),
   (4, 'rust');
+
 -- Worked example 1
 SELECT
   'ordinary_inequality' AS comparison,
@@ -69,15 +82,17 @@ SELECT
   (NULL::integer IS DISTINCT FROM 2)
 ORDER BY
   comparison;
+
 -- Worked example 2
 SELECT
   'empty_array' AS case_name,
   5 < ANY (ARRAY[]::integer[]) AS any_larger,
   5 < ALL (ARRAY[]::integer[]) AS all_larger;
+
 -- Exercises
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 -- 1. Inspect unknown and NULL-safe comparison side by side
--- Inputs/evidence: For sql-deep-01 Exercise 1, Using deep 1_values, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value<>2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.
+-- Inputs/evidence: For sql-deep-01 Exercise 1, Using `deep1_values`, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value<>2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.
 -- Expected result/shape: For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1,2, NULL respectively. A WHERE filter is not part of this diagnostic.
 -- Verify: For sql-deep-01 Exercise 1, project predicates before filtering and compare all three row IDs. In particular, test NULL with IS NULL instead of equality and confirm the blocklist NULL makes the nonmatch unknown.
 -- 2. Express a known-value anti-join policy
@@ -93,11 +108,11 @@ SELECT
 -- Expected result/shape: For sql-deep-01 Exercise 4, Rows 2 and 3 remain, with values 2 andNULL. The NULL candidate matches the NULL blocklist value under this explicit value-comparison rule.
 -- Verify: For sql-deep-01 Exercise 4, count all input reconciliation rows and inspect the missing-to-known and missing-to-missing cases independently, using IS DISTINCT FROM as a total Boolean comparison.
 -- 5. Find people satisfying every required skill
--- Inputs/evidence: For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in deep 1_required. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.
+-- Inputs/evidence: For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in `deep1_required`. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.
 -- Expected result/shape: For sql-deep-01 Exercise 5, People 1 Ada and 4 Dee pass. Ada has a duplicate sql record, Dee has extra rust, and neither changes the all-requirements result. Ben, Cy, Eli fail.
 -- Verify: For sql-deep-01 Exercise 5, list the required skill set for each returned person row, ignoring duplicate possessions; verify that an extra skill cannot compensate for a missing required skill.
 -- 6. Make empty-requirement policy visible
--- Inputs/evidence: For sql-deep-01 Exercise 6, Inside the temporary fixture, empty deep 1_required and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.
+-- Inputs/evidence: For sql-deep-01 Exercise 6, Inside the temporary fixture, empty `deep1_required` and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.
 -- Expected result/shape: For sql-deep-01 Exercise 6, All five people have all_requirements=true and nonempty_policy=false. The original two required skills must be restored by the exercise savepoint rollback.
 -- Verify: For sql-deep-01 Exercise 6, run the empty-requirement case inside a savepoint; compare the universal-logic population with the explicit nonempty-policy population and restore the fixture afterward.
 ROLLBACK;

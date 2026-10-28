@@ -282,19 +282,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Compare offset spellings of one instant.</strong> Parse UTC midnight and the equivalent previous-day offset representation. <strong>Expected:</strong> equal timestamps and UTC ISO output. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Observe a spring-forward clock gap.</strong> Format two instants one hour apart across the New York spring transition. <strong>Expected:</strong> local hour changes from 01 to 03 while elapsed time is one hour. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject impossible or ambiguous calendar text.</strong> Accept leap-day 2024-02-29 and reject 2023-02-29, slash format and month 13. <strong>Expected:</strong> only the valid strict date is accepted. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Distinguish repeated fall-back clock readings.</strong> Format two instants on either side of the fall transition. <strong>Expected:</strong> both read 01:30 locally but offsets differ and timestamps are one hour apart. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Inspect locale number parts without parsing display text.</strong> Format 1234.5 in US English and German and inspect their decimal separators. <strong>Expected:</strong> decimal dot versus comma; numeric value remains unchanged. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid timestamp and timezone assumptions.</strong> Inspect Invalid Date and request a nonexistent timezone. <strong>Expected:</strong> NaN timestamp; toISOString and invalid timezone construction throw RangeError. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

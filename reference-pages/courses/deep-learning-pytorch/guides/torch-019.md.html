@@ -280,19 +280,19 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <ol>
 <li><strong>Compute the fixed spatial filter.</strong> Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout. <strong>Expected:</strong> output shape 1, 1, 2, 2; all values-4. <strong>Verify:</strong> Save the assertion results for exercise 1, including output shape 1, 1, 2, 2; all values-4.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Rotate the kernel explicitly.</strong> Flip both kernel spatial axes and repeat. <strong>Expected:</strong> all outputs+4. <strong>Verify:</strong> Save the assertion results for exercise 2, including all outputs+4.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Translate image layout.</strong> Convert NCHW to NHWC with permute and back. <strong>Expected:</strong> exact round trip; NHWC shape 1, 3, 3, 1. <strong>Verify:</strong> Save the assertion results for exercise 3, including exact round trip; NHWC shape 1, 3, 3, 1.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect stride output size.</strong> Repeat with stride 2 and padding 0. <strong>Expected:</strong> output shape 1, 1, 1, 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including output shape 1, 1, 1, 1.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Trace one pixel influence.</strong> Add 10 to the top-left pixel and compare output delta. <strong>Expected:</strong> only top-left output increases 10. <strong>Verify:</strong> Save the assertion results for exercise 5, including only top-left output increases 10.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Count shared parameters.</strong> Build a1-input-channel, 2-output-channel, 2x2bias-free Conv2d. <strong>Expected:</strong> 8trainable scalars. <strong>Verify:</strong> Save the assertion results for exercise 6, including 8trainable scalars.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

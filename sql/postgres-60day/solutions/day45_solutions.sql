@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Baseline: correlated item aggregation for each recent order.
 EXPLAIN (
   ANALYZE,
@@ -34,9 +35,12 @@ WHERE
   o.order_date >= CURRENT_TIMESTAMP - interval '180 days'
 GROUP BY
   c.country;
+
 -- Candidate indexes. They are course-owned and rolled back with the solution.
 CREATE INDEX idx_orders_recent_customer_solution ON orders (order_date, customer_id, order_id);
+
 CREATE INDEX idx_order_items_order_quantity_solution ON order_items (order_id) INCLUDE (quantity);
+
 -- Optimized set-based answer with a sargable date predicate.
 EXPLAIN (
   ANALYZE,
@@ -69,6 +73,7 @@ GROUP BY
   c.country
 ORDER BY
   units DESC;
+
 -- The lesson's 70% target is a measurement goal, not a guaranteed result on
 -- the compact seed. Compare Execution Time and buffer counts in both plans.
 -- Exercise 1: the original date_trunc(column) expression hides the raw search
@@ -84,6 +89,7 @@ FROM
 WHERE
   order_date >= date_trunc('day', CURRENT_TIMESTAMP) - interval '180 days'
   AND order_date < date_trunc('day', CURRENT_TIMESTAMP) + interval '1 day';
+
 -- Exercise 2: JSON keeps node, row, time, and buffer evidence structured.
 EXPLAIN (
   ANALYZE,
@@ -99,6 +105,7 @@ WHERE
   order_date >= CURRENT_TIMESTAMP - interval '180 days'
 GROUP BY
   customer_id;
+
 -- Exercise 3: build both equivalent results once, then compare each direction.
 WITH direct AS (
   SELECT
@@ -162,6 +169,7 @@ FROM (
     *
   FROM
     direct) p;
+
 -- Exercise 4: both shapes must produce zero rows for an impossible old window.
 SELECT
   COUNT(*) AS impossible_window_rows
@@ -170,6 +178,7 @@ FROM
 WHERE
   order_date >= timestamptz '1900-01-01 00:00:00+00'
   AND order_date < timestamptz '1900-01-02 00:00:00+00';
+
 -- Exercise 5: the existing (order_date, customer_id, order_id) candidate serves
 -- date-bounded customer work but adds storage and write maintenance.
 SELECT
@@ -182,6 +191,7 @@ WHERE
   AND indexname LIKE '%solution'
 ORDER BY
   indexname;
+
 -- Exercise 6: the executable evidence above supports a report with separate
 -- correctness, plan, timing, and operational-cost sections. No timing result
 -- from this compact seed is a universal performance promise.

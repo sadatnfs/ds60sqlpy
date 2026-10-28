@@ -5,7 +5,9 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `sql/`.
 ## Dialect and environment
 
 - Target PostgreSQL 16 or newer.
-- Canonical automation uses PostgreSQL 17.
+- Canonical automation uses PostgreSQL 17. The `sql-write-01` and
+  `sql-json-01` extensions explicitly require PostgreSQL 17 or newer and check
+  the server version before using version-specific syntax.
 - Run against the disposable `advanced_sql_training` database.
 - Use the `training` schema unless a lesson explicitly creates another disposable schema.
 - Execute files with `psql -X -v ON_ERROR_STOP=1`.

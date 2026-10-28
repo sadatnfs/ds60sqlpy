@@ -312,19 +312,19 @@ inputs<span class="syntax-punctuation">,</span>labels<span class="syntax-operato
 <ol>
 <li><strong>Align an answer-only record.</strong> Use prompt IDs[1, 2] and answer IDs[5, 6, 3]. <strong>Expected:</strong> inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. <strong>Verify:</strong> Save the assertion results for exercise 1, including inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Preserve prompt context without prompt loss.</strong> Change prompt IDs to[8, 9] while retaining the answer; inspect labels. <strong>Expected:</strong> prompt inputs change; answer labels remain 5, 6, 3. <strong>Verify:</strong> Save the assertion results for exercise 2, including prompt inputs change; answer labels remain 5, 6, 3.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject an empty answer.</strong> Prepare a record with prompt[1, 2] and no answer tokens. <strong>Expected:</strong> ValueError for no answer targets. <strong>Verify:</strong> Save the assertion results for exercise 3, including ValueError for no answer targets.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect destructive truncation.</strong> Use a context limit 2 for a prompt of length 2 and answer length 3. <strong>Expected:</strong> ValueError because truncation removes every answer target. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError because truncation removes every answer target.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Keep family splits disjoint.</strong> Assign two formatting variants tofamilyF and test that they cannot cross train/test. <strong>Expected:</strong> family intersectionF is a leak. <strong>Verify:</strong> Save the assertion results for exercise 5, including family intersectionF is a leak.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject unsupported targets before training.</strong> Mark a target answer as unsupported by its cited source and apply an admission gate. <strong>Expected:</strong> record excluded despite valid token arrays. <strong>Verify:</strong> Save the assertion results for exercise 6, including record excluded despite valid token arrays.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

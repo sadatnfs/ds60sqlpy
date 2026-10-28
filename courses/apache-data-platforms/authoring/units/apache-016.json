@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 60,
+  "prerequisites": ["apache-015"],
+  "concepts": ["logical plan", "predicate pushdown", "HAVING"],
+  "evidence": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums.",
+  "sources": [
+    ["DataFusion EXPLAIN", "https://datafusion.apache.org/user-guide/sql/explain.html"],
+    [
+      "DataFusion query engine architecture",
+      "https://datafusion.apache.org/library-user-guide/query-optimizer.html"
+    ]
+  ]
+}

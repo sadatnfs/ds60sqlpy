@@ -109,6 +109,9 @@ elif a[:1]==['info']:
 elif a[:2]==['image','tag']:
  assert a[-1] not in c.get('built_images',[]),'must not overwrite a prepared tag'
  c.setdefault('built_images',[]).append(a[-1]);save()
+elif a[:2]==['image','pull']:
+ if c.get('fail')=='pull':sys.exit(7)
+ c.setdefault('built_images',[]).append(a[-1]);save()
 elif a[:2]==['image','push']:
  if c.get('fail')=='push':sys.exit(7)
 elif a[:2]==['image','inspect']:
@@ -118,8 +121,12 @@ elif a[:2]==['image','inspect']:
  absent=(missing is True or isinstance(missing,list) and a[-1] in missing)
  if '--format' in a:
   if '{{.Os}}' in a[a.index('--format')+1]:
-   platform=c.get('image_platforms',{}).get(a[-1],c.get('image_platform','linux amd64'))
+   engine_arch=c.get('architecture','amd64')
+   normalized_arch={'aarch64':'arm64','x86_64':'amd64'}.get(engine_arch,engine_arch)
+   platform=c.get('image_platforms',{}).get(a[-1],c.get('image_platform','linux '+normalized_arch))
    print(platform+' '+c.get('tag_image_id','sha256:'+'d'*64))
+  elif 'org.opencontainers.image.version' in a[a.index('--format')+1]:
+   print(c.get('latest_release',version))
   else:print(c.get('tag_image_id','sha256:'+'d'*64))
  sys.exit(1 if absent and a[-1] not in c.get('built_images',[]) else 0)
 elif a[:1]==['inspect']:
@@ -242,7 +249,10 @@ elif 'exec' in a and c.get('fail')=='http':sys.exit(7)
                 env=self.env,
                 text=True,
                 capture_output=True,
-                timeout=20,
+                # The all-profile harness starts many separate fake Docker Python
+                # processes. Keep its ceiling independent of production readiness
+                # deadlines and allow parallel CI/compiler load as the catalog grows.
+                timeout=60,
                 **options,
             )
 
@@ -1080,7 +1090,13 @@ def test_hub_missing_images_pull_matching_architecture_without_any_build(
 ) -> None:
     launcher.set(missing_images=True, architecture=architecture)
     result = launcher.run(
-        "--starter", "--from-hub", "exampleuser", "--tag", "0.4.1", "--no-browser"
+        "--starter",
+        "--from-hub",
+        "exampleuser",
+        "--architecture-tags",
+        "--tag",
+        "0.4.1",
+        "--no-browser",
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = launcher.calls()
@@ -1097,6 +1113,7 @@ def test_hub_missing_images_pull_matching_architecture_without_any_build(
     assert (
         state.read_text()
         == "DS60_IMAGE_SOURCE=hub\nDS60_IMAGE_NAMESPACE=exampleuser\nDS60_IMAGE_TAG=0.4.1\n"
+        "DS60_IMAGE_LAYOUT=architecture\n"
     )
 
 
@@ -1321,7 +1338,8 @@ def test_gpu_selection_is_saved_and_restored_for_strict_resume(launcher: Any) ->
 def test_gpu_workers_refuse_unsupported_engine_architecture_without_building(launcher: Any) -> None:
     launcher.set(architecture="arm64")
     result = launcher.run("--profile", "cuda-python", "--gpu-device", "0", "--no-browser")
-    assert result.returncode != 0 and "Apple GPUs are not CUDA devices" in result.stderr
+    assert result.returncode != 0 and "currently target Linux amd64" in result.stderr
+    assert "CPU-model lessons" in result.stderr
     assert not any("build" in call["args"] or "up" in call["args"] for call in launcher.calls())
 
 
@@ -1437,3 +1455,218 @@ def test_hub_missing_app_tag_and_changed_port_recover_local_image_without_downlo
     assert not any("build" in command or "pull" in command for command in commands)
     replacements = [command for command in commands if "--force-recreate" in command]
     assert len(replacements) == 1 and replacements[0][-1] == "lab"
+
+
+@pytest.mark.parametrize("architecture", ["amd64", "arm64"])
+def test_hub_all_profiles_prepares_complete_catalog_without_local_builds(
+    launcher: Any, architecture: str
+) -> None:
+    launcher.set(missing_images=True, architecture=architecture)
+    result = launcher.run(
+        "--all", "--from-hub", "exampleuser", "--tag", RELEASE_VERSION, "--no-browser"
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = launcher.calls()
+    assert not built_services(calls)
+    pulls = [call for call in calls if "pull" in call["args"] and "up" not in call["args"]]
+    assert [call["args"][-1] for call in pulls] == [
+        "postgres",
+        "lab",
+        *[service for _, service in ORDINARY_PROFILE_SERVICES],
+    ]
+    for profile, service, _repository, suffix, variable, kind in IMAGE_ROWS:
+        if kind not in {"app", "ordinary"}:
+            continue
+        expected = (
+            f"exampleuser/ds60sqlpy:{RELEASE_VERSION}"
+            if profile == "app"
+            else f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-{suffix}"
+        )
+        assert all(call["image_env"][variable] == expected for call in pulls)
+        assert any(call["args"][-1] == service for call in pulls)
+    assert not any(
+        any(action in call["args"] for action in ("push", "login", "prune", "--volumes"))
+        for call in calls
+    )
+
+
+@pytest.mark.parametrize("action", ["up", "pull", "resume"])
+@pytest.mark.parametrize("platform", ["linux amd64", "windows arm64"])
+def test_hub_new_containers_reject_wrongly_tagged_platform_without_starting(
+    launcher: Any, action: str, platform: str
+) -> None:
+    reference = f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-worker-python-core"
+    launcher.set(architecture="arm64", image_platforms={reference: platform})
+    result = launcher.run(
+        action,
+        "--starter",
+        "--from-hub",
+        "exampleuser",
+        "--tag",
+        RELEASE_VERSION,
+        "--no-browser",
+    )
+    assert result.returncode != 0, result.stdout + result.stderr
+    assert "does not match Linux/arm64" in result.stderr
+    assert not built_services(launcher.calls())
+    assert not any(
+        any(
+            operation in call["args"] for operation in ("up", "start", "down", "prune", "--volumes")
+        )
+        for call in launcher.calls()
+    )
+    state = launcher.directory / ".classroom/ds60-classroom/images.env"
+    assert "DS60_IMAGE_SOURCE=hub" in state.read_text()
+    assert not (state.parent / "launcher.lock").exists()
+
+
+def test_hub_resume_keeps_existing_containers_when_a_new_tag_has_another_platform(
+    launcher: Any,
+) -> None:
+    launcher.set(architecture="arm64")
+    assert (
+        launcher.run(
+            "--starter", "--from-hub", "exampleuser", "--tag", RELEASE_VERSION, "--no-browser"
+        ).returncode
+        == 0
+    )
+    original = json.loads(launcher.config.read_text())["containers"].copy()
+    before = len(launcher.calls())
+    state = json.loads(launcher.config.read_text())
+    state["image_platform"] = "windows amd64"
+    launcher.set(**state)
+    result = launcher.run("resume", "--no-browser")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert json.loads(launcher.config.read_text())["containers"] == original
+    assert not any(
+        any(action in call["args"] for action in ("pull", "build", "up", "prune", "--volumes"))
+        for call in launcher.calls()[before:]
+    )
+
+
+@pytest.mark.parametrize("architecture", ["amd64", "arm64"])
+def test_latest_resolves_once_then_pins_all_services_and_resume(
+    launcher: Any, architecture: str
+) -> None:
+    launcher.set(missing_images=True, architecture=architecture)
+    result = launcher.run(
+        "--starter", "--from-hub", "exampleuser", "--tag", "latest", "--no-browser"
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = launcher.calls()
+    assert calls and not built_services(calls)
+    latest_pulls = [call for call in calls if call["args"][:2] == ["image", "pull"]]
+    assert len(latest_pulls) == 1
+    assert latest_pulls[0]["args"][-1] == "exampleuser/ds60sqlpy:latest"
+    service_pulls = [
+        call
+        for call in calls
+        if call["args"][0] == "compose" and "pull" in call["args"] and "up" not in call["args"]
+    ]
+    assert {call["args"][-1] for call in service_pulls} == {"postgres", "lab", "python-core-worker"}
+    assert all(
+        call["image_env"]["DS60_LAB_IMAGE"] == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}"
+        and call["image_env"]["DS60_WORKER_PYTHON_CORE_IMAGE"]
+        == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-worker-python-core"
+        for call in service_pulls
+    )
+    saved = launcher.directory / ".classroom/ds60-classroom/images.env"
+    assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in saved.read_text()
+    assert "DS60_IMAGE_LAYOUT=manifest\n" in saved.read_text()
+    before = len(calls)
+    containers = json.loads(launcher.config.read_text())["containers"].copy()
+    state = json.loads(launcher.config.read_text())
+    state["latest_release"] = "99.0.0"
+    launcher.set(**state)
+    resumed = launcher.run("resume", "--no-browser")
+    assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+    assert json.loads(launcher.config.read_text())["containers"] == containers
+    assert not any(
+        any(action in call["args"] for action in ("pull", "build", "up", "push", "login"))
+        for call in launcher.calls()[before:]
+    )
+
+
+def test_latest_strict_resume_never_fetches_an_uncached_pointer(launcher: Any) -> None:
+    launcher.set(missing_images=True)
+    result = launcher.run(
+        "resume", "--starter", "--from-hub", "exampleuser", "--tag", "latest", "--no-browser"
+    )
+    assert result.returncode != 0 and "latest is not cached locally" in result.stderr
+    assert not any(
+        any(action in call["args"] for action in ("pull", "build", "up", "start"))
+        for call in launcher.calls()
+    )
+
+
+@pytest.mark.parametrize("release", ["", "<no value>", "99.0.0", "1.0.0$(touch bad)"])
+def test_latest_invalid_or_mismatched_label_preserves_saved_selection(
+    launcher: Any, release: str
+) -> None:
+    saved = _image_state(launcher, "local", "", RELEASE_VERSION)
+    before = saved.read_bytes()
+    launcher.set(latest_release=release)
+    result = launcher.run(
+        "--starter", "--from-hub", "exampleuser", "--tag", "latest", "--rebuild", "--no-browser"
+    )
+    assert result.returncode != 0
+    assert saved.read_bytes() == before
+    assert not (saved.parent / "launcher.lock").exists()
+    assert not any(
+        any(
+            action in call["args"]
+            for action in ("build", "up", "start", "down", "prune", "--volumes")
+        )
+        for call in launcher.calls()
+    )
+    assert not (launcher.directory / "bad").exists()
+
+
+def test_latest_doctor_does_not_resolve_or_download(launcher: Any) -> None:
+    launcher.set(missing_images=True)
+    result = launcher.run("doctor", "--from-hub", "exampleuser", "--tag", "latest")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert not any("pull" in call["args"] or "build" in call["args"] for call in launcher.calls())
+    assert not (launcher.directory / ".classroom").exists()
+
+
+def test_interrupted_first_latest_pull_remembers_hub_and_starter_selection(launcher: Any) -> None:
+    launcher.set(missing_images=True, fail="pull")
+    failed = launcher.run(
+        "--starter", "--from-hub", "exampleuser", "--tag", "latest", "--no-browser"
+    )
+    assert failed.returncode != 0
+    state = launcher.directory / ".classroom/ds60-classroom"
+    assert "DS60_IMAGE_SOURCE=hub\n" in (state / "images.env").read_text()
+    assert "DS60_IMAGE_TAG=latest\n" in (state / "images.env").read_text()
+    assert "DS60_PROFILES=python-core\n" in (state / "selection.env").read_text()
+    assert not (state / "launcher.lock").exists()
+    previous = json.loads(launcher.config.read_text())
+    previous["fail"] = ""
+    launcher.set(**previous)
+    before = len(launcher.calls())
+    retried = launcher.run("--no-browser")
+    assert retried.returncode == 0, retried.stdout + retried.stderr
+    calls = launcher.calls()[before:]
+    assert not built_services(calls)
+    assert not any("java-worker" in call["args"] for call in calls)
+    assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in (state / "images.env").read_text()
+
+
+@pytest.mark.parametrize("profile", ["cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"])
+@pytest.mark.parametrize("action", ["up", "resume", "build", "pull"])
+def test_arm_never_prepares_or_starts_unsupported_cuda_images(
+    launcher: Any, profile: str, action: str
+) -> None:
+    launcher.set(architecture="arm64", missing_images=True)
+    options = [action, "--profile", profile, "--no-browser"]
+    if action == "pull":
+        options += ["--from-hub", "exampleuser", "--tag", RELEASE_VERSION]
+    result = launcher.run(*options)
+    assert result.returncode != 0, result.stdout + result.stderr
+    assert "On ARM" in result.stderr and "CPU-model lessons" in result.stderr
+    assert not any(
+        any(operation in call["args"] for operation in ("build", "pull", "up", "start"))
+        for call in launcher.calls()
+    )
+    assert not (launcher.directory / ".classroom").exists()

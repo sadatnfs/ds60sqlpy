@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "mle-009",
+      "kind": "plotly",
+      "count": 2,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "mle-018",
+      "kind": "json",
+      "count": 2,
+      "description_required": true
+    }
+  ]
+}

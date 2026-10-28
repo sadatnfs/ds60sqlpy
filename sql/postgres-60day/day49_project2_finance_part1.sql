@@ -1,11 +1,11 @@
 -- Day 49: Project 2 - Financial/Operational Analysis (Part 1)
--- BEGINNER WORKFLOW — sql-49: Project2 Finance Part1
+-- BEGINNER WORKFLOW - sql-49: Project 2 Finance Part 1
 -- Guide: sql/postgres-60day/companion-guides/day49_project2_finance_part1.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-49/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-49.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Revenue forecasting with time-series patterns
 BEGIN;
 SET search_path TO training, public;
+
 -- Monthly revenue
 WITH monthly AS (
   SELECT
@@ -36,6 +37,7 @@ FROM
 ORDER BY
   month DESC
 LIMIT 24;
+
 -- YoY growth per month
 WITH monthly AS (
   SELECT
@@ -56,6 +58,7 @@ FROM
 ORDER BY
   m.month DESC
 LIMIT 36;
+
 -- Naive seasonal forecast: use last year's month as forecast
 WITH monthly AS (
   SELECT
@@ -79,6 +82,7 @@ FROM
   LEFT JOIN monthly m_prev ON m_prev.month = (f.month - interval '12 months')::date
 ORDER BY
   f.month;
+
 -- MA(3) forecast: average of last 3 months revenue
 WITH monthly AS (
   SELECT
@@ -104,6 +108,7 @@ FROM
 ORDER BY
   month DESC
 LIMIT 6;
+
 -- Exercises
 -- 1. Build MA(6) and MA(12) and compare MAPEs vs seasonal naive.
 --    Inputs: For sql-49 Exercise 1, aggregate `orders` by observed month, left-join to `month_spine`, compute full-window history counts, and reshape four forecasts over `common_scoring_rows`.

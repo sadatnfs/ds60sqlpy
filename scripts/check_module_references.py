@@ -29,6 +29,7 @@ from ds60sqlpy.gpu_runtime import GPU_PROFILES  # noqa: E402
 from ds60sqlpy.modules import LANGUAGES, MAX_SOURCE_BYTES, ModuleCatalog, ModuleLesson  # noqa: E402
 from scripts.check_classroom_profiles import TERMINAL, ClassroomClient  # noqa: E402
 from scripts.check_scientific_artifacts import verify_figures  # noqa: E402
+from scripts.declared_outputs import load_contracts, verify_contract  # noqa: E402
 
 ORDINARY_PROFILES = (
     frozenset(LANGUAGES)
@@ -67,6 +68,7 @@ class ReferenceCase:
     verification_id: str | None
     source_path: str
     source: str
+    output_contract: dict[str, Any] | None = None
 
     @property
     def source_sha256(self) -> str:
@@ -81,6 +83,7 @@ class ReferenceCase:
             "learning_mode": self.learning_mode,
             "verification_id": self.verification_id,
             "source_path": self.source_path,
+            "expected_outputs": self.output_contract,
             "source_sha256": self.source_sha256,
         }
 
@@ -98,6 +101,15 @@ def reference_case(catalog: ModuleCatalog, lesson: ModuleLesson) -> ReferenceCas
     source = catalog.content_path(source_path, MAX_SOURCE_BYTES).read_text(encoding="utf-8")
     if not source.strip() or len(source.encode("utf-8")) > MAX_SOURCE_BYTES:
         raise ValueError(f"{lesson.id} has an empty or oversized executable reference.")
+    identities = {key for key, unit in catalog.lessons.items() if unit.track_id == lesson.track_id}
+    contract = load_contracts(catalog.root, lesson.track_id, identities).get(lesson.id)
+    if contract is None and lesson.runtime_profile in {"stan-cpu", "dbt-duckdb"}:
+        contract = {
+            "kinds": ["table", "plotly"]
+            if lesson.runtime_profile == "stan-cpu"
+            else ["table", "json"],
+            "description_required": True,
+        }
     return ReferenceCase(
         lesson.id,
         lesson.track_id,
@@ -107,6 +119,7 @@ def reference_case(catalog: ModuleCatalog, lesson: ModuleLesson) -> ReferenceCas
         lesson.verification_id,
         source_path,
         source,
+        contract,
     )
 
 
@@ -173,6 +186,7 @@ def verify_result(case: ReferenceCase, job_id: str, job: dict[str, Any]) -> None
     ):
         raise ValueError(f"{case.lesson_id} did not produce a successful source-bound receipt.")
     verify_figures(case.lesson_id, case.source, job.get("artifacts"))
+    verify_contract(case.output_contract, job.get("artifacts"))
 
 
 def wait_for_job(client: Client, job_id: str, deadline: float) -> dict[str, Any]:

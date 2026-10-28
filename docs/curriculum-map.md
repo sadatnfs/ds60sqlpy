@@ -189,3 +189,12 @@ prerequisites, including beginner practice, instead of forcing every learner
 through every specialization. The generated catalog now includes 77 Python,
 78 PostgreSQL, and 13 bridge lessons. Historical IDs and saved progress remain
 stable.
+
+## Scientific and applied-system subjects
+
+The legacy sequence above is one entry route. [The scientist roadmap](scientist-roadmap.md)
+connects its existing foundations to R, JAX, DAX, Julia, Polars, real dbt,
+Applied Science, Bayesian Computing, ML engineering and LLM evaluation.
+Track manifests remain the authority for canonical lessons, variants, mode and
+runtime. Additive tutorial subjects use complete worked answers and do not inherit
+the practice exercise/readiness sequence as a mandatory gate.

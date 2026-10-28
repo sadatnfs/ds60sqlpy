@@ -309,19 +309,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Read a small UTF-8 file.</strong> Write one line containing an emoji, then compare text length and byte length. <strong>Expected:</strong> text round-trips; UTF-8 byte length exceeds code-unit length. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Preserve characters and lines across chunks.</strong> Stream two lines with a two-byte highWaterMark and decode using readline. <strong>Expected:</strong> lines are A😀B and second, without a corrupt replacement character. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Refuse accidental overwrite.</strong> Create a file exclusively twice and inspect its unchanged content. <strong>Expected:</strong> second creation rejects with EEXIST; original first remains. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Distinguish a missing file.</strong> Read a path known not to exist in the fresh directory. <strong>Expected:</strong> ENOENT rejection. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Restrict a learner-supplied fixture name.</strong> Accept report.txt but reject traversal, separators and an absolute path. <strong>Expected:</strong> only report.txt is accepted. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Handle an empty text stream.</strong> Stream an empty file with the same decoder and line interface. <strong>Expected:</strong> no lines. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

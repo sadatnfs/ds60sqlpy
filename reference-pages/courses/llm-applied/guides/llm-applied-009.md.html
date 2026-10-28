@@ -287,19 +287,19 @@ private_key<span class="syntax-operator">=</span>cache_key<span class="syntax-pu
 <ol>
 <li><strong>Filter before scoring.</strong> Give a public-only request the six-document corpus and inspect admitted IDs. <strong>Expected:</strong> private-v1 absent before ranking. <strong>Verify:</strong> Save the assertion results for exercise 1, including private-v1 absent before ranking.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Permit an explicitly privileged scope.</strong> Use allowed scopes public, restricted and compare the admitted set. <strong>Expected:</strong> all 6 documents admitted. <strong>Verify:</strong> Save the assertion results for exercise 2, including all 6 documents admitted.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Partition answer caches.</strong> Build cache keys for the same question under public-only and privileged scope sets. <strong>Expected:</strong> keys differ. <strong>Verify:</strong> Save the assertion results for exercise 3, including keys differ.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Invalidate on corpus change.</strong> Change corpus-v1 tocorpus-v2 under the same access policy. <strong>Expected:</strong> cache key changes. <strong>Verify:</strong> Save the assertion results for exercise 4, including cache key changes.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Keep hostile evidence inert.</strong> Inspectattack-v1 while retaining a public-only policy. <strong>Expected:</strong> scope set remains exactly public; private-v1 still excluded. <strong>Verify:</strong> Save the assertion results for exercise 5, including scope set remains exactly public; private-v1 still excluded.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Avoid restricted identifiers in public traces.</strong> Create a trace from admitted result IDs only and check it contains no restricted ID. <strong>Expected:</strong> trace contains only public document IDs. <strong>Verify:</strong> Save the assertion results for exercise 6, including trace contains only public document IDs.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

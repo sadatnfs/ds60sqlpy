@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day12_oop_dataclasses.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day12_oop_dataclasses.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -508,13 +508,13 @@ first<span class="syntax-operator">.</span>quantity <span class="syntax-operator
 <ol>
 <li>Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code>__post_init__</code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</li>
 <li><strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</li>
 <li><strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code>__post_init__</code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</li>
@@ -675,13 +675,13 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code>__post_init__</code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</li>
 <li><strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</li>
 <li><strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code>__post_init__</code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</li>

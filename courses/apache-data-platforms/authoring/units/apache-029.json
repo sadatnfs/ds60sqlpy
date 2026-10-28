@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-027", "apache-028"],
+  "concepts": ["catchup", "historical intervals", "targeted correction", "reprocessing identity"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Airflow Dag Run and catchup",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/core-concepts/dag-run.html"
+    ],
+    [
+      "Airflow backfill",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/core-concepts/backfill.html"
+    ]
+  ]
+}

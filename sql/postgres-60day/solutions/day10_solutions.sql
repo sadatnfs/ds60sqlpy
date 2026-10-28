@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.
 -- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.
@@ -37,10 +38,12 @@ SET search_path TO training, public;
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_1;
+
 CREATE TEMP TABLE exercise_category_revenue (
   category text PRIMARY KEY,
   revenue numeric NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO exercise_category_revenue (category, revenue)
 SELECT
   p.category,
@@ -50,6 +53,7 @@ FROM
   JOIN products AS p ON p.product_id = oi.product_id
 GROUP BY
   p.category;
+
 SELECT
   category,
   ROUND(revenue, 2) AS revenue
@@ -58,6 +62,7 @@ FROM
 ORDER BY
   revenue DESC,
   category;
+
 ROLLBACK TO SAVEPOINT exercise_1;
 
 -- ---------------------------------------------------------------------------

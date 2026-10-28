@@ -251,19 +251,19 @@ variable<span class="syntax-operator">=</span>layer<span class="syntax-operator"
 <ol>
 <li><strong>Create an identity residual.</strong> Call a width2 residual with zero kernel on[[1,2],[3,4]]. <strong>Expected:</strong> output equals input; one tracked kernel. <strong>Verify:</strong> Save the assertion results for exercise 1, including output equals input; one tracked kernel.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reuse the state.</strong> Call the layer on another batch of the same width and compare variable object identity. <strong>Expected:</strong> same variable object and variable count1. <strong>Verify:</strong> Save the assertion results for exercise 2, including same variable object and variable count1.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Assign a known transform.</strong> Set the kernel to identity and inspect the residual output. <strong>Expected:</strong> output2<em>x. <strong>Verify:</strong> Save the assertion results for exercise 3, including output2</em>x.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject an incompatible width.</strong> Call the built width2 layer with a width3 input. <strong>Expected:</strong> ValueError naming feature width. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError naming feature width.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Check branch gradients.</strong> Differentiate the sum of output entries with respect to the kernel. <strong>Expected:</strong> gradient matrix[[4,4],[6,6]]. <strong>Verify:</strong> Save the assertion results for exercise 5, including gradient matrix[[4,4],[6,6]].</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Count parameters by width.</strong> Build a separate width3 layer and count its square kernel entries. <strong>Expected:</strong> 9 parameters; width2 layer remains4. <strong>Verify:</strong> Save the assertion results for exercise 6, including 9 parameters; width2 layer remains4.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

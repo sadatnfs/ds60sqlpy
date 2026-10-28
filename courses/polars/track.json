@@ -1,0 +1,394 @@
+{
+  "schema_version": 1,
+  "id": "polars",
+  "title": "Polars: columnar data engineering",
+  "summary": "A complete route through typed tables, expression semantics, temporal correctness, lazy execution, Arrow interoperability, measured performance and validated data publication.",
+  "lessons": [
+    {
+      "id": "polars-001",
+      "title": "Rows, columns, schemas and expressions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "python-03"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "DataFrame",
+        "Series",
+        "schema",
+        "expression",
+        "row grain"
+      ],
+      "outcome": "Construct and verify a typed table with a stated row grain.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-001 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-002",
+      "title": "Expression contexts and explicit dependencies",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-001"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "select",
+        "with_columns",
+        "alias",
+        "literal",
+        "dependency ordering"
+      ],
+      "outcome": "Build a transformation whose dependency stages are explicit.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-002 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-003",
+      "title": "Types, parsing failures and exact numeric values",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-001",
+        "polars-002"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "strict casts",
+        "quarantine",
+        "integer bounds",
+        "Decimal",
+        "missingness"
+      ],
+      "outcome": "Implement a parsing policy that preserves rejected evidence.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-003 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-004",
+      "title": "Null, NaN and three-valued logic",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-001",
+        "polars-003"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "null",
+        "NaN",
+        "boolean logic",
+        "filter policy",
+        "imputation"
+      ],
+      "outcome": "Explain how missingness changes a specific calculation.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-004 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-005",
+      "title": "Aggregation grain and weighted quantities",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-002",
+        "polars-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "group_by",
+        "denominator",
+        "weighted rates",
+        "row count",
+        "observed count"
+      ],
+      "outcome": "Build an aggregate whose numerator, denominator and weighting unit are explicit.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-005 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-006",
+      "title": "Joins, cardinality and reconciliation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-003",
+        "polars-004",
+        "polars-005"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "join",
+        "cardinality",
+        "fanout",
+        "semi join",
+        "anti join"
+      ],
+      "outcome": "Enrich a fact table while proving its grain and totals remain valid.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-006 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-007",
+      "title": "Time zones, elapsed time and interval boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-003",
+        "polars-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "timezone",
+        "UTC",
+        "wall clock",
+        "half-open intervals",
+        "event time"
+      ],
+      "outcome": "Define time semantics before aggregating a dataset.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-007 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-008",
+      "title": "Reshaping while preserving identity",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-001",
+        "polars-003",
+        "polars-005"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "unpivot",
+        "pivot",
+        "cell uniqueness",
+        "aggregation",
+        "reconciliation"
+      ],
+      "outcome": "Reshape a repeated-measurement dataset with a checked compound key.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-008 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-009",
+      "title": "Ordered windows and row-preserving statistics",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-002",
+        "polars-005",
+        "polars-007"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "window",
+        "over",
+        "lag",
+        "cumulative sum",
+        "ordering"
+      ],
+      "outcome": "Create row-preserving historical features with explicit ordering.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-009 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-010",
+      "title": "Lazy plans and optimizer reasoning",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-002",
+        "polars-005",
+        "polars-006"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "LazyFrame",
+        "logical plan",
+        "predicate pushdown",
+        "projection",
+        "equivalence"
+      ],
+      "outcome": "Explain a lazy query in terms of its requested result and observable execution plan.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-010 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-011",
+      "title": "Files, schema boundaries and columnar artifacts",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-003",
+        "polars-010"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "CSV",
+        "Parquet",
+        "scan",
+        "sink",
+        "schema",
+        "quarantine"
+      ],
+      "outcome": "Publish a small typed artifact with independently checked readback.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-011 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-012",
+      "title": "Arrow interoperability and categorical meaning",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-003",
+        "polars-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Arrow",
+        "validity bitmap",
+        "Enum",
+        "category order",
+        "round trip"
+      ],
+      "outcome": "Move a typed table across an Arrow boundary while preserving its logical contract.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-012 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-013",
+      "title": "Nested data, lists and structs",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-002",
+        "polars-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "list",
+        "struct",
+        "explode",
+        "nested expression",
+        "grain"
+      ],
+      "outcome": "Normalize nested events with an explicit population and identity contract.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-013 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-014",
+      "title": "As-of joins and knowledge available at prediction time",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-006",
+        "polars-007",
+        "polars-009"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "asof join",
+        "backward match",
+        "tolerance",
+        "availability time",
+        "leakage"
+      ],
+      "outcome": "Reconstruct features using only information eligible at each prediction time.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-014 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-015",
+      "title": "Streaming execution and bounded output",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-010",
+        "polars-011"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "streaming",
+        "in-memory engine",
+        "sink",
+        "stateful operator",
+        "resource budget"
+      ],
+      "outcome": "Evaluate a query under an explicit engine and resource contract.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-015 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-016",
+      "title": "Native expressions and the boundary of Python UDFs",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-002",
+        "polars-010",
+        "polars-015"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "UDF",
+        "purity",
+        "return dtype",
+        "batch equivalence",
+        "optimizer contract"
+      ],
+      "outcome": "Use a Python UDF only with an explicit value, type and batching contract.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-016 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-017",
+      "title": "Performance measurements with correctness controls",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-010",
+        "polars-015",
+        "polars-016"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "benchmark",
+        "cache regime",
+        "median",
+        "result equality",
+        "memory estimate"
+      ],
+      "outcome": "Produce a reviewable performance comparison with a correctness oracle.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-017 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "polars-018",
+      "title": "A validated event-to-feature publication",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "polars-006",
+        "polars-011",
+        "polars-014",
+        "polars-017"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "data contract",
+        "deduplication",
+        "quarantine",
+        "artifact hash",
+        "readback"
+      ],
+      "outcome": "Publish a feature artifact with explicit derivation and consumption contracts.",
+      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "verification": "Run the assertions and inspect polars-018 reference checks passed. Interpret the counterexample in the guide."
+    }
+  ]
+}

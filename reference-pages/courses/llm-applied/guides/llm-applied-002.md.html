@@ -289,19 +289,19 @@ parsed<span class="syntax-punctuation">,</span>spans<span class="syntax-operator
 <ol>
 <li><strong>Validate a correct proposal.</strong> Validate visits 10, purchases 3 and assignment_unit account. <strong>Expected:</strong> conversion rate 0.3. <strong>Verify:</strong> Save the assertion results for exercise 1, including conversion rate 0.3.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject a plausible but impossible record.</strong> Validate visits 2 and purchases 3 under the declared one-purchase-per-visit policy. <strong>Expected:</strong> ValueError for inconsistent counts. <strong>Verify:</strong> Save the assertion results for exercise 2, including ValueError for inconsistent counts.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Trace extracted values to text.</strong> Parse the source text Visits: 10; Purchases: 3; Unit: account and retain source spans. <strong>Expected:</strong> values 10 and 3; each span slices the original digits. <strong>Verify:</strong> Save the assertion results for exercise 3, including values 10 and 3; each span slices the original digits.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Distinguish missing from zero.</strong> Submit a record with purchases=None and compare it with a real zero-purchase record. <strong>Expected:</strong> None is rejected by this strict schema; zero is accepted with rate 0. <strong>Verify:</strong> Save the assertion results for exercise 4, including None is rejected by this strict schema; zero is accepted with rate 0.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject boolean and extra fields.</strong> Submit visits=True, then add an undeclared p_value field to a valid proposal. <strong>Expected:</strong> TypeError for a boolean count; ValueError for an extra field. <strong>Verify:</strong> Save the assertion results for exercise 5, including TypeError for a boolean count; ValueError for an extra field.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Preserve the assignment unit.</strong> Attempt to replace account with visit and explain why the independence assumption cannot be inferred from the count fields. <strong>Expected:</strong> invalid unit rejected; account remains explicit. <strong>Verify:</strong> Save the assertion results for exercise 6, including invalid unit rejected; account remains explicit.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

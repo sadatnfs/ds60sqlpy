@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-numpy-02.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-numpy-02.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_numpy_02.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-02.html#solution-1">explanatory solutions</a> and <a href="python-numpy-02.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -435,23 +435,23 @@ distance <span class="syntax-operator">=</span> np<span class="syntax-operator">
 <li><strong>Reduce the observation axis.</strong> Return a new floating matrix whose columns have zero means. Require a finite two-dimensional array with at least one row. Test two rows and three columns so row/column mistakes cannot pass accidentally.</li>
 </ol>
 <p><strong>Expected:</strong> [[1,10,100],[3,14,108]] becomes[[-1,-2,-4],[1,2,4]]. The source is unchanged; shape(0,3) and a vector raise ValueError.</p>
-<ol>
+<ol start="2">
 <li><strong>Broadcast one factor per row.</strong> Multiply each matrix row by its corresponding finite factor without mutating either input. Require factors to be a one-dimensional vector whose length equals the number of rows. Permit an empty row batch.</li>
 </ol>
 <p><strong>Expected:</strong> [[1,2,3],[4,5,6]] with [10,100] gives [[10,20,30],[400,500,600]]. Three factors raise ValueError; shape(0,3) with an empty vector returns (0,3).</p>
-<ol>
+<ol start="3">
 <li><strong>Create all pairs with a declared contraction.</strong> Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.</li>
 </ol>
 <p><strong>Expected:</strong> [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns shape(0,1); two versus three features raises ValueError.</p>
-<ol>
+<ol start="4">
 <li><strong>Contract observations using valid weights.</strong> Return weighted column means for a finite matrix using one nonnegative finite weight per row. Require positive total weight. Reject negative weights, zero total or wrong length, rather than dividing and returning NaNs.</li>
 </ol>
 <p><strong>Expected:</strong> [[1,10],[3,30]] with [1,3] gives [2.5,25]. Weights[0,0],[-1,2] and [1] raise ValueError; weights scaled by ten give the same means.</p>
-<ol>
+<ol start="5">
 <li><strong>Preserve leading batch axes.</strong> Apply a finite two-dimensional weight matrix(d, k) to values with at least two dimensions and final dimension d. Return all leading dimensions followed by k. Reject an incompatible final dimension.</li>
 </ol>
 <p><strong>Expected:</strong> A(2,3,4) input times a(4,2) weight matrix returns (2,3,2), matching an explicit per-batch matrix multiply. A(3,4) input also works; weights(3,2) are rejected.</p>
-<ol>
+<ol start="6">
 <li><strong>Normalize while preserving zero vectors.</strong> Return a new finite matrix whose nonzero rows have Euclidean norm one and zero rows remain zero. Reject nonfinite or nonmatrix inputs. Avoid evaluating a zero division and then hiding its warning.</li>
 </ol>
 <p><strong>Expected:</strong> [[3,4],[0,0],[-2,0]] becomes[[.6,.8],[0,0],[-1,0]]. All results are finite, source stays unchanged and infinity raises ValueError.</p>

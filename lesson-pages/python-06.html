@@ -404,12 +404,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day06_data_structures.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day06_data_structures.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -497,13 +497,13 @@ user_name <span class="syntax-operator">=</span> user_by_id<span class="syntax-p
 <ol>
 <li>Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Choose structures by semantics, ordering, uniqueness, lookup, and mutability, not by habit. State what duplicates and missing keys mean.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</li>
 <li><strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</li>
 <li><strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</li>
@@ -653,13 +653,13 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</li>
 <li><strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</li>
 <li><strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</li>

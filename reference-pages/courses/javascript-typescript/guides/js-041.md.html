@@ -365,19 +365,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Aggregate valid split-byte input.</strong> Decode rows for groups A and B from three-byte chunks and aggregate their values. <strong>Expected:</strong> A count 2 sum 5; B count 1 sum 4; zero rejected. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Quarantine syntax and domain failures with physical line numbers.</strong> Place malformed JSON and a string-valued amount after a valid row. <strong>Expected:</strong> one accepted row; diagnostics at lines 2 and 3 with json/schema categories. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Preserve a multi-byte group name across single-byte chunks.</strong> Use an emoji group and split every UTF-8 byte. <strong>Expected:</strong> group name remains intact with sum 7. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Handle blank lines and a final line without newline.</strong> Supply blank lines, CRLF and one final valid row. <strong>Expected:</strong> two accepted rows; no fabricated empty records. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Enforce input and record budgets.</strong> Reject a line exceeding 1024 bytes and an input exceeding 16384 bytes. <strong>Expected:</strong> RangeError for each resource-limit violation. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Expose incomplete-data counts and empty input.</strong> Analyze one invalid row and no valid rows, then analyze an empty stream. <strong>Expected:</strong> zero accepted with one rejected versus zero accepted with zero rejected. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -1,0 +1,76 @@
+version: 2
+models:
+  - name: stg_orders
+    description: One identified order under an explicit paid/refunded/pending policy.
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - paid
+                  - refunded
+                  - pending
+  - name: stg_customers
+    description: One current synthetic customer, without a claim of historical availability.
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+  - name: customer_revenue
+    description: "One customer with net amount: paid less full refunds, pending contributes
+      zero."
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+      - name: net_amount
+        description: Synthetic currency under the declared status policy.
+unit_tests:
+  - name: refund_and_pending_policy
+    model: customer_revenue
+    given:
+      - input: ref('stg_customers')
+        rows:
+          - customer_id: 10
+            name: Ada
+            region: north
+      - input: ref('stg_orders')
+        rows:
+          - order_id: 1
+            customer_id: 10
+            recognized_amount: 100
+          - order_id: 2
+            customer_id: 10
+            recognized_amount: -25
+          - order_id: 3
+            customer_id: 10
+            recognized_amount: 0
+    expect:
+      rows:
+        - customer_id: 10
+          name: Ada
+          region: north
+          net_amount: 75
+          order_count: 3
+exposures:
+  - name: customer_review
+    type: dashboard
+    depends_on:
+      - ref('customer_revenue')
+    owner:
+      name: Learning team
+    description: Declared local consumer, not evidence of external deployment.

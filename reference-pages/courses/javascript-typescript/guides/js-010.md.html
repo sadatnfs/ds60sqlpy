@@ -288,19 +288,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Observe a live binding.</strong> Import a mutable counter and its increment function, then inspect the count before and after incrementing. <strong>Expected:</strong> count changes from 0 to 1 through the imported namespace. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Resolve a relative dependency.</strong> Create a main module importing twice from ./math.mjs, then call its export. <strong>Expected:</strong> answer equals 8. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Prove cached module identity.</strong> Import one URL twice and compare the namespace and exported object. <strong>Expected:</strong> both namespace and object identities are shared. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect CommonJS interoperability.</strong> Import a .cjs file exporting an object through its default binding. <strong>Expected:</strong> default.label equals legacy. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject a missing dependency.</strong> Import a module with a nonexistent relative dependency and preserve the loader error code. <strong>Expected:</strong> ERR_MODULE_NOT_FOUND. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Respect namespace ownership.</strong> Attempt to assign an exported binding from the importer. <strong>Expected:</strong> TypeError; exported value remains 3. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

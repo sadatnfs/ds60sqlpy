@@ -259,19 +259,19 @@ form<span class="syntax-punctuation">.</span>addEventListener<span class="syntax
 <ol>
 <li><strong>Validate one local form submission.</strong> Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity. <strong>Expected:</strong> valid output Ada: 2; invalid input produces no accepted state. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Handle storage success and failure explicitly.</strong> Run this standalone snippet on a loopback HTTP origin and activate Save. <strong>Expected:</strong> either Saved or a visible Storage unavailable message, never an invented success. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Load only a recognized stored schema.</strong> Reject malformed JSON or a stored version other than 1 before rendering. <strong>Expected:</strong> invalid saved state is diagnosed and does not become accepted application state. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Distinguish current state from persisted state.</strong> Change a form value after saving without submitting again, then reload the page. <strong>Expected:</strong> the last saved value returns; the unsaved edit is not falsely described as persisted. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Observe a change from another tab.</strong> Open the same loopback URL in two tabs, save in one, and observe the other. <strong>Expected:</strong> the other tab reports an external change; the writing tab does not receive its own storage event. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reset only this lesson&#x27;s key.</strong> Remove the owned draft and verify an unrelated storage key remains. <strong>Expected:</strong> owned key absent; unrelated key unchanged. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

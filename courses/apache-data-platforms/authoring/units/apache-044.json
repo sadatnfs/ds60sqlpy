@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "advanced",
+  "minutes": 60,
+  "prerequisites": ["apache-039", "apache-015", "apache-042"],
+  "concepts": ["catalog protocols", "Arrow materialization", "cross-engine evidence"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    ["PyIceberg query integration", "https://py.iceberg.apache.org/api/#query-the-data"],
+    ["DataFusion Arrow I/O", "https://datafusion.apache.org/python/user-guide/io/arrow.html"],
+    ["Iceberg catalog concepts", "https://iceberg.apache.org/docs/latest/"]
+  ]
+}

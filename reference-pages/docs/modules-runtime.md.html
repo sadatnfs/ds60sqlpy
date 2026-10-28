@@ -219,6 +219,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Pinned PyMC/ArviZ with the tutorial&#x27;s InferenceData contract and CPU sampling</td>
 </tr>
 <tr>
+<td><code>data-engineering</code></td>
+<td><code>main.py</code></td>
+<td>Fresh Python with prepared Polars, Arrow, DuckDB, dbt Core/adapter and ML engineering tools</td>
+</tr>
+<tr>
+<td><code>data-platforms-python</code></td>
+<td><code>main.py</code></td>
+<td>PyArrow, DataFusion SQL and PyIceberg with an embedded local SQLite catalog; temporary files are discarded after each run</td>
+</tr>
+<tr>
+<td><code>dbt-duckdb</code></td>
+<td><code>model.sql</code></td>
+<td>Real SQL/Jinja compilation and dbt seed/build in a fixed local DuckDB project; bounded result table and metadata</td>
+</tr>
+<tr>
+<td><code>stan-cpu</code></td>
+<td><code>main.stan</code></td>
+<td>CmdStan 2.40.0 translation/compilation and two seeded chains, each with 100 warmup and 100 retained draws</td>
+</tr>
+<tr>
+<td><code>julia</code></td>
+<td><code>main.jl</code></td>
+<td>Julia 1.13.3 fresh process, two threads, read-only prepared project/depot and scientific packages</td>
+</tr>
+<tr>
 <td><code>r-statistics</code></td>
 <td><code>main.R</code></td>
 <td>Rscript with base/recommended statistics, ggplot2, Plotly and S3/S4/R6/S7 support</td>
@@ -301,9 +326,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>The authoritative commands are in <a href="../src/ds60sqlpy/worker_operations.py.html"><code>worker_operations.py</code></a>; image inputs and locks are under <code>docker/workers/</code> and <a href="../compose.modules.yaml.html"><code>compose.modules.yaml</code></a>. Read the lesson&#x27;s capability notice before assuming an additional library exists. A prepared compiler does not imply Maven, Cargo, Composer, CMake, a browser DOM, interactive stdin or an arbitrary multi-file build. Larger project fixtures have their own documented preparation and cleanup. SwiftUI and Apple SDKs need the separate Xcode route.</p>
 <p>The original Python and SQL classroom pads use their own bounded adapters. Notebook-style Python cells can share variables within one Run; a later Run starts a fresh process. PostgreSQL is a classroom service, not a worker profile. SQL snippets and <strong>Whole SQL lesson (psql)</strong> have different transaction and include-file behavior. Whole lessons use guarded cataloged source and fixed includes. Preparing the <code>training</code> schema is a deliberate reset of disposable course tables. See <a href="setup/postgresql.md.html">PostgreSQL setup</a> and <a href="classroom-experience.md.html">classroom controls</a>.</p>
-<h3 id="offline-drafts-and-saved-figures">Offline drafts and saved figures<a class="heading-anchor" href="#offline-drafts-and-saved-figures" aria-label="Link to this section">#</a></h3>
+<h3 id="data-and-scientific-project-boundaries">Data and scientific project boundaries<a class="heading-anchor" href="#data-and-scientific-project-boundaries" aria-label="Link to this section">#</a></h3>
+<p>The <code>data-engineering</code> environment is separate from Python Core. It supplies Polars/Arrow/DuckDB, real dbt and the packages required by the ML engineering route, including skops for the prepared MLflow scikit-learn serializer. The lesson must declare its actual profile; a Python filename alone does not select those dependencies. Downloads and package installation are not part of a Run operation.</p>
+<p>The <code>data-platforms-python</code> profile owns separately locked PyArrow, DataFusion and PyIceberg versions, plus pandas and offline plotting packages. The readiness probe executes real DataFusion SQL and an Iceberg append/read through a local SQLite catalog. These are actual library operations, not distributed-service claims. Persistent Flight, Ballista and other platform workshops have separate owned projects. Ordinary Run cannot start a persistent service, install packages or retain arbitrary Parquet/catalog files between runs.</p>
+<p>The <code>dbt-duckdb</code> pad accepts a single SQL/Jinja model with a fixed synthetic orders/customers fixture. It performs actual dbt compilation and materialization and captures a bounded table plus run metadata. SQL-model variants at <code>dbt-001</code>, <code>dbt-002</code>, <code>dbt-003</code> and <code>dbt-007</code> provide the focused entry route. The canonical Python lessons construct and inspect complete local projects; the <a href="../courses/dbt/projects/retail/README.md.html">retail project</a> adds an owned CLI workspace for configuration, snapshots and incremental/state workflows. The browser does not provide an arbitrary multi-file dbt editor.</p>
+<p>Stan pads accept self-contained native model source. Put small teaching fixtures in <code>transformed data</code>; an absent or empty <code>data</code> block is appropriate. There is no second JSON-data editor. The operation fixes sampling settings and captures an actual summary table and two-chain trace. Short chains do not establish convergence; constant quantities can have undefined diagnostics. Use the <a href="../courses/bayesian-computing/projects/normal-mean/README.md.html">normal-mean project</a> for a standard model/data.json/CmdStanPy 1.3.0 workflow with explicit saved outputs.</p>
+<p>Julia uses <code>/opt/julia-env</code> and <code>/opt/julia-depot</code>, with prepared CSV, DataFrames, Distributions, ForwardDiff, Optim and JSON3 packages. Each Run starts a fresh process with two threads. The source cannot install packages into the read-only depot. JuliaFormatter belongs to the prepared authoring toolchain; formatting a source file does not execute it or establish numerical correctness.</p>
+<p>The <a href="../courses/ml-engineering/projects/local-system/README.md.html">owned ML system</a> trains from actual local Feast historical features, records MLflow evidence and serves predictions through real loopback HTTP. Its explicit CLI starts, stops, resumes and activates model versions. Predictor state is mounted read-only; training and administrative changes are separate operations. Its <code>state/</code> directory is separate from classroom volumes. This is a synthetic local learning project, with no cloud account, external production qualification or server lifecycle hidden inside an ordinary pad.</p>
+<h3 id="offline-drafts-and-saved-outputs">Offline drafts and saved outputs<a class="heading-anchor" href="#offline-drafts-and-saved-outputs" aria-label="Link to this section">#</a></h3>
 <p>DAX uses the <code>dax-offline</code> editing capability, not a launcher profile or compiler. Its <code>main.dax</code> draft and notes are saved per lesson. A worked comparison checks the reference source and model hashes and shows bounded hand-derived tables. Editing the pad does not recompute those tables. Both service and job entrypoints reject execution requests for this capability.</p>
-<p>Python/R workers can attach at most two bounded PNG or Plotly artifacts to their source-bound result. Plotly data is rendered in a separate opaque offline frame; metadata descriptions and small tables remain accessible in the classroom. Opening a saved result renders that saved data without rerunning the program. A storage/capture warning is separate from runtime success or failure. See <a href="plotting.md.html">plotting</a> for supported operations and limits.</p>
+<p>Supported workers can attach at most two outputs in total: PNG, Plotly, table or JSON report. Payloads are bounded by 180,000 bytes, and the combined serialized document by 384,000 bytes. The PNG payload limit applies to decoded image bytes; see the output guide for exact per-kind rules. Tables allow at most 12 columns and 100 rows. Unsafe large JSON integers must be encoded as strings to preserve their exact values. Python, R and Julia capture paths retain the job destination even if code changes its working directory. Plotly renders in a separate opaque offline frame; reports and tables remain ordinary accessible data, never trusted HTML. Opening a saved result renders that saved data without rerunning the program. A storage/capture warning is separate from runtime success or failure. See <a href="plotting.md.html">plotting</a> for supported operations and limits.</p>
 <h3 id="browser-and-optional-gpu-surfaces">Browser and optional GPU surfaces<a class="heading-anchor" href="#browser-and-optional-gpu-surfaces" aria-label="Link to this section">#</a></h3>
 <p><code>html-browser</code> and <code>javascript-browser</code> are browser capabilities, not launcher <code>--profile</code> names. They need no additional compiler worker. HTML/CSS accepts one complete document with embedded styles and bounded inline JavaScript. D3 uses the bundled library, <code>#chart</code> and <code>#output</code>, with inline offline data. Plotly is also bundled for JavaScript visualization lessons. Node source has no browser DOM. External imports, fetches and navigation are not part of the opaque preview contract.</p>
 <p>Live preview is an explicit page-session opt-in. Editing can refresh that preview, but it does not automatically save result receipts. Manual Run and <strong>Save observation</strong> are separate actions. Switching lessons, viewing history, Stop and reload must not silently rerun source. Browser observations retain the submitted source identity and <code>verified: false</code>; they are not server-side tests. The initial preview has a 120-second UI wait budget, not an operating-system CPU quota or a promise to interrupt arbitrary synchronous browser code. See the <a href="classroom-experience.md.html#explore-in-the-preview-studio">preview studio guide</a>.</p>
@@ -371,7 +403,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
    ./classroom --local-build --registry upstream --starter --project ds60-k8s-study <span class="syntax-string">\</span>
      --port <span class="syntax-number">8787</span> --database-port <span class="syntax-number">55433</span> --no-browser</code></pre>
 <p>The preparation helper below accepts only a local <code>unix:///...</code> endpoint. Do not substitute a remote context or another engine after the classroom starts. This recipe uses locally built release images and the upstream registry selection consistently. Hub mode and an unrelated learner project are not part of this optional preparation example.</p>
-<ol>
+<ol start="2">
 <li>Finish image and tool preparation before starting the short lease. The fixture tag is its own protocol version; the worker tag follows the checkout&#x27;s package version. These builds do not create a cluster or publish images:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   CLASSROOM_VERSION<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span>python3 -c <span class="syntax-string">&#x27;import pathlib,tomllib; print(tomllib.loads(pathlib.Path(&quot;pyproject.toml&quot;).read_text())[&quot;project&quot;][&quot;version&quot;])&#x27;</span><span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span>
@@ -382,7 +414,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
    python3 scripts/prepare_kubernetes.py tools --allow-download
    python3 scripts/prepare_kubernetes.py doctor</code></pre>
 <p>Tools are pinned and checked against official SHA256 metadata. The helper&#x27;s default tool cache is <code>work/kubernetes-tools</code>; it does not install globally. Both Dockerfiles accept a deliberately selected <code>DS60_PYTHON_IMAGE</code> build argument when a reviewed TLS-preserving base mirror is required. See <a href="../docker/kubernetes/README.md.html">image and fixture details</a>.</p>
-<ol>
+<ol start="3">
 <li>Prepare immediately before practice. This command creates a new owned node and namespace, loads the existing fixture image and requests a short-lived scoped credential. <code>--allow-node-download</code> explicitly permits fetching the pinned node image when absent; omit it for an already cached run:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   python3 scripts/prepare_kubernetes.py prepare --confirm-create <span class="syntax-string">\</span>
@@ -392,7 +424,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
    python3 scripts/prepare_kubernetes.py inspect <span class="syntax-string">\</span>
      --session <span class="syntax-string">&quot;</span>$DS60_K8S_SESSION_DIR<span class="syntax-string">&quot;</span> --docker-host <span class="syntax-string">&quot;</span>$DOCKER_HOST<span class="syntax-string">&quot;</span></code></pre>
 <p>Inspection checks the lease, matching private host receipt, chosen endpoint and remaining lifetime without changing the cluster. The token is requested for 15 minutes; its returned expiry governs validity. A fresh session needs enough time for the longest job and cleanup reserve. Do not edit timestamps, move credentials into <code>.learning</code>, or treat a paused browser as a lease renewal.</p>
-<ol>
+<ol start="4">
 <li>Start only the already prepared app overlay and Kubernetes worker. Existing PostgreSQL, Core worker and private runtime volume remain in place:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   docker compose -p <span class="syntax-string">&quot;</span>$COMPOSE_PROJECT_NAME<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
@@ -400,7 +432,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
      --profile k8s-kind up -d --no-deps --no-build --pull never <span class="syntax-string">\</span>
      --wait --wait-timeout <span class="syntax-number">120</span> lab kubernetes-worker</code></pre>
 <p><code>DS60_PUBLIC_PORT</code> must match the actual published browser port so exact Host/Origin authentication continues to work. This overlay retains every ordinary and optional GPU endpoint and adds only Kubernetes. It mounts the scoped lease/config read-only, joins the owned kind network and publishes no worker port. Open <code>http://127.0.0.1:8787/classroom</code> for the example ports. Read the capability notice before choosing an executable Kubernetes variant.</p>
-<ol>
+<ol start="5">
 <li>Inspect or stop using the same project, overlay and session variable. Status and stop do not renew a lease or create a cluster and remain usable after expiry:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   docker compose -p <span class="syntax-string">&quot;</span>$COMPOSE_PROJECT_NAME<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
@@ -412,7 +444,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
    python3 scripts/prepare_kubernetes.py release <span class="syntax-string">\</span>
      --session <span class="syntax-string">&quot;</span>$DS60_K8S_SESSION_DIR<span class="syntax-string">&quot;</span> --confirm-release</code></pre>
 <p>Release checks the recorded full container ID, ownership and namespace UID. It preserves same-name replacements and ambiguous resources, then proves node absence before removing credentials. Keep the private receipt until release succeeds. Learner volumes, unrelated containers and shared networks remain intact; <code>down -v</code> is not a cluster-release shortcut.</p>
-<ol>
+<ol start="6">
 <li>Restore the ordinary app configuration from its existing image, with no build or pull, before using normal classroom resume again:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   docker compose -p <span class="syntax-string">&quot;</span>$COMPOSE_PROJECT_NAME<span class="syntax-string">&quot;</span> -f compose.classroom.yaml <span class="syntax-string">\</span>

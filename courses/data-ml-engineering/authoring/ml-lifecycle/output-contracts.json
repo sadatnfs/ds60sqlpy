@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "dme-033",
+      "kinds": ["plotly", "table"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-034",
+      "kinds": ["table", "json"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-035",
+      "kinds": ["table", "json"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-036",
+      "kinds": ["table", "json"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-037",
+      "kinds": ["table", "json"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-038",
+      "kinds": ["plotly", "json"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-039",
+      "kinds": ["table", "json"],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-040",
+      "kinds": ["table", "json"],
+      "description_required": true,
+      "table_required": true
+    }
+  ]
+}

@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="postgresql-professional-modules">PostgreSQL professional modules<a class="heading-anchor" href="#postgresql-professional-modules" aria-label="Link to this section">#</a></h2>
 <blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work.</p></blockquote>
 <p>These named modules extend the numbered PostgreSQL track without renumbering Days 1–60. They teach database responsibilities that are normally encountered in application and production work: owning a relational model, evolving it through reviewed migrations, and enforcing least privilege.</p>
-<p>The classroom supplies PostgreSQL 17; the portable SQL examples target PostgreSQL 16 or newer and the disposable <code>advanced_sql_training</code> database. Run commands from the repository root. Never substitute a production, shared, or personally valuable database.</p>
+<p>The classroom supplies PostgreSQL 17. Most examples also support PostgreSQL 16; the explicitly marked PostgreSQL 17 lessons require version 17 or newer. Every script targets the disposable <code>advanced_sql_training</code> database. Run commands from the repository root. Never substitute a production, shared, or personally valuable database.</p>
 <h3 id="learning-path">Learning path<a class="heading-anchor" href="#learning-path" aria-label="Link to this section">#</a></h3>
 <p>A complete beginner starts with the small-fixture on-ramp:</p>
 <ol>
@@ -210,6 +210,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="../../../lesson-pages/sql-quality-01.html#guide">Bag reconciliation and join fanout</a> exposes equal-total counterexamples, duplicate multiplicity, and independent-child overcounting.</li>
 <li><a href="../../../lesson-pages/sql-scale-01.html#guide">Cursor pagination and bounded batches</a> handles timestamp ties, NULL phases, mutation cases, and the difference between a cursor and a snapshot.</li>
 <li><a href="../../../lesson-pages/sql-concurrency-01.html#guide">Isolation traces and optimistic concurrency</a> tests versioned writes and supplies a separately prepared, optional two-session visibility experiment.</li>
+</ul>
+<p>The PostgreSQL 17 extension adds two advanced labs after their named prerequisites:</p>
+<ul>
+<li><a href="../../../lesson-pages/sql-write-01.html#guide">Change application with MERGE and ON CONFLICT</a> separates complete snapshots from partial events, validates source identity, audits changed rows and checks repeat convergence.</li>
+<li><a href="../../../lesson-pages/sql-json-01.html#guide">Typed JSON_TABLE projection and result grain</a> explains nested rows, ordinality, missing values versus JSON null, conversion errors and parent-level totals.</li>
 </ul>
 <p>Use the generated catalog for the exact inventory, ordering, levels, direct prerequisites, and artifact paths rather than copying a second module table:</p>
 <pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track sql</code></pre>

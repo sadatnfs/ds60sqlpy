@@ -1,28 +1,5 @@
 # SQL-TEMPORAL-01: Temporal and Domain Modelling
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-found-01`, `sql-types-01`, `sql-prog-01`,
-  `sql-test-01`, and `sql-39`
-- **Prerequisites:** [SQL-FOUND-01](sql_found_01_relational_design.md),
-  [SQL-TYPES-01](sql_types_01_native_types_search.md),
-  [SQL-PROG-01](sql_prog_01_routines_triggers.md),
-  [SQL-TEST-01](sql_test_01_contracts_migrations.md), ranges, triggers, and
-  [SQL Day 39 transaction/advisory-lock concepts](../../postgres-60day/companion-guides/day39_locks_deadlocks.md).
-- **Artifacts:** [learner SQL](../lessons/sql_temporal_01_domain_modelling.sql) ·
-  [solution reasoning](../solutions/sql_temporal_01_domain_modelling_solutions.md) ·
-  [executable solution](../solutions/sql_temporal_01_domain_modelling_solutions.sql)
-
-Run:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_temporal_01_domain_modelling.sql
-```
-
-The default is offline, fixed-time, and rollback-safe. It inspects but never
-enables `btree_gist`.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -87,6 +64,29 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-found-01`, `sql-types-01`, `sql-prog-01`,
+  `sql-test-01`, and `sql-39`
+- **Prerequisites:** [SQL-FOUND-01](sql_found_01_relational_design.md),
+  [SQL-TYPES-01](sql_types_01_native_types_search.md),
+  [SQL-PROG-01](sql_prog_01_routines_triggers.md),
+  [SQL-TEST-01](sql_test_01_contracts_migrations.md), ranges, triggers, and
+  [SQL Day 39 transaction/advisory-lock concepts](../../postgres-60day/companion-guides/day39_locks_deadlocks.md).
+- **Artifacts:** [learner SQL](../lessons/sql_temporal_01_domain_modelling.sql) ·
+  [solution reasoning](../solutions/sql_temporal_01_domain_modelling_solutions.md) ·
+  [executable solution](../solutions/sql_temporal_01_domain_modelling_solutions.sql)
+
+Run:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_temporal_01_domain_modelling.sql
+```
+
+The default is offline, fixed-time, and rollback-safe. It inspects but never
+enables `btree_gist`.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -106,7 +106,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_temporal_01_domain_modelling.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_temporal_01_domain_modelling.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

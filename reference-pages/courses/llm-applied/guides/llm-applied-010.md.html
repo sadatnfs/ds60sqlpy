@@ -308,19 +308,19 @@ original<span class="syntax-operator">=</span><span class="syntax-string">&#x27;
 <ol>
 <li><strong>Apply a controlled synonym rewrite.</strong> Rewritebuy rate usingbuy-&gt;purchase while preserving the original question. <strong>Expected:</strong> rewrittenpurchase rate; original unchanged. <strong>Verify:</strong> Save the assertion results for exercise 1, including rewrittenpurchase rate; original unchanged.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Retain a rewrite trace.</strong> Record the original, rewritten query and policy version. <strong>Expected:</strong> trace includes all three fields. <strong>Verify:</strong> Save the assertion results for exercise 2, including trace includes all three fields.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Follow two evidence hops.</strong> Use graphmetric-&gt;exclusions-&gt;test_accounts with a two-hop bound. <strong>Expected:</strong> visited metric, exclusions, test_accounts. <strong>Verify:</strong> Save the assertion results for exercise 3, including visited metric, exclusions, test_accounts.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Stop at the declared depth.</strong> Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and negative budgets. <strong>Expected:</strong> test_accounts is absent; invalid budgets raise ValueError before traversal. <strong>Verify:</strong> Save the assertion results for exercise 4, including test_accounts is absent; invalid budgets raise ValueError before traversal.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Break a retrieval cycle.</strong> Addtest_accounts-&gt;metric and traverse with a larger bound. <strong>Expected:</strong> each document appears once. <strong>Verify:</strong> Save the assertion results for exercise 5, including each document appears once.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Preserve authorization across hops.</strong> Remove a restricted target from the admitted graph and ensure links to it are not followed. <strong>Expected:</strong> restricted document never appears. <strong>Verify:</strong> Save the assertion results for exercise 6, including restricted document never appears.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

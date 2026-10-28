@@ -313,19 +313,19 @@ manifest<span class="syntax-operator">=</span><span class="syntax-punctuation">[
 <ol>
 <li><strong>Fingerprint authored sources.</strong> Add source=course-authored, permission=course-fixture and SHA256 to each local document. <strong>Expected:</strong> 6 complete records; all hashes contain 64 characters. <strong>Verify:</strong> Save the assertion results for exercise 1, including 6 complete records; all hashes contain 64 characters.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Detect a changed definition.</strong> Create metric-v2 with changed text and compare content hashes to metric-v1. <strong>Expected:</strong> hash differs; family remains metric; version is 2. <strong>Verify:</strong> Save the assertion results for exercise 2, including hash differs; family remains metric; version is 2.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Choose an active version explicitly.</strong> Select the highest version per family from metric-v1, metric-v2 and trial-v1. <strong>Expected:</strong> active IDs metric-v2 and trial-v1. <strong>Verify:</strong> Save the assertion results for exercise 3, including active IDs metric-v2 and trial-v1.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect family leakage.</strong> Place metric-v1 in training and metric-v2 in testing, then compare their families. <strong>Expected:</strong> family intersection contains metric despite different hashes. <strong>Verify:</strong> Save the assertion results for exercise 4, including family intersection contains metric despite different hashes.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Refuse incomplete admission metadata.</strong> Remove permission from one record and validate admission. <strong>Expected:</strong> ValueError for missing permission. <strong>Verify:</strong> Save the assertion results for exercise 5, including ValueError for missing permission.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep instruction-like documents inert.</strong> Inspect attack-v1 and confirm its text does not alter the manifest validator or access metadata. <strong>Expected:</strong> attack text remains data; restricted record remains restricted. <strong>Verify:</strong> Save the assertion results for exercise 6, including attack text remains data; restricted record remains restricted.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

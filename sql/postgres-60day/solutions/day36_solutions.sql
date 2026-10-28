@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 1: weekly revenue by country.
 CREATE MATERIALIZED VIEW mv_weekly_country_revenue_solution AS
 SELECT
@@ -27,7 +28,9 @@ FROM
 GROUP BY
   date_trunc('week', o.order_date),
   c.country;
+
 CREATE UNIQUE INDEX idx_mv_weekly_country_solution ON mv_weekly_country_revenue_solution (week, country);
+
 -- Exercise 2: compare equivalent base-table and materialized-view plans.
 EXPLAIN (
   ANALYZE,
@@ -44,6 +47,7 @@ FROM
 GROUP BY
   date_trunc('week', o.order_date),
   c.country;
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -55,6 +59,7 @@ SELECT
   orders
 FROM
   mv_weekly_country_revenue_solution;
+
 -- Exercise 3: change one disposable base row after materialization. The first
 -- comparison exposes staleness; REFRESH then makes the view current.
 UPDATE
@@ -67,6 +72,7 @@ WHERE
       MIN(order_id)
     FROM
       orders);
+
 SELECT
   (
     SELECT
@@ -78,7 +84,9 @@ SELECT
       SUM(revenue)
     FROM
       mv_weekly_country_revenue_solution) AS stale_mv_total;
+
 REFRESH MATERIALIZED VIEW mv_weekly_country_revenue_solution;
+
 SELECT
   (
     SELECT
@@ -90,6 +98,7 @@ SELECT
       SUM(revenue)
     FROM
       mv_weekly_country_revenue_solution) AS refreshed_mv_total;
+
 -- Exercise 4: the unique (week,country) index above is the structural
 -- prerequisite for REFRESH ... CONCURRENTLY after initial population. Ordinary
 -- REFRESH remains appropriate inside this single-session rollback lab.
@@ -100,6 +109,7 @@ FROM
 WHERE
   schemaname = 'training'
   AND tablename = 'mv_weekly_country_revenue_solution';
+
 -- Exercise 5: this view stores order-header totals. Name that definition and
 -- show the line-item alternative rather than assuming they are interchangeable.
 SELECT
@@ -113,6 +123,7 @@ SELECT
       SUM(quantity * unit_price * (1 - discount))
     FROM
       order_items) AS line_revenue;
+
 -- Exercise 6: a spine supplies requested combinations; the outer join turns
 -- missing aggregate rows into an explicit display zero by policy.
 WITH months AS (
@@ -140,4 +151,5 @@ FROM
     m.week DESC,
     c.country
   LIMIT 20;
+
 ROLLBACK;

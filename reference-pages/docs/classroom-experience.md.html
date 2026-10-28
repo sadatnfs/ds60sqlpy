@@ -222,7 +222,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="read-the-explanation">Read the explanation<a class="heading-anchor" href="#read-the-explanation" aria-label="Link to this section">#</a></h3>
 <p>A lesson puts its guide beside its coding or reading workspace. Mathematics renders with fractions, powers and indices. Code blocks are highlighted by language and remain copyable. Those resources are bundled locally.</p>
 <p>Use <strong>Focus on reading</strong> for a wider explanation and <strong>Show code and notes</strong> to return to practice. The section chooser jumps within a long guide. Keep each example&#x27;s input, expected observation and limitation together. A tiny demonstration teaches a mechanism; its success does not establish production scale or model quality.</p>
-<p>Programming practice offers predictions, exercises, hints and separate solutions. Reveal a solution when you want to compare with your attempt. The statistics/ML tutorial gives complete worked examples and answered discussion directly, without mandatory exams or hidden answers.</p>
+<p>Programming practice offers predictions, exercises, hints and separate solutions. Reveal a solution when you want to compare with your attempt. Statistics/ML, Applied Science and Bayesian Computing are tutorial tracks with complete worked examples and answered discussion directly, without mandatory exams or hidden answers.</p>
 <h3 id="choose-the-right-execution-environment">Choose the right execution environment<a class="heading-anchor" href="#choose-the-right-execution-environment" aria-label="Link to this section">#</a></h3>
 <p>The capability notice describes the selected lesson or variant. A runtime can be unavailable while the guide and your saved source remain readable. Follow its preparation command instead of installing tools inside the pad.</p>
 <div class="table-wrap"><table><thead><tr>
@@ -258,6 +258,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Uses the selected prepared CPU worker for bounded local examples</td>
 </tr>
 <tr>
+<td>Polars and full dbt/ML examples</td>
+<td>Runs a fresh Python program in the dedicated data-engineering environment</td>
+</tr>
+<tr>
+<td>dbt SQL-model variant</td>
+<td>Builds one SQL/Jinja model in a fixed dbt/DuckDB project and displays bounded actual results</td>
+</tr>
+<tr>
+<td>Stan</td>
+<td>Compiles the native model and runs two short chains, then displays its real diagnostic summary and trace</td>
+</tr>
+<tr>
+<td>Julia</td>
+<td>Runs a fresh <code>main.jl</code> process with prepared scientific packages and two threads</td>
+</tr>
+<tr>
+<td>DAX</td>
+<td>Saves an editable draft and compares explicitly hand-derived reference tables; there is no Run operation</td>
+</tr>
+<tr>
 <td>Reading</td>
 <td>Saves reasoning and notes without an invented execution action</td>
 </tr>
@@ -275,6 +295,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The classroom keeps work separate by lesson, language, variant and SQL mode. <strong>Save work</strong> records the current draft and notes; ordinary edits also schedule a save. Wait for the saved confirmation before closing. If a server save fails, the interface tells you whether a recoverable browser draft remains. Keep a copy until server saving is confirmed.</p>
 <p><strong>Saved runs</strong> stores the source and output from a particular execution or explicit browser observation. Reading history does not rerun that source or replace your current edit. A saved run can describe an older version than the draft visible in the editor.</p>
 <p>Python/SQL workspaces offer earlier saved pad versions where supported. Modern module pads retain their current source and recorded run snapshots; do not assume every keystroke creates an immutable version. Restoring or copying earlier source differs from inspecting earlier output.</p>
+<p>Saved worker outputs can include charts, tables and JSON reports in addition to stdout. They retain the submitted source identity. A stored table does not recalculate when you edit the pad. See <a href="plotting.md.html">output limits and interpretation</a>.</p>
 <p>Progress markers record your learning choices. A tutorial read marker is a bookmark. A reference run and a completion mark do not certify independent mastery; explanation and transfer to a new case provide additional evidence.</p>
 <h3 id="return-to-the-same-learning-data">Return to the same learning data<a class="heading-anchor" href="#return-to-the-same-learning-data" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-bash">./classroom stop

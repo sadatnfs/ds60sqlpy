@@ -1,0 +1,12 @@
+version: 2
+snapshots:
+  - name: customer_history
+    relation: ref('stg_customers')
+    config:
+      schema: history
+      unique_key: customer_id
+      strategy: check
+      check_cols:
+        - name
+        - region
+      hard_deletes: invalidate

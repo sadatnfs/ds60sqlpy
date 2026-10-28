@@ -1,0 +1,4 @@
+.env
+.workshop/
+.workshop-lock/
+__pycache__/

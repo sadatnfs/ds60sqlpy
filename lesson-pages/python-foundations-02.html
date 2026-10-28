@@ -440,37 +440,37 @@ quantity <span class="syntax-operator">=</span> <span class="syntax-builtin">int
 </ol>
 <p><strong>Verify:</strong> Your log records <code>SyntaxError</code>, <code>ZeroDivisionError</code>, and a normal run with wrong value 7 instead of 12, respectively.</p>
 <p><strong>Hint:</strong> A normal exit and a correct business result are separate claims.</p>
-<ol>
+<ol start="2">
 <li><strong>Inspect the raw input.</strong> Inspect <code>raw = &quot; 08 &quot;</code> with <code>repr</code> and <code>type</code>, convert it deliberately, and calculate its successor. Then try <code>&quot;eight&quot;</code> in a separate run.</li>
 </ol>
 <p><strong>Verify:</strong> The valid parsed value is 8 and successor is 9; invalid text raises <code>ValueError</code> and is not converted to zero.</p>
 <p><strong>Hint:</strong> Read the exact characters before changing the parser.</p>
-<ol>
+<ol start="3">
 <li><strong>Repair the boundary.</strong> A free-shipping rule says orders costing at least 20 qualify. The implementation uses <code>amount &gt; 20</code>. Predict values 19, 20, and 21, then repair one comparison.</li>
 </ol>
 <p><strong>Verify:</strong> A three-row observation table reports False, True, True after the change; the before table differs only at 20.</p>
 <p><strong>Hint:</strong> Translate at least into its mathematical boundary.</p>
-<ol>
+<ol start="4">
 <li><strong>Read an exception precisely.</strong> Run <code>int(&quot;4.5&quot;)</code> in a fresh file. Capture the exception class and the failing line. State whether the input is invalid integer text or a missing package.</li>
 </ol>
 <p><strong>Verify:</strong> The recorded class is <code>ValueError</code>; no installation command is used, and the report identifies the text <code>&quot;4.5&quot;</code> as the failing input.</p>
 <p><strong>Hint:</strong> A decimal-looking string is not an integer representation for int.</p>
-<ol>
+<ol start="5">
 <li><strong>Reduce a wrong result.</strong> A receipt with price 7, quantity 3, and a whole-order discount 2 uses <code>price * (quantity - discount)</code>. Strip unrelated output and repair only the arithmetic grouping.</li>
 </ol>
 <p><strong>Verify:</strong> The failing result is 7 and repaired result is 19. With discount zero, both formulas yield 21, showing why that case alone missed the bug.</p>
 <p><strong>Hint:</strong> State whether the discount changes the number of items or the order total.</p>
-<ol>
+<ol start="6">
 <li><strong>Keep the failure visible.</strong> Write a try/except around <code>int(&quot;unknown&quot;)</code> that records the conversion failure by setting a status string. Avoid an empty except block and do not return a fake successful amount.</li>
 </ol>
 <p><strong>Verify:</strong> The terminal reports status <code>invalid quantity</code>; a valid <code>&quot;4&quot;</code> reports <code>accepted</code> and quantity 4.</p>
 <p><strong>Hint:</strong> Catch the specific conversion exception near the conversion.</p>
-<ol>
+<ol start="7">
 <li><strong>Disprove a hypothesis.</strong> Investigate <code>&quot;2&quot; + &quot;3&quot;</code> yielding <code>&quot;23&quot;</code>. Test the hypothesis that Python added the numbers incorrectly by inspecting types and repeating the operation on integers.</li>
 </ol>
 <p><strong>Verify:</strong> Your log records string operands and integer result 5 in the control experiment, rejecting the arithmetic-bug hypothesis.</p>
 <p><strong>Hint:</strong> Change one variable in your experiment: the value types.</p>
-<ol>
+<ol start="8">
 <li><strong>Write a regression note.</strong> Choose the shipping or receipt defect. Save a four-part note containing contract, smallest failing input, repaired observation, and one nearby boundary case. Add executable checks.</li>
 </ol>
 <p><strong>Verify:</strong> The note names concrete input 20 for shipping or (7, 3, 2) for the receipt, and assertions fail if you reintroduce the original operator.</p>

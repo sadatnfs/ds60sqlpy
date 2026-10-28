@@ -44,6 +44,29 @@ def main() -> None:
         executable.write_bytes(archive.read(names[0]))
         executable.chmod(0o755)
 
+    # Keep the native compiler pin aligned with docker/workers/native/releases.lock.json.
+    stan_release = {
+        "amd64": (
+            "cmdstan-2.40.0.tar.gz",
+            "26d21c9737b35728e926f9b7a5d7362b38dc23e2e7d5e166c890e1fa74dac90c",
+        ),
+        "arm64": (
+            "cmdstan-2.40.0-linux-arm64.tar.gz",
+            "c31e9f45a701c47f547381080ee804bf7e2428aace68eff68d4262b5c406aa63",
+        ),
+    }
+    filename, checksum = stan_release[os.environ["TARGETARCH"]]
+    data = download(
+        "https://github.com/stan-dev/cmdstan/releases/download/v2.40.0/" + filename, checksum
+    )
+    with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as archive:
+        stream = archive.extractfile("cmdstan-2.40.0/bin/linux-stanc")
+        if stream is None:
+            raise RuntimeError("Missing pinned Stan compiler")
+        target = Path("/usr/local/bin/stanc")
+        target.write_bytes(stream.read())
+        target.chmod(0o755)
+
     data = download(
         "https://codeload.github.com/darold/pgFormatter/tar.gz/refs/tags/v5.11",
         "563619e13294b3db55d7a98a761786024ea3609d007fa94654a69a7346b8fd67",

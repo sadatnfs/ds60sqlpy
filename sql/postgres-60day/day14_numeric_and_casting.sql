@@ -1,11 +1,11 @@
 -- Day 14: Numeric functions & casting
--- BEGINNER WORKFLOW — sql-14: Numeric and Casting
+-- BEGINNER WORKFLOW - sql-14: Numeric and Casting
 -- Guide: sql/postgres-60day/companion-guides/day14_numeric_and_casting.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-14/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-14.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.
 -- Assumptions: Money is exact `numeric`; division casts denominators to numeric where fractions matter. NULL/zero denominators return NULL through `NULLIF`.
@@ -35,6 +36,7 @@ ORDER BY
   total_amount DESC,
   order_id
 LIMIT 50;
+
 -- Safe division and null handling
 SELECT
   p.category,
@@ -48,6 +50,7 @@ GROUP BY
 ORDER BY
   avg_price DESC,
   p.category;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

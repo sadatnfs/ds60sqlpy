@@ -1,11 +1,11 @@
 -- Day 38: Transactions & ACID, Isolation Levels
--- BEGINNER WORKFLOW — sql-38: Transactions Isolation
+-- BEGINNER WORKFLOW - sql-38: Transactions Isolation
 -- Guide: sql/postgres-60day/companion-guides/day38_transactions_isolation.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-38/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-38.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,20 +18,25 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Show current isolation level
 SHOW TRANSACTION ISOLATION LEVEL;
+
 -- Set per-transaction isolation level (demo)
 SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
 -- Demo table
 CREATE TEMP TABLE txn_demo (
   id int PRIMARY KEY,
   qty int
 );
+
 INSERT INTO txn_demo
 VALUES
   (1, 10),
   (2, 20),
   (3, 30);
+
 -- Read snapshot under REPEATABLE READ
 SELECT
   *
@@ -39,6 +44,7 @@ FROM
   txn_demo
 ORDER BY
   id;
+
 -- In a second session (instruction):
 --   BEGIN; UPDATE txn_demo SET qty = qty + 5 WHERE id = 2; COMMIT;
 -- Back here, under REPEATABLE READ snapshot, we still see old value
@@ -48,24 +54,28 @@ FROM
   txn_demo
 WHERE
   id = 2;
+
 -- Now switch to READ COMMITTED to see new row versions on each statement
 -- Note: This affects only subsequent transactions; included here for demo
 -- COMMIT;  -- would end current tx; but we keep everything safe and roll back at end
 -- BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED; SELECT * FROM txn_demo WHERE id=2;
 -- Savepoint / rollback demo
 SAVEPOINT sp1;
+
 UPDATE
   txn_demo
 SET
   qty = qty + 100
 WHERE
   id = 1;
+
 SELECT
   *
 FROM
   txn_demo
 WHERE
   id = 1;
+
 -- shows +100 within tx
 ROLLBACK TO SAVEPOINT sp1;
 

@@ -329,19 +329,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Compile and run a two-module project.</strong> Compile a main module importing twice from ./math.mjs and run it. <strong>Expected:</strong> both processes succeed; output 8; math.mjs is emitted. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect type-only erasure.</strong> Compile a type import and inspect the emitted entry before running it. <strong>Expected:</strong> no model import in emitted entry; output A. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject a type mismatch without output.</strong> Assign text to a number in a fresh project. <strong>Expected:</strong> TS2322; nonzero compiler status; no compiled main.mjs. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Require runtime-valid relative extensions.</strong> Import ./math without an extension under NodeNext ESM. <strong>Expected:</strong> TS2835 and no emitted entry. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Observe a missing runtime artifact.</strong> Compile successfully, remove only the owned emitted dependency, then run the entry. <strong>Expected:</strong> Node fails with ERR_MODULE_NOT_FOUND. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Retain value imports beside erased type imports.</strong> Import both a type and a value from one module. <strong>Expected:</strong> value dependency remains; runtime prints ready:A. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

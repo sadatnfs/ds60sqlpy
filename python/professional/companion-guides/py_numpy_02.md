@@ -26,7 +26,7 @@ not prerequisites for opening this lesson in the Docker classroom. Local
 `.learning/` files and CLI progress belong to this checkout; they do not read or
 update the Docker classroom's named learning volume.
 
-Open the [learner script](../lessons/py_numpy_02.py) in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored `.learning/` copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
+Open the [learner script](../lessons/py_numpy_02.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
 
 Prepared POSIX/WSL contributor terminal:
 

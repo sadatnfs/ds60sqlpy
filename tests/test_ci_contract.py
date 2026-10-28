@@ -26,15 +26,21 @@ def test_core_matrix_overrides_project_python_default_and_asserts_version() -> N
 
 
 def test_source_quality_runs_once_with_the_shared_docker_entrypoints() -> None:
+    from scripts.ci_source_quality import languages
+    from scripts.format_repo import LANGUAGES
+
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    formatting = workflow.split("  source-quality:", maxsplit=1)[1].split("  core:", maxsplit=1)[0]
-    assert "runs-on: ubuntu-latest" in formatting
-    assert "matrix:" not in formatting
-    assert "run: ./scripts/format-repo --check" in formatting
-    assert "run: ./scripts/lint-repo" in formatting
+    formatting = workflow.split("  source-quality:", 1)[1].split("  core:", 1)[0]
+    assert "toolchain: [main, r, julia]" in formatting
+    assert 'scripts/ci_source_quality.py --toolchain "$TOOLCHAIN"' in formatting
     assert "run: git diff --exit-code" in formatting
-    assert workflow.count("./scripts/format-repo --check") == 1
-    assert "ruff format --check" not in workflow
+    assigned = [item for shard in ("main", "r", "julia") for item in languages(shard)]
+    assert len(assigned) == len(set(assigned)) and set(assigned) == set(LANGUAGES)
+    driver = (REPO_ROOT / "scripts/ci_source_quality.py").read_text()
+    assert '"scripts/format-repo", "--check"' in driver
+    assert '"scripts/lint-repo"' in driver
+    assert "ensure_publication_paths(ROOT)" in driver
+    assert "scripts/sync_example_fences.py --check" in workflow
     hooks = (REPO_ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
     assert "entry: ./scripts/format-repo --check" in hooks
     assert "id: ds60-ruff-format" not in hooks
@@ -42,7 +48,6 @@ def test_source_quality_runs_once_with_the_shared_docker_entrypoints() -> None:
     assert "format:\n\t./scripts/format-repo\n" in makefile
     assert "format-check:\n\t./scripts/format-repo --check\n" in makefile
     assert "lint:\n\t./scripts/lint-repo\n" in makefile
-    assert "check: format-check lint\n" in makefile
 
 
 def test_pytest_console_entrypoint_can_import_repository_scripts() -> None:
@@ -118,31 +123,25 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
         workflow = path.read_text(encoding="utf-8")
         runners = re.findall(r"(?m)^    runs-on: (.+)$", workflow)
         if path.name == "publish-images.yml":
-            reviewed_native_runner = (
-                "${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}"
-            )
-            assert runners == ["ubuntu-latest", reviewed_native_runner, reviewed_native_runner]
-            architecture = workflow.split("      architecture:", maxsplit=1)[1].split(
-                "      publish:", maxsplit=1
-            )[0]
-            assert re.findall(r"(?m)^        type: (.+)$", architecture) == ["choice"]
-            assert re.findall(r"(?m)^        options: (.+)$", architecture) == ["[amd64, arm64]"]
-            assert re.findall(r"(?m)^        default: (.+)$", architecture) == ["amd64"]
-            assert "  workflow_dispatch:" in workflow
-            assert not re.search(r"(?m)^  (push|pull_request|schedule):", workflow)
+            assert runners == [
+                "ubuntu-24.04",
+                "${{ matrix.runner }}",
+                "${{ matrix.runner }}",
+                "ubuntu-24.04",
+            ]
+            assert "runner: ubuntu-24.04-arm" in workflow
+            assert "runner: ubuntu-24.04" in workflow
+            assert "workflow_dispatch:" not in workflow
+            assert "branches: [main]" in workflow
         else:
             assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow
         assert "scripts/build_app.py" not in workflow
         assert "scripts/check_windows_private_acl.py" not in workflow
         assert "scripts/check_windows_runtime_startup.py" not in workflow
-
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    core = workflow.split("  developer-bootstrap:", maxsplit=1)[0]
-    assert 'python-version: ["3.11", "3.12"]' in core
-    bootstrap = workflow.split("  developer-bootstrap:", maxsplit=1)[1].split(
-        "  postgres:", maxsplit=1
-    )[0]
+    assert 'python-version: ["3.11", "3.12"]' in workflow
+    bootstrap = workflow.split("  developer-bootstrap:", 1)[1].split("  postgres:", 1)[0]
     assert "Linux contributor bootstrap" in bootstrap
     assert 'UV_PYTHON: "3.12"' in bootstrap
     assert "bash scripts/setup.sh --dependency-mode locked" in bootstrap
@@ -167,35 +166,28 @@ def test_ci_installs_renderer_before_sql_or_starter_checks() -> None:
 
 def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts() -> None:
     from scripts.check_classroom_profiles import CASES
+    from scripts.ci_profiles import groups
 
-    workflow = (WORKFLOW.parent / "app-build.yml").read_text(encoding="utf-8")
-    docker = workflow.split("  docker:", maxsplit=1)[1]
-    matrix = docker.split("    env:", maxsplit=1)[0]
-    assert "paths:" not in workflow
+    workflow = (WORKFLOW.parent / "app-build.yml").read_text()
+    selection = workflow.split("  docker-matrix:", 1)[1].split("  docker:", 1)[0]
+    assert "!(github.event_name == 'push'" in selection
+    assert "github.ref == 'refs/heads/main'" in selection
+    assert "contains(github.event.head_commit.message, '[publish-docker]')" in selection
     assert "  push:" in workflow and "  pull_request:" in workflow
-    assert "bash classroom --registry upstream --rebuild --no-browser" in docker
-    assert "scripts/docker_lab.sh" not in docker
-    assert "compose.classroom.yaml" in docker
-    assert "work/runtime-receipts.json" in docker and "--check-persistence" in docker
-    assert "python-core $DS60_PROFILES" in docker
-    for command in (
-        "scripts/check_lab_http.py",
-        "scripts/check_classroom_profiles.py",
-        "scripts/check_classroom_failures.py",
-        "scripts/check_module_references.py",
-        "scripts/check_classroom_browser.py",
-        "scripts/check_d3_browser.py",
-    ):
-        assert command in docker
-    assert "--check-timeout" in docker
-    assert "scripts/course.py sql --quiet all --reset" in docker
-    assert "scripts/course.py sql --quiet solutions --reset" in docker
-    assert "max-parallel: 4" in matrix
-    for profile in CASES.keys() - {"python-core"}:
-        assert profile in matrix
-    assert "--profile '*' down\n" in docker
-    assert "if: always()" in docker and "--volumes --remove-orphans" in docker
+    assert "paths:" not in workflow
+    docker = workflow.split("  docker:", 1)[1]
+    assert "scripts/ci_classroom.py prepare" in docker
+    assert "scripts/ci_classroom.py qualify" in docker
+    assert "scripts/ci_classroom.py cleanup" in docker
+    assert "max-parallel: 4" in docker
+    assert {profile for group in groups() for profile in group["profiles"]} == set(CASES)
+    assert "work/*receipts.json" in docker and "work/module-reference-results.json" in docker
+    assert "if: always()" in docker
     assert "docker system prune" not in docker and "docker image prune" not in docker
+    driver = (REPO_ROOT / "scripts/ci_classroom.py").read_text()
+    assert '"--registry",' in driver and '"mirrors"' in driver
+    assert '"--no-build"' in driver and '"down", "--volumes", "--remove-orphans"' in driver
+    assert "--rebuild" not in driver
 
 
 def test_workflows_pin_actions_and_install_node_explicitly() -> None:

@@ -1,0 +1,67 @@
+{
+  "number": 11,
+  "title": "Judge calibration and presentation bias",
+  "concepts": [
+    "LLM as judge",
+    "position bias",
+    "counterbalancing",
+    "Brier score",
+    "calibration error"
+  ],
+  "outcome": "Audit a judge using identity-aware order swaps and held-out probability calibration while keeping agreement distinct from correctness.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-003", "eval-004", "eval-010"],
+  "exercises": [
+    {
+      "title": "Invert the swapped result",
+      "task": "Candidate A is on the right and the left answer wins.",
+      "expected": "The identity score for A is 0.",
+      "hint": "Map position back to candidate identity.",
+      "answer": "A position-level label has no fixed model meaning until the display order is known."
+    },
+    {
+      "title": "Check perfect probabilities",
+      "task": "Score probabilities 1,0 against labels 1,0.",
+      "expected": "Brier and the stated ECE are 0.",
+      "hint": "Use the actual labels, not a thresholded probability.",
+      "answer": "Perfect probabilities have zero squared error and zero within-bin calibration gap on this fixture."
+    },
+    {
+      "title": "Check maximally wrong probabilities",
+      "task": "Score 0,1 against 1,0.",
+      "expected": "Both reported scores are 1.",
+      "hint": "Each squared error is 1.",
+      "answer": "The example diagnoses probability failure even if a separate presentation metric remains favorable."
+    },
+    {
+      "title": "Use a constant judge",
+      "task": "Give probability 0.5 to balanced labels.",
+      "expected": "ECE 0 and Brier 0.25 under these bins.",
+      "hint": "Calibration and discrimination answer different questions.",
+      "answer": "A constant predictor can match the overall class frequency while providing no item-level ranking information."
+    },
+    {
+      "title": "Test verbosity invariance",
+      "task": "Duplicate an answer paragraph without adding a claim.",
+      "expected": "Record whether identity preference changes.",
+      "hint": "Hold candidate meaning and the comparison partner fixed.",
+      "answer": "A change diagnoses one presentation sensitivity. It does not prove all longer answers are favored or all length adjustments are valid."
+    },
+    {
+      "title": "Freeze a recalibration mapping",
+      "task": "Fit a mapping on development labels, then evaluate it on new families.",
+      "expected": "Final labels do not influence the fitted mapping.",
+      "hint": "Treat recalibration as model selection.",
+      "answer": "Independent assessment is needed because a reliability diagram can be made attractive by fitting and evaluating on the same cases."
+    }
+  ],
+  "sources": [
+    ["Model-judge presentation bias study", "https://arxiv.org/abs/2306.05685"],
+    [
+      "scikit-learn probability calibration",
+      "https://scikit-learn.org/stable/modules/calibration.html"
+    ]
+  ]
+}

@@ -552,7 +552,7 @@ Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punc
 <li>Sweep <code>alpha</code> values and plot validation scores for Ridge and Lasso.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; regularization strength, coefficient shrinkage, sparsity, and stability; evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.</p>
-<ol>
+<ol start="2">
 <li>Inspect fitted coefficients and compare their sparsity.</li>
 </ol>
 <p>The separate solution also demonstrates Elastic Net as a useful extension.</p>
@@ -565,19 +565,19 @@ Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punc
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Connect regularization strength to coefficient geometry, validation, and feature scaling. Sparse or stable coefficients are model behaviors, not causal truths.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept. <strong>Progressive hint:</strong> Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.</li>
 </ol>
 <p><strong>Verify:</strong> Prediction; print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.</p>
-<ol>
+<ol start="4">
 <li><strong>Elastic Net implementation:</strong> Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity. <strong>Progressive hint:</strong> Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.</li>
 </ol>
 <p><strong>Verify:</strong> Elastic Net implementation; print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.</p>
-<ol>
+<ol start="5">
 <li><strong>Scaling bug:</strong> Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison. <strong>Progressive hint:</strong> The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.</li>
 </ol>
 <p><strong>Verify:</strong> Scaling bug; fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.</p>
-<ol>
+<ol start="6">
 <li><strong>Stability investigation:</strong> Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions. <strong>Progressive hint:</strong> Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.</li>
 </ol>
 <p><strong>Verify:</strong> Stability investigation; over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.</p>
@@ -792,7 +792,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Sweep <code>alpha</code> values and plot validation scores for Ridge and Lasso.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — regularization strength, coefficient shrinkage, sparsity, and stability — evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.</p>
-<ol>
+<ol start="2">
 <li>Inspect fitted coefficients and compare their sparsity.</li>
 </ol>
 <p>The separate solution also demonstrates Elastic Net as a useful extension.</p>
@@ -805,19 +805,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Connect regularization strength to coefficient geometry, validation, and feature scaling. Sparse or stable coefficients are model behaviors, not causal truths.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept. <strong>Progressive hint:</strong> Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.</li>
 </ol>
 <p><strong>Verify:</strong> Prediction — print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.</p>
-<ol>
+<ol start="4">
 <li><strong>Elastic Net implementation:</strong> Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity. <strong>Progressive hint:</strong> Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.</li>
 </ol>
 <p><strong>Verify:</strong> Elastic Net implementation — print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.</p>
-<ol>
+<ol start="5">
 <li><strong>Scaling bug:</strong> Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison. <strong>Progressive hint:</strong> The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.</li>
 </ol>
 <p><strong>Verify:</strong> Scaling bug — fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.</p>
-<ol>
+<ol start="6">
 <li><strong>Stability investigation:</strong> Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions. <strong>Progressive hint:</strong> Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.</li>
 </ol>
 <p><strong>Verify:</strong> Stability investigation — over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.</p>

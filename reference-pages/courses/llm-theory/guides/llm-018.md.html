@@ -316,19 +316,19 @@ logits<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=<
 <ol>
 <li><strong>Prepare a tiny training batch.</strong> Use two four-token sequences and shifted labels with vocabulary16. <strong>Expected:</strong> inputs shape(2,3);6 active targets. <strong>Verify:</strong> Save the assertion results for exercise 1, including inputs shape(2,3);6 active targets.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Measure the initial objective.</strong> Calculate initial cross entropy before any optimizer step. <strong>Expected:</strong> finite positive loss. <strong>Verify:</strong> Save the assertion results for exercise 2, including finite positive loss.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Perform twelve bounded updates.</strong> Use Adam(.01), zero gradients each step, log losses and norms, and update exactly12 times. <strong>Expected:</strong> 12 finite losses and norms; at least one positive norm. <strong>Verify:</strong> Save the assertion results for exercise 3, including 12 finite losses and norms; at least one positive norm.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Verify actual parameter change.</strong> Compare the output projection with its detached snapshot. <strong>Expected:</strong> weights differ. <strong>Verify:</strong> Save the assertion results for exercise 4, including weights differ.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Clear accumulated gradients.</strong> Call zero_grad(set_to_none=True) after the run and inspect every parameter gradient. <strong>Expected:</strong> all gradientsNone. <strong>Verify:</strong> Save the assertion results for exercise 5, including all gradientsNone.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Report budget honestly.</strong> Create a run record with12 completed updates and the declared200 maximum. <strong>Expected:</strong> stopped_at12; no convergence claim. <strong>Verify:</strong> Save the assertion results for exercise 6, including stopped_at12; no convergence claim.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

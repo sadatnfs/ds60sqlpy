@@ -1,0 +1,58 @@
+{
+  "number": 20,
+  "title": "Distributions, random state and Monte Carlo evidence",
+  "concepts": ["Random", "Distributions", "Monte Carlo", "tail probability", "Plotly"],
+  "outcome": "Use explicit random generators, compare simulation with analytic quantities and preserve the distinction between numerical and sampling uncertainty.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-014", "julia-019"],
+  "sources": [
+    ["Distributions.jl", "https://juliastats.org/Distributions.jl/stable/"],
+    ["Julia random generation", "https://docs.julialang.org/en/v1/stdlib/Random/"]
+  ],
+  "figure": 1,
+  "exercises": [
+    {
+      "title": "State the parameterization",
+      "task": "Construct Normal(2,3).",
+      "expected": "The mean is 2 and variance 9.",
+      "hint": "The second argument is standard deviation.",
+      "answer": "A familiar parameter name should be checked against the actual distribution API."
+    },
+    {
+      "title": "Reproduce a sequence",
+      "task": "Create two generators with the same seed and sample the same distribution.",
+      "expected": "They produce equal arrays in the stated runtime.",
+      "hint": "Keep generator state explicit.",
+      "answer": "This demonstrates reproducibility under the current implementation, not a universal cross-version promise."
+    },
+    {
+      "title": "Advance the generator",
+      "task": "Draw twice from one generator object.",
+      "expected": "Its state advances and the arrays differ in the fixture.",
+      "hint": "A seed initializes state; it is not reapplied on every call.",
+      "answer": "Reusing or recreating a generator defines different sampling procedures."
+    },
+    {
+      "title": "Scale Monte Carlo work",
+      "task": "Increase the draw count by a factor of 4 under independent sampling.",
+      "expected": "The theoretical mean standard-error scale halves.",
+      "hint": "Use sigma divided by square root of n.",
+      "answer": "An individual realization can still deviate unpredictably; the scaling is a statement about the sampling model."
+    },
+    {
+      "title": "Inspect an extreme tail",
+      "task": "Compare a survival-function calculation with naive subtraction.",
+      "expected": "A stable tail API retains a small positive probability.",
+      "hint": "Avoid cancellation before taking a logarithm.",
+      "answer": "Probability APIs have different numerical roles even when algebraic formulas look equivalent."
+    },
+    {
+      "title": "Interpret the plot",
+      "task": "Compare empirical frequencies with the exact Binomial masses.",
+      "expected": "Finite simulated frequencies fluctuate around the model probabilities.",
+      "hint": "Keep the sample size and model assumptions visible.",
+      "answer": "The chart is a mechanism demonstration and does not establish a real population distribution."
+    }
+  ]
+}

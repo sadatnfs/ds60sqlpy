@@ -7,11 +7,15 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep4_vertices (
   vertex text PRIMARY KEY
 ) ON COMMIT DROP;
+
 INSERT INTO deep4_vertices
 VALUES
   ('a'),
@@ -21,12 +25,14 @@ VALUES
   ('e'),
   ('f'),
   ('g');
+
 CREATE TEMP TABLE deep4_edges (
   source text NOT NULL,
   target text NOT NULL,
   cost integer NOT NULL CHECK (cost >= 0),
   PRIMARY KEY (source, target)
 ) ON COMMIT DROP;
+
 INSERT INTO deep4_edges
 VALUES
   ('a', 'b', 1),
@@ -36,6 +42,7 @@ VALUES
   ('d', 'b', 1),
   ('b', 'e', 5),
   ('d', 'g', 1);
+
 CREATE FUNCTION pg_temp.assert_true (ok boolean, message text)
   RETURNS void
   LANGUAGE plpgsql
@@ -47,43 +54,50 @@ BEGIN
 END
 $assert$
 ;
-  -- Exercises
-  -- 1. Compute reachability with a finite identity state
-  SAVEPOINT exercise_1;
-  CREATE TEMP TABLE answer_1 ON COMMIT DROP AS
-  WITH RECURSIVE reachable (
-    vertex
+-- Exercises
+-- 1. Compute reachability with a finite identity state
+SAVEPOINT exercise_1;
+
+CREATE TEMP TABLE answer_1 ON COMMIT DROP AS
+WITH RECURSIVE reachable (
+  vertex
 ) AS (
-    VALUES ('a'::text)
-    UNION
-    SELECT
-      e.target
-    FROM
-      reachable AS r
-      JOIN deep4_edges AS e ON e.source = r.vertex
-)
+  VALUES ('a'::text)
+  UNION
   SELECT
-    vertex
+    e.target
   FROM
-    reachable
-  ORDER BY
-    vertex;
+    reachable AS r
+    JOIN deep4_edges AS e ON e.source = r.vertex
+)
+SELECT
+  vertex
+FROM
+  reachable
+ORDER BY
+  vertex;
+
+SELECT
+  vertex
+FROM
+  answer_1
+ORDER BY
+  vertex;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      vertex
-    FROM
-      answer_1
-    ORDER BY
-      vertex;
-      SELECT
-        pg_temp.assert_true ((
-          SELECT
-            COALESCE(jsonb_agg(to_jsonb (answer_1)
-            ORDER BY vertex), '[]'::jsonb)
-          FROM answer_1) = '[{"vertex": "a"}, {"vertex": "b"}, {"vertex": "c"}, {"vertex": "d"}, {"vertex": "e"}, {"vertex": "g"}]'::jsonb, 'sql-deep-04 exercise 1');
+      COALESCE(jsonb_agg(to_jsonb (answer_1)
+      ORDER BY vertex), '[]'::jsonb)
+    FROM answer_1) = '[{"vertex": "a"}, {"vertex": "b"}, {"vertex": "c"}, {"vertex": "d"}, {"vertex": "e"}, {"vertex": "g"}]'::jsonb, 'sql-deep-04 exercise 1');
+
 ROLLBACK TO SAVEPOINT exercise_1;
+
 RELEASE SAVEPOINT exercise_1;
+
 -- 2. Enumerate simple routes to a target
 SAVEPOINT exercise_2;
+
 CREATE TEMP TABLE answer_2 ON COMMIT DROP AS
 WITH RECURSIVE paths (
   vertex,
@@ -109,24 +123,30 @@ WHERE
   vertex = 'd'
 ORDER BY
   path;
-  SELECT
-    path,
-    total_cost,
-    hops
-  FROM
-    answer_2
-  ORDER BY
-    path;
+
+SELECT
+  path,
+  total_cost,
+  hops
+FROM
+  answer_2
+ORDER BY
+  path;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_2)
-          ORDER BY path), '[]'::jsonb)
-        FROM answer_2) = '[{"path": ["a", "b", "c", "d"], "total_cost": 3, "hops": 3}, {"path": ["a", "c", "d"], "total_cost": 5, "hops": 2}]'::jsonb, 'sql-deep-04 exercise 2');
+      COALESCE(jsonb_agg(to_jsonb (answer_2)
+      ORDER BY path), '[]'::jsonb)
+    FROM answer_2) = '[{"path": ["a", "b", "c", "d"], "total_cost": 3, "hops": 3}, {"path": ["a", "c", "d"], "total_cost": 5, "hops": 2}]'::jsonb, 'sql-deep-04 exercise 2');
+
 ROLLBACK TO SAVEPOINT exercise_2;
+
 RELEASE SAVEPOINT exercise_2;
+
 -- 3. Emit one cycle-closing step as evidence
 SAVEPOINT exercise_3;
+
 CREATE TEMP TABLE answer_3 ON COMMIT DROP AS
 WITH RECURSIVE walks (
   vertex,
@@ -155,24 +175,30 @@ WHERE
   is_cycle
 ORDER BY
   cycle_path;
-  SELECT
-    cycle_path,
-    repeated_vertex,
-    cycle_cost
-  FROM
-    answer_3
-  ORDER BY
-    cycle_path;
+
+SELECT
+  cycle_path,
+  repeated_vertex,
+  cycle_cost
+FROM
+  answer_3
+ORDER BY
+  cycle_path;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_3)
-          ORDER BY cycle_path), '[]'::jsonb)
-        FROM answer_3) = '[{"cycle_path": ["a", "b", "c", "d", "b"], "repeated_vertex": "b", "cycle_cost": 4}, {"cycle_path": ["a", "c", "d", "b", "c"], "repeated_vertex": "c", "cycle_cost": 7}]'::jsonb, 'sql-deep-04 exercise 3');
+      COALESCE(jsonb_agg(to_jsonb (answer_3)
+      ORDER BY cycle_path), '[]'::jsonb)
+    FROM answer_3) = '[{"cycle_path": ["a", "b", "c", "d", "b"], "repeated_vertex": "b", "cycle_cost": 4}, {"cycle_path": ["a", "c", "d", "b", "c"], "repeated_vertex": "c", "cycle_cost": 7}]'::jsonb, 'sql-deep-04 exercise 3');
+
 ROLLBACK TO SAVEPOINT exercise_3;
+
 RELEASE SAVEPOINT exercise_3;
+
 -- 4. Report a truncated search honestly
 SAVEPOINT exercise_4;
+
 CREATE TEMP TABLE answer_4 ON COMMIT DROP AS
 WITH RECURSIVE paths (
   vertex,
@@ -213,6 +239,7 @@ GROUP BY
   p.vertex, b.truncated
 ORDER BY
   p.vertex;
+
 SELECT
   vertex,
   min_hops,
@@ -221,16 +248,21 @@ FROM
   answer_4
 ORDER BY
   vertex;
-  SELECT
-    pg_temp.assert_true ((
-      SELECT
-        COALESCE(jsonb_agg(to_jsonb (answer_4)
-        ORDER BY vertex), '[]'::jsonb)
-      FROM answer_4) = '[{"vertex": "a", "min_hops": 0, "search_truncated": true}, {"vertex": "b", "min_hops": 1, "search_truncated": true}, {"vertex": "c", "min_hops": 1, "search_truncated": true}, {"vertex": "d", "min_hops": 2, "search_truncated": true}, {"vertex": "e", "min_hops": 2, "search_truncated": true}]'::jsonb, 'sql-deep-04 exercise 4');
+
+SELECT
+  pg_temp.assert_true ((
+    SELECT
+      COALESCE(jsonb_agg(to_jsonb (answer_4)
+      ORDER BY vertex), '[]'::jsonb)
+    FROM answer_4) = '[{"vertex": "a", "min_hops": 0, "search_truncated": true}, {"vertex": "b", "min_hops": 1, "search_truncated": true}, {"vertex": "c", "min_hops": 1, "search_truncated": true}, {"vertex": "d", "min_hops": 2, "search_truncated": true}, {"vertex": "e", "min_hops": 2, "search_truncated": true}]'::jsonb, 'sql-deep-04 exercise 4');
+
 ROLLBACK TO SAVEPOINT exercise_4;
+
 RELEASE SAVEPOINT exercise_4;
+
 -- 5. Return cheapest path evidence for every vertex
 SAVEPOINT exercise_5;
+
 CREATE TEMP TABLE answer_5 ON COMMIT DROP AS
 WITH RECURSIVE paths (
   vertex,
@@ -269,6 +301,7 @@ FROM
   LEFT JOIN best AS b ON b.vertex = v.vertex
 ORDER BY
   v.vertex;
+
 SELECT
   vertex,
   total_cost,
@@ -277,16 +310,21 @@ FROM
   answer_5
 ORDER BY
   vertex;
-  SELECT
-    pg_temp.assert_true ((
-      SELECT
-        COALESCE(jsonb_agg(to_jsonb (answer_5)
-        ORDER BY vertex), '[]'::jsonb)
-      FROM answer_5) = '[{"vertex": "a", "total_cost": 0, "path": ["a"]}, {"vertex": "b", "total_cost": 1, "path": ["a", "b"]}, {"vertex": "c", "total_cost": 2, "path": ["a", "b", "c"]}, {"vertex": "d", "total_cost": 3, "path": ["a", "b", "c", "d"]}, {"vertex": "e", "total_cost": 6, "path": ["a", "b", "e"]}, {"vertex": "f", "total_cost": null, "path": null}, {"vertex": "g", "total_cost": 4, "path": ["a", "b", "c", "d", "g"]}]'::jsonb, 'sql-deep-04 exercise 5');
+
+SELECT
+  pg_temp.assert_true ((
+    SELECT
+      COALESCE(jsonb_agg(to_jsonb (answer_5)
+      ORDER BY vertex), '[]'::jsonb)
+    FROM answer_5) = '[{"vertex": "a", "total_cost": 0, "path": ["a"]}, {"vertex": "b", "total_cost": 1, "path": ["a", "b"]}, {"vertex": "c", "total_cost": 2, "path": ["a", "b", "c"]}, {"vertex": "d", "total_cost": 3, "path": ["a", "b", "c", "d"]}, {"vertex": "e", "total_cost": 6, "path": ["a", "b", "e"]}, {"vertex": "f", "total_cost": null, "path": null}, {"vertex": "g", "total_cost": 4, "path": ["a", "b", "c", "d", "g"]}]'::jsonb, 'sql-deep-04 exercise 5');
+
 ROLLBACK TO SAVEPOINT exercise_5;
+
 RELEASE SAVEPOINT exercise_5;
+
 -- 6. Separate processed dependencies from cyclic or blocked vertices
 SAVEPOINT exercise_6;
+
 CREATE TEMP TABLE answer_6 ON COMMIT DROP AS
 WITH RECURSIVE steps (
   done
@@ -332,6 +370,7 @@ FROM
   CROSS JOIN final AS f
 ORDER BY
   v.vertex;
+
 SELECT
   vertex,
   processed,
@@ -340,12 +379,16 @@ FROM
   answer_6
 ORDER BY
   vertex;
-  SELECT
-    pg_temp.assert_true ((
-      SELECT
-        COALESCE(jsonb_agg(to_jsonb (answer_6)
-        ORDER BY vertex), '[]'::jsonb)
-      FROM answer_6) = '[{"vertex": "a", "processed": true, "cyclic_or_blocked": false}, {"vertex": "b", "processed": false, "cyclic_or_blocked": true}, {"vertex": "c", "processed": false, "cyclic_or_blocked": true}, {"vertex": "d", "processed": false, "cyclic_or_blocked": true}, {"vertex": "e", "processed": false, "cyclic_or_blocked": true}, {"vertex": "f", "processed": true, "cyclic_or_blocked": false}, {"vertex": "g", "processed": false, "cyclic_or_blocked": true}]'::jsonb, 'sql-deep-04 exercise 6');
+
+SELECT
+  pg_temp.assert_true ((
+    SELECT
+      COALESCE(jsonb_agg(to_jsonb (answer_6)
+      ORDER BY vertex), '[]'::jsonb)
+    FROM answer_6) = '[{"vertex": "a", "processed": true, "cyclic_or_blocked": false}, {"vertex": "b", "processed": false, "cyclic_or_blocked": true}, {"vertex": "c", "processed": false, "cyclic_or_blocked": true}, {"vertex": "d", "processed": false, "cyclic_or_blocked": true}, {"vertex": "e", "processed": false, "cyclic_or_blocked": true}, {"vertex": "f", "processed": true, "cyclic_or_blocked": false}, {"vertex": "g", "processed": false, "cyclic_or_blocked": true}]'::jsonb, 'sql-deep-04 exercise 6');
+
 ROLLBACK TO SAVEPOINT exercise_6;
+
 RELEASE SAVEPOINT exercise_6;
+
 ROLLBACK;

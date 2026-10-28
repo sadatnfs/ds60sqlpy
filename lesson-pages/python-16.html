@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day16_numpy_fundamentals.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -497,16 +497,16 @@ centered <span class="syntax-operator">=</span> scores <span class="syntax-opera
 <ol>
 <li>Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</li>
 <li><strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</li>
 <li><strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</li>
@@ -662,16 +662,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</li>
 </ol>
 <h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</li>
 <li><strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</li>
 <li><strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</li>

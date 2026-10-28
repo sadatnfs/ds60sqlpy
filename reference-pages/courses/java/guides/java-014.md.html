@@ -250,19 +250,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Filter and sum.</strong> Keep even values from 1,2,3,4 and sum their squares. <strong>Expected:</strong> 20. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 20.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Observe laziness with an explicit terminal.</strong> Create a mapped stream that increments a counter,then consumetoList. <strong>Expected:</strong> counter0 before terminal and3 after. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with counter0 before terminal and3 after.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Group with a collector.</strong> Count red,blue,red withgroupingBy and counting. <strong>Expected:</strong> red2L,blue1L. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with red2L,blue1L.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject stream reuse.</strong> Consume a stream once,then attempt another terminal operation. <strong>Expected:</strong> IllegalStateException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IllegalStateException.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Check the reduction identity.</strong> Compare sum reduction with identity0 against a deliberately wrong identity10. <strong>Expected:</strong> correct6;wrong16 in the sequential fixture. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with correct6;wrong16 in the sequential fixture.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Expose nonassociative subtraction.</strong> Compare(10-3)-2 with10-(3-2),then use an associative sum for a parallel fixture. <strong>Expected:</strong> 5 versus 9; parallel sum 5050. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 5 versus 9; parallel sum 5050.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

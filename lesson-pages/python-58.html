@@ -317,7 +317,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <div class="meta">
           <span class="tag">advanced</span>
           <span class="tag">120 minutes</span>
-          <span class="tag">data setup</span>
+          <span class="tag">quality setup</span>
           <span class="tag">offline</span>
         </div>
         <p><strong>Prerequisites:</strong></p>
@@ -382,7 +382,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-58-code-review-refactoring-and-tests">Day 58: Code Review, Refactoring, and Tests<a class="heading-anchor" href="#guide--day-58-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
-<p><strong>Lesson ID:</strong> <code>python-58</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
+<p>The notebook reference creates a real, owned temporary <code>src/myproj</code> package and runs a fresh pytest process against it. The test output establishes the import boundary and three behavioral cases, then the temporary project is removed. The multi-file snippets below are separately prepared project layouts; save them at their declared paths when following that optional contributor route. Ordinary classroom learners need no host package or source-directory setup.</p>
+<p><strong>Lesson ID:</strong> <code>python-58</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>quality</code> · <strong>Network:</strong> offline</p>
 <p>Refactoring changes structure while preserving intended behavior. Today you move notebook logic behind importable interfaces, add focused tests, and use Ruff, mypy, and pytest as complementary evidence.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of the lesson, you can:</p>
@@ -397,7 +398,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li>Complete <code>python-57</code> (security, privacy, and ethics).</li>
 <li>Recall modules, pytest, logging, and type hints from <code>python-05</code>, <code>python-09</code>, <code>python-10</code>, <code>python-11</code>, and <code>python-14</code>.</li>
-<li>Install the <code>quality</code> dependency group.</li>
+<li>The Docker Core image supplies the <code>quality</code> tools. Optional contributors prepare that declared group in their separate environment.</li>
 </ul>
 <h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
 <div class="table-wrap"><table><thead><tr>
@@ -567,11 +568,11 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <li>Move at least two notebook functions into a <code>src/</code> package and add tests.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
-<ol>
+<ol start="2">
 <li>Add type hints and docstrings, then run mypy.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
-<ol>
+<ol start="3">
 <li>Write a short maintainer guide in the project root.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
@@ -585,15 +586,15 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support, not replace, domain evidence.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Characterization testing:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change. <strong>Progressive hint:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</li>
 </ol>
 <p><strong>Verify:</strong> Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
-<ol>
+<ol start="5">
 <li><strong>Risk-based review:</strong> Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths. <strong>Progressive hint:</strong> Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.</li>
 </ol>
 <p><strong>Verify:</strong> Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
-<ol>
+<ol start="6">
 <li><strong>Compatibility change:</strong> Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan. <strong>Progressive hint:</strong> Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.</li>
 </ol>
 <p><strong>Verify:</strong> Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p>
@@ -885,11 +886,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Move at least two notebook functions into a <code>src/</code> package and add tests.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — behavior-preserving refactoring, seams, tests, and compatibility review — import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
-<ol>
+<ol start="2">
 <li>Add type hints and docstrings, then run mypy.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — behavior-preserving refactoring, seams, tests, and compatibility review — run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
-<ol>
+<ol start="3">
 <li>Write a short maintainer guide in the project root.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — behavior-preserving refactoring, seams, tests, and compatibility review — write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
@@ -903,15 +904,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support—not replace—domain evidence.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Characterization testing:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change. <strong>Progressive hint:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</li>
 </ol>
 <p><strong>Verify:</strong> Characterization testing — save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
-<ol>
+<ol start="5">
 <li><strong>Risk-based review:</strong> Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths. <strong>Progressive hint:</strong> Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.</li>
 </ol>
 <p><strong>Verify:</strong> Risk-based review — complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
-<ol>
+<ol start="6">
 <li><strong>Compatibility change:</strong> Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan. <strong>Progressive hint:</strong> Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.</li>
 </ol>
 <p><strong>Verify:</strong> Compatibility change — assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p>
@@ -956,6 +957,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-58-solutions-code-review-refactoring-and-tests">Day 58: Solutions: Code Review, Refactoring, and Tests<a class="heading-anchor" href="#solution-1--day-58-solutions-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
+<p>The notebook reference creates a real, owned temporary <code>src/myproj</code> package and runs a fresh pytest process against it. The test output establishes the import boundary and three behavioral cases, then the temporary project is removed. The multi-file snippets below are separately prepared project layouts; save them at their declared paths when following that optional contributor route. Ordinary classroom learners need no host package or source-directory setup.</p>
 <p>We refactor notebook logic into a module, write unit tests, configure pre‑commit hooks, and add a CI workflow.</p>
 <p>Contents</p>
 <ul>
@@ -1135,17 +1137,79 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span> <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> xs<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>x <span class="syntax-operator">-</span> mn<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>mx <span class="syntax-operator">-</span> mn<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> xs<span class="syntax-punctuation">]</span></span></code></pre>
 </article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># tests/test_fe.py</span></span>
-<span class="source-line"><span class="syntax-keyword">import</span> pytest</span>
-<span class="source-line"><span class="syntax-keyword">from</span> myproj.fe <span class="syntax-keyword">import</span> scale_minmax</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Create a real private package before testing its import boundary.</span></span>
+<span class="source-line"><span class="syntax-comment"># The temporary project is removed after its child pytest process completes.</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">import</span> os</span>
+<span class="source-line"><span class="syntax-keyword">import</span> subprocess</span>
+<span class="source-line"><span class="syntax-keyword">import</span> sys</span>
+<span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
 <span class="source-line"></span>
+<span class="source-line">module_source <span class="syntax-operator">=</span> <span class="syntax-string">&quot;&quot;&quot;</span><span class="syntax-string">from collections.abc import Iterable</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">test_scale_happy</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">    <span class="syntax-keyword">assert</span> scale_minmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-string">def scale_minmax(xs: Iterable[float]) -&gt; list[float]:</span></span>
+<span class="source-line"><span class="syntax-string">    values = list(xs)</span></span>
+<span class="source-line"><span class="syntax-string">    lower, upper = min(values), max(values)</span></span>
+<span class="source-line"><span class="syntax-string">    if upper == lower:</span></span>
+<span class="source-line"><span class="syntax-string">        return [0.0 for _ in values]</span></span>
+<span class="source-line"><span class="syntax-string">    return [(value - lower) / (upper - lower) for value in values]</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line">test_source <span class="syntax-operator">=</span> <span class="syntax-string">&quot;&quot;&quot;</span><span class="syntax-string">import pytest</span></span>
+<span class="source-line"><span class="syntax-string">from myproj.fe import scale_minmax</span></span>
 <span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">def test_scale_happy():</span></span>
+<span class="source-line"><span class="syntax-string">    assert scale_minmax([0, 5, 10]) == [0.0, 0.5, 1.0]</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">test_scale_constant</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">    <span class="syntax-keyword">assert</span> scale_minmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span></span></code></pre>
+<span class="source-line"><span class="syntax-string">def test_scale_constant():</span></span>
+<span class="source-line"><span class="syntax-string">    assert scale_minmax([3, 3, 3]) == [0.0, 0.0, 0.0]</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">def test_empty_input():</span></span>
+<span class="source-line"><span class="syntax-string">    with pytest.raises(ValueError):</span></span>
+<span class="source-line"><span class="syntax-string">        scale_minmax([])</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">day58-project-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> temporary<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    project <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>temporary<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    package <span class="syntax-operator">=</span> project <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">src/myproj</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    package<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>package <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__init__.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>package <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fe.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>module_source<span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tests <span class="syntax-operator">=</span> project <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">tests</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    tests<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>tests <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">test_fe.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>test_source<span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    environment <span class="syntax-operator">=</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    environment<span class="syntax-operator">.</span>pop<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">PYTEST_ADDOPTS</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    environment<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        PYTHONPATH<span class="syntax-operator">=</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>project <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">src</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        PYTEST_DISABLE_PLUGIN_AUTOLOAD<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        PYTHONDONTWRITEBYTECODE<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    result <span class="syntax-operator">=</span> subprocess<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-punctuation">[</span></span>
+<span class="source-line">            sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">-m</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">pytest</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">-q</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">-c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            os<span class="syntax-operator">.</span>devnull<span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">-o</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">addopts=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">--rootdir</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>project<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">-o</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">cache_dir=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>project <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pytest-cache</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-string">&quot;</span><span class="syntax-string">--noconftest</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">            <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>tests<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        cwd<span class="syntax-operator">=</span>project<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        env<span class="syntax-operator">=</span>environment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">        capture_output<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        text<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        timeout<span class="syntax-operator">=</span><span class="syntax-number">30</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>stdout<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>returncode <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> result<span class="syntax-operator">.</span>stderr</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3 passed</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> result<span class="syntax-operator">.</span>stdout</span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Private package import and three actual pytest contracts passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Run tests</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>

@@ -267,19 +267,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Annotate a numeric function.</strong> Define a function accepting two numbers and returning their sum; inspect its runtime value. <strong>Expected:</strong> sum 5 with runtime typeof number. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Show that an assertion does not convert data.</strong> Assert that an unknown string is a number, then inspect the actual runtime type. <strong>Expected:</strong> the runtime value remains the string wrong. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare literal preservation and widening.</strong> Use const for a fixed tag and let for a changing text value. <strong>Expected:</strong> fixed tag remains ready; mutable text can change to done. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Handle null explicitly under strict checking.</strong> Write a length function accepting string or null. <strong>Expected:</strong> length 3 for abc and 0 for null. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Observe type erasure through object keys.</strong> Declare a record type and create a compatible object. <strong>Expected:</strong> runtime keys contain only id and count, with no type alias metadata. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Narrow unknown before numeric use.</strong> Accept only a finite number from an unknown value. <strong>Expected:</strong> 12 doubles to 24; string 12 and Infinity reject. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

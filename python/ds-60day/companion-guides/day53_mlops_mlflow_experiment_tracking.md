@@ -16,6 +16,15 @@ By the end of the lesson, you can:
 - reload an artifact by run URI; and
 - distinguish tracking, artifact storage, registry workflow, and reproducibility.
 
+## Resource and artifact contract
+
+These examples target the prepared MLflow 3 environment. Metadata use explicit
+local SQLite and model files use a local artifact directory. The reference
+trusts only `sklearn.tree._tree.Tree` for its own freshly fitted RandomForest
+when the current skops serializer requests it; it does not infer a broad trust
+list from arbitrary artifacts. Reload only the model this local run just wrote.
+No tracking server, registry promotion or model deployment is started here.
+
 ## Prerequisites
 
 - Complete `python-52` (scalable computation).
@@ -45,18 +54,38 @@ alongside model hyperparameters.
 import mlflow
 import mlflow.sklearn
 
-mlflow.set_experiment("ds60-local-experiment")
+from pathlib import Path
+
+# Explicit local metadata and artifact stores override ambient tracking settings.
+artifact_dir = Path("artifacts/day53").resolve()
+artifact_dir.mkdir(parents=True, exist_ok=True)
+tracking_uri = "sqlite:///" + str(artifact_dir / "tracking.sqlite")
+if mlflow.active_run() is not None:
+    raise RuntimeError("Finish the active run before opening this isolated lesson")
+mlflow.set_tracking_uri(tracking_uri)
+mlflow.set_registry_uri(tracking_uri)
+experiment_name = "ds60-day53-local"
+artifact_location = (artifact_dir / "runs").as_uri()
+experiment = mlflow.get_experiment_by_name(experiment_name)
+if experiment is None:
+    experiment_id = mlflow.create_experiment(experiment_name, artifact_location=artifact_location)
+else:
+    if experiment.artifact_location != artifact_location:
+        raise RuntimeError("Existing experiment has a different artifact location")
+    experiment_id = experiment.experiment_id
+mlflow.set_experiment(experiment_id=experiment_id)
+
 with mlflow.start_run(run_name="baseline") as run:
     mlflow.log_param("model", "LogisticRegression")
     mlflow.log_param("random_state", 42)
     mlflow.log_metric("roc_auc", 0.91)
     # After fitting:
-    # mlflow.sklearn.log_model(pipeline, artifact_path="model")
+    # mlflow.sklearn.log_model(pipeline, name="model")
     print(run.info.run_id)
 ```
 
 Use actual calculated metrics in the notebook; the literal metric above only
-shows the logging API. Keep `mlruns/` as a learner-local ignored artifact, not a
+shows the logging API. Keep `artifacts/day53/` as a learner-local ignored artifact, not a
 source file to commit.
 
 ## View the local UI
@@ -64,13 +93,13 @@ source file to commit.
 macOS/Linux:
 
 ```bash
-.venv/bin/mlflow ui --backend-store-uri mlruns
+.venv/bin/mlflow ui --backend-store-uri sqlite:///artifacts/day53/tracking.sqlite --host 127.0.0.1
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\.venv\Scripts\mlflow.exe ui --backend-store-uri mlruns
+.\.venv\Scripts\mlflow.exe ui --backend-store-uri sqlite:///artifacts/day53/tracking.sqlite --host 127.0.0.1
 ```
 
 Open `http://127.0.0.1:5000`, and stop the process with Ctrl+C when finished.
@@ -80,10 +109,13 @@ The server binds locally and the lesson works offline.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-53` for its guide, notebook and capability notice. The default Core does not include the `production` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [prepared ML engineering course](../../../courses/ml-engineering/guides/mle-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `production` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The notebook writes an explicit local SQLite metadata store and local model artifacts under artifacts/day53. The loopback UI is a separate terminal process. Registry promotion, hosted tracking and deployment are project extensions, not effects of opening this lesson.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -92,8 +124,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 53 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -185,17 +216,22 @@ from tempfile import TemporaryDirectory
 import mlflow
 
 original_uri = mlflow.get_tracking_uri()
-with TemporaryDirectory() as directory:
-    mlflow.set_tracking_uri(Path(directory).as_uri())
-    mlflow.set_experiment("day53-local-mechanics")
-    with mlflow.start_run(run_name="bounded-example") as active:
-        mlflow.log_param("alpha", 0.1)
-        mlflow.log_metric("validation_score", 0.8)
-        run_id = active.info.run_id
-    recorded = mlflow.get_run(run_id)
-    print(recorded.info.status, recorded.data.params, recorded.data.metrics)
-    assert recorded.info.status == "FINISHED"
-mlflow.set_tracking_uri(original_uri)
+try:
+    with TemporaryDirectory() as directory:
+        store = Path(directory).resolve()
+        mlflow.set_tracking_uri("sqlite:///" + str(store / "tracking.sqlite"))
+        experiment_id = mlflow.create_experiment(
+            "day53-local-mechanics", artifact_location=(store / "runs").as_uri()
+        )
+        with mlflow.start_run(run_name="bounded-example", experiment_id=experiment_id) as active:
+            mlflow.log_param("alpha", 0.1)
+            mlflow.log_metric("validation_score", 0.8)  # illustrative API value
+            run_id = active.info.run_id
+        recorded = mlflow.get_run(run_id)
+        print(recorded.info.status, recorded.data.params, recorded.data.metrics)
+        assert recorded.info.status == "FINISHED"
+finally:
+    mlflow.set_tracking_uri(original_uri)
 ```
 
 **Expected observation:** The context manager closes the run as FINISHED, and the parameter/metric are queryable from a local temporary tracking store.
@@ -292,7 +328,7 @@ model from `runs:/<run_id>/model` reproduces predictions on the same input.
 | Runs appear in different stores | Working directory/tracking URI changed | Set and document the local URI |
 | Nested/duplicate runs appear | Autolog and manual contexts overlap | Decide the intended run structure |
 | Artifact cannot be loaded | Wrong run ID or artifact path | Inspect the run's artifact tree in UI |
-| Repository becomes huge | Local `mlruns/` committed | Keep learner artifacts ignored |
+| Repository becomes huge | Local `artifacts/day53/` committed | Keep learner artifacts ignored |
 | Metrics are incomparable | Split/data/metric definition changed | Log data identity and evaluation protocol |
 
 Local file tracking is ideal for learning and one user. Team use needs durable
@@ -311,7 +347,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.
+Tutor me through `python-53` : Day 53 : Experiment Tracking with MLflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evidence. Use exactly these maintained learner materials:

@@ -1,0 +1,59 @@
+{
+  "number": 27,
+  "title": "Modules, source loading and reproducible projects",
+  "concepts": ["modules", "exports", "include", "package layout", "Project.toml", "Manifest.toml"],
+  "outcome": "Separate namespaces from source files, execute a tiny owned multi-file project offline, and distinguish locked dependencies from code loading.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-009", "julia-011"],
+  "sources": [
+    ["Julia modules", "https://docs.julialang.org/en/v1/manual/modules/"],
+    ["Julia code loading", "https://docs.julialang.org/en/v1/manual/code-loading/"],
+    ["Creating packages", "https://pkgdocs.julialang.org/v1/creating-packages/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Use qualified access",
+      "task": "Call LocalStats.center on[2,4].",
+      "expected": "The result is[-1,1].",
+      "hint": "The module owns the name.",
+      "answer": "Qualified access works even without bringing the export into the caller namespace."
+    },
+    {
+      "title": "Trace exports",
+      "task": "Explain whether export makes other names private.",
+      "expected": "It does not enforce privacy.",
+      "hint": "Compare name lookup with access control.",
+      "answer": "Export controls convenient importing; module qualification is not a security boundary."
+    },
+    {
+      "title": "Inspect the project fixture",
+      "task": "Identify which file declares identity and which defines twice.",
+      "expected": "Project.toml declares identity; src/TinyScale.jl defines behavior.",
+      "hint": "The test file consumes the source.",
+      "answer": "Metadata, implementation and tests serve distinct roles."
+    },
+    {
+      "title": "Debug relative paths",
+      "task": "Explain why @__DIR__ is used in the test entrypoint.",
+      "expected": "It anchors the path at the source file.",
+      "hint": "The process working directory may differ.",
+      "answer": "Source-relative paths avoid hidden dependence on where the command was launched."
+    },
+    {
+      "title": "Design reproducible dependencies",
+      "task": "List what Project and Manifest do and do not establish.",
+      "expected": "They identify declared and resolved dependency state.",
+      "hint": "Hardware, data and external services need separate records.",
+      "answer": "A lock graph supports reproduction but does not alone qualify scientific outputs or service availability."
+    },
+    {
+      "title": "Transfer into a real package",
+      "task": "Separate a CSV workflow into numerical core, IO and tests.",
+      "expected": "The core takes values and returns values without network calls.",
+      "hint": "Keep side effects at explicit boundaries.",
+      "answer": "A pure public kernel is independently testable; IO and package operations can have separate integration checks."
+    }
+  ]
+}

@@ -249,19 +249,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Retain sequence multiplicity.</strong> Create a mutable list red,blue,red and append green. <strong>Expected:</strong> size 4; red appears twice. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with size 4; red appears twice.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Count with a map.</strong> Count each color withMap.merge. <strong>Expected:</strong> red2,blue1,green1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with red2,blue1,green1.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Inspect set insertion.</strong> Insertred twice into a HashSet and inspect return values. <strong>Expected:</strong> first true,second false,size1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with first true,second false,size1.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Create deterministic output order.</strong> Sort the count-map keys before presenting them. <strong>Expected:</strong> blue,green,red. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with blue,green,red.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Distinguish lookup from insertion.</strong> Readmissing withgetOrDefault0 and compare map size. <strong>Expected:</strong> value0;map stillsize3. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with value0;map stillsize3.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Respect unmodifiable fixtures.</strong> Try adding toList.of(1,2) and catch the specific exception. <strong>Expected:</strong> UnsupportedOperationException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with UnsupportedOperationException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

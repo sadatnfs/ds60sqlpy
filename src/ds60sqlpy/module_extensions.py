@@ -331,7 +331,10 @@ def load_extra_plans(root: Path, profiles: set[str]) -> tuple[list[dict[str, Any
             raise ValueError("Subject plans must cover all three learning stages.")
         plan["stages"] = [{"id": level, "title": level.title()} for level in LEVELS]
         plan["pilot"] = {"lesson_id": rows[0]["id"]}
-        plan["learning_mode"] = "practice"
+        mode = plan.get("learning_mode", "practice")
+        if not isinstance(mode, str) or mode not in {"practice", "tutorial"}:
+            raise ValueError("Invalid subject learning mode.")
+        plan["learning_mode"] = mode
         plans.append(plan)
     book = load_book(root)
     if book is not None:

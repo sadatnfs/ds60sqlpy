@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 1: compare a correlated aggregate with pre-aggregation plus JOIN.
 EXPLAIN (
   ANALYZE,
@@ -30,6 +31,7 @@ SELECT
       o.customer_id = c.customer_id) AS order_count
 FROM
   customers c;
+
 EXPLAIN (
   ANALYZE,
   BUFFERS
@@ -48,6 +50,7 @@ SELECT
 FROM
   customers c
   LEFT JOIN order_counts oc USING (customer_id);
+
 -- Exercise 2: compare aggregating every order before LIMIT...
 EXPLAIN (
   ANALYZE,
@@ -72,6 +75,7 @@ ORDER BY
   order_date DESC,
   order_id DESC
 LIMIT 100;
+
 -- ...with finding the 100 newest orders before aggregating their lines.
 -- Both return one row per selected order; the second version reduces work.
 EXPLAIN (
@@ -104,6 +108,7 @@ GROUP BY
 ORDER BY
   ro.order_date DESC,
   ro.order_id DESC;
+
 -- Exercise 3: MATERIALIZED creates an optimization boundary; NOT MATERIALIZED
 -- permits the CTE to be folded into its single parent query.
 EXPLAIN WITH recent AS MATERIALIZED (
@@ -120,6 +125,7 @@ SELECT
 FROM
   recent
   JOIN customers USING (customer_id);
+
 EXPLAIN WITH recent AS NOT MATERIALIZED (
   SELECT
     order_id,
@@ -134,6 +140,7 @@ SELECT
 FROM
   recent
   JOIN customers USING (customer_id);
+
 -- Exercise 4: reduce items to one row per order before crossing the next grain.
 WITH item_totals AS (
   SELECT
@@ -155,6 +162,7 @@ GROUP BY
   c.country
 ORDER BY
   c.country;
+
 -- Exercise 5: aggregate each independent many-side to order grain. Joining raw
 -- payments and items would multiply both amounts.
 WITH paid AS (
@@ -186,6 +194,7 @@ FROM
 ORDER BY
   o.order_id
 LIMIT 20;
+
 -- Exercise 6: NOT EXISTS remains two-valued for each customer even if the
 -- subquery's projected expression could contain NULL.
 SELECT
@@ -202,4 +211,5 @@ WHERE
       o.customer_id = c.customer_id)
 ORDER BY
   c.customer_id;
+
 ROLLBACK;

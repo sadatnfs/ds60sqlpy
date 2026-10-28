@@ -1,0 +1,58 @@
+{
+  "number": 6,
+  "title": "Functions, keywords, closures and argument sharing",
+  "concepts": ["function", "keyword argument", "closure", "higher-order function", "mutation"],
+  "outcome": "Write reusable functions with explicit contracts and distinguish local rebinding from mutation of a passed object.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-005"],
+  "sources": [
+    ["Julia function arguments", "https://docs.julialang.org/en/v1/manual/functions/"],
+    ["Julia methods", "https://docs.julialang.org/en/v1/manual/methods/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Use defaults",
+      "task": "Call affine on 5 without keywords.",
+      "expected": "The result is 5.",
+      "hint": "Inspect both default parameters.",
+      "answer": "A default is part of the function contract and should be recorded when it matters scientifically."
+    },
+    {
+      "title": "Override one choice",
+      "task": "Set shift=-2 for input 5.",
+      "expected": "The result is 3.",
+      "hint": "Unspecified keywords retain their defaults.",
+      "answer": "Explicit keyword configuration makes a transformation reproducible."
+    },
+    {
+      "title": "Build a closure",
+      "task": "Create a scale 3 function and apply it to 2.",
+      "expected": "The result is 6.",
+      "hint": "The returned function retains its scale binding.",
+      "answer": "A closure packages a transformation and context; it does not necessarily copy mutable captured objects."
+    },
+    {
+      "title": "Trace a rebound argument",
+      "task": "Call rebind on a caller array.",
+      "expected": "The caller array remains unchanged.",
+      "hint": "The local name is assigned another array.",
+      "answer": "Rebinding the argument name is different from mutating the shared object."
+    },
+    {
+      "title": "Trace a mutated argument",
+      "task": "Call change_first! on a nonempty vector.",
+      "expected": "Its first element becomes 99 and the returned object aliases it.",
+      "hint": "Compare identity as well as contents.",
+      "answer": "The naming convention warns callers that the operation changes shared state."
+    },
+    {
+      "title": "Reject an empty mutation",
+      "task": "Call change_first! on an empty vector.",
+      "expected": "An explicit ArgumentError is raised.",
+      "hint": "State the first-element precondition.",
+      "answer": "A clear input contract produces a more useful diagnostic than an accidental indexing failure."
+    }
+  ]
+}

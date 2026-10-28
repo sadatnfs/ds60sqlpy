@@ -442,37 +442,37 @@ end <span class="syntax-operator">=</span> datetime<span class="syntax-operator"
 </ol>
 <p><strong>Verify:</strong> The accepted values have exponent -2 and integer-cent values 1230 and 0; <code>&quot;0.10&quot;</code> plus <code>&quot;0.20&quot;</code> totals exactly 0.30.</p>
 <p><strong>Hint:</strong> Validate the text shape before quantizing so quantization cannot silently repair precision.</p>
-<ol>
+<ol start="2">
 <li><strong>Reject ambiguous numeric forms.</strong> Probe <code>&quot;1.005&quot;</code>, <code>&quot;NaN&quot;</code>, <code>&quot;Infinity&quot;</code>, <code>&quot;1e2&quot;</code>, <code>&quot;-1&quot;</code>, an empty string, a float, and a thirteen-digit integer string.</li>
 </ol>
 <p><strong>Verify:</strong> Every probe raises ValueError. A two-digit fractional amount <code>&quot;1.00&quot;</code> still succeeds, showing the check is not blanket rejection.</p>
 <p><strong>Hint:</strong> A bounded lexical rule can rule out both unexpected notation and unreasonable digit counts.</p>
-<ol>
+<ol start="3">
 <li><strong>Expose Unicode collisions.</strong> Implement <code>canonical_label</code> using trim, NFC, casefold, then NFC. Implement collision_groups that retains distinct raw spellings for shared canonical values.</li>
 </ol>
 <p><strong>Verify:</strong> Assert equal canonical values for <code>&quot;Café&quot;</code> and <code>&quot;Cafe\u0301&quot;</code>; collision output maps <code>strasse</code> to two raw spellings. Identical repeated raw text produces an empty collision mapping.</p>
 <p><strong>Hint:</strong> Keep raw spellings even when their normalized comparison keys agree.</p>
-<ol>
+<ol start="4">
 <li><strong>Parse and convert an instant.</strong> Implement <code>parse_instant</code> to require an aware parsed timestamp and return UTC. Compare <code>2026-01-02T00:30:00+02:00</code> with its UTC equivalent.</li>
 </ol>
 <p><strong>Verify:</strong> Both representations produce equal datetimes at 2026-01-01 22:30 UTC; a timestamp without any offset raises ValueError.</p>
 <p><strong>Hint:</strong> Check utcoffset before converting; do not assume the local machine timezone.</p>
-<ol>
+<ol start="5">
 <li><strong>Own an exact boundary once.</strong> Implement a window membership function that requires aware ordered bounds. Test start, one middle instant, end, and an empty or reversed window.</li>
 </ol>
 <p><strong>Verify:</strong> Membership assertions return True for start/middle and False for end; tests capture ValueError for nonpositive windows. Adjacent-window boundary membership sums to exactly 1.</p>
 <p><strong>Hint:</strong> Use a single declared [start, end) policy across every comparison.</p>
-<ol>
+<ol start="6">
 <li><strong>Reconcile a window total.</strong> Implement <code>window_total</code> over records with amount and occurred_at text. Include two in-window values 0.10 and 0.20 and an exact-end value 9.00.</li>
 </ol>
 <p><strong>Verify:</strong> The result is count 2 and Decimal total 0.30; an independent integer sum gives 30 cents. The 9.00 record is excluded.</p>
 <p><strong>Hint:</strong> Perform exact cents accounting after validation, then convert the integer sum back to Decimal.</p>
-<ol>
+<ol start="7">
 <li><strong>Prevent filter-hidden invalid data.</strong> Add an out-of-window record with amount <code>&quot;bad&quot;</code>. Explain whether filtering is permitted to conceal the malformed source value.</li>
 </ol>
 <p><strong>Verify:</strong> A test captures ValueError for the bad amount and confirms that no total is returned, even with the malformed record outside the selected window.</p>
 <p><strong>Hint:</strong> Boundary ordering is observable behavior; test it explicitly.</p>
-<ol>
+<ol start="8">
 <li><strong>Transfer to local-day reporting.</strong> Write a policy note for a source that asks for a city-local business day instead of a UTC day. State what additional metadata and tests are needed without inventing a zone conversion.</li>
 </ol>
 <p><strong>Verify:</strong> The note requires a named zone and rules/version, tests a seasonal offset change and ambiguous local time, and distinguishes a local day from a fixed 24-hour UTC window.</p>

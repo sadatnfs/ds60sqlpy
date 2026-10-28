@@ -76,3 +76,10 @@ docker/workers/dotnet/bin/
 docker/workers/dotnet/obj/
 **/*.xcodeproj/**/xcuserdata/
 **/*.xcworkspace/**/xcuserdata/
+
+# Local structured output from standalone classroom examples
+ds60-figures.json
+.ds60-output-*
+
+# Private assets, tokens and event history from optional workshops.
+.workshop/

@@ -37,8 +37,16 @@ def test_browser_chooser_baseline_matches_the_current_catalog_sources() -> None:
         for path in (root / "courses").glob("*/lessons.json")
     }
     assert {"cuda", "web-development", "jax", "r", "dax", "data-visualization"} <= modules
-    assert len(browser.SUBJECTS) == 26
     assert set(legacy) | modules | {"statistics-ml"} == browser.SUBJECTS
+
+
+def test_browser_expectations_include_newly_admitted_subjects(tmp_path: Path) -> None:
+    (tmp_path / "curriculum").mkdir()
+    (tmp_path / "curriculum/catalog.json").write_text(json.dumps({"tracks": {"python": {}}}))
+    subject = tmp_path / "courses/new-subject"
+    subject.mkdir(parents=True)
+    (subject / "lessons.json").write_text(json.dumps({"track_id": "new-subject"}))
+    assert browser.published_subjects(tmp_path) == {"python", "new-subject"}
 
 
 @pytest.mark.parametrize("identity", ["js-029", "js-030", "js-031"])

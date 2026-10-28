@@ -10,7 +10,9 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
-FIXTURE = Path("python") / "professional" / "fixtures" / "data" / "beginner_orders.csv"
+from ds60sqlpy.teaching_data import teaching_fixture
+
+FIXTURE = teaching_fixture("beginner-orders")
 
 
 def load_rows(path: Path) -> list[dict[str, str]]:

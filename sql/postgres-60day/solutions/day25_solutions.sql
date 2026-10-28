@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.
 -- Assumptions: The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.
@@ -69,6 +70,7 @@ GROUP BY
   depth
 ORDER BY
   depth;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Report each manager's direct-report count and payroll.
@@ -107,6 +109,7 @@ FROM
 ORDER BY
   dt.direct_reports DESC,
   manager.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Identify hierarchy roots and leaves in one report.
@@ -160,6 +163,7 @@ FROM
 ORDER BY
   node_type,
   employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Count employees reachable from roots and compare with total employees.
@@ -205,6 +209,7 @@ SELECT
       employees) - COUNT(DISTINCT employee_id) AS unreachable_employees
 FROM
   organization;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Calculate full-subtree report counts per manager without counting the manager as their own report.
@@ -250,6 +255,7 @@ GROUP BY
 ORDER BY
   all_descendant_reports DESC,
   manager_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Report department headcount split between managers and nonmanagers.
@@ -289,5 +295,6 @@ GROUP BY
   d.name
 ORDER BY
   d.department_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

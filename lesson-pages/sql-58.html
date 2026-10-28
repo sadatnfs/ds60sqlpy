@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-58 · Final Capstone Part1 · DS60</title>
+  <title>sql-58 · Final Capstone Part 1 · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-58</p>
-        <h1>Final Capstone Part1</h1>
+        <h1>Final Capstone Part 1</h1>
         <p class="hero-copy">Applied analytics and capstones</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -404,12 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-58-final-capstone-part-1-ingestion-and-data-quality">Day 58: Final Capstone, Part 1: Ingestion and Data Quality<a class="heading-anchor" href="#guide--day-58-final-capstone-part-1-ingestion-and-data-quality" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> <a href="sql-57.html#guide">Day 57; trends and anomalies</a></li>
-<li><strong>Artifacts:</strong> <a href="sql-58.html#learner">learner SQL</a> · <a href="sql-58.html#solution-1">solution reasoning</a> · <a href="sql-58.html#solution-2">executable solution</a></li>
-</ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-58</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -425,12 +419,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-58</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-57.html#guide">Day 57; trends and anomalies</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-58.html#learner">learner SQL</a> · <a href="sql-58.html#solution-1">solution reasoning</a> · <a href="sql-58.html#solution-2">executable solution</a></li>
+</ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Raw staging, Rejection reason, Upsert count. Its worked SQL reads or creates <code>stg_customers_raw</code>, <code>customers</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: For each timestamp format, test a format-specific regular expression before casting. Keep raw text and parsed value together, collect explicit rejection reasons, and upsert only accepted rows inside the rollback-only transaction. Return staged, valid, invalid, and affected counts that reconcile. The first runnable example has a concrete contract: Example 1 must complete through <code>psql</code> with its documented command tag or notice for the lesson evidence named below. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup. Its final projection is the columns written in the final <code>SELECT</code>. Reselect the returned key columns from the columns written in the final <code>SELECT</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day58_final_capstone_part1.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/postgres-60day/day58_final_capstone_part1.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> stg_customers_raw <span class="syntax-punctuation">(</span>
   full_name <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
@@ -557,7 +557,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/day58_final_capstone_part1.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -569,13 +569,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 58: Final Capstone - Integrated Data Challenge (Part 1)</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-58: Final Capstone Part1</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-58: Final Capstone Part 1</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day58_final_capstone_part1.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-58/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-58.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -589,6 +589,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- Focus: Real-world messy data, data quality fixes, staging, and normalization</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Simulate messy incoming data (staging)</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> stg_customers_raw <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  full_name <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span></span>
@@ -598,11 +599,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  created_at <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  attributes <span class="syntax-builtin">TEXT</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> stg_customers_raw <span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> attributes<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;  Customer 501  &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CUSTOMER501@EXAMPLE.COM &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27; us &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27; GOLD &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2025/01/03 10:00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;channel&quot;:&quot;Web&quot;,&quot;referrer&quot;:&quot;SEO&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Customer 502&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;customer-502@example.com&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;03-01-2025&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;channel&quot;:&quot;mobile&quot;,&quot;referrer&quot;:&quot;email&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Customer 503&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;invalid-email&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;silver&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2025-01-05T12:34:56Z&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;channel&quot;:&quot;store&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Clean and conform the staging data into canonical types</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> cleaned <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -637,6 +640,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  validated<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Upsert valid rows into customers (demo only; rolled back)</span></span>
 <span class="source-line"><span class="syntax-comment">--    Here we only insert valid emails and countries</span></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> customers <span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> attributes<span class="syntax-punctuation">)</span></span>
@@ -677,6 +681,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">AND</span> v<span class="syntax-punctuation">.</span>country_valid</span>
 <span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">DO</span> <span class="syntax-keyword">NOTHING</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- avoid dup per our schema constraint</span></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Create a DQ report: invalid emails, invalid countries, null criticals</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> dq <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
@@ -707,11 +712,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  dq<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Normalize country names (demo mapping table)</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> country_map <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  code <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  normalized <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> country_map</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -724,12 +731,14 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;IN&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;IN&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;AU&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;AU&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;BR&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;BR&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  src<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">AS</span> raw<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>cm<span class="syntax-punctuation">.</span>normalized<span class="syntax-punctuation">,</span> <span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>src<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  stg_customers_raw src</span>
 <span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> country_map cm <span class="syntax-keyword">ON</span> cm<span class="syntax-punctuation">.</span>code <span class="syntax-operator">=</span> src<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Extend the parser to handle additional datetime formats.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-58 Exercise 1, read from `stg_customers_raw`, `customers`, and `country_map`. Build the answer toward `parse_additional_datetime_formats_safely_answer`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
@@ -1169,7 +1178,7 @@ $<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/solutions/day58_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1196,6 +1205,7 @@ $<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> stg_customer_ingest_solution <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  source_row_number <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  full_name <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
@@ -1206,12 +1216,14 @@ $<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">
 <span class="source-line">  phone <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  attributes <span class="syntax-builtin">text</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> stg_customer_ingest_solution <span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> phone<span class="syntax-punctuation">,</span> attributes<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27; Customer 601 &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CUSTOMER601@EXAMPLE.COM &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USA&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;gold&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2026/01/03 10:00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(415) 555-0101&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;channel&quot;:&quot;web&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Customer 602&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;customer602@example.com&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;silver&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;01/15/2026 08:30&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;+44 20 7946 0958&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;channel&quot;:&quot;mobile&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Customer 603&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;customer603@example.com&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;15-Jan-2026 12:00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;030-1234567&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;channel&quot;:&quot;store&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Customer bad&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;not-an-email&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;XX&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;bronze&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;not-a-date&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;123&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;not-json&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> cleaned_customer_ingest_solution <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  source_row_number <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  full_name <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
@@ -1227,9 +1239,11 @@ $<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">
 <span class="source-line">  attributes jsonb<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  json_valid <span class="syntax-builtin">boolean</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Parse only the supported formats, in a declared source time zone, and turn</span></span>
 <span class="source-line"><span class="syntax-comment">-- malformed-but-regex-shaped input into NULL rather than aborting the batch.</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>try_parse_customer_timestamp <span class="syntax-punctuation">(</span>raw_value <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> timestamptz</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -1269,14 +1283,14 @@ $<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercise 1: guarded CASE branches parse each supported datetime format and</span></span>
-<span class="source-line">  <span class="syntax-comment">-- leave unrecognized input NULL instead of raising.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercise 2: phone text is normalized to digits and validated in staging;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- there is deliberately no destination column in training.customers.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercise 3: an INOUT procedure returns a two-column DQ/load summary.</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">PROCEDURE</span> ingest_customer_stage_solution <span class="syntax-punctuation">(</span><span class="syntax-keyword">INOUT</span> upserted_rows <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">INOUT</span> invalid_rows <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: guarded CASE branches parse each supported datetime format and</span></span>
+<span class="source-line"><span class="syntax-comment">-- leave unrecognized input NULL instead of raising.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: phone text is normalized to digits and validated in staging;</span></span>
+<span class="source-line"><span class="syntax-comment">-- there is deliberately no destination column in training.customers.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: an INOUT procedure returns a two-column DQ/load summary.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">OR</span> <span class="syntax-keyword">REPLACE</span> <span class="syntax-keyword">PROCEDURE</span> ingest_customer_stage_solution <span class="syntax-punctuation">(</span><span class="syntax-keyword">INOUT</span> upserted_rows <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">INOUT</span> invalid_rows <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line"><span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">  <span class="syntax-keyword">TRUNCATE</span> cleaned_customer_ingest_solution<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
@@ -1363,187 +1377,200 @@ $<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">GET</span> <span class="syntax-keyword">DIAGNOSTICS</span> upserted_rows <span class="syntax-operator">=</span> <span class="syntax-keyword">ROW_COUNT</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CALL</span> ingest_customer_stage_solution <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises 1 and 2 are visible in the parsed datetime and normalized phone</span></span>
-<span class="source-line">  <span class="syntax-comment">-- columns. Phone is not loaded because the canonical customers table has no</span></span>
-<span class="source-line">  <span class="syntax-comment">-- phone column; changing that model is a separate migration decision.</span></span>
+<span class="source-line">$<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CALL</span> ingest_customer_stage_solution <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises 1 and 2 are visible in the parsed datetime and normalized phone</span></span>
+<span class="source-line"><span class="syntax-comment">-- columns. Phone is not loaded because the canonical customers table has no</span></span>
+<span class="source-line"><span class="syntax-comment">-- phone column; changing that model is a separate migration decision.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  cleaned_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: deterministic winner selection happens after normalization and</span></span>
+<span class="source-line"><span class="syntax-comment">-- before upsert. Newest valid timestamp wins; email/full_name break any ties.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> candidates <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    <span class="syntax-operator">*</span></span>
+<span class="source-line">    email <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    created_at<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    source_row_number<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> email <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      source_row_number <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> winner_rank</span>
 <span class="source-line">  <span class="syntax-keyword">FROM</span></span>
 <span class="source-line">    cleaned_customer_ingest_solution</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    email<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-comment">-- Exercise 4: deterministic winner selection happens after normalization and</span></span>
-<span class="source-line">    <span class="syntax-comment">-- before upsert. Newest valid timestamp wins; email/full_name break any ties.</span></span>
-<span class="source-line">    <span class="syntax-keyword">WITH</span> candidates <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        email <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        created_at<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        source_row_number<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> email <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">          source_row_number <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> winner_rank</span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">        cleaned_customer_ingest_solution</span>
-<span class="source-line">      <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">        email_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> country_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> phone_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> json_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> created_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> full_name <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    email_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> country_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> phone_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> json_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> created_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> full_name <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  candidates</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  winner_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  normalized_email<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: every cleaned row receives one acceptance state and a diagnostic</span></span>
+<span class="source-line"><span class="syntax-comment">-- reason. Keeping detail permits remediation; grouped counts alone would not.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> classified <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">      <span class="syntax-keyword">OR</span> full_name <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;invalid_name&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">WHEN</span> email_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;invalid_email&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">WHEN</span> country_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;invalid_country&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">WHEN</span> created_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;invalid_datetime&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">WHEN</span> phone_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;invalid_phone&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">WHEN</span> json_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;invalid_json&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">      <span class="syntax-string">&#x27;accepted&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> outcome</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    cleaned_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  outcome<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  classified</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  outcome</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  outcome<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: normalized email is the deduplication/conflict key, so case and</span></span>
+<span class="source-line"><span class="syntax-comment">-- surrounding whitespace cannot create competing logical customers.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  email <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> candidate_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  cleaned_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  email</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 7: missing and unknown are different quality states. Preserve the</span></span>
+<span class="source-line"><span class="syntax-comment">-- raw input beside its normalized candidate.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  country <span class="syntax-keyword">AS</span> raw_country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;USA&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;US&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;U S&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;US&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> normalized_candidate<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> <span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;missing&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USA&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;FR&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;IN&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;AU&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;BR&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;recognized&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;unrecognized&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> country_status</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  stg_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  raw_country NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 8: source identity makes replay detection independent of row values.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> staged_batch_identity <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  batch_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  source_row_number <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>batch_id<span class="syntax-punctuation">,</span> source_row_number<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> staged_batch_identity</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;day58-demo&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  source_row_number<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  stg_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>batch_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  source_row_number<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">DO</span> <span class="syntax-keyword">NOTHING</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> staged_batch_identity</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;day58-demo&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  source_row_number<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  stg_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>batch_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  source_row_number<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">DO</span> <span class="syntax-keyword">NOTHING</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> replay_safe_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  staged_batch_identity<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 9: PostgreSQL 16&#x27;s IS JSON predicate validates text without raising.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Invalid raw text remains available for quarantine and diagnosis.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  attributes <span class="syntax-keyword">AS</span> raw_attributes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> attributes <span class="syntax-keyword">IS</span> JSON <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;valid_json&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;invalid_json&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> json_status</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  stg_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 10: each staged row is accepted or rejected exactly once. Upserted</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows can be inserts or updates; production code would return those two counts</span></span>
+<span class="source-line"><span class="syntax-comment">-- separately using an explicit merge/audit strategy.</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> classified <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    email_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> country_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> phone_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> json_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> created_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> full_name <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">AS</span> accepted</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    cleaned_customer_ingest_solution</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      <span class="syntax-operator">*</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      candidates</span>
-<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">      winner_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      normalized_email<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-comment">-- Exercise 5: every cleaned row receives one acceptance state and a diagnostic</span></span>
-<span class="source-line">      <span class="syntax-comment">-- reason. Keeping detail permits remediation; grouped counts alone would not.</span></span>
-<span class="source-line">      <span class="syntax-keyword">WITH</span> classified <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">          <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">            <span class="syntax-keyword">OR</span> full_name <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;invalid_name&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">WHEN</span> email_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;invalid_email&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">WHEN</span> country_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;invalid_country&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">WHEN</span> created_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;invalid_datetime&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">WHEN</span> phone_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;invalid_phone&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">WHEN</span> json_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;invalid_json&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;accepted&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> outcome</span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">          cleaned_customer_ingest_solution</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        outcome<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span></span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">        classified</span>
-<span class="source-line">      <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">        outcome</span>
-<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">        outcome<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-comment">-- Exercise 6: normalized email is the deduplication/conflict key, so case and</span></span>
-<span class="source-line">        <span class="syntax-comment">-- surrounding whitespace cannot create competing logical customers.</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          email <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
-<span class="source-line">          <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> candidate_rows</span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">          cleaned_customer_ingest_solution</span>
-<span class="source-line">        <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">          email</span>
-<span class="source-line">        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">          email<span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-comment">-- Exercise 7: missing and unknown are different quality states. Preserve the</span></span>
-<span class="source-line">          <span class="syntax-comment">-- raw input beside its normalized candidate.</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            country <span class="syntax-keyword">AS</span> raw_country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;USA&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">              <span class="syntax-string">&#x27;US&#x27;</span></span>
-<span class="source-line">            <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;U S&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">              <span class="syntax-string">&#x27;US&#x27;</span></span>
-<span class="source-line">            <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">              <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> normalized_candidate<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">              <span class="syntax-keyword">OR</span> <span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">              <span class="syntax-string">&#x27;missing&#x27;</span></span>
-<span class="source-line">            <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">upper</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USA&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;FR&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;IN&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;AU&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;BR&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">              <span class="syntax-string">&#x27;recognized&#x27;</span></span>
-<span class="source-line">            <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">              <span class="syntax-string">&#x27;unrecognized&#x27;</span></span>
-<span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> country_status</span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">            stg_customer_ingest_solution</span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">            raw_country NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-comment">-- Exercise 8: source identity makes replay detection independent of row values.</span></span>
-<span class="source-line">            <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> staged_batch_identity <span class="syntax-punctuation">(</span></span>
-<span class="source-line">              batch_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">              source_row_number <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">              email <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">              <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>batch_id<span class="syntax-punctuation">,</span> source_row_number<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> staged_batch_identity</span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;day58-demo&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">            source_row_number<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            email</span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">            stg_customer_ingest_solution</span>
-<span class="source-line">          <span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>batch_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            source_row_number<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">DO</span> <span class="syntax-keyword">NOTHING</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> staged_batch_identity</span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-string">&#x27;day58-demo&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">            source_row_number<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            email</span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">            stg_customer_ingest_solution</span>
-<span class="source-line">          <span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>batch_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            source_row_number<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">DO</span> <span class="syntax-keyword">NOTHING</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">              <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> replay_safe_rows</span>
-<span class="source-line">            <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">              staged_batch_identity<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-comment">-- Exercise 9: PostgreSQL 16&#x27;s IS JSON predicate validates text without raising.</span></span>
-<span class="source-line">              <span class="syntax-comment">-- Invalid raw text remains available for quarantine and diagnosis.</span></span>
-<span class="source-line">              <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                email<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                attributes <span class="syntax-keyword">AS</span> raw_attributes<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> attributes <span class="syntax-keyword">IS</span> JSON <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                  <span class="syntax-string">&#x27;valid_json&#x27;</span></span>
-<span class="source-line">                <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                  <span class="syntax-string">&#x27;invalid_json&#x27;</span></span>
-<span class="source-line">                <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> json_status</span>
-<span class="source-line">              <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                stg_customer_ingest_solution</span>
-<span class="source-line">              <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                email<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                <span class="syntax-comment">-- Exercise 10: each staged row is accepted or rejected exactly once. Upserted</span></span>
-<span class="source-line">                <span class="syntax-comment">-- rows can be inserts or updates; production code would return those two counts</span></span>
-<span class="source-line">                <span class="syntax-comment">-- separately using an explicit merge/audit strategy.</span></span>
-<span class="source-line">                <span class="syntax-keyword">WITH</span> classified <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                    email_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">                    <span class="syntax-keyword">AND</span> country_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">                    <span class="syntax-keyword">AND</span> phone_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">                    <span class="syntax-keyword">AND</span> json_valid <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line">                    <span class="syntax-keyword">AND</span> created_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">                    <span class="syntax-keyword">AND</span> full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">                    <span class="syntax-keyword">AND</span> full_name <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">AS</span> accepted</span>
-<span class="source-line">                  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                    cleaned_customer_ingest_solution</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                  <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                      stg_customer_ingest_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> staged_rows<span class="syntax-punctuation">,</span></span>
-<span class="source-line">          <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> accepted <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> accepted_rows<span class="syntax-punctuation">,</span></span>
-<span class="source-line">          <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> accepted <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rejected_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      stg_customer_ingest_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> staged_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> accepted <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> accepted_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> accepted <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rejected_rows<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> reconciled_rows</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  classified<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
 
@@ -1592,8 +1619,8 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-57.html"><small>Previous lesson</small><strong>sql-57</strong><span>Project4 BI Part3</span></a>
-        <a class="nav-card next" href="sql-59.html"><small>Next lesson</small><strong>sql-59</strong><span>Final Capstone Part2</span></a>
+        <a class="nav-card" href="sql-57.html"><small>Previous lesson</small><strong>sql-57</strong><span>Project 4 BI Part 3</span></a>
+        <a class="nav-card next" href="sql-59.html"><small>Next lesson</small><strong>sql-59</strong><span>Final Capstone Part 2</span></a>
       </nav>
     </div>
   </main>

@@ -1,0 +1,94 @@
+name: ds60-mle-workshop
+x-common: &common
+  image: ${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.0}
+  pull_policy: never
+  user: "${DS60_WORKSHOP_UID:-1000}:${DS60_WORKSHOP_GID:-1000}"
+  working_dir: /project
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  init: true
+  cpus: 2
+  mem_limit: 2g
+  pids_limit: 128
+  tmpfs:
+    - /tmp:size=256m,mode=1777
+  labels:
+    org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Set an ownership identifier}
+  environment:
+    HOME: /tmp
+    USER: learner
+    DS60_STATE_DIR: /state
+    DS60_WORKSHOP_OWNER: ${DS60_WORKSHOP_OWNER}
+    FEAST_USAGE: "False"
+    DO_NOT_TRACK: "true"
+    MLFLOW_DISABLE_AGENT_HINT: "1"
+    MLFLOW_ENABLE_TELEMETRY: "false"
+    POLARS_MAX_THREADS: "2"
+    OMP_NUM_THREADS: "2"
+    OPENBLAS_NUM_THREADS: "2"
+    MPLBACKEND: Agg
+  networks: [owned]
+services:
+  train:
+    <<: *common
+    entrypoint: [python3, /project/train.py]
+    volumes:
+      - .:/project:ro
+      - ./state:/state
+  predictor:
+    <<: *common
+    networks: [owned, ingress]
+    entrypoint:
+      [
+        python3,
+        -m,
+        uvicorn,
+        service:app,
+        --host,
+        0.0.0.0,
+        --port,
+        "8080",
+        --workers,
+        "1",
+        --limit-concurrency,
+        "16",
+        --timeout-keep-alive,
+        "2",
+        --no-access-log,
+      ]
+    depends_on:
+      train:
+        condition: service_completed_successfully
+    volumes:
+      - .:/project:ro
+      - ./state:/state:ro
+    ports:
+      - "127.0.0.1:${DS60_WORKSHOP_PORT:-8891}:8080"
+    healthcheck:
+      test:
+        [
+          CMD,
+          python3,
+          -c,
+          "import json,urllib.request; assert json.load(urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=3))['ready']",
+        ]
+      interval: 3s
+      timeout: 4s
+      retries: 30
+      start_period: 30s
+  control:
+    <<: *common
+    profiles: [control]
+    entrypoint: [python3, /project/control.py]
+    volumes:
+      - .:/project:ro
+      - ./state:/state
+networks:
+  owned:
+    internal: true
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER}
+  ingress:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER}

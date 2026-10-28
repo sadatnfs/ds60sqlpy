@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+  "track_id": "dbt",
+  "lessons": [
+    {
+      "id": "dbt-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-001.md",
+      "source_path": "courses/dbt/lessons/dbt-001.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-001_reference.py",
+        "courses/dbt/solutions/dbt-001_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "sql-model",
+          "title": "SQL model",
+          "language": "sql",
+          "runtime_profile": "dbt-duckdb",
+          "source_path": "courses/dbt/variants/dbt-001_sql-model.sql",
+          "solution_paths": [
+            "courses/dbt/variants/dbt-001_sql-model_reference.sql",
+            "courses/dbt/solutions/dbt-001_sql-model_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "dbt-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-002.md",
+      "source_path": "courses/dbt/lessons/dbt-002.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-002_reference.py",
+        "courses/dbt/solutions/dbt-002_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "sql-model",
+          "title": "SQL model",
+          "language": "sql",
+          "runtime_profile": "dbt-duckdb",
+          "source_path": "courses/dbt/variants/dbt-002_sql-model.sql",
+          "solution_paths": [
+            "courses/dbt/variants/dbt-002_sql-model_reference.sql",
+            "courses/dbt/solutions/dbt-002_sql-model_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "dbt-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-003.md",
+      "source_path": "courses/dbt/lessons/dbt-003.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-003_reference.py",
+        "courses/dbt/solutions/dbt-003_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "sql-model",
+          "title": "SQL model",
+          "language": "sql",
+          "runtime_profile": "dbt-duckdb",
+          "source_path": "courses/dbt/variants/dbt-003_sql-model.sql",
+          "solution_paths": [
+            "courses/dbt/variants/dbt-003_sql-model_reference.sql",
+            "courses/dbt/solutions/dbt-003_sql-model_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "dbt-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-004.md",
+      "source_path": "courses/dbt/lessons/dbt-004.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-004_reference.py",
+        "courses/dbt/solutions/dbt-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-005.md",
+      "source_path": "courses/dbt/lessons/dbt-005.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-005_reference.py",
+        "courses/dbt/solutions/dbt-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-006.md",
+      "source_path": "courses/dbt/lessons/dbt-006.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-006_reference.py",
+        "courses/dbt/solutions/dbt-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-007.md",
+      "source_path": "courses/dbt/lessons/dbt-007.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-007_reference.py",
+        "courses/dbt/solutions/dbt-007_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "sql-model",
+          "title": "SQL model",
+          "language": "sql",
+          "runtime_profile": "dbt-duckdb",
+          "source_path": "courses/dbt/variants/dbt-007_sql-model.sql",
+          "solution_paths": [
+            "courses/dbt/variants/dbt-007_sql-model_reference.sql",
+            "courses/dbt/solutions/dbt-007_sql-model_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "dbt-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-008.md",
+      "source_path": "courses/dbt/lessons/dbt-008.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-008_reference.py",
+        "courses/dbt/solutions/dbt-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-009.md",
+      "source_path": "courses/dbt/lessons/dbt-009.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-009_reference.py",
+        "courses/dbt/solutions/dbt-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-010.md",
+      "source_path": "courses/dbt/lessons/dbt-010.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-010_reference.py",
+        "courses/dbt/solutions/dbt-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-011.md",
+      "source_path": "courses/dbt/lessons/dbt-011.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-011_reference.py",
+        "courses/dbt/solutions/dbt-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-012.md",
+      "source_path": "courses/dbt/lessons/dbt-012.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-012_reference.py",
+        "courses/dbt/solutions/dbt-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-013.md",
+      "source_path": "courses/dbt/lessons/dbt-013.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-013_reference.py",
+        "courses/dbt/solutions/dbt-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-014.md",
+      "source_path": "courses/dbt/lessons/dbt-014.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-014_reference.py",
+        "courses/dbt/solutions/dbt-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-015.md",
+      "source_path": "courses/dbt/lessons/dbt-015.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-015_reference.py",
+        "courses/dbt/solutions/dbt-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-016.md",
+      "source_path": "courses/dbt/lessons/dbt-016.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-016_reference.py",
+        "courses/dbt/solutions/dbt-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-017.md",
+      "source_path": "courses/dbt/lessons/dbt-017.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-017_reference.py",
+        "courses/dbt/solutions/dbt-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-018.md",
+      "source_path": "courses/dbt/lessons/dbt-018.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-018_reference.py",
+        "courses/dbt/solutions/dbt-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-019.md",
+      "source_path": "courses/dbt/lessons/dbt-019.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-019_reference.py",
+        "courses/dbt/solutions/dbt-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-020.md",
+      "source_path": "courses/dbt/lessons/dbt-020.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-020_reference.py",
+        "courses/dbt/solutions/dbt-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-021.md",
+      "source_path": "courses/dbt/lessons/dbt-021.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-021_reference.py",
+        "courses/dbt/solutions/dbt-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-022.md",
+      "source_path": "courses/dbt/lessons/dbt-022.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-022_reference.py",
+        "courses/dbt/solutions/dbt-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-023.md",
+      "source_path": "courses/dbt/lessons/dbt-023.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-023_reference.py",
+        "courses/dbt/solutions/dbt-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-024.md",
+      "source_path": "courses/dbt/lessons/dbt-024.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-024_reference.py",
+        "courses/dbt/solutions/dbt-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-025.md",
+      "source_path": "courses/dbt/lessons/dbt-025.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-025_reference.py",
+        "courses/dbt/solutions/dbt-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dbt-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/dbt/guides/dbt-026.md",
+      "source_path": "courses/dbt/lessons/dbt-026.py",
+      "solution_paths": [
+        "courses/dbt/references/dbt-026_reference.py",
+        "courses/dbt/solutions/dbt-026_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

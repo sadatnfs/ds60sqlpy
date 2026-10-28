@@ -15,6 +15,7 @@ this playbook into a reusable contributor-agent workflow.
 | Change | Durable registration | Validation |
 | --- | --- | --- |
 | Extend existing Python, SQL or bridge material | Existing artifacts and `catalog_builder.py`; additive legacy manifests when appropriate | Legacy catalog, practice and depth gates |
+| Add a tutorial subject | Normal `track.json` with `learning_mode: "tutorial"`, plus `lessons.json` and complete worked source | Tutorial semantics, prerequisites, numerical examples, output contracts and rendering |
 | Add a new subject to the classroom | `courses/<subject>/track.json` and `lessons.json` | `ModuleCatalog`, subject tests and browser/runtime checks |
 | Extend one of the original five module subjects | Existing plan under `docs/expansion/plans/` and its `courses/<subject>/lessons.json` | Same module gates and core-plan validation |
 | Extend the statistics tutorial | `courses/statistics-ml/manifest.json` or additive `tutorials/index.json`, chapters, examples and coverage | Tutorial coverage, numerical examples and rendering |
@@ -26,10 +27,12 @@ still comes from `lessons.json`. `module_plans.load_core_plans` owns these five
 plan inputs. Additive subjects use `track.json`. Do not
 migrate an existing subject between these contracts as an incidental edit.
 
-The statistics loader is currently specific to that book. A different tutorial
-book requires a deliberate loader/schema extension and tests, or a proposal
-kept outside active registration until supported. Do not assume any arbitrary
-`manifest.json` is automatically discovered.
+The original statistics loader remains specific to its chapter/outline contract.
+New tutorial subjects use the validated additive track `learning_mode: "tutorial"`
+contract, as in Applied Science and Bayesian Computing. The default is `practice`.
+Tutorials expose complete worked source and may have empty `solution_paths`;
+ordinary practice keeps its separate learner/reference artifacts. Do not assume
+any arbitrary `manifest.json` is automatically discovered.
 
 ## Design a useful progression
 
@@ -67,7 +70,9 @@ Write the self-contained guide, learner artifact, reference and explanatory
 solution under `courses/<subject>/`. Define vocabulary, show worked examples,
 include expected observations and misconceptions, and provide progressive
 practice. Reading-only practice uses reasoning and a separate explanation.
-The statistics tutorial has no exercise quota or hidden answer gate.
+Tutorial-mode subjects have no exercise quota or hidden answer gate. Read
+[the scientist roadmap](scientist-roadmap.md) before duplicating an already
+implemented scientific or data-engineering sequence.
 
 Preserve IDs, variant aliases and state ownership. Add accessible subject
 colors and a text label to the existing UI; do not add another public page.
@@ -155,3 +160,11 @@ After prose changes, compile TeX before generating readers. Maintain professiona
 factual copy, preserve literal code, and review mathematical meaning independently
 of successful rendering. Keep current source hashes distinct from historical
 runtime evidence.
+
+For current scientific and data examples, inspect the authored Applied Science,
+Bayesian Computing, Julia, Polars, dbt, ML engineering and LLM evaluation routes.
+A dbt SQL-model variant and its complete Python/CLI project serve different
+learning needs. A Stan pad and its separate JSON-data project are similarly
+distinct. A local ML HTTP service needs its own owned lifecycle and durable
+state, not an unbounded worker process. Reuse those contracts only when the new
+subject has the same requirements.

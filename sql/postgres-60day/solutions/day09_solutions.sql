@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
 -- Assumptions: `EXISTS` tests whether at least one row qualifies and ignores selected values. `NOT EXISTS` remains safe when inner columns can be NULL.
@@ -48,6 +49,7 @@ WHERE
       AND o.status = 'delivered')
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Return products that have never been sold.
@@ -76,6 +78,7 @@ WHERE
       oi.product_id = p.product_id)
 ORDER BY
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Return each customer's orders that are above that customer's average order total.
@@ -106,6 +109,7 @@ ORDER BY
   o.customer_id,
   o.total_amount DESC,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Explain and avoid the `NOT IN` plus NULL trap by finding customers without orders using `NOT EXISTS`.
@@ -133,6 +137,7 @@ WHERE
       o.customer_id = c.customer_id)
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Return only each customer's most recent order without an arbitrary `LIMIT 1`.
@@ -166,6 +171,7 @@ WHERE
     LIMIT 1)
 ORDER BY
   o.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Return customers for whom every order has at least one payment, excluding customers with no orders.
@@ -207,5 +213,6 @@ WHERE
           p.order_id = o.order_id))
   ORDER BY
     c.customer_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

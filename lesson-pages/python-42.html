@@ -559,11 +559,11 @@ most_unusual <span class="syntax-operator">=</span> np<span class="syntax-operat
 <li>Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; unsupervised geometry, cluster stability, and anomaly ranking; for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.</p>
-<ol>
+<ol start="2">
 <li>Compute silhouette scores for <code>k</code> from 2 through 6 and discuss the result.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; unsupervised geometry, cluster stability, and anomaly ranking; for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.</p>
-<ol>
+<ol start="3">
 <li>Compare Isolation Forest with Local Outlier Factor.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; unsupervised geometry, cluster stability, and anomaly ranking; on identical scaled data and declared contamination/neighbors, print each method&#x27;s continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.</p>
@@ -576,15 +576,15 @@ most_unusual <span class="syntax-operator">=</span> np<span class="syntax-operat
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make unsupervised assumptions observable through scaling, stability, domain checks, and synthetic controls. A cluster ID or anomaly label is not ground truth.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Scaling sensitivity:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization. <strong>Progressive hint:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</li>
 </ol>
 <p><strong>Verify:</strong> Scaling sensitivity; print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.</p>
-<ol>
+<ol start="5">
 <li><strong>Cluster stability:</strong> Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up. <strong>Progressive hint:</strong> Labels can permute. Use adjusted Rand index or align centers before comparing assignments.</li>
 </ol>
 <p><strong>Verify:</strong> Cluster stability; over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.</p>
-<ol>
+<ol start="6">
 <li><strong>Anomaly validation without labels:</strong> Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity. <strong>Progressive hint:</strong> Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.</li>
 </ol>
 <p><strong>Verify:</strong> Anomaly validation without labels; deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p>
@@ -815,11 +815,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.</p>
-<ol>
+<ol start="2">
 <li>Compute silhouette scores for <code>k</code> from 2 through 6 and discuss the result.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.</p>
-<ol>
+<ol start="3">
 <li>Compare Isolation Forest with Local Outlier Factor.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method&#x27;s continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.</p>
@@ -832,15 +832,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make unsupervised assumptions observable through scaling, stability, domain checks, and synthetic controls. A cluster ID or anomaly label is not ground truth.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Scaling sensitivity:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization. <strong>Progressive hint:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</li>
 </ol>
 <p><strong>Verify:</strong> Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.</p>
-<ol>
+<ol start="5">
 <li><strong>Cluster stability:</strong> Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up. <strong>Progressive hint:</strong> Labels can permute. Use adjusted Rand index or align centers before comparing assignments.</li>
 </ol>
 <p><strong>Verify:</strong> Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.</p>
-<ol>
+<ol start="6">
 <li><strong>Anomaly validation without labels:</strong> Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity. <strong>Progressive hint:</strong> Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.</li>
 </ol>
 <p><strong>Verify:</strong> Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p>

@@ -1,11 +1,11 @@
 -- Day 45: Phase 3 Project - Performance Optimization
--- BEGINNER WORKFLOW — sql-45: Phase3 Optimization Project
+-- BEGINNER WORKFLOW - sql-45: Phase3 Optimization Project
 -- Guide: sql/postgres-60day/companion-guides/day45_phase3_optimization_project.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-45/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-45.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Baseline (intentionally suboptimal):
 EXPLAIN ANALYZE
 SELECT
@@ -33,8 +34,10 @@ GROUP BY
   c.country
 ORDER BY
   2 DESC;
+
 -- Optimized rewrite: avoid function on column and add helpful index
 CREATE INDEX IF NOT EXISTS idx_orders_order_date_only ON orders (order_date);
+
 EXPLAIN ANALYZE
 SELECT
   c.country,
@@ -49,6 +52,7 @@ GROUP BY
   c.country
 ORDER BY
   2 DESC;
+
 -- Additional optimization: pre-aggregate items by order to reduce rows early
 EXPLAIN ANALYZE WITH items AS (
   SELECT
@@ -72,6 +76,7 @@ GROUP BY
   c.country
 ORDER BY
   2 DESC;
+
 -- Target: Reduce runtime by >70% vs baseline on your dataset
 -- The percentage is a measurement goal, never a guaranteed result on the small
 -- deterministic seed. Record plan shape, rows, buffers, and execution time.

@@ -1,24 +1,5 @@
 # SQL-TEST-01: SQL Tests, Migration Checks, and Data Contracts
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-found-02` and `sql-42`
-- **Prerequisites:** [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md),
-  [SQL Day 42 data-quality checks](../../postgres-60day/companion-guides/day42_data_quality_validation.md),
-  constraints, catalogs, and transactions.
-- **Artifacts:** [learner SQL](../lessons/sql_test_01_contracts_migrations.sql) ·
-  [solution reasoning](../solutions/sql_test_01_contracts_migrations_solutions.md) ·
-  [executable solution](../solutions/sql_test_01_contracts_migrations_solutions.sql)
-
-Run on any supported operating system:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_test_01_contracts_migrations.sql
-```
-
-The harness needs no third-party framework and rolls back its test schema.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -83,6 +64,25 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-found-02` and `sql-42`
+- **Prerequisites:** [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md),
+  [SQL Day 42 data-quality checks](../../postgres-60day/companion-guides/day42_data_quality_validation.md),
+  constraints, catalogs, and transactions.
+- **Artifacts:** [learner SQL](../lessons/sql_test_01_contracts_migrations.sql) ·
+  [solution reasoning](../solutions/sql_test_01_contracts_migrations_solutions.md) ·
+  [executable solution](../solutions/sql_test_01_contracts_migrations_solutions.sql)
+
+Run on any supported operating system:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_test_01_contracts_migrations.sql
+```
+
+The harness needs no third-party framework and rolls back its test schema.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -102,7 +102,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_test_01_contracts_migrations.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_test_01_contracts_migrations.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

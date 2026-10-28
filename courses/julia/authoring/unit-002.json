@@ -1,0 +1,64 @@
+{
+  "number": 2,
+  "title": "Numbers, promotion, overflow and exactness",
+  "concepts": ["integer overflow", "Float64", "Rational", "BigInt", "promotion"],
+  "outcome": "Choose and validate numeric representations while distinguishing exact arithmetic, overflow and floating-point approximation.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-001"],
+  "sources": [
+    [
+      "Julia numeric representations",
+      "https://docs.julialang.org/en/v1/manual/integers-and-floating-point-numbers/"
+    ],
+    [
+      "Complex and rational arithmetic",
+      "https://docs.julialang.org/en/v1/manual/complex-and-rational-numbers/"
+    ]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Retain a remainder",
+      "task": "Compute quotient and remainder for 7 divided by 2.",
+      "expected": "The integer quotient is 3 and remainder 1.",
+      "hint": "Use div and rem explicitly.",
+      "answer": "Integer division answers another question from floating-point division."
+    },
+    {
+      "title": "Reject a narrowing conversion",
+      "task": "Convert 128 to Int8.",
+      "expected": "The conversion raises InexactError.",
+      "hint": "Inspect the target range.",
+      "answer": "A constructor conversion that cannot represent the value must not be confused with wrapping arithmetic."
+    },
+    {
+      "title": "Keep an exact ratio",
+      "task": "Add 1//10 and 2//10.",
+      "expected": "The result equals 3//10 exactly.",
+      "hint": "Use rational syntax.",
+      "answer": "This preserves the intended ratio instead of first rounding decimal-looking binary floats."
+    },
+    {
+      "title": "Choose a precision",
+      "task": "Compare 1.0f0 and 1.0.",
+      "expected": "Their types are Float32 and Float64.",
+      "hint": "Literal syntax is part of the contract.",
+      "answer": "More precision changes representation cost and error; it does not validate the model."
+    },
+    {
+      "title": "Check a large integer",
+      "task": "Compute BigInt(2)^100.",
+      "expected": "The mathematical integer is retained beyond the machine Int range.",
+      "hint": "Promote before exponentiation.",
+      "answer": "Converting a wrapped machine result afterward cannot reconstruct the lost value."
+    },
+    {
+      "title": "Explain a tolerance",
+      "task": "Justify an absolute tolerance for a measured quantity.",
+      "expected": "The bound uses that quantity units and required accuracy.",
+      "hint": "Do not substitute a larger bound for a diagnosis.",
+      "answer": "Representation, conditioning and algorithmic error inform a tolerance; passing an arbitrary bound proves little."
+    }
+  ]
+}

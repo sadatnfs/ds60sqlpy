@@ -17,11 +17,15 @@ if os.environ.get("DS60_RUN_CACHED_NLP_EXTENSION") != "1":
     print(
         "Skipped the optional cached fine-tuning extension. "
         "Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the "
-        "dataset, tokenizer, model, and metric are cached."
+        "local dataset and pinned tokenizer/model snapshots are prepared."
     )
 else:
+    # Local assets must have been prepared from a trusted pinned revision.
+    # Runtime makes no Hub requests, even when this extension is enabled.
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["HF_DATASETS_OFFLINE"] = "1"
     # 1) Imports
-    from datasets import load_dataset
+    from datasets import load_from_disk
     from transformers import (
         AutoTokenizer,
         AutoModelForSequenceClassification,
@@ -29,14 +33,17 @@ else:
         Trainer,
     )
     import numpy as np
-    import evaluate
     from pathlib import Path
 
-    # 2) Data: use IMDB for demo
-    ds = load_dataset("imdb")
+    # 2) Data: separately prepared local IMDB snapshot, not a runtime download.
+    assets = Path("artifacts/day49/prepared")
+    ds = load_from_disk(str(assets / "imdb"))
+    model_dir = assets / "distilbert"
+    if len(ds["train"]) < 256 or len(ds["test"]) < 128:
+        raise ValueError("Prepared dataset is smaller than the declared bounded example")
 
     # 3) Tokenizer and encoding
-    tok = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    tok = AutoTokenizer.from_pretrained(model_dir, local_files_only=True)
 
     def encode(batch):
         return tok(batch["text"], truncation=True, padding="max_length", max_length=128)
@@ -48,16 +55,15 @@ else:
 
     # 4) Model
     model = AutoModelForSequenceClassification.from_pretrained(
-        "distilbert-base-uncased", num_labels=2
+        model_dir, num_labels=2, local_files_only=True, use_safetensors=True
     )
 
     # 5) Metrics
-    accuracy = evaluate.load("accuracy")
 
     def compute_metrics(eval_pred):
         logits, labels = eval_pred
         preds = np.argmax(logits, axis=-1)
-        return {"accuracy": accuracy.compute(predictions=preds, references=labels)["accuracy"]}
+        return {"accuracy": float(np.mean(preds == labels))}
 
     # 6) Training args and trainer
     args = TrainingArguments(
@@ -68,6 +74,8 @@ else:
         per_device_train_batch_size=8,
         per_device_eval_batch_size=16,
         logging_steps=5,
+        report_to="none", use_cpu=True, dataloader_num_workers=0,
+        save_strategy="no", seed=49, data_seed=49,
     )
     trainer = Trainer(
         model=model,
@@ -97,7 +105,7 @@ if os.environ.get("DS60_RUN_CACHED_NLP_EXTENSION") != "1":
     print(
         "Skipped the optional cached fine-tuning extension. "
         "Set DS60_RUN_CACHED_NLP_EXTENSION=1 only after the "
-        "dataset, tokenizer, model, and metric are cached."
+        "local dataset and pinned tokenizer/model snapshots are prepared."
     )
 else:
     # Suppose your dataset has imbalance; compute class weights
@@ -137,8 +145,8 @@ else:
             return (loss, outputs) if return_outputs else loss
 
     weighted_model = AutoModelForSequenceClassification.from_pretrained(
-        "distilbert-base-uncased",
-        num_labels=2,
+        model_dir,
+        num_labels=2, local_files_only=True, use_safetensors=True,
     )
     trainer_weighted = WeightedTrainer(
         model=weighted_model,

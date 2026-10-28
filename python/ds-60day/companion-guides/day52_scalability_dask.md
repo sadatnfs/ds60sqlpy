@@ -42,19 +42,23 @@ huge pandas DataFrame still needs enough memory on the client.
 
 ```python
 import dask.dataframe as dd
+import numpy as np
+import pandas as pd
 
-frame = dd.demo.make_timeseries(
-    start="2000-01-01",
-    end="2000-02-01",
-    freq="1min",
-    dtypes={"name": str, "id": int, "x": float, "y": float},
-    partition_freq="7D",
-)
-lazy_mean = frame.groupby("name")["x"].mean()
-print(frame.npartitions, lazy_mean)
-
-result = lazy_mean.compute()
-print(type(result), result.head())
+# Original deterministic synthetic fixture, deliberately small enough for RAM.
+rng = np.random.default_rng(52)
+source = pd.DataFrame({
+    "name": rng.choice(["north", "south", "west"], size=2000),
+    "x": rng.normal(size=2000),
+    "y": rng.normal(size=2000),
+})
+df = dd.from_pandas(source, npartitions=4)
+# Constructing this graph does not execute the grouped reduction.
+agg = df.groupby("name")["x"].mean()
+result = agg.compute(scheduler="threads", num_workers=2).sort_index()
+expected = source.groupby("name")["x"].mean().sort_index()
+np.testing.assert_allclose(result.to_numpy(), expected.to_numpy(), rtol=1e-12)
+print(result)
 ```
 
 Nothing expensive happens until an execution trigger such as `compute`,
@@ -65,10 +69,13 @@ triggering it.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-52` for its guide, notebook and capability notice. The default Core does not include the `production` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [data and ML engineering course](../../../courses/data-ml-engineering/guides/dme-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `production` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The complete example needs Dask DataFrame; the distributed reference also needs dask.distributed. A chunked Python reduction illustrates the algebra without proving a Dask execution. Local scheduler and dashboard processes require a separately prepared project environment.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -77,8 +84,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 52 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -292,7 +298,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-52` — Day 52 — Scalability with Dask and Chunked pandas.
+Tutor me through `python-52` : Day 52 : Scalability with Dask and Chunked pandas.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize lazy task graphs, partitions, bounded reducers, and scale evidence. Use exactly these maintained learner materials:

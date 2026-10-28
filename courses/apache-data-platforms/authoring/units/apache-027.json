@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-008", "apache-007"],
+  "concepts": ["DAG", "TaskFlow", "data intervals", "logical date", "XCom references"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Airflow TaskFlow tutorial",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/tutorial/taskflow.html"
+    ],
+    [
+      "Airflow Dag Run intervals",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/core-concepts/dag-run.html"
+    ]
+  ]
+}

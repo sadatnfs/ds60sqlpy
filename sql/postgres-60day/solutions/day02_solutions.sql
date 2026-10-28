@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Aggregate rows only after naming the grouping grain, then filter groups with `HAVING` and preserve numeric meaning.
 -- Assumptions: Money columns are exact `numeric`; round only presentation values. `COUNT(column)` excludes NULL while `COUNT(*)` counts rows.
@@ -42,6 +43,7 @@ GROUP BY
 ORDER BY
   customer_count DESC,
   c.country;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate net revenue and average unit price by product category, keeping categories above 100,000 in revenue.
@@ -70,6 +72,7 @@ HAVING
 ORDER BY
   net_revenue DESC,
   p.category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Summarize order count and average total by status, retaining statuses with at least 100 orders.
@@ -96,6 +99,7 @@ HAVING
 ORDER BY
   order_count DESC,
   o.status;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Show `COUNT(*)`, `COUNT(email)`, and missing-email count together; predict their relationship.
@@ -113,6 +117,7 @@ SELECT
   COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_rows
 FROM
   customers AS c;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a query that tries to filter `SUM(amount)` in `WHERE` by moving the aggregate condition to the correct clause.
@@ -138,6 +143,7 @@ HAVING
 ORDER BY
   total_expense DESC,
   e.category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Produce monthly order count, total revenue, and returned-order count for the last 12 complete or partial months.
@@ -166,5 +172,6 @@ GROUP BY
   date_trunc('month', o.order_date)
 ORDER BY
   order_month;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

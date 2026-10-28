@@ -1,11 +1,11 @@
 -- Day 4: LEFT/RIGHT/FULL OUTER JOINs and NULL handling
--- BEGINNER WORKFLOW — sql-04: Outer Joins
+-- BEGINNER WORKFLOW - sql-04: Outer Joins
 -- Guide: sql/postgres-60day/companion-guides/day04_outer_joins.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-04/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-04.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
 -- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.
@@ -38,6 +39,7 @@ ORDER BY
   orders ASC,
   c.customer_id
 LIMIT 25;
+
 -- RIGHT JOIN: products that appear in orders (or not)
 SELECT
   p.product_id,
@@ -53,6 +55,7 @@ ORDER BY
   sold_qty ASC,
   p.product_id
 LIMIT 25;
+
 -- FULL OUTER JOIN: payments vs orders.
 -- A payment foreign key prevents an orphan payment in this dataset, while an
 -- order may legitimately have no payment. Keep both keys visible when auditing.
@@ -71,6 +74,7 @@ WHERE
 ORDER BY
   COALESCE(o.order_id, p.order_id),
   p.payment_id;
+
 -- mismatches
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.

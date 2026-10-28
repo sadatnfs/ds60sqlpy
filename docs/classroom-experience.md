@@ -39,8 +39,9 @@ production scale or model quality.
 
 Programming practice offers predictions, exercises, hints and separate
 solutions. Reveal a solution when you want to compare with your attempt.
-The statistics/ML tutorial gives complete worked examples and answered
-discussion directly, without mandatory exams or hidden answers.
+Statistics/ML, Applied Science and Bayesian Computing are tutorial tracks with
+complete worked examples and answered discussion directly, without mandatory
+exams or hidden answers.
 
 ## Choose the right execution environment
 
@@ -57,6 +58,11 @@ Follow its preparation command instead of installing tools inside the pad.
 | HTML/CSS or browser JavaScript/D3 | Opens a separate browser preview with local inline code and bundled resources |
 | PHP | Executes a fresh CLI program with prepared PDO SQLite; generated HTML is text output |
 | TensorFlow, PyTorch and Spark | Uses the selected prepared CPU worker for bounded local examples |
+| Polars and full dbt/ML examples | Runs a fresh Python program in the dedicated data-engineering environment |
+| dbt SQL-model variant | Builds one SQL/Jinja model in a fixed dbt/DuckDB project and displays bounded actual results |
+| Stan | Compiles the native model and runs two short chains, then displays its real diagnostic summary and trace |
+| Julia | Runs a fresh `main.jl` process with prepared scientific packages and two threads |
+| DAX | Saves an editable draft and compares explicitly hand-derived reference tables; there is no Run operation |
 | Reading | Saves reasoning and notes without an invented execution action |
 
 Do not paste raw notebook JSON into a Python pad. Keep `# %%` markers in
@@ -119,6 +125,10 @@ Python/SQL workspaces offer earlier saved pad versions where supported.
 Modern module pads retain their current source and recorded run snapshots;
 do not assume every keystroke creates an immutable version. Restoring or
 copying earlier source differs from inspecting earlier output.
+
+Saved worker outputs can include charts, tables and JSON reports in addition
+to stdout. They retain the submitted source identity. A stored table does not
+recalculate when you edit the pad. See [output limits and interpretation](plotting.md).
 
 Progress markers record your learning choices. A tutorial read marker is a
 bookmark. A reference run and a completion mark do not certify independent

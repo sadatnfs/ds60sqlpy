@@ -23,8 +23,10 @@ Python installation is required just to read the skill and course files.
 
 Ask it to read your current attempt, explain one mechanism, and give the next
 useful hint. Keep saved drafts and notes intact. A tutor should not mark a lesson
-complete merely because an example ran. The statistics/ML tutorial provides its
-worked answers directly and does not require exams or hidden-solution gates.
+complete merely because an example ran. Tutorial-mode tracks, including
+statistics/ML, Applied Science and Bayesian Computing, provide worked answers
+directly without exams or hidden-solution gates. Use the
+[scientist roadmap](scientist-roadmap.md) for current cross-subject placement.
 
 To resume the classroom, use `./classroom` for normal reuse of saved containers
 and images, or `./classroom resume` to prohibit builds and pulls. Supply the same

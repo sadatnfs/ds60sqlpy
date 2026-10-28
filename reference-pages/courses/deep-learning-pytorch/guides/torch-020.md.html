@@ -252,19 +252,19 @@ image<span class="syntax-operator">=</span>torch<span class="syntax-operator">.<
 <ol>
 <li><strong>Compare local reductions.</strong> Pool patch 1, 3; 2, 4 with a 2-by-2 window. <strong>Expected:</strong> max 4; average 2.5. <strong>Verify:</strong> Save the assertion results for exercise 1, including max 4; average 2.5.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect a horizontal flip.</strong> Flip the width axis and read the pixel s. <strong>Expected:</strong> rows 3, 1 and 4, 2. <strong>Verify:</strong> Save the assertion results for exercise 2, including rows 3, 1 and 4, 2.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Check the round trip.</strong> Flip the image horizontal l y twice. <strong>Expected:</strong> exact original values. <strong>Verify:</strong> Save the assertion results for exercise 3, including exact original values.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose discarded information.</strong> Change only the non maximum pixel 1 to0 and compare pool s. <strong>Expected:</strong> max still 4; average 2.25. <strong>Verify:</strong> Save the assertion results for exercise 4, including max still 4; average 2.25.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Keep evaluation transforms deterministic.</strong> Define a transform that flips only in training and returns an owned copy in evaluation. <strong>Expected:</strong> evaluation equals source and does not alias it. <strong>Verify:</strong> Save the assertion results for exercise 5, including evaluation equals source and does not alias it.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transform directional labels consistently.</strong> Map left to right under horizontal reflect i on and check the inverse. <strong>Expected:</strong> left-&gt;right-&gt;left. <strong>Verify:</strong> Save the assertion results for exercise 6, including left-&gt;right-&gt;left.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

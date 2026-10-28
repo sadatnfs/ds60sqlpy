@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="add-or-extend-a-learning-module">Add or extend a learning module<a class="heading-anchor" href="#add-or-extend-a-learning-module" aria-label="Link to this section">#</a></h2>
 <p>New subjects belong in the existing <code>/classroom</code> home and workspace. Content, runtime execution and presentation have separate contracts. Reuse a prepared runtime when it fits and preserve stable IDs and progress. Read the <a href="../content-authoring.md.html">content contract</a>, <a href="../curriculum-extension-playbook.md.html">extension playbook</a> and closest subject <code>AGENTS.md</code> before editing. The authoring skill provides the repeatable contributor workflow.</p>
 <h3 id="route-metadata-and-authored-admission">Route metadata and authored admission<a class="heading-anchor" href="#route-metadata-and-authored-admission" aria-label="Link to this section">#</a></h3>
-<p>For a new subject, <code>courses/&lt;subject&gt;/track.json</code> uses schema version 1, an ID matching its directory, a title, a summary and <code>lessons</code>. Each lesson row has:</p>
+<p>For a new subject, <code>courses/&lt;subject&gt;/track.json</code> uses schema version 1, an ID matching its directory, a title, a summary and <code>lessons</code>. Optional track-level <code>learning_mode</code> accepts only <code>practice</code> or <code>tutorial</code>; omission means <code>practice</code>. It applies to that route and its variants. Each lesson row has:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Field</th>
 <th>Meaning</th>
@@ -247,7 +247,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="content-and-variants">Content and variants<a class="heading-anchor" href="#content-and-variants" aria-label="Link to this section">#</a></h3>
 <p>Keep guides, learner source, executable references, explanations and small fixtures separate. Follow the subject&#x27;s authoring sources when they exist. Define vocabulary, explain mechanisms and syntax, show worked examples, progress through distinct practice, and state expected behavior and failures. Six exercises are the ordinary module floor; quantity is not a substitute for teaching quality. Do not use empty headings or repeated task wording.</p>
 <p>A reading-only practice lesson uses <code>language: markdown</code> and <code>runtime_profile: reading</code>, plus a separate explanatory solution. It has no invented Run action. For an implementation of the same objective in another language, use the exact <code>variants</code> schema in <code>modules.py</code>. The curated <code>spark-013@pyspark</code> pattern has separate saved source and jobs while retaining one canonical lesson count. A different learning objective needs a new lesson.</p>
-<p>The statistics tutorial uses its dedicated <code>manifest.json</code> contract, exposed by <code>module_extensions.py</code>. Its chapter/example pairs are directly available, without exams, problem sets, verifiers or solution gates. Preserve its source outline and coverage identities. Adding a different tutorial book currently requires an explicit loader extension; a filename alone does not register one.</p>
+<p>The statistics tutorial uses its dedicated <code>manifest.json</code> contract, exposed by <code>module_extensions.py</code>. Its chapter/example pairs are directly available, without exams, problem sets, verifiers or solution gates. Preserve its source outline and coverage identities. New tutorial subjects use the normal additive <code>track.json</code> plus <code>lessons.json</code> contract with <code>learning_mode: &quot;tutorial&quot;</code> on the track, as in Applied Science and Bayesian Computing. They keep complete worked source in <code>source_path</code>; <code>solution_paths</code> may be empty or expose extra worked examples, without a hidden-answer gate. Tutorial mode does not bypass path, language, runtime, prerequisite or artifact validation. An arbitrary <code>manifest.json</code> still does not register a new loader.</p>
 <h3 id="existing-execution-contracts">Existing execution contracts<a class="heading-anchor" href="#existing-execution-contracts" aria-label="Link to this section">#</a></h3>
 <p>Read <code>LANGUAGES</code> in <code>modules.py</code>, <code>SERVICES</code> in <code>module_jobs.py</code> and <code>PROFILES</code> in <code>worker_operations.py</code> before choosing a profile. Examples include:</p>
 <div class="table-wrap"><table><thead><tr>
@@ -257,6 +257,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td><code>python-core</code>, <code>tensorflow-cpu</code>, <code>llm-torch-cpu</code></td>
 <td>Python source with the profile&#x27;s prepared packages and small CPU fixtures</td>
+</tr>
+<tr>
+<td><code>data-engineering</code></td>
+<td><code>main.py</code> with prepared Polars/Arrow/DuckDB, real dbt and ML engineering packages</td>
+</tr>
+<tr>
+<td><code>dbt-duckdb</code></td>
+<td><code>model.sql</code>, one SQL/Jinja model in the fixed local dbt project; full configuration uses a separate project</td>
+</tr>
+<tr>
+<td><code>stan-cpu</code></td>
+<td><code>main.stan</code>, self-contained transformed-data fixture; fixed native compile and two short sampling chains</td>
+</tr>
+<tr>
+<td><code>julia</code></td>
+<td><code>main.jl</code>, Julia 1.13.3 and its read-only prepared project/depot, two threads and a fresh process</td>
 </tr>
 <tr>
 <td><code>cpp20</code></td>
@@ -365,7 +381,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Image selection and distribution</td>
-<td><code>scripts/classroom_images.sh</code>, <code>docker/classroom-images.tsv</code>, publisher tests and manual publication matrix</td>
+<td><code>scripts/classroom_images.sh</code>, <code>docker/classroom-images.tsv</code>, publisher tests and AMD64/ARM64 publication groups for marked main commits</td>
 </tr>
 <tr>
 <td>Formatting and static checks</td>
@@ -386,7 +402,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Browser-only profiles require a real browser path instead of an ordinary worker claim. HTML documents preserve native parsing, classic lexical scope and lifecycle behavior. Preview text in a guide must stay escaped, not executed. Live mode is an explicit page-session opt-in: it debounces edits, preserves editor focus, cancels on navigation, and never automatically writes immutable observations. Manual Run and Save observation have separately tested source identities. The D3 precedent uses <code>javascript-browser</code>, a sandboxed opaque-origin iframe, bundled library, source-bound client observations and dedicated UI qualification. Such records remain explicitly unverified and have no worker return code or typed checks. Preserve drafts and history without automatic replay. A Docker/cluster reading lesson must never gain engine or ambient cluster access merely to make its Run button available.</p>
 <p>When introducing a new ordinary runtime profile, add a small deterministic cataloged reference to <code>CASES</code> in <code>scripts/check_classroom_profiles.py</code> and to the container workflow&#x27;s grouped profile matrix. The check requires actual source-bound reference execution, declared typed checks and readback after container replacement without rerunning. Generic references validate their assertions and expected output; specialized typed checks are an additional contract only where registered. A subject reusing an existing runtime needs its lesson tests, not another runtime image. The supported implementation and release target is Linux containers, with Windows using WSL 2. Do not add native Windows runtime, private-ACL or executable-build gates for a new subject.</p>
 <p>Optional GPU profiles are deliberately outside ordinary defaults and <code>--all</code>. Use explicit device selection, version/capability checks and real allocation, kernel and readback probes. Keep reading and CPU-model alternatives available without calling them CUDA execution. Compile-only acceptance, device correctness, profiling and multi-GPU operation require different evidence. GPU Spark is an owned external workflow with compatible plugin/Spark/Scala/JDK/CUDA versions; supported SQL/DataFrame operators are not arbitrary accelerated UDFs.</p>
-<p>Record what ran, on which revision and platform, and what remains unverified. A configured profile, container build or one architecture&#x27;s success is not acceptance on every operating system. Preserve learning volumes and unrelated workloads when removing test resources.</p></article>
+<p>Record what ran, on which revision and platform, and what remains unverified. A configured profile, container build or one architecture&#x27;s success is not acceptance on every operating system. Preserve learning volumes and unrelated workloads when removing test resources.</p>
+<h3 id="structured-scientific-results-and-authoring-tools">Structured scientific results and authoring tools<a class="heading-anchor" href="#structured-scientific-results-and-authoring-tools" aria-label="Link to this section">#</a></h3>
+<p>Use <code>publish_table</code> and <code>publish_report</code> from <code>ds60sqlpy.plot_artifacts</code> for bounded data results alongside captured PNG/Plotly charts. All kinds share the two-output budget, with 180,000 bytes per output and 384,000 bytes combined. Tables allow 12 columns and 100 rows. Finite JSON values and exact integer representation are required; large identifiers belong in strings. A result publication warning must preserve the actual computation status. Read saved results without replay and keep their source identity visible.</p>
+<p>Declare required reference outputs in the subject&#x27;s <code>figure-contracts.json</code>. The corpus checker validates kind/count, descriptions and accessible tables through <code>scripts/declared_outputs.py</code>; a successful exit with missing declared outputs fails qualification. This contract describes expected output, not permission to execute code. See <a href="../plotting.md.html">plotting and reports</a>.</p>
+<p>Stan formatting/static checks use the pinned stanc adapter; Julia uses JuliaFormatter and parse checks in its prepared tool image. dbt <code>.sql</code> uses the SQLfmt adapter rather than the PostgreSQL formatter because Jinja is part of the language. Preserve each generator&#x27;s source-to-guide contract, then regenerate shared TeX/readers after source formatting. None of these syntax checks replaces real compilation, dbt execution, numerical assertions or browser readback.</p></article>
   </main>
 </body>
 </html>

@@ -1,11 +1,11 @@
 -- Day 10: INSERT/UPDATE/DELETE with Subqueries (safe via ROLLBACK)
--- BEGINNER WORKFLOW — sql-10: DML with Subqueries
+-- BEGINNER WORKFLOW - sql-10: DML with Subqueries
 -- Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-10/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-10.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.
 -- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.
@@ -33,6 +34,7 @@ FROM
   JOIN products p ON p.product_id = oi.product_id
 GROUP BY
   p.category;
+
 SELECT
   category,
   revenue
@@ -41,6 +43,7 @@ FROM
 ORDER BY
   revenue DESC,
   category;
+
 -- Example: Update salaries by department performance (demo only).
 -- Capture RETURNING in a data-modifying CTE so the evidence can be sorted.
 WITH changed AS (
@@ -69,6 +72,7 @@ FROM
   changed
 ORDER BY
   employee_id;
+
 -- Example: Delete unpaid old orders (demo only)
 WITH deleted AS (
   DELETE FROM orders AS o
@@ -89,6 +93,7 @@ FROM
   deleted
 ORDER BY
   order_id;
+
 -- All changes will be rolled back below
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.

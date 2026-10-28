@@ -223,6 +223,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Hierarchical fitting, predictive checks and sampling diagnostics</td>
 </tr>
 <tr>
+<td><code>data-engineering</code></td>
+<td><code>main.py</code>, prepared Polars/Arrow/DuckDB, dbt and ML tools</td>
+<td>Data transformations, complete local dbt workflows and ML engineering examples</td>
+</tr>
+<tr>
+<td><code>data-platforms-python</code></td>
+<td><code>main.py</code>, prepared PyArrow, DataFusion and PyIceberg</td>
+<td>Arrow/Parquet processing, actual SQL execution and embedded local Iceberg tables</td>
+</tr>
+<tr>
+<td><code>dbt-duckdb</code></td>
+<td><code>model.sql</code>, SQL/Jinja in a fixed local dbt project</td>
+<td>Beginner SQL-model variants with actual compilation, build and result tables</td>
+</tr>
+<tr>
+<td><code>stan-cpu</code></td>
+<td><code>main.stan</code>, CmdStan 2.40.0</td>
+<td>Native probabilistic models, bounded sampling and captured diagnostics</td>
+</tr>
+<tr>
+<td><code>julia</code></td>
+<td><code>main.jl</code>, Julia 1.13.3 with prepared packages</td>
+<td>Dispatch, data analysis, numerical methods and scientific computing</td>
+</tr>
+<tr>
 <td><code>r-statistics</code></td>
 <td><code>main.R</code>, Rscript</td>
 <td>Statistical programming, S3/S4/R6/S7, base/ggplot2/Plotly graphics</td>
@@ -308,6 +333,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="optional-gpu-and-cluster-environments">Optional GPU and cluster environments<a class="heading-anchor" href="#optional-gpu-and-cluster-environments" aria-label="Link to this section">#</a></h3>
 <p>NVIDIA profiles <code>cuda-cpp</code>, <code>cuda-python</code>, <code>pytorch-cuda</code> and <code>tensorflow-cuda</code> are excluded from ordinary startup and <code>--all</code>. They need explicit device selection and compatible hardware, driver and container support. Follow <a href="cuda-classroom.md.html">CUDA setup</a> and the selected variant&#x27;s instructions. CPU workers remain CPU environments on a GPU-equipped host.</p>
 <p>Kubernetes uses a separately prepared owned cluster and scoped capabilities. The classroom receives neither the engine socket nor an ambient cluster configuration. Follow <a href="modules-runtime.md.html#prepare-and-run-the-owned-kubernetes-lab">Kubernetes setup</a>.</p>
+<p>The dbt SQL pad has a fixed five-order fixture. Project configuration, incrementals and snapshots use the full Python/CLI route or the <a href="../courses/dbt/projects/retail/README.md.html">owned retail project</a>. The <a href="../courses/ml-engineering/projects/local-system/README.md.html">ML service</a> runs through its own Docker lifecycle, with separate persistent state and a predictor that mounts that state read-only. Ordinary pad runs are fresh bounded processes.</p>
 <p>Real web servers, multi-file C++ projects, Apple app development, long model training and larger Spark clusters are explicit project workflows. A single-source pad does not implicitly provide their additional capabilities.</p>
 <h3 id="optional-python-package-sets-for-local-builds">Optional Python package sets for local builds<a class="heading-anchor" href="#optional-python-package-sets-for-local-builds" aria-label="Link to this section">#</a></h3>
 <p>The app and Python Core worker use locked Core extras: notebooks, data, bridge, quality, professional and SQL notebooks. Advanced Python lessons can declare additional package groups.</p>
@@ -354,8 +380,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Package installation does not download every model, tokenizer or dataset. Prepare assets through the lesson&#x27;s workflow and keep their storage separate from temporary job files. The named learning volume preserves classroom work; it does not automatically preserve arbitrary temporary caches or checkpoints.</p>
 <p>See <a href="setup/offline.md.html">offline preparation</a>, <a href="dockerhub.md.html">image distribution</a> and <a href="one-command-classroom.md.html">the launcher guide</a> for the corresponding steps.</p>
 <p>DAX is available in every installation as an offline editor with worked-reference tables; it has no worker to build. HTML/CSS and JavaScript/D3/Plotly use the bundled browser preview. For a scientific subset, choose:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --profile jax-cpu --profile bayesian-cpu --profile r-statistics</code></pre>
-<p>Python Core is included by the launcher. This replaces the saved selection with Core and the named profiles. Existing projects preserve their previous selection on an ordinary resume; use <code>--all</code> when deliberately adding the full current set.</p></article>
+<pre class="highlighted-code"><code class="language-bash">./classroom --profile jax-cpu --profile bayesian-cpu --profile stan-cpu --profile r-statistics --profile julia</code></pre>
+<p>Python Core is included by the launcher. This replaces the saved selection with Core and the named profiles. Existing projects preserve their previous selection on an ordinary resume; use <code>--all</code> when deliberately adding the full current set.</p>
+<p>For the data and analytics engineering routes, select both the Python project runtime and the beginner SQL-model runtime:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --profile data-engineering --profile dbt-duckdb</code></pre>
+<p>The <a href="scientist-roadmap.md.html">scientist roadmap</a> maps subjects to these execution surfaces. Selecting these profiles does not start the separate ML service.</p></article>
   </main>
 </body>
 </html>

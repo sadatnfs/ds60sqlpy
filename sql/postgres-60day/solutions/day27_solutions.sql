@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
 -- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.
@@ -40,6 +41,7 @@ SELECT
   COUNT(*) AS all_orders
 FROM
   orders AS o;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Pivot customer counts for US, CA, GB, and DE by segment.
@@ -66,6 +68,7 @@ GROUP BY
   c.segment
 ORDER BY
   c.segment NULLS LAST;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Unpivot a wide quarterly sample into quarter/amount rows.
@@ -100,6 +103,7 @@ FROM
 ORDER BY
   w.company,
   unpivoted.quarter;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare a missing pivot combination with a real zero and preserve the distinction.
@@ -125,6 +129,7 @@ GROUP BY
   e.category
 ORDER BY
   e.category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.
@@ -162,6 +167,7 @@ GROUP BY
   month_start
 ORDER BY
   month_start;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Round-trip a wide sample to long form and back, verifying values and NULLs.
@@ -203,5 +209,6 @@ long AS (
     company
   ORDER BY
     company;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

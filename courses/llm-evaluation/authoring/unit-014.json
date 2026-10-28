@@ -1,0 +1,64 @@
+{
+  "number": 14,
+  "title": "Robustness, access policy and adversarial evaluation",
+  "concepts": [
+    "metamorphic testing",
+    "access policy",
+    "prompt injection",
+    "critical-risk coverage",
+    "untrusted data"
+  ],
+  "outcome": "Build bounded adversarial and invariance tests while enforcing authorization independently of generated text or average answer quality.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-009", "eval-011"],
+  "exercises": [
+    {
+      "title": "Change formatting",
+      "task": "Change capitalization and surrounding whitespace in the query conversion.",
+      "expected": "The authorized result remains public-guide.",
+      "hint": "Normalize harmless text without changing policy metadata.",
+      "answer": "The intended invariant concerns formatting, not permission. The query transformation cannot expand the allowed candidate set."
+    },
+    {
+      "title": "Remove authorization",
+      "task": "Use an empty allowed-access set.",
+      "expected": "No document is returned.",
+      "hint": "Apply policy before query matching.",
+      "answer": "An authorization boundary should hold even when the requested content otherwise matches perfectly."
+    },
+    {
+      "title": "Reject extra authority fields",
+      "task": "Add a self-declared authority field to a proposal.",
+      "expected": "The exact-schema validator rejects it.",
+      "hint": "Untrusted data cannot add new privileges.",
+      "answer": "A generated claim of authority is not the trusted policy context."
+    },
+    {
+      "title": "Inspect an intermediate action",
+      "task": "An answer omits restricted text but retrieval accessed it.",
+      "expected": "Record a policy failure.",
+      "hint": "Evaluate side effects and candidate sets as well as visible text.",
+      "answer": "A benign final sentence cannot undo an unauthorized intermediate read."
+    },
+    {
+      "title": "Audit family coverage",
+      "task": "Repeat one attack template one hundred times.",
+      "expected": "Report one covered template family, not universal security evidence.",
+      "hint": "Distinguish repetitions from diversity.",
+      "answer": "Repetitions can measure stochastic sensitivity within a template, but new families provide different threat coverage."
+    },
+    {
+      "title": "Keep unknown separate",
+      "task": "An output cannot be confidently labeled for a critical condition.",
+      "expected": "Route it to review and retain unknown status.",
+      "hint": "A missing verdict is not a pass.",
+      "answer": "This prevents uncertainty from being absorbed into a favorable aggregate or silently excluded denominator."
+    }
+  ],
+  "sources": [
+    ["NIST adversarial machine learning taxonomy", "https://doi.org/10.6028/NIST.AI.100-2e2025"],
+    ["Existing grounded assistant controls", "../../../courses/llm-applied/README.md"]
+  ]
+}

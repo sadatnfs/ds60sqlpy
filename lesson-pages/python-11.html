@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day11_debug_logging_profiling.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -508,16 +508,16 @@ elapsed <span class="syntax-operator">=</span> timeit<span class="syntax-operato
 <ol>
 <li>Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</li>
 <li><strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</li>
 <li><strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</li>
@@ -679,16 +679,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Add module-level logging with <code>logging.getLogger(__name__)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</li>
 </ol>
 <h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</li>
 <li><strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</li>
 <li><strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</li>

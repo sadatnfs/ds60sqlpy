@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 60,
+  "prerequisites": ["apache-015"],
+  "concepts": ["join cardinality", "dimension uniqueness", "SQL nulls"],
+  "evidence": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums.",
+  "sources": [
+    ["DataFusion SQL queries", "https://datafusion.apache.org/user-guide/sql/select.html"],
+    [
+      "DataFusion join expressions",
+      "https://datafusion.apache.org/python/user-guide/common-operations/joins.html"
+    ]
+  ]
+}

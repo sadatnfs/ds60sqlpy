@@ -1,15 +1,5 @@
 # Day 54: Data Warehouse Project, Part 3: Aggregates
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Prerequisites:** Review [Day 53; slowly changing dimensions](day53_project3_dwh_part2_scd.md)
-  and retain the committed Day 52 warehouse in the same database. Day 54 does
-  not depend on Day 53's rolled-back changes.
-- **Artifacts:** [learner SQL](../day54_project3_dwh_part3_aggregations.sql) ·
-  [solution reasoning](../solutions/day54_solutions.md) ·
-  [executable solution](../solutions/day54_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -74,6 +64,16 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Prerequisites:** Review [Day 53; slowly changing dimensions](day53_project3_dwh_part2_scd.md)
+  and retain the committed Day 52 warehouse in the same database. Day 54 does
+  not depend on Day 53's rolled-back changes.
+- **Artifacts:** [learner SQL](../day54_project3_dwh_part3_aggregations.sql) ·
+  [solution reasoning](../solutions/day54_solutions.md) ·
+  [executable solution](../solutions/day54_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -93,7 +93,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

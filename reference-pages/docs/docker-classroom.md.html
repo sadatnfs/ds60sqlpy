@@ -304,7 +304,7 @@ docker rm <span class="syntax-string">&quot;</span>$backup_helper<span class="sy
 <span class="syntax-builtin">set</span> -eu
 backup_dir<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/Documents/REPLACE_WITH_YOUR_BACKUP_FOLDER</span><span class="syntax-string">&quot;</span>
 restore_project<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">ds60-restored-</span><span class="syntax-keyword">$(</span>date +%Y%m%d-%H%M%S<span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span>
-restore_tag<span class="syntax-operator">=</span><span class="syntax-number">0</span>.5.0
+restore_tag<span class="syntax-operator">=</span><span class="syntax-number">1</span>.0.0
 <span class="syntax-operator">[</span><span class="syntax-operator">[</span> <span class="syntax-string">&quot;</span>$restore_project<span class="syntax-string">&quot;</span> <span class="syntax-operator">=</span>~ ^<span class="syntax-operator">[</span>a-z0-9<span class="syntax-operator">]</span><span class="syntax-operator">[</span>a-z0-9_-<span class="syntax-operator">]</span>*$ <span class="syntax-operator">]</span><span class="syntax-operator">]</span>
 docker info --format <span class="syntax-string">&#x27;{{.OSType}}&#x27;</span>
 <span class="syntax-operator">[</span> -d <span class="syntax-string">&quot;</span>$backup_dir<span class="syntax-string">&quot;</span> <span class="syntax-operator">]</span>

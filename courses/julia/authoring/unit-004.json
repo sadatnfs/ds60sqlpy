@@ -1,0 +1,58 @@
+{
+  "number": 4,
+  "title": "Conditions, equality and explicit missing decisions",
+  "concepts": ["Boolean", "short circuit", "identity", "isequal", "missing condition"],
+  "outcome": "Write explicit Boolean decisions and select equality semantics appropriate to numeric values and data keys.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-002"],
+  "sources": [
+    ["Julia control flow", "https://docs.julialang.org/en/v1/manual/control-flow/"],
+    ["Julia missing values", "https://docs.julialang.org/en/v1/manual/missing/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Distinguish zero and absent",
+      "task": "Compare rates 0/5 and 0/0 under the helper policy.",
+      "expected": "The first is 0; the second is nothing.",
+      "hint": "Inspect both value and meaning.",
+      "answer": "A real zero rate is different from having no valid denominator."
+    },
+    {
+      "title": "Check a predicate",
+      "task": "Use an integer directly as an if condition.",
+      "expected": "Julia raises a type error.",
+      "hint": "Write an explicit comparison.",
+      "answer": "The language requires a Boolean decision rather than an implicit truthiness conversion."
+    },
+    {
+      "title": "Protect an access",
+      "task": "Guard the first element of a possibly empty array.",
+      "expected": "The access occurs only when the collection is nonempty.",
+      "hint": "Put the guard first in a short-circuit expression.",
+      "answer": "This makes the precondition visible and prevents a predictable boundary error."
+    },
+    {
+      "title": "Compare NaN keys",
+      "task": "Use isequal for two NaN values.",
+      "expected": "The data-key equality result is true.",
+      "hint": "Do not substitute ordinary numerical equality.",
+      "answer": "Dictionary-oriented equality needs consistent treatment of special values."
+    },
+    {
+      "title": "Inspect signed zero",
+      "task": "Compare 0.0 and -0.0 using both equality functions.",
+      "expected": "== agrees; isequal distinguishes them.",
+      "hint": "The sign bit can matter for key semantics.",
+      "answer": "Choose the relation required by the application rather than assuming all equality operations are interchangeable."
+    },
+    {
+      "title": "Keep an unknown decision",
+      "task": "Evaluate a comparison involving missing.",
+      "expected": "Its result can remain missing.",
+      "hint": "Unknown is not automatically false.",
+      "answer": "A data policy must decide whether to reject, defer or explicitly replace the unknown value."
+    }
+  ]
+}

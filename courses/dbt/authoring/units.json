@@ -1,0 +1,2180 @@
+{
+  "id": "dbt",
+  "title": "dbt and analytics engineering",
+  "summary": "A complete SQL-first route from real Core/DuckDB project files through tests, macros, snapshots, incremental correctness, contracts, documentation, targets, state/defer CI, governance and accepted data-product recovery.",
+  "units": [
+    {
+      "id": "dbt-001",
+      "title": "A real dbt project and its execution stages",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["dbt project", "profile", "parse", "compile", "run", "build"],
+      "prerequisites": ["sql-start-03"],
+      "outcome": "Build and inspect a local dbt project through its real adapter.",
+      "theory": "dbt transforms data by executing project-defined SQL through a database adapter. A project contains model files, configuration, tests and dependency declarations. A profile tells the adapter which owned database and execution settings to use. The classroom examples write ordinary project files into a temporary directory, invoke the installed dbt CLI through its Python interface and inspect a real DuckDB database. They do not simulate a dbt run.\n\nParsing, compilation and execution establish different facts. Parsing builds a graph and checks project structure. Compilation resolves template expressions into SQL. Running materializes model relations in the database. Building also includes selected tests and other dependency-aware resources. A compiled SQL file is therefore useful evidence of what would be submitted, but it does not prove that the relation exists or that its contents passed tests.\n\nThe Python wrapper is necessary because the classroom has one Python pad. Its file writes are explicit and local; you can inspect the normal dbt filenames in the source. An external multi-file project uses the same concepts, but persistence, credentials and orchestration require their own owned setup. Nothing in this lesson selects a cloud warehouse or installs packages while running.",
+      "syntax": "dbt_project.yml declares the project name, version, profile name and resource directories. profiles.yml declares the local DuckDB path and bounded threading settings. Model SQL belongs under models/. dbtRunner.invoke receives a list of CLI arguments; calls run serially in this program. The result's success flag is checked before interpreting artifacts, and the database is queried independently after execution.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Parse and build an actual relation",
+          "explanation": "The first case parses a one-model project, checks its manifest node, builds the model and queries the resulting relation. The answer 42 is verified in DuckDB rather than inferred from the source text. The run-results artifact is then checked for successful materialization.",
+          "expected": "A manifest node exists, the database returns 42, and the run result reports success."
+        },
+        {
+          "title": "Compilation does not substitute for execution",
+          "explanation": "The second case inspects compiled SQL before running the model. It checks that no answer relation has yet been materialized, then runs the model and observes the result. The fixture deliberately computes the same answer through an expression.",
+          "expected": "Compiled SQL contains 6*7; the answer relation appears only after run."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Locate the project",
+          "task": "Identify the model, project and profile files created by the wrapper.",
+          "check": "Each file has a distinct responsibility.",
+          "hint": "Read the project helper before the model.",
+          "answer": "The model states SQL logic, project configuration defines resource locations, and the profile chooses the database. Keeping these roles separate prevents accidental environment assumptions."
+        },
+        {
+          "title": "Change the expression",
+          "task": "Return 21*2 from the model and run it.",
+          "check": "The database still returns 42.",
+          "hint": "Inspect compiled SQL as well as output.",
+          "answer": "The source expression changes while the result remains equal. That is a concrete example of why source identity and result equality are different evidence."
+        },
+        {
+          "title": "Introduce invalid SQL",
+          "task": "Remove part of the select expression and observe the failed command.",
+          "check": "Execution reports failure with a database diagnostic.",
+          "hint": "Check the returned success value.",
+          "answer": "Do not continue publication after a failed command. Preserve the diagnostic and distinguish parsing/template errors from SQL execution errors."
+        },
+        {
+          "title": "Inspect the manifest",
+          "task": "Find the model's unique_id and original file path.",
+          "check": "They identify the project node and source.",
+          "hint": "Open target/manifest.json.",
+          "answer": "The manifest is a structured graph artifact, not merely a log. It can support lineage and selection, but does not prove data quality by itself."
+        },
+        {
+          "title": "Inspect run results",
+          "task": "Find status and execution information after build.",
+          "check": "A successful model result is recorded.",
+          "hint": "Read the actual output artifact.",
+          "answer": "The result concerns this invocation and selected resources. A prior successful artifact should not be reused as evidence for changed source."
+        },
+        {
+          "title": "State the runtime boundary",
+          "task": "Explain which files remain after the classroom job.",
+          "check": "Source and bounded results remain; scratch project databases do not.",
+          "hint": "The pad runs in a fresh job directory.",
+          "answer": "For a durable external project, prepare an owned work directory and explicit database/artifact storage. Do not assume a temporary classroom path is a deployment."
+        }
+      ],
+      "diagnosis": "A missing profile error usually means the project profile name and profiles.yml key disagree. A missing relation after compile is expected unless the model was run. A successful run with no tests is not a quality certificate. Inspect the command, selected resources, result status and actual database contents before deciding what was established.",
+      "transfer": "Build and inspect a local dbt project through its real adapter. Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: A real dbt project and its execution stages",
+          "https://docs.getdbt.com/reference/programmatic-invocations"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ],
+      "sql_variant": {
+        "explanation": "The SQL reference returns one row with answer 42. Change the expression and inspect the emitted SQL and materialized table. The prepared project supplies the setup; use the full-project route to author and inspect configuration files."
+      }
+    },
+    {
+      "id": "dbt-002",
+      "title": "Seeds, staging and rejected records",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["seed", "staging model", "casting", "raw records", "quarantine"],
+      "prerequisites": ["dbt-001"],
+      "outcome": "Create a staging boundary with complete record accounting.",
+      "theory": "A seed is a small versioned CSV resource loaded by dbt. It is useful for fixtures and stable reference data; it is not a general replacement for an ingestion system. A staging model then gives source fields deliberate names and types. These are separate boundaries: loading records establishes that they reached a relation, while staging defines how the analysis interprets them.\n\nThe first case loads three amounts and verifies their total after staging. The second introduces a malformed token and uses a deliberate permissive conversion with a rejection condition. The raw relation remains available, so accepted rows can be reconciled with the original input. A cleaned table alone would hide the missing contribution and its cause.\n\nA staging layer should preserve enough identity to explain every decision. Do not silently convert bad text to zero or drop an identifier to make a model pass. For a production source, include an ingestion identity, schema version and rejection reason; the classroom fixture keeps the data small enough to inspect directly.",
+      "syntax": "CSV files belong under seeds/ and are referenced with ref just like dependency-aware relations. A staging model can use explicit casts for mandatory fields and try_cast when a null result is part of a declared rejection policy. The SQL WHERE condition decides which records enter the accepted relation. Compare accepted and rejected counts against the raw seed relation.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Load and stage numeric records",
+          "explanation": "The first project builds a seed and its dependent staging model, then queries the actual result. Explicit integer casts make the output contract visible. The manifest also confirms that the input is a seed resource.",
+          "expected": "Three rows materialize and amount totals 21."
+        },
+        {
+          "title": "Preserve a malformed input for diagnosis",
+          "explanation": "The second case keeps the raw relation while accepting only successfully parsed amounts. The bad token's record is counted independently, so it cannot disappear from the accounting.",
+          "expected": "Two rows are accepted, one is rejected, and all three remain in raw input."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Add a valid row",
+          "task": "Add id 4 with amount 3 and rebuild.",
+          "check": "Accepted total becomes 24.",
+          "hint": "Predict the new contribution.",
+          "answer": "The source and staged counts should both increase by one. Keep the identifier unique and verify the new row separately."
+        },
+        {
+          "title": "Add missing text",
+          "task": "Add a blank amount and decide its category.",
+          "check": "The policy distinguishes missing from malformed.",
+          "hint": "A null parse result has more than one possible cause.",
+          "answer": "Keep a raw-is-null or blank indicator and a rejection reason. Treating all failed conversions alike can hide different operational problems."
+        },
+        {
+          "title": "Keep the source identity",
+          "task": "Return id alongside parsed amount.",
+          "check": "Each accepted result can be traced to a raw record.",
+          "hint": "Do not aggregate before accounting.",
+          "answer": "Row identity supports diagnosis and later deduplication. A total without identifiers is insufficient to explain rejection."
+        },
+        {
+          "title": "Check source coverage",
+          "task": "Count accepted and rejected records.",
+          "check": "Their sum equals the raw count under the fixture policy.",
+          "hint": "Make categories disjoint.",
+          "answer": "The reconciliation fails if a row is counted twice or disappears. State classification order when duplicate and invalid conditions overlap."
+        },
+        {
+          "title": "Choose a seed use case",
+          "task": "Explain whether daily production transactions should normally be manually maintained as a seed.",
+          "check": "The answer distinguishes small reference data from ingestion.",
+          "hint": "A versioned CSV has a limited role.",
+          "answer": "Use seeds for small controlled fixtures or mappings. Production ingestion needs a separate reproducible source contract and operational process."
+        },
+        {
+          "title": "Fail mandatory parsing",
+          "task": "Replace the permissive conversion with a strict cast.",
+          "check": "The malformed fixture fails.",
+          "hint": "This is an explicit policy choice.",
+          "answer": "Use strict failure when invalid input must block the product. Keep the failed evidence and do not mistake a stopped run for data that never arrived."
+        }
+      ],
+      "diagnosis": "A seed can load successfully while a staging cast fails. Conversely, permissive SQL can succeed while excluding important records. Inspect the raw relation, parsed field and rejection count. Do not repair an error by silently widening every field to text or swallowing all conversion failures.",
+      "transfer": "Create a staging boundary with complete record accounting. State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Seeds, staging and rejected records",
+          "https://docs.getdbt.com/docs/build/seeds"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ],
+      "sql_variant": {
+        "explanation": "The SQL reference keeps paid orders 1, 2 and 5 with amounts 100, 50 and 120. Their total is 270. Removing the status filter returns the five-row population. Preserve the order key, inspect casts and compare the compiled predicate. The full-project parsing/quarantine exercise uses its separately declared source fixture."
+      }
+    },
+    {
+      "id": "dbt-003",
+      "title": "Dependency graphs and materialization choices",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["ref", "DAG", "view", "table", "ephemeral", "dependency"],
+      "prerequisites": ["dbt-001", "dbt-002"],
+      "outcome": "Choose a materialization using observed database behavior and a stated workload.",
+      "theory": "ref creates a dependency on another dbt resource and resolves its database relation. That gives dbt a graph it can order and inspect. Hardcoding a table name can bypass this dependency information even when the SQL happens to run. The graph is therefore part of the execution contract, not just a diagram for documentation.\n\nA materialization defines how a model result is represented. A view stores a query definition, a table stores a materialized result, and an ephemeral model is compiled into a dependent query rather than created as its own relation. These choices change storage, freshness, reuse and query cost. They do not change the need to validate grain and values.\n\nThe first case uses a staging view and a downstream table, then inspects both the manifest dependency and the actual database relation types. The second uses an ephemeral model to make the absence of a standalone relation explicit. The purpose is to connect configuration to observed behavior rather than memorize names.",
+      "syntax": "config(materialized='view') or config(materialized='table') declares a model representation. ref('staging') connects the downstream model to its dependency. For an ephemeral input, compiled SQL includes a generated common-table expression. Inspect manifest depends_on nodes and information_schema tables to distinguish graph structure from database objects.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Observe the graph and physical objects",
+          "explanation": "The first project links a seed to a staging view and then a materialized total. It verifies the manifest edge, the result 12 and the database object kinds. These checks answer complementary questions.",
+          "expected": "staging is a view, customer_total is a table, and its dependency names staging."
+        },
+        {
+          "title": "Inspect an inlined ephemeral model",
+          "explanation": "The second case builds a dependent model that uses an ephemeral constant. The value reaches the final relation, but the ephemeral model itself is absent from the database object list.",
+          "expected": "The final answer is 42 and no base relation is created."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Remove a declared edge",
+          "task": "Replace ref with a hardcoded relation name and inspect the manifest.",
+          "check": "The explicit dependency disappears.",
+          "hint": "SQL name resolution is not graph declaration.",
+          "answer": "The query may still run if the relation already exists, but build ordering and state selection lose the declared relationship."
+        },
+        {
+          "title": "Change a representation",
+          "task": "Switch staging from view to table and rebuild.",
+          "check": "The observed relation type changes.",
+          "hint": "Check information_schema.",
+          "answer": "The change affects when data is recomputed and how much storage is used. It should be reviewed against freshness and downstream workload requirements."
+        },
+        {
+          "title": "Inspect compiled SQL",
+          "task": "Locate the generated CTE for the ephemeral model.",
+          "check": "The dependent query includes the base logic.",
+          "hint": "No standalone base table is expected.",
+          "answer": "Ephemeral reuse can duplicate logic across consumers. It is a design choice, not a universal performance optimization."
+        },
+        {
+          "title": "Add a downstream model",
+          "task": "Create a second consumer using ref.",
+          "check": "The graph contains its new edge.",
+          "hint": "Name the dependency through the API.",
+          "answer": "Test the result and review the graph. A valid edge does not establish the consumer's business semantics."
+        },
+        {
+          "title": "Compare freshness",
+          "task": "Explain how a view and a table may expose changes in their upstream data.",
+          "check": "The answer distinguishes query-time evaluation from materialization time.",
+          "hint": "Inspect the stored representation.",
+          "answer": "The exact behavior depends on the database and relation. A table usually requires another run to refresh its contents; a view evaluates its stored query when queried."
+        },
+        {
+          "title": "Choose a cost experiment",
+          "task": "Design a fair comparison of two materializations.",
+          "check": "Both satisfy the same values and freshness contract.",
+          "hint": "Include refresh and read costs.",
+          "answer": "Measure representative reads, build time and storage under the required freshness. Comparing one cached read alone would be incomplete."
+        }
+      ],
+      "diagnosis": "A relation-not-found error can come from a missing graph edge or an unbuilt dependency. An absent ephemeral relation is expected. A fast view query on tiny data does not establish production performance. Inspect compilation and actual object types before changing orchestration order.",
+      "transfer": "Choose a materialization using observed database behavior and a stated workload. Retain ref-based dependencies and test the resulting graph, values and freshness expectations. This supports reliable selection and deployment when the project grows.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Dependency graphs and materialization choices",
+          "https://docs.getdbt.com/docs/build/materializations"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ],
+      "sql_variant": {
+        "explanation": "The SQL reference joins the two fixed refs and groups paid amounts by customer identity. Customer 10/Ada/north has 100 from one paid order; customer 20/Ben/south has 170 from two. Compare by customer_id rather than the displayed row order. The full-project route additionally controls model dependencies and materialization files."
+      }
+    },
+    {
+      "id": "dbt-004",
+      "title": "Data tests and the meaning of a failed build",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["not_null", "unique", "data tests", "run results", "failure recovery"],
+      "prerequisites": ["dbt-002", "dbt-003"],
+      "outcome": "Use data tests as explicit evidence for a declared contract.",
+      "theory": "Data tests express conditions that a relation should satisfy. A not-null test checks presence, while a unique test checks a key candidate. They are useful safeguards, but passing them does not prove that every value is correct. A table can have unique identifiers and still use the wrong currency, time window or join.\n\nA build can materialize a model before a test fails. That is an important operational boundary: detecting a bad result is different from preventing every consumer from seeing it. The second case deliberately creates duplicate identifiers, observes a failed test and verifies that the relation still exists. A later publication gate will use successful test artifacts to decide whether to expose a product.\n\nFailure recovery should preserve the cause. Correct the fixture or transformation under a stated contract, rerun the required resources and inspect new results. Do not change a uniqueness test into a row-count test merely to obtain a green status. The expected key is part of the data model.",
+      "syntax": "Model column metadata can declare data_tests such as not_null and unique. build includes selected tests in dependency order. target/run_results.json records statuses for the invocation. Check the returned success value and each relevant result; a model status success can coexist with a test status fail in the same build.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Pass two independent key conditions",
+          "explanation": "The first case builds a two-row table and checks that both not-null and uniqueness tests pass. It also queries the row count directly. The program does not infer data quality solely from process exit.",
+          "expected": "Two test results pass and the table contains two rows."
+        },
+        {
+          "title": "Observe failure and repair",
+          "explanation": "The duplicate fixture fails uniqueness while leaving a materialized table. The program then changes the second identifier, rebuilds and checks new success/pass statuses. The first failure remains an explicit part of the investigation.",
+          "expected": "Duplicate data is rejected by the test; the corrected rebuild passes."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Create a null key",
+          "task": "Add a record with an absent identifier.",
+          "check": "The not-null test fails.",
+          "hint": "Uniqueness and presence are different conditions.",
+          "answer": "Keep both tests when the contract requires a mandatory unique key. One cannot stand in for the other."
+        },
+        {
+          "title": "Keep duplicate payloads",
+          "task": "Use two equal rows with the same id and amount.",
+          "check": "Uniqueness still fails.",
+          "hint": "Identical content does not make two rows one record.",
+          "answer": "A deduplication policy may legitimately collapse retries upstream, but the model must apply that policy explicitly before claiming unique grain."
+        },
+        {
+          "title": "Inspect failure artifacts",
+          "task": "Find the failed test identifier in run_results.",
+          "check": "The artifact names the failing condition.",
+          "hint": "Do not inspect only the final console line.",
+          "answer": "Retain invocation identity and source version alongside the test result. A stale artifact from an earlier run is not current evidence."
+        },
+        {
+          "title": "Check materialized state",
+          "task": "Query the bad table after the failed build.",
+          "check": "It still exists in this local case.",
+          "hint": "Tests can run after materialization.",
+          "answer": "A quality gate must be connected to publication or access control if invalid output must remain unavailable to consumers."
+        },
+        {
+          "title": "Repair the contract",
+          "task": "Fix the source identity and rerun the build.",
+          "check": "Both tests pass on new evidence.",
+          "hint": "Do not weaken the requirement.",
+          "answer": "The correction should explain why the identifier is now valid. Renaming a duplicate arbitrarily would only conceal an unresolved identity problem."
+        },
+        {
+          "title": "Add a quantity check",
+          "task": "Propose a test that key checks would miss.",
+          "check": "It checks a meaningful domain or reconciliation rule.",
+          "hint": "Unique rows can still have wrong totals.",
+          "answer": "Use a signed amount rule, a source-total reconciliation or a declared accepted-value domain as appropriate. Every additional test needs a business meaning."
+        }
+      ],
+      "diagnosis": "When a build fails, distinguish compilation, model execution and test failure. Check which relations were already materialized and whether publication was blocked. Avoid treating warning severity as an automatic acceptable outcome; it should follow a reviewed policy, not a desire for successful status.",
+      "transfer": "Use data tests as explicit evidence for a declared contract. Demonstrate a known violation, inspect the materialized state and repair the source or transformation without weakening the assertion. Carry test outcomes into the later publication decision.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Data tests and the meaning of a failed build",
+          "https://docs.getdbt.com/docs/build/data-tests"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-005",
+      "title": "Source freshness and clock assumptions",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["source", "freshness", "loaded_at", "clock", "SLA"],
+      "prerequisites": ["dbt-002", "dbt-003"],
+      "outcome": "Define and test a source freshness policy with an explicit clock and response.",
+      "theory": "Freshness asks whether a source has been updated within a permitted age. It is different from completeness, correctness and event-time coverage. A source can contain a recent timestamp while missing many records, and an old historical dataset can be complete for its intended purpose. Choose the freshness clock and threshold from the consumer's requirement.\n\nThe example uses the actual DuckDB clock and constructs a fresh record or a record two days old. A one-hour error threshold distinguishes those cases. The timestamp is explicitly timezone-aware. This is a bounded local check of dbt's freshness behavior, not an observation about an external ingestion service.\n\nThe meaning of loaded_at matters. It might represent ingestion completion, upstream publication or a field supplied by the source. If future timestamps, partial loads or clock skew are possible, max(loaded_at) alone can produce a misleading pass. A production contract should combine freshness with coverage, batch identity and relevant consistency checks.",
+      "syntax": "A source declaration names a schema and table identifier independently of a model. Its loaded_at_field and freshness thresholds define the check. source freshness writes target/sources.json. The program checks its actual pass/error status and uses source() in the model to declare the dependency. Do not confuse this artifact with ordinary model run_results.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Check a fresh local source",
+          "explanation": "The first case writes a timestamp near the current UTC time, loads the seed and runs the real freshness command. Its small timing margin is well inside the declared one-hour threshold.",
+          "expected": "The source freshness status is pass."
+        },
+        {
+          "title": "Reject a stale source",
+          "explanation": "The second case subtracts two days from the same clock policy. The command is expected to fail under the one-hour threshold, and the sources artifact must record error. This is a designed negative case, not a swallowed unexpected failure.",
+          "expected": "The stale source reports error."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change the threshold",
+          "task": "Allow three days for the deliberately old source.",
+          "check": "A two-day-old source can pass that revised policy.",
+          "hint": "Thresholds encode a requirement.",
+          "answer": "The outcome changes because the policy changed. Document who accepts that age and what decisions use the data."
+        },
+        {
+          "title": "Use a future timestamp",
+          "task": "Describe how a future loaded_at value can mislead an age check.",
+          "check": "The answer calls for a separate future-time validation.",
+          "hint": "A recent maximum can hide bad clocks.",
+          "answer": "Reject or investigate impossible future timestamps within a declared skew tolerance. A negative age is not evidence of a healthy ingestion process."
+        },
+        {
+          "title": "Separate event and load time",
+          "task": "Give an old event a recent ingestion timestamp.",
+          "check": "Fresh ingestion does not imply recent event coverage.",
+          "hint": "There are two different clocks.",
+          "answer": "Check event-time coverage separately when the consumer needs a recent event window. Late arrivals can be valid under the ingestion contract."
+        },
+        {
+          "title": "Inspect the artifact",
+          "task": "Read sources.json and identify the tested source.",
+          "check": "The source identifier and status are retained.",
+          "hint": "This command has a distinct artifact.",
+          "answer": "Record the invocation and exact threshold with the result. A status without its policy is difficult to interpret."
+        },
+        {
+          "title": "Test partial ingestion",
+          "task": "Explain why one recent row cannot prove a complete batch.",
+          "check": "The answer names a coverage or batch-integrity check.",
+          "hint": "max alone ignores missing rows.",
+          "answer": "Use expected partitions, counts, batch manifests or other source-specific reconciliation. Combine independent dimensions of reliability."
+        },
+        {
+          "title": "Define an action",
+          "task": "Specify what happens when freshness fails.",
+          "check": "The action distinguishes blocking, fallback and investigation.",
+          "hint": "A diagnostic needs an operational response.",
+          "answer": "For a critical feature, the consumer might refuse publication or use an explicitly valid older model/input. Record the degraded state rather than silently using stale values."
+        }
+      ],
+      "diagnosis": "A stale-source error can be correct behavior under the declared threshold. Check timestamp parsing, timezone, clock skew and the meaning of loaded_at before increasing the limit. If the source passes but users see missing data, investigate completeness rather than claiming freshness proved everything.",
+      "transfer": "Define and test a source freshness policy with an explicit clock and response. Pair it with batch completeness and time-coverage checks appropriate to the consumer. Keep the local fixture evidence separate from claims about an actual upstream service.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Source freshness and clock assumptions",
+          "https://docs.getdbt.com/docs/deploy/source-freshness"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-006",
+      "title": "Unit fixtures and integration tests",
+      "level": "beginner",
+      "minutes": 90,
+      "concepts": ["unit test", "fixture", "expected rows", "integration", "boundary case"],
+      "prerequisites": ["dbt-003", "dbt-004"],
+      "outcome": "Use controlled fixtures to test transformation logic and real-data checks to test integration.",
+      "theory": "A unit fixture supplies controlled inputs to test a model's transformation logic. An integration test examines relations produced from an actual source or seed. Both are useful, but they answer different questions. A unit fixture can demonstrate aggregation behavior on a boundary case without claiming that the production input has valid keys or complete coverage.\n\nThe worked model sums amounts per customer. Its unit fixture contains two orders for one customer, while the actual loaded seed contains a different customer and amount. The expected result belongs to the fixture, not to the seed. Checking that the seed remains unchanged makes the distinction concrete.\n\nThe second case deliberately uses the wrong expected total. dbt must report a failed unit test even though the SQL is executable. A test suite should contain examples that would fail under meaningful defects such as missing grouping, wrong keys, incorrect boundaries or duplicated joins. Tests that only repeat the model's own calculation can agree with the same mistake.",
+      "syntax": "The unit_tests YAML section names the model, supplied inputs and expected rows. The input declaration ref('raw_orders') substitutes a controlled relation for that dependency. The example first prepares the parent schema, then selects test_type:unit. Result artifacts are inspected for the actual pass or fail status.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Use a controlled unit population",
+          "explanation": "The fixture amounts 2 and 3 belong to customer 1 and should sum to 5. The loaded source amount 100 belongs to another row and is not used as the fixture expectation. The program verifies that the underlying seed remains 100.",
+          "expected": "The unit test passes with total 5 and the source seed is unchanged."
+        },
+        {
+          "title": "Require a wrong expectation to fail",
+          "explanation": "The second case changes only the expected total to 99. A robust test runner should reject that expectation rather than infer success from SQL compilation or an available model relation.",
+          "expected": "The unit result is fail under the incorrect expected row."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Add a second customer",
+          "task": "Supply a fixture with two customer groups.",
+          "check": "The expected result has one row per customer.",
+          "hint": "Make the grouping key observable.",
+          "answer": "This catches a model that returns one global total. Verify row identities as well as amounts."
+        },
+        {
+          "title": "Add a zero amount",
+          "task": "Include a zero-valued order for an existing customer.",
+          "check": "The total is unchanged but row coverage increases.",
+          "hint": "Some defects do not change additive totals.",
+          "answer": "A separate count output or row-accounting test can reveal a dropped zero-valued row when that distinction matters."
+        },
+        {
+          "title": "Change a key",
+          "task": "Use two distinct customer identifiers with the same display label.",
+          "check": "They remain separate groups.",
+          "hint": "Identity is not a label.",
+          "answer": "The fixture should catch grouping by a nonunique display field. Use the actual intended key in both SQL and expectation."
+        },
+        {
+          "title": "Remove a grouping clause",
+          "task": "Introduce a transformation defect and observe failure.",
+          "check": "The unit test rejects wrong output or SQL.",
+          "hint": "Tests need a meaningful counterexample.",
+          "answer": "A failure proves that this fixture detects that defect. It does not prove the suite detects all possible changes."
+        },
+        {
+          "title": "Compare test types",
+          "task": "Explain what the unit fixture cannot establish about the source.",
+          "check": "It cannot prove actual source completeness or uniqueness.",
+          "hint": "Synthetic inputs have controlled properties.",
+          "answer": "Use integration tests, source contracts and operational observations for the actual data. Keep the evidence categories separate."
+        },
+        {
+          "title": "Build an independent oracle",
+          "task": "Calculate expected totals directly from the small input rows.",
+          "check": "The oracle does not copy the SQL expression verbatim.",
+          "hint": "Use transparent arithmetic or a different implementation.",
+          "answer": "Independent expected values reduce the risk that the model and test share the same error. Document the assumptions behind the oracle."
+        }
+      ],
+      "diagnosis": "An empty selected test set is not a passing unit test. Check how many results were returned and their identifiers. Schema preparation errors should be distinguished from a wrong expected row. Do not change expected output merely because the current implementation produced something else.",
+      "transfer": "Use controlled fixtures to test transformation logic and real-data checks to test integration. Include at least one counterexample that would detect a plausible defect, and retain the source and expected rows needed to explain the result.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Unit fixtures and integration tests",
+          "https://docs.getdbt.com/docs/build/unit-tests"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-007",
+      "title": "Jinja macros and compiled SQL evidence",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["Jinja", "macro", "compilation", "identifier", "safe ratio"],
+      "prerequisites": ["dbt-001", "dbt-003"],
+      "outcome": "Review a macro through its source, emitted SQL and actual result.",
+      "theory": "A dbt macro generates SQL during compilation. It can reduce repeated logic and centralize a reviewed calculation, but it is not a Python row function executed once for each database record. The generated SQL is what the database evaluates. Inspecting compiled SQL is therefore an important part of understanding and debugging a macro.\n\nThe ratio macro receives SQL expressions for a numerator and denominator. It emits a CASE expression that returns null for a zero denominator and performs floating division otherwise. That is a declared undefined-rate policy, not a universal rule. A different consumer might reject zero-trial groups or expose a separate status field. The macro should make the choice visible rather than hide it behind a convenient name.\n\nTemplate arguments also have trust and quoting boundaries. A trusted model expression is different from an arbitrary user-supplied string. Reusing text in SQL does not automatically make it a safe identifier or a bound parameter. The lesson uses fixed authored expressions and an owned local database. External input needs a separately designed validation and parameterization boundary.",
+      "syntax": "A macro is declared with Jinja macro/endmacro blocks and called inside double-brace expressions. The example's arguments are trusted column-expression strings. compile expands the macro into ordinary SQL; build then evaluates it. An undefined macro is a compilation error, which should be diagnosed before reasoning about database rows.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Inspect a complete expansion",
+          "explanation": "The valid project generates rates for a normal count and a zero denominator. It checks actual values and reads compiled SQL to verify that the macro call has been expanded. Both the source abstraction and the executed expression remain inspectable.",
+          "expected": "The rates are 0.25 andnull; compiled SQL contains CASE logic rather than the macro call."
+        },
+        {
+          "title": "Stop on an undefined abstraction",
+          "explanation": "The second case calls a macro that does not exist. The compiler must reject it and must not produce a successful compiled model file. This distinguishes a template-definition problem from a numeric result.",
+          "expected": "Compilation fails before model execution."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change the zero policy",
+          "task": "Return a separate invalid-denominator flag alongside the rate.",
+          "check": "Zero-trial rows remain identifiable.",
+          "hint": "A null value alone can have several causes.",
+          "answer": "Publish both the rate and a named status or denominator. Consumers can then distinguish no observations from missing source counts."
+        },
+        {
+          "title": "Check integer behavior",
+          "task": "Use 1 success and 4 trials and inspect the result type.",
+          "check": "The rate is 0.25 rather than an integer truncation.",
+          "hint": "Read the generated cast.",
+          "answer": "The macro explicitly chooses floating division. Portability across adapters still needs testing because database type rules differ."
+        },
+        {
+          "title": "Review macro inputs",
+          "task": "Explain why arbitrary user text should not become a SQL expression.",
+          "check": "The answer identifies the trust boundary.",
+          "hint": "Template substitution is not parameter binding.",
+          "answer": "Validate identifiers and use appropriate binding for values in external interfaces. This classroom macro accepts fixed project-authored expressions only."
+        },
+        {
+          "title": "Inspect compiled code",
+          "task": "Locate the CASE expression under target/compiled.",
+          "check": "The generated expression is readable.",
+          "hint": "The database does not execute the macro name.",
+          "answer": "Review compilation when a macro changes. A short source call can hide a large semantic change in the emitted SQL."
+        },
+        {
+          "title": "Test a negative denominator",
+          "task": "Define a policy for negative trial counts.",
+          "check": "The policy explicitly rejects or classifies the invalid domain.",
+          "hint": "Zero handling is not full domain validation.",
+          "answer": "Add a data test or guard for the count domain. A mathematically computed negative rate does not make invalid counts acceptable."
+        },
+        {
+          "title": "Version shared logic",
+          "task": "Describe what should be reviewed when the macro changes.",
+          "check": "Affected consumers and their semantics are identified.",
+          "hint": "A shared helper has a dependency surface.",
+          "answer": "Inspect downstream models, tests, compiled SQL and compatibility requirements. A macro refactor should preserve the promised calculation or declare a versioned change."
+        }
+      ],
+      "diagnosis": "If compilation fails, inspect macro discovery, names and argument syntax. If results are wrong, inspect the compiled SQL and numeric domain. Do not patch a macro by suppressing undefined names or replacing every exceptional denominator with zero. That can produce clean output while changing the analytical question.",
+      "transfer": "Review a macro through its source, emitted SQL and actual result. Keep domain assumptions explicit and test contrasting numeric cases. Use abstraction to make a calculation consistent without hiding the evidence needed to validate it.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Jinja macros and compiled SQL evidence",
+          "https://docs.getdbt.com/docs/build/jinja-macros"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ],
+      "sql_variant": {
+        "explanation": "The SQL reference demonstrates Jinja variable resolution and source() in a prepared model. It produces total_orders 5, paid_orders 3 and paid_order_rate 0.6. Setting accepted_status explicitly to refunded yields one qualifying order and rate 0.2. Custom macro files and packages require the full-project route; this variant does not pretend to create them."
+      }
+    },
+    {
+      "id": "dbt-008",
+      "title": "Incremental watermarks and late-arriving records",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["incremental", "watermark", "append", "late data", "full refresh"],
+      "prerequisites": ["dbt-002", "dbt-003", "dbt-004"],
+      "outcome": "State the assumptions under which an incremental result equals a full recomputation.",
+      "theory": "An incremental model reuses an existing relation and processes selected new or changed records. This can reduce work, but it introduces state into the transformation. The result now depends on the previous materialization, the new source and the selection rule. A full recomputation and an incremental update should agree under the assumptions of that rule.\n\nA strict maximum watermark is appropriate only when relevant records arrive with a monotonically increasing key and previously processed records do not change. The first case uses that narrow assumption and demonstrates a repeatable append. The second adds a record whose update key falls behind the current maximum. It is new to the pipeline but not newer under the chosen predicate, so it is missed.\n\nThe defect is not fixed by repeatedly running the same query. The program explicitly compares the incremental result with a full refresh to expose the missing record. A production strategy needs a late-arrival policy, a backfill process or a different source/change-tracking contract. Performance savings must be evaluated alongside those correctness assumptions.",
+      "syntax": "config(materialized='incremental') declares the representation. is_incremental() identifies runs with an existing incremental relation, and this refers to that relation. The example selects source rows with updated_at greater than the target maximum. --full-refresh deliberately rebuilds the model; it is not the same operation as a normal rerun.",
+      "math": "",
+      "worked": [
+        {
+          "title": "A monotone append satisfies its assumptions",
+          "explanation": "The first case begins with one record, then adds a later key. A further run has no newer records and should not duplicate output. The database is checked after each complete sequence rather than assuming idempotency from the code shape.",
+          "expected": "Two records remain after the append and repeat run."
+        },
+        {
+          "title": "A late record violates the watermark assumption",
+          "explanation": "The second case adds a record with key 15 after the target maximum reaches 20. The incremental predicate excludes it. A full refresh sees all three records, providing an independent comparison of the two execution paths.",
+          "expected": "The incremental relation has 2 rows; full refresh has 3."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Add a later event",
+          "task": "Insert a record whose update key exceeds the watermark.",
+          "check": "The incremental relation gains that record.",
+          "hint": "Compare against the actual target maximum.",
+          "answer": "The case demonstrates the intended append condition. Keep a stable identity so the inserted row can be verified."
+        },
+        {
+          "title": "Repeat without changes",
+          "task": "Run the incremental model again with the same source.",
+          "check": "No duplicate record appears under this fixture.",
+          "hint": "The strict predicate selects no new rows.",
+          "answer": "This is idempotency under the stated monotone append assumptions. It does not establish correct updates or late-data handling."
+        },
+        {
+          "title": "Add a late event",
+          "task": "Insert a new id behind the current maximum.",
+          "check": "The normal incremental result misses it.",
+          "hint": "New to the pipeline differs from newer timestamp.",
+          "answer": "Retain this counterexample and compare with a full recomputation. Do not describe a successful incremental run as complete without the arrival assumption."
+        },
+        {
+          "title": "Modify an old record",
+          "task": "Change a previously loaded amount without changing its update key.",
+          "check": "The simple append strategy does not reliably apply that correction.",
+          "hint": "The predicate and write strategy both matter.",
+          "answer": "Use a reviewed change indicator and keyed update/backfill strategy. A timestamp that does not change cannot communicate the correction."
+        },
+        {
+          "title": "Define a backfill",
+          "task": "Specify a controlled way to recover missed history.",
+          "check": "The scope and expected reconciliation are explicit.",
+          "hint": "A full refresh is one possible bounded mechanism.",
+          "answer": "For a large system, choose partitions or versioned replacement under an owned plan. Verify keys and totals before publishing the repaired result."
+        },
+        {
+          "title": "Compare costs fairly",
+          "task": "Describe what an incremental performance claim must include.",
+          "check": "It includes state maintenance and repair obligations.",
+          "hint": "A cheap normal run is not the entire lifecycle.",
+          "answer": "Account for late data, failures, backfills, validation and freshness requirements. Correctness boundaries should be part of the cost comparison."
+        }
+      ],
+      "diagnosis": "If an incremental run succeeds but records are missing, inspect the target watermark and arrival pattern. If duplicates appear, inspect both the source predicate and write strategy. Keep an independently recomputed small fixture to detect divergence instead of relying only on the incremental table's own counts.",
+      "transfer": "State the assumptions under which an incremental result equals a full recomputation. Test both a valid append and a late-arrival violation, then define the required repair or stronger strategy. The next lesson adds keyed updates with an explicit lookback bound.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Incremental watermarks and late-arriving records",
+          "https://docs.getdbt.com/docs/build/incremental-models"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-009",
+      "title": "Keyed updates, lookback windows and idempotency",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["unique_key", "delete+insert", "lookback", "idempotency", "backfill"],
+      "prerequisites": ["dbt-004", "dbt-008"],
+      "outcome": "Implement a keyed incremental contract with tested boundary and repeat-run behavior.",
+      "theory": "A keyed incremental strategy can replace records whose identity is already present. A lookback window can revisit recent source records so corrections and bounded late arrivals are considered. Together, these mechanisms address some weaknesses of a pure append watermark. They still require a valid key, deterministic source selection and a bound on lateness.\n\nThe example uses DuckDB's delete+insert strategy with id as the matching key. The source predicate includes a ten-unit lookback behind the current maximum. An update to id 1 and a late insertion of id 3 are therefore included, while unchanged id 2 can be revisited without creating another copy. The result is checked again after a repeat run.\n\nThe counterexample arrives outside that lookback. It remains missing until a full refresh. A ten-unit window is a data-contract choice, not proof that older corrections cannot occur. Also, unique_key configures incremental matching; it does not by itself replace a data test proving that the selected source has one record per key.",
+      "syntax": "unique_key names the matching identity. incremental_strategy='delete+insert' is an adapter-specific implementation choice that must be supported by the prepared database. The lookback predicate uses >= so the lower boundary is included. Keep an independent uniqueness test and a reviewed policy for multiple source versions of the same key.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Revisit rows without duplicating them",
+          "explanation": "The first case updates an existing amount and adds a late record within the allowed window. It then reruns the model to verify the same three identified values. This checks the combination of selection and write semantics.",
+          "expected": "Final amounts are id 1=6, id 2=7 and id 3=9, with three rows after rerun."
+        },
+        {
+          "title": "Expose the limit of a finite lookback",
+          "explanation": "The second case adds a record older than the ten-unit window. A normal update misses it, while full refresh recovers it. The result makes the lateness assumption visible rather than describing lookback as universal correctness.",
+          "expected": "Normal output has 1 row; a declared full refresh produces 2."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Test the exact boundary",
+          "task": "Add a record at max(updated_at)-10.",
+          "check": "The inclusive predicate considers it.",
+          "hint": "The operator is >=.",
+          "answer": "Record whether the business policy includes that boundary and test it explicitly. A small operator change can alter historical coverage."
+        },
+        {
+          "title": "Repeat a correction",
+          "task": "Apply the same corrected source twice.",
+          "check": "The identified result remains unchanged.",
+          "hint": "Check both values and row count.",
+          "answer": "Idempotency requires deterministic selection and matching. Comparing only a total can miss offsetting duplicate and missing records."
+        },
+        {
+          "title": "Duplicate a source key",
+          "task": "Add two selected records with one id.",
+          "check": "A separate key test detects the ambiguity.",
+          "hint": "unique_key is not an automatic source uniqueness guarantee.",
+          "answer": "Resolve versions before the incremental write or fail the build. Arbitrary ordering can otherwise determine which state survives."
+        },
+        {
+          "title": "Widen the lookback",
+          "task": "Include a previously missed old record by changing the window.",
+          "check": "The record is selected under the revised policy.",
+          "hint": "Measure added work as well as correctness.",
+          "answer": "A wider window changes compute and still has a limit. Choose it from observed/contracted lateness and maintain a separate repair process."
+        },
+        {
+          "title": "Compare with full recomputation",
+          "task": "Rebuild the small fixture and compare keyed rows.",
+          "check": "The accepted incremental case matches.",
+          "hint": "Use stable ordering and schema.",
+          "answer": "This is a strong regression for the fixture. Production completeness still depends on the source versioning and arrival contract."
+        },
+        {
+          "title": "Specify a correction ledger",
+          "task": "List what should be recorded for a backfill.",
+          "check": "It includes identity, time scope, source version and reconciliation.",
+          "hint": "A repair needs reproducible evidence.",
+          "answer": "Retain the reason, affected keys or partitions, input version, old/new checks and publication decision. Do not silently rewrite historical outputs."
+        }
+      ],
+      "diagnosis": "If a keyed update creates duplicates, inspect selected-source uniqueness rather than assuming unique_key enforced it. If old corrections are missed, inspect the lookback bound. If a rerun changes results without source changes, inspect ordering, nondeterministic expressions and external state.",
+      "transfer": "Implement a keyed incremental contract with tested boundary and repeat-run behavior. Explain which late arrivals it accepts, which require repair and how the result is reconciled with a full recomputation. Keep the policy explicit as data volume grows.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Keyed updates, lookback windows and idempotency",
+          "https://docs.getdbt.com/reference/resource-configs/unique_key"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-010",
+      "title": "Snapshots and observed historical state",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": ["snapshot", "SCD2", "check strategy", "validity interval", "deletion"],
+      "prerequisites": ["dbt-003", "dbt-004", "dbt-005"],
+      "outcome": "Explain what a snapshot actually observed and what it cannot reconstruct.",
+      "theory": "A snapshot records changes in a mutable source as observed by successive snapshot runs. It can support slowly changing dimension history, but it cannot recover states that were never observed between runs. Its validity intervals describe the snapshot's chosen strategy and clock. Those intervals should not automatically be treated as the true business-effective time of every change.\n\nThe example uses the check strategy to detect a change in region for a stable customer identifier. dbt stores a closed historical version and a current version. The second case also removes a customer from the source and uses hard_deletes='invalidate' so the previously current record is closed. Without a declared deletion policy, consumers can misinterpret missing source records.\n\nHistory is meaningful only with a stable identity and clear column choices. A changed display name, a corrected attribute and a genuinely new entity are different events. Decide which changes create new versions and which time interpretation the downstream consumer requires.",
+      "syntax": "The modern YAML snapshot declares a relation, unique_key, strategy, check_cols and deletion policy. The example obtains the actual relation name from the generated manifest because custom schema naming can depend on the adapter/profile. dbt_valid_to is null for current versions under this contract. Query both all historical rows and the active subset.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Observe an attribute change",
+          "explanation": "The first case snapshots two customers, changes one region, and snapshots again. The history has three versions in total, with two current customers. The old region remains observable rather than being overwritten.",
+          "expected": "There are 3 history rows; current regions are west and south."
+        },
+        {
+          "title": "Invalidate a deleted source entity",
+          "explanation": "The second case changes one customer and removes the other. The explicit deletion policy closes the removed customer's current version. It does not invent a new active customer or silently erase history.",
+          "expected": "History still has 3 rows, but only customer 1/west is current."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect a closed version",
+          "task": "Query the old region and its validity endpoint.",
+          "check": "The changed version has a non-null dbt_valid_to.",
+          "hint": "Current and historical predicates differ.",
+          "answer": "Retain both versions and their interval meaning. A current-only query is appropriate for a different question than a historical reconstruction."
+        },
+        {
+          "title": "Change a tracked column",
+          "task": "Add another attribute to check_cols.",
+          "check": "Its changes can create new versions under the revised policy.",
+          "hint": "The tracked column set is part of the contract.",
+          "answer": "Review whether the attribute represents meaningful state or noisy metadata. Tracking every field can produce unnecessary history churn."
+        },
+        {
+          "title": "Explain unobserved changes",
+          "task": "Describe a source that changes twice between snapshot runs.",
+          "check": "The intermediate state may never appear in the snapshot.",
+          "hint": "Observation frequency limits evidence.",
+          "answer": "Use a source change log or another stronger history mechanism when the intermediate state matters. Snapshots cannot reconstruct unobserved facts."
+        },
+        {
+          "title": "Compare deletion policies",
+          "task": "Explain the effect of ignoring source deletions.",
+          "check": "A formerly current record can remain open.",
+          "hint": "Missing source data needs interpretation.",
+          "answer": "Choose a policy that distinguishes genuine deletion from incomplete ingestion. A partial load should not automatically invalidate valid entities."
+        },
+        {
+          "title": "Review temporal meaning",
+          "task": "Distinguish snapshot observation time from business-effective time.",
+          "check": "The explanation keeps the clocks separate.",
+          "hint": "The check strategy observes changes when it runs.",
+          "answer": "For event-effective analyses, preserve source effective/known times and define a temporal model. Do not infer them from snapshot timing alone."
+        },
+        {
+          "title": "Verify identity",
+          "task": "Add a source uniqueness test on customer_id.",
+          "check": "Conflicting identity is detected before trusting history.",
+          "hint": "A stable key is required.",
+          "answer": "Multiple source rows for one snapshot key need a deterministic, justified resolution or a failure. Otherwise the historical record becomes ambiguous."
+        }
+      ],
+      "diagnosis": "Unexpected history growth may come from unstable keys or noisy tracked columns. Unexpected open records may come from the deletion policy. A historical result can also be temporally wrong even when its interval columns are well-formed. Inspect source completeness and time semantics before changing snapshot configuration.",
+      "transfer": "Explain what a snapshot actually observed and what it cannot reconstruct. Verify current and closed versions, define deletion handling, and preserve identity and clock contracts before using the history for features or analysis.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Snapshots and observed historical state",
+          "https://docs.getdbt.com/docs/build/snapshots"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-011",
+      "title": "Enforced model schemas and constraint boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": [
+        "model contract",
+        "data type",
+        "not-null constraint",
+        "compatibility",
+        "failure timing"
+      ],
+      "prerequisites": ["dbt-003", "dbt-004"],
+      "outcome": "Define a model schema contract and verify both accepted and rejected changes.",
+      "theory": "A model contract declares the output columns and types expected by consumers. Enforcing that contract can reject an incompatible model before a replacement relation is published. It complements data tests, which inspect conditions on resulting records. Schema compatibility and data quality remain different dimensions of a reliable product.\n\nThe first model declares an integer identifier and a bigint amount. Explicit SQL casts make the intended types predictable. The second case first builds a valid table, then changes amount into incompatible text. The command must fail, and the program checks that the previously valid relation remains available for this specific failure path.\n\nThat observation is deliberately narrow. It does not establish that an entire multi-model build is atomic or that every failure rolls back every prior change. Another model may have materialized earlier, and data tests can fail after materialization. Publication needs its own project-level decision and recovery contract.",
+      "syntax": "The model config contains contract.enforced=true and a complete column/type declaration. Column constraints such as not_null depend on database support. An explicit cast documents the intended SQL type; it should not be used to hide a value-domain error. Query actual database contents after failure to establish what state survived.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Create a compatible relation",
+          "explanation": "The valid model declares two fields and produces a matching row. The program checks actual values after build. The schema is a promise to a consumer, while the row assertion is evidence about this particular fixture.",
+          "expected": "The model returns id 1 and amount 42 under the declared types."
+        },
+        {
+          "title": "Reject incompatible output",
+          "explanation": "The second case changes the amount expression to varchar. Contract validation rejects the altered output, and the previous amount 42 remains in the relation. The guide treats that result as a tested failure path rather than a universal transaction guarantee.",
+          "expected": "The incompatible run fails and the previous valid amount remains 42."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Remove a declared column",
+          "task": "Delete amount from the model output.",
+          "check": "The enforced contract rejects the mismatch.",
+          "hint": "The declared schema is complete.",
+          "answer": "A consumer cannot safely assume the missing field exists. Treat removal as a compatibility change rather than silently updating the contract."
+        },
+        {
+          "title": "Add a new output field",
+          "task": "Add an undeclared field and inspect enforcement.",
+          "check": "The schema change is explicit.",
+          "hint": "More columns can still change a contract.",
+          "answer": "Review the consumer interface and update/version the contract deliberately. Do not assume additional fields are harmless in every downstream system."
+        },
+        {
+          "title": "Test a null identifier",
+          "task": "Return null for the constrained identifier.",
+          "check": "The database/contract path reports the violation when supported.",
+          "hint": "Schema type and value presence differ.",
+          "answer": "Keep data tests as appropriate and inspect adapter constraint support. A declared constraint should not be advertised as enforced without actual evidence."
+        },
+        {
+          "title": "Distinguish failure stages",
+          "task": "Compare the incompatible-schema case with the earlier uniqueness-test failure.",
+          "check": "The two cases leave different observed state.",
+          "hint": "Where validation occurs matters.",
+          "answer": "A schema preflight may reject replacement earlier, while a data test can fail after materialization. Design publication around the actual sequence."
+        },
+        {
+          "title": "Check consumer assumptions",
+          "task": "List properties beyond column types.",
+          "check": "They include grain, units, time and missingness.",
+          "hint": "An integer field can still mean the wrong thing.",
+          "answer": "Add semantic contracts and tests. Schema enforcement does not establish that amount uses the expected currency or period."
+        },
+        {
+          "title": "Plan an incompatible change",
+          "task": "Describe a safe way to replace gross amount with net amount.",
+          "check": "It uses an explicit version and consumer migration.",
+          "hint": "A type-preserving semantic change can still break users.",
+          "answer": "Publish a new version with its definition, compare results, migrate consumers and retain rollback evidence. The next lesson makes version selection explicit."
+        }
+      ],
+      "diagnosis": "A contract error may be the correct protection against an incompatible model. Inspect declared and actual column names/types instead of disabling enforcement. After failure, inspect the database and invocation artifacts; do not assume every relation reverted to a prior state.",
+      "transfer": "Define a model schema contract and verify both accepted and rejected changes. Keep the observed failure timing separate from broader transaction claims, and combine structural compatibility with semantic and publication checks.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Enforced model schemas and constraint boundaries",
+          "https://docs.getdbt.com/docs/mesh/govern/model-contracts"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-012",
+      "title": "Model versions and semantic compatibility",
+      "level": "intermediate",
+      "minutes": 90,
+      "concepts": [
+        "versioned ref",
+        "latest version",
+        "semantic change",
+        "consumer contract",
+        "migration"
+      ],
+      "prerequisites": ["dbt-003", "dbt-011"],
+      "outcome": "Manage a semantic model change with explicit consumer versioning.",
+      "theory": "A model version identifies a particular contract. Consumers can reference an explicit version or follow the declared latest version. Those choices have different change behavior. An explicit version supports a controlled migration; following latest can be appropriate only when the consumer accepts the change policy.\n\nThe first case gives two versions the same column name and numeric type but different values. A stable consumer requests version 1 and receives 100, while an unversioned consumer follows version 2 and receives 80. This is intentionally a semantic change, not a parser or dtype error. A type-compatible change can still alter a model feature, dashboard metric or business decision.\n\nThe second case makes the meaning explicit: gross 100 minus returns 20 yields net 80. The dependency graph records where the calculation came from, but it does not decide whether a consumer intended gross or net. Versioning, descriptions, comparison evidence and a migration plan work together.",
+      "syntax": "The model metadata declares latest_version and its versions, with defined_in pointing to the implementation files. ref('customer_value', version=1) selects an explicit contract. A plain ref follows the declared latest version. Inspect both the resolved database result and manifest dependency information.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Resolve explicit and latest consumers",
+          "explanation": "The first project builds both versions and two consumers. Their results demonstrate the consequence of version selection while keeping the output type unchanged. The example avoids implying that a version number automatically guarantees compatibility.",
+          "expected": "The explicit v1 consumer returns 100; the latest v2 consumer returns 80."
+        },
+        {
+          "title": "Name the semantic difference",
+          "explanation": "The second project computes a net quantity from its defined components and records the dependency edge. It provides enough meaning to explain why a consumer might need a different version or retraining.",
+          "expected": "Net is 80, derived from gross 100 and returns 20."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Pin a consumer",
+          "task": "Change the latest consumer to request version 1 explicitly.",
+          "check": "It returns 100.",
+          "hint": "Use the version argument.",
+          "answer": "Pinning defines the chosen contract. It also creates a responsibility to review and migrate deliberately when the old version is retired."
+        },
+        {
+          "title": "Change latest selection",
+          "task": "Declare version 1 as latest in the fixture.",
+          "check": "The unversioned consumer follows that declaration.",
+          "hint": "Latest is project metadata.",
+          "answer": "The behavior is controlled by configuration, not a universal semantic ordering. Keep release and consumer expectations explicit."
+        },
+        {
+          "title": "Add a type-compatible defect",
+          "task": "Change the value while keeping the same type and name.",
+          "check": "Schema checks alone can still pass.",
+          "hint": "Meaning is not captured by dtype.",
+          "answer": "Add semantic reconciliation and consumer-level checks. A feature can remain Float64 while changing units or time windows."
+        },
+        {
+          "title": "Design a model migration",
+          "task": "Explain what a trained model needs when its input changes from gross to net.",
+          "check": "The answer includes feature version and validation.",
+          "hint": "The old coefficients were trained under a different meaning.",
+          "answer": "Evaluate or retrain under the new feature contract, compare decisions and retain a rollback-compatible bundle. Do not change the upstream alias silently."
+        },
+        {
+          "title": "Inspect lineage",
+          "task": "Find the dependency for the net model in the manifest.",
+          "check": "It points to the declared base model.",
+          "hint": "Lineage records a relationship.",
+          "answer": "Use lineage to identify affected consumers. It does not itself prove that the calculation answers their intended question."
+        },
+        {
+          "title": "Retain rollback information",
+          "task": "List the artifacts needed to restore a previous consumer contract.",
+          "check": "They identify source, model version and validated data/interface.",
+          "hint": "A version label alone is insufficient.",
+          "answer": "Retain the implementation, dependency versions, schema/semantic definition and accepted evidence. A rollback should restore a coherent bundle."
+        }
+      ],
+      "diagnosis": "If a result changes without a schema error, inspect semantic definitions and version resolution. An unversioned ref can follow a new latest contract intentionally. If a pinned consumer fails after removal of an old version, follow the migration policy instead of silently retargeting it.",
+      "transfer": "Manage a semantic model change with explicit consumer versioning. Demonstrate the changed result, identify affected consumers and define validation and rollback requirements. Carry the same discipline into ML feature and model artifact versions.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Model versions and semantic compatibility",
+          "https://docs.getdbt.com/docs/mesh/govern/model-versions"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-013",
+      "title": "Selectors, graph expansion and state comparison",
+      "level": "advanced",
+      "minutes": 90,
+      "concepts": ["selector", "tag", "graph expansion", "state", "manifest"],
+      "prerequisites": ["dbt-003", "dbt-004"],
+      "outcome": "Construct and inspect a reproducible selection against an explicit baseline.",
+      "theory": "Selection controls which resources a command considers. A tag-based selection expresses a group chosen by project metadata; graph operators expand to related resources. State selection compares current project metadata with a saved manifest. These mechanisms can reduce work, but they are not themselves tests of scientific correctness or deployment safety.\n\nThe first case tags a base model and selects it with its downstream dependent. The unrelated model is excluded. The second saves a manifest, changes one source file and uses state:modified+ to include the changed model and its downstream consumer. The selected set is inspected explicitly before any claim about reduced validation is made.\n\nA state comparison depends on the baseline manifest. Keeping that baseline inside the directory that the next command overwrites can destroy the comparison. Save it separately with its source revision and environment identity. Also distinguish a changed definition from changed underlying data: a source can receive new records while the model file remains unchanged.",
+      "syntax": "ls returns the selected resource list without running model transformations. tag:feature+ adds downstream graph expansion. state:modified+ compares definitions against --state and includes downstream resources. The program uses --resource-type model and --output name so its expected set is explicit. Keep state artifacts outside the active target output directory.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Select a tagged subgraph",
+          "explanation": "The first project has a tagged base model, its child and an unrelated model. The actual list result must contain exactly base and child. This validates selection semantics without treating the selection as an executed data test.",
+          "expected": "The selected model names are base and child."
+        },
+        {
+          "title": "Compare against a saved manifest",
+          "explanation": "The second case saves a prior manifest before editing base.sql. The state selector includes the modified base and its dependent child. The baseline remains separate from the command's new target artifacts.",
+          "expected": "Changed and downstream selection contains both models."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Remove graph expansion",
+          "task": "Select tag:feature without the plus suffix.",
+          "check": "Only the explicitly tagged model is selected.",
+          "hint": "Tags and dependency traversal are different operations.",
+          "answer": "Use graph operators deliberately and inspect the returned set. A tag on one model does not automatically label every downstream consumer."
+        },
+        {
+          "title": "Add an unrelated change",
+          "task": "Edit the unrelated model and inspect state selection.",
+          "check": "The changed node appears under the matching state selector.",
+          "hint": "Compare with the saved manifest.",
+          "answer": "Record the baseline revision and exact selection expression. The expected scope should be reviewed rather than inferred from a successful command."
+        },
+        {
+          "title": "Protect the baseline",
+          "task": "Store prior manifest data outside target/.",
+          "check": "The next invocation does not overwrite it.",
+          "hint": "The active output directory is mutable.",
+          "answer": "Use a dedicated state directory or immutable CI artifact. A self-overwritten baseline can incorrectly make changes appear absent."
+        },
+        {
+          "title": "Change only data",
+          "task": "Explain why new source rows can matter without a model-file edit.",
+          "check": "The answer distinguishes definitions from data state.",
+          "hint": "state:modified is not a data freshness check.",
+          "answer": "Use the selection appropriate to the data update and validate relevant outputs. Definition comparison alone cannot establish that existing materializations are current."
+        },
+        {
+          "title": "Inspect selected tests",
+          "task": "Include tests and examine the resource types returned.",
+          "check": "The intended tests are visible in the selection.",
+          "hint": "Selecting models is not proof of test inclusion.",
+          "answer": "Review indirect-selection policy and the actual result list. An empty test selection must not be reported as a successful validation suite."
+        },
+        {
+          "title": "Record a CI decision",
+          "task": "List the evidence needed to justify a reduced build.",
+          "check": "It includes baseline, selection, dependencies and executed results.",
+          "hint": "A selection plan is only one stage.",
+          "answer": "Keep the source revision, manifest identity, selected node set, commands and actual outcomes. Use a broader gate when the change affects shared semantics or operational assumptions."
+        }
+      ],
+      "diagnosis": "Unexpectedly small selections can result from tags, graph direction, indirect-test rules or an overwritten baseline. Inspect ls output before executing a destructive or expensive command. A successful selector command with zero intended resources is not a completed validation.",
+      "transfer": "Construct and inspect a reproducible selection against an explicit baseline. Explain which dependencies and tests are included and which data changes are outside the comparison. The later CI lessons connect that selection to real execution and deferral.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Selectors, graph expansion and state comparison",
+          "https://docs.getdbt.com/reference/node-selection/syntax"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-014",
+      "title": "Documentation, catalogs, exposures and ownership",
+      "level": "advanced",
+      "minutes": 90,
+      "concepts": ["catalog", "manifest", "description", "exposure", "lineage", "ownership"],
+      "prerequisites": ["dbt-003", "dbt-004"],
+      "outcome": "Build documentation that joins observed structure with authored meaning and ownership.",
+      "theory": "Documentation has both structural and semantic parts. A database catalog can identify a column's physical type, while a project description explains what the value means. Neither substitutes for the other. A field named total needs a grain, unit, time window and inclusion policy before a consumer can interpret it reliably.\n\nThe first case generates real dbt documentation artifacts after building a mart. The catalog records the observed database column, and the manifest records a declared exposure depending on that mart. An exposure represents a downstream use such as a dashboard or application. It improves lineage and ownership visibility, but it does not prove that an external consumer is currently healthy or actually using the declared version.\n\nThe second case demonstrates a structurally documented but semantically undescribed model. Its integer type is available, yet its description is empty. A documentation build can therefore succeed while important meaning remains absent. Treat generated artifacts as a foundation for review, not an automatic substitute for authored definitions.",
+      "syntax": "docs generate inspects the built project and writes catalog.json alongside manifest.json. Model and column descriptions live in schema metadata. An exposure names its type, owner and ref-based dependencies. The classroom inspects these JSON artifacts locally; it does not start a separate docs web server or claim that arbitrary generated HTML is a trusted worker result.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Connect physical and declared information",
+          "explanation": "The first case checks a total column in the catalog and the exposure's dependency in the manifest. It combines observed database structure with declared project meaning without confusing the two.",
+          "expected": "The catalog contains total and the decision-report exposure depends on mart."
+        },
+        {
+          "title": "Detect missing semantics",
+          "explanation": "The second project builds and documents a model with no authored description. The program verifies that its physical INTEGER type is known while its description is empty.",
+          "expected": "The type is available, but the business description is missing."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Write a complete definition",
+          "task": "Describe total with its grain, units and inclusion rule.",
+          "check": "A reader can interpret the quantity without guessing.",
+          "hint": "A column name alone is insufficient.",
+          "answer": "State which records contribute, the grouping key, time boundary and unit. Keep the definition aligned with the model and tests."
+        },
+        {
+          "title": "Add a downstream consumer",
+          "task": "Declare a second exposure with its owner and dependency.",
+          "check": "The new edge appears in the manifest.",
+          "hint": "Use ref-based lineage.",
+          "answer": "The exposure is a maintained declaration. Validate actual consumer behavior separately and update ownership when responsibility changes."
+        },
+        {
+          "title": "Inspect physical type",
+          "task": "Read the catalog's type for a column.",
+          "check": "It matches the built database representation.",
+          "hint": "Compilation alone does not create the catalog observation.",
+          "answer": "Generate docs against the intended materialized state and retain its invocation/source context. A stale catalog can describe an older deployment."
+        },
+        {
+          "title": "Find an undocumented field",
+          "task": "Create a model column without a description.",
+          "check": "The documentation gap remains visible.",
+          "hint": "Success of docs generate is not prose completeness.",
+          "answer": "Add a semantic review gate appropriate to the project. Avoid automatically filling descriptions with generic repeated text."
+        },
+        {
+          "title": "Separate lineage from execution",
+          "task": "Explain what an exposure cannot establish.",
+          "check": "It cannot prove the external dashboard ran successfully.",
+          "hint": "Declared relationships differ from runtime observations.",
+          "answer": "Combine lineage with actual deployment and service evidence when making operational claims. Keep those evidence sources separately identifiable."
+        },
+        {
+          "title": "Export a compact review record",
+          "task": "Select useful metadata from the generated artifacts.",
+          "check": "The record contains meaning, ownership and dependency identifiers.",
+          "hint": "Do not dump an entire large manifest into a user message.",
+          "answer": "Keep a bounded summary with links or hashes identifying the underlying artifacts. The full files remain the detailed evidence in a durable project."
+        }
+      ],
+      "diagnosis": "A missing catalog node may mean the model was not materialized or the wrong environment was inspected. An empty description is an authored-content gap. An exposure pointing to the wrong model is a lineage defect even if the database query succeeds. Diagnose these separately.",
+      "transfer": "Build documentation that joins observed structure with authored meaning and ownership. Review a consumer's dependency and record which claims are declarations versus runtime evidence. This creates a useful handoff for analysts, data scientists and operators.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Documentation, catalogs, exposures and ownership",
+          "https://docs.getdbt.com/docs/build/documentation"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-015",
+      "title": "Publication gates after materialization",
+      "level": "advanced",
+      "minutes": 90,
+      "concepts": [
+        "publication",
+        "test outcome",
+        "accepted artifact",
+        "failure state",
+        "consumer boundary"
+      ],
+      "prerequisites": ["dbt-004", "dbt-011"],
+      "outcome": "Separate candidate computation from accepted publication.",
+      "theory": "Materialization and publication are different actions. A model relation may exist even when later tests fail. If consumers must not see invalid data, they need an accepted-output boundary that is updated only after the required evidence passes. A successful SQL statement is insufficient for that decision.\n\nThe example builds a candidate relation with key tests and publishes a small JSON output only when the complete invocation and relevant statuses pass. The bad fixture still materializes two rows, but no published file is created. The program checks both facts so it cannot confuse detection with transactional rollback.\n\nThis is a local publication gate, not a distributed transaction across a warehouse and an object store. A real deployment needs atomic pointer or version selection, ownership, retry behavior and recovery after uncertain outcomes. The lesson establishes the decision rule and evidence boundary that those mechanisms must implement.",
+      "syntax": "Check result.success and the relevant run_results statuses before writing the accepted output. Keep the candidate relation separate from the consumer-facing artifact. A publication receipt should identify the data, schema, source version and checks that justified acceptance. A stale successful artifact must not qualify a new candidate.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Publish an accepted candidate",
+          "explanation": "The valid two-row fixture passes both key conditions and produces a JSON artifact. The program confirms that the artifact exists only after successful evidence is available.",
+          "expected": "Two candidate rows are present and publication is true."
+        },
+        {
+          "title": "Keep a failed candidate out of the accepted boundary",
+          "explanation": "The duplicate-key fixture causes a failed test. The database relation still exists, but the publication step is skipped. This is the intended failure policy, not a missing output bug.",
+          "expected": "Two candidate rows exist, but publication is false."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change the failure condition",
+          "task": "Add a domain test that rejects negative amounts.",
+          "check": "The candidate can be blocked by a meaningful semantic failure.",
+          "hint": "Key validity is only one dimension.",
+          "answer": "Define the condition and verify a designed negative fixture. Do not treat every possible warning as equivalent to an accepted result."
+        },
+        {
+          "title": "Inspect candidate state",
+          "task": "Query the bad relation after failure.",
+          "check": "Its materialized rows are still observable.",
+          "hint": "Tests may occur after model creation.",
+          "answer": "Use this observation to design consumer isolation. Hiding an error message does not remove invalid data from a relation."
+        },
+        {
+          "title": "Retain an accepted version",
+          "task": "Keep a prior valid artifact while a new candidate fails.",
+          "check": "The accepted version remains identifiable.",
+          "hint": "Separate candidate and accepted paths.",
+          "answer": "A consumer should follow a declared accepted version or pointer, not whichever file was most recently written."
+        },
+        {
+          "title": "Handle an uncertain write",
+          "task": "Describe a publication timeout after the write may have occurred.",
+          "check": "The response reconciles identity before retrying.",
+          "hint": "An unknown outcome is not a confirmed failure.",
+          "answer": "Read the intended publication identifier or hash and determine whether it exists. Blind retries can duplicate side effects in less idempotent systems."
+        },
+        {
+          "title": "Record the evidence",
+          "task": "Add a compact receipt beside the accepted data.",
+          "check": "It identifies source, checks and data identity.",
+          "hint": "A file timestamp is not enough.",
+          "answer": "Retain input and model versions, schema/grain, executed test outcomes and output identity. Keep provenance and semantic quality as distinct claims."
+        },
+        {
+          "title": "Test a stale artifact",
+          "task": "Change source data but reuse an old successful run_results file.",
+          "check": "A reviewed gate rejects the mismatched evidence.",
+          "hint": "Bind evidence to the current candidate.",
+          "answer": "Use invocation and source/data identities. A successful result from a different run cannot justify publication of changed data."
+        }
+      ],
+      "diagnosis": "If invalid data appears despite a failed build, inspect the consumer-facing boundary. If publication is missing after success, check the exact selected statuses and artifact path. Keep failures visible and reconcile uncertain outcomes before retrying. A gate that simply ignores failed tests is not recovery.",
+      "transfer": "Separate candidate computation from accepted publication. Demonstrate both paths and retain a source-bound decision record. Extend the mechanism to an atomic version pointer and a tested recovery plan in a durable owned environment.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Publication gates after materialization",
+          "https://docs.getdbt.com/reference/artifacts/run-results-json"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-016",
+      "title": "Metric contracts and valid denominators",
+      "level": "advanced",
+      "minutes": 90,
+      "concepts": [
+        "metric grain",
+        "denominator",
+        "weighted rate",
+        "semantic model",
+        "reconciliation"
+      ],
+      "prerequisites": ["dbt-004", "dbt-007"],
+      "outcome": "Publish a metric with a complete numerator/denominator contract and an independent check.",
+      "theory": "A metric is a defined quantity, not merely a SQL expression. Its contract names the population, unit of analysis, numerator, denominator, time window and treatment of missing or invalid records. Two expressions can both execute and still answer different questions. The first responsibility is to define the desired quantity.\n\nThe worked fixture pools successes and trials by cohort. Cohort A contains rows with very different trial counts, so averaging row-level rates gives a misleading result for the pooled-trial question. This is the same statistical issue seen in the Polars path, now expressed in a tested warehouse model. The transfer matters because a semantic error can survive changes in language or tooling.\n\nThe examples use ordinary dbt models and SQL. They do not claim to run a hosted semantic layer or MetricFlow service. A future semantic-layer integration should preserve these contracts and test its actual query semantics. Installing another tool would not decide the correct denominator.",
+      "syntax": "Aggregate numerator and denominator separately, then divide with a declared zero-denominator policy. Keep the denominator in the output for review and uncertainty calculations. A GROUP BY changes result grain, so identify its keys explicitly. Avoid using an unweighted AVG of precomputed rates unless equal-row weighting is the intended estimand.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Compute cohort-level pooled rates",
+          "explanation": "The valid model retains trial counts beside rates. The program checks exact cohort values in the actual DuckDB relation. This makes both the weighting and the evidence amount visible.",
+          "expected": "Cohort A is 0.1 from 100 trials; cohort B is 0.5 from 2 trials."
+        },
+        {
+          "title": "Execute a mathematically different metric",
+          "explanation": "The second model averages two row rates and returns about 0.545 rather than 0.1. The SQL is valid; the defect is the mismatch between its weighting and the pooled-trial question.",
+          "expected": "Equal-row averaging differs by more than 0.4 from the pooled rate."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Write the population",
+          "task": "Specify which trial records belong in the metric.",
+          "check": "The inclusion and time rules are explicit.",
+          "hint": "A WHERE clause should implement a definition.",
+          "answer": "State eligibility, time, treatment of missingness and duplicate policy before writing the SQL. Keep those rules with the metric owner."
+        },
+        {
+          "title": "Pool across cohorts",
+          "task": "Compute the all-trial rate.",
+          "check": "The rate is 11/102.",
+          "hint": "Use count weighting.",
+          "answer": "A mean of cohort rates would give equal cohort weight and a different target. Choose the weighting unit from the question."
+        },
+        {
+          "title": "Test empty evidence",
+          "task": "Add a zero-trial cohort.",
+          "check": "Its rate follows an explicit undefined-value policy.",
+          "hint": "No trials do not prove zero success probability.",
+          "answer": "Return null or a separate no-evidence status and retain the denominator. Do not silently manufacture observed failures."
+        },
+        {
+          "title": "Preserve counts",
+          "task": "Show numerator and denominator with every rate.",
+          "check": "The estimate can be independently reconstructed.",
+          "hint": "A percentage loses sample-size information.",
+          "answer": "Counts support intervals and comparison of evidence. Preserve the original metric grain while joining other descriptive fields."
+        },
+        {
+          "title": "Prevent join inflation",
+          "task": "Add a duplicate descriptive dimension and test reconciliation.",
+          "check": "The gate detects changed totals or cardinality.",
+          "hint": "A valid metric can be corrupted by enrichment.",
+          "answer": "Validate the relationship and compare numerator/denominator totals before and after joins. Distinct on a final display is not a general repair."
+        },
+        {
+          "title": "Review semantic-layer claims",
+          "task": "Explain what extra qualification a metric service would need.",
+          "check": "It includes actual generated queries and equivalent outputs.",
+          "hint": "A declaration is not execution.",
+          "answer": "Use known fixtures and compare service results with an independent oracle, including nulls, joins, time boundaries and filters. Keep platform setup explicit."
+        }
+      ],
+      "diagnosis": "A large rate change may come from a changed denominator rather than a changed phenomenon. Inspect grouping, source coverage and join multiplicities. A query that compiles and passes key tests can still implement the wrong estimand. Make the metric definition and independent fixture arithmetic part of review.",
+      "transfer": "Publish a metric with a complete numerator/denominator contract and an independent check. Carry it across SQL, Polars and downstream model dashboards without changing its meaning. Treat semantic-layer adoption as an additional implementation to qualify against that contract.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Metric contracts and valid denominators",
+          "https://docs.getdbt.com/docs/build/metrics-overview"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-017",
+      "title": "Temporal data products and late-known facts",
+      "level": "advanced",
+      "minutes": 90,
+      "concepts": [
+        "event time",
+        "availability time",
+        "bitemporal selection",
+        "window",
+        "feature leakage"
+      ],
+      "prerequisites": ["dbt-005", "dbt-009", "dbt-010"],
+      "outcome": "Produce a historical feature relation with explicit entity, time and version semantics.",
+      "theory": "Historical correctness depends on what was knowable at the decision time. An event can occur before a cutoff but arrive after it. A correction can revise an old event using information discovered later. Selecting only event_time<=cutoff can therefore expose future knowledge to a historical analysis or model.\n\nThe example represents both event_at and known_at. It joins requests to eligible feature records and uses row_number to select the latest version after applying both clocks. The counterexample omits the availability condition and returns a strikingly different value for the first request. The program compares the actual model relations, not only the SQL strings.\n\nThis small candidate join is designed for inspection, not arbitrary scale. A large implementation needs an appropriate physical strategy, snapshots or source history while preserving the same semantics. The schema must also distinguish unavailable information from a legitimate zero, and requests with no eligible history must remain accounted for.",
+      "syntax": "The join combines entity identity with event and availability cutoffs. row_number partitions by request identity and orders eligible versions by the declared version keys. Eligibility must be applied before selecting the latest row. The fixture uses integer time keys for transparent arithmetic; a real contract must define timezone and boundary semantics for timestamps.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Select only known information",
+          "explanation": "At request cutoff 5, the event at 4 is not known until 7, so the correct result uses the earlier value 10. At cutoff 9, value 30 is eligible. The ordering chooses among already eligible records.",
+          "expected": "The available feature values are [10,30]."
+        },
+        {
+          "title": "Observe a leaking historical model",
+          "explanation": "The second case omits the known_at condition. It selects 999 for the first request, even though that information was unavailable at cutoff 5. Both models execute successfully, making the semantic failure visible.",
+          "expected": "The event-only model returns [999,30]."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Add an unmatched request",
+          "task": "Create a cutoff before any eligible feature.",
+          "check": "The request is explicitly retained or counted as unmatched.",
+          "hint": "The example inner join has a coverage limit.",
+          "answer": "Left-join selected results back to the request population and report missing-feature reasons. Do not drop difficult requests before evaluating a model."
+        },
+        {
+          "title": "Change the availability clock",
+          "task": "Make the revised event known at 4.",
+          "check": "It is eligible for cutoff 5.",
+          "hint": "The two-clock rule remains unchanged.",
+          "answer": "The result changes because the source history changed. Preserve that history/version when reporting a retrospective analysis."
+        },
+        {
+          "title": "Test equal cutoffs",
+          "task": "Place an event exactly on the request boundary.",
+          "check": "Its treatment matches the documented inclusive rule.",
+          "hint": "Boundary operators are assumptions.",
+          "answer": "The example uses <=. Some systems require a transaction or ingestion watermark that changes what equality means operationally."
+        },
+        {
+          "title": "Add version ties",
+          "task": "Create two eligible versions with equal event and known keys.",
+          "check": "A further deterministic authority rule or rejection is required.",
+          "hint": "row_number needs a meaningful total ordering.",
+          "answer": "Do not rely on accidental database ordering. Define an additional version identifier or fail ambiguous input."
+        },
+        {
+          "title": "Compare with a snapshot",
+          "task": "Explain why a periodic snapshot may not capture every intermediate state.",
+          "check": "The answer distinguishes observed state from complete source history.",
+          "hint": "A snapshot sees what was present when it ran.",
+          "answer": "Choose a source history mechanism that supports the desired retrospective question. Do not reinterpret snapshot observation time as business-effective time."
+        },
+        {
+          "title": "Validate with an oracle",
+          "task": "Recompute the two request values in Python from the tiny rows.",
+          "check": "The oracle returns 10 and 30.",
+          "hint": "Use the explicit eligibility inequalities.",
+          "answer": "Keep this independent fixture in regression tests. SQL execution success alone cannot identify a temporal leakage error."
+        }
+      ],
+      "diagnosis": "If a historical score is suspiciously good, inspect availability and label timing before interpreting model quality. If rows disappear, reconcile request coverage. If results vary on rerun, inspect version ties and ordering. Fix the temporal data contract before adjusting the model.",
+      "transfer": "Produce a historical feature relation with explicit entity, time and version semantics. Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Temporal data products and late-known facts",
+          "https://docs.getdbt.com/docs/build/snapshots"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-018",
+      "title": "Local packages and reusable project dependencies",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["package", "dependency preparation", "macro namespace", "lockfile", "offline"],
+      "prerequisites": ["dbt-007"],
+      "outcome": "Prepare and inspect a real reusable dbt dependency with an explicit source boundary.",
+      "theory": "A dbt package is another project that contributes resources such as macros or models. Declaring a package and preparing it are separate steps. A model can reference a package namespace only after the dependency is available under the project's configured package installation location. This is a project dependency boundary, not a reason to download arbitrary code during a learner run.\n\nThe example uses a local package created inside the owned temporary project. Its macro adds one to a supplied SQL expression. The deps command prepares that local dependency and writes a lock artifact; the subsequent build resolves the namespace and executes the emitted SQL in DuckDB. No registry or network request is needed.\n\nA package name or lockfile is not a trust certificate. Review source, license, versions and transitive requirements before adopting an external package. A local path dependency can change without an external release number, so a reproducible project also needs its source identity. Keep authored local packages separate from generated installation directories and never treat copied build output as the maintained source.",
+      "syntax": "packages.yml declares a local package path. The package has its own dbt_project.yml, name and macros directory. A namespace-qualified call such as classroom_utils.add_one identifies the package that supplies the macro. Run deps before compile/build, then inspect package-lock.yml and the manifest macro entry. Local dependencies are the only package preparation performed in these offline examples.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Use a prepared local package",
+          "explanation": "The first case writes a real local package and prepares it with dbt deps. Its macro appears in the manifest, the lock artifact exists, and the resulting model returns 42. Each observation comes from the actual toolchain.",
+          "expected": "The macro is registered, the lockfile is written and the model returns 42."
+        },
+        {
+          "title": "Diagnose missing preparation",
+          "explanation": "The second project attempts compilation before deps and expects rejection. Preparing the existing local package is then sufficient for compilation to succeed. The model logic itself has not changed.",
+          "expected": "Missing dependency preparation fails; local deps followed by compile succeeds."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect package identity",
+          "task": "Find the package name and macro namespace.",
+          "check": "They identify classroom_utils and add_one.",
+          "hint": "Project names determine namespaces.",
+          "answer": "Keep names stable and avoid accidental collisions. A namespace is a source-resolution mechanism, not a guarantee that the macro is trustworthy."
+        },
+        {
+          "title": "Change package logic",
+          "task": "Change the local macro to add 2 and rebuild.",
+          "check": "The output becomes 43.",
+          "hint": "The dependency source changed.",
+          "answer": "Record the source change and affected consumers. A local path can change even when no remote version declaration changes."
+        },
+        {
+          "title": "Read the lock artifact",
+          "task": "Inspect package-lock.yml after deps.",
+          "check": "The prepared dependency is recorded.",
+          "hint": "A lock supports reproducibility only for its declared semantics.",
+          "answer": "Retain the package declaration and corresponding source. Review what is pinned versus what remains a mutable local path."
+        },
+        {
+          "title": "Keep generated paths separate",
+          "task": "Identify the authored local package and installed package directory.",
+          "check": "Their maintenance roles differ.",
+          "hint": "Do not edit a generated copy as the source.",
+          "answer": "Update the maintained package, rerun preparation and validate consumers. Generated installation trees should not enter the portable source payload as accidental build output."
+        },
+        {
+          "title": "Review an external package",
+          "task": "List evidence needed before adding a registry dependency.",
+          "check": "It includes source, version, license and required capabilities.",
+          "hint": "A package can execute templating logic during compilation.",
+          "answer": "Use a reviewed dependency policy and prepare downloads explicitly. Opening a lesson must not silently obtain or execute a new package."
+        },
+        {
+          "title": "Test namespace failure",
+          "task": "Use an incorrect package namespace and observe compilation.",
+          "check": "The undefined macro is rejected.",
+          "hint": "Check discovery before changing SQL arithmetic.",
+          "answer": "The diagnostic concerns dependency/name resolution. Preserve it and correct the declaration or call rather than inventing a fallback calculation."
+        }
+      ],
+      "diagnosis": "An undefined package macro can result from missing preparation, a wrong package name or an unavailable resource. Check the dependency declaration, installed paths and manifest before modifying the consumer's SQL. Do not solve a local preparation problem by enabling unrelated network access inside the classroom.",
+      "transfer": "Prepare and inspect a real reusable dbt dependency with an explicit source boundary. Demonstrate its missing-dependency failure and a reviewed source change. Extend the same discipline to external packages only in a deliberately prepared project with suitable version and trust controls.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Local packages and reusable project dependencies",
+          "https://docs.getdbt.com/docs/build/packages"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-019",
+      "title": "Targets, environments and owned database routing",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["target", "profile", "schema", "environment", "routing"],
+      "prerequisites": ["dbt-003", "dbt-014"],
+      "outcome": "Run a project against an explicitly identified owned target and verify its actual destination.",
+      "theory": "A target selects a named execution environment from a profile. A project can use the same model definitions while changing database or schema routing and other adapter settings. That flexibility must not turn into ambient selection of a valuable database. Every example here uses one newly created local DuckDB file; dev and prod are synthetic schema labels inside it.\n\nThe first case builds the same model into separate schemas and returns target.name as data so the routing is visible. The result demonstrates environment selection without implying that two schemas in one file provide the isolation, access control or durability of independent production systems.\n\nThe second case requests an undefined target and expects failure. Falling back silently to another environment would make the observation ambiguous and could be dangerous in a real project. Keep target identity, database ownership and credentials explicit, and separate source configuration from secrets when adapting the project outside the classroom.",
+      "syntax": "profiles.yml defines named outputs and a default target. --target chooses an output explicitly. target.name is available during template compilation and can be useful for bounded environment logic, but core business semantics should not drift accidentally between environments. The example changes schema routing while preserving the declared calculation.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Observe explicit routing",
+          "explanation": "The project builds into dev and prod schemas in the same owned file. Each relation reports its selected environment and the answer 42. Both are queried independently after execution.",
+          "expected": "dev.answer and prod.answer contain the corresponding target label and 42."
+        },
+        {
+          "title": "Reject an unknown environment",
+          "explanation": "The second case names a target absent from the profile. The invocation must fail without creating a successful run-results artifact. This preserves uncertainty rather than guessing which output was intended.",
+          "expected": "The unknown target is rejected before a successful model run."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect the destination",
+          "task": "Identify the exact file and schema selected for each target.",
+          "check": "Both are owned local fixtures.",
+          "hint": "A target name alone is not a destination.",
+          "answer": "Record adapter type, database identity and schema. Names such as prod should not be assumed to point to real production or to be safe without inspection."
+        },
+        {
+          "title": "Preserve calculation semantics",
+          "task": "Return the same numeric result in both targets.",
+          "check": "The result remains 42.",
+          "hint": "Routing and business logic are different concerns.",
+          "answer": "Use environment branches only where their behavior is deliberate and tested. Hidden semantic differences can invalidate promotion evidence."
+        },
+        {
+          "title": "Change the default",
+          "task": "Select another default target but still pass --target explicitly.",
+          "check": "The explicit selection wins for the invocation.",
+          "hint": "Inspect the actual command.",
+          "answer": "A repeatable job should record the chosen target. Relying on a mutable local default weakens reproducibility."
+        },
+        {
+          "title": "Reject missing configuration",
+          "task": "Remove an output and attempt to select it.",
+          "check": "The command fails clearly.",
+          "hint": "No fallback is appropriate.",
+          "answer": "Preserve the failure and repair the environment declaration. Do not redirect checks to a shared database to make them run."
+        },
+        {
+          "title": "Separate secrets",
+          "task": "Describe how real credentials should be supplied.",
+          "check": "They are outside maintained public fixtures and logs.",
+          "hint": "The classroom profile needs no secrets.",
+          "answer": "Use an approved secret mechanism in a separately owned environment. Do not place real passwords or tokens into the versioned lesson project."
+        },
+        {
+          "title": "Compare isolation claims",
+          "task": "Explain what two schemas in one file do not establish.",
+          "check": "They do not provide independent failure domains or access control.",
+          "hint": "Namespacing is one mechanism.",
+          "answer": "Evaluate actual permissions, concurrency, backups, network boundaries and recovery for a deployed environment. The local case demonstrates routing only."
+        }
+      ],
+      "diagnosis": "If a model appears in the wrong place, inspect target selection and generated schema naming before editing SQL. If credentials are missing in an external project, use the approved environment setup rather than copying secrets into the model. Stop when destination ownership is unclear.",
+      "transfer": "Run a project against an explicitly identified owned target and verify its actual destination. Preserve calculation semantics across routing changes, reject unknown environments and document the additional isolation requirements of real deployments.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Targets, environments and owned database routing",
+          "https://docs.getdbt.com/reference/dbt-jinja-functions/target"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-020",
+      "title": "Deferral and the choice of upstream state",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["defer", "state manifest", "relation resolution", "favor-state", "baseline"],
+      "prerequisites": ["dbt-013", "dbt-019"],
+      "outcome": "Use deferral with an explicit upstream-state contract.",
+      "theory": "Deferral lets a selected model resolve unselected dependencies using a prior manifest's relation information. It can support a small development or CI build that reuses accepted upstream relations. The manifest is therefore more than a source checksum: it identifies concrete relations that must exist and be appropriate for the intended test.\n\nThe first case builds a baseline in the synthetic prod schema, saves its manifest, and builds only a child in dev. No dev parent is created, so the child resolves the accepted prod parent. The second case gives dev its own parent with a different value. Normal deferral and favor-state then produce different observed results.\n\nThis difference matters when developers assume defer always means use production data. Existing target relations can influence resolution unless the selection policy explicitly favors the saved state. A reliable CI recipe should state which data is being read, how that baseline is qualified and whether target relations may already exist. The local schemas are owned fixtures, not access to a real production warehouse.",
+      "syntax": "--defer and --state point compilation to a saved manifest for eligible unselected dependencies. --favor-state changes the preference when an existing target relation could otherwise be used. The example saves its baseline outside target/ and checks compiled SQL as well as actual result values. Qualified names in compiled SQL identify the chosen parent.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Resolve an absent dev dependency from accepted state",
+          "explanation": "The first project builds prod.base and saves its manifest, then runs only dev.child. The result 11 comes from the baseline parent 1 plus 10. The program verifies that dev.base does not exist and that compiled SQL names prod.base.",
+          "expected": "The child returns 11 and its parent is resolved from prod."
+        },
+        {
+          "title": "Observe an existing target relation and favor-state",
+          "explanation": "The second case creates dev.base with 100 after the baseline parent 1 exists. Default deferral uses the existing dev relation, while favor-state forces the saved baseline relation for the selected child.",
+          "expected": "The default result is 101; favor-state produces 2."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect the chosen parent",
+          "task": "Read the child's compiled relation name.",
+          "check": "It matches the intended source environment.",
+          "hint": "Do not infer resolution from flags alone.",
+          "answer": "The compiled SQL and actual value together reveal which parent was used. Retain both when validating a CI recipe."
+        },
+        {
+          "title": "Create a stale dev parent",
+          "task": "Leave an old target relation before a deferred build.",
+          "check": "Its effect is explicitly observed.",
+          "hint": "Existing state changes the test environment.",
+          "answer": "Use a clean owned schema or a deliberate favor-state policy. Do not assume every developer workspace has the same prior relations."
+        },
+        {
+          "title": "Remove the baseline relation",
+          "task": "Describe what happens if the manifest points to a missing table.",
+          "check": "Execution cannot rely on the manifest alone.",
+          "hint": "Metadata is not the relation itself.",
+          "answer": "Validate the baseline's availability and identity. A saved manifest is insufficient evidence that its referenced data still exists or is accepted."
+        },
+        {
+          "title": "Change a selected parent",
+          "task": "Include the parent in the current selection.",
+          "check": "The current selected resource is built under the chosen target.",
+          "hint": "Selection and deferral interact.",
+          "answer": "Review the selected graph and relation resolution together. Deferral is not a blanket override of all current resources."
+        },
+        {
+          "title": "Protect sensitive data",
+          "task": "Explain why a deferred CI job still needs reviewed access.",
+          "check": "It may read baseline relations.",
+          "hint": "Small compute scope is not a privacy boundary.",
+          "answer": "Use approved synthetic or governed data and suitable credentials in real environments. The classroom uses only its own temporary file."
+        },
+        {
+          "title": "Record baseline identity",
+          "task": "Specify the metadata needed for a reproducible deferred run.",
+          "check": "It includes source revision, manifest hash and relation/data context.",
+          "hint": "The same path can point to different content later.",
+          "answer": "Retain an immutable baseline artifact and the relevant data/version contract. Explain which uncertainties remain outside the local check."
+        }
+      ],
+      "diagnosis": "Unexpected values can come from an existing target relation rather than a wrong SQL formula. Inspect selected resources, state identity, favor-state behavior and compiled relation names. If the baseline is unavailable or unqualified, stop instead of silently selecting another environment.",
+      "transfer": "Use deferral with an explicit upstream-state contract. Demonstrate how target residue changes resolution and choose a reviewed policy for a clean or deliberately state-preferring CI environment. Validate actual results after compilation.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Deferral and the choice of upstream state",
+          "https://docs.getdbt.com/reference/node-selection/defer"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-021",
+      "title": "Slim CI with actual builds and data tests",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": [
+        "CI",
+        "state selection",
+        "deferred baseline",
+        "test evidence",
+        "isolated target"
+      ],
+      "prerequisites": ["dbt-004", "dbt-006", "dbt-013", "dbt-020"],
+      "outcome": "Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership.",
+      "theory": "A slim CI workflow combines a selection plan with actual execution against an isolated target and an explicit upstream baseline. Its goal is to validate the relevant change efficiently while retaining meaningful tests. Selecting changed nodes without running them is not CI acceptance, and a successful model build without the required tests is incomplete evidence.\n\nThe example first builds an accepted baseline in a synthetic prod schema. It then changes a child and runs state:modified+ in dev with deferral. One change preserves the key contract; another duplicates rows and must fail uniqueness. The accepted baseline is queried afterward to verify that the CI exercise did not alter it.\n\nA reduced CI scope is justified only under stated assumptions. Shared macros, environment changes, source contracts, schema migrations or operational behavior may require a broader gate. Keep the baseline, selected graph, executed statuses and target ownership with the result. An efficient test that reads the wrong data or omits the relevant condition is not a useful release check.",
+      "syntax": "The workflow saves a baseline manifest separately, edits the current source, and invokes build with --select state:modified+, --defer, --state and an explicit target. It inspects run_results and the preserved baseline relation. The negative fixture is expected to fail; that failure proves the selected data test actually ran.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Accept a compatible change",
+          "explanation": "The first child change adds a filter that preserves the identified row. The selected build and its tests pass in dev, while the baseline still has one row. The result binds the selection to actual evidence.",
+          "expected": "The changed candidate passes and the accepted baseline is unchanged."
+        },
+        {
+          "title": "Reject a duplicated output",
+          "explanation": "The second change unions the same parent rows twice. SQL execution is valid, but the child uniqueness test fails. The baseline remains unchanged because the CI target is distinct.",
+          "expected": "The candidate contains a failed test and the baseline still has one row."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect selected resources",
+          "task": "List the nodes and tests included by the state expression.",
+          "check": "The changed child and required tests are visible.",
+          "hint": "Selection is inspectable before execution.",
+          "answer": "Keep that inventory with the result. An empty or incomplete selection cannot justify acceptance merely because the command exits successfully."
+        },
+        {
+          "title": "Introduce a semantic failure",
+          "task": "Change the child quantity while keeping its schema.",
+          "check": "An independent semantic test is needed to detect it.",
+          "hint": "Key checks do not cover every contract.",
+          "answer": "Add a known reconciliation or domain condition. A reduced suite is useful only if its assertions cover the relevant behavior."
+        },
+        {
+          "title": "Verify isolation",
+          "task": "Query the accepted baseline after a failed candidate.",
+          "check": "Its content remains unchanged.",
+          "hint": "Targets should have explicit ownership.",
+          "answer": "Use a dedicated CI schema/database and approved access. Do not redirect a failing exercise to a shared valuable environment."
+        },
+        {
+          "title": "Review a shared macro change",
+          "task": "Decide whether the normal slim scope is sufficient.",
+          "check": "The decision includes downstream effects.",
+          "hint": "A small source edit can affect many nodes.",
+          "answer": "Inspect graph expansion and run broader checks when needed. Explain the reason rather than treating slim selection as an unconditional policy."
+        },
+        {
+          "title": "Retain invocation evidence",
+          "task": "Record the source and baseline identities with statuses.",
+          "check": "The result can be traced to exact inputs.",
+          "hint": "A green badge alone loses context.",
+          "answer": "Keep the selected resources, command, target, baseline manifest and actual outcomes. Avoid attaching old successful artifacts to changed source."
+        },
+        {
+          "title": "Define failure handling",
+          "task": "State what a failed CI candidate is allowed to publish.",
+          "check": "It cannot replace the accepted product.",
+          "hint": "Testing and publication are separate stages.",
+          "answer": "Retain diagnostics and cleanup only owned CI resources. Repair the defect and generate new evidence before promotion."
+        }
+      ],
+      "diagnosis": "A fast CI run can be empty or incomplete. Check resource counts, test selection and the baseline before interpreting its result. A failed test is useful evidence, not a reason to remove the assertion. Keep cleanup scoped to the owned CI target and preserve the accepted baseline.",
+      "transfer": "Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership. Demonstrate that a meaningful defect fails and that accepted data remains intact. Explain when the change requires a broader validation scope.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Slim CI with actual builds and data tests",
+          "https://docs.getdbt.com/docs/deploy/ci-jobs"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-022",
+      "title": "Diagnose template, database and semantic failures",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["compilation", "binding error", "semantic test", "diagnosis", "evidence"],
+      "prerequisites": ["dbt-004", "dbt-007", "dbt-011"],
+      "outcome": "Diagnose failures using the layer that actually rejected the work.",
+      "theory": "A failed data workflow can fail at different layers. Project parsing and template compilation establish whether definitions can be resolved. Database execution establishes whether the generated SQL can run under the selected schema and privileges. Data tests and independent reconciliation ask whether the resulting values satisfy the intended contract. These layers should be diagnosed separately.\n\nThe first case uses a valid template that refers to a nonexistent database column. Compilation produces SQL, but execution fails when DuckDB binds that column. The second case produces a valid but doubled amount. It runs successfully as SQL and is rejected by an independently specified reconciliation test. The difference prevents a common mistake: assuming a compiled or materialized result is correct.\n\nA useful incident record names the source revision, selected resources, target, first relevant error and observed database state. Avoid changing several things at once or weakening a test before understanding its assertion. The goal is to identify which assumption failed and produce new evidence for a specific correction.",
+      "syntax": "Inspect compiled SQL for a database error and run_results for execution/test outcomes. A singular data test returns failing rows; zero rows mean that particular condition passed. The example uses a fixed independently calculated total 12 rather than deriving the expectation through the same mistaken expression as the model.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Compile a template that the database rejects",
+          "explanation": "The first project has a valid ref expression and a prepared input relation, so template compilation succeeds. The generated SQL names a missing column and actual execution fails. This isolates a database-binding issue from dependency preparation.",
+          "expected": "Compiled SQL exists, but the model result status is error."
+        },
+        {
+          "title": "Reject a wrong quantity after valid execution",
+          "explanation": "The second model doubles a sum and materializes 24. A singular test expecting 12 returns a failing row. Both the result and the failure are inspected, so the diagnosis concerns semantics rather than syntax.",
+          "expected": "The relation contains 24 and the independent reconciliation test fails."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Classify the first failure",
+          "task": "Identify which layer rejects the missing-column model.",
+          "check": "It is database binding/execution.",
+          "hint": "The template already compiled.",
+          "answer": "Inspect the actual relation schema and generated column name. Changing package configuration would not address this specific defect."
+        },
+        {
+          "title": "Create a template error",
+          "task": "Replace a valid ref with an undefined macro.",
+          "check": "Compilation fails earlier.",
+          "hint": "Compare with the macro lesson.",
+          "answer": "The failure concerns definition resolution before the final SQL can be evaluated. Keep the layers separate in the diagnostic record."
+        },
+        {
+          "title": "Preserve the wrong result",
+          "task": "Inspect the doubled model before repair.",
+          "check": "The materialized 24 remains evidence of the defect.",
+          "hint": "Do not delete every artifact immediately.",
+          "answer": "Retain a bounded source/result record in an owned environment. It helps prove what changed and prevents a vague claim that the previous code merely failed."
+        },
+        {
+          "title": "Repair one cause",
+          "task": "Remove the incorrect factor 2 and rebuild.",
+          "check": "The independent total becomes 12 and the test passes.",
+          "hint": "Change the smallest relevant assumption.",
+          "answer": "Keep the same fixture and oracle while applying the correction. A new unrelated dataset would make the before/after comparison less informative."
+        },
+        {
+          "title": "Avoid a circular oracle",
+          "task": "Explain why expecting whatever the model outputs is not a test.",
+          "check": "The expected value is independently justified.",
+          "hint": "Shared mistakes can produce agreement.",
+          "answer": "Use hand calculation, a different implementation or a separately established contract. Record which assumptions the oracle itself depends on."
+        },
+        {
+          "title": "Write an incident note",
+          "task": "Describe trigger, failed assumption, observed state, correction and verification.",
+          "check": "The note is specific and reproducible.",
+          "hint": "A stack trace alone is not the explanation.",
+          "answer": "Include the invocation and resource identities without exposing credentials. Distinguish confirmed causes from hypotheses that still need testing."
+        }
+      ],
+      "diagnosis": "Start with the first relevant diagnostic rather than the last cascade of skipped resources. Inspect actual selected nodes and database state. A model success followed by a test failure calls for semantic investigation, while a missing relation may indicate preparation or routing. Do not report a skipped downstream resource as a passing result.",
+      "transfer": "Diagnose failures using the layer that actually rejected the work. Preserve bounded before/after evidence and verify a focused correction with an independent oracle. Apply the same method to feature and model pipelines where an apparently healthy process can still produce an invalid product.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Diagnose template, database and semantic failures",
+          "https://docs.getdbt.com/reference/artifacts/run-results-json"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-023",
+      "title": "Query plans, measured cost and semantic equivalence",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["EXPLAIN", "query timing", "materialization cost", "multiset", "benchmark"],
+      "prerequisites": ["dbt-003", "dbt-008", "dbt-022"],
+      "outcome": "Measure database work with a correctness oracle and a clearly defined interval.",
+      "theory": "Performance work begins with a correct delivered contract. A query that removes duplicates, drops ordering or changes a filter may run faster because it performs a different computation. Compare values, identities and required ordering before comparing elapsed time. SQL's multiset behavior is particularly important because equal-looking records can represent distinct contributions.\n\nThe first case builds a bounded ten-thousand-row relation, executes a grouped query repeatedly and checks its answer with independent Python arithmetic. It also retrieves an actual DuckDB plan. The measured interval covers the query connection/execution path, not the preceding dbt build. Those scopes are reported separately so the timing is not misrepresented as total pipeline cost.\n\nThe counterexample applies DISTINCT and changes a total from 17 to 12. It is not a valid optimization for an additive multiset contract. Tiny timings in this classroom are demonstrations of a measurement method, not rankings of databases or capacity promises. A production study needs representative size, distribution, concurrency and failure behavior.",
+      "syntax": "EXPLAIN returns database planning information; inspect it alongside actual result checks. perf_counter measures a declared interval, and a small repeated sample can report a median without hiding individual variability. Do not assert exact plan text or a guaranteed speed ordering across versions and machines. Materialization, refresh and read costs belong to the complete workload decision.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Measure a correctly verified query",
+          "explanation": "The project materializes ten thousand deterministic records and computes five grouped sums over a subset. Every repetition must match an independent oracle. The program confirms that a plan is available and reports a median rather than a universal speed claim.",
+          "expected": "The five group totals match Python arithmetic and a nonnegative timing summary is reported."
+        },
+        {
+          "title": "Expose a false optimization",
+          "explanation": "The second project removes a repeated contribution with DISTINCT. Its result is smaller, but the total changes. This makes the semantic cost visible before anyone calls the operation an improvement.",
+          "expected": "The multiset total is 17; the changed result totals 12."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change measured scope",
+          "task": "Include the dbt build in a separate timing.",
+          "check": "The report states which interval each value covers.",
+          "hint": "Preparation and query costs differ.",
+          "answer": "Keep fixture generation outside the intended interval or describe it explicitly. Comparing differently scoped timings is misleading."
+        },
+        {
+          "title": "Vary data size",
+          "task": "Repeat the query at another bounded size.",
+          "check": "The result remains independently checked.",
+          "hint": "Scale the same data-generation rule.",
+          "answer": "Record input size and resource settings. A few observations do not establish a universal capacity curve."
+        },
+        {
+          "title": "Inspect plan changes",
+          "task": "Change a predicate and review the new plan.",
+          "check": "The actual result and plan are both available.",
+          "hint": "Plans are diagnostic artifacts.",
+          "answer": "Do not equate a different operator name with a correctness defect. Investigate whether the requested work and measured behavior changed."
+        },
+        {
+          "title": "Keep duplicates when required",
+          "task": "Restore the repeated contribution in the second case.",
+          "check": "The correct total is 17.",
+          "hint": "A duplicated value is not necessarily a duplicate event.",
+          "answer": "Choose deduplication from record identity and domain policy. DISTINCT is not a general performance repair."
+        },
+        {
+          "title": "Include ordering requirements",
+          "task": "Specify whether consumers need sorted rows.",
+          "check": "The comparison includes the required sort when applicable.",
+          "hint": "Sequence and bag equality are different contracts.",
+          "answer": "A faster unordered output cannot replace an ordered interface silently. State the accepted contract before tuning."
+        },
+        {
+          "title": "Write a bounded conclusion",
+          "task": "Summarize what the fixture actually measured.",
+          "check": "It names data, query, environment and limitations.",
+          "hint": "Avoid platform-wide claims.",
+          "answer": "Report observed timings and correctness evidence. Use them to choose the next experiment, including I/O, refresh and concurrency if those matter to deployment."
+        }
+      ],
+      "diagnosis": "Near-zero lazy or compile timings may not include query execution. A faster result with different counts or totals is not an equivalent replacement. Check the dataset, cache regime, selected work and result contract before attributing performance to a tool or setting.",
+      "transfer": "Measure database work with a correctness oracle and a clearly defined interval. Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "DuckDB documentation: Query plans, measured cost and semantic equivalence",
+          "https://duckdb.org/docs/stable/guides/meta/explain.html"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-024",
+      "title": "Groups, model access and governance boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": [
+        "group",
+        "model access",
+        "ownership",
+        "reference policy",
+        "database permissions"
+      ],
+      "prerequisites": ["dbt-012", "dbt-014", "dbt-019"],
+      "outcome": "Use groups and model access to define supported project interfaces, while keeping database authorization claims separate.",
+      "theory": "Project governance defines responsibilities and permitted dependency relationships. dbt groups can associate models with owners, while model access levels control which project models may reference another model. This helps manage interfaces inside a growing codebase. It is not the same mechanism as a database permission system.\n\nThe first case gives an internal model private access and uses it from a consumer in the same group. The build succeeds, and a direct DuckDB query can still read the internal relation in this owned database. That observation is important: a private model declaration does not automatically revoke SQL privileges from a database user.\n\nThe second case moves the consumer to another group and expects the dbt reference policy to reject it. This is a real compiler/project-governance check. A deployed environment still needs appropriate database grants, identities, credentials, network boundaries and audit practices. The local project makes no claim that those external controls have been installed.",
+      "syntax": "Group definitions include an owner label. Model config declares group and access, and ref creates the dependency evaluated by that policy. The example compares a same-group reference with a cross-group reference to a private model. It then distinguishes the dbt dependency rule from direct database querying.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Use a private model within its group",
+          "explanation": "The internal model returns 41 and its same-group consumer returns 42. Both are real relations in the local fixture. A direct query of the internal relation still works under the owned database connection.",
+          "expected": "The build succeeds, while direct SQL visibility remains a separate fact."
+        },
+        {
+          "title": "Reject an unapproved cross-group dependency",
+          "explanation": "The second project places the consumer in another group while retaining private access on the producer. The build is expected to fail under dbt's reference policy.",
+          "expected": "The cross-group private-model reference is rejected."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Identify the owner",
+          "task": "Locate the group and owner metadata for a model.",
+          "check": "Responsibility is explicitly declared.",
+          "hint": "A label must correspond to a real maintained process outside the fixture.",
+          "answer": "Use ownership to route review and incidents. A declared owner does not prove someone has acknowledged or fulfilled the responsibility."
+        },
+        {
+          "title": "Change access deliberately",
+          "task": "Make the producer public and review the cross-group dependency.",
+          "check": "The reference policy changes explicitly.",
+          "hint": "This is an interface decision.",
+          "answer": "Review schema, semantics, support and migration obligations before broadening access. Public within dbt is not synonymous with public on the internet."
+        },
+        {
+          "title": "Test database visibility",
+          "task": "Query the internal relation directly in the owned fixture.",
+          "check": "It remains readable here.",
+          "hint": "The database connection has its own privileges.",
+          "answer": "Use actual grants and identity controls in a deployed environment. Do not advertise model access metadata as row/column authorization."
+        },
+        {
+          "title": "Define a sensitive field boundary",
+          "task": "Explain how a restricted column should be controlled outside this fixture.",
+          "check": "The answer includes a real authorization mechanism.",
+          "hint": "Documentation alone cannot prevent a read.",
+          "answer": "Use an appropriate governed model, grants or service boundary and test it with the intended identity. This lesson does not configure external permissions."
+        },
+        {
+          "title": "Plan a dependency change",
+          "task": "Describe how consumers should migrate from an internal model to a supported interface.",
+          "check": "The plan identifies versions and acceptance checks.",
+          "hint": "A dependency graph is a compatibility surface.",
+          "answer": "Publish a documented stable model, validate consumers and retire internal references under a clear policy. Avoid silently changing their meaning."
+        },
+        {
+          "title": "Audit the claim",
+          "task": "Write exactly what these two cases establish.",
+          "check": "They establish local dbt reference-policy behavior.",
+          "hint": "Keep compiler and security evidence separate.",
+          "answer": "Record accepted/rejected dependencies and observed direct SQL access. Name the external controls that require their own configuration and tests."
+        }
+      ],
+      "diagnosis": "A private-reference error can be correct governance behavior. Do not bypass it by hardcoding a relation name and claiming the policy passed. Conversely, a private model that is readable through direct SQL is not surprising: inspect database permissions as a different layer.",
+      "transfer": "Use groups and model access to define supported project interfaces, while keeping database authorization claims separate. Test both allowed and rejected dependencies and record who owns semantic compatibility and external access controls.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Groups, model access and governance boundaries",
+          "https://docs.getdbt.com/docs/mesh/govern/model-access"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-025",
+      "title": "Recovery, accepted versions and atomic pointers",
+      "level": "advanced",
+      "minutes": 120,
+      "concepts": ["rollback", "candidate", "accepted release", "transaction", "recovery"],
+      "prerequisites": ["dbt-015", "dbt-019", "dbt-021"],
+      "outcome": "Recover a data product through explicit accepted versions and a tested pointer mechanism.",
+      "theory": "Recovery begins by identifying which state was accepted and which operations may already have happened. A failed candidate build can leave new relations, while consumers should continue using a previously accepted product. Keeping a distinct accepted version makes that decision possible without pretending every build is one global transaction.\n\nThe first case creates a consumer-facing view over a versioned accepted table. It changes that pointer inside a real DuckDB transaction and rolls the transaction back. The original value remains visible afterward. This qualifies a local database mechanism, not atomicity across multiple services, filesystems and warehouses.\n\nThe second case materializes a candidate 99 that violates a declared maximum 50, while an accepted release retains 42. The failed test does not erase the candidate, and the consumer boundary is intentionally not advanced. A durable operating procedure should also specify ownership, retries, uncertain outcomes, retention and how a rollback restores a compatible set of data and code.",
+      "syntax": "BEGIN/ROLLBACK delimit the demonstrated database transaction. The accepted relation and publication view have separate names from the candidate. Inspect actual values after the failure or rollback. A model/source version and its validation evidence should travel with the accepted artifact; a name such as latest is insufficient without an identity contract.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Roll back a pointer change",
+          "explanation": "The first case temporarily changes the view's visible value inside a transaction, observes the candidate and rolls back. The final query must again return the original version and value. This is actual database behavior on an owned file.",
+          "expected": "The temporary 99 is visible inside the transaction; rollback restores version 1/value 42."
+        },
+        {
+          "title": "Retain an accepted product after candidate failure",
+          "explanation": "The second case builds a candidate that fails a data test. Its relation contains 99, but the separately retained accepted release still contains 42. The publication decision remains separate from materialization.",
+          "expected": "The candidate is rejected and the accepted value remains 42."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Inspect both states",
+          "task": "Query candidate and accepted relations after failure.",
+          "check": "Their different values are explicit.",
+          "hint": "Do not infer state from the final exit code alone.",
+          "answer": "Record what changed and what remained accepted. This supports a targeted recovery instead of a broad destructive reset."
+        },
+        {
+          "title": "Commit an accepted change",
+          "task": "Repeat the pointer transaction under a valid policy and commit it.",
+          "check": "The new accepted view is visible afterward.",
+          "hint": "Approval evidence must precede promotion.",
+          "answer": "Verify the candidate first, then switch an identified pointer. Keep the previous version for a declared rollback period."
+        },
+        {
+          "title": "Handle an uncertain response",
+          "task": "Describe a client timeout after a possible commit.",
+          "check": "The response reconciles the intended version before retry.",
+          "hint": "Unknown outcome is not confirmed rollback.",
+          "answer": "Read the accepted pointer and transaction evidence. Blindly repeating a non-idempotent action can create additional side effects."
+        },
+        {
+          "title": "Restore compatible components",
+          "task": "List what a data/model rollback may need beyond one table.",
+          "check": "It includes schema, features, model and interface versions.",
+          "hint": "A technically successful pointer switch can still be incompatible.",
+          "answer": "Restore a coherent accepted bundle and verify its consumer behavior. A stale model may not accept a newly changed feature schema."
+        },
+        {
+          "title": "Bound retention",
+          "task": "Define how old accepted versions are removed.",
+          "check": "Ownership and retention rules are explicit.",
+          "hint": "Cleanup is a separate destructive action.",
+          "answer": "Preserve required rollback and audit evidence, then remove only owned expired artifacts under the approved policy. Do not use a global prune as incident diagnosis."
+        },
+        {
+          "title": "Separate transaction scopes",
+          "task": "Explain what the local rollback test cannot prove.",
+          "check": "It does not establish a distributed transaction.",
+          "hint": "Other services can commit independently.",
+          "answer": "Use an appropriate publication/reconciliation protocol across boundaries and test partial failures. Keep this local result as one component of the design."
+        }
+      ],
+      "diagnosis": "If recovery changes more than intended, stop and identify the candidate, accepted version and actual consumer pointer. A failed test may leave materialized data. A timeout may leave an unknown commit outcome. Reconcile state before retrying or deleting evidence.",
+      "transfer": "Recover a data product through explicit accepted versions and a tested pointer mechanism. Demonstrate a failed candidate and a reversible local promotion, then describe which distributed or operational guarantees still need separate implementation and qualification.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "DuckDB documentation: Recovery, accepted versions and atomic pointers",
+          "https://duckdb.org/docs/stable/sql/statements/transactions.html"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    },
+    {
+      "id": "dbt-026",
+      "title": "Publish a complete validated analytics product",
+      "level": "advanced",
+      "minutes": 180,
+      "concepts": ["capstone", "staging", "tests", "lineage", "publication", "decision receipt"],
+      "prerequisites": [
+        "dbt-009",
+        "dbt-010",
+        "dbt-011",
+        "dbt-014",
+        "dbt-016",
+        "dbt-017",
+        "dbt-018",
+        "dbt-021",
+        "dbt-024",
+        "dbt-025"
+      ],
+      "outcome": "Deliver a complete local analytics product with a reviewable acceptance decision.",
+      "theory": "The capstone joins the preceding mechanisms into one bounded analytics product. Raw order text is staged under a parsing policy, a customer dimension enriches accepted orders, and a mart summarizes totals at a declared customer/region grain. Tests check source and model identities before an accepted artifact is published. The complete program creates ordinary dbt files and executes the installed tool against an owned DuckDB database.\n\nThe fixture contains one malformed amount, so the accepted mart must account for excluded input rather than silently describing itself as the whole source. The valid product totals 21 across three accepted orders. A second fixture duplicates a dimension key, and the build must block publication. This case connects an operational gate to the earlier fanout reasoning.\n\nThe final receipt records grain, row count, a data hash and manifest dependencies. Those fields make an accepted artifact identifiable and reviewable. They do not establish authenticity or a deployed service-level objective on their own. A durable environment additionally needs ownership, atomic publication, storage/retention decisions and recovery after an uncertain operation.",
+      "syntax": "The program writes seed CSVs, model SQL and YAML tests, runs build, inspects actual query results and generates documentation artifacts. Only the accepted path writes published.json. Its hash binds a canonical serialized result for this fixture. The manifest supplies declared model dependencies; the row checks and test outcomes provide separate evidence about the computation.",
+      "math": "",
+      "worked": [
+        {
+          "title": "Build and publish the accepted case",
+          "explanation": "The clean dimension and staged order rules produce two customer summaries. The program reconciles raw and accepted counts, inspects dependency metadata and checks the written receipt. This is a complete local workflow rather than a list of proposed commands.",
+          "expected": "Customer totals are 12 and 9, overall 21; one raw order is quarantined and a receipt is written."
+        },
+        {
+          "title": "Block an invalid dimension",
+          "explanation": "The second fixture repeats customer 10 in the dimension. The uniqueness test fails and publication remains absent. The failure is an expected decision under the contract, and should not be concealed by deduplicating a final report.",
+          "expected": "The invalid candidate is not published."
+        }
+      ],
+      "exercises": [
+        {
+          "title": "Change a valid order",
+          "task": "Add a new identified paid amount and predict the mart change.",
+          "check": "Counts and totals reconcile independently.",
+          "hint": "Calculate the contribution before running.",
+          "answer": "Verify the affected customer and overall total. Retain raw, accepted and rejected counts so the new result is explainable."
+        },
+        {
+          "title": "Add a conflicting dimension",
+          "task": "Use two different regions for one customer key.",
+          "check": "The contract rejects the ambiguity.",
+          "hint": "A duplicate is not resolved by arbitrary selection.",
+          "answer": "Define a valid historical or authority rule before enrichment. If the intended dimension is current-only, its key must be unique."
+        },
+        {
+          "title": "Inspect lineage",
+          "task": "Identify both mart dependencies from the manifest.",
+          "check": "They name staging_orders and customers.",
+          "hint": "Dependencies are structured metadata.",
+          "answer": "Use them to trace the product, while keeping the distinction between declared lineage and independently verified quantity preservation."
+        },
+        {
+          "title": "Verify the receipt",
+          "task": "Read published.json and recompute its data identity.",
+          "check": "The received content matches the declared hash and grain.",
+          "hint": "Keep identity separate from correctness.",
+          "answer": "A hash detects byte/content changes under its serialization convention. It does not prove that the input population or business definition was appropriate."
+        },
+        {
+          "title": "Add temporal semantics",
+          "task": "Extend the source with event and known timestamps.",
+          "check": "The resulting product obeys a declared cutoff.",
+          "hint": "Reuse the two-clock reasoning.",
+          "answer": "Do not label a current-state mart as historically available without testing that property. A model-training consumer needs the correct temporal version."
+        },
+        {
+          "title": "Write the release decision",
+          "task": "Explain why the clean case is accepted and the bad case is blocked.",
+          "check": "The decision cites concrete checks and remaining boundaries.",
+          "hint": "A green process is not the entire argument.",
+          "answer": "State the grain, parsing policy, key checks, quantities, lineage and output identity. Name the external operational requirements that the local exercise does not qualify."
+        }
+      ],
+      "diagnosis": "If the product differs from its expected total, follow the pipeline from raw parsing through key relationships and aggregation. If the build fails, inspect which resources ran and whether publication was prevented. If a receipt is stale, do not update its hash without re-establishing the candidate's source and validation evidence.",
+      "transfer": "Deliver a complete local analytics product with a reviewable acceptance decision. Extend it with a controlled schema or timing change, run its negative cases and explain how a consumer can select a valid version. Use the ML engineering path to connect that product to features, model training and serving contracts.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "references": [
+        [
+          "dbt documentation: Publish a complete validated analytics product",
+          "https://docs.getdbt.com/reference/artifacts/dbt-artifacts"
+        ],
+        [
+          "dbt-duckdb adapter configuration and capabilities",
+          "https://github.com/duckdb/dbt-duckdb"
+        ]
+      ]
+    }
+  ],
+  "project_readme": "projects/retail/README.md",
+  "project_summary": "The maintained retail project contains actual SQL models, seeds, macros, local packages, tests, snapshots and target configuration. Copy it to an owned working directory and use its Docker launcher to inspect durable artifacts and evolve a complete project."
+}

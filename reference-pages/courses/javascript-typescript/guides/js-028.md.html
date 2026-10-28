@@ -330,19 +330,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Find a shortest unweighted path.</strong> Search a graph with two equal-length routes from A to D. <strong>Expected:</strong> A,B,D under the stated neighbor order. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Beat greedy coin selection.</strong> Use denominations 1,3,4 to make amount 6. <strong>Expected:</strong> two coins; amount zero needs zero coins. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Terminate on a cyclic graph.</strong> Search A to C through A-B-A cycles and check source-to-source. <strong>Expected:</strong> A,B,C and A. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Separate disconnection from malformed input.</strong> Search a disconnected target, then supply a missing neighbor. <strong>Expected:</strong> undefined for no path; RangeError for invalid graph. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Represent unreachable coin amounts.</strong> Use denomination 2 for targets 3 and 4. <strong>Expected:</strong> undefined and 2. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid recurrence configurations.</strong> Try zero, negative and fractional coins plus target 1001. <strong>Expected:</strong> RangeError for all invalid configurations; empty denominations cannot make 1. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

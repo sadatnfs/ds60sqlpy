@@ -321,19 +321,19 @@ sequence<span class="syntax-operator">=</span>torch<span class="syntax-operator"
 <ol>
 <li><strong>Clone one base into two candidates.</strong> Create a seed 31 decoder and copy its state into full and adapted candidates. <strong>Expected:</strong> all initial base parameters equal. <strong>Verify:</strong> Save the assertion results for exercise 1, including all initial base parameters equal.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Install an output-head adapter.</strong> Freeze the adapted model, replace its output layer with rank 2LoRA, and compare initial logits. <strong>Expected:</strong> 96 trainable adapter entries; initial logits match base. <strong>Verify:</strong> Save the assertion results for exercise 2, including 96 trainable adapter entries; initial logits match base.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Train both candidates under fixed budgets.</strong> Run 20 full-SFT updates at.01 and 20 adapter updates at.03 on the same masked batch. <strong>Expected:</strong> both training losses decrease; all logged values finite. <strong>Verify:</strong> Save the assertion results for exercise 3, including both training losses decrease; all logged values finite.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Prove base preservation.</strong> Compare every frozen adapted-model parameter against its saved copy. <strong>Expected:</strong> all frozen tensors exactly equal. <strong>Verify:</strong> Save the assertion results for exercise 4, including all frozen tensors exactly equal.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Compare a frozen held-out task.</strong> Evaluate prompt[7, 2] with answer[5, 3] for both candidates using the same mask. <strong>Expected:</strong> two finite held-out losses; no predetermined winner. <strong>Verify:</strong> Save the assertion results for exercise 5, including two finite held-out losses; no predetermined winner.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Record comparison limits.</strong> Build a report with trainable counts, update budgets, target module and task scope. <strong>Expected:</strong> adapter 96 entries; 20 updates each; scope literal-token task. <strong>Verify:</strong> Save the assertion results for exercise 6, including adapter 96 entries; 20 updates each; scope literal-token task.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -1,0 +1,58 @@
+x-base: &base
+  image: ${DS60_PLATFORM_IMAGE:?Prepare the data-platforms-python image}
+  pull_policy: never
+  entrypoint: [python3]
+  working_dir: /project
+  volumes:
+    - .:/project:ro
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,noexec,size=64m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  cpus: 1.0
+  mem_limit: 512m
+  labels:
+    org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+    org.ds60.workshop.kind: apache-arrow-flight
+services:
+  initialize:
+    <<: *base
+    user: "0:0"
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    command: [service.py, init, --state, /state]
+    volumes:
+      - .:/project:ro
+      - fixture:/state
+  server:
+    <<: *base
+    user: "1000:1000"
+    command: [service.py, serve, --state, /state]
+    volumes:
+      - .:/project:ro
+      - fixture:/state:ro
+    depends_on:
+      initialize:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python3, client.py, --endpoint, "grpc://127.0.0.1:8815", --health]
+      interval: 5s
+      timeout: 8s
+      retries: 12
+      start_period: 5s
+  client:
+    <<: *base
+    user: "1000:1000"
+    profiles: [tools]
+    command: [client.py]
+volumes:
+  fixture:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-arrow-flight
+networks:
+  default:
+    internal: true
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-arrow-flight

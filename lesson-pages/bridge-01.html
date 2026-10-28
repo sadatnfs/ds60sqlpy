@@ -488,63 +488,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Progressive hint:</strong> Resolve each source once, then validate the final selected value at the boundary.</li>
 <li><strong>Verify:</strong> Assert that CLI <code>debug</code> overrides environment <code>WARNING</code>, an absent URL remains <code>None</code>, <code>INF0</code> raises <code>ValueError</code>, and the supplied environment mapping is unchanged.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Security:</strong> Implement <code>redact_database_url()</code> so diagnostics retain scheme, user, host, port, and database but remove password, query, and fragment.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Parsing components is safer than replacing substrings in an opaque secret.</li>
 <li><strong>Verify:</strong> Use a URL containing sentinel password, query token, and fragment; assert all three sentinels are absent while scheme, username, host, port, and database remain visible.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Implementation:</strong> Implement <code>build_parser()</code> with <code>--database-url</code>, <code>--log-level</code>, and <code>--dry-run</code> without reading global process state during parser construction.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Parser construction and argument parsing are separate responsibilities.</li>
 <li><strong>Verify:</strong> Assert <code>parse_args([])</code> leaves URL and log-level overrides unset with <code>dry_run=False</code>; then parse all three flags and compare the exact namespace without reading <code>sys.argv</code>.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Integration:</strong> Implement <code>main(argv)</code> so it parses the supplied sequence, loads settings, configures logging, and emits only a safe summary.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A testable CLI accepts an argument sequence instead of rewriting <code>sys.argv</code>.</li>
 <li><strong>Verify:</strong> Call <code>main()</code> with an injected argument list and captured logs; assert exit status <code>0</code>, the selected level, one redacted database label, and no full URL or password.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Testing:</strong> Create a table-driven test matrix for defaults, CLI precedence, mixed-case levels, invalid levels, malformed URLs, credentials, and a missing URL.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Include both successful values and exact failure types; assert secrets are absent from all diagnostics.</li>
 <li><strong>Verify:</strong> Parameterize defaults, each CLI override, mixed-case valid levels, <code>INF0</code>, missing URL, malformed URL, and sentinel credentials; compare exact <code>Settings</code> or exception types.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Prediction:</strong> Predict the result when the environment says <code>WARNING</code>, the CLI supplies <code>debug</code>, <code>dry_run=True</code>, and no database URL exists; then verify it.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Apply precedence independently per setting rather than treating one source as an all-or-nothing bundle.</li>
 <li><strong>Verify:</strong> Write <code>Settings(database_url=None, log_level=&#x27;DEBUG&#x27;, dry_run=True)</code> before running the case, then assert the returned dataclass equals that prediction.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Debugging:</strong> Repair a redactor that catches parse errors but returns <code>f&#x27;invalid: {database_url}&#x27;</code> and explain why the exception path is still a leak.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Failure messages are an output boundary and need the same secrecy rule as normal logs.</li>
 <li><strong>Verify:</strong> Feed malformed text containing <code>secret-marker</code>; assert the repaired branch returns a fixed marker such as <code>&lt;invalid-database-url&gt;</code> and never includes <code>secret-marker</code>.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Design:</strong> Add configuration provenance such as <code>cli</code>, <code>environment</code>, or <code>default</code> without storing or logging the selected secret value twice.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Metadata about a source can be safe even when the source value is not.</li>
 <li><strong>Verify:</strong> Show provenance labels <code>cli</code>, <code>environment</code>, and <code>default</code> beside resolved fields while the complete database URL exists in only one field and never appears in the safe summary.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Security testing:</strong> Use a recording logger or <code>caplog</code> to prove that startup, success, and validation-failure paths contain no password, query token, or full URL.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Test the emitted boundary, not only the return value of the redaction helper.</li>
 <li><strong>Verify:</strong> Capture startup, success, and validation-failure logs with password/query sentinels; assert every sentinel and the full URL are absent and the safe host/database label remains.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Portability:</strong> Write equivalent Windows PowerShell and POSIX invocations that set environment values outside Python and pass CLI overrides through <code>argv</code>; identify what remains platform-neutral.</li>
 </ol>
 <ul>
@@ -1081,7 +1081,7 @@ solve the final transfer problem without opening solutions/.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-deep-06.html"><small>Previous lesson</small><strong>sql-deep-06</strong><span>Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality</span></a>
+        <a class="nav-card" href="sql-json-01.html"><small>Previous lesson</small><strong>sql-json-01</strong><span>PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain</span></a>
         <a class="nav-card next" href="bridge-02.html"><small>Next lesson</small><strong>bridge-02</strong><span>Protocols Context Decorators</span></a>
       </nav>
     </div>

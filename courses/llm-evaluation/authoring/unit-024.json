@@ -1,0 +1,67 @@
+{
+  "number": 24,
+  "title": "Off-policy evaluation and the final alignment audit",
+  "concepts": [
+    "importance sampling",
+    "self-normalization",
+    "doubly robust evaluation",
+    "overlap",
+    "independent utility"
+  ],
+  "outcome": "Evaluate a changed finite policy from logged actions with explicit propensity/support assumptions, and connect the result to an independent alignment decision.",
+  "level": "advanced",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-016", "eval-020", "eval-022", "eval-023"],
+  "exercises": [
+    {
+      "title": "Recover behavior value",
+      "task": "Set the target policy equal to the behavior policy in case A.",
+      "expected": "All weights are 1 and the mean observed reward is 0.75.",
+      "hint": "The ratio cancels when the policies match.",
+      "answer": "This is a basic estimator invariant under the constructed log."
+    },
+    {
+      "title": "Evaluate a useful target",
+      "task": "Use target rows[0.9,0.1] and[0.1,0.9] with the exact synthetic outcome table.",
+      "expected": "The target value is 0.9.",
+      "hint": "Average the target reward over the two equally weighted contexts.",
+      "answer": "Known counterfactual outcomes make this value inspectable only in the authored environment; real evaluations need data and assumptions."
+    },
+    {
+      "title": "Remove behavior support",
+      "task": "Give an action zero behavior probability but positive target probability.",
+      "expected": "The helper rejects the target.",
+      "hint": "No finite importance ratio supplies an unobserved action outcome.",
+      "answer": "A value model may extrapolate there, but that is a different identifying assumption and not justified by overlap-based evaluation alone."
+    },
+    {
+      "title": "Use a zero outcome model",
+      "task": "Set every outcome-model prediction to zero.",
+      "expected": "The doubly robust expression reduces to ordinary importance sampling.",
+      "hint": "Its direct-model term vanishes.",
+      "answer": "This algebraic check separates the correction structure from a claim that the supplied model is correct."
+    },
+    {
+      "title": "Interpret self-normalization",
+      "task": "Compare IPS and SNIS in case B.",
+      "expected": "Their finite-sample values differ.",
+      "hint": "Their denominators are n and the observed weight sum.",
+      "answer": "Self-normalization changes the estimator. A useful variance tradeoff should not be described as exact finite-sample unbiasedness."
+    },
+    {
+      "title": "Audit the final claim",
+      "task": "Choose a policy after inspecting many estimates from the same log.",
+      "expected": "Treat that log as selection evidence and obtain a protected final assessment.",
+      "hint": "The holdout rule still applies after policy optimization.",
+      "answer": "A complete alignment decision needs independent task utility, support, uncertainty and critical-condition evidence, not only a favorable training reward or off-policy point estimate."
+    }
+  ],
+  "sources": [
+    ["Doubly robust off-policy evaluation", "https://arxiv.org/abs/1511.03722"],
+    [
+      "Existing ranking and policy evaluation",
+      "../../../courses/statistics-ml/tutorials/science/05-ranking-policy-and-allocation.md"
+    ]
+  ]
+}

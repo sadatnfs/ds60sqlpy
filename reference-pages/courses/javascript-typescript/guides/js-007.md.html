@@ -263,19 +263,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Keep equal-looking object keys distinct.</strong> Create two {id: 1} objects and use them as Map keys. <strong>Expected:</strong> size 2 and separate values. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect Set equality.</strong> Insert NaN twice, +0 and -0. <strong>Expected:</strong> size 2: one NaN and one zero. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Count repeated events.</strong> Build a frequency Map for red, blue, red. <strong>Expected:</strong> red 2, blue 1. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Distinguish a stored zero from absence.</strong> Store key a with 0 and compare has/get for a and b. <strong>Expected:</strong> a present with 0; b absent with undefined. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Trace insertion order updates.</strong> Insert a, b, update a, then delete and reinsert a. <strong>Expected:</strong> update order a, b; reinsertion order b, a. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Deduplicate while preserving first occurrence.</strong> Use Set over b, a, b, c, a and compare the ordered unique values. <strong>Expected:</strong> b, a, c. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -450,31 +450,31 @@ changed <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <li><strong>Validate the product boundary.</strong> Implement <code>normalize</code> and <code>load_product</code>. Require exactly <code>invoice_id</code> and <code>amount_cents</code> per JSON row, unique nonempty invoice IDs without outer whitespace, and nonnegative integer cents. Reject Boolean amounts, fractional values, missing/extra fields, and duplicate IDs.</li>
 </ol>
 <p><strong>Expected:</strong> Golden rows are <code>(A,10000),(B,5000),(C,0)</code>, sorted by ID. Each malformed fixture raises <code>ValueError</code>. Empty input yields an empty tuple; a zero-valued invoice remains present. Hint: validate before constructing an identity dictionary so duplicates cannot disappear silently.</p>
-<ol>
+<ol start="2">
 <li><strong>Retain controls without overstating them.</strong> Implement <code>summarize</code> for both product fixtures. Write the strongest statement the two controls support, then one equality claim they do not support.</li>
 </ol>
 <p><strong>Expected:</strong> Both inputs yield <code>Summary(3,15000)</code>. The expected and incident row collections are unequal. Your test must show both matching summaries and unequal keyed rows. Hint: a counterexample needs a passing control and a failing stronger claim on the same input.</p>
-<ol>
+<ol start="3">
 <li><strong>Reconcile identities and values.</strong> Implement <code>reconcile</code> and the evidence <code>accepted</code> property. Validate both inputs, inspect the union of their keys, and return deterministic <code>changed</code>, <code>missing</code>, and <code>unexpected</code> diagnostics. Keep absent-side amounts as <code>None</code>, never zero.</li>
 </ol>
 <p><strong>Expected:</strong> Exactly three diagnostics, ordered by invoice ID: B changed <code>5000 -&gt; 4000</code>, C missing <code>0 -&gt; None</code>, D unexpected <code>None -&gt; 1000</code>. <code>reconcile((), ())</code> accepts; golden versus golden accepts. Hint: test key presence before comparing the associated amount.</p>
-<ol>
+<ol start="4">
 <li><strong>Repair from source facts.</strong> Implement <code>load_source_lines</code> and <code>build_product</code> using the independent source-lines fixture and complete invoice manifest <code>(&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)</code>. Reject repeated line IDs, orphan lines, repeated manifest IDs, and invalid cents. Preserve zero-line invoices.</li>
 </ol>
 <p><strong>Expected:</strong> Repaired rows equal the unchanged golden rows exactly, and source inputs remain unchanged. Two A lines sum to 10000, B is 5000, and C is 0. A duplicate L1 or a line for absent invoice Z raises <code>ValueError</code>. Hint: the manifest defines all parent identities; line facts supply amounts.</p>
-<ol>
+<ol start="5">
 <li><strong>Fingerprint the declared contract.</strong> Implement <code>canonical_digest</code> using SHA-256 of UTF-8 canonical JSON containing <code>contract_version: 1</code> and sorted validated rows. Use sorted object keys, compact separators, and ASCII-safe JSON encoding. Explain why this identifies content without proving truth.</li>
 </ol>
 <p><strong>Expected:</strong> Reordering valid rows preserves the 64-hex digest; changing any amount changes it. The golden digest is <code>fddc2c8909fee69e1b96661b9e11a1e87c7212bfe2d5f731a9f45ed2ae868fc3</code>. Repeated invoice identities fail before hashing. Hint: define the bytes before selecting a hash function.</p>
-<ol>
+<ol start="6">
 <li><strong>Gate a fake publication.</strong> Implement <code>publish_checked</code>. Validate the release ID, snapshot actual rows once, reconcile with the independent expected rows, and call the injected Publisher only after acceptance. Let publication failures propagate without automatic retries.</li>
 </ol>
 <p><strong>Expected:</strong> Incident input raises <code>ReleaseRejected</code> with zero recorded calls. Repaired input records one <code>(release_id, sorted_rows, digest)</code> call. A fake that records and then raises still records only once; the caller receives the exception and cannot claim acknowledged publication. Hint: distinguish a rejected precondition from an unknown external outcome.</p>
-<ol>
+<ol start="7">
 <li><strong>Preserve an inspectable artifact.</strong> Implement <code>write_evidence</code> to create a caller-named JSON report exclusively. Record the contract version, verdict, both summaries, both digests, and ordered diagnostics. Use a temporary test directory, not a fixed learner output path.</li>
 </ol>
 <p><strong>Expected:</strong> The report round-trips with <code>accepted: false</code> and C&#x27;s absent actual amount as JSON <code>null</code>. A second write to the same path raises <code>FileExistsError</code>, leaving the first report&#x27;s bytes unchanged. Hint: exclusive creation protects existing work without a prior existence check.</p>
-<ol>
+<ol start="8">
 <li><strong>Write an evidence-bounded incident review.</strong> Implement <code>incident_review</code> and prepare a short handoff with observations, impact, causal uncertainty, repair, verification, and unresolved questions. Require a rejected before and accepted after that both use the same golden digest.</li>
 </ol>
 <p><strong>Expected:</strong> The review names all three mismatches, explains matching summaries, marks the historical cause unproven, and states that consumer delivery and production recovery remain unknown. Passing a different golden dataset as the repair is rejected. Hint: a working repair can be verified even when the original failure mechanism has not been established.</p>

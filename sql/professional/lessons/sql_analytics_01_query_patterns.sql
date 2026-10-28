@@ -1,11 +1,11 @@
 -- SQL-ANALYTICS-01: Reusable analytical query patterns
--- BEGINNER WORKFLOW — sql-analytics-01: Reusable Analytical Query Patterns
+-- BEGINNER WORKFLOW - sql-analytics-01: Reusable Analytical Query Patterns
 -- Guide: sql/professional/companion-guides/sql_analytics_01_query_patterns.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-analytics-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-analytics-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -21,11 +21,14 @@
 \echo 'SQL-ANALYTICS-01: disposable analytical-pattern lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_analytics_lab;
+
 CREATE TABLE pro_analytics_lab.users (
   user_id bigint PRIMARY KEY,
   signup_at timestamptz NOT NULL
 );
+
 CREATE TABLE pro_analytics_lab.events (
   ingestion_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   source_event_id text NOT NULL,
@@ -34,17 +37,20 @@ CREATE TABLE pro_analytics_lab.events (
   event_at timestamptz NOT NULL,
   ingested_at timestamptz NOT NULL
 );
+
 CREATE TABLE pro_analytics_lab.daily_activity (
   user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),
   activity_date date NOT NULL,
   PRIMARY KEY (user_id, activity_date)
 );
+
 CREATE TABLE pro_analytics_lab.campaign_touches (
   touch_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),
   campaign text NOT NULL,
   touched_at timestamptz NOT NULL
 );
+
 CREATE TABLE pro_analytics_lab.tier_history (
   user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),
   valid_from timestamptz NOT NULL,
@@ -53,11 +59,13 @@ CREATE TABLE pro_analytics_lab.tier_history (
   PRIMARY KEY (user_id, valid_from),
   CHECK (valid_to IS NULL OR valid_to > valid_from)
 );
+
 INSERT INTO pro_analytics_lab.users (user_id, signup_at)
 VALUES
   (1, TIMESTAMPTZ '2026-01-01 09:00:00+00'),
   (2, TIMESTAMPTZ '2026-01-15 10:00:00+00'),
   (3, TIMESTAMPTZ '2026-02-01 08:00:00+00');
+
 INSERT INTO pro_analytics_lab.events (source_event_id, user_id, event_name, event_at, ingested_at)
 VALUES
   ('E100', 1, 'signup', TIMESTAMPTZ '2026-01-01 09:00:00+00', TIMESTAMPTZ '2026-01-01 09:01:00+00'),
@@ -76,6 +84,7 @@ VALUES
   ('E300', 3, 'signup', TIMESTAMPTZ '2026-02-01 08:00:00+00', TIMESTAMPTZ '2026-02-01 08:01:00+00'),
   ('E301', 3, 'view_item', TIMESTAMPTZ '2026-02-01 08:05:00+00', TIMESTAMPTZ '2026-02-01 08:06:00+00'),
   ('E302', 3, 'active', TIMESTAMPTZ '2026-02-03 08:00:00+00', TIMESTAMPTZ '2026-02-03 08:01:00+00');
+
 INSERT INTO pro_analytics_lab.daily_activity (user_id, activity_date)
 VALUES
   (1, DATE '2026-01-01'),
@@ -91,18 +100,21 @@ VALUES
   (2, DATE '2026-01-18'),
   (3, DATE '2026-02-01'),
   (3, DATE '2026-02-03');
+
 INSERT INTO pro_analytics_lab.campaign_touches (user_id, campaign, touched_at)
 VALUES
   (1, 'search', TIMESTAMPTZ '2025-12-30 10:00:00+00'),
   (1, 'email', TIMESTAMPTZ '2026-01-01 09:15:00+00'),
   (2, 'search', TIMESTAMPTZ '2026-01-10 12:00:00+00'),
   (3, 'social', TIMESTAMPTZ '2026-01-20 12:00:00+00');
+
 INSERT INTO pro_analytics_lab.tier_history (user_id, valid_from, valid_to, tier)
 VALUES
   (1, TIMESTAMPTZ '2026-01-01 00:00:00+00', TIMESTAMPTZ '2026-01-10 00:00:00+00', 'basic'),
   (1, TIMESTAMPTZ '2026-01-10 00:00:00+00', NULL, 'pro'),
   (2, TIMESTAMPTZ '2026-01-01 00:00:00+00', NULL, 'basic'),
   (3, TIMESTAMPTZ '2026-02-01 00:00:00+00', NULL, 'basic');
+
 -- Canonicalize duplicate ingestion with an explicit winner rule.
 CREATE VIEW pro_analytics_lab.deduplicated_events AS
 SELECT
@@ -120,6 +132,7 @@ FROM (
     pro_analytics_lab.events AS e) AS ranked
 WHERE
   ranked.winner_rank = 1;
+
 \echo 'Deduplication: one deterministic winner per source event'
 SELECT
   de.source_event_id,

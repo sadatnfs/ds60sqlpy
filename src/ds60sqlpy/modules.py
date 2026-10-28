@@ -19,6 +19,11 @@ from ds60sqlpy.module_plans import load_core_plans
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 LANGUAGES = {
+    "dbt-duckdb": frozenset({"sql"}),
+    "data-engineering": frozenset({"python"}),
+    "data-platforms-python": frozenset({"python"}),
+    "stan-cpu": frozenset({"stan"}),
+    "julia": frozenset({"julia"}),
     "reading": frozenset({"markdown"}),
     "dax-offline": frozenset({"dax"}),
     "jax-cpu": frozenset({"python"}),
@@ -58,6 +63,9 @@ VERIFIERS = frozenset(
     }
 )
 SOURCE_SUFFIXES = {
+    "sql": {".sql"},
+    "stan": {".stan"},
+    "julia": {".jl"},
     "python": {".py"},
     "r": {".R", ".r"},
     "dax": {".dax"},
@@ -141,6 +149,9 @@ class ModuleCatalog:
                     "scala": "Scala",
                     "python": "Python",
                     "r": "R",
+                    "sql": "SQL",
+                    "stan": "Stan",
+                    "julia": "Julia",
                     "dax": "DAX",
                     "cpp": "C++",
                     "c": "C",

@@ -1,0 +1,14 @@
+ARG BASE_IMAGE=ds60sqlpy-worker-python-core:1.0.0
+FROM ${BASE_IMAGE}
+USER root
+COPY requirements.amd64.lock requirements.arm64.lock /tmp/preparation/
+RUN python3 -m venv /opt/airflow-env \
+    && arch=$(python3 -c 'import platform; print({"aarch64":"arm64","x86_64":"amd64"}[platform.machine()])') \
+    && /opt/airflow-env/bin/python -m pip install --disable-pip-version-check --no-cache-dir --no-compile --only-binary=:all: --require-hashes -r /tmp/preparation/requirements.${arch}.lock \
+    && rm -r /tmp/preparation \
+    && python3 -c 'import pwd; from pathlib import Path; p=Path("/etc/passwd"); p.write_text(p.read_text()+"airflow:x:50000:0:Airflow:/state/home:/bin/sh\n") if not any(x.pw_uid==50000 for x in pwd.getpwall()) else None'
+ENV PATH=/opt/airflow-env/bin:$PATH PYTHONPATH=/project PYTHONDONTWRITEBYTECODE=1
+USER 50000:0
+WORKDIR /project
+ENTRYPOINT ["python3"]
+LABEL org.ds60.workshop.kind="apache-airflow-core-fallback" org.ds60.upstream.version="3.3.2"

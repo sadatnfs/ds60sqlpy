@@ -11,23 +11,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from ds60sqlpy.plot_artifacts import validate_artifacts
+from ds60sqlpy import plot_artifacts
+from ds60sqlpy.plot_artifacts import publish_artifact
 
 
-def main() -> None:
-    saved: list[dict[str, Any]] = []
-
+def _run() -> None:
     def append(artifact: dict[str, Any]) -> None:
-        if len(saved) >= 2:
-            print("Figure limit reached: the first two figures are retained.", file=sys.stderr)
-            return
         try:
-            checked = validate_artifacts([*saved, artifact])
-            Path("ds60-figures.json").write_text(json.dumps(checked, allow_nan=False), "utf-8")
+            publish_artifact(artifact)
         except (OSError, ValueError, TypeError, RecursionError) as exc:
             print("Figure omitted: " + str(exc), file=sys.stderr)
-            return
-        saved[:] = checked
 
     def patch_plotly(module: Any) -> None:
         def show_plotly(figure: Any, *args: Any, **kwargs: Any) -> None:
@@ -65,6 +58,11 @@ def main() -> None:
         if pyplot is not None:
             with contextlib.suppress(Exception):
                 pyplot.show()
+
+
+def main() -> None:
+    with plot_artifacts.output_directory(Path.cwd()):
+        return _run()
 
 
 if __name__ == "__main__":

@@ -260,19 +260,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Call through an interface.</strong> Use Pricing references to identity and half-price implementations on 100 cents. <strong>Expected:</strong> 100 and 50. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 100 and 50.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compose a fee policy.</strong> Wrap the half-price policy with a10-cent fee. <strong>Expected:</strong> price100 becomes60. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with price100 becomes60.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Inspect rounding semantics.</strong> Apply integer half-price to101 cents under truncation-toward-zero. <strong>Expected:</strong> 50 cents before fee. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 50 cents before fee.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Validate every implementation.</strong> Call regular,half and fee policy with-1. <strong>Expected:</strong> all throwIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with all throwIllegalArgumentException.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Change a collaborator without changing caller code.</strong> Iterate over the three policies and collect prices for100. <strong>Expected:</strong> results100,50,60. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with results100,50,60.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject an invalid wrapper.</strong> Construct a fee wrapper with a negative fee or null delegate. <strong>Expected:</strong> negative fee IllegalArgumentException;null delegate NullPointerException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with negative fee IllegalArgumentException;null delegate NullPointerException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

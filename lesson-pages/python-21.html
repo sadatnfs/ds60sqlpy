@@ -405,12 +405,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day21_time_series_pandas.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day21_time_series_pandas.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -501,13 +501,13 @@ trailing_7d <span class="syntax-operator">=</span> values<span class="syntax-ope
 <ol>
 <li>Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. <strong>Expected behavior:</strong> the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. <strong>Verify:</strong> inspect the earliest/latest instant and demonstrate that conversion preserves the instant.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Using deterministic daily sales, compute a three-observation rolling mean and weekly <code>W-FRI</code> sums. <strong>Constraints:</strong> sort the index, choose <code>min_periods</code>, and document weekly labels/boundaries. <strong>Verify:</strong> trace the first three rolling windows by hand and assert weekly sums preserve the grand total.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Keep timestamps timezone-aware at system boundaries, declare resampling windows, and reconcile totals whenever frequency changes.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the difference between <code>tz_localize</code> and <code>tz_convert</code>, and which one applies to a naive timestamp. <strong>Progressive hint:</strong> Localization assigns meaning; conversion changes representation of an instant. <strong>Verify:</strong> Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises.</li>
 <li><strong>Tracing:</strong> Trace a three-day rolling mean with <code>min_periods=1</code> and identify which observations contribute at the beginning. <strong>Progressive hint:</strong> Early windows contain fewer rows when the minimum allows it. <strong>Verify:</strong> List source dates contributing to the first three outputs and assert their means for <code>min_periods=1</code> exactly.</li>
 <li><strong>Implementation:</strong> Resample deterministic daily sales to <code>W-FRI</code>, then assert the grand total is preserved. <strong>Progressive hint:</strong> Document the weekly label/boundary and use sums for additive measures. <strong>Verify:</strong> Assert weekly bin labels follow <code>W-FRI</code>, every source date belongs to one bin, and weekly sums equal the daily grand total.</li>
@@ -657,13 +657,13 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. <strong>Expected behavior:</strong> the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. <strong>Verify:</strong> inspect the earliest/latest instant and demonstrate that conversion preserves the instant.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Using deterministic daily sales, compute a three-observation rolling mean and weekly <code>W-FRI</code> sums. <strong>Constraints:</strong> sort the index, choose <code>min_periods</code>, and document weekly labels/boundaries. <strong>Verify:</strong> trace the first three rolling windows by hand and assert weekly sums preserve the grand total.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Keep timestamps timezone-aware at system boundaries, declare resampling windows, and reconcile totals whenever frequency changes.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict the difference between <code>tz_localize</code> and <code>tz_convert</code>, and which one applies to a naive timestamp. <strong>Progressive hint:</strong> Localization assigns meaning; conversion changes representation of an instant. <strong>Verify:</strong> Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises.</li>
 <li><strong>Tracing:</strong> Trace a three-day rolling mean with <code>min_periods=1</code> and identify which observations contribute at the beginning. <strong>Progressive hint:</strong> Early windows contain fewer rows when the minimum allows it. <strong>Verify:</strong> List source dates contributing to the first three outputs and assert their means for <code>min_periods=1</code> exactly.</li>
 <li><strong>Implementation:</strong> Resample deterministic daily sales to <code>W-FRI</code>, then assert the grand total is preserved. <strong>Progressive hint:</strong> Document the weekly label/boundary and use sums for additive measures. <strong>Verify:</strong> Assert weekly bin labels follow <code>W-FRI</code>, every source date belongs to one bin, and weekly sums equal the daily grand total.</li>

@@ -1,0 +1,42 @@
+def show_curve():
+    import plotly.graph_objects as go
+
+    p = np.array([0.9, 0.8, 0.2, 0.1])
+    y = np.array([1, 1, 0, 0])
+    rows = []
+    for take in (p < 0.5, p >= 0.5):
+        rows.append([float(p[take].mean()), float(y[take].mean()), int(take.sum())])
+    assert [row[2] for row in rows] == [2, 2]
+    figure = go.Figure()
+    figure.add_scatter(x=[0, 1], y=[0, 1], mode="lines", name="Identity reference")
+    figure.add_scatter(
+        x=[r[0] for r in rows],
+        y=[r[1] for r in rows],
+        mode="markers",
+        name="Authored bins",
+        customdata=[[r[2]] for r in rows],
+        hovertemplate=(
+            "Mean score=%{x}<br>Observed rate=%{y}<br>Count=%{customdata[0]}<extra></extra>"
+        ),
+    )
+    figure.update_layout(
+        title="Reliability table with two observations per bin",
+        xaxis_title="Mean stated probability",
+        yaxis_title="Observed fraction correct",
+        xaxis_range=[0, 1],
+        yaxis_range=[0, 1],
+        meta={
+            "description": (
+                "Two synthetic observations contribute to each bin. The plot "
+                "is descriptive; it supplies no precise population "
+                "calibration claim or uncertainty band."
+            ),
+            "table": {"columns": ["Mean probability", "Observed rate", "Count"], "rows": rows},
+        },
+    )
+    figure.show()
+    print("eval-011 Plotly curve complete")
+
+
+if __name__ == "__main__":
+    show_curve()

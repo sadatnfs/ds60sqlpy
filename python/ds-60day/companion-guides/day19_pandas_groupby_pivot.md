@@ -1,5 +1,8 @@
 # Day 19: GroupBy, Aggregation, Pivoting, and Melting
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 Grouping changes a table's grain. State the output grain before writing the
@@ -223,7 +226,7 @@ The result has one row per `(region, channel)`. `size` counts rows, while
 
 ## Dataset note
 
-The notebook uses Seaborn's cached `tips` data. The constructed example above
+The notebook uses the original synthetic restaurant-bills fixture. The constructed example above
 is the offline alternative when that cache has not been primed.
 
 ## Exercises and progressive hints

@@ -278,19 +278,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Trace the independent oracle.</strong> Starting from the exact vectors and <code>w=0</code>, write the three residuals, loss, gradient and new weight for rate <code>0.1</code> before running Example A. Name which values are mutable. <strong>Expected:</strong> residuals <code>[-2,-4,-6]</code>, loss <code>56/3</code>, gradient <code>-56/3</code>, new weight <code>28/15</code>; only <code>w</code> is updated. <strong>Verify:</strong> retain the four tolerance assertions and compare your written derivative with the tape result. A copied dictionary alone is insufficient.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Find an overly large step.</strong> Reset <code>w</code> to zero and change only the rate to <code>0.25</code>. Recompute the gradient from the reset state, apply one update and calculate the new loss. Explain whether subtraction of a gradient always improves a finite step. <strong>Expected:</strong> new weight <code>14/3</code>, new loss <code>896/27</code>, which exceeds <code>56/3</code>. <strong>Verify:</strong> check both numbers within <code>1e-12</code> and compare the old/new losses. Do not change labels or quietly reduce the rate after observing the result.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Construct two genuine steps.</strong> Implement a two-step loop, with a fresh tape and forward computation on each iteration, starting at zero and rate <code>0.1</code>. Log the weight after each update and recompute each loss. <strong>Expected:</strong> weights <code>28/15</code> and <code>448/225</code>; the second loss is <code>56/151875</code>. Reusing the first gradient does not satisfy this contract. <strong>Verify:</strong> assert both weights and the second loss within <code>1e-12</code>, and inspect that two gradient calculations used different current weights.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject a broken pairing.</strong> Write an eager helper that accepts only equal, nonempty vector shapes for <code>x</code> and <code>y</code>. It should reject the column target from Example B before calculating an MSE. <strong>Expected:</strong> valid <code>(3,)</code> pairs succeed; <code>(3,)</code> versus <code>(3,1)</code> and an empty vector raise <code>ValueError</code> with an explanatory shape/emptiness message. <strong>Verify:</strong> include a test that confirms the bad initial loss would have matched <code>56/3</code> without the guard, so the guard protects a real semantic error.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Diagnose missing versus zero.</strong> Compute <code>prediction=w*x</code> outside a tape, then use that precomputed tensor inside a new tape&#x27;s loss. Inspect the gradient at <code>w=0</code>. Repair the recording boundary and separately test <code>w=2</code>. <strong>Expected:</strong> disconnected gradient is <code>None</code>; repaired gradient at zero is <code>-56/3</code>; the connected gradient at two is numeric zero. <strong>Verify:</strong> assert the disconnected result is None and compare numeric gradient values for the repaired and optimum cases. Do not replace every <code>None</code> with zero to make an update run.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer to a bias and held-out input.</strong> A bias <code>b</code> adds the same offset to every prediction: <code>prediction=w*x+b</code>. Use targets <code>[3,5,7]</code>, initialize both scalars to zero and take one rate-<code>0.1</code> step. Keep <code>(x=4,y=9)</code> untouched until you inspect the resulting held-out prediction. <strong>Expected:</strong> initial gradients are <code>-68/3</code> and <code>-10</code>; new weight <code>34/15</code>, new bias <code>1</code>, training MSE <code>224/675</code>; held-out prediction <code>151/15</code> and squared error <code>256/225</code>. <strong>Verify:</strong> check all values within <code>1e-12</code>, report training and held-out quantities separately, and state that one tiny holdout is not a quality benchmark. Do not tune on that held-out result.</li>
 </ol>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>

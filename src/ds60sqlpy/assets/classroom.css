@@ -1545,3 +1545,13 @@ p:last-child {
   overflow-x: auto;
   margin-top: 0.75rem;
 }
+
+#figures .structured-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+#figures .highlighted-code {
+  max-height: 32rem;
+  overflow: auto;
+  padding: 1rem;
+}

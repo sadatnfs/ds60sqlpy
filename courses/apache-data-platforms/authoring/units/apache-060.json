@@ -1,0 +1,23 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-059", "apache-057"],
+  "concepts": ["Time boundaries, hybrid tables and upserts"],
+  "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
+  "sources": [
+    [
+      "Hybrid tables",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/basics/components/table/logical-table.md"
+    ],
+    [
+      "Upsert",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/upsert-and-dedup/upsert.md"
+    ],
+    [
+      "Table configuration",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/reference/configuration-reference/table.md"
+    ]
+  ]
+}

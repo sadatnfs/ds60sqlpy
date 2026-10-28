@@ -270,19 +270,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Round-trip version 2 data.</strong> Encode account a1, balance 125, note Café with version 2 and decode. <strong>Expected:</strong> equal domain record and exact Unicode note. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with equal domain record and exact Unicode note.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Apply a version1 default.</strong> Encode the same core fields usingversion1,which lacks note. <strong>Expected:</strong> decoded noteunlabelled. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with decoded noteunlabelled.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject an unknown version.</strong> Change the version bytes to99 and decode. <strong>Expected:</strong> IOException naming version. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOException naming version.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect truncation.</strong> Remove the final byte from a validversion2payload. <strong>Expected:</strong> IOException or EOFException before returning a record. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOException or EOFException before returning a record.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject an oversized declared text length.</strong> Replace the first text length withInteger.MAX_VALUE. <strong>Expected:</strong> IOException for length before allocating that size. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOException for length before allocating that size.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject trailing data and invalid domain state.</strong> Append an extra byte,then try constructing a negative-balance account. <strong>Expected:</strong> trailing payload IOException; negative balance IllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with trailing payload IOException; negative balance IllegalArgumentException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

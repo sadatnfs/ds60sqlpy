@@ -1,0 +1,23 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-060", "apache-057"],
+  "concepts": ["Multistage queries and capacity"],
+  "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
+  "sources": [
+    [
+      "Multistage query engine",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/querying-and-sql/multi-stage-query/README.md"
+    ],
+    [
+      "Query options",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/querying-and-sql/query-execution-controls/query-options.md"
+    ],
+    [
+      "SQL reference",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/querying-and-sql/README.md"
+    ]
+  ]
+}

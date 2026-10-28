@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="follow-one-lesson-through-the-system">Follow one lesson through the system<a class="heading-anchor" href="#follow-one-lesson-through-the-system" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Authoring sources</strong> define teaching, metadata, learner code and references. Some subjects generate bundles from <code>courses/&lt;subject&gt;/authoring/</code>; others maintain artifacts directly. Read that subject&#x27;s guidance before editing.</li>
-<li><strong>Catalog loaders</strong> validate identities, prerequisites, artifact paths and admitted runtimes. Python/SQL/bridge use the legacy catalog. Modern subjects use module plans and authored manifests. The statistics book has a separate tutorial contract.</li>
+<li><strong>Catalog loaders</strong> validate identities, prerequisites, artifact paths and admitted runtimes. Python/SQL/bridge use the legacy catalog. Modern subjects use module plans and authored manifests. The statistics book has a separate tutorial contract; new additive tracks can declare validated tutorial mode.</li>
 <li><strong>The shared classroom</strong> derives its directory and navigation from those loaders. It loads guides, preserves independent pads/notes/variants, and exposes only the selected lesson&#x27;s actual capabilities.</li>
 <li><strong>Execution</strong> uses a fixed prepared worker, a bounded legacy operation, or an opaque browser preview. Reading mode is a real learning mode without a Run operation. Content metadata cannot choose arbitrary commands.</li>
 <li><strong>Results and progress</strong> retain source identity. Reading a previous result never reruns it. Browser observations, worker verification and self-reported completion remain distinct evidence.</li>
@@ -246,6 +246,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td><code>courses/&lt;subject&gt;/track.json</code>, <code>lessons.json</code>, <code>modules.py</code>, <code>module_extensions.py</code></td>
 </tr>
 <tr>
+<td>Scientific and data routes</td>
+<td><code>courses/applied-science/</code>, <code>bayesian-computing/</code>, <code>julia/</code>, <code>polars/</code>, <code>dbt/</code>, <code>ml-engineering/</code>, <code>llm-evaluation/</code> under <code>courses/</code></td>
+</tr>
+<tr>
+<td>Integrated engineering book</td>
+<td><code>courses/data-ml-engineering/</code>, its owned <code>projects/data-product/</code> and <code>projects/inference-service/</code></td>
+</tr>
+<tr>
+<td>Apache and open-data systems</td>
+<td><code>courses/apache-data-platforms/</code>, its authoring sources, owned service projects and <a href="../courses/apache-data-platforms/authoring/ENVIRONMENTS.md.html">qualification ledger</a></td>
+</tr>
+<tr>
+<td>Structured result publishing</td>
+<td><code>plot_artifacts.py</code>, <code>worker_figures.py</code>, <code>worker_figures.R</code>, <code>worker_figures.jl</code>, <code>scripts/declared_outputs.py</code></td>
+</tr>
+<tr>
+<td>Native statistical and dbt adapters</td>
+<td><code>stan_runner.py</code>, <code>dbt_runner.py</code>, <code>docker/workers/</code></td>
+</tr>
+<tr>
 <td>Tutorial book</td>
 <td><code>courses/statistics-ml/manifest.json</code>, <code>coverage.json</code>, chapters and examples</td>
 </tr>
@@ -282,6 +302,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">python scripts/course.py catalog
 python scripts/check_modules.py --json</code></pre>
 <p>The catalog determines the subject inventory. Execution profiles are not a subject count. Several languages share a worker; CUDA combines reading, CPU and optional GPU variants. HTML/CSS and JavaScript/D3 run in browser previews, while PHP CLI and the separately prepared HTTP fixture have different contracts.</p>
+<p>The engineering book is a tutorial with complete worked references. Its data product and inference service are separately owned persistent projects, not unbounded pad operations. Apache library lessons use <code>data-platforms-python</code>; distributed platform workshops have their own preparation, lifecycle and state. Read their current ledger rather than inferring server acceptance from a chapter, client implementation or CPU architecture descriptor.</p>
 <h3 id="generated-maintained-and-private-files">Generated, maintained and private files<a class="heading-anchor" href="#generated-maintained-and-private-files" aria-label="Link to this section">#</a></h3>
 <p>Do not hand-edit <code>START_HERE.html</code>, <code>lesson-pages/</code>, <code>reference-pages/</code> or the legacy <code>curriculum/catalog.json</code>. Run a changed subject&#x27;s documented generator first, format its source output, then use <code>make generate</code> for shared views. Read <a href="content-authoring.md.html">content authoring</a> and <a href="validation.md.html">validation</a> for the complete order and check modes. Not every generator supports <code>--check</code>; use only its documented command.</p>
 <p><code>.learning/</code> is local learner/contributor state; Docker uses named volumes for its own learning data, PostgreSQL and private runtime state. <code>.classroom/</code> records launcher selection and image preferences, not a full data backup. Reuse the same project and engine to resume. Build outputs, caches, logs, credentials and Git history do not belong in the portable source ZIP. Historical runtime receipts are immutable observations. Formatting-equivalence records explain reviewed source drift; they are not fresh execution receipts.</p>
@@ -289,7 +310,8 @@ python scripts/check_modules.py --json</code></pre>
 <p>Use <code>./classroom</code> for prepared Docker behavior, <code>./classroom resume</code> for strict no-build/no-pull startup, and <code>./classroom --rebuild</code> for deliberate source or configuration updates. Optional GPU workers require compatible NVIDIA hardware and explicit selection. Ordinary <code>--all</code> excludes them and the owned-cluster adapter. A container build cannot prove hardware readiness.</p>
 <p>A contributor can serve the same UI with <code>python scripts/course.py serve --no-browser</code> in the prepared Python environment. It reports actual local capabilities and does not create workers or import Docker progress. The native desktop executable, private editor-launch API and separate module/portal applications have been retired. Windows learners and contributors use WSL 2 for the Linux Docker route.</p>
 <p>Use focused behavioral tests first, then the relevant <a href="validation.md.html">release gates</a>. The full Python suite uses <code>python -m pytest -n 4 --dist loadgroup</code> so shared database tests remain grouped. A UI or runtime change also needs actual prepared-worker/browser checks with disposable state. Preserve learner volumes and unrelated containers.</p>
-<p>For new learning paths, follow the authoring skill. For tutoring, use <a href="learning-with-an-ai-tutor.md.html">learning with a companion</a>. The <a href="implementation/CHECKPOINT.md.html">implementation checkpoint</a> records durable architecture and operational constraints, not a past developer&#x27;s session state.</p></article>
+<p>For new learning paths, follow the authoring skill. For tutoring, use <a href="learning-with-an-ai-tutor.md.html">learning with a companion</a>. The <a href="implementation/CHECKPOINT.md.html">implementation checkpoint</a> records durable architecture and operational constraints, not a past developer&#x27;s session state.</p>
+<p>For current scientific route placement, use <a href="scientist-roadmap.md.html">the scientist roadmap</a>. The full dbt project, local ML service and standard-data Stan project live under their subjects&#x27; <code>projects/</code> directories. Their owned copies and outputs are not classroom pad state. Preserve their source fixtures in packaging while excluding compiled models, databases, trained state and generated dbt target/log files.</p></article>
   </main>
 </body>
 </html>

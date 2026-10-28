@@ -527,19 +527,19 @@ ids <span class="syntax-operator">=</span> torch<span class="syntax-operator">.<
 <ol>
 <li><strong>Build a bounded decoder.</strong> Set seed 7, build the default decoder, count every trainable scalar and compare with the component ledger. <strong>Expected:</strong> Exactly 10,464 trainable scalars, below the 50,000 teaching bound. <strong>Verify:</strong> Save the assertion results for exercise 1, including Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Trace output axes.</strong> Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype. <strong>Expected:</strong> Finite float32 logits with shape [1,4,16]. <strong>Verify:</strong> Save the assertion results for exercise 2, including Finite float32 logits with shape [1,4,16].</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Recompute prefixes.</strong> Recompute prefixes of lengths 1 through 4 independently with the same initialized weights. <strong>Expected:</strong> Every prefix matches the corresponding full-sequence early logits within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 3, including Every prefix matches the corresponding full-sequence early logits within 1e-6.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Perturb only future tokens.</strong> Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits. <strong>Expected:</strong> The first two score vectors remain unchanged within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 4, including The first two score vectors remain unchanged within 1e-6.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Inspect head shapes.</strong> Run without disabling autograd and inspect the returned K/V cache shapes, detachment and data-byte count. <strong>Expected:</strong> Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes. <strong>Verify:</strong> Save the assertion results for exercise 5, including Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid token IDs.</strong> Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width configurations. <strong>Expected:</strong> Every invalid contract raises ValueError before a misleading reshape or embedding computation. <strong>Verify:</strong> Save the assertion results for exercise 6, including Every invalid contract raises ValueError before a misleading reshape or embedding computation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

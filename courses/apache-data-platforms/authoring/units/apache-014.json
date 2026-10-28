@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 70,
+  "prerequisites": ["apache-012", "apache-004", "rust-042"],
+  "concepts": [
+    "IPC interoperability",
+    "C Data Interface ownership",
+    "Flight transport",
+    "Rust Arrow"
+  ],
+  "evidence": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad.",
+  "sources": [
+    ["Arrow C Data Interface", "https://arrow.apache.org/docs/format/CDataInterface.html"],
+    ["Arrow Flight protocol", "https://arrow.apache.org/docs/format/Flight.html"],
+    ["Prepared Rust Arrow IPC", "https://docs.rs/arrow-ipc/60.0.0/arrow_ipc/"]
+  ]
+}

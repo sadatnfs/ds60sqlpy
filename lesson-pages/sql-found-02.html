@@ -404,16 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--sql-found-02-versioned-schema-migrations-and-safe-evolution">SQL-FOUND-02: Versioned Schema Migrations and Safe Evolution<a class="heading-anchor" href="#guide--sql-found-02-versioned-schema-migrations-and-safe-evolution" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Intermediate</li>
-<li><strong>Catalog prerequisites:</strong> <code>sql-found-01</code>; <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>; <code>sql-39</code>; <a href="sql-39.html#guide">SQL Day 39; locks and deadlocks</a></li>
-<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>, the transaction/locking sequence through SQL Day 39, constraints, and permission to create/drop an isolated schema in <code>advanced_sql_training</code>.</li>
-<li><strong>Artifacts:</strong> <a href="sql-found-02.html#learner">learner SQL</a> · <a href="../reference-pages/sql/professional/fixtures/migrations/README.md.html">fixture migrations</a> · <a href="sql-found-02.html#solution-1">solution reasoning</a> · <a href="sql-found-02.html#solution-2">executable solution</a></li>
-</ul>
-<p>Run from the repository root in Windows PowerShell, macOS, or Linux:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></pre>
-<p>That command drops and recreates only <code>pro_migration_lab</code>, upgrades it through five versions, verifies it, and drops it on normal completion. If you interrupt the script, run the explicit <a href="../reference-pages/sql/professional/fixtures/migrations/cleanup.sql.html"><code>cleanup.sql</code></a> command shown in the <a href="../reference-pages/sql/professional/README.md.html">professional-track README</a>.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-found-02</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -429,12 +419,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-found-02</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Intermediate</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-found-01</code>; <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>; <code>sql-39</code>; <a href="sql-39.html#guide">SQL Day 39; locks and deadlocks</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>, the transaction/locking sequence through SQL Day 39, constraints, and permission to create/drop an isolated schema in <code>advanced_sql_training</code>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-found-02.html#learner">learner SQL</a> · <a href="../reference-pages/sql/professional/fixtures/migrations/README.md.html">fixture migrations</a> · <a href="sql-found-02.html#solution-1">solution reasoning</a> · <a href="sql-found-02.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root in Windows PowerShell, macOS, or Linux:</p>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></pre>
+<p>That command drops and recreates only <code>pro_migration_lab</code>, upgrades it through five versions, verifies it, and drops it on normal completion. If you interrupt the script, run the explicit <a href="../reference-pages/sql/professional/fixtures/migrations/cleanup.sql.html"><code>cleanup.sql</code></a> command shown in the <a href="../reference-pages/sql/professional/README.md.html">professional-track README</a>.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand–migrate–contract. Its worked SQL reads or creates <code>pro_migration_lab.schema_migrations</code>, <code>pro_migration_lab.service_requests</code>, <code>pro_migration_lab.service_requests_api</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: The fixture owns one schema and five ordered files. Every migration starts a transaction, checks schemamigrations, performs its body only when absent, records metadata last, and commits. A failed statement prevents the metadata row from lying about a partial migration. The first runnable example has a concrete contract: Example 1 returns one row per <code>migration_id</code> with columns <code>migration_id</code>, <code>migration_name</code>, and <code>content_tag</code> from <code>pro_migration_lab.schema_migrations</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce. Its final projection is <code>migration_id</code>, <code>migration_name</code>, and <code>content_tag</code>. Reselect the returned key columns from <code>pro_migration_lab.schema_migrations</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_found_02_versioned_migrations.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/professional/lessons/sql_found_02_versioned_migrations.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
     sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">,</span>
@@ -570,7 +570,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -582,13 +582,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-FOUND-02: Versioned schema migrations and safe evolution</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-found-02: Versioned Schema Migrations and Safe Evolution</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-found-02: Versioned Schema Migrations and Safe Evolution</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_found_02_versioned_migrations.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-found-02/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-found-02.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -891,7 +891,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -986,8 +986,10 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_migration_lab<span class="syntax-punctuation">.</span>service_requests</span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> assigned_team <span class="syntax-builtin">text</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-punctuation">(</span>migration_id<span class="syntax-punctuation">,</span> migration_name<span class="syntax-punctuation">,</span> content_tag<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;expand_assigned_team&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-solution-006-v1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">COMMIT</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1010,6 +1012,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">END</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  sr<span class="syntax-punctuation">.</span>assigned_team <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
@@ -1021,8 +1024,10 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-punctuation">(</span>migration_id<span class="syntax-punctuation">,</span> migration_name<span class="syntax-punctuation">,</span> content_tag<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;backfill_assigned_team&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-solution-007-v1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">COMMIT</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3, migration 008: contract after compatible writers are deployed.</span></span>
@@ -1030,10 +1035,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_migration_lab<span class="syntax-punctuation">.</span>service_requests</span>
 <span class="source-line">  <span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">COLUMN</span> assigned_team <span class="syntax-keyword">SET</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-string">&#x27;general&#x27;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">COLUMN</span> assigned_team <span class="syntax-keyword">SET</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_migration_lab<span class="syntax-punctuation">.</span>service_requests</span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">CONSTRAINT</span> service_requests_assigned_team_ck <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>assigned_team <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;general&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;response&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-punctuation">(</span>migration_id<span class="syntax-punctuation">,</span> migration_name<span class="syntax-punctuation">,</span> content_tag<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;contract_assigned_team&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;course-solution-008-v1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">COMMIT</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>

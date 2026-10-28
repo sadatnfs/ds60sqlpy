@@ -1,6 +1,7 @@
 -- SQL-START-03: Query Construction and Debugging
 -- Guide: sql/professional/companion-guides/sql_start_03_query_debugging.md
--- Use Create/open guided SQL notebook and the ignored learner copy.
+-- Use ./classroom -> PostgreSQL -> sql-start-03 and its saved learner copy.
+-- Select "Whole SQL lesson (psql)"; Docker supplies the client.
 -- Run the complete file with psql -X -v ON_ERROR_STOP=1.
 -- Only the local disposable advanced_sql_training database is permitted.
 -- Setup is supplied. Write attempts before the final ROLLBACK.
@@ -12,14 +13,18 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE start_tasks (
   task_id integer PRIMARY KEY,
   team text NOT NULL,
   status text NOT NULL,
   effort integer
 ) ON COMMIT DROP;
+
 INSERT INTO start_tasks (task_id, team, status, effort)
 VALUES
   (1, 'Red', 'open', 2),
@@ -28,6 +33,7 @@ VALUES
   (4, 'Blue', 'open', 3),
   (5, 'Red', 'open', 3),
   (6, 'Blue', 'blocked', 0);
+
 -- Example 1: Watch a predicate narrow the identities
 -- Expected: Four rows, columns task_id, team, status, effort; IDs 1,3,4,5. ID 3 still has NULL effort.
 SELECT
@@ -41,6 +47,7 @@ WHERE
   status = 'open'
 ORDER BY
   task_id;
+
 -- Example 2: Compute a label without using it too early
 -- Expected: Three rows with columns task_id, doubled_effort: (2,10), (4,6), (5,6).
 SELECT
@@ -53,6 +60,7 @@ WHERE
 ORDER BY
   doubled_effort DESC,
   task_id;
+
 -- Exercises
 -- Keep predictions and attempts in your own working copy.
 -- 1. Build a stage.

@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>Build locally, publish deliberately, and pull a classroom release · DS60 reference</title>
+  <title>Publish and install a classroom release · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -190,115 +190,162 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Build locally, publish deliberately, and pull a classroom release</h1>
+      <h1>Publish and install a classroom release</h1>
       <p class="source-path">Generated from <code>docs/dockerhub.md</code></p>
     </header>
-    <article class="document"><h2 id="build-locally-publish-deliberately-and-pull-a-classroom-release">Build locally, publish deliberately, and pull a classroom release<a class="heading-anchor" href="#build-locally-publish-deliberately-and-pull-a-classroom-release" aria-label="Link to this section">#</a></h2>
-<p>The classroom still builds locally by default. Docker Hub is an optional way to distribute an already reviewed image set. Nothing in <code>./classroom</code> uploads images, signs in to an account, deletes volumes or changes Docker Hub settings.</p>
-<p>The publisher uses <strong>one repository</strong>, <code>YOUR_DOCKERHUB_USER/ds60sqlpy</code>, with a separate tag for each image and CPU architecture. For example:</p>
-<pre class="highlighted-code"><code class="language-text">YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-lab-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-worker-python-core-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-worker-php-cli-arm64</code></pre>
-<p>Use your actual lowercase Docker Hub username wherever this guide says <code>YOUR_DOCKERHUB_USER</code>. GitHub and Docker Hub are separate accounts. A private GitHub repository does not make a Docker Hub repository private. A public image contains the shipped application and course sources, so choose repository visibility deliberately before uploading. The build excludes learner state, Git history and private runtime credentials; still review the release payload.</p>
+    <article class="document"><h2 id="publish-and-install-a-classroom-release">Publish and install a classroom release<a class="heading-anchor" href="#publish-and-install-a-classroom-release" aria-label="Link to this section">#</a></h2>
+<p>Docker Hub distribution is optional. Ordinary <code>./classroom</code> startup, builds, pulls and resumes never upload images. There are two explicit publication routes:</p>
+<ul>
+<li><strong>GitHub Actions:</strong> a push to <code>main</code> whose HEAD commit message contains <code>[publish-docker]</code> builds and qualifies Linux AMD64 and ARM64 images, then promotes combined release tags.</li>
+<li><strong>Local publisher:</strong> <code>./classroom publish</code> previews already built images. Adding <code>--push</code> uploads the selected images for their one actual architecture.</li>
+</ul>
+<p>Both use one repository, <code>YOUR_DOCKERHUB_USER/ds60sqlpy</code>. Replace the placeholder with the actual lowercase username or organization namespace. The app and every ordinary worker have separate tags. PostgreSQL keeps its upstream/mirror image; GPU workers, SDK/tooling base images and unrelated local images are excluded.</p>
+<h3 id="tag-layouts">Tag layouts<a class="heading-anchor" href="#tag-layouts" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Publication route</th>
+<th>App tag</th>
+<th>Example worker tag</th>
+</tr></thead><tbody>
+<tr>
+<td>Combined CI release</td>
+<td><code>1.0.0</code>, with <code>latest</code> pointing to a completed release</td>
+<td><code>1.0.0-worker-python-core</code></td>
+</tr>
+<tr>
+<td>Manual architecture set</td>
+<td><code>1.0.0-lab-arm64</code> or <code>1.0.0-lab-amd64</code></td>
+<td><code>1.0.0-worker-python-core-arm64</code> or <code>1.0.0-worker-python-core-amd64</code></td>
+</tr>
+</tbody></table></div>
+<p>Each combined release tag points to an image index containing Linux <code>amd64</code> and <code>arm64</code> variants. Docker selects the variant matching the engine. This is the default <code>--from-hub</code> layout. Manual architecture tags require the consumer&#x27;s explicit <code>--architecture-tags</code> option. Publishing ARM64 images from a Mac does not create AMD64 images for a typical Windows/WSL machine, and the local publisher does not create a combined manifest. <a href="https://docs.docker.com/build/building/multi-platform/">Docker multi-platform images</a></p>
 <h3 id="1-build-and-try-the-release-on-your-machine">1. Build and try the release on your machine<a class="heading-anchor" href="#1-build-and-try-the-release-on-your-machine" aria-label="Link to this section">#</a></h3>
-<p>Run these commands in the repository folder using Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows. Start your Linux-container engine first. The following command shows the build logs, starts the classroom and opens the browser:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">0</span>.5.0 --rebuild</code></pre>
-<p>This includes the app, PostgreSQL and the ordinary runtime workers. HTML and CSS previews run in the browser. PHP has its own worker. Optional NVIDIA workers are excluded from <code>--all</code> and from the normal publisher; see <a href="cuda-classroom.md.html">CUDA classroom setup</a> before choosing them.</p>
-<p>Use <code>--project NAME</code> on this and every later command if your existing workspace has a custom name. The default project is <code>ds60-classroom</code>. A new project has its own saved work; changing its name is not a way to recover previous progress.</p>
-<p>For a build without starting anything, use:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">0</span>.5.0</code></pre>
-<p>Check representative reading and runnable lessons, compiler errors, switching between subjects, saved drafts and prior results. Verify the normal lifecycle:</p>
+<p>The CI route builds its own images on native runners. The commands in this section prepare a local installation or the manual publisher&#x27;s input images. Use Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows.</p>
+<p>Build the complete ordinary set with visible logs and start the classroom:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">1</span>.0.0 --rebuild</code></pre>
+<p>To build without starting services:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">1</span>.0.0</code></pre>
+<p>Already built and tested the matching image set? No rebuild is required merely to publish it manually. Check actual lessons, compiler diagnostics, figures, saved drafts and prior results, then verify stop/resume:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom stop
 ./classroom resume</code></pre>
-<p>The repository&#x27;s <a href="validation.md.html">validation guide</a> describes contributor checks and runtime acceptance. Passing a finite test suite is useful release evidence; it cannot prove zero defects or qualify hardware that was never tested. Keep a record of the Git revision, image set, architecture and checks used for release.</p>
+<p>Keep the same <code>--project NAME</code> on later commands if you chose a custom project. Use <a href="validation.md.html">validation</a> to distinguish source checks, actual runtime execution, browser behavior and platform qualification. A finite test pass does not establish that every workload or hardware configuration is correct.</p>
 <h3 id="2-prepare-your-docker-hub-account">2. Prepare your Docker Hub account<a class="heading-anchor" href="#2-prepare-your-docker-hub-account" aria-label="Link to this section">#</a></h3>
-<p>Sign in through Docker Hub and create a repository called <code>ds60sqlpy</code>. Choose public or private visibility according to who should be able to download it. Check your current account&#x27;s repository and transfer limits before sharing a large image set. A private repository requires learners to authenticate too.</p>
-<p>Authenticate the local Docker CLI:</p>
-<pre class="highlighted-code"><code class="language-bash">docker login --username YOUR_DOCKERHUB_USER</code></pre>
-<p>At the password prompt, use a Docker Hub personal access token with the needed read/write permission. Do not put a token in a command, <code>.env</code>, Git, a screenshot or a lesson. Docker&#x27;s credential helper stores authentication separately from the classroom. <a href="https://docs.docker.com/security/access-tokens/">Docker access-token documentation</a></p>
-<h3 id="3-review-the-complete-image-mapping-then-publish">3. Review the complete image mapping, then publish<a class="heading-anchor" href="#3-review-the-complete-image-mapping-then-publish" aria-label="Link to this section">#</a></h3>
-<p>The first command only inspects local images and prints their destination tags:</p>
-<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.5.0</code></pre>
-<p>It requires the complete ordinary image set to exist locally and checks that the images are Linux images for one consistent architecture. It captures their immutable local IDs before any upload. It does not rebuild missing images or infer that an image passed the test suite.</p>
-<p>After reviewing that output and your release checks, explicitly publish:</p>
-<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.5.0 --push</code></pre>
-<p>The script tags the inspected local IDs and pushes them sequentially. PostgreSQL is pulled from its existing upstream/mirror source and is not republished as your own image. GPU worker publication is excluded because it needs separate hardware qualification. The Docker Hub Tags page lets you confirm the uploaded set. <a href="https://docs.docker.com/docker-hub/repos/manage/hub-images/push/">Docker image publishing</a></p>
-<p>An interrupted upload can leave a partial release. Repeat the same command to finish its missing layers, but do not announce that release until every image has uploaded successfully. Treat released tags as immutable: use a new version when contents change, rather than silently overwriting a tag other learners use.</p>
-<h4 id="architecture-matters">Architecture matters<a class="heading-anchor" href="#architecture-matters" aria-label="Link to this section">#</a></h4>
-<p>A normal build on Apple Silicon produces Linux <code>arm64</code> images. A normal build on an Intel/AMD computer produces Linux <code>amd64</code> images. These are different from the host OS name: Windows WSL 2 usually uses Linux <code>amd64</code> containers.</p>
-<p>The publisher adds the actual image architecture to every tag. The launcher selects the suffix matching the Docker engine. Publishing an <code>arm64</code> set does not provide an <code>amd64</code> set automatically. To serve both, build and qualify the same release on both architectures, or use the optional native-runner workflow below separately for each architecture. A missing platform tag fails visibly; the launcher will not silently rebuild or run an emulated release instead.</p>
+<p>Create a repository named <code>ds60sqlpy</code> in the intended namespace. Choose its visibility deliberately: a private GitHub repository does not make the Hub repository private. The published app image includes the shipped course and application sources. The provided build excludes learner state, Git history and private runtime credentials.</p>
+<p>For CI, configure the two <strong>repository Actions secrets</strong> described in <a href="#5-github-actions-publication">section 5</a>. No local Docker login is required for that workflow. For manual publication, the operator authenticates on the publishing machine if it is not already logged in:</p>
+<pre class="highlighted-code"><code class="language-bash">docker login</code></pre>
+<p>Docker Hub normally uses a device-code/browser sign-in flow. An interactive username-and-token login is available through <code>docker login --username YOUR_LOGIN_USERNAME</code>. Keep credentials in Docker&#x27;s configured credential store and out of source files, commands, screenshots and lessons. Organization destinations need write access from the authenticated account. The local publisher never logs in or reads a password. <a href="https://docs.docker.com/reference/cli/docker/login/">Docker login</a>, <a href="https://docs.docker.com/security/access-tokens/">access tokens</a>.</p>
+<h3 id="3-review-the-complete-image-mapping-then-publish-manually">3. Review the complete image mapping, then publish manually<a class="heading-anchor" href="#3-review-the-complete-image-mapping-then-publish-manually" aria-label="Link to this section">#</a></h3>
+<p>Preview the complete local image set without tagging or uploading:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
+<p>Omitting a selection, or adding <code>--all</code>, includes the app and every ordinary worker in <code>docker/classroom-images.tsv</code>. All selected images must exist and agree on one Linux architecture before any tag or push operation. The tag defaults to the checked-in source version; an explicit version must match it. Each invocation inspects the current local images and pins their immutable IDs. It neither builds missing images nor proves that existing images passed tests.</p>
+<p>After reviewing the mapping and your local qualification, upload deliberately:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0 --push</code></pre>
+<p>Keep the tested image set unchanged between review and upload. A missing image stops preflight before any selected image is tagged or pushed. Prepare the complete set first, or explicitly select a smaller distribution.</p>
+<p>For a starter-only set, preview both necessary images:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0 --profile app --profile python-core</code></pre>
+<p>Append <code>--push</code> only when ready to upload that same selection. Repeated <code>--profile</code> options select exact images, with no implicit app or Core. <code>--all</code> and <code>--profile</code> cannot be combined. A partial set cannot serve a full <code>--all</code> installation. The older <code>./scripts/publish-images</code> entrypoint and <code>--namespace</code>/<code>--version</code> aliases remain supported; supply one spelling per namespace/version option.</p>
+<p>This route creates architecture tags only. A learner on that architecture uses:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0 --architecture-tags</code></pre>
+<p>Use <code>--starter</code> instead of <code>--all</code> for the explicitly published starter set. There is no manual <code>latest</code> shortcut. Treat released architecture tags as immutable and use a new checked-in version when image content changes.</p>
 <h3 id="4-start-from-published-images">4. Start from published images<a class="heading-anchor" href="#4-start-from-published-images" aria-label="Link to this section">#</a></h3>
-<p>The learner still needs a matching checkout or starter ZIP for the launcher and Compose files. After you have published the required architecture, they run:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.5.0</code></pre>
-<p>This pulls missing classroom images, starts the services and opens the browser. It never falls back to a local build in Hub mode. A smaller installation is:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.5.0</code></pre>
-<p>The project saves its source, namespace and version in <code>.classroom/PROJECT/images.env</code>. These are declarative preferences, not shell code and not the learning database. Subsequent commands retain that selection:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom stop
+<p>Download the checkout or starter ZIP matching the release for its launcher and Compose files. After CI has completed publication, pull and start the combined release:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
+<p>Hub mode pulls the selected images and validates their native Linux platform before creating or refreshing services. It never falls back to local builds or silently emulates a mismatched architecture. Private repositories require Docker authentication. Use <code>--starter</code> for a smaller prepared installation.</p>
+<h4 id="choosing-latest-safely">Choosing latest safely<a class="heading-anchor" href="#choosing-latest-safely" aria-label="Link to this section">#</a></h4>
+<p>For the current completed CI release:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag latest</code></pre>
+<p>The launcher resolves the app&#x27;s <code>latest</code> tag to a concrete release, requires that release to match the source checkout, and uses its immutable versioned worker tags. It saves the concrete version for the project. A mismatch asks you to update the checkout or starter ZIP before continuing. <code>latest</code> works only with the combined Hub layout, not local builds or <code>--architecture-tags</code>.</p>
+<p>Later <code>./classroom</code> and <code>./classroom resume</code> retain the saved concrete version; they do not follow a moving <code>latest</code> tag automatically. No worker is selected from an independently moving latest alias.</p>
+<h4 id="pull-only-setup-and-strict-resume">Pull-only setup and strict resume<a class="heading-anchor" href="#pull-only-setup-and-strict-resume" aria-label="Link to this section">#</a></h4>
+<p>For a new project, separate downloading from startup:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0
 ./classroom resume</code></pre>
-<p><code>resume</code> and <code>--no-build</code> never build or pull, including in Hub mode. Missing containers may be recreated from matching local images while keeping volumes. If an image is missing, ordinary <code>./classroom</code> can prepare it according to the saved image source; <code>resume</code> instead explains what is missing.</p>
-<p>To download the selected images without starting services:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.5.0</code></pre>
-<p>To switch an existing locally built project to the published release, explicitly apply the configuration change while preserving its volumes:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.5.0 --rebuild</code></pre>
-<p>In Hub mode, <code>--rebuild</code> refreshes the selected published images and applies the update. It does not compile them. To return to local development:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">0</span>.5.0 --rebuild</code></pre>
-<p>Always use the matching source release and image tag. Preserve a learning backup before a version upgrade. Keep your project name unchanged. Do not delete named volumes as an image-update step.</p>
-<h3 id="5-optional-github-actions-publication">5. Optional GitHub Actions publication<a class="heading-anchor" href="#5-optional-github-actions-publication" aria-label="Link to this section">#</a></h3>
-<p>The repository includes <strong>Publish classroom images (manual)</strong>. It has no push, tag or scheduled trigger. Its default is a build/validation rehearsal without publishing. It runs only from <code>main</code>, checks the requested version and bounded architecture choice, and requires successful push runs of <code>.github/workflows/ci.yml</code> and <code>.github/workflows/app-build.yml</code> on <code>main</code> for the exact same Git revision. It checks the latest matching run and attempt, not a workflow&#x27;s display name or an older successful commit.</p>
-<p>Publication has two separate phases:</p>
+<p>The project records the namespace, layout, profiles and concrete release. <code>resume</code> and <code>--no-build</code> never pull or build. Ordinary startup can prepare missing images from the saved source. Pull-only preparation leaves existing containers unchanged.</p>
+<p>Existing saved Hub settings from older versions retain their architecture-tag layout. A new explicit <code>--from-hub</code> selection defaults to the combined layout; add <code>--architecture-tags</code> when selecting a manual/older architecture release.</p>
+<h4 id="apply-an-update-while-retaining-progress">Apply an update while retaining progress<a class="heading-anchor" href="#apply-an-update-while-retaining-progress" aria-label="Link to this section">#</a></h4>
+<p>For an existing local project, an architecture-layout project moving to CI tags, or an intentional Hub version update, keep the project name and apply the intended release explicitly:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0 --rebuild</code></pre>
+<p>Use the matching new source version when upgrading. To deliberately follow <code>latest</code> again, update the checkout/ZIP and use <code>--tag latest --rebuild</code>. In Hub mode, <code>--rebuild</code> pulls and applies images; it never compiles locally. A new download alone does not replace running containers.</p>
+<p>To return to local development:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">1</span>.0.0 --rebuild</code></pre>
+<p>Keep the same custom <code>--project NAME</code> on every command. Images contain runtime tools and course sources, not saved drafts, notes, receipts or database state. Named volumes retain that state. Moving machines requires the separate <a href="one-command-classroom.md.html#backup-and-transfer">backup and transfer procedure</a>.</p>
+<h3 id="5-github-actions-publication">5. GitHub Actions publication<a class="heading-anchor" href="#5-github-actions-publication" aria-label="Link to this section">#</a></h3>
+<p>The publication workflow runs only for a <strong>push to <code>main</code> whose HEAD commit message contains <code>[publish-docker]</code></strong>. HEAD is the newest commit in that push. An unmarked push, a pull request, a tag push, or a marker only on an earlier commit does not opt in. Routine validation workflows retain their own configured triggers. Any occurrence of the marker in the HEAD message opts in, so leave it out of ordinary checkpoint messages, including descriptions of this publishing feature, unless publication is intended.</p>
+<p>Set these two repository secrets under <strong>Settings → Secrets and variables → Actions → Repository secrets</strong>:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Secret</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><code>DOCKERHUB_USERNAME</code></td>
+<td>The destination Docker Hub account/namespace used by the workflow</td>
+</tr>
+<tr>
+<td><code>DOCKERHUB_TOKEN</code></td>
+<td>A token authorized to push to that repository</td>
+</tr>
+</tbody></table></div>
+<p>No additional repository variables, enable flag or protected-environment configuration is required. Never commit the secret values or print them in workflow logs. The workflow handles authentication on its runners.</p>
+<p>After local checks, stage the reviewed release changes on <code>main</code> and create the opt-in commit, for example:</p>
+<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release 1.0.0 [publish-docker]&quot;</span>
+git push origin main</code></pre>
+<p>The source version is <code>1.0.0</code> for this release. The workflow reads the checked-in version rather than inventing a registry-only version. Do not combine a publication commit with a CI-skip marker.</p>
+<h4 id="native-builds-staging-and-promotion">Native builds, staging and promotion<a class="heading-anchor" href="#native-builds-staging-and-promotion" aria-label="Link to this section">#</a></h4>
+<p>The gate waits for the exact revision&#x27;s source validation and Docker starter checks, and promotion rechecks that qualification before canonical tag writes. The ordinary Docker runtime matrix is skipped for this marked main push because the publication workflow performs the native runtime qualification itself.</p>
 <ol>
-<li><strong>Build and qualify every image.</strong> All ordinary runtime images and the app image are built and exercised on the selected native architecture, with at most two image jobs running together. Each worker writes a source-bound runtime receipt. No job in this phase receives the Docker Hub token or logs in to Docker Hub.</li>
-<li><strong>Publish only after the entire build matrix succeeds.</strong> The publish matrix depends on both the initial gate and all image jobs. If any image build, qualification or required archive upload fails, no publish job can begin. The <code>dockerhub</code> environment and its secret are used only in this phase.</li>
+<li>Native Linux AMD64 and ARM64 runners build and qualify their app and Python Core seed images, then the ordinary worker groups. Builds and runtime qualification are real work and can take substantial time.</li>
+<li>Images are uploaded under commit-specific staging tags in the same Hub repository. Small receipts bind source revision, profile, platform, immutable image identity and qualification evidence. Image layers move through the registry; the workflow does not transfer giant Docker image archives through Actions artifacts.</li>
+<li>Promotion requires the complete ordinary image set for both architectures and all required checks to succeed. It publishes and validates the worker version tags first, then the app version tag. Worker latest aliases follow, and the app <code>latest</code> pointer moves last.</li>
 </ol>
-<p>With <code>publish</code> <strong>false</strong>, the workflow does not export or upload large Docker image archives, log in to Docker Hub, or push images. It can retain small validation receipts. This is the recommended first run.</p>
-<p>With <code>publish</code> <strong>true</strong>, each qualified image is saved by its immutable image ID into an archive with SHA-256, file size, platform, source tag, profile, release, namespace, Git revision and workflow-run metadata. These checked-image artifacts have a <strong>one-day retention period</strong>. The publish jobs download only the selected profile/architecture artifact from the <strong>same workflow run ID</strong> using GitHub CLI. They verify the metadata and archive hash before loading, then inspect the loaded image ID and platform before registry login. The existing publisher tags the verified local ID and pushes it. This is an integrity and provenance handoff; it is not a cryptographic image-signing or supply-chain attestation service.</p>
-<p>No Docker Hub secret, account configuration or hosted publication has been set up for you. When you are ready:</p>
-<ol>
-<li>Create a Docker Hub access token with read/write permission. Keep the value private and revoke it if exposed.</li>
-<li>In GitHub repository <strong>Settings → Secrets and variables → Actions</strong>, add the repository variable <code>DOCKERHUB_USERNAME</code> with your lowercase Docker Hub namespace.</li>
-<li>Create the GitHub environment <strong>dockerhub</strong> under repository settings. Add <code>DOCKERHUB_TOKEN</code> as an <strong>environment secret</strong>, not a plain variable. Do not place this token in the build jobs or commit it to the repository.</li>
-<li>If your GitHub plan supports the relevant environment protection rules, require a reviewer and restrict the environment to the release branch. If environments or the required protections are unavailable for your repository, retain the local publication route rather than assuming a protection exists.</li>
-<li>First run the workflow with <code>publish</code> left <strong>false</strong>, choosing <code>0.5.0</code> and one architecture. Review all build jobs and validation receipts. This needs available Actions runners and a successful exact-revision CI result.</li>
-<li>When ready to upload, deliberately set the repository variable <code>DOCKERHUB_PUBLISH_ENABLED</code> to the exact value <code>true</code>. Its absence or any other value blocks publication. The publish phase checks the flag again before downloading or authenticating.</li>
-<li>Run the workflow with <code>publish</code> <strong>true</strong>. Every image is built and qualified before the publication phase becomes eligible. Approve the environment only after reviewing the complete matrix. Tokens pass through standard input. Repeat for the other architecture only if you intend to support and qualify it.</li>
-</ol>
-<h4 id="storage-time-and-retry-expectations">Storage, time and retry expectations<a class="heading-anchor" href="#storage-time-and-retry-expectations" aria-label="Link to this section">#</a></h4>
-<p>A full image set can consume many gigabytes of <strong>temporary Actions artifact storage</strong>. Each archived image can repeat base layers, so the total archive size can exceed the final registry&#x27;s deduplicated storage. One-day retention limits how long these archives remain; it does not make their upload, download or storage free. Small validation receipts use seven-day retention. The separate publish jobs also consume runner minutes while downloading, hashing, loading and pushing. Check current account allowances and billing settings before a publication run, especially for a private repository. The local publisher avoids this GitHub artifact-transfer route. <a href="https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions">GitHub Actions billing</a></p>
-<p>Environment approval can take long enough for a one-day artifact to expire. An expired, missing, ambiguous or mismatched artifact fails safely before login. Start a fresh complete qualification run when required archives have expired. Within one workflow run, retries select the latest unexpired artifact attempt for each exact profile and architecture and verify that attempt&#x27;s metadata. They cannot silently fetch an archive from another workflow run or revision. <a href="https://cli.github.com/manual/gh_run_download">GitHub artifact downloads</a></p>
-<p>The build gate prevents a failed qualification from publishing a partial set. <strong>Registry transport is still not atomic across image tags.</strong> An upload failure, expired credential or interruption during the later publish matrix can leave some already uploaded tags. Do not announce the release until every publish job succeeds and the architecture&#x27;s complete tag set is visible in Docker Hub. Retry failed publication jobs while their verified archives remain available; otherwise perform a fresh complete run for the same intended revision. Preserve released tags when contents change by choosing a new version.</p>
-<p>GPU images remain outside this workflow because they need real hardware qualification. Hosted CI, a dry run, archive verification and a successful registry push are separate observations. None establishes that all possible hardware or user workloads are defect free.</p>
+<p>Staging uploads can occur before the full matrix completes. A staging tag is not a completed release. Normal installation uses the completed app/version pointer and its concrete worker version tags. This order avoids selecting a new app before its required worker versions are available.</p>
+<h4 id="retrying-an-interrupted-run">Retrying an interrupted run<a class="heading-anchor" href="#retrying-an-interrupted-run" aria-label="Link to this section">#</a></h4>
+<p>Registry operations across multiple tags are not a transaction. <strong>Re-run failed jobs</strong> can reuse successful receipts from earlier attempts of the same workflow run and source revision. The selected receipts must be unique and valid, and worker receipts must bind the exact app/Core seed digests they used. Receipts from another run or revision are rejected; rebuilt seeds cannot silently be combined with old worker results.</p>
+<p>A failed promotion can complete matching partial version tags using those original image identities, without rewriting completed matching tags. A new commit or a full rebuild that encounters partial or conflicting immutable tags must finish the original failed promotion or use a consistent checked-in patch bump, such as <code>1.0.1</code>. No registry-only version is invented.</p>
+<p>A complete same-revision release can be recognized without rebuilding or used to finish missing latest aliases. Older reruns cannot move latest backward. Do not delete or overwrite a published version merely to make a run succeed.</p>
+<p>Review the actual workflow result, receipts and published manifests before announcing availability. Local tests, source configuration, staging pushes and successful final promotion are different evidence. This guide does not claim that a particular registry upload has completed.</p>
+<h4 id="transfer-and-account-limits">Transfer and account limits<a class="heading-anchor" href="#transfer-and-account-limits" aria-label="Link to this section">#</a></h4>
+<p>The first upload includes the app and ordinary worker set for both architectures and can be large. Later pushes can reuse unchanged registry layers, but changed layers still transfer and qualification still consumes runner time. Staging tags can remain after a failed or interrupted run.</p>
+<p>Docker currently lists <strong>200 pulls per 6 hours for authenticated Personal accounts</strong>, subject to its usage rules. Do not promise unlimited free pulls, transfer or storage. Docker&#x27;s fair-use policy permits restrictions or charges for excessive usage. Check the current account limits and GitHub runner allowances before scheduling repeated full builds. <a href="https://docs.docker.com/docker-hub/usage/pulls/">Docker Hub pull limits</a>, <a href="https://docs.docker.com/docker-hub/usage/">Docker Hub fair use</a>.</p>
+<p>GPU hardware, optional cluster operations and external services remain separate qualification paths. Combined Linux image tags do not establish host-engine setup, GPU readiness or correctness for every possible workload.</p>
 <h3 id="troubleshooting-without-losing-progress">Troubleshooting without losing progress<a class="heading-anchor" href="#troubleshooting-without-losing-progress" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Observation</th>
-<th>Smallest useful next step</th>
+<th>Next step</th>
 </tr></thead><tbody>
 <tr>
-<td><code>manifest unknown</code></td>
-<td>Check namespace, release, image suffix and engine architecture. Confirm publication finished.</td>
+<td>No publication run</td>
+<td>Check the branch, push event and exact marker in the HEAD commit message.</td>
 </tr>
 <tr>
-<td><code>unauthorized</code> or <code>denied</code></td>
-<td>Check repository visibility and Docker login in this terminal. Keep tokens out of logs.</td>
+<td>Version conflict</td>
+<td>Preserve the published tags; update the source release consistently and requalify.</td>
 </tr>
 <tr>
-<td>Hub rate or account limit</td>
-<td>Check the current Docker Hub account limits; local-build mode remains available.</td>
+<td><code>latest</code> differs from the checkout</td>
+<td>Obtain the matching source release or starter ZIP, then retry explicitly.</td>
 </tr>
 <tr>
-<td>Configuration mismatch during resume</td>
-<td>Keep the project name and volumes; use the explicit matching-version update command.</td>
+<td>Missing image tag</td>
+<td>Check release completion, namespace and whether combined or architecture layout was selected.</td>
 </tr>
 <tr>
-<td>Missing local image during resume</td>
-<td>Run ordinary <code>./classroom</code> to prepare missing images from the saved source.</td>
+<td>Wrong Linux architecture</td>
+<td>Publish and qualify the missing native platform; renaming a tag does not convert it.</td>
 </tr>
 <tr>
-<td>Snapshot/layer extraction errors</td>
-<td>Inspect the engine&#x27;s storage health. Source changes and tag retries do not repair corrupted storage. Back up saved work before destructive engine recovery.</td>
+<td>Unauthorized or denied</td>
+<td>Check the operator&#x27;s Docker login or the two repository secrets, without exposing values.</td>
 </tr>
 <tr>
-<td>GPU worker unavailable</td>
-<td>Use CPU/reading variants and the separate CUDA setup guide. Ordinary Hub images do not establish GPU readiness.</td>
+<td>Pull-rate or usage limit</td>
+<td>Review current provider limits and avoid repeated unnecessary pulls.</td>
+</tr>
+<tr>
+<td>Missing image during strict resume</td>
+<td>Use ordinary startup to prepare the saved release, or the deliberate update path.</td>
+</tr>
+<tr>
+<td>Progress appears missing</td>
+<td>Return to the original project/engine and verify its volumes; an image pull does not transfer progress.</td>
 </tr>
 </tbody></table></div></article>
   </main>

@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO dwh, training, public;
+
 DO $require_day52$
 BEGIN
   IF to_regclass('dwh.fact_sales') IS NULL THEN
@@ -21,6 +22,7 @@ BEGIN
   END IF;
 END
 $require_day52$;
+
 CREATE TABLE agg_sales_category_month (
   year int NOT NULL,
   month int NOT NULL,
@@ -29,6 +31,7 @@ CREATE TABLE agg_sales_category_month (
   units bigint NOT NULL,
   PRIMARY KEY (year, month, category)
 );
+
 CREATE TABLE agg_sales_customer_month (
   year int NOT NULL,
   month int NOT NULL,
@@ -37,6 +40,7 @@ CREATE TABLE agg_sales_customer_month (
   orders bigint NOT NULL,
   PRIMARY KEY (year, month, customer_sk)
 );
+
 -- Exercise 1: product-month aggregate.
 CREATE TABLE agg_sales_product_month (
   year int NOT NULL,
@@ -47,6 +51,7 @@ CREATE TABLE agg_sales_product_month (
   orders bigint NOT NULL,
   PRIMARY KEY (year, month, product_sk)
 );
+
 -- Exercise 2: refresh all aggregate tables for one year/month.
 CREATE OR REPLACE PROCEDURE refresh_sales_aggregates_solution (p_year int, p_month int)
 LANGUAGE plpgsql
@@ -98,7 +103,7 @@ BEGIN
 END
 $procedure$
 ;
-  DO $refresh_latest_month$
+DO $refresh_latest_month$
 DECLARE
   latest_year int;
   latest_month int;
@@ -113,17 +118,18 @@ BEGIN
   CALL refresh_sales_aggregates_solution(latest_year, latest_month);
 END
 $refresh_latest_month$;
-  -- Product aggregate must reconcile to facts for the refreshed month.
-  WITH aggregate_total AS (
-    SELECT
-      year,
-      month,
-      SUM(revenue) AS revenue
-    FROM
-      agg_sales_product_month
-    GROUP BY
-      year,
-      month
+
+-- Product aggregate must reconcile to facts for the refreshed month.
+WITH aggregate_total AS (
+  SELECT
+    year,
+    month,
+    SUM(revenue) AS revenue
+  FROM
+    agg_sales_product_month
+  GROUP BY
+    year,
+    month
 ),
 fact_total AS (
   SELECT
@@ -150,49 +156,52 @@ SELECT
 FROM
   aggregate_total a
   JOIN fact_total f USING (year, month);
-  -- Exercise 3: list loaded periods. A late fact for any listed closed period
-  -- requires refreshing that period, not only the newest one.
+
+-- Exercise 3: list loaded periods. A late fact for any listed closed period
+-- requires refreshing that period, not only the newest one.
+SELECT
+  dd.year,
+  dd.month,
+  COUNT(*) AS fact_rows,
+  MAX(dd.date_actual) AS latest_fact_date
+FROM
+  fact_sales fs
+  JOIN dim_date dd USING (date_key)
+GROUP BY
+  dd.year,
+  dd.month
+ORDER BY
+  dd.year DESC,
+  dd.month DESC;
+
+-- Exercise 4: the procedure's DELETE + INSERT statements share this surrounding
+-- transaction. The prior call already refreshed one month atomically.
+SELECT
+  year,
+  month,
+  COUNT(*) AS category_rows,
+  SUM(revenue) AS revenue
+FROM
+  agg_sales_category_month
+GROUP BY
+  year,
+  month
+ORDER BY
+  year DESC,
+  month DESC;
+
+-- Exercise 5: FULL JOIN plus COALESCE in the delta exposes a row missing from
+-- either side instead of allowing NULL arithmetic to hide it.
+WITH aggregate_total AS (
   SELECT
-    dd.year,
-    dd.month,
-    COUNT(*) AS fact_rows,
-    MAX(dd.date_actual) AS latest_fact_date
+    year,
+    month,
+    SUM(revenue) AS revenue
   FROM
-    fact_sales fs
-    JOIN dim_date dd USING (date_key)
+    agg_sales_category_month
   GROUP BY
-    dd.year,
-    dd.month
-  ORDER BY
-    dd.year DESC,
-    dd.month DESC;
-    -- Exercise 4: the procedure's DELETE + INSERT statements share this surrounding
-    -- transaction. The prior call already refreshed one month atomically.
-    SELECT
-      year,
-      month,
-      COUNT(*) AS category_rows,
-      SUM(revenue) AS revenue
-    FROM
-      agg_sales_category_month
-    GROUP BY
-      year,
-      month
-    ORDER BY
-      year DESC,
-      month DESC;
-      -- Exercise 5: FULL JOIN plus COALESCE in the delta exposes a row missing from
-      -- either side instead of allowing NULL arithmetic to hide it.
-      WITH aggregate_total AS (
-        SELECT
-          year,
-          month,
-          SUM(revenue) AS revenue
-        FROM
-          agg_sales_category_month
-        GROUP BY
-          year,
-          month
+    year,
+    month
 ),
 fact_total AS (
   SELECT
@@ -219,14 +228,16 @@ WHERE
 ORDER BY
   year,
   month;
-  -- Exercise 6: snapshot, rerun the same latest-month refresh, then compare both
-  -- directions. An empty difference proves row/value idempotency.
-  CREATE TEMP TABLE aggregate_snapshot_before AS
-  SELECT
-    *
-  FROM
-    agg_sales_category_month;
-    DO $refresh_latest_month_again$
+
+-- Exercise 6: snapshot, rerun the same latest-month refresh, then compare both
+-- directions. An empty difference proves row/value idempotency.
+CREATE TEMP TABLE aggregate_snapshot_before AS
+SELECT
+  *
+FROM
+  agg_sales_category_month;
+
+DO $refresh_latest_month_again$
 DECLARE
   latest_year int;
   latest_month int;
@@ -237,31 +248,33 @@ BEGIN
   CALL refresh_sales_aggregates_solution(latest_year, latest_month);
 END
 $refresh_latest_month_again$;
-    SELECT
-      'before_minus_after' AS side,
-      *
-    FROM (
-      SELECT
-        *
-      FROM
-        aggregate_snapshot_before
-      EXCEPT
-      SELECT
-        *
-      FROM
-        agg_sales_category_month) a
-  UNION ALL
+
+SELECT
+  'before_minus_after' AS side,
+  *
+FROM (
   SELECT
-    'after_minus_before',
     *
-  FROM (
-    SELECT
-      *
-    FROM
-      agg_sales_category_month
-    EXCEPT
-    SELECT
-      *
-    FROM
-      aggregate_snapshot_before) b;
-  ROLLBACK;
+  FROM
+    aggregate_snapshot_before
+  EXCEPT
+  SELECT
+    *
+  FROM
+    agg_sales_category_month) a
+UNION ALL
+SELECT
+  'after_minus_before',
+  *
+FROM (
+  SELECT
+    *
+  FROM
+    agg_sales_category_month
+  EXCEPT
+  SELECT
+    *
+  FROM
+    aggregate_snapshot_before) b;
+
+ROLLBACK;

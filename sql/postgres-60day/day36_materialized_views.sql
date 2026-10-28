@@ -1,11 +1,11 @@
 -- Day 36: Materialized Views & Caching
--- BEGINNER WORKFLOW — sql-36: Materialized Views
+-- BEGINNER WORKFLOW - sql-36: Materialized Views
 -- Guide: sql/postgres-60day/companion-guides/day36_materialized_views.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-36/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-36.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Materialized view for category revenue by month
 CREATE MATERIALIZED VIEW mv_category_month_revenue AS
 SELECT
@@ -31,6 +32,7 @@ FROM
 GROUP BY
   p.category,
   date_trunc('month', o.order_date);
+
 -- Query the MV
 SELECT
   *
@@ -40,8 +42,10 @@ ORDER BY
   month DESC,
   revenue DESC
 LIMIT 50;
+
 -- Refresh when needed (will be rolled back)
 REFRESH MATERIALIZED VIEW mv_category_month_revenue;
+
 -- Exercises
 -- 1. Create a MV for weekly revenue by country.
 --    Inputs: For sql-36 Exercise 1, read from `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`. Compute `week_start`, `country`, and `revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.

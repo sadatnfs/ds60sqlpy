@@ -50,23 +50,39 @@ print(
 
 Worked reference for Exercise 1; SHAP summary (tree model)
 ```python
-# Missing SHAP is a disclosed capability boundary. Any failure after a
-# successful import is a real defect and must remain visible.
+def select_class_shap(values, feature_shape, class_index=1, class_count=2):
+    """Select a classifier output without confusing class and sample axes."""
+    if not 0 <= class_index < class_count:
+        raise ValueError("class index is outside the classifier outputs")
+    if isinstance(values, list):
+        if len(values) != class_count:
+            raise ValueError("SHAP list must contain one array per class")
+        selected = np.asarray(values[class_index])
+    else:
+        values = np.asarray(values)
+        if values.shape != (*feature_shape, class_count):
+            raise ValueError("SHAP array must have sample, feature, class axes")
+        selected = values[:, :, class_index]
+    if selected.shape != feature_shape or not np.isfinite(selected).all():
+        raise ValueError("selected SHAP values must be finite and match the features")
+    return selected
+
+
+# Missing SHAP is a disclosed capability boundary. A broken installed package
+# or an unexpected result shape remains a visible failure.
 try:
     import shap
-except ModuleNotFoundError:
+except ModuleNotFoundError as error:
+    if error.name != "shap":
+        raise
     print("SHAP is not installed; complete the permutation/PDP work first.")
 else:
-    shap_explainer = shap.TreeExplainer(rf)
+    shap_explainer = shap.TreeExplainer(rf, feature_perturbation="tree_path_dependent")
     shap_values = shap_explainer.shap_values(X_explain)
-    # SHAP <0.45 returned one array per class; newer SHAP returns a 3-D array.
-    if isinstance(shap_values, list):
-        positive_class_values = np.asarray(shap_values[1])
-    elif np.asarray(shap_values).ndim == 3:
-        positive_class_values = np.asarray(shap_values)[:, :, 1]
-    else:
-        positive_class_values = np.asarray(shap_values)
-    assert positive_class_values.shape == X_explain.shape
+    class_index = int(np.flatnonzero(rf.classes_ == 1)[0])
+    positive_class_values = select_class_shap(
+        shap_values, X_explain.shape, class_index, len(rf.classes_)
+    )
     mean_absolute_shap = np.abs(positive_class_values).mean(axis=0)
     shap_order = np.argsort(mean_absolute_shap)[::-1]
     shap_top_five = feature_names[shap_order[:5]].tolist()
@@ -75,9 +91,7 @@ else:
         {
             "shap_top_five": shap_top_five,
             "permutation_top_five": permutation_top_five,
-            "top_five_overlap": sorted(
-                set(shap_top_five) & set(permutation_top_five)
-            ),
+            "top_five_overlap": sorted(set(shap_top_five) & set(permutation_top_five)),
         }
     )
     shap.summary_plot(
@@ -90,8 +104,12 @@ else:
 ```
 Notes
 - TreeExplainer supports tree-based models efficiently
-- Positive SHAP values push prediction toward the positive class, negative away
+- The selected output is class `1`, named `benign` in this bundled fixture.
+  Positive values increase that class output relative to its expected value.
 - Global importance can be approximated by mean |SHAP| per feature
+- [TreeExplainer documentation](https://shap.readthedocs.io/en/latest/generated/shap.TreeExplainer.html)
+  describes the older list and newer array representations. The shape guard
+  rejects an unrecognized representation rather than silently choosing a sample.
 
 ---
 
@@ -109,9 +127,7 @@ PartialDependenceDisplay.from_estimator(
     ax=ax,
     grid_resolution=20,
 )
-ax.set_title(
-    f"PDP for held-out permutation rank 1: {feature_names[most_important]}"
-)
+ax.set_title(f"PDP for held-out permutation rank 1: {feature_names[most_important]}")
 plt.tight_layout()
 plt.show()
 ```
@@ -133,7 +149,7 @@ else:
         explainer = LimeTabularExplainer(
             Xtr,
             feature_names=feature_names,
-            class_names=["negative", "positive"],
+            class_names=dataset.target_names.tolist(),
             discretize_continuous=True,
             random_state=seed,
         )

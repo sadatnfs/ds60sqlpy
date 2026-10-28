@@ -1,5 +1,8 @@
 # Day 22: Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)
 
+**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 

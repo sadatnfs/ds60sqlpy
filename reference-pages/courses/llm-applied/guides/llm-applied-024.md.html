@@ -335,19 +335,19 @@ answer<span class="syntax-operator">=</span>assistant<span class="syntax-operato
 <ol>
 <li><strong>Answer a supported domain definition.</strong> Ask the public assistant forconversion_definition. <strong>Expected:</strong> answered with metric-v1 citation and source text. <strong>Verify:</strong> Save the assertion results for exercise 1, including answered with metric-v1 citation and source text.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Abstain on missing evidence.</strong> Ask forcomet_period, which has no supporting corpus entry. <strong>Expected:</strong> unknown with missing evidence reason. <strong>Verify:</strong> Save the assertion results for exercise 2, including unknown with missing evidence reason.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Enforce access before answering.</strong> Ask a public-only assistant forrestricted_threshold, then ask a separately authorized assistant. <strong>Expected:</strong> public unknown; authorizedanswercitesprivate-v1. <strong>Verify:</strong> Save the assertion results for exercise 3, including public unknown; authorizedanswercitesprivate-v1.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Compute a data-science result deterministically.</strong> Calculate 3 purchases over 10 eligible visits and reject 11 purchases over 10 visits. <strong>Expected:</strong> rate.3; invalid counts raise ValueError. <strong>Verify:</strong> Save the assertion results for exercise 4, including rate.3; invalid counts raise ValueError.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Evaluate fixed task and boundary cases.</strong> Score supported, missing andrestricted-public questions against their expected statuses. <strong>Expected:</strong> 3 of 3 status contracts pass; citation integrity checked separately. <strong>Verify:</strong> Save the assertion results for exercise 5, including 3 of 3 status contracts pass; citation integrity checked separately.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Issue a bounded capstone decision.</strong> Record local fixture acceptance while leaving pretrained generation, real identity integration and production readiness unverified. <strong>Expected:</strong> local_fixture_pass True; production_go no-go. <strong>Verify:</strong> Save the assertion results for exercise 6, including local_fixture_pass True; production_go no-go.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

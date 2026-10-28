@@ -41,27 +41,38 @@ causal story.
 
 ```python
 import shap
+import numpy as np
 from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42
-)
-model = RandomForestClassifier(
-    n_estimators=200,
-    random_state=42,
-).fit(X_train, y_train)
+Xtr, Xte, ytr, yte = train_test_split(X, y, stratify=y, random_state=42)
+rf = RandomForestClassifier(n_estimators=200, n_jobs=1, random_state=42).fit(Xtr, ytr)
+rf.score(Xte, yte)
+explainer = shap.TreeExplainer(rf, feature_perturbation="tree_path_dependent")
+X_sample = Xte[:200]
+shap_values = explainer.shap_values(X_sample)
+def select_class_shap(values, feature_shape, class_index=1, class_count=2):
+    """Select a classifier output without confusing class and sample axes."""
+    if not 0 <= class_index < class_count:
+        raise ValueError("class index is outside the classifier outputs")
+    if isinstance(values, list):
+        if len(values) != class_count:
+            raise ValueError("SHAP list must contain one array per class")
+        selected = np.asarray(values[class_index])
+    else:
+        values = np.asarray(values)
+        if values.shape != (*feature_shape, class_count):
+            raise ValueError("SHAP array must have sample, feature, class axes")
+        selected = values[:, :, class_index]
+    if selected.shape != feature_shape or not np.isfinite(selected).all():
+        raise ValueError("selected SHAP values must be finite and match the features")
+    return selected
 
-sample = X_test[:200]  # bounded for CPU and memory
-values = shap.TreeExplainer(model).shap_values(sample)
-if isinstance(values, list):          # older SHAP: one array per class
-    positive_values = values[1]
-elif values.ndim == 3:                # newer SHAP: rows × features × classes
-    positive_values = values[:, :, 1]
-else:
-    positive_values = values
+positive_class_values = select_class_shap(shap_values, X_sample.shape)
+# Class1 is benign in this bundled dataset; no causal claim follows.
+shap.summary_plot(positive_class_values, X_sample, show=False)
 ```
 
 The lesson is fully offline after packages are installed. It uses package-bundled
@@ -71,10 +82,13 @@ data and a small sample because SHAP can be computationally heavy.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-43` for its guide, notebook and capability notice. The default Core does not include the `ml` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [ML engineering course](../../../courses/ml-engineering/guides/mle-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `ml` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The complete starter imports SHAP; the reference also uses LIME. The later scikit-learn sensitivity and permutation cells do not exercise either optional explanation package.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -83,8 +97,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 43 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -297,7 +310,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.
+Tutor me through `python-43` : Day 43 : Model Interpretation with SHAP, PDP, and Permutation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize global versus local explanations, perturbation assumptions, and causal limits. Use exactly these maintained learner materials:

@@ -1,0 +1,67 @@
+{
+  "number": 13,
+  "title": "Selection procedures and protected holdouts",
+  "concepts": [
+    "selection bias",
+    "nested evaluation",
+    "holdout reuse",
+    "protocol freeze",
+    "winner optimism"
+  ],
+  "outcome": "Evaluate a complete model/prompt selection procedure without using final outcomes to choose the winner.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-012", "eval-007"],
+  "exercises": [
+    {
+      "title": "Two noisy candidates",
+      "task": "Enumerate the four two-candidate noise combinations.",
+      "expected": "The mean maximum is 0.05.",
+      "hint": "Only the all-negative combination has a negative maximum.",
+      "answer": "Three combinations select+0.1 and one selects-0.1, giving(0.3-0.1)/4."
+    },
+    {
+      "title": "Change only final outcomes",
+      "task": "Alter the outer outcomes while retaining development scores.",
+      "expected": "The selected candidate IDs do not change.",
+      "hint": "Selection must be a function of development information only.",
+      "answer": "This invariant distinguishes assessment from a hidden second round of tuning."
+    },
+    {
+      "title": "Specify a tie rule",
+      "task": "Give equal development scores to two candidates.",
+      "expected": "The reference chooses the first candidate deterministically.",
+      "hint": "NumPy argmax returns the first maximum.",
+      "answer": "Tie handling is part of a reproducible procedure; it should not depend on which final outcome is better."
+    },
+    {
+      "title": "Find the optimistic procedure",
+      "task": "Select using the outer table in case B.",
+      "expected": "Its same-table average is 0.85, but it is no longer protected assessment.",
+      "hint": "Trace which labels selected each candidate.",
+      "answer": "The larger score is explained by using outcome information twice, not by evidence that the original procedure improved."
+    },
+    {
+      "title": "Place preprocessing",
+      "task": "Decide where a learned normalization or calibration fit belongs.",
+      "expected": "Inside the corresponding training/development partition.",
+      "hint": "Data-dependent transforms are part of model fitting.",
+      "answer": "An outer holdout can leak through a transform even when the final estimator receives only training rows."
+    },
+    {
+      "title": "Reclassify a reused holdout",
+      "task": "Use final-set errors to revise a prompt.",
+      "expected": "The set becomes development or regression evidence for that revision.",
+      "hint": "A file name does not preserve independence.",
+      "answer": "Acquire a new protected assessment for the changed procedure rather than claiming the original untouched-test interpretation."
+    }
+  ],
+  "sources": [
+    ["Selection bias in cross-validation", "https://jmlr.org/papers/v11/cawley10a.html"],
+    [
+      "Existing complete-procedure validation",
+      "../../../courses/statistics-ml/tutorials/learning/07-validation-as-a-procedure.md"
+    ]
+  ]
+}

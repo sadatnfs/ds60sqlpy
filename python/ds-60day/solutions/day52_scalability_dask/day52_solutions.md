@@ -75,7 +75,7 @@ persisted = ddf.persist(scheduler="threads")
 cached_value, cached_seconds = timed_mean(persisted)
 repeat_value, repeat_seconds = timed_mean(persisted)
 
-assert uncached_value == cached_value == repeat_value
+np.testing.assert_allclose([cached_value, repeat_value], uncached_value, rtol=1e-12)
 print(
     {
         "first_uncached_seconds": round(uncached_seconds, 4),
@@ -97,7 +97,8 @@ from dask.distributed import Client
 
 # Threads avoid Windows process-spawn boilerplate in a notebook. Enable the
 # dashboard intentionally after confirming that the configured port is free.
-client = Client(processes=False, dashboard_address=None, n_workers=2)
+client = Client(processes=False, host="127.0.0.1", dashboard_address=None,
+                n_workers=2, threads_per_worker=1, memory_limit="256MiB")
 try:
     cached = client.persist(ddf)
     row_count = int(cached.shape[0].compute())

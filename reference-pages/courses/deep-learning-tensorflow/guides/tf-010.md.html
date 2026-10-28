@@ -240,19 +240,19 @@ changed<span class="syntax-operator">=</span>x<span class="syntax-operator">.</s
 <ol>
 <li><strong>Partition accounts.</strong> Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32; train on A,B. <strong>Expected:</strong> train mean4 and validation IDs C,D. <strong>Verify:</strong> Save the assertion results for exercise 1, including train mean4 and validation IDs C,D.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Expose global fitting.</strong> Change the last validation value to3200 and compare train-only and global means. <strong>Expected:</strong> training mean stays4; global mean changes. <strong>Verify:</strong> Save the assertion results for exercise 2, including training mean stays4; global mean changes.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Find crossing groups.</strong> Assign alternating rows to train and validation and inspect intersections. <strong>Expected:</strong> A,B,C,D all cross the split. <strong>Verify:</strong> Save the assertion results for exercise 3, including A,B,C,D all cross the split.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Apply frozen centering.</strong> Center both partitions with training mean4 and compare validation centered values. <strong>Expected:</strong> validation values16,18,26,28. <strong>Verify:</strong> Save the assertion results for exercise 4, including validation values16,18,26,28.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Freeze selection identity.</strong> Hash sorted training IDs before and after calculating validation errors. <strong>Expected:</strong> The selection hash is unchanged. <strong>Verify:</strong> Save the assertion results for exercise 5, including The selection hash is unchanged.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer to unseen accounts.</strong> Add account E with value1000 only to evaluation; specify whether its normalization can update the training mean. <strong>Expected:</strong> transformed value996; fitted mean remains4. <strong>Verify:</strong> Save the assertion results for exercise 6, including transformed value996; fitted mean remains4.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -253,19 +253,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Protect a compound counter.</strong> Run two workers making 1000 synchronized increments each. <strong>Expected:</strong> counter 2000. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with counter 2000.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Use an atomic increment.</strong> Repeat the workload withAtomicInteger.incrementAndGet. <strong>Expected:</strong> value2000. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with value2000.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Inspect compare-and-set.</strong> Change0to1 with CAS,then retry expecting0. <strong>Expected:</strong> first true;second false;value1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with first true;second false;value1.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Combine map updates atomically.</strong> UseConcurrentHashMap.merge for2000 total increments ofkeyx. <strong>Expected:</strong> stored count2000. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with stored count2000.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Bound lock contention.</strong> Hold a ReentrantLock in the caller while a worker tries to acquire it with a short timeout. <strong>Expected:</strong> worker returns false;lock released in finally. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with worker returns false;lock released in finally.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Use one global order for two locks.</strong> Have both workers acquire first then second before incrementing shared state. <strong>Expected:</strong> 2000 increments and no blocked worker after bounded joins. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 2000 increments and no blocked worker after bounded joins.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

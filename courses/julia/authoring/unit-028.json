@@ -1,0 +1,58 @@
+{
+  "number": 28,
+  "title": "Property testing and reproducible numerical evidence",
+  "concepts": ["Test", "properties", "metamorphic checks", "random seeds", "invariants"],
+  "outcome": "Combine hand-derived cases, generated inputs and invariants so that a plausible but incorrect transformation cannot pass by comparing only to itself.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-009", "julia-020", "julia-027"],
+  "sources": [
+    ["Julia Test", "https://docs.julialang.org/en/v1/stdlib/Test/"],
+    ["Julia Random reproducibility", "https://docs.julialang.org/en/v1/stdlib/Random/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Derive an oracle",
+      "task": "Compute probabilities for[2,5,3] by hand.",
+      "expected": "The result is[0.2,0.5,0.3].",
+      "hint": "The total is 10.",
+      "answer": "The hand-derived asymmetric case prevents a uniform-output bug from passing."
+    },
+    {
+      "title": "Diagnose overflow",
+      "task": "Explain why direct sum([1e308,1e308]) is dangerous.",
+      "expected": "The sum exceeds Float64 range.",
+      "hint": "The desired probabilities are still well-defined.",
+      "answer": "Scaling by the maximum gives[1,1], then divides by 2 without overflowing."
+    },
+    {
+      "title": "Test a permutation",
+      "task": "Swap the first and last weights and predict the output.",
+      "expected": "The first and last probabilities swap.",
+      "hint": "Preserve index meaning.",
+      "answer": "Equivariance checks alignment and catches accidental sorting."
+    },
+    {
+      "title": "Find a weak property",
+      "task": "Explain why sum-to-one alone cannot verify weighting.",
+      "expected": "A uniform vector passes it.",
+      "hint": "Use an asymmetric known case.",
+      "answer": "Properties constrain behavior from different directions; one broad invariant is insufficient."
+    },
+    {
+      "title": "Add an input contract",
+      "task": "Specify how negative, all-zero and nonfinite inputs should behave.",
+      "expected": "Each is rejected with ArgumentError.",
+      "hint": "Do not invent a replacement distribution.",
+      "answer": "A rejected input gives the caller a chance to correct the model rather than silently changing its meaning."
+    },
+    {
+      "title": "Transfer to a regression library",
+      "task": "Propose properties for predictions from a fitted exact line.",
+      "expected": "Known points, shape preservation and permutation alignment.",
+      "hint": "Use independent coefficients and values.",
+      "answer": "Tests should detect coefficient swaps, row reordering and missing intercepts independently of the fitting implementation."
+    }
+  ]
+}

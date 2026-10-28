@@ -1,0 +1,11 @@
+*
+!Dockerfile
+!requirements.lock
+!serving_*.py
+!server.py
+!prepare.py
+!check_model.py
+!corpus.txt
+!index.html
+!app.js
+!style.css

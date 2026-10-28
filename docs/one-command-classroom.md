@@ -17,8 +17,9 @@ folder or repository and run:
 That is the complete ordinary startup command on **macOS, Linux and Windows
 through WSL 2**. It checks the engine and Compose version, reuses the current
 project's saved selection, starts existing containers, waits for health checks,
-verifies the web page and opens its actual local address. It builds only missing
-images. A new project selects the classroom and all ordinary workers
+verifies the web page and opens its actual local address. Local-build mode
+builds only missing images; saved Hub mode pulls missing selected images.
+Ordinary startup uploads nothing. A new project selects the classroom and all ordinary workers
 unless you choose `--starter` or specific profiles.
 
 Repeat the same command to **resume your existing installation**. Updating the
@@ -30,9 +31,11 @@ The command uses Bash, already available on macOS and in Ubuntu/WSL. Confirm
 that `docker info` succeeds as your normal user before starting; engine access
 permissions and WSL integration belong to the engine installation. The course
 runtimes run inside Docker: you do not install Python, PostgreSQL, GCC, Go,
-.NET, Rust, Swift, Java, Node, PHP, TensorFlow, PyTorch or Spark on the host.
+.NET, Rust, Swift, Java, Node, PHP, R, Julia, Stan, TensorFlow, PyTorch or Spark
+on the host. Polars, dbt and ML engineering dependencies are also prepared in
+their dedicated images.
 First preparation needs internet and downloads several large SDK and framework
-images. For the full runtime set, budget about **60 GB of free disk**
+images. For the full runtime set, budget about **80 GB of free disk**
 for images, dependencies and build cache, and start with **8 GB of engine
 memory**. This is planning guidance, not a measured minimum or a guarantee:
 architecture, selected profiles and retained builds change storage use.
@@ -144,7 +147,10 @@ The app serves the complete library, PostgreSQL stores the disposable course
 database, and the ordinary workers provide the language/framework
 runtimes. [Runtime profiles](docker-profiles.md) lists their exact names,
 filenames and boundaries. HTML/CSS and browser JavaScript/D3 need only the app's
-bundled preview. PHP uses its own CLI worker.
+bundled preview. PHP uses its own CLI worker. Julia, native Stan, Polars and
+real dbt have their declared ordinary profiles. A separate ML service or full
+dbt/Stan project starts only through its documented project instructions.
+See [the scientist roadmap](scientist-roadmap.md) for the learning routes.
 
 Kubernetes cluster preparation, pretrained-model downloads and optional
 NVIDIA GPU workers remain explicit workflows. GPU profiles are excluded from
@@ -168,32 +174,113 @@ prunes caches or deletes a learning volume.
 
 ## Local builds and published Hub images
 
-Local builds are the default. Their source comes from your downloaded checkout,
-and normal startup builds only missing selected images. To build selected local
-images with visible logs and start them in one command, use:
+Local builds are the default. To install the current local source with visible
+build logs, use:
 
 ```sh
-./classroom --local-build --rebuild
+./classroom --all --local-build --tag 1.0.0 --rebuild
 ```
 
-After the owner publishes a compatible release, you can instead choose Hub
-images. Replace the placeholders with the actual publisher and release:
+### Install a combined CI release
+
+Use a checkout or starter ZIP matching the published version. The default Hub
+layout is the combined Linux AMD64/ARM64 release produced by the GitHub workflow for marked pushes to main:
 
 ```sh
-./classroom --from-hub PUBLISHER --tag VERSION
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
 
-That setting is remembered for this project. Hub mode pulls matching native
-architecture tags and never silently falls back to a local build. Normal
-startup pulls missing selected images; `resume` never pulls. `./classroom pull`
-refreshes the selected Hub images without starting them. `--rebuild` in Hub
-mode refreshes images and applies the update; it does not compile local edits.
+The app uses `USER/ds60sqlpy:1.0.0` and workers use tags such as
+`USER/ds60sqlpy:1.0.0-worker-python-core`. Docker selects the native architecture
+from each index. Startup validates the resolved Linux platform and does not
+fall back to local builds. Use `--starter` instead of `--all` for a smaller
+installation. Private Hub repositories require Docker authentication.
 
-Use `--local-build` when deliberately returning to source builds. Image source
-and base-registry choice are different: `--registry` chooses public base-image
-sources for local preparation, while `--from-hub` chooses published DS60 images.
-A successful Git push does not mean images were published. See
-[Docker Hub distribution](dockerhub.md) for tags, architectures and publication.
+For a new project, separate downloading from startup:
+
+```sh
+./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+./classroom resume
+```
+
+The project remembers profiles, namespace, layout and version. `resume` and
+`--no-build` never pull or build. A later bare `./classroom` prepares only missing
+images from the saved source. Pull-only preparation does not replace existing
+containers.
+
+### Pin latest to a concrete release
+
+To select the current completed CI release deliberately:
+
+```sh
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag latest
+```
+
+The launcher resolves the app version and requires a matching source checkout.
+It then uses the corresponding immutable worker version tags and saves that
+concrete release. A mismatch asks you to update the checkout or ZIP. Later
+resume keeps that resolved version; it does not advance automatically.
+`latest` is available only for the combined Hub layout.
+
+### Publish through GitHub or from a local machine
+
+GitHub publication runs only on a push to `main` with `[publish-docker]` in
+the HEAD commit message. It uses repository secrets `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN`, with no extra enable variable or protected environment.
+Native AMD64/ARM64 jobs stage and qualify the image set before promoting
+completed version tags and then latest. The checked-in source version controls
+the release; conflicting existing versions are not overwritten. See
+[the publication guide](dockerhub.md#5-github-actions-publication) before
+creating a marked release commit.
+
+The independent local publisher previews existing images:
+
+```sh
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+```
+
+After local testing and preview review, add `--push` to upload that selection.
+The operator handles `docker login` if needed. Missing selected images stop
+preflight; the publisher does not build or authenticate. Its default is the
+app plus all ordinary workers, with exact partial selection described in
+[Docker Hub distribution](dockerhub.md).
+
+Local publication provides one actual architecture and does not create
+combined manifests. Consume its architecture tags explicitly:
+
+```sh
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --architecture-tags
+```
+
+Publishing only ARM64 does not provide AMD64 images. Existing saved Hub
+settings from older launcher versions retain their architecture-tag layout.
+New explicit Hub selections default to combined tags unless
+`--architecture-tags` is supplied.
+
+### Apply an image update while retaining progress
+
+Keep the same project and matching checkout when switching from local images,
+changing tag layout, or applying a published release:
+
+```sh
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --rebuild
+```
+
+Use the intended source release/version. For an intentional latest update,
+obtain the matching checkout/ZIP and use `--tag latest --rebuild`.
+In Hub mode, `--rebuild` pulls and applies images without compiling locally.
+Strict resume cannot apply a changed source/version configuration.
+
+Keep the same custom `--project NAME` on every command. A new project name
+selects different volumes rather than moving progress. Return to local
+development deliberately with `./classroom --local-build --tag 1.0.0 --rebuild`.
+`--registry` controls public base-image sources for local preparation;
+`--from-hub` selects published classroom images.
+
+Images contain course/runtime files, not drafts, notes, receipts or database
+state. Follow [backup and transfer](#backup-and-transfer) when moving machines
+or upgrading. Neither local tests nor a configured workflow establish that
+registry publication has completed; check the actual release tags and results.
 
 ## Ports and saved work
 

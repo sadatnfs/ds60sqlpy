@@ -1,0 +1,20 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-061", "apache-057"],
+  "concepts": ["Operations, recovery and data verification"],
+  "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
+  "sources": [
+    [
+      "Troubleshooting",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/operate-pinot/troubleshooting/README.md"
+    ],
+    [
+      "Segment management",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/operate-pinot/segment-management.md"
+    ],
+    ["Pinned release", "https://pinot.apache.org/download/"]
+  ]
+}

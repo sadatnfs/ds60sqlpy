@@ -1,0 +1,230 @@
+[
+  {
+    "id": "dme-033",
+    "title": "Frame an ML decision and establish a baseline",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-032"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "decision baseline",
+      "cost-sensitive classification",
+      "validation-only threshold selection",
+      "cohort population mix"
+    ],
+    "outcome": "Train and evaluate a real baseline for an explicitly defined synthetic decision.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-033.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-033.py",
+    "related_paths": [
+      {
+        "label": "Focused ML engineering decision workshop",
+        "path": "courses/ml-engineering/guides/mle-001.md"
+      },
+      {
+        "label": "Statistics and machine learning textbook",
+        "path": "courses/statistics-ml/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-034",
+    "title": "Point-in-time feature retrieval and the feature-store boundary",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["dme-033"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "Feast",
+      "event time",
+      "availability time",
+      "historical feature retrieval",
+      "TTL boundary",
+      "request population"
+    ],
+    "outcome": "Use actual local Feast retrieval against a two-clock independent oracle.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-034.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-034.py",
+    "related_paths": [
+      {
+        "label": "Focused Feast historical-feature workshop",
+        "path": "courses/ml-engineering/guides/mle-006.md"
+      },
+      {
+        "label": "Independent event and availability time model",
+        "path": "courses/data-ml-engineering/authoring/foundations/chapters/dme-014.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-035",
+    "title": "Feature quality and fitted transformations",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-034"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "fitted preprocessing",
+      "imputation",
+      "scaling",
+      "one-hot encoding",
+      "unknown categories",
+      "data leakage"
+    ],
+    "outcome": "Fit a real preprocessing pipeline on training rows only.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-035.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-035.py",
+    "related_paths": [
+      {
+        "label": "Focused feature-contract workshop",
+        "path": "courses/ml-engineering/guides/mle-005.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-036",
+    "title": "Train/serve consistency and safe model interfaces",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-035"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "train/serve consistency",
+      "feature contracts",
+      "strict JSON",
+      "unit compatibility",
+      "fitted pipelines",
+      "validation before inference"
+    ],
+    "outcome": "Compare fitted-pipeline predictions with a reviewed JSON inference interface.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-036.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-036.py",
+    "related_paths": [
+      {
+        "label": "Actual owned model-service lifecycle",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-037",
+    "title": "Reproducible training, snapshots and computation state",
+    "level": "advanced",
+    "minutes": 95,
+    "prerequisites": ["dme-036"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "training reproducibility",
+      "recipe fingerprint",
+      "ordered data identity",
+      "random seeds",
+      "numerical tolerance",
+      "checkpoint state"
+    ],
+    "outcome": "Repeat a seeded training run with declared data/configuration identities.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-037.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-037.py",
+    "related_paths": [
+      {
+        "label": "Focused reproducibility and contract investigation",
+        "path": "courses/ml-engineering/guides/mle-011.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-038",
+    "title": "Temporal evaluation, calibration and decision uncertainty",
+    "level": "advanced",
+    "minutes": 110,
+    "prerequisites": ["dme-037"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "group-aware validation",
+      "temporal evaluation",
+      "probability calibration",
+      "Brier score",
+      "AUC",
+      "label maturity",
+      "reliability uncertainty"
+    ],
+    "outcome": "Evaluate a realistic future or grouped cohort with calibrated metrics.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-038.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-038.py",
+    "related_paths": [
+      {
+        "label": "Statistics and ML theory book",
+        "path": "courses/statistics-ml/README.md"
+      },
+      {
+        "label": "Focused ML engineering evaluation workshop",
+        "path": "courses/ml-engineering/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-039",
+    "title": "Experiments, MLflow registry and acceptance decisions",
+    "level": "advanced",
+    "minutes": 100,
+    "prerequisites": ["dme-038"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "MLflow tracking",
+      "logged model",
+      "model registry",
+      "model aliases",
+      "acceptance gates",
+      "evaluation identity"
+    ],
+    "outcome": "Create and read back real local MLflow runs and model versions.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-039.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-039.py",
+    "related_paths": [
+      {
+        "label": "Persistent local ML service and rollback",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      },
+      {
+        "label": "Focused MLflow registry workshop",
+        "path": "courses/ml-engineering/guides/mle-011.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-040",
+    "title": "Artifacts, integrity and the software supply chain",
+    "level": "advanced",
+    "minutes": 110,
+    "prerequisites": ["dme-039"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "model artifacts",
+      "content hashes",
+      "strict numerical schema",
+      "bounded file loading",
+      "provenance",
+      "supply chain",
+      "origin trust"
+    ],
+    "outcome": "Validate a bounded model manifest and its exact content hashes.",
+    "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-040.md",
+    "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-040.py",
+    "related_paths": [
+      {
+        "label": "Actual safe numerical checkpoint workflow",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "Persistent model activation and rollback",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      }
+    ]
+  }
+]

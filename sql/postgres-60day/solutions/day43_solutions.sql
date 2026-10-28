@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 1: emit a filtered CSV through the client connection.
 -- In interactive psql, replace COPY ... TO STDOUT with:
 -- \copy (SELECT * FROM training.customers WHERE country='US')
@@ -36,6 +37,7 @@ COPY (
   TO STDOUT WITH (
     FORMAT csv,
     HEADER true);
+
 -- A temporary staging table models the result of a later \copy ... FROM file.
 CREATE TEMP TABLE customers_restore_stage AS
 SELECT
@@ -49,12 +51,14 @@ FROM
   customers
 WHERE
   country = 'US';
+
 UPDATE
   customers_restore_stage
 SET
   full_name = full_name || ' [restored]'
 WHERE
   email = 'customer1@example.com';
+
 -- Exercise 2: idempotent restore keyed by the schema's unique email.
 INSERT INTO customers (full_name, email, country, created_at, segment, attributes)
 SELECT
@@ -72,10 +76,12 @@ ON CONFLICT (email)
     country = EXCLUDED.country,
     segment = EXCLUDED.segment,
     attributes = EXCLUDED.attributes;
+
 SELECT
   COUNT(*) AS staged_rows
 FROM
   customers_restore_stage;
+
 -- Exercise 3: COPY above writes from the database backend to STDOUT; psql
 -- \copy consumes that stream on the client. The latter is normally appropriate
 -- when the learner controls the client filesystem but not the server host.
@@ -89,6 +95,7 @@ SELECT
   clock_timestamp() AS observed_at
 FROM
   customers;
+
 -- Exercise 5: ROW_NUMBER chooses one repeatable winner per normalized email.
 WITH staged_duplicates AS (
   SELECT
@@ -110,6 +117,7 @@ WHERE
   winner_rank = 1
 ORDER BY
   email;
+
 -- Exercise 6: IS DISTINCT FROM is NULL-safe and returns only actual column
 -- differences between stage and target.
 SELECT
@@ -125,4 +133,5 @@ WHERE
   OR s.segment IS DISTINCT FROM c.segment
 ORDER BY
   s.email;
+
 ROLLBACK;

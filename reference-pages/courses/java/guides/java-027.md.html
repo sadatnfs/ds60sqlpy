@@ -284,19 +284,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Compile a literal application.</strong> Build a Hello class whose main prints build-ok. <strong>Expected:</strong> compiler exit 0;Hello.class exists. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with compiler exit 0;Hello.class exists.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Create a runnable archive.</strong> Package the compiled classes withmain-classHello and fixed timestamp. <strong>Expected:</strong> JAR exists andcontainsHello.class. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with JAR exists andcontainsHello.class.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare two builds with fixed metadata.</strong> Package the same classes twice with the same timestamp. <strong>Expected:</strong> archive byte hashes equal in this preparedJDK. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with archive byte hashes equal in this preparedJDK.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Execute the packaged entrypoint.</strong> Run the JAR in a bounded childJVM. <strong>Expected:</strong> stdoutbuild-ok;exit 0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with stdoutbuild-ok;exit 0.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Detect a changed source identity.</strong> Hash two source strings differing in their printed message. <strong>Expected:</strong> differentSHA256digests. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with differentSHA256digests.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Record an explicit dependency contract.</strong> Represent H2 asversion2.5.252 witha required verified hash field and reject a movingLATEST label. <strong>Expected:</strong> exact version accepted; LATEST not treated as a pin. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with exact version accepted; LATEST not treated as a pin.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

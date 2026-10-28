@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
+  <title>python-lang-02 · Scope, Closures, and Observable Decorator Contracts · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    .katex{font:normal 1.21em KaTeX_Main,math,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.19.1"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.katex-newline{display:block}.katex .katex-base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .katex-base,.katex .katex-strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .katex-vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .katex-thinbox{display:inline-flex;flex-direction:row;max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline,.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-rule,.katex .katex-underline .underline-line,.katex .mfrac .frac-line{min-height:1px}.katex .mspace{display:inline-block}.katex .katex-smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.katex-inner,.katex .llap>.katex-inner,.katex .rlap>.katex-inner{position:absolute}.katex .clap>.katex-fix,.katex .llap>.katex-fix,.katex .rlap>.katex-fix{display:inline-block}.katex .llap>.katex-inner{right:0}.katex .clap>.katex-inner,.katex .rlap>.katex-inner{left:0}.katex .clap>.katex-inner>span{margin-left:-50%;margin-right:50%}.katex .katex-rule{border:0 solid;display:inline-block;position:relative}.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.katex-root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .katex-sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .katex-sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .katex-sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .katex-sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .katex-sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .katex-sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .katex-sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .katex-sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .katex-sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .katex-sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .katex-sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .katex-sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .katex-sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .katex-sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .katex-sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .katex-sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .katex-sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .katex-sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .katex-sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .katex-sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .katex-sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .katex-sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .katex-sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .katex-sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .katex-sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .katex-sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .katex-sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .katex-sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .katex-sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .katex-sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .katex-sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .katex-sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .katex-sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .katex-sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .katex-sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .katex-sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .katex-sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .katex-sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .katex-sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .katex-sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .katex-sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .katex-sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .katex-sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .katex-sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .katex-sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .katex-sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .katex-sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .katex-sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .katex-sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .katex-sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .katex-sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .katex-sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .katex-sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .katex-sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .katex-sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .katex-sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .katex-sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .katex-sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .katex-sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .katex-sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .katex-sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .katex-sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .katex-sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .katex-sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .katex-sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .katex-sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .katex-sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .katex-sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .katex-sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .katex-sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .katex-sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .katex-sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .katex-sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .katex-sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .katex-sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .katex-sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .katex-sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .katex-sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .katex-sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .katex-sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .katex-sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .katex-sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .katex-sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .katex-sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .katex-sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .katex-sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .katex-sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .katex-sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .katex-sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .katex-sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .katex-sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .katex-sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .katex-sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .katex-sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .katex-sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .katex-sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .katex-sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .katex-sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .katex-sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .katex-sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .katex-sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .katex-sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .katex-sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .katex-sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .katex-sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .katex-sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .katex-sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .katex-sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .katex-sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .katex-sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .katex-sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .katex-sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .katex-sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .katex-sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .katex-sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .katex-sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .katex-sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .katex-sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .katex-sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .katex-sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .katex-sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .katex-accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .katex-accent .accent-body{position:relative}.katex .katex-accent .accent-body:not(.accent-full){width:0}.katex .katex-overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .katex-stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .katex-stretchy:after,.katex .katex-stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .katex-sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .reflectbox{display:inline-block;transform:scaleX(-1)}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.katex-tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.katex-tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+
+
+.guide, .artifact-content, article.document {
+  font-family: "Latin Modern", "STIX Two Text", Georgia, serif;
+  font-size: var(--reading-size, 1.15rem); line-height: 1.7;
+  font-kerning: normal; text-wrap: pretty;
+}
+.guide p, .artifact-content p, article.document p { max-width: 72ch; }
+.guide h1, .guide h2, .guide h3, .guide h4,
+.artifact-content h2, .artifact-content h3, article.document h2, article.document h3 {
+  font-family: inherit; font-weight: 700; line-height: 1.25; text-wrap: balance;
+}
+.katex { font-size: 1.05em; text-align: initial; }
+.katex math { font-size: inherit; }
+.katex-display { margin: 0; }
+.katex .base { white-space: nowrap; }
+.tex-compiled { scrollbar-width: thin; }
+.guide, .artifact-content, article.document { counter-reset: equation; }
+.equation { margin: 1.4rem 0; counter-increment: equation; }
+.equation-label { text-align: right; font: .8rem/1.4 system-ui, sans-serif; opacity: .75; }
+.equation-label::after { content: " " counter(equation); }
+.equation-source { font: .8rem/1.4 system-ui, sans-serif; margin-top: .4rem; }
+.equation-source pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: .65rem; }
+.equation-source summary { cursor: pointer; }
+@media print {
+  .guide, .artifact-content, article.document { font-size: 11pt; line-height: 1.45; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  pre, table, .math-display { break-inside: avoid; }
+}
+
+/* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-lang-02" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-lang-02</p>
+        <h1>Scope, Closures, and Observable Decorator Contracts</h1>
+        <p class="hero-copy">Python language mechanics and structured execution</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-lang-01.html">python-lang-01</a> <a class="tag" href="python-11.html">python-11</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python lesson in the classroom</h2>
+          <p id="run-guidance">Open the lesson in the Docker classroom, read the exercise contract, and use its Python coding pad. Select the required package profile before running an optional-library example. The cataloged path is <code>python/professional/lessons/py_lang_02.py</code>.</p>
+          <div class="static-help">
+            This file is a reading preview. Run <code>./classroom</code> from the course folder and select this lesson to save your attempt and use its supported runtime. On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. External projects follow the prerequisites and cleanup in their own guide.
+          </div>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_lang_02.py">
+            Open learner artifact in VS Code
+          </a>
+          <a class="button lab-only" href="../learn?lesson=python-lang-02" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_lang_02.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_lang_02.md">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--scope-closures-and-observable-decorator-contracts">Scope, Closures, and Observable Decorator Contracts<a class="heading-anchor" href="#guide--scope-closures-and-observable-decorator-contracts" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-lang-02</code>. Plan about three hours for reading, tracing, and independent implementation. Historical day 86 is a stable catalog label, not a study deadline.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Run <code>./classroom</code> from the repository root and open <strong>Python</strong> in the shared <code>/classroom</code> directory. Select this lesson, read its Python capability notice, and use the saved coding pad. Windows uses the same launcher in WSL 2. Docker provides Python and all required standard-library modules. Paste the complete <a href="python-lang-02.html#learner">learner script</a> into the pad, save, and Run. The output pane shows two worked-example observations and a completion message. The six task functions intentionally raise <code>NotImplementedError</code> until you implement them; the opening examples do not call those functions.</p>
+<p>The browser saves source, notes, and results in its learning volume, while every Run starts a fresh Python process. Include imports, fixtures, and checks in the submitted source. In-memory closures, iterators, tasks, and event loops do not survive the run. Save the source that reproduces your evidence. Running the demonstrations proves only those cases, not completion of the six tasks. Every input here is an original, bounded local fixture; no download, server, database, credentials, or additional package is needed.</p>
+<h5 id="guide--optional-prepared-contributor-route">Optional prepared contributor route<a class="heading-anchor" href="#guide--optional-prepared-contributor-route" aria-label="Link to this section">#</a></h5>
+<p>After the separate <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a>, run <code>uv run --no-sync python python/professional/lessons/py_lang_02.py</code> from the repository root. This host interpreter and checkout do not read the browser&#x27;s Docker learning volume. See the <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> for source, result history, and navigation. This optional command is not a second installation requirement for ordinary learners.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced Python language practice, using Python 3.11-compatible syntax.</li>
+<li><strong>Direct prerequisite:</strong> <code>python-lang-01</code>, <a href="python-lang-01.html#guide">companion guide</a>.</li>
+<li><strong>Direct prerequisite:</strong> <code>python-11</code>, <a href="python-11.html#guide">companion guide</a>.</li>
+<li><strong>Artifacts:</strong> <a href="python-lang-02.html#learner">learner</a>, <a href="python-lang-02.html#solution-1">explained answers</a>, <a href="python-lang-02.html#solution-2">executable reference</a>.</li>
+</ul>
+<p>You should already write functions, read exceptions and tests, and distinguish type annotations from runtime checks. This unit deepens the time and ownership of name lookup; it does not assume prior closure or decorator expertise.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>Explain when a function reads a name, when it keeps a reference, and when it stores a default value. Build independent closures and private mutable state, then distinguish that state from a deliberately shared configuration object. Wrap functions without losing their identity or changing their exception behavior. Finally, predict decorator order and construct a pipeline whose meaning survives later edits to the caller&#x27;s list of stages.</p>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Scope:</strong> The region in which a name is resolved. Within a function, Python first considers local names, then enclosing function scopes, the module, and builtins. This lookup order describes names, not a permanent snapshot of all objects visible when the function was defined.</li>
+<li><strong>Binding:</strong> The association between a name and an object. Assigning a new dictionary to <code>config</code> changes that binding; mutating <code>config[&quot;limit&quot;]</code> changes the existing dictionary. Those are observably different operations.</li>
+<li><strong>Closure:</strong> A function that retains access to bindings in an enclosing function after that outer call returns. Each outer call can create a new private binding. Several functions made within one call can share one binding.</li>
+<li><strong>Late binding:</strong> A free name is looked up when the function runs. A loop usually updates one binding repeatedly, so closures made during that loop can all observe its final value. A new factory call supplies a separate scope; a default parameter can instead store the current object during definition.</li>
+<li><strong>Rebinding with nonlocal:</strong> <code>nonlocal total</code> tells an inner function that assignment should change an existing enclosing binding. Reading <code>total</code> does not need this declaration. Assigning to it without the declaration makes it local and can produce <code>UnboundLocalError</code> when it is read first.</li>
+<li><strong>Decorator:</strong> A callable that receives a function and returns its replacement. Writing <code>@decorate</code> above <code>def calculate</code> is equivalent to rebinding <code>calculate = decorate(calculate)</code> after definition. Decoration happens once; the replacement wrapper runs on every later call.</li>
+</ul>
+<p>A function and a callable object are related but distinct. For this lesson the decorators accept ordinary synchronous functions with names and docstrings. <code>*args</code> collects positional arguments in a tuple, and <code>**kwargs</code> collects named arguments in a dictionary. Passing <code>function(*args, **kwargs)</code> forwards those arguments. It does not make a copy of the objects referenced by them.</p>
+<p><code>functools.wraps(function)</code> copies useful metadata and installs <code>__wrapped__</code>. Tools such as <code>inspect.signature</code> follow that link by default. Metadata helps inspection, but does not itself enforce a call&#x27;s domain. A wrapper still needs to reject a negative integer before the body executes if that is its contract. Type annotations likewise describe intended types without checking them.</p>
+<p>The integer policy here excludes <code>bool</code>, even though Python makes it an integer subclass. Use that policy consistently when comparing the valid input zero with the invalid input <code>False</code>. This boundary is an exercise choice appropriate to a numerical counter; another API could choose a different policy explicitly.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--a-loop-stores-functions-before-their-calls-happen">A loop stores functions before their calls happen<a class="heading-anchor" href="#guide--a-loop-stores-functions-before-their-calls-happen" aria-label="Link to this section">#</a></h5>
+<p>Predict both lists before running the following example. The loop name <code>label</code> belongs to the same enclosing call on both iterations. In the second list, <code>saved=label</code> is evaluated when each lambda is created. Strings are immutable, so keeping that string object gives the two expected labels. The default technique would retain a reference to a mutable object, not clone its contents. A factory is often clearer once the behavior needs validation or several local names.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_binding</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    late <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    early <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> label <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">red</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        late<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> label<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># noqa: B023 - deliberate late-binding contrast</span>
+        early<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> saved<span class="syntax-operator">=</span>label<span class="syntax-punctuation">:</span> saved<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> late<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> early<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">red</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Late binding:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> late<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Definition defaults:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> early<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+worked_binding<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The late-bound functions produce <code>[&#x27;blue&#x27;, &#x27;blue&#x27;]</code>; the defaults produce <code>[&#x27;red&#x27;, &#x27;blue&#x27;]</code>. If both results match, inspect whether the supposed late-bound function is actually being called within the loop, before <code>label</code> changes. Moving a call can conceal the bug without fixing the stored callback.</p>
+<h5 id="guide--a-wrapper-observes-both-the-success-and-failure-route">A wrapper observes both the success and failure route<a class="heading-anchor" href="#guide--a-wrapper-observes-both-the-success-and-failure-route" aria-label="Link to this section">#</a></h5>
+<p>The wrapper below forwards arguments and uses <code>finally</code> for an observation that must occur on either route. <code>return</code> inside <code>try</code> does not bypass <code>finally</code>. The division error propagates to the caller, where this small demonstration expects it. There is no broad fallback returning zero, so an invalid operation cannot look like a valid numerical answer. This example observes entry/exit; the independent tracing task asks you to distinguish success from failure.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> wraps
+
+events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">announce</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-decorator">@wraps</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">wrapper</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">return</span> function<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+            events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> wrapper
+
+<span class="syntax-decorator">@announce</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">reciprocal</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return one divided by value.&quot;&quot;&quot;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">1</span> <span class="syntax-operator">/</span> value
+
+<span class="syntax-keyword">assert</span> reciprocal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    reciprocal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ZeroDivisionError<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">The wrapper hid the failure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> events <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> reciprocal<span class="syntax-operator">.</span>__name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reciprocal</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Decorator events:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The first call returns <code>0.5</code>; the second raises <code>ZeroDivisionError</code>. Both produce a balanced before/after pair and the wrapper retains the name <code>reciprocal</code>. The final print contains four strings. Remove <code>wraps</code> experimentally and compare the name, docstring, and inspected signature; restore it before evaluating the exercise contracts.</p>
+<p>Two stacked decorators apply from the bottom upward during definition, while calls enter the outer wrapper first. For <code>@trace</code> above <code>@validate</code>, tracing receives the validated replacement and observes its rejection. Reversing the lines means validation rejects before tracing begins. Neither arrangement should invoke the mathematical body for rejected input. Separate body calls from trace events when investigating this difference.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>For each task, first write one prediction, then implement only its learner function and call it with the stated fixture. Make observations with a fresh local list or dictionary for each case. Retain failed assertions while debugging so the difference between a wrong answer and an incomplete check remains clear.</p>
+<h5 id="guide--exercise-1-bind-independent-offsets">Exercise 1: Bind independent offsets<a class="heading-anchor" href="#guide--exercise-1-bind-independent-offsets" aria-label="Link to this section">#</a></h5>
+<p><strong>Inputs:</strong> A tuple of exact integers such as (2, -1, 0); bool is not an integer for these contracts.</p>
+<p><strong>Expected:</strong> Return one function per offset in input order. Each function adds its own offset to an exact integer argument. Empty input returns (). Reject invalid offsets before returning functions, and invalid call arguments, with ValueError.</p>
+<p><strong>Verify:</strong> Calling all three functions with 10 returns (12, 9, 10). Call them again in reverse order to expose accidental shared late binding.</p>
+<h5 id="guide--exercise-2-keep-private-accumulated-state">Exercise 2: Keep private accumulated state<a class="heading-anchor" href="#guide--exercise-2-keep-private-accumulated-state" aria-label="Link to this section">#</a></h5>
+<p><strong>Inputs:</strong> An exact integer start and later exact integer increments, including negative increments.</p>
+<p><strong>Expected:</strong> Return a closure with private running state. Calls add the increment and return the new total. Separate factory calls never share state. Reject a malformed start or increment with ValueError; a rejected increment must not change the stored total.</p>
+<p><strong>Verify:</strong> A total starting at 5 returns 7 then 4 for increments 2 and -3. After rejecting True, increment 0 still returns 4; a second factory starting at 5 still returns 5.</p>
+<h5 id="guide--exercise-3-read-a-live-configuration-binding">Exercise 3: Read a live configuration binding<a class="heading-anchor" href="#guide--exercise-3-read-a-live-configuration-binding" aria-label="Link to this section">#</a></h5>
+<p><strong>Inputs:</strong> A caller-owned dictionary whose keys are nonempty strings and values exact integers, plus an existing nonempty key.</p>
+<p><strong>Expected:</strong> Validate the initial dictionary without copying or modifying it. Return a closure that reads the current value of the selected key on each call. A missing key raises KeyError, including after later deletion; a malformed current value raises ValueError. Replacing a separate caller variable with a new dictionary does not replace the captured dictionary.</p>
+<p><strong>Verify:</strong> A captured limit initially 3 becomes 8 after config[&quot;limit&quot;] = 8. Deleting limit raises KeyError; reinserting a string raises ValueError. Record the caller dictionary before and after construction to prove no mutation.</p>
+<h5 id="guide--exercise-4-trace-a-call-without-changing-its-result">Exercise 4: Trace a call without changing its result<a class="heading-anchor" href="#guide--exercise-4-trace-a-call-without-changing-its-result" aria-label="Link to this section">#</a></h5>
+<p><strong>Inputs:</strong> A list for observation and an ordinary synchronous callable to decorate. Calls may use positional and keyword arguments or raise an Exception.</p>
+<p><strong>Expected:</strong> Return a decorator that preserves metadata with functools.wraps. Append call:NAME before invocation, then return:NAME on success or raise:NAME:TYPE on an Exception. Return the original result and re-raise the same exception object. Do not catch BaseException control signals.</p>
+<p><strong>Verify:</strong> For a function named divide, division by zero yields [&quot;call:divide&quot;, &quot;raise:divide:ZeroDivisionError&quot;]. Inspect <strong>name</strong>, <strong>doc</strong>, <strong>wrapped</strong>, and inspect.signature; assert an injected exception is the identical object.</p>
+<h5 id="guide--exercise-5-make-decorator-order-observable">Exercise 5: Make decorator order observable<a class="heading-anchor" href="#guide--exercise-5-make-decorator-order-observable" aria-label="Link to this section">#</a></h5>
+<p><strong>Inputs:</strong> An ordinary one-integer function. The wrapper accepts one exact integer that must be at least zero.</p>
+<p><strong>Expected:</strong> Preserve function metadata. Reject negative integers, bool, and nonintegers with ValueError before calling the wrapped function. Otherwise return its result unchanged. Compare tracing outside validation with validation outside tracing; neither order may call the body for invalid input.</p>
+<p><strong>Verify:</strong> A traced outer wrapper records call and raise for -1. An outer validator records no trace for -1. On 0 both call the body once and return its actual result.</p>
+<h5 id="guide--exercise-6-snapshot-and-compose-a-pipeline">Exercise 6: Snapshot and compose a pipeline<a class="heading-anchor" href="#guide--exercise-6-snapshot-and-compose-a-pipeline" aria-label="Link to this section">#</a></h5>
+<p><strong>Inputs:</strong> A finite caller-owned sequence of callables. Each stage accepts and returns an integer. Input stage storage may be changed after construction.</p>
+<p><strong>Expected:</strong> Snapshot the stage sequence and reject a noncallable stage with ValueError at construction. Return a function applying stages from left to right. Empty stages return their input unchanged. Forward a stage exception immediately without calling later stages; never mutate the supplied sequence.</p>
+<p><strong>Verify:</strong> For add-two then multiply-three, input 4 gives 18, while reversed stages give 14. Clearing the original list afterward does not change the first pipeline; record that a later stage was not called after a deliberate error.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<p>Explain without running code why a factory called twice can keep independent state even when its inner functions have the same name. Explain why storing a default dictionary does not freeze later mutations. For the live lookup, identify which operation changes the captured dictionary and which operation merely rebinds a caller&#x27;s variable. Give the exact exception and unchanged total expected after passing <code>True</code> to the accumulator.</p>
+<p><strong>Verify:</strong> Keep assertion evidence for <code>(12, 9, 10)</code>, the post-rejection total <code>4</code>, a successful lookup changing from <code>3</code> to <code>8</code>, the identical injected exception, and pipeline results <code>18</code> versus <code>14</code>. Also keep the two invalid-call trace transcripts and the body-call list. These observations cover different mechanisms; a correct final integer alone cannot prove metadata or nonmutation.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<p>If every callback adds the final offset, inspect its free names and when it is called. Create a separate enclosing call per offset or deliberately bind a default. If <code>UnboundLocalError</code> mentions <code>total</code>, look for an assignment in the inner function and decide whether the intended state is enclosing or local. Do not fix the error by introducing a module global shared by all accumulators.</p>
+<p>If an invalid increment changes the next valid total, validation happened too late. Move the check before the state transition. If changing a configuration value has no effect, inspect whether you captured the value or copied the whole dictionary instead of retaining the specified live object. If a wrapper hides a failure, check for an unintended return in <code>finally</code> or a broad exception handler that returns a substitute value.</p>
+<p>If logs are missing, compare decorator order before adding another logging layer. If a pipeline changes after the original list is cleared, identify its ownership boundary: the stage sequence needs a snapshot, while the callable objects themselves remain shared references. This lesson does not promise thread-safe counters, immutable callable internals, or safe remote retry.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="python-lang-03.html#guide"><code>python-lang-03</code>: Iterators, Generator Pipelines, and Resource Lifetime</a>. It uses private state that is suspended between calls rather than hidden inside a wrapper. Return to the <a href="python-lang-01.html#guide">typing and data model unit</a> when a callable&#x27;s protocol or variance, rather than its runtime binding, is the question. Before moving on, describe a callback bug and its smallest reproducer in your own words, including the time at which the wrong name is read.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-lang-02: Scope, Closures, and Observable Decorator Contracts.
+Read python/professional/companion-guides/py_lang_02.md and python/professional/lessons/py_lang_02.py. Direct prerequisites: python-lang-01, python-11.
+Keep the advanced lesson self-contained for someone new to its specific mechanisms. Explain scope, closures, binding, nonlocal, decorators, metadata, ask me to predict a concrete result, then let me attempt it. Give one hint at a time and review my exact value, exception, event, and cleanup evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request comparison or have made an honest attempt.
+Use only prepared local offline fixtures in the Docker Python classroom; preserve saved source and notes. No SQL or external service is involved. Done when all six contracts and boundary cases have inspected evidence, and I can explain the timing and ownership decision behind each result.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_lang_02.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_lang_02.py">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-lang-02: Scope, Closures, and Observable Decorator Contracts.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Run two offline worked examples, then implement the six separate task functions.</span></span>
+<span class="source-line"><span class="syntax-string">Each classroom Run starts a fresh process; saved source and notes persist.</span></span>
+<span class="source-line"><span class="syntax-string">The opening examples do not call the unimplemented exercises.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Bind independent offsets.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inputs: A tuple of exact integers such as (2, -1, 0); bool is not an integer for these</span></span>
+<span class="source-line"><span class="syntax-comment"># | contracts.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Return one function per offset in input order. Each function adds its own offset to</span></span>
+<span class="source-line"><span class="syntax-comment"># | an exact integer argument. Empty input returns (). Reject invalid offsets before</span></span>
+<span class="source-line"><span class="syntax-comment"># | returning functions, and invalid call arguments, with ValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Calling all three functions with 10 returns (12, 9, 10). Call them again in reverse</span></span>
+<span class="source-line"><span class="syntax-comment"># | order to expose accidental shared late binding.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">bind_offsets</span><span class="syntax-punctuation">(</span>offsets<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Bind independent offsets.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    See the explicit input, expected, and verification contract above.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement bind_offsets</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Keep private accumulated state.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inputs: An exact integer start and later exact integer increments, including negative</span></span>
+<span class="source-line"><span class="syntax-comment"># | increments.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Return a closure with private running state. Calls add the increment and return the</span></span>
+<span class="source-line"><span class="syntax-comment"># | new total. Separate factory calls never share state. Reject a malformed start or</span></span>
+<span class="source-line"><span class="syntax-comment"># | increment with ValueError; a rejected increment must not change the stored total.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A total starting at 5 returns 7 then 4 for increments 2 and -3. After rejecting</span></span>
+<span class="source-line"><span class="syntax-comment"># | True, increment 0 still returns 4; a second factory starting at 5 still returns 5.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">make_running_total</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Keep private accumulated state.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    See the explicit input, expected, and verification contract above.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement make_running_total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Read a live configuration binding.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inputs: A caller-owned dictionary whose keys are nonempty strings and values exact integers,</span></span>
+<span class="source-line"><span class="syntax-comment"># | plus an existing nonempty key.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Validate the initial dictionary without copying or modifying it. Return a closure</span></span>
+<span class="source-line"><span class="syntax-comment"># | that reads the current value of the selected key on each call. A missing key raises</span></span>
+<span class="source-line"><span class="syntax-comment"># | KeyError, including after later deletion; a malformed current value raises</span></span>
+<span class="source-line"><span class="syntax-comment"># | ValueError. Replacing a separate caller variable with a new dictionary does not</span></span>
+<span class="source-line"><span class="syntax-comment"># | replace the captured dictionary.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A captured limit initially 3 becomes 8 after config[&quot;limit&quot;] = 8. Deleting limit</span></span>
+<span class="source-line"><span class="syntax-comment"># | raises KeyError; reinserting a string raises ValueError. Record the caller</span></span>
+<span class="source-line"><span class="syntax-comment"># | dictionary before and after construction to prove no mutation.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">make_live_lookup</span><span class="syntax-punctuation">(</span>config<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Read a live configuration binding.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    See the explicit input, expected, and verification contract above.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement make_live_lookup</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Trace a call without changing its result.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inputs: A list for observation and an ordinary synchronous callable to decorate. Calls may</span></span>
+<span class="source-line"><span class="syntax-comment"># | use positional and keyword arguments or raise an Exception.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Return a decorator that preserves metadata with functools.wraps. Append call:NAME</span></span>
+<span class="source-line"><span class="syntax-comment"># | before invocation, then return:NAME on success or raise:NAME:TYPE on an Exception.</span></span>
+<span class="source-line"><span class="syntax-comment"># | Return the original result and re-raise the same exception object. Do not catch</span></span>
+<span class="source-line"><span class="syntax-comment"># | BaseException control signals.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: For a function named divide, division by zero yields [&quot;call:divide&quot;,</span></span>
+<span class="source-line"><span class="syntax-comment"># | &quot;raise:divide:ZeroDivisionError&quot;]. Inspect __name__, __doc__, __wrapped__, and</span></span>
+<span class="source-line"><span class="syntax-comment"># | inspect.signature; assert an injected exception is the identical object.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">trace_calls</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>Callable<span class="syntax-punctuation">[</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Trace a call without changing its result.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    See the explicit input, expected, and verification contract above.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement trace_calls</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Make decorator order observable.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inputs: An ordinary one-integer function. The wrapper accepts one exact integer that must be</span></span>
+<span class="source-line"><span class="syntax-comment"># | at least zero.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Preserve function metadata. Reject negative integers, bool, and nonintegers with</span></span>
+<span class="source-line"><span class="syntax-comment"># | ValueError before calling the wrapped function. Otherwise return its result</span></span>
+<span class="source-line"><span class="syntax-comment"># | unchanged. Compare tracing outside validation with validation outside tracing;</span></span>
+<span class="source-line"><span class="syntax-comment"># | neither order may call the body for invalid input.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: A traced outer wrapper records call and raise for -1. An outer validator records no</span></span>
+<span class="source-line"><span class="syntax-comment"># | trace for -1. On 0 both call the body once and return its actual result.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">require_nonnegative</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Make decorator order observable.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    See the explicit input, expected, and verification contract above.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement require_nonnegative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Snapshot and compose a pipeline.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inputs: A finite caller-owned sequence of callables. Each stage accepts and returns an</span></span>
+<span class="source-line"><span class="syntax-comment"># | integer. Input stage storage may be changed after construction.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: Snapshot the stage sequence and reject a noncallable stage with ValueError at</span></span>
+<span class="source-line"><span class="syntax-comment"># | construction. Return a function applying stages from left to right. Empty stages</span></span>
+<span class="source-line"><span class="syntax-comment"># | return their input unchanged. Forward a stage exception immediately without calling</span></span>
+<span class="source-line"><span class="syntax-comment"># | later stages; never mutate the supplied sequence.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: For add-two then multiply-three, input 4 gives 18, while reversed stages give 14.</span></span>
+<span class="source-line"><span class="syntax-comment"># | Clearing the original list afterward does not change the first pipeline; record that</span></span>
+<span class="source-line"><span class="syntax-comment"># | a later stage was not called after a deliberate error.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compose_stages</span><span class="syntax-punctuation">(</span>stages<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Snapshot and compose a pipeline.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">    See the explicit input, expected, and verification contract above.</span></span>
+<span class="source-line"><span class="syntax-string">    &quot;&quot;&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> NotImplementedError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement compose_stages</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">worked_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">worked_binding</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        late <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        early <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> label <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">red</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            late<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> label<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># noqa: B023 - deliberate late-binding contrast</span></span>
+<span class="source-line">            early<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> saved<span class="syntax-operator">=</span>label<span class="syntax-punctuation">:</span> saved<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> late<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> early<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">red</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Late binding:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> late<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Definition defaults:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> early<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    worked_binding<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> wraps</span>
+<span class="source-line"></span>
+<span class="source-line">    events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">announce</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-decorator">@wraps</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">def</span> <span class="syntax-function">wrapper</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-keyword">return</span> function<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> wrapper</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-decorator">@announce</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">reciprocal</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Return one divided by value.&quot;&quot;&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-number">1</span> <span class="syntax-operator">/</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> reciprocal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        reciprocal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ZeroDivisionError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">pass</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">The wrapper hid the failure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> events <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> reciprocal<span class="syntax-operator">.</span>__name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">reciprocal</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Decorator events:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> events<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    worked_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Examples passed. Implement and verify the six separate task functions.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_lang_02_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_lang_02_solutions.md">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--python-lang-02-explained-solutions">python-lang-02: Explained solutions<a class="heading-anchor" href="#solution-1--python-lang-02-explained-solutions" aria-label="Link to this section">#</a></h3>
+<p>The <a href="python-lang-02.html#solution-2">executable reference</a> implements the six contracts and contains independent expected-value, failure, and lifetime assertions. Read the <a href="python-lang-02.html#guide">learner guide</a> for the complete run workflow and attempt each <a href="python-lang-02.html#learner">learner function</a> before comparing. The reference runs entirely offline in the prepared Docker Python classroom; its assertions are behavioral evidence for these fixtures, not a claim about unseen learner work or external system acceptance.</p>
+<h4 id="solution-1--exercise-1-bind-independent-offsets">Exercise 1: Bind independent offsets<a class="heading-anchor" href="#solution-1--exercise-1-bind-independent-offsets" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> A tuple of exact integers such as (2, -1, 0); bool is not an integer for these contracts.</p>
+<p><strong>Expected:</strong> Return one function per offset in input order. Each function adds its own offset to an exact integer argument. Empty input returns (). Reject invalid offsets before returning functions, and invalid call arguments, with ValueError.</p>
+<p><strong>Verify:</strong> Calling all three functions with 10 returns (12, 9, 10). Call them again in reverse order to expose accidental shared late binding.</p>
+<p>The reference first validates every offset, so a malformed later entry does not leave the caller holding a partially accepted collection of functions. It then calls a small factory once per offset. Each factory call creates a separate local binding named offset, and its inner add function reads that binding later. The closure therefore remembers the selected offset through an independent enclosing scope. Testing only the final callback would miss the loop-binding defect; calling all callbacks and then reversing the call order distinguishes independent capture from shared state. An empty tuple has no callbacks and produces an empty result tuple. A default argument could also bind the current integer, but it would appear in the function&#x27;s signature and would need care to prevent callers from overriding an implementation detail.</p>
+<h4 id="solution-1--exercise-2-keep-private-accumulated-state">Exercise 2: Keep private accumulated state<a class="heading-anchor" href="#solution-1--exercise-2-keep-private-accumulated-state" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> An exact integer start and later exact integer increments, including negative increments.</p>
+<p><strong>Expected:</strong> Return a closure with private running state. Calls add the increment and return the new total. Separate factory calls never share state. Reject a malformed start or increment with ValueError; a rejected increment must not change the stored total.</p>
+<p><strong>Verify:</strong> A total starting at 5 returns 7 then 4 for increments 2 and -3. After rejecting True, increment 0 still returns 4; a second factory starting at 5 still returns 5.</p>
+<p>The accumulator&#x27;s total lives in the factory invocation. nonlocal is necessary because the inner function reassigns that enclosing name, rather than merely reading an integer object. The increment is validated before changing total. This sequencing gives rejection a precise guarantee: a bad input leaves the next valid observation unchanged. Integer addition creates a new integer object and rebinds total; it does not mutate an integer in place. The executable fixture starts at five, adds two, subtracts three, rejects True, and then adds zero. The last observation must still be four. A separately constructed accumulator still returns five. A module-level counter or a mutable default list would create accidental sharing across factory calls and violate this contract even if one test sequence happened to pass.</p>
+<h4 id="solution-1--exercise-3-read-a-live-configuration-binding">Exercise 3: Read a live configuration binding<a class="heading-anchor" href="#solution-1--exercise-3-read-a-live-configuration-binding" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> A caller-owned dictionary whose keys are nonempty strings and values exact integers, plus an existing nonempty key.</p>
+<p><strong>Expected:</strong> Validate the initial dictionary without copying or modifying it. Return a closure that reads the current value of the selected key on each call. A missing key raises KeyError, including after later deletion; a malformed current value raises ValueError. Replacing a separate caller variable with a new dictionary does not replace the captured dictionary.</p>
+<p><strong>Verify:</strong> A captured limit initially 3 becomes 8 after config[&quot;limit&quot;] = 8. Deleting limit raises KeyError; reinserting a string raises ValueError. Record the caller dictionary before and after construction to prove no mutation.</p>
+<p>The live lookup captures the original dictionary object and the selected key binding. It deliberately does not cache config[key] at construction. Looking up the key again on every call exposes later updates and deletion, with normal KeyError on absence. The validator checks all initial key/value entries without altering them. Later reads validate the selected current value, because a caller can mutate the shared dictionary after construction. Other later dictionary edits are outside the selected read contract. Reassigning the caller&#x27;s variable config to a different dictionary leaves the closure&#x27;s original reference intact. The reference keeps an old_config name solely to make that object identity visible in the test. Copying the dictionary would be a reasonable snapshot API, but it would answer a different question and would fail the required change from three to eight.</p>
+<h4 id="solution-1--exercise-4-trace-a-call-without-changing-its-result">Exercise 4: Trace a call without changing its result<a class="heading-anchor" href="#solution-1--exercise-4-trace-a-call-without-changing-its-result" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> A list for observation and an ordinary synchronous callable to decorate. Calls may use positional and keyword arguments or raise an Exception.</p>
+<p><strong>Expected:</strong> Return a decorator that preserves metadata with functools.wraps. Append call:NAME before invocation, then return:NAME on success or raise:NAME:TYPE on an Exception. Return the original result and re-raise the same exception object. Do not catch BaseException control signals.</p>
+<p><strong>Verify:</strong> For a function named divide, division by zero yields [&quot;call:divide&quot;, &quot;raise:divide:ZeroDivisionError&quot;]. Inspect <strong>name</strong>, <strong>doc</strong>, <strong>wrapped</strong>, and inspect.signature; assert an injected exception is the identical object.</p>
+<p>The decorator factory captures the caller&#x27;s observation list. Decoration creates a wrapper with wraps applied, so the wrapper retains the original name, docstring, and <strong>wrapped</strong> link. The wrapper accepts arbitrary positional and keyword arguments and forwards them unchanged. It records entry first, then separates ordinary success from an Exception. A bare raise inside the handler re-raises the original exception object and traceback rather than constructing a replacement with the same message. The reference checks object identity with an injected RuntimeError; comparing only its text would miss a replacement error. BaseException subclasses remain control signals and are not converted into ordinary failure log entries. Metadata preservation does not make the wrapper statically typed for every possible callable; the runtime contract here is specifically ordinary synchronous functions.</p>
+<h4 id="solution-1--exercise-5-make-decorator-order-observable">Exercise 5: Make decorator order observable<a class="heading-anchor" href="#solution-1--exercise-5-make-decorator-order-observable" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> An ordinary one-integer function. The wrapper accepts one exact integer that must be at least zero.</p>
+<p><strong>Expected:</strong> Preserve function metadata. Reject negative integers, bool, and nonintegers with ValueError before calling the wrapped function. Otherwise return its result unchanged. Compare tracing outside validation with validation outside tracing; neither order may call the body for invalid input.</p>
+<p><strong>Verify:</strong> A traced outer wrapper records call and raise for -1. An outer validator records no trace for -1. On 0 both call the body once and return its actual result.</p>
+<p>Validation is its own wrapper and happens before invocation of the function it wraps. The exact integer test distinguishes zero from False, and the nonnegative test rejects negative integers without running the body. When tracing is outermost, its call entry occurs before the validator rejects and its handler records the resulting ValueError. When validation is outermost, the rejected call never reaches the tracing wrapper. Both arrangements therefore protect the body but produce different trace evidence. The body-call list is empty after the two invalid calls, which is stronger evidence than inspecting only logs. Both zero calls then return the body&#x27;s true result and each adds one entry to the body list. Reversing decorator order to obtain desired observability is a policy decision, not a general rule that either order is always superior.</p>
+<h4 id="solution-1--exercise-6-snapshot-and-compose-a-pipeline">Exercise 6: Snapshot and compose a pipeline<a class="heading-anchor" href="#solution-1--exercise-6-snapshot-and-compose-a-pipeline" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> A finite caller-owned sequence of callables. Each stage accepts and returns an integer. Input stage storage may be changed after construction.</p>
+<p><strong>Expected:</strong> Snapshot the stage sequence and reject a noncallable stage with ValueError at construction. Return a function applying stages from left to right. Empty stages return their input unchanged. Forward a stage exception immediately without calling later stages; never mutate the supplied sequence.</p>
+<p><strong>Verify:</strong> For add-two then multiply-three, input 4 gives 18, while reversed stages give 14. Clearing the original list afterward does not change the first pipeline; record that a later stage was not called after a deliberate error.</p>
+<p>The pipeline converts the stage sequence to a tuple before returning its closure. This snapshots which callable objects participate and their order, so clearing the original list has no effect. It does not deep-copy callable internals: a stage that closes over mutable configuration can still observe that configuration. The reference applies stages in supplied order, so add-two followed by multiply-three transforms four into eighteen. Reversing those stages gives fourteen and exposes an implementation that guessed conventional right-to-left composition. Empty composition is the identity operation. Stage validation happens at construction, while stage exceptions propagate during invocation. A deliberate first-stage error plus an independent later-stage observation list proves short-circuiting. Catching the error and continuing would return a plausible number while violating the pipeline&#x27;s control-flow contract. No global pipeline registry or external package is needed.</p>
+<p>The following compact check runs in the executable reference namespace after its function definitions:</p>
+<pre class="highlighted-code"><code class="language-python">callbacks <span class="syntax-operator">=</span> bind_offsets<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>callback<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> callback <span class="syntax-operator">in</span> callbacks<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Run the complete reference from fresh process state when comparing results. A change to an input policy must be deliberate and reflected in its assertions; merely suppressing an exception or deleting a cleanup check does not satisfy the original contract.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_lang_02_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_lang_02_solution.py">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Executable references for python-lang-02, with behavioral assertions.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> inspect</span>
+<span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
+<span class="source-line"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> wraps</span>
+<span class="source-line"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_integer</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">object</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected an exact integer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Bind independent offsets.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">bind_offsets</span><span class="syntax-punctuation">(</span>offsets<span class="syntax-punctuation">:</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">[</span>Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> offset <span class="syntax-operator">in</span> offsets<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        _integer<span class="syntax-punctuation">(</span>offset<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">bind</span><span class="syntax-punctuation">(</span>offset<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">def</span> <span class="syntax-function">add</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> _integer<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> offset</span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> add</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>bind<span class="syntax-punctuation">(</span>offset<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> offset <span class="syntax-operator">in</span> offsets<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Keep private accumulated state.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">make_running_total</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    total <span class="syntax-operator">=</span> _integer<span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">increment</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">nonlocal</span> total</span>
+<span class="source-line">        checked <span class="syntax-operator">=</span> _integer<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> checked</span>
+<span class="source-line">        <span class="syntax-keyword">return</span> total</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> increment</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Read a live configuration binding.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">make_live_lookup</span><span class="syntax-punctuation">(</span>config<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>config<span class="syntax-punctuation">,</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> key</span>
+<span class="source-line">        <span class="syntax-operator">or</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> name <span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> config<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a dictionary with nonempty string keys</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> config<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        _integer<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _integer<span class="syntax-punctuation">(</span>config<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">lookup</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> _integer<span class="syntax-punctuation">(</span>config<span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> lookup</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Trace a call without changing its result.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">trace_calls</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>Callable<span class="syntax-punctuation">[</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">decorate</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-decorator">@wraps</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">def</span> <span class="syntax-function">wrapper</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">:</span> Any<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">:</span> Any<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Any<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">call:</span><span class="syntax-string">{</span>function<span class="syntax-operator">.</span>__name__<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                result <span class="syntax-operator">=</span> function<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">                events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">raise:</span><span class="syntax-string">{</span>function<span class="syntax-operator">.</span>__name__<span class="syntax-string">}</span><span class="syntax-string">:</span><span class="syntax-string">{</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">                <span class="syntax-keyword">raise</span></span>
+<span class="source-line">            events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">return:</span><span class="syntax-string">{</span>function<span class="syntax-operator">.</span>__name__<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> result</span>
+<span class="source-line"></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> wrapper</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> decorate</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Make decorator order observable.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">require_nonnegative</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-decorator">@wraps</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">wrapper</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        checked <span class="syntax-operator">=</span> _integer<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> checked <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected a nonnegative integer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> function<span class="syntax-punctuation">(</span>checked<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> wrapper</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Snapshot and compose a pipeline.</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">compose_stages</span><span class="syntax-punctuation">(</span>stages<span class="syntax-punctuation">:</span> Sequence<span class="syntax-punctuation">[</span>Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    frozen <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>stages<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">callable</span><span class="syntax-punctuation">(</span>stage<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> stage <span class="syntax-operator">in</span> frozen<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Each stage must be callable</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">pipeline</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">for</span> stage <span class="syntax-operator">in</span> frozen<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            value <span class="syntax-operator">=</span> stage<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> pipeline</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">_raises</span><span class="syntax-punctuation">(</span>kind<span class="syntax-punctuation">:</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">[</span>Exception<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">:</span> Callable<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> Any<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Exception<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        action<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> kind <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> error</span>
+<span class="source-line">    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Expected </span><span class="syntax-string">{</span>kind<span class="syntax-operator">.</span>__name__<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">verify_examples</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    adders <span class="syntax-operator">=</span> bind_offsets<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>add<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> add <span class="syntax-operator">in</span> adders<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>add<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> add <span class="syntax-operator">in</span> adders<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> bind_offsets<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> bind_offsets<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> adders<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    running <span class="syntax-operator">=</span> make_running_total<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    separate <span class="syntax-operator">=</span> make_running_total<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>running<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> running<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> running<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> running<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">and</span> separate<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> make_running_total<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># type: ignore[arg-type]  # Deliberately invalid input.</span></span>
+<span class="source-line">    config <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    before <span class="syntax-operator">=</span> config<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    lookup <span class="syntax-operator">=</span> make_live_lookup<span class="syntax-punctuation">(</span>config<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> config <span class="syntax-operator">==</span> before <span class="syntax-operator">and</span> lookup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span></span>
+<span class="source-line">    config<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">8</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> lookup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span></span>
+<span class="source-line">    old_config <span class="syntax-operator">=</span> config</span>
+<span class="source-line">    config <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">99</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> lookup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span> <span class="syntax-operator">and</span> old_config <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-keyword">del</span> old_config<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>KeyError<span class="syntax-punctuation">,</span> lookup<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    old_config<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">limit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">invalid</span><span class="syntax-string">&quot;</span>  <span class="syntax-comment"># type: ignore[assignment]  # Probe runtime validation.</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> lookup<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> make_live_lookup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    events<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    failure <span class="syntax-operator">=</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">original</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">divide</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> divisor<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;&quot;&quot;Divide a value by a supplied divisor.&quot;&quot;&quot;</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> divisor <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> failure</span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value <span class="syntax-operator">/</span> divisor</span>
+<span class="source-line"></span>
+<span class="source-line">    wrapped <span class="syntax-operator">=</span> trace_calls<span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>divide<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> wrapped<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> divisor<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> events <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">call:divide</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">return:divide</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> _raises<span class="syntax-punctuation">(</span>RuntimeError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> wrapped<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> divisor<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> failure</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> events<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">call:divide</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">raise:divide:RuntimeError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> wrapped<span class="syntax-operator">.</span>__name__ <span class="syntax-operator">==</span> divide<span class="syntax-operator">.</span>__name__ <span class="syntax-operator">and</span> wrapped<span class="syntax-operator">.</span>__doc__ <span class="syntax-operator">==</span> divide<span class="syntax-operator">.</span>__doc__</span>
+<span class="source-line">    <span class="syntax-comment"># Callable describes calls; wraps also attaches this runtime metadata.</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> wrapped<span class="syntax-operator">.</span>__wrapped__ <span class="syntax-operator">is</span> divide  <span class="syntax-comment"># type: ignore[attr-defined]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> inspect<span class="syntax-operator">.</span>signature<span class="syntax-punctuation">(</span>wrapped<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> inspect<span class="syntax-operator">.</span>signature<span class="syntax-punctuation">(</span>divide<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    body<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">square</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        body<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    outer_trace<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    inner_trace<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    traced_validator <span class="syntax-operator">=</span> trace_calls<span class="syntax-punctuation">(</span>outer_trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>require_nonnegative<span class="syntax-punctuation">(</span>square<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    validated_trace <span class="syntax-operator">=</span> require_nonnegative<span class="syntax-punctuation">(</span>trace_calls<span class="syntax-punctuation">(</span>inner_trace<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>square<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> traced_validator<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> validated_trace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> body <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> inner_trace <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> outer_trace <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">call:square</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">raise:square:ValueError</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> traced_validator<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">and</span> validated_trace<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> body <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    stages <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">*</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    pipeline <span class="syntax-operator">=</span> compose_stages<span class="syntax-punctuation">(</span>stages<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">18</span> <span class="syntax-operator">and</span> compose_stages<span class="syntax-punctuation">(</span>stages<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">14</span></span>
+<span class="source-line">    stages<span class="syntax-operator">.</span>clear<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">18</span> <span class="syntax-operator">and</span> compose_stages<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span></span>
+<span class="source-line">    _raises<span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> compose_stages<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>  <span class="syntax-comment"># type: ignore[list-item]  # Deliberately invalid stage.</span></span>
+<span class="source-line">    later<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">broken</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> failure</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">observe</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        later<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> _raises<span class="syntax-punctuation">(</span>RuntimeError<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span><span class="syntax-punctuation">:</span> compose_stages<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>broken<span class="syntax-punctuation">,</span> observe<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> failure</span>
+<span class="source-line">    <span class="syntax-keyword">assert</span> later <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">All six scope, closure, and decorator contracts passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    verify_examples<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through python-lang-02: Scope, Closures, and Observable Decorator Contracts.
+Read python/professional/companion-guides/py_lang_02.md and python/professional/lessons/py_lang_02.py. Direct prerequisites: python-lang-01, python-11.
+Keep the advanced lesson self-contained for someone new to its specific mechanisms. Explain scope, closures, binding, nonlocal, decorators, metadata, ask me to predict a concrete result, then let me attempt it. Give one hint at a time and review my exact value, exception, event, and cleanup evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request comparison or have made an honest attempt.
+Use only prepared local offline fixtures in the Docker Python classroom; preserve saved source and notes. No SQL or external service is involved. Done when all six contracts and boundary cases have inspected evidence, and I can explain the timing and ownership decision behind each result.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-algo-04.html"><small>Previous lesson</small><strong>python-algo-04</strong><span>Dynamic Programming, State Design, and Reconstructable Decisions</span></a>
+        <a class="nav-card next" href="python-lang-03.html"><small>Next lesson</small><strong>python-lang-03</strong><span>Iterators, Generator Pipelines, and Resource Lifetime</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+  </script>
+</body>
+</html>

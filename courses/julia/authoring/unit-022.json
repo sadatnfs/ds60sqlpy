@@ -1,0 +1,58 @@
+{
+  "number": 22,
+  "title": "Forward-mode automatic differentiation",
+  "concepts": ["ForwardDiff", "dual number", "gradient", "Jacobian", "generic storage"],
+  "outcome": "Differentiate supported numerical functions and validate derivatives while preserving the numeric representation carried by dual numbers.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-012", "julia-019"],
+  "sources": [
+    ["ForwardDiff differentiation API", "https://juliadiff.org/ForwardDiff.jl/stable/user/api/"],
+    ["ForwardDiff limitations", "https://juliadiff.org/ForwardDiff.jl/stable/user/limitations/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Differentiate analytically",
+      "task": "Compute the gradient of x1 squared plus 3x2 squared at[2,3].",
+      "expected": "The result is[4,18].",
+      "hint": "Differentiate each coordinate separately.",
+      "answer": "An analytic case provides an independent reference for the AD implementation."
+    },
+    {
+      "title": "Check Jacobian axes",
+      "task": "Differentiate the vector-valued function.",
+      "expected": "Rows correspond to outputs and columns to inputs.",
+      "hint": "Inspect the stated function shapes.",
+      "answer": "A transposed derivative array can have plausible values but the wrong meaning."
+    },
+    {
+      "title": "Preserve numeric types",
+      "task": "Replace a hardcoded Float64 buffer with similar(x).",
+      "expected": "The dual-number path can retain derivative information.",
+      "hint": "Use the input representation when the contract is generic.",
+      "answer": "Ordinary evaluation alone does not reveal a differentiation-incompatible conversion."
+    },
+    {
+      "title": "Compare reductions",
+      "task": "Differentiate a sum and a mean of two inputs.",
+      "expected": "Gradients are[1,1] and[0.5,0.5].",
+      "hint": "The denominator is part of the objective.",
+      "answer": "A reduction change alters gradient scale and cannot be treated as a cosmetic refactor."
+    },
+    {
+      "title": "Inspect a branch boundary",
+      "task": "Evaluate a nonsmooth function near its kink.",
+      "expected": "A library result needs a differentiability interpretation.",
+      "hint": "The executed branch is not a symbolic proof.",
+      "answer": "At a nondifferentiable point, a returned convention should not be promoted to a unique mathematical derivative."
+    },
+    {
+      "title": "Validate a new gradient",
+      "task": "Compare analytic or finite-difference directional behavior at several valid inputs.",
+      "expected": "Use meaningful tolerances and retain failures.",
+      "hint": "Separate approximation error from a wrong formula.",
+      "answer": "Derivative checks should inspect shapes, scales and domain assumptions before optimization."
+    }
+  ]
+}

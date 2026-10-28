@@ -257,19 +257,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Separate cancellation request from acknowledged completion.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Add a cancellation check before a simulated state-changing step.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Write a bounded processing loop with cleanup on cancellation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose retrying an unknown write merely because its waiter was cancelled.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Test cancellation before work and after an already completed result.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design a receipt distinguishing success, confirmed cancellation and unknown outcome.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

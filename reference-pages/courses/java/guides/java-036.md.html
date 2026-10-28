@@ -285,19 +285,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Verify the compiler target.</strong> Compile the fixture with --release 21 and inspect its class header. <strong>Expected:</strong> magic CAFEBABE; major version 65. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with magic CAFEBABE; major version 65.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect packaged launch metadata.</strong> Open thebuiltJAR andcheckMain-Class andApp.class. <strong>Expected:</strong> Main-ClassApp;class entry present. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with Main-ClassApp;class entry present.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Run a fresh-process self-test.</strong> Launch the JAR with--self-test through a bounded childJVM. <strong>Expected:</strong> exit 0 andoutputrelease-ok. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with exit 0 andoutputrelease-ok.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Verify an invalid launch fails clearly.</strong> Run thesameJAR with an unsupported argument. <strong>Expected:</strong> exit2 and unknown argument diagnostic. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with exit2 and unknown argument diagnostic.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject artifact tampering before execution.</strong> Hash the JAR,fliponebyte,and call the integrity gate. <strong>Expected:</strong> SecurityException;original bytes restored for cleanup. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with SecurityException;original bytes restored for cleanup.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Record runtime-image scope and rollback identity.</strong> Inspect whether jlink exists,and write a record distinguishing local JAR acceptance fromanunbuiltcustomruntime. <strong>Expected:</strong> previous artifact v1 retained; custom_runtime_built False. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with previous artifact v1 retained; custom_runtime_built False.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

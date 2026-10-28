@@ -368,19 +368,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Build, verify and execute a fresh bundle.</strong> Create the authored bundle, verify hashes and run its self-test in a child. <strong>Expected:</strong> three checks passed; actual Node version reported. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject altered application bytes before execution.</strong> Append a harmless comment to the owned application after manifest creation. <strong>Expected:</strong> digest verification fails. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject a manifest path outside the allowlist.</strong> Replace one file entry with ../outside.txt. <strong>Expected:</strong> path is rejected before any outside file is read. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Preserve result and diagnostic channels on failure.</strong> Invoke an unsupported argument containing a fake secret-like value. <strong>Expected:</strong> nonzero child exit; stdout empty; generic stderr without the value. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Derive stable content identity from unchanged files.</strong> Read and hash the same app twice and compare with its manifest entry. <strong>Expected:</strong> equal digests and an unchanged manifest match. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Gate an observed runtime against explicit policy.</strong> Accept the current runtime major for the fixture and reject a different required major. <strong>Expected:</strong> matching policy passes; mismatched policy throws. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

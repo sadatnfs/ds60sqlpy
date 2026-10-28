@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
 -- Assumptions: Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
@@ -57,6 +58,7 @@ GROUP BY
 ORDER BY
   net_revenue DESC,
   ov.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Use one category-revenue CTE twice to return the highest category and total revenue.
@@ -96,6 +98,7 @@ SELECT
     SELECT
       SUM(cr.revenue)
     FROM category_revenue AS cr), 2) AS all_revenue;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Create staged payment reconciliation CTEs at order grain.
@@ -139,6 +142,7 @@ FROM
 ORDER BY
   ABS(total_amount - paid_amount) DESC,
   order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare `MATERIALIZED` and `NOT MATERIALIZED` syntax on a side-effect-free filtered order CTE without claiming one is universally faster.
@@ -182,6 +186,7 @@ FROM
   inline_orders
 ORDER BY
   variant;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a multi-stage query whose repeated `total` column names are ambiguous by assigning grain-specific aliases.
@@ -228,6 +233,7 @@ GROUP BY
 ORDER BY
   country_revenue DESC,
   c.country;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Use a data-modifying CTE to demonstrate an update and inspect its returned rows without persistence.
@@ -246,6 +252,7 @@ ORDER BY
 -- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_6;
+
 WITH candidates AS (
   SELECT
     p.product_id
@@ -276,6 +283,7 @@ SELECT
   MAX(product_id) AS last_updated_product
 FROM
   updated;
+
 ROLLBACK TO SAVEPOINT exercise_6;
 
 -- No course answer persists changes or temporary objects.

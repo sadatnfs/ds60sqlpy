@@ -1,0 +1,1062 @@
+{
+  "schema_version": 1,
+  "status": "design-not-admitted",
+  "units": [
+    {
+      "id": "apache-001",
+      "section": "Foundations",
+      "title": "A platform is a set of contracts",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Trace an order from event to query result",
+        "Compare a local batch with a delayed event"
+      ],
+      "outcome": "Separate storage, transport, execution, catalog and governance responsibilities"
+    },
+    {
+      "id": "apache-002",
+      "section": "Foundations",
+      "title": "Rows, columns, types and missing values",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Represent money with decimal and preserve nulls",
+        "Reject an incompatible schema rather than silently coerce"
+      ],
+      "outcome": "Define logical types and physical representation before choosing a format"
+    },
+    {
+      "id": "apache-003",
+      "section": "Foundations",
+      "title": "Files, objects and tables",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Read projected Parquet columns",
+        "Compare a file listing with a committed table snapshot"
+      ],
+      "outcome": "Distinguish bytes, files, partitions, table metadata and atomic commits"
+    },
+    {
+      "id": "apache-004",
+      "section": "Foundations",
+      "title": "Processes, networks and ownership",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Resolve a Compose service name inside its network",
+        "Diagnose a host localhost versus container localhost mistake"
+      ],
+      "outcome": "Trace a connection through client, DNS, listener and advertised endpoint"
+    },
+    {
+      "id": "apache-005",
+      "section": "Foundations",
+      "title": "Partitioning, ordering and skew",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Hash a customer key into partitions",
+        "Measure one hot key against evenly distributed keys"
+      ],
+      "outcome": "Explain partition-local ordering and the cost of a shuffle"
+    },
+    {
+      "id": "apache-006",
+      "section": "Foundations",
+      "title": "Delivery, retries and idempotence",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Retry a stable event identifier",
+        "Reject two conflicting payloads with the same identifier"
+      ],
+      "outcome": "Specify the boundary at which a duplicate is suppressed"
+    },
+    {
+      "id": "apache-007",
+      "section": "Foundations",
+      "title": "Time, history and reproducibility",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Distinguish event, ingestion and processing time",
+        "Reconstruct a versioned fixture with late corrections"
+      ],
+      "outcome": "Record source version, clock and query assumptions"
+    },
+    {
+      "id": "apache-008",
+      "section": "Foundations",
+      "title": "Evidence and operational experiments",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Build a deterministic result oracle",
+        "Separate restart survival from replication availability"
+      ],
+      "outcome": "Design positive, negative and recovery checks without overclaiming production readiness"
+    },
+    {
+      "id": "apache-009",
+      "section": "Arrow",
+      "title": "Arrays, buffers and null bitmaps",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Inspect integer value and validity buffers",
+        "Trace a sliced array with a nonzero offset"
+      ],
+      "outcome": "Explain why logical length, buffer length and offset differ"
+    },
+    {
+      "id": "apache-010",
+      "section": "Arrow",
+      "title": "Schemas, nested data and dictionaries",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Build a list of structs with null children",
+        "Compare dictionary-encoded categories with plain strings"
+      ],
+      "outcome": "Choose a schema that preserves missingness and semantic units"
+    },
+    {
+      "id": "apache-011",
+      "section": "Arrow",
+      "title": "Compute kernels and chunked tables",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Filter and aggregate a chunked table",
+        "Demonstrate null propagation versus explicit fill"
+      ],
+      "outcome": "Use vector kernels without confusing a chunk boundary with a partition"
+    },
+    {
+      "id": "apache-012",
+      "section": "Arrow",
+      "title": "IPC, streams and ownership",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Round-trip record batches through an IPC stream",
+        "Read an IPC file with random batch access"
+      ],
+      "outcome": "Compare zero-copy opportunities with allocations at conversion boundaries"
+    },
+    {
+      "id": "apache-013",
+      "section": "Arrow",
+      "title": "Parquet datasets and predicate pruning",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Read a partitioned fixture with projection and filter",
+        "Show a filter that still requires residual evaluation"
+      ],
+      "outcome": "Inspect metadata and distinguish pruning from proof of row-level correctness"
+    },
+    {
+      "id": "apache-014",
+      "section": "Arrow",
+      "title": "Language boundaries and Flight",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Exchange Arrow IPC between Python and prepared Rust",
+        "Request batches from a real local Flight service"
+      ],
+      "outcome": "Explain C Data Interface lifetime and Flight transport without calling either a database"
+    },
+    {
+      "id": "apache-015",
+      "section": "DataFusion",
+      "title": "SessionContext, SQL and DataFrames",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Register Arrow batches and execute a grouped query",
+        "Run the equivalent DataFrame expression"
+      ],
+      "outcome": "Separate plan construction from execution and materialization"
+    },
+    {
+      "id": "apache-016",
+      "section": "DataFusion",
+      "title": "Logical and physical plans",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Inspect projection and predicate pushdown",
+        "Compare an aggregate before and after a selective filter"
+      ],
+      "outcome": "Read operators and explain why plan text is evidence rather than a stable API"
+    },
+    {
+      "id": "apache-017",
+      "section": "DataFusion",
+      "title": "Joins, SQL nulls and cardinality",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Join orders to a unique dimension",
+        "Expose a duplicate dimension key that multiplies revenue"
+      ],
+      "outcome": "Predict join output multiplicity and missing-key semantics"
+    },
+    {
+      "id": "apache-018",
+      "section": "DataFusion",
+      "title": "Partitions, memory and spill",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Control target partitions on a bounded dataset",
+        "Compare a selective scan with a sort under a memory budget"
+      ],
+      "outcome": "Explain why more partitions can increase overhead and peak memory"
+    },
+    {
+      "id": "apache-019",
+      "section": "DataFusion",
+      "title": "UDFs and engine extension boundaries",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Register a typed scalar Python UDF",
+        "Contrast a native expression with a row callback"
+      ],
+      "outcome": "Explain volatility, types and optimizer visibility"
+    },
+    {
+      "id": "apache-020",
+      "section": "DataFusion",
+      "title": "Embedding an analytical engine",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Build an isolated bounded query function over a fixed dataset",
+        "Reject an unapproved table or oversized result"
+      ],
+      "outcome": "Define a bounded engine API with reproducible source and resource settings"
+    },
+    {
+      "id": "apache-021",
+      "section": "Ballista",
+      "title": "From an engine to a distributed scheduler",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Run the released Python client against scheduler and executors",
+        "Compare local DataFusion with the same Ballista SQL result"
+      ],
+      "outcome": "Trace plan serialization, scheduling and Arrow Flight data movement"
+    },
+    {
+      "id": "apache-022",
+      "section": "Ballista",
+      "title": "Cluster configuration and shared data paths",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Query one read-only Parquet path from separate scheduler, executor and client processes",
+        "Remove a fixture path and detect the actual empty result with an independent oracle"
+      ],
+      "outcome": "Distinguish logical paths from filesystem visibility across processes"
+    },
+    {
+      "id": "apache-023",
+      "section": "Ballista",
+      "title": "Stages, shuffle and task placement",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Inspect distributed aggregation stages",
+        "Compare balanced groups with a hot grouping key"
+      ],
+      "outcome": "Explain stage barriers, shuffle files and scheduler decisions"
+    },
+    {
+      "id": "apache-024",
+      "section": "Ballista",
+      "title": "Clients and supported language APIs",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Submit from the matching Python client",
+        "Submit a Rust client against the same cluster"
+      ],
+      "outcome": "Respect protocol and release compatibility instead of assuming Spark API parity"
+    },
+    {
+      "id": "apache-025",
+      "section": "Ballista",
+      "title": "Failure, retry and retained evidence",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Stop an owned executor during a bounded workload",
+        "Restart an owned scheduler and characterize observed job behavior"
+      ],
+      "outcome": "Report precisely what recovered and what needs resubmission"
+    },
+    {
+      "id": "apache-026",
+      "section": "Ballista",
+      "title": "Capacity and operational decisions",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Compare one and two task-slot allocations in the supported executor wrapper",
+        "Bound collect and inspect history/metrics"
+      ],
+      "outcome": "Choose an embedded engine or a cluster from workload evidence"
+    },
+    {
+      "id": "apache-027",
+      "section": "Airflow",
+      "title": "DAGs, tasks and data intervals",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Run a TaskFlow DAG over a fixed logical interval",
+        "Show why wall-clock now changes a backfill"
+      ],
+      "outcome": "Distinguish scheduler time, logical date and data interval"
+    },
+    {
+      "id": "apache-028",
+      "section": "Airflow",
+      "title": "Dependencies, retries and idempotent tasks",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Write an idempotent partition output",
+        "Inject one transient task failure and inspect retry state"
+      ],
+      "outcome": "Keep side effects safe across retries and task clearing"
+    },
+    {
+      "id": "apache-029",
+      "section": "Airflow",
+      "title": "Scheduling, catchup and backfills",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Materialize two historical intervals",
+        "Correct one partition without recomputing unrelated history"
+      ],
+      "outcome": "Choose a backfill plan with explicit completeness semantics"
+    },
+    {
+      "id": "apache-030",
+      "section": "Airflow",
+      "title": "Assets, mapping and bounded concurrency",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Trigger a consumer from an updated asset",
+        "Map a bounded list with pool limits"
+      ],
+      "outcome": "Separate orchestration metadata from bulk data transfer"
+    },
+    {
+      "id": "apache-031",
+      "section": "Airflow",
+      "title": "Connections, providers and security",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Use a local connection reference without embedding a secret in a DAG",
+        "Reject a missing provider or invalid connection"
+      ],
+      "outcome": "Keep parse-time side effects and credentials outside authored code"
+    },
+    {
+      "id": "apache-032",
+      "section": "Airflow",
+      "title": "Operations and recovery",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Restart scheduler and retain metadata/history",
+        "Diagnose a stuck task from logs and state transitions"
+      ],
+      "outcome": "Recover the owned installation without deleting orchestration history"
+    },
+    {
+      "id": "apache-033",
+      "section": "Kafka",
+      "title": "The log, topics and partitions",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Produce keyed events with the official CLI",
+        "Consume the same log with two independent groups"
+      ],
+      "outcome": "Distinguish a durable log from a destructive queue"
+    },
+    {
+      "id": "apache-034",
+      "section": "Kafka",
+      "title": "Producer acknowledgements and idempotence",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Observe an acknowledged transactional write",
+        "Show two distinct business send calls retained despite producer idempotence"
+      ],
+      "outcome": "Explain producer IDs, sequence numbers and the scope of deduplication"
+    },
+    {
+      "id": "apache-035",
+      "section": "Kafka",
+      "title": "Consumers, offsets and rebalances",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Commit only after successful processing",
+        "Restart a consumer before committing and observe replay"
+      ],
+      "outcome": "Explain at-least-once processing with a concrete offset timeline"
+    },
+    {
+      "id": "apache-036",
+      "section": "Kafka",
+      "title": "Transactions and isolation",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Commit one transaction and abort another",
+        "Compare read_committed with read_uncommitted"
+      ],
+      "outcome": "State exactly which Kafka operations are atomic"
+    },
+    {
+      "id": "apache-037",
+      "section": "Kafka",
+      "title": "Retention, compaction and schemas",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Compare deletion retention with keyed compaction",
+        "Evolve an optional field and reject an incompatible payload"
+      ],
+      "outcome": "Distinguish latest state from event history and schema compatibility"
+    },
+    {
+      "id": "apache-038",
+      "section": "Kafka",
+      "title": "KRaft, networking and operations",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Inspect controller/broker roles and advertised listeners",
+        "Restart an owned broker and retain committed records"
+      ],
+      "outcome": "Diagnose connectivity, consumer lag and disk bounds without claiming single-node HA"
+    },
+    {
+      "id": "apache-039",
+      "section": "Iceberg",
+      "title": "Snapshots and the table abstraction",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Create a real local PyIceberg SQL catalog and append data",
+        "Read the previous snapshot after a second append"
+      ],
+      "outcome": "Explain metadata files, manifests and data-file references"
+    },
+    {
+      "id": "apache-040",
+      "section": "Iceberg",
+      "title": "Field IDs and schema evolution",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Rename a field while retaining its identity",
+        "Reject a required-field evolution that invalidates existing data"
+      ],
+      "outcome": "Distinguish identity from column position or display name"
+    },
+    {
+      "id": "apache-041",
+      "section": "Iceberg",
+      "title": "Hidden partitioning and evolution",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Partition by a transform and inspect planned files",
+        "Evolve the partition specification without rewriting old data"
+      ],
+      "outcome": "Explain residual predicates across multiple partition specs"
+    },
+    {
+      "id": "apache-042",
+      "section": "Iceberg",
+      "title": "Concurrency and optimistic commits",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Commit from one table handle then detect a stale second handle",
+        "Retry after reloading against the new snapshot"
+      ],
+      "outcome": "Identify the catalog compare-and-swap boundary"
+    },
+    {
+      "id": "apache-043",
+      "section": "Iceberg",
+      "title": "Deletes, maintenance and retention",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Perform a bounded overwrite or delete and inspect snapshots",
+        "Expire only unreferenced old state under a retained-snapshot policy"
+      ],
+      "outcome": "Separate logical deletion, physical cleanup and rollback promises"
+    },
+    {
+      "id": "apache-044",
+      "section": "Iceberg",
+      "title": "Catalogs and cross-engine reads",
+      "surface": "data-platforms-python",
+      "status": "design",
+      "worked_cases": [
+        "Read a snapshot through the actual PyIceberg to Arrow to DataFusion bridge",
+        "Compare a refreshed relation and a different logical SQL catalog identity"
+      ],
+      "outcome": "Verify engine/version capabilities instead of treating all catalog protocols as interchangeable"
+    },
+    {
+      "id": "apache-045",
+      "section": "Flink",
+      "title": "Streams, operators and a running job",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Submit a real Java bounded stream job",
+        "Read the same event contract through Flink SQL"
+      ],
+      "outcome": "Trace source, transformation, sink and execution graph"
+    },
+    {
+      "id": "apache-046",
+      "section": "Flink",
+      "title": "Event time and watermarks",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Window out-of-order events with explicit timestamps",
+        "Send an event beyond allowed lateness and inspect its route"
+      ],
+      "outcome": "Explain that watermarks estimate completeness rather than guarantee it"
+    },
+    {
+      "id": "apache-047",
+      "section": "Flink",
+      "title": "Keyed state and timers",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Maintain per-customer running state",
+        "Fire an inactivity timer with event-time progress"
+      ],
+      "outcome": "Distinguish operator state, keyed state and timer semantics"
+    },
+    {
+      "id": "apache-048",
+      "section": "Flink",
+      "title": "Checkpoints and end-to-end guarantees",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Complete a checkpoint and restart the job",
+        "Contrast a transactional Kafka sink with a nontransactional side effect"
+      ],
+      "outcome": "Bound exactly-once claims by source, state and sink participation"
+    },
+    {
+      "id": "apache-049",
+      "section": "Flink",
+      "title": "Backpressure and capacity",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Constrain a sink and observe upstream pressure",
+        "Change parallelism while preserving compatible state"
+      ],
+      "outcome": "Explain bottleneck propagation, slots and partition skew"
+    },
+    {
+      "id": "apache-050",
+      "section": "Flink",
+      "title": "Savepoints and schema evolution",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Take a savepoint and restore compatible state",
+        "Demonstrate a deliberately incompatible operator identity"
+      ],
+      "outcome": "Treat upgrades as state migrations with a rollback plan"
+    },
+    {
+      "id": "apache-051",
+      "section": "Cassandra",
+      "title": "Query-first modeling and CQL",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Create a time-bucketed partition for a concrete lookup",
+        "Show why a cross-partition ad hoc filter is expensive"
+      ],
+      "outcome": "Choose primary and clustering keys from access patterns"
+    },
+    {
+      "id": "apache-052",
+      "section": "Cassandra",
+      "title": "Writes, SSTables and reads",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Write updates and inspect row visibility",
+        "Compare a range within one partition with many-partition access"
+      ],
+      "outcome": "Explain commit log, memtable, SSTable and read reconciliation"
+    },
+    {
+      "id": "apache-053",
+      "section": "Cassandra",
+      "title": "Replication and consistency levels",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Run a small real multi-node optional topology",
+        "Contrast ONE and QUORUM during an owned node outage"
+      ],
+      "outcome": "Apply quorum reasoning only with its replication and failure assumptions"
+    },
+    {
+      "id": "apache-054",
+      "section": "Cassandra",
+      "title": "Tombstones, TTL and compaction",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Expire a bounded fixture with TTL",
+        "Inspect a delete and explain repair-before-GC requirements"
+      ],
+      "outcome": "Connect tombstones and compaction to resurrection risk"
+    },
+    {
+      "id": "apache-055",
+      "section": "Cassandra",
+      "title": "Transactions, indexes and drivers",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Use lightweight compare-and-set for one invariant",
+        "Query a Storage Attached Index with selectivity checks"
+      ],
+      "outcome": "Distinguish LWT, batch atomicity and ordinary last-write-wins semantics"
+    },
+    {
+      "id": "apache-056",
+      "section": "Cassandra",
+      "title": "Repair, backup and operations",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Capture a snapshot and verify a restore in owned storage",
+        "Restart a node and inspect ring and pending work"
+      ],
+      "outcome": "Explain repair scope, consistency and restore boundaries"
+    },
+    {
+      "id": "apache-057",
+      "section": "Pinot",
+      "title": "Segments and serving topology",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Load a bounded offline segment",
+        "Query through broker and identify serving server"
+      ],
+      "outcome": "Explain controller, broker, server, segment and ZooKeeper roles"
+    },
+    {
+      "id": "apache-058",
+      "section": "Pinot",
+      "title": "Kafka ingestion and real-time segments",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Ingest the shared event fixture from Kafka",
+        "Observe malformed-event handling and ingestion lag"
+      ],
+      "outcome": "Trace consuming segments into committed segments"
+    },
+    {
+      "id": "apache-059",
+      "section": "Pinot",
+      "title": "Indexes and query plans",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Compare filtered queries with and without an inverted index",
+        "Test a range or sorted index on an appropriate column"
+      ],
+      "outcome": "Explain index selection and memory/storage tradeoffs"
+    },
+    {
+      "id": "apache-060",
+      "section": "Pinot",
+      "title": "Time boundaries, hybrid tables and upserts",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Combine historical offline data with fresh real-time data",
+        "Apply a versioned update with primary-key comparison"
+      ],
+      "outcome": "Prevent overlap double-counting and define late-update semantics"
+    },
+    {
+      "id": "apache-061",
+      "section": "Pinot",
+      "title": "Multistage queries and capacity",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Join small dimension data using the supported engine",
+        "Bound a query and inspect response exceptions"
+      ],
+      "outcome": "Separate analytical serving latency from batch throughput"
+    },
+    {
+      "id": "apache-062",
+      "section": "Pinot",
+      "title": "Operations, recovery and data verification",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Restart owned Pinot services and verify query results",
+        "Compare ingested counts with source event identities"
+      ],
+      "outcome": "Diagnose segment, schema and consumption failures without deleting state"
+    },
+    {
+      "id": "apache-063",
+      "section": "Hive and Metastore",
+      "title": "Warehouse, catalog and execution",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Create a namespace and external table in Hive",
+        "Inspect the metastore record independently of querying data"
+      ],
+      "outcome": "Separate HiveServer2, Metastore and storage responsibilities"
+    },
+    {
+      "id": "apache-064",
+      "section": "Hive and Metastore",
+      "title": "Schemas, partitions and serialization",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Register partition locations and read Parquet",
+        "Demonstrate a wrong type or location with a controlled failure"
+      ],
+      "outcome": "Explain SerDe, physical files and partition discovery"
+    },
+    {
+      "id": "apache-065",
+      "section": "Hive and Metastore",
+      "title": "Metastore durability and clients",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Persist metadata in PostgreSQL",
+        "Restart Metastore and query from a second client"
+      ],
+      "outcome": "Trace Thrift metadata calls without confusing them with data reads"
+    },
+    {
+      "id": "apache-066",
+      "section": "Hive and Metastore",
+      "title": "Hive SQL and execution plans",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Explain a selective aggregate over a partitioned fixture",
+        "Compare map-side assumptions with observed execution"
+      ],
+      "outcome": "Teach cost, statistics and execution-engine boundaries"
+    },
+    {
+      "id": "apache-067",
+      "section": "Hive and Metastore",
+      "title": "Transactional tables and Iceberg integration",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Compare Hive transactional-table semantics with Iceberg snapshots",
+        "Read a compatible Iceberg table through the prepared integration"
+      ],
+      "outcome": "Treat formats and commit protocols as explicit contracts"
+    },
+    {
+      "id": "apache-068",
+      "section": "Hive and Metastore",
+      "title": "Catalog upgrades and operational recovery",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Run schema verification before startup",
+        "Reject an incompatible database schema and recover from an owned backup"
+      ],
+      "outcome": "Plan metadata upgrades without assuming a rollback of binaries rolls back schema"
+    },
+    {
+      "id": "apache-069",
+      "section": "Atlas",
+      "title": "Types, entities and metadata identity",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Create custom dataset and process type definitions",
+        "Create two entity versions with stable qualified names"
+      ],
+      "outcome": "Distinguish a type, entity, relationship and classification"
+    },
+    {
+      "id": "apache-070",
+      "section": "Atlas",
+      "title": "Lineage as recorded relationships",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Record a process with input and output datasets",
+        "Query lineage and show an intentionally missing edge"
+      ],
+      "outcome": "Explain that recorded lineage is evidence only for instrumented operations"
+    },
+    {
+      "id": "apache-071",
+      "section": "Atlas",
+      "title": "Classifications and discovery",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Attach a classification to a synthetic dataset",
+        "Search by type and classification then remove it"
+      ],
+      "outcome": "Separate metadata labels from enforcement in a data engine"
+    },
+    {
+      "id": "apache-072",
+      "section": "Atlas",
+      "title": "Hooks, notifications and integration",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Inspect a supported Hive hook or explicit API ingest path",
+        "Retry a duplicate notification without inventing duplicate assets"
+      ],
+      "outcome": "Define provenance and delivery boundaries of metadata ingestion"
+    },
+    {
+      "id": "apache-073",
+      "section": "Atlas",
+      "title": "Authorization and governance workflows",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Compare permitted and rejected local API requests",
+        "Document a classification review and owner decision"
+      ],
+      "outcome": "Keep policy intention distinct from actual enforcement"
+    },
+    {
+      "id": "apache-074",
+      "section": "Atlas",
+      "title": "Graph, indexes and recovery",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Restart the owned Atlas backing services",
+        "Verify entity and lineage survival and diagnose index lag"
+      ],
+      "outcome": "Understand graph storage, search indexes and backup consistency"
+    },
+    {
+      "id": "apache-075",
+      "section": "Delta Sharing",
+      "title": "An open sharing protocol",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "List shares, schemas and tables from the real reference server",
+        "Reject an invalid recipient credential"
+      ],
+      "outcome": "Distinguish Delta Sharing from an Apache project and from Delta table storage"
+    },
+    {
+      "id": "apache-076",
+      "section": "Delta Sharing",
+      "title": "Metadata, file URLs and read paths",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Fetch a bounded table through the Python client",
+        "Inspect metadata response and actual file reads separately"
+      ],
+      "outcome": "Trace control-plane authorization and data-plane retrieval"
+    },
+    {
+      "id": "apache-077",
+      "section": "Delta Sharing",
+      "title": "Snapshots, predicates and consistency",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Read a pinned table version",
+        "Compare a server predicate hint with client-side correctness checks"
+      ],
+      "outcome": "Keep predicate pushdown and access control conceptually separate"
+    },
+    {
+      "id": "apache-078",
+      "section": "Delta Sharing",
+      "title": "Recipients and credential boundaries",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Use a fixture-only short-lived profile",
+        "Rotate or invalidate access and observe rejection"
+      ],
+      "outcome": "Avoid embedding recipient credentials in notebooks or published source"
+    },
+    {
+      "id": "apache-079",
+      "section": "Delta Sharing",
+      "title": "History, changes and compatible readers",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Read supported table history or changes from the pinned server",
+        "Reject an unsupported protocol or feature explicitly"
+      ],
+      "outcome": "Negotiate capabilities rather than assuming every client reads every Delta feature"
+    },
+    {
+      "id": "apache-080",
+      "section": "Delta Sharing",
+      "title": "Operating a bounded sharing service",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Restart the real server and retain the shared table",
+        "Test missing data-file and unavailable-server failures"
+      ],
+      "outcome": "Distinguish persisted data, share configuration and client retry behavior"
+    },
+    {
+      "id": "apache-081",
+      "section": "Integration and capstones",
+      "title": "Batch lakehouse with reproducible snapshots",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Materialize a bounded event batch into Iceberg",
+        "Compare Spark and DataFusion reads through supported paths"
+      ],
+      "outcome": "Produce an evidence bundle with schema, snapshot and result identity"
+    },
+    {
+      "id": "apache-082",
+      "section": "Integration and capstones",
+      "title": "Streaming analytical serving",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Move Kafka events through Flink to Pinot",
+        "Inject a duplicate and late correction and reconcile counts"
+      ],
+      "outcome": "Document the guarantee at each source/state/sink boundary"
+    },
+    {
+      "id": "apache-083",
+      "section": "Integration and capstones",
+      "title": "Orchestrated backfills and live data",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Use Airflow to correct a historical partition",
+        "Keep a live event stream independent of the backfill"
+      ],
+      "outcome": "Separate orchestration intervals from event-time semantics"
+    },
+    {
+      "id": "apache-084",
+      "section": "Integration and capstones",
+      "title": "Catalog and governance integration",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Register Hive/Iceberg assets and process lineage in Atlas",
+        "Compare metadata classification with an actual denied data access"
+      ],
+      "outcome": "Show where governance information ends and enforcement begins"
+    },
+    {
+      "id": "apache-085",
+      "section": "Integration and capstones",
+      "title": "Sharing a versioned data product",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Publish one bounded Delta table through the reference server",
+        "Validate recipient access and reproducible table version"
+      ],
+      "outcome": "Specify a consumer contract with provenance and revocation limits"
+    },
+    {
+      "id": "apache-086",
+      "section": "Integration and capstones",
+      "title": "Failure and recovery game day",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Restart a stateful service and compare durable evidence",
+        "Break one owned configuration then restore it"
+      ],
+      "outcome": "Write a recovery report distinguishing loss, duplication and unavailability"
+    },
+    {
+      "id": "apache-087",
+      "section": "Integration and capstones",
+      "title": "Capacity, costs and architectural tradeoffs",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Measure CPU, memory, storage and latency on a small workload",
+        "Contrast embedded, batch, streaming and serving alternatives"
+      ],
+      "outcome": "Extrapolate carefully and separate measured results from capacity forecasts"
+    },
+    {
+      "id": "apache-088",
+      "section": "Integration and capstones",
+      "title": "An auditable data-platform capstone",
+      "surface": "reading",
+      "status": "design",
+      "worked_cases": [
+        "Build one selected end-to-end path with source-bound receipts",
+        "Independently verify its failure and restart behavior"
+      ],
+      "outcome": "Deliver a reproducible design, implementation, runbook and evidence dossier"
+    }
+  ]
+}

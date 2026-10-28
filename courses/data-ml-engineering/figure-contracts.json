@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "dme-013",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-014",
+      "kinds": [
+        "plotly",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-016",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-029",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-032",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-033",
+      "kinds": [
+        "plotly",
+        "table"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-034",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-035",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-036",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-037",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-038",
+      "kinds": [
+        "plotly",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-039",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-040",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-041",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-043",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-044",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-046",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-049",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-051",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-055",
+      "kinds": [
+        "table",
+        "json"
+      ],
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "dme-056",
+      "kinds": [
+        "json",
+        "json"
+      ],
+      "description_required": true
+    }
+  ]
+}

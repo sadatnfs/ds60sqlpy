@@ -144,9 +144,9 @@ One row per position returns in_window true, true, false. The start is included 
 
 **Verify:** For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.
 
-3. **Create one nullable retention label per user.** Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
+3. **Create one nullable retention label per user.** Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
 
-**Inputs/evidence:** For sql-deep-06 Exercise 3, Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
+**Inputs/evidence:** For sql-deep-06 Exercise 3, Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
 
 **Expected result/shape:** For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1's multiple day 7 events still produce one true label; its exact window-end event is excluded.
 

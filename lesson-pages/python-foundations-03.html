@@ -446,37 +446,37 @@ cleaned <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 </ol>
 <p><strong>Verify:</strong> Accepted results are 0 and 4. The other three inputs raise ValueError, with missing, non-integer, and negative reasons respectively.</p>
 <p><strong>Hint:</strong> Do not use a broad exception handler as a substitute for a representation check.</p>
-<ol>
+<ol start="2">
 <li><strong>Keep raw records unchanged.</strong> Implement <code>normalize_record</code> for string id and quantity fields. Given <code>{&quot;id&quot;: &quot; A &quot;, &quot;quantity&quot;: &quot;2&quot;}</code>, return canonical fields without mutating the input.</li>
 </ol>
 <p><strong>Verify:</strong> The result equals <code>{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: 2}</code> while the original id still contains both surrounding spaces.</p>
 <p><strong>Hint:</strong> Construct a new dictionary rather than reusing the original object.</p>
-<ol>
+<ol start="3">
 <li><strong>Make missing identity visible.</strong> Test an absent id, an empty id, and an all-space id. Decide whether <code>&quot;A&quot;</code> and <code>&quot;a&quot;</code> collide under the declared case-sensitive policy.</li>
 </ol>
 <p><strong>Verify:</strong> Tests capture ValueError for each missing identity and assert that normalized ids <code>A</code> and <code>a</code> remain unequal strings.</p>
 <p><strong>Hint:</strong> Normalization and identity comparison are separate policy choices.</p>
-<ol>
+<ol start="4">
 <li><strong>Account for every row.</strong> Implement <code>clean_rows</code> returning accepted and rejected lists. Feed ids A, B, C with quantities 2, many, and 0.</li>
 </ol>
 <p><strong>Verify:</strong> Three inputs produce two accepted records with total quantity 2 and one rejection at one-based row 2; count reconciliation equals 3.</p>
 <p><strong>Hint:</strong> Catch only the validation failure and preserve its row with the reason.</p>
-<ol>
+<ol start="5">
 <li><strong>Enforce first valid wins.</strong> Feed A/many, A/2, and A/3 in that order. Add duplicate detection after validation and preserve rejection evidence.</li>
 </ol>
 <p><strong>Verify:</strong> Only A/2 is accepted; rows 1 and 3 are rejected for non-integer quantity and duplicate id. The first invalid row does not reserve A.</p>
 <p><strong>Hint:</strong> Update the set of seen identifiers only at the acceptance step.</p>
-<ol>
+<ol start="6">
 <li><strong>Reject wrong field types.</strong> Test <code>{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: None}</code> and <code>{&quot;id&quot;: 3, &quot;quantity&quot;: &quot;2&quot;}</code>. Avoid converting arbitrary objects with <code>str</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Both records appear in rejected output with ValueError-derived reasons, and neither becomes an accepted zero or identifier <code>&quot;3&quot;</code>.</p>
 <p><strong>Hint:</strong> The contract accepts text fields, not every object that can be displayed.</p>
-<ol>
+<ol start="7">
 <li><strong>Check empty and all-invalid batches.</strong> Run <code>clean_rows</code> with no rows, then with two invalid quantity rows. Summarize accepted quantities with an explicit zero start.</li>
 </ol>
 <p><strong>Verify:</strong> The empty batch returns two empty lists and total 0. The invalid batch has accepted count 0, rejected count 2, and total 0.</p>
 <p><strong>Hint:</strong> An empty total does not mean that the input was complete or valid.</p>
-<ol>
+<ol start="8">
 <li><strong>Transfer to stock adjustments.</strong> Describe a second contract where negative counts represent returns. Keep the original parser unchanged and write boundary cases for a separate signed parser.</li>
 </ol>
 <p><strong>Verify:</strong> Your policy note records signed-parser output -1, the original parser&#x27;s ValueError for the same text, and rejection tests for empty and decimal text in both contracts.</p>

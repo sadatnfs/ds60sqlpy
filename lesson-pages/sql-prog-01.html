@@ -404,16 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--sql-prog-01-functions-procedures-and-triggers">SQL-PROG-01: Functions, Procedures, and Triggers<a class="heading-anchor" href="#guide--sql-prog-01-functions-procedures-and-triggers" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Catalog prerequisite:</strong> <code>sql-found-02</code></li>
-<li><strong>Prerequisites:</strong> <a href="sql-found-02.html#guide">SQL-FOUND-02; versioned migrations</a>, transactions, constraints, and multirow <code>UPDATE</code>.</li>
-<li><strong>Artifacts:</strong> <a href="sql-prog-01.html#learner">learner SQL</a> · <a href="sql-prog-01.html#solution-1">solution reasoning</a> · <a href="sql-prog-01.html#solution-2">executable solution</a></li>
-</ul>
-<p>Run from the repository root on Windows PowerShell, macOS, or Linux:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></pre>
-<p>The schema, functions, procedures, triggers, and audit rows are created inside one transaction and removed by <code>ROLLBACK</code>.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-prog-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -429,12 +419,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-prog-01</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisite:</strong> <code>sql-found-02</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-02.html#guide">SQL-FOUND-02; versioned migrations</a>, transactions, constraints, and multirow <code>UPDATE</code>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-prog-01.html#learner">learner SQL</a> · <a href="sql-prog-01.html#solution-1">solution reasoning</a> · <a href="sql-prog-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root on Windows PowerShell, macOS, or Linux:</p>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></pre>
+<p>The schema, functions, procedures, triggers, and audit rows are created inside one transaction and removed by <code>ROLLBACK</code>.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. Its worked SQL reads or creates <code>pro_routines_lab.work_items</code>, <code>pro_routines_lab.work_item_audit</code>, <code>pro_routines_lab.statement_audit</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: openitemcount(text) is a STABLE, PARALLEL SAFE, SECURITY INVOKER SQL function. It reads one statement snapshot and composes inside SELECT. Do not label a routine IMMUTABLE merely because its source text looks simple: a table-reading function changes when table data changes. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_routines_lab.work_items</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_prog_01_routines_triggers.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/professional/lessons/sql_prog_01_routines_triggers.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-punctuation">(</span>
     item_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
@@ -567,7 +567,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -579,13 +579,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-PROG-01: Functions, procedures, and triggers</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-prog-01: Functions, Procedures, and Triggers</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-prog-01: Functions, Procedures, and Triggers</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_prog_01_routines_triggers.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-prog-01/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-prog-01.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -602,7 +602,9 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">\echo <span class="syntax-string">&#x27;SQL-PROG-01: disposable routines and trigger lab&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_routines_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Declarative constraints are the first choice for row-local invariants.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  item_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
@@ -612,6 +614,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  created_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_item_audit <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  audit_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  item_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -620,17 +623,20 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  changed_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  changed_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>statement_audit <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  statement_audit_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  changed_rows <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>changed_rows <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  item_ids <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  changed_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-punctuation">(</span>owner_name<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Avery&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Review intake form&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Avery&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Publish reference notes&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;in_progress&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Morgan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Archive completed records&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Query functions can be composed inside SELECT. STABLE promises that this</span></span>
 <span class="source-line"><span class="syntax-comment">-- function does not modify data and sees one statement snapshot.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>open_item_count <span class="syntax-punctuation">(</span>p_owner_name <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
@@ -646,29 +652,33 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">      <span class="syntax-keyword">AND</span> wi<span class="syntax-punctuation">.</span>status <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
 <span class="source-line">$<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- A BEFORE row trigger may replace NEW before storage.</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>set_work_item_updated_at <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
-<span class="source-line">    <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">    <span class="syntax-keyword">VOLATILE</span></span>
-<span class="source-line">    <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
-<span class="source-line">    <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-comment">-- A BEFORE row trigger may replace NEW before storage.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>set_work_item_updated_at <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">VOLATILE</span></span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">NEW</span><span class="syntax-punctuation">.</span>updated_at <span class="syntax-punctuation">:</span><span class="syntax-operator">=</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-keyword">RETURN</span> <span class="syntax-keyword">NEW</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_set_updated_at</span>
-<span class="source-line">      <span class="syntax-keyword">BEFORE</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
-<span class="source-line">      <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
-<span class="source-line">      <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>set_work_item_updated_at <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-comment">-- An AFTER row trigger records one audit row per status transition.</span></span>
-<span class="source-line">      <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
-<span class="source-line">        <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">        <span class="syntax-keyword">VOLATILE</span></span>
-<span class="source-line">        <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
-<span class="source-line">        <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line">$<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_set_updated_at</span>
+<span class="source-line">  <span class="syntax-keyword">BEFORE</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>set_work_item_updated_at <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- An AFTER row trigger records one audit row per status transition.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">VOLATILE</span></span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">OLD</span><span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">NEW</span><span class="syntax-punctuation">.</span>status <span class="syntax-keyword">THEN</span></span>
 <span class="source-line">        <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_item_audit <span class="syntax-punctuation">(</span></span>
@@ -686,19 +696,22 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-keyword">RETURN</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_status_audit</span>
-<span class="source-line">          <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
-<span class="source-line">          <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
-<span class="source-line">          <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-comment">-- A statement trigger runs once and can inspect transition tables containing</span></span>
-<span class="source-line">          <span class="syntax-comment">-- all OLD and NEW rows affected by that statement.</span></span>
-<span class="source-line">          <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_statement <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
-<span class="source-line">            <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">            <span class="syntax-keyword">VOLATILE</span></span>
-<span class="source-line">            <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
-<span class="source-line">            <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line">$<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_status_audit</span>
+<span class="source-line">  <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- A statement trigger runs once and can inspect transition tables containing</span></span>
+<span class="source-line"><span class="syntax-comment">-- all OLD and NEW rows affected by that statement.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_statement <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">VOLATILE</span></span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>statement_audit <span class="syntax-punctuation">(</span>changed_rows<span class="syntax-punctuation">,</span> item_ids<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
@@ -715,23 +728,27 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">          <span class="syntax-keyword">ROW</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>owner_name<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>title<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-keyword">RETURN</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_statement_audit</span>
-<span class="source-line">              <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">REFERENCING</span> <span class="syntax-keyword">OLD</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> old_rows <span class="syntax-keyword">NEW</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> new_rows</span>
-<span class="source-line">              <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">STATEMENT</span></span>
-<span class="source-line">              <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_statement <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-comment">-- Procedures are invoked with CALL and do not return a query relation. This</span></span>
-<span class="source-line">              <span class="syntax-comment">-- procedure deliberately participates in its caller&#x27;s transaction.</span></span>
-<span class="source-line">              <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">PROCEDURE</span> pro_routines_lab<span class="syntax-punctuation">.</span>close_owner_items <span class="syntax-punctuation">(</span>p_owner_name <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">              <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">              <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span> <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line">$<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_statement_audit</span>
+<span class="source-line">  <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">REFERENCING</span> <span class="syntax-keyword">OLD</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> old_rows <span class="syntax-keyword">NEW</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> new_rows</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">STATEMENT</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_work_item_statement <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Procedures are invoked with CALL and do not return a query relation. This</span></span>
+<span class="source-line"><span class="syntax-comment">-- procedure deliberately participates in its caller&#x27;s transaction.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">PROCEDURE</span> pro_routines_lab<span class="syntax-punctuation">.</span>close_owner_items <span class="syntax-punctuation">(</span>p_owner_name <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line"><span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line"><span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">UPDATE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
 <span class="source-line">    <span class="syntax-keyword">SET</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
 <span class="source-line">    <span class="syntax-keyword">WHERE</span> wi<span class="syntax-punctuation">.</span>owner_name <span class="syntax-operator">=</span> p_owner_name</span>
 <span class="source-line">      <span class="syntax-keyword">AND</span> wi<span class="syntax-punctuation">.</span>status <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;closed&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">;</span></span>
+<span class="source-line">$<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;Function used as a query expression&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  owners<span class="syntax-punctuation">.</span>owner_name<span class="syntax-punctuation">,</span></span>
@@ -1039,7 +1056,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1067,25 +1084,30 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">\<span class="syntax-keyword">set</span> ON_ERROR_STOP <span class="syntax-keyword">on</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_routines_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  item_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  owner_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>btrim<span class="syntax-punctuation">(</span>owner_name<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  title <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  status <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;in_progress&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;closed&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_item_audit <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  audit_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  item_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  old_status <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  new_status <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-punctuation">(</span>owner_name<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Avery&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;open&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Avery&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;closed&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Morgan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Three&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;in_progress&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Morgan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Four stays closed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;closed&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -1103,25 +1125,29 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_audit_status</span>
-<span class="source-line">    <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
-<span class="source-line">    <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
-<span class="source-line">    <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-comment">-- Exercise 1: NULL input returns zero because equality matches no item.</span></span>
-<span class="source-line">    <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span>p_item_id <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">bigint</span></span>
-<span class="source-line">      <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
-<span class="source-line">      <span class="syntax-keyword">STABLE</span> PARALLEL SAFE</span>
-<span class="source-line">      <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
-<span class="source-line">      <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_audit_status</span>
+<span class="source-line">  <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>audit_status <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: NULL input returns zero because equality matches no item.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span>p_item_id <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">bigint</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
+<span class="source-line">  <span class="syntax-keyword">STABLE</span> PARALLEL SAFE</span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">FROM</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_item_audit <span class="syntax-keyword">AS</span> a</span>
 <span class="source-line">    <span class="syntax-keyword">WHERE</span> a<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> p_item_id</span>
-<span class="source-line">$<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-comment">-- Exercise 2.</span></span>
-<span class="source-line">      <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">PROCEDURE</span> pro_routines_lab<span class="syntax-punctuation">.</span>reassign_open_items <span class="syntax-punctuation">(</span>p_from_owner <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> p_to_owner <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">      <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span> <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line">$<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">PROCEDURE</span> pro_routines_lab<span class="syntax-punctuation">.</span>reassign_open_items <span class="syntax-punctuation">(</span>p_from_owner <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> p_to_owner <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line"><span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line"><span class="syntax-keyword">AS</span> $<span class="syntax-keyword">procedure</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> p_to_owner <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> btrim<span class="syntax-punctuation">(</span>p_to_owner<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span></span>
 <span class="source-line">        RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;destination owner must not be blank&#x27;</span></span>
@@ -1133,13 +1159,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">WHERE</span> wi<span class="syntax-punctuation">.</span>owner_name <span class="syntax-operator">=</span> p_from_owner</span>
 <span class="source-line">      <span class="syntax-keyword">AND</span> wi<span class="syntax-punctuation">.</span>status <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;closed&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">procedure</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-comment">-- Exercise 3.</span></span>
-<span class="source-line">      <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>prevent_direct_reopen <span class="syntax-punctuation">(</span> <span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
-<span class="source-line">        <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">        <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
-<span class="source-line">        <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line">$<span class="syntax-keyword">procedure</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>prevent_direct_reopen <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">OLD</span><span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">NEW</span><span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">THEN</span></span>
 <span class="source-line">        RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;item_id is immutable (% -&gt; %)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">OLD</span><span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">NEW</span><span class="syntax-punctuation">.</span>item_id</span>
@@ -1151,23 +1179,28 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-keyword">RETURN</span> <span class="syntax-keyword">NEW</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_prevent_direct_reopen</span>
-<span class="source-line">          <span class="syntax-keyword">BEFORE</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
-<span class="source-line">          <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
-<span class="source-line">          <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>prevent_direct_reopen <span class="syntax-punctuation">(</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">            pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">          <span class="syntax-keyword">SET</span></span>
-<span class="source-line">            status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
-<span class="source-line">          <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">            wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">              pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_1_changes<span class="syntax-punctuation">,</span></span>
-<span class="source-line">              pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_3_changes<span class="syntax-punctuation">,</span></span>
-<span class="source-line">              pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_item_changes<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">CALL</span> pro_routines_lab<span class="syntax-punctuation">.</span>reassign_open_items <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Morgan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Taylor&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line">$<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_prevent_direct_reopen</span>
+<span class="source-line">  <span class="syntax-keyword">BEFORE</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">ROW</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>prevent_direct_reopen <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_1_changes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_3_changes<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_item_changes<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CALL</span> pro_routines_lab<span class="syntax-punctuation">.</span>reassign_open_items <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Morgan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Taylor&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">        <span class="syntax-keyword">CALL</span> pro_routines_lab<span class="syntax-punctuation">.</span>reassign_open_items<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Taylor&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;   &#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
@@ -1194,7 +1227,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">        <span class="syntax-keyword">UPDATE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
@@ -1207,7 +1241,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">        <span class="syntax-keyword">UPDATE</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items</span>
@@ -1220,37 +1255,42 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-comment">-- A second valid transition makes Exercise 1&#x27;s multiple-row boundary visible.</span></span>
-<span class="source-line">              <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">              <span class="syntax-keyword">SET</span></span>
-<span class="source-line">                status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;in_progress&#x27;</span></span>
-<span class="source-line">              <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">                <span class="syntax-keyword">SET</span></span>
-<span class="source-line">                  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
-<span class="source-line">                <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                  wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                    <span class="syntax-operator">*</span></span>
-<span class="source-line">                  <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;zero matching audit rows&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">999</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;one matching audit row&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;multiple matching audit rows&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;NULL input policy&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> probes <span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">,</span> item_id<span class="syntax-punctuation">,</span> observed_change_count<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                  probe<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                      wi<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                      wi<span class="syntax-punctuation">.</span>owner_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                      wi<span class="syntax-punctuation">.</span>status</span>
-<span class="source-line">                    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                      pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">                    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                      wi<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                      <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- A second valid transition makes Exercise 1&#x27;s multiple-row boundary visible.</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;in_progress&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;zero matching audit rows&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">999</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;one matching audit row&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;multiple matching audit rows&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;NULL input policy&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> probes <span class="syntax-punctuation">(</span>probe<span class="syntax-punctuation">,</span> item_id<span class="syntax-punctuation">,</span> observed_change_count<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  probe<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>owner_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>status</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> pro_routines_lab<span class="syntax-punctuation">.</span>status_change_count<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">2</span> <span class="syntax-keyword">THEN</span></span>
 <span class="source-line">        RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;status-change function returned wrong count&#x27;</span><span class="syntax-punctuation">;</span></span>
@@ -1265,66 +1305,71 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                      <span class="syntax-comment">-- Exercise 4 is reconciled after Exercise 7 creates the statement-level audit.</span></span>
-<span class="source-line">                      <span class="syntax-comment">-- Exercise 5: choose the narrowest mechanism whose authority matches the rule.</span></span>
-<span class="source-line">                      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                        <span class="syntax-operator">*</span></span>
-<span class="source-line">                      <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                        <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;allowed status vocabulary&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CHECK constraint&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;row-local and declarative; all writers receive the same rule&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;OLD-to-NEW transition&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;row trigger&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;requires both stored versions and may reject or audit a transition&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;queryable reusable calculation&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;function&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;composes in SQL but cannot COMMIT or ROLLBACK&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;multi-step command&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;procedure called with CALL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;may control transactions only when invoked at an allowed top-level boundary&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> decision <span class="syntax-punctuation">(</span><span class="syntax-keyword">rule</span><span class="syntax-punctuation">,</span> mechanism<span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                      <span class="syntax-keyword">rule</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                        <span class="syntax-comment">-- Exercise 6: inspect the promises PostgreSQL&#x27;s planner relies on.</span></span>
-<span class="source-line">                        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                          <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span>prokind</span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;f&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;function&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;p&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;procedure&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                            p<span class="syntax-punctuation">.</span>prokind<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span></span>
-<span class="source-line">                          <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> routine_kind<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          pg_get_function_identity_arguments<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_arguments<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span>provolatile</span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;i&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;immutable&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;s&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;stable&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;volatile&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> volatility<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span>proparallel</span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;s&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;safe&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;r&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;restricted&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;unsafe&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> parallel_mode<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          p<span class="syntax-punctuation">.</span>prosecdef <span class="syntax-keyword">AS</span> security_definer<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          p<span class="syntax-punctuation">.</span>proconfig <span class="syntax-keyword">AS</span> routine_settings</span>
-<span class="source-line">                        <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                          pg_catalog<span class="syntax-punctuation">.</span>pg_proc <span class="syntax-keyword">AS</span> p</span>
-<span class="source-line">                          <span class="syntax-keyword">JOIN</span> pg_catalog<span class="syntax-punctuation">.</span>pg_namespace <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">ON</span> n<span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>pronamespace</span>
-<span class="source-line">                        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                          n<span class="syntax-punctuation">.</span>nspname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_routines_lab&#x27;</span></span>
-<span class="source-line">                        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                          p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                          <span class="syntax-comment">-- Exercise 7: transition tables expose the complete affected set once per</span></span>
-<span class="source-line">                          <span class="syntax-comment">-- statement, including a legitimate zero-change status summary.</span></span>
-<span class="source-line">                          <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                            summary_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                            matched_rows <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                            changed_status_rows <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">                          <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>summarize_status_statement <span class="syntax-punctuation">(</span> <span class="syntax-punctuation">)</span></span>
-<span class="source-line">                            <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
-<span class="source-line">                            <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">                            <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
-<span class="source-line">                            <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4 is reconciled after Exercise 7 creates the statement-level audit.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: choose the narrowest mechanism whose authority matches the rule.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;allowed status vocabulary&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CHECK constraint&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;row-local and declarative; all writers receive the same rule&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;OLD-to-NEW transition&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;row trigger&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;requires both stored versions and may reject or audit a transition&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;queryable reusable calculation&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;function&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;composes in SQL but cannot COMMIT or ROLLBACK&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;multi-step command&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;procedure called with CALL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;may control transactions only when invoked at an allowed top-level boundary&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> decision <span class="syntax-punctuation">(</span><span class="syntax-keyword">rule</span><span class="syntax-punctuation">,</span> mechanism<span class="syntax-punctuation">,</span> reason<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">rule</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: inspect the promises PostgreSQL&#x27;s planner relies on.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span>prokind</span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;f&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;function&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;p&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;procedure&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>prokind<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> routine_kind<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_get_function_identity_arguments<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_arguments<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span>provolatile</span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;i&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;immutable&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;s&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;stable&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;volatile&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> volatility<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span>proparallel</span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;s&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;safe&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;r&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;restricted&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;unsafe&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> parallel_mode<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>prosecdef <span class="syntax-keyword">AS</span> security_definer<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proconfig <span class="syntax-keyword">AS</span> routine_settings</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>pg_proc <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> pg_catalog<span class="syntax-punctuation">.</span>pg_namespace <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">ON</span> n<span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>pronamespace</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  n<span class="syntax-punctuation">.</span>nspname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_routines_lab&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 7: transition tables expose the complete affected set once per</span></span>
+<span class="source-line"><span class="syntax-comment">-- statement, including a legitimate zero-change status summary.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  summary_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  matched_rows <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  changed_status_rows <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>summarize_status_statement <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">trigger</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">INVOKER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-punctuation">(</span></span>
 <span class="source-line">        matched_rows<span class="syntax-punctuation">,</span> changed_status_rows</span>
@@ -1338,67 +1383,74 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">JOIN</span> new_rows <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>item_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-keyword">RETURN</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
-<span class="source-line">$<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                            <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_statement_status_summary</span>
-<span class="source-line">                              <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">REFERENCING</span> <span class="syntax-keyword">OLD</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> old_rows <span class="syntax-keyword">NEW</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> new_rows</span>
-<span class="source-line">                              <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">STATEMENT</span></span>
-<span class="source-line">                              <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>summarize_status_statement <span class="syntax-punctuation">(</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                              <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                                pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">                              <span class="syntax-keyword">SET</span></span>
-<span class="source-line">                                title <span class="syntax-operator">=</span> wi<span class="syntax-punctuation">.</span>title <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27; (reviewed)&#x27;</span></span>
-<span class="source-line">                              <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                <span class="syntax-comment">-- A statement trigger fires even when the target set is genuinely empty.</span></span>
-<span class="source-line">                                <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                                  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">                                <span class="syntax-keyword">SET</span></span>
-<span class="source-line">                                  title <span class="syntax-operator">=</span> wi<span class="syntax-punctuation">.</span>title</span>
-<span class="source-line">                                <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                  <span class="syntax-comment">-- This two-row status transition supports the Exercise 4 reconciliation:</span></span>
-<span class="source-line">                                  <span class="syntax-comment">-- two row-level audit facts but one statement-level summary fact.</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                                    pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
-<span class="source-line">                                  <span class="syntax-keyword">SET</span></span>
-<span class="source-line">                                    status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;in_progress&#x27;</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                    wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                      s<span class="syntax-punctuation">.</span>summary_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                      s<span class="syntax-punctuation">.</span>matched_rows<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                      s<span class="syntax-punctuation">.</span>changed_status_rows</span>
-<span class="source-line">                                    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                      pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-keyword">AS</span> s</span>
-<span class="source-line">                                    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                                      s<span class="syntax-punctuation">.</span>summary_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                        <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                            pro_routines_lab<span class="syntax-punctuation">.</span>work_item_audit <span class="syntax-keyword">AS</span> a</span>
-<span class="source-line">                                          <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                            a<span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>old_status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>new_status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;in_progress&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_audit_records<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                        <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                            pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-keyword">AS</span> s</span>
-<span class="source-line">                                          <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                            s<span class="syntax-punctuation">.</span>matched_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>changed_status_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> statement_audit_records<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                        <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>changed_status_rows<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                            pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-keyword">AS</span> s</span>
-<span class="source-line">                                          <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                            s<span class="syntax-punctuation">.</span>matched_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>changed_status_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> statement_changed_status_rows<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line">$<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TRIGGER</span> work_items_statement_status_summary</span>
+<span class="source-line">  <span class="syntax-keyword">AFTER</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">ON</span> pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">REFERENCING</span> <span class="syntax-keyword">OLD</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> old_rows <span class="syntax-keyword">NEW</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-keyword">AS</span> new_rows</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">EACH</span> <span class="syntax-keyword">STATEMENT</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">FUNCTION</span> pro_routines_lab<span class="syntax-punctuation">.</span>summarize_status_statement <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  title <span class="syntax-operator">=</span> wi<span class="syntax-punctuation">.</span>title <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27; (reviewed)&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- A statement trigger fires even when the target set is genuinely empty.</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  title <span class="syntax-operator">=</span> wi<span class="syntax-punctuation">.</span>title</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- This two-row status transition supports the Exercise 4 reconciliation:</span></span>
+<span class="source-line"><span class="syntax-comment">-- two row-level audit facts but one statement-level summary fact.</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>work_items <span class="syntax-keyword">AS</span> wi</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;in_progress&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  wi<span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>summary_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>matched_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>changed_status_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-keyword">AS</span> s</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>summary_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      pro_routines_lab<span class="syntax-punctuation">.</span>work_item_audit <span class="syntax-keyword">AS</span> a</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      a<span class="syntax-punctuation">.</span>item_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>old_status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;closed&#x27;</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>new_status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;in_progress&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_audit_records<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-keyword">AS</span> s</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      s<span class="syntax-punctuation">.</span>matched_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>changed_status_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> statement_audit_records<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>changed_status_rows<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      pro_routines_lab<span class="syntax-punctuation">.</span>statement_status_summary <span class="syntax-keyword">AS</span> s</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      s<span class="syntax-punctuation">.</span>matched_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>changed_status_rows <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> statement_changed_status_rows<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">        <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span></span>
@@ -1420,12 +1472,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-comment">-- Exercise 8: only the inner duplicate insert rolls back. The outer marker</span></span>
-<span class="source-line">                                        <span class="syntax-comment">-- remains, and an unexpected condition is never swallowed.</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>exception_probe <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                          probe_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
-<span class="source-line">                                        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 8: only the inner duplicate insert rolls back. The outer marker</span></span>
+<span class="source-line"><span class="syntax-comment">-- remains, and an unexpected condition is never swallowed.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>exception_probe <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  probe_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>exception_probe <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;outer-survives&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-keyword">BEGIN</span></span>
@@ -1450,73 +1504,79 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-comment">-- Exercise 9: this lesson deliberately creates no SECURITY DEFINER routine.</span></span>
-<span class="source-line">                                        <span class="syntax-comment">-- Inventory the actual state, then return a design-only hardening checklist;</span></span>
-<span class="source-line">                                        <span class="syntax-comment">-- SQL-SEC-01 performs the privileged role/grant exercise.</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                          p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          pg_get_function_identity_arguments<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_arguments<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          p<span class="syntax-punctuation">.</span>prosecdef <span class="syntax-keyword">AS</span> security_definer<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          pg_get_userbyid<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>proowner<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> owner_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          p<span class="syntax-punctuation">.</span>proconfig <span class="syntax-keyword">AS</span> routine_settings<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          p<span class="syntax-punctuation">.</span>proacl <span class="syntax-keyword">AS</span> execute_acl</span>
-<span class="source-line">                                        <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                          pg_catalog<span class="syntax-punctuation">.</span>pg_proc <span class="syntax-keyword">AS</span> p</span>
-<span class="source-line">                                          <span class="syntax-keyword">JOIN</span> pg_catalog<span class="syntax-punctuation">.</span>pg_namespace <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">ON</span> n<span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>pronamespace</span>
-<span class="source-line">                                        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                          n<span class="syntax-punctuation">.</span>nspname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_routines_lab&#x27;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                                          p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          identity_arguments<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                            <span class="syntax-operator">*</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;dedicated owner&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;NOLOGIN role with only required object privileges&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;fixed path&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SET search_path = pg_catalog and schema-qualify every object&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;validated input&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;reject NULL, blank, out-of-range, and unauthorized values&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;closed execution surface&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;REVOKE ALL ON FUNCTION ... FROM PUBLIC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;explicit caller&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GRANT EXECUTE only to the reviewed application role&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;catalog verification&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;inspect owner, prosecdef, proconfig, and proacl&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> hardening <span class="syntax-punctuation">(</span>step_number<span class="syntax-punctuation">,</span> control<span class="syntax-punctuation">,</span> required_evidence<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                                          step_number<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                            <span class="syntax-comment">-- Exercise 10: claim a deterministic batch under row locks. Production workers</span></span>
-<span class="source-line">                                            <span class="syntax-comment">-- commit quickly, recover stale leases, and keep external work out of this lock.</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                              queue_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              claimed_by <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              claimed_at timestamptz</span>
-<span class="source-line">                                            <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-punctuation">(</span>claimed_by<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">VALUES</span></span>
-<span class="source-line">                                            <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                            <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                            <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">WITH</span> claimable <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                              q<span class="syntax-punctuation">.</span>queue_id</span>
-<span class="source-line">                                            <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                              pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-keyword">AS</span> q</span>
-<span class="source-line">                                            <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                              q<span class="syntax-punctuation">.</span>claimed_by <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                                              q<span class="syntax-punctuation">.</span>queue_id</span>
-<span class="source-line">                                            <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                                              SKIP LOCKED</span>
-<span class="source-line">                                            <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line">                                          pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-keyword">AS</span> q</span>
-<span class="source-line">                                        <span class="syntax-keyword">SET</span></span>
-<span class="source-line">                                          claimed_by <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;worker-1&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          claimed_at <span class="syntax-operator">=</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-06-01 00:00:00+00&#x27;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                          claimable <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                                          q<span class="syntax-punctuation">.</span>queue_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>queue_id</span>
-<span class="source-line">                                        RETURNING</span>
-<span class="source-line">                                          q<span class="syntax-punctuation">.</span>queue_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          q<span class="syntax-punctuation">.</span>claimed_by<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          q<span class="syntax-punctuation">.</span>claimed_at<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 9: this lesson deliberately creates no SECURITY DEFINER routine.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inventory the actual state, then return a design-only hardening checklist;</span></span>
+<span class="source-line"><span class="syntax-comment">-- SQL-SEC-01 performs the privileged role/grant exercise.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_get_function_identity_arguments<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_arguments<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>prosecdef <span class="syntax-keyword">AS</span> security_definer<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_get_userbyid<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>proowner<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> owner_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proconfig <span class="syntax-keyword">AS</span> routine_settings<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proacl <span class="syntax-keyword">AS</span> execute_acl</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>pg_proc <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> pg_catalog<span class="syntax-punctuation">.</span>pg_namespace <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">ON</span> n<span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>pronamespace</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  n<span class="syntax-punctuation">.</span>nspname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_routines_lab&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  identity_arguments<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;dedicated owner&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;NOLOGIN role with only required object privileges&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;fixed path&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SET search_path = pg_catalog and schema-qualify every object&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;validated input&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;reject NULL, blank, out-of-range, and unauthorized values&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;closed execution surface&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;REVOKE ALL ON FUNCTION ... FROM PUBLIC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;explicit caller&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;GRANT EXECUTE only to the reviewed application role&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;catalog verification&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;inspect owner, prosecdef, proconfig, and proacl&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> hardening <span class="syntax-punctuation">(</span>step_number<span class="syntax-punctuation">,</span> control<span class="syntax-punctuation">,</span> required_evidence<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  step_number<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 10: claim a deterministic batch under row locks. Production workers</span></span>
+<span class="source-line"><span class="syntax-comment">-- commit quickly, recover stale leases, and keep external work out of this lock.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  queue_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  claimed_by <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  claimed_at timestamptz</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-punctuation">(</span>claimed_by<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> claimable <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    q<span class="syntax-punctuation">.</span>queue_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-keyword">AS</span> q</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    q<span class="syntax-punctuation">.</span>claimed_by <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    q<span class="syntax-punctuation">.</span>queue_id</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    SKIP LOCKED</span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  pro_routines_lab<span class="syntax-punctuation">.</span>claim_queue <span class="syntax-keyword">AS</span> q</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  claimed_by <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;worker-1&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  claimed_at <span class="syntax-operator">=</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-06-01 00:00:00+00&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  claimable <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  q<span class="syntax-punctuation">.</span>queue_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>queue_id</span>
+<span class="source-line">RETURNING</span>
+<span class="source-line">  q<span class="syntax-punctuation">.</span>queue_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  q<span class="syntax-punctuation">.</span>claimed_by<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  q<span class="syntax-punctuation">.</span>claimed_at<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
 

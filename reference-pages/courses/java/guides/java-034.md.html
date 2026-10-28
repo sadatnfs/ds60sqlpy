@@ -262,19 +262,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Test the pure calculation.</strong> Compute 3 items at 125 cents and check the zero/negative quantity policy. <strong>Expected:</strong> 375 cents; nonpositive quantity rejected. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 375 cents; nonpositive quantity rejected.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compose a deterministic service.</strong> Inject a fixedcatalog,clock and audit list,and request twoitems. <strong>Expected:</strong> total250,time2026-01-01T00:00:00Z,oneauditevent. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with total250,time2026-01-01T00:00:00Z,oneauditevent.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject an unknown catalog item.</strong> Requestmissing andinspecttheauditlist. <strong>Expected:</strong> NoSuchElementException;no additional audit. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with NoSuchElementException;no additional audit.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Propagate an infrastructure failure.</strong> Inject a Catalog thatthrowsIOException. <strong>Expected:</strong> same failure type;no success audit. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with same failure type;no success audit.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Prove invalid quantity fails before a repository call.</strong> Use a countingcatalog and request negative quantity. <strong>Expected:</strong> repositorycallcount0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with repositorycallcount0.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Detect arithmetic overflow without an event.</strong> UseLong.MAX_VALUEunitprice andquantity2. <strong>Expected:</strong> ArithmeticException;audit sink unused. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with ArithmeticException;audit sink unused.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

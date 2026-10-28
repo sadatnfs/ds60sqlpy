@@ -277,19 +277,19 @@ result<span class="syntax-operator">=</span><span class="syntax-punctuation">{</
 <ol>
 <li><strong>Calculate recall and reciprocal rank.</strong> Use relevant IDs a, c and retrieved b, c, a. <strong>Expected:</strong> recall 1; reciprocal rank 0.5. <strong>Verify:</strong> Save the assertion results for exercise 1, including recall 1; reciprocal rank 0.5.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Measure a retrieval miss.</strong> Use relevant a and retrieved b, c. <strong>Expected:</strong> recall 0; reciprocal rank 0. <strong>Verify:</strong> Save the assertion results for exercise 2, including recall 0; reciprocal rank 0.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Handle an unanswerable question.</strong> Use an empty relevant set and a saved abstention result. <strong>Expected:</strong> recall None; appropriate abstention True. <strong>Verify:</strong> Save the assertion results for exercise 3, including recall None; appropriate abstention True.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Separate support from correctness.</strong> Record a correct-looking answer whose cited context does not support it. <strong>Expected:</strong> correct True but supported False. <strong>Verify:</strong> Save the assertion results for exercise 4, including correct True but supported False.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Apply an oracle-context control.</strong> Compare q1 observed incorrect with oracle-context correct under the same rubric. <strong>Expected:</strong> paired improvement 1 for q1. <strong>Verify:</strong> Save the assertion results for exercise 5, including paired improvement 1 for q1.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject duplicate result identities.</strong> Validate one score row per question and inject a duplicateq 1. <strong>Expected:</strong> duplicate ID detected. <strong>Verify:</strong> Save the assertion results for exercise 6, including duplicate ID detected.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

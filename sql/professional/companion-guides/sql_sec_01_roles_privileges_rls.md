@@ -1,31 +1,5 @@
 # SQL-SEC-01: Roles, Privileges, and Row-Level Security
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-found-02` and `sql-39`
-- **Prerequisites:** [SQL-FOUND-01; relational design](sql_found_01_relational_design.md),
-  [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md), SQL Day 38
-  transactions, [SQL Day 39 locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md),
-  and the disposable `advanced_sql_training` database.
-- **Optional capability:** hands-on role tests require the connected PostgreSQL
-  role to have `CREATEROLE` or superuser status. The default script checks first
-  and safely skips without creating anything when that capability is absent.
-- **Artifacts:** [learner SQL](../lessons/sql_sec_01_roles_privileges_rls.sql) ·
-  [solution reasoning](../solutions/sql_sec_01_roles_privileges_rls_solutions.md) ·
-  [executable solution](../solutions/sql_sec_01_roles_privileges_rls_solutions.sql)
-
-This command is portable across Windows PowerShell, macOS, and Linux:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql
-```
-
-Do not connect as an administrator to a shared or valuable database merely to
-make the optional path run. The lab creates only NOLOGIN roles inside one
-transaction and ends with `ROLLBACK`; it never sets passwords, changes server
-configuration, or grants broad access.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -90,6 +64,32 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-found-02` and `sql-39`
+- **Prerequisites:** [SQL-FOUND-01; relational design](sql_found_01_relational_design.md),
+  [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md), SQL Day 38
+  transactions, [SQL Day 39 locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md),
+  and the disposable `advanced_sql_training` database.
+- **Optional capability:** hands-on role tests require the connected PostgreSQL
+  role to have `CREATEROLE` or superuser status. The default script checks first
+  and safely skips without creating anything when that capability is absent.
+- **Artifacts:** [learner SQL](../lessons/sql_sec_01_roles_privileges_rls.sql) ·
+  [solution reasoning](../solutions/sql_sec_01_roles_privileges_rls_solutions.md) ·
+  [executable solution](../solutions/sql_sec_01_roles_privileges_rls_solutions.sql)
+
+This command is portable across Windows PowerShell, macOS, and Linux:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql
+```
+
+Do not connect as an administrator to a shared or valuable database merely to
+make the optional path run. The lab creates only NOLOGIN roles inside one
+transaction and ends with `ROLLBACK`; it never sets passwords, changes server
+configuration, or grants broad access.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -109,7 +109,7 @@ The first runnable example has a concrete contract: Example 1 returns one row pe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

@@ -282,19 +282,19 @@ answer<span class="syntax-operator">=</span>extractive_answer<span class="syntax
 <ol>
 <li><strong>Return a supported extractive answer.</strong> Answer the conversion-definition question from the metric document and its first sentence. <strong>Expected:</strong> status answered; one claim; citation slices the exact sentence. <strong>Verify:</strong> Save the assertion results for exercise 1, including status answered; one claim; citation slices the exact sentence.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject a corrupted span.</strong> Change the stored quote while leaving citation offsets unchanged. <strong>Expected:</strong> citation integrity check returns False. <strong>Verify:</strong> Save the assertion results for exercise 2, including citation integrity check returns False.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Abstain on missing evidence.</strong> Request an unsupported comet-period answer with no admitted supporting document. <strong>Expected:</strong> status unknown; claims empty; reason missing evidence. <strong>Verify:</strong> Save the assertion results for exercise 3, including status unknown; claims empty; reason missing evidence.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Separate a valid citation from support.</strong> Cite the metric document for a claim about statistical significance and inspect the authored support map. <strong>Expected:</strong> document exists but significance claim unsupported. <strong>Verify:</strong> Save the assertion results for exercise 4, including document exists but significance claim unsupported.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Bind the source version.</strong> Compare a citation requiring version 1 with a supplied version 2 document. <strong>Expected:</strong> version mismatch blocks citation reuse. <strong>Verify:</strong> Save the assertion results for exercise 5, including version mismatch blocks citation reuse.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep arithmetic separate from prose.</strong> Compute 3 purchases over 10 visits and attach the deterministic result to an explanation record. <strong>Expected:</strong> rate.3 with input counts preserved. <strong>Verify:</strong> Save the assertion results for exercise 6, including rate.3 with input counts preserved.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

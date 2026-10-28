@@ -1,13 +1,5 @@
 # Day 14: Numeric Types, Casting, and Precision (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 13; date, time, and time zones](day13_date_time_functions.md)
-- **Artifacts:** [learner SQL](../day14_numeric_and_casting.sql) ·
-  [solution reasoning](../solutions/day14_solutions.md) ·
-  [executable solution](../solutions/day14_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -72,6 +64,14 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Prerequisites:** [Day 13; date, time, and time zones](day13_date_time_functions.md)
+- **Artifacts:** [learner SQL](../day14_numeric_and_casting.sql) ·
+  [solution reasoning](../solutions/day14_solutions.md) ·
+  [executable solution](../solutions/day14_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -95,7 +95,7 @@ business question requires.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day14_numeric_and_casting.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day14_numeric_and_casting.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

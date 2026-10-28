@@ -165,12 +165,56 @@ def lint_group(language: str, paths: list[str], root: Path) -> bool:
     for path in paths:
         # Swift and Scala use their own parsers below because Tree-sitter rejects
         # valid result-builder and inline-lambda syntax in the taught dialects.
-        if language in {"swift", "scala", "r"}:
+        if language in {"swift", "scala", "r", "julia", "stan", "dbt"}:
             continue
         for error in syntax_errors(path, root, language):
             print(error, file=sys.stderr)
             success = False
-    if language == "r":
+    if language == "dbt":
+        for path in paths:
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts/dbt_source_tools.py"), "lint"],
+                input=(root / path).read_bytes(),
+                cwd=root,
+                capture_output=True,
+                check=False,
+            )
+            if result.returncode:
+                print(
+                    path + ": " + result.stderr.decode("utf-8", errors="replace"), file=sys.stderr
+                )
+                success = False
+    elif language in {"julia", "stan"}:
+        command = (
+            [
+                "julia",
+                "--startup-file=no",
+                "--compiled-modules=existing",
+                "--project=/opt/julia-env",
+                str(root / "scripts/julia_source_tools.jl"),
+                "lint",
+            ]
+            if language == "julia"
+            else [sys.executable, str(root / "scripts/stan_source_tools.py"), "lint"]
+        )
+        for path in paths:
+            try:
+                result = subprocess.run(
+                    command,
+                    input=(root / path).read_bytes(),
+                    cwd=root,
+                    capture_output=True,
+                    check=False,
+                )
+            except FileNotFoundError:
+                print("Missing prepared language tool. Use ./scripts/lint-repo.", file=sys.stderr)
+                return False
+            if result.returncode:
+                print(
+                    path + ": " + result.stderr.decode("utf-8", errors="replace"), file=sys.stderr
+                )
+                success = False
+    elif language == "r":
         for path in paths:
             try:
                 result = subprocess.run(

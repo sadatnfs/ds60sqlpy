@@ -1,0 +1,23 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-057"],
+  "concepts": ["Kafka ingestion and real-time segments"],
+  "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
+  "sources": [
+    [
+      "Stream ingestion",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/stream-ingestion.md"
+    ],
+    [
+      "Kafka connector",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/stream-ingestion/import-from-apache-kafka.md"
+    ],
+    [
+      "Table configuration",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/reference/configuration-reference/table.md"
+    ]
+  ]
+}

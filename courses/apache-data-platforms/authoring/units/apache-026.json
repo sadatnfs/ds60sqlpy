@@ -1,0 +1,16 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-023", "apache-025", "apache-018"],
+  "concepts": ["capacity experiments", "critical path", "bounded collect", "measurement limits"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Ballista tuning guide",
+      "https://datafusion.apache.org/ballista/user-guide/tuning-guide.html"
+    ],
+    ["Ballista configuration", "https://datafusion.apache.org/ballista/user-guide/configs.html"]
+  ]
+}

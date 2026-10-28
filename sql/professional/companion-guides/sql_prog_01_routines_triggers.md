@@ -1,24 +1,5 @@
 # SQL-PROG-01: Functions, Procedures, and Triggers
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisite:** `sql-found-02`
-- **Prerequisites:** [SQL-FOUND-02; versioned migrations](sql_found_02_versioned_migrations.md),
-  transactions, constraints, and multirow `UPDATE`.
-- **Artifacts:** [learner SQL](../lessons/sql_prog_01_routines_triggers.sql) ·
-  [solution reasoning](../solutions/sql_prog_01_routines_triggers_solutions.md) ·
-  [executable solution](../solutions/sql_prog_01_routines_triggers_solutions.sql)
-
-Run from the repository root on Windows PowerShell, macOS, or Linux:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_prog_01_routines_triggers.sql
-```
-
-The schema, functions, procedures, triggers, and audit rows are created inside
-one transaction and removed by `ROLLBACK`.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -83,6 +64,25 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisite:** `sql-found-02`
+- **Prerequisites:** [SQL-FOUND-02; versioned migrations](sql_found_02_versioned_migrations.md),
+  transactions, constraints, and multirow `UPDATE`.
+- **Artifacts:** [learner SQL](../lessons/sql_prog_01_routines_triggers.sql) ·
+  [solution reasoning](../solutions/sql_prog_01_routines_triggers_solutions.md) ·
+  [executable solution](../solutions/sql_prog_01_routines_triggers_solutions.sql)
+
+Run from the repository root on Windows PowerShell, macOS, or Linux:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_prog_01_routines_triggers.sql
+```
+
+The schema, functions, procedures, triggers, and audit rows are created inside
+one transaction and removed by `ROLLBACK`.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -102,7 +102,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_prog_01_routines_triggers.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_prog_01_routines_triggers.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

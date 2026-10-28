@@ -24,10 +24,14 @@ By the end of the lesson, you can:
 
 ## Network and offline contract
 
-The notebook's first `pipeline("sentiment-analysis")` call may download a
-default model and tokenizer. `en_core_web_sm` is also a separate spaCy model
-download. Cache intentional assets during connected setup; do not assume they
-exist on another machine.
+The default notebook never requests a pretrained model. `RUN_CACHED_SENTIMENT`
+is false until a trusted, pinned model/tokenizer snapshot is deliberately placed
+in `artifacts/day49/prepared/sentiment`. Both loaders use `local_files_only=True`;
+missing assets fail locally. The package install alone does not provide those
+assets. `en_core_web_sm` is another separately installed model; if it is absent,
+the notebook uses a blank tokenizer and explicitly reports that trained POS/NER
+are unavailable. Read each model card, license and exact revision before a
+separate connected preparation. No example should send private text to a service.
 
 Offline fallbacks:
 
@@ -63,15 +67,16 @@ subword IDs and masks.
 ## Worked example: make the model choice explicit
 
 ```python
-from transformers import pipeline
+from pathlib import Path
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
-# This identifier should already be cached for an offline run.
-sentiment = pipeline(
-    "sentiment-analysis",
-    model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+model_dir = Path("artifacts/day49/prepared/sentiment")
+tokenizer = AutoTokenizer.from_pretrained(model_dir, local_files_only=True)
+model = AutoModelForSequenceClassification.from_pretrained(
+    model_dir, local_files_only=True, use_safetensors=True
 )
-for text in ["I love this course!", "This is terrible..."]:
-    print(text, sentiment(text))
+sentiment = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer, device=-1)
+print(sentiment(["I love this course!", "This is terrible..."]))
 ```
 
 Record the exact model identifier and package version. A confidence-like score
@@ -82,10 +87,13 @@ sarcasm, dialect, negation, or domain-specific language.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-49` for its guide, notebook and capability notice. The default Core does not include the `nlp` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [offline NLP course](../../../courses/nlp/guides/nlp-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `nlp` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The default tokenizer examples need spaCy; they do not contain a trained sentiment or POS model. Cached Transformers inference and the IMDB training reference are explicitly enabled local-asset extensions. Prepare Torch as well as the nlp extra for those extensions.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -94,8 +102,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 49 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -136,7 +143,7 @@ privacy boundary.
 ### Worked examples and syntax anatomy
 
 - **`spacy.blank('en')`:** creates an offline tokenizer without a downloaded statistical pipeline.
-- **`pipeline(task, model=..., local_files_only=...)`:** bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.
+- **`from_pretrained(..., local_files_only=True)`:** bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.
 - **token offsets and truncation:** connect tokens back to original text and define what content the model actually saw.
 
 Read an API call from the inside out: identify the data entering the
@@ -221,8 +228,7 @@ assert token_ids[-1] == vocabulary["[UNK]"]
    and decoded output. Use contractions and punctuation to expose differences.
 
 The reference solution extends the topic with a 20-step DistilBERT smoke
-fine-tune and a spaCy matcher. That path downloads dataset/model assets unless
-cached and is intentionally not the default offline exercise.
+fine-tune and a spaCy matcher. That local project requires separately prepared dataset/model snapshots and is not the default offline exercise. It reads those local assets without Hub requests. IMDB is an external dataset with its own provenance; it is not one of the course's original synthetic fixtures.
 
 ### Additional mastery practice
 
@@ -292,7 +298,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-49` — Day 49 — NLP Basics with Hugging Face and spaCy.
+Tutor me through `python-49` : Day 49 : NLP Basics with Hugging Face and spaCy.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tokenization contracts, cached NLP models, and sensitive-text evaluation. Use exactly these maintained learner materials:

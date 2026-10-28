@@ -45,6 +45,8 @@ val_tfms = transforms.Compose(
 if using_image_folder:
     train_ds = datasets.ImageFolder(train_dir, transform=val_tfms)
     valid_ds = datasets.ImageFolder(valid_dir, transform=val_tfms)
+    if train_ds.class_to_idx != valid_ds.class_to_idx:
+        raise ValueError("Training and validation class mappings differ")
     n_classes = len(train_ds.classes)
 else:
     print(
@@ -87,7 +89,8 @@ checkpoint = (
     Path(torch.hub.get_dir()) / "checkpoints" / Path(weights.url).name
 )
 if checkpoint.exists():
-    model = models.resnet18(weights=weights)
+    model = models.resnet18(weights=None)
+    model.load_state_dict(torch.load(checkpoint, map_location="cpu", weights_only=True))
     using_pretrained_weights = True
 else:
     model = models.resnet18(weights=None)
@@ -110,6 +113,10 @@ loss_fn = nn.CrossEntropyLoss()
 def run_epoch(train=True):
     dl = train_dl if train else valid_dl
     model.train() if train else model.eval()
+    # A frozen backbone also keeps BatchNorm running buffers fixed.
+    for module in model.modules():
+        if isinstance(module, nn.modules.batchnorm._BatchNorm):
+            module.eval()
     total=0; correct=0; loss_sum=0.0
     with torch.set_grad_enabled(train):
         for xb, yb in dl:
@@ -142,7 +149,7 @@ for _ in range(5):
     hist_tune['tr'].append((tr_loss, tr_acc)); hist_tune['va'].append((va_loss, va_acc))
 ```
 Line‑by‑line
-- Freeze: prevents backbone weights from updating; only the new head learns
+- Freeze: prevents backbone weights from updating; BatchNorm is explicitly kept in evaluation mode so its running buffers also stay fixed
 - Replace head: output dims = n_classes
 - Two phases: first stabilize head, then unfreeze last block with smaller LR to avoid catastrophic forgetting
 

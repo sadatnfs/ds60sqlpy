@@ -15,14 +15,28 @@ import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lab import LabServer
+from ds60sqlpy.modules import ModuleCatalog
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(scope="module")
+def browser_module_catalog() -> ModuleCatalog:
+    # Reuse real immutable curriculum metadata, not learner state. Catalog admission
+    # has its own tests; rebuilding every subject inside an HTTP auth request makes
+    # this boundary test depend on catalog size and parallel disk/CPU contention.
+    return ModuleCatalog(ROOT)
+
+
 @pytest.fixture
-def sandbox_server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[LabServer]:
+def sandbox_server(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, browser_module_catalog: ModuleCatalog
+) -> Iterator[LabServer]:
     monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda _: {})
     monkeypatch.setattr("ds60sqlpy.module_service.rendered_targets", lambda _: {})
+    monkeypatch.setattr(
+        "ds60sqlpy.module_service.ModuleCatalog", lambda _root: browser_module_catalog
+    )
     server = LabServer(Catalog.load(), progress_path=tmp_path / "progress.json")
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -43,8 +57,8 @@ def request(
     payload: dict[str, Any] | None = None,
     headers: dict[str, str] | None = None,
 ) -> tuple[int, dict[str, str], bytes]:
-    # The first valid module request initializes the full catalog. Allow a bounded
-    # cold start under parallel CI load, still below the browser's 25-second wait.
+    # Bound HTTP processing independently of the fixture's curriculum preparation.
+    # ModuleService and each learner-state directory are still initialized lazily.
     connection = HTTPConnection("127.0.0.1", server.server_port, timeout=15)
     try:
         connection.request(
@@ -154,6 +168,7 @@ def test_browser_observation_writes_require_exact_host_token_and_origin(
     assert server.token.encode() not in body
     assert server._module_state_directory is not None
     assert not server._module_state_directory.exists()
+    assert server._modules is None
 
     status, result_headers, body = request(
         server, "/api/modules", method="POST", payload=payload, headers=headers

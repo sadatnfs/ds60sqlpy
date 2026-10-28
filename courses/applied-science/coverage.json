@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "mode": "tutorial",
+  "areas": [
+    {
+      "area": "causal identification and transport",
+      "baseline": "statistics-015",
+      "units": ["science-001", "science-002", "science-003"],
+      "new_evidence": "Exact target-population contrasts, weight concentration and specified bias scenarios",
+      "limits": "Identification assumptions remain substantive; synthetic potential means are not external causal evidence."
+    },
+    {
+      "area": "staggered and longitudinal causality",
+      "baseline": "statistics-science-008",
+      "units": ["science-004", "science-005", "science-006"],
+      "new_evidence": "Eligible group-time contrasts, sequential enumeration, IPW and information-time contracts",
+      "limits": "The worked mechanisms do not replace design-specific inference for a real staggered or dynamic study."
+    },
+    {
+      "area": "forecasting and decision loss",
+      "baseline": "statistics-science-003",
+      "units": ["science-007", "science-008", "science-009"],
+      "new_evidence": "Actual vintage leakage contrast, covariance-weighted reconciliation and asymmetric decision loss",
+      "limits": "Small deterministic scenarios do not establish general forecasting superiority or interval calibration."
+    },
+    {
+      "area": "survival and competing risks",
+      "baseline": "statistics-science-004",
+      "units": ["science-010", "science-011", "science-012"],
+      "new_evidence": "Risk-set likelihood oracle, fitted censored Weibull and coherent incidence calculations",
+      "limits": "Residual-style diagnostics are labeled mechanisms; external PH assumptions and censoring need review."
+    },
+    {
+      "area": "recommendation and policy evaluation",
+      "baseline": "statistics-science-005",
+      "units": ["science-013", "science-014", "science-015"],
+      "new_evidence": "Candidate ceilings, trained pairwise scorer with gradient oracle and exact logged-policy values",
+      "limits": "This is not an internet-scale serving system or an assertion that historical clicks identify preferences."
+    },
+    {
+      "area": "optimization under uncertainty",
+      "baseline": "statistics-036",
+      "units": ["science-016", "science-017", "science-018"],
+      "new_evidence": "Real LP/MILP, independent enumeration, local sensitivity and finite-scenario information value",
+      "limits": "Estimated coefficients, unknown scenarios and normative constraints need additional evidence."
+    },
+    {
+      "area": "research synthesis",
+      "baseline": "statistics-science-006",
+      "units": ["science-019", "science-020"],
+      "new_evidence": "Estimated heterogeneity, predictive vs mean uncertainty, GLS dependence and explicit missing-study scenario",
+      "limits": "Tiny-study normal approximations are not claimed calibrated; scenario rows are not invented observed studies."
+    },
+    {
+      "area": "spatial and survey reasoning",
+      "baseline": "statistics-030",
+      "units": ["science-021", "science-022"],
+      "new_evidence": "Moran graph contrasts, blocked split edges, design expectation and covariance-derived clustering effect",
+      "limits": "Spatial exchangeability, population support and actual sampling design remain explicit assumptions."
+    },
+    {
+      "area": "high-dimensional prediction and decisions",
+      "baseline": "statistics-learning-007",
+      "units": ["science-023", "science-024"],
+      "new_evidence": "Rank-deficiency oracle, independent prediction and data-to-decision rollback ledger",
+      "limits": "Coefficient uniqueness under regularization is distinct from scientific identification and decision validity."
+    }
+  ]
+}

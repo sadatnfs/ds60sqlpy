@@ -1,0 +1,1503 @@
+{
+  "schema_version": 1,
+  "id": "data-ml-engineering",
+  "title": "Data and ML Engineering",
+  "summary": "A complete tutorial from engineering foundations through data systems, dependable ML workflows and the LLM serving lifecycle.",
+  "learning_mode": "tutorial",
+  "lessons": [
+    {
+      "id": "dme-001",
+      "title": "From a record to an engineering decision",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [],
+      "runtime": "python-core",
+      "concepts": [
+        "record grain",
+        "input contract",
+        "publication decision",
+        "observable evidence"
+      ],
+      "outcome": "Trace a small record-to-metric pipeline and define its observable contract.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-002",
+      "title": "Files, paths, processes and the Linux container boundary",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "dme-001"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "process",
+        "working directory",
+        "filesystem boundary",
+        "stdout and stderr",
+        "exit status"
+      ],
+      "outcome": "Read and write owned UTF-8 files through explicit paths.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-003",
+      "title": "Values, units, missingness and clocks",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-001"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "types",
+        "units",
+        "missingness",
+        "aware timestamps",
+        "denominators"
+      ],
+      "outcome": "Normalize aware timestamps and retain the meaning of missing values.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-004",
+      "title": "SQL, row grain, keys and relational reasoning",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-001",
+        "dme-003"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "relational grain",
+        "primary keys",
+        "join cardinality",
+        "aggregation",
+        "SQL NULL"
+      ],
+      "outcome": "Execute real DuckDB joins and grouped metrics with an independent row oracle.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-005",
+      "title": "Python functions, collections and state boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-001",
+        "dme-003"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "function interface",
+        "mutation",
+        "iterator lifetime",
+        "replay",
+        "complexity"
+      ],
+      "outcome": "Build a pure transformation with explicit inputs and outputs.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-006",
+      "title": "Tests, invariants and evidence that can falsify a claim",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-005"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "independent oracle",
+        "unit tests",
+        "invariants",
+        "negative cases",
+        "evidence boundaries"
+      ],
+      "outcome": "Check hand-derived outputs, boundaries and changed inputs.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-007",
+      "title": "Structural schemas and semantic data contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-003",
+        "dme-005",
+        "dme-006"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "schema validation",
+        "strict types",
+        "compatibility direction",
+        "units",
+        "consumer contract"
+      ],
+      "outcome": "Validate a strict typed input and a compatible additive schema change.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-008",
+      "title": "Source, dependency and data identities for reproducible work",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-002",
+        "dme-006",
+        "dme-007"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "content identity",
+        "source control",
+        "dependency identity",
+        "reproducibility",
+        "provenance"
+      ],
+      "outcome": "Build a reviewable source/data/configuration hash manifest.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-009",
+      "title": "File ingestion, manifests and resumable delivery",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-002",
+        "dme-007",
+        "dme-008"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "delivery manifest",
+        "content identity",
+        "explicit parsing",
+        "transactional acceptance",
+        "replay"
+      ],
+      "outcome": "Ingest a declared CSV/JSON delivery with checksums and row reconciliation.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-010",
+      "title": "HTTP APIs, pagination, retries and idempotency",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-007",
+        "dme-009"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "HTTP contract",
+        "snapshot pagination",
+        "idempotency key",
+        "unknown outcome",
+        "ASGI boundary"
+      ],
+      "outcome": "Exercise an actual local ASGI pagination contract without network access.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-011",
+      "title": "Change-data capture events and ordered application",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-004",
+        "dme-009",
+        "dme-010"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "absolute versus delta events",
+        "source version",
+        "tombstone",
+        "transaction ownership",
+        "capture versus application"
+      ],
+      "outcome": "Apply synthetic insert/update/delete events to a real local SQLite table.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-012",
+      "title": "Facts, dimensions and slowly changing business meaning",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-004",
+        "dme-007",
+        "dme-011"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "fact grain",
+        "dimension identity",
+        "valid-time interval",
+        "cardinality",
+        "historical meaning"
+      ],
+      "outcome": "Build and query a real dimensional product at a declared grain.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-013",
+      "title": "JSON, CSV, Parquet and Arrow interoperability",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-003",
+        "dme-007",
+        "dme-009"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "serialization contract",
+        "Arrow schema",
+        "Parquet",
+        "validity bitmap",
+        "JSON representation"
+      ],
+      "outcome": "Round-trip typed columnar records and inspect actual Arrow/Parquet schemas.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-014",
+      "title": "Event time, availability time and late-known facts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-003",
+        "dme-011",
+        "dme-012"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "event time",
+        "known time",
+        "prediction cutoff",
+        "temporal leakage",
+        "request coverage"
+      ],
+      "outcome": "Select only information known at a decision cutoff.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-015",
+      "title": "Atomic publication and consistent consumer views",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-002",
+        "dme-008",
+        "dme-009"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "immutable version",
+        "atomic pointer",
+        "manifest integrity",
+        "failure phase",
+        "consistent reader"
+      ],
+      "outcome": "Publish a checked local manifest through an atomic pointer replacement.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-016",
+      "title": "Data quality, deduplication and explicit quarantine",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-004",
+        "dme-007",
+        "dme-011",
+        "dme-013"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "physical schema",
+        "quarantine",
+        "audit identity",
+        "source-version conflict",
+        "current snapshot"
+      ],
+      "outcome": "Retain valid and rejected Polars records with concrete reason codes.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-017",
+      "title": "Choosing and comparing local query engines",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-004",
+        "dme-013",
+        "dme-016"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "query engine",
+        "null aggregate",
+        "independent oracle",
+        "row grain"
+      ],
+      "outcome": "Compare actual SQLite, DuckDB and Polars results under one contract.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-018",
+      "title": "Columnar layout, partition pruning and bounded reads",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-013",
+        "dme-017"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Parquet fragment",
+        "partition pruning",
+        "projection",
+        "small files"
+      ],
+      "outcome": "Inspect real partitioned Parquet fragments selected by a predicate.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-019",
+      "title": "Spark partitions, shuffles and skew",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-017",
+        "dme-018"
+      ],
+      "runtime": "spark-local-python",
+      "concepts": [
+        "Spark partition",
+        "shuffle exchange",
+        "key skew",
+        "partial aggregation"
+      ],
+      "outcome": "Execute and inspect a real Spark aggregation and its physical shuffle boundary.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-020",
+      "title": "Orchestration, dependencies and safe retries",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-008",
+        "dme-015",
+        "dme-016"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "dependency DAG",
+        "checkpoint identity",
+        "reconciliation",
+        "task attempt"
+      ],
+      "outcome": "Execute a bounded local DAG with recorded completed artifact identities.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-021",
+      "title": "Transactions, idempotency and the outbox pattern",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-010",
+        "dme-011",
+        "dme-020"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "transactional outbox",
+        "consumer inbox",
+        "idempotency",
+        "uncertain acknowledgement"
+      ],
+      "outcome": "Commit a state change and an outbox event in one actual SQLite transaction.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-022",
+      "title": "Backfills, overlapping windows and correction policies",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-011",
+        "dme-012",
+        "dme-014",
+        "dme-021"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "half-open interval",
+        "partition revision",
+        "backfill",
+        "replacement semantics"
+      ],
+      "outcome": "Rebuild a declared half-open historical interval and reconcile it.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-023",
+      "title": "Stream windows, watermarks and state lifetime",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-014",
+        "dme-021",
+        "dme-022"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "event time",
+        "watermark",
+        "allowed lateness",
+        "revision-aware sink"
+      ],
+      "outcome": "Trace a bounded event-time window mechanism under out-of-order arrivals.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-024",
+      "title": "Checkpoints, replay and state-schema evolution",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-015",
+        "dme-020",
+        "dme-021",
+        "dme-023"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "checkpoint cursor",
+        "consistent prefix",
+        "source identity",
+        "state-schema evolution"
+      ],
+      "outcome": "Restore a versioned checkpoint and compare with a full replay oracle.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-025",
+      "title": "Object storage, object identity and conditional updates",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-015",
+        "dme-021"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "object key",
+        "generation precondition",
+        "manifest publication",
+        "ABA conflict"
+      ],
+      "outcome": "Model versioned object publication and conditional pointer updates explicitly.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-026",
+      "title": "Lake file organization, manifests and evolution",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-013",
+        "dme-018",
+        "dme-025"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Parquet manifest",
+        "directional schema evolution",
+        "union by name",
+        "dataset grain"
+      ],
+      "outcome": "Query an actual versioned Parquet manifest with DuckDB.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-027",
+      "title": "Table formats: snapshots, transactions and concurrency",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-021",
+        "dme-025",
+        "dme-026"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "table snapshot",
+        "optimistic parent check",
+        "logical delete",
+        "orphan reachability"
+      ],
+      "outcome": "Investigate snapshot and delete invariants using real local files and a clearly labelled table-format model.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-028",
+      "title": "Catalogs, discovery, ownership and access decisions",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-007",
+        "dme-027"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "dataset catalog",
+        "accepted version",
+        "resource action",
+        "semantic compatibility"
+      ],
+      "outcome": "Query a real local metadata catalog and resolve a versioned dataset contract.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-029",
+      "title": "Cassandra: access paths, partition keys and consistency",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-011",
+        "dme-018",
+        "dme-021"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "query-shaped partition key",
+        "time bucket",
+        "replica intersection",
+        "tombstone retention"
+      ],
+      "outcome": "Derive query-shaped partition keys and quantify a hot-partition case.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-030",
+      "title": "Pinot and low-latency analytical serving",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-017",
+        "dme-022",
+        "dme-023",
+        "dme-029"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "analytical serving",
+        "entity upsert",
+        "comparison revision",
+        "aggregate retraction"
+      ],
+      "outcome": "Compute a query oracle and choose a compatible ingestion grain.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-031",
+      "title": "Lineage, provenance and reproducible investigations",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-008",
+        "dme-020",
+        "dme-026",
+        "dme-028"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "artifact lineage",
+        "recipe identity",
+        "dependency invalidation",
+        "provenance"
+      ],
+      "outcome": "Trace an actual artifact dependency graph using content identities.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-032",
+      "title": "Governance, minimization, retention and review",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-013",
+        "dme-028",
+        "dme-031"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "purpose restriction",
+        "minimization",
+        "pseudonym linkage",
+        "retention audit"
+      ],
+      "outcome": "Enforce a declared synthetic access/retention policy and preserve an audit record.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-033",
+      "title": "Frame an ML decision and establish a baseline",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-032"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "decision baseline",
+        "cost-sensitive classification",
+        "validation-only threshold selection",
+        "cohort population mix"
+      ],
+      "outcome": "Train and evaluate a real baseline for an explicitly defined synthetic decision.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-034",
+      "title": "Point-in-time feature retrieval and the feature-store boundary",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "dme-033"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Feast",
+        "event time",
+        "availability time",
+        "historical feature retrieval",
+        "TTL boundary",
+        "request population"
+      ],
+      "outcome": "Use actual local Feast retrieval against a two-clock independent oracle.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-035",
+      "title": "Feature quality and fitted transformations",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-034"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "fitted preprocessing",
+        "imputation",
+        "scaling",
+        "one-hot encoding",
+        "unknown categories",
+        "data leakage"
+      ],
+      "outcome": "Fit a real preprocessing pipeline on training rows only.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-036",
+      "title": "Train/serve consistency and safe model interfaces",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-035"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "train/serve consistency",
+        "feature contracts",
+        "strict JSON",
+        "unit compatibility",
+        "fitted pipelines",
+        "validation before inference"
+      ],
+      "outcome": "Compare fitted-pipeline predictions with a reviewed JSON inference interface.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-037",
+      "title": "Reproducible training, snapshots and computation state",
+      "level": "advanced",
+      "minutes": 95,
+      "prerequisites": [
+        "dme-036"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "training reproducibility",
+        "recipe fingerprint",
+        "ordered data identity",
+        "random seeds",
+        "numerical tolerance",
+        "checkpoint state"
+      ],
+      "outcome": "Repeat a seeded training run with declared data/configuration identities.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-038",
+      "title": "Temporal evaluation, calibration and decision uncertainty",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "dme-037"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "group-aware validation",
+        "temporal evaluation",
+        "probability calibration",
+        "Brier score",
+        "AUC",
+        "label maturity",
+        "reliability uncertainty"
+      ],
+      "outcome": "Evaluate a realistic future or grouped cohort with calibrated metrics.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-039",
+      "title": "Experiments, MLflow registry and acceptance decisions",
+      "level": "advanced",
+      "minutes": 100,
+      "prerequisites": [
+        "dme-038"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "MLflow tracking",
+        "logged model",
+        "model registry",
+        "model aliases",
+        "acceptance gates",
+        "evaluation identity"
+      ],
+      "outcome": "Create and read back real local MLflow runs and model versions.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-040",
+      "title": "Artifacts, integrity and the software supply chain",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "dme-039"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "model artifacts",
+        "content hashes",
+        "strict numerical schema",
+        "bounded file loading",
+        "provenance",
+        "supply chain",
+        "origin trust"
+      ],
+      "outcome": "Validate a bounded model manifest and its exact content hashes.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-041",
+      "title": "Batch and online inference as different contracts",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-034",
+        "dme-036",
+        "dme-040"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "batch inference",
+        "online request contract",
+        "feature event time",
+        "accepted model version"
+      ],
+      "outcome": "Compare real batch predictions with a local ASGI request contract.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-042",
+      "title": "HTTP serving, concurrency and cancellation boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-021",
+        "dme-041"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "bounded admission",
+        "async cancellation",
+        "resource cleanup",
+        "uncertain effects"
+      ],
+      "outcome": "Exercise a bounded real ASGI contract and resource cleanup.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-043",
+      "title": "Observability, SLOs and error budgets",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-042"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "eligible denominator",
+        "timely success",
+        "error budget",
+        "multi-window burn"
+      ],
+      "outcome": "Compute request-based service indicators with explicit eligible denominators.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-044",
+      "title": "Data drift, model quality and delayed labels",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-014",
+        "dme-038",
+        "dme-043"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "distribution drift",
+        "matured cohort",
+        "label availability",
+        "coverage"
+      ],
+      "outcome": "Measure a changed input distribution without inferring quality loss automatically.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-045",
+      "title": "Security boundaries, secrets and shared systems",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-028",
+        "dme-032",
+        "dme-040",
+        "dme-042"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "resource authorization",
+        "fixed file mapping",
+        "POSIX descriptor",
+        "strict payload"
+      ],
+      "outcome": "Enforce a synthetic resource-authorization contract and safe request validation.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-046",
+      "title": "Capacity, latency and cost at the system boundary",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-018",
+        "dme-019",
+        "dme-042",
+        "dme-043"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "queue model",
+        "tail latency",
+        "scan amplification",
+        "cost units"
+      ],
+      "outcome": "Compute a bounded workload/capacity model and check its assumptions.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-047",
+      "title": "Incidents, retries, failure domains and degraded service",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-021",
+        "dme-042",
+        "dme-043",
+        "dme-046"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "retry budget",
+        "circuit breaker",
+        "failure domain",
+        "degraded mode"
+      ],
+      "outcome": "Trace a declared circuit-breaker/retry mechanism with bounded probes.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-048",
+      "title": "Delivery, compatibility and rollback",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dme-022",
+        "dme-026",
+        "dme-039",
+        "dme-040",
+        "dme-047"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "expand and contract",
+        "backfill readiness",
+        "consumer version",
+        "compatible rollback"
+      ],
+      "outcome": "Perform a compatible local schema migration and accepted-version switch.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-049",
+      "title": "Capstone: a validated local data product",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-016",
+        "dme-018",
+        "dme-025",
+        "dme-027",
+        "dme-031"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "complete source contract",
+        "actual analytical pipeline",
+        "Parquet publication",
+        "quality rejection"
+      ],
+      "outcome": "Connect ingestion, quarantine, real analytical transformation and an accepted publication manifest.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-050",
+      "title": "Capstone: late data, replay and backfill repair",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-021",
+        "dme-022",
+        "dme-024",
+        "dme-030",
+        "dme-049"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "durable event log",
+        "current entity state",
+        "full-history oracle",
+        "atomic correction"
+      ],
+      "outcome": "Reconcile identified streaming-style updates with a full batch recomputation.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-051",
+      "title": "Capstone: features, training, registry and inference",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-034",
+        "dme-035",
+        "dme-036",
+        "dme-039",
+        "dme-041",
+        "dme-045"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Feast historical retrieval",
+        "online materialization",
+        "MLflow artifact reload",
+        "ASGI inference"
+      ],
+      "outcome": "Connect actual Feast, fitted training, MLflow evidence and local inference.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-052",
+      "title": "Backup, restore and recovery objectives",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-024",
+        "dme-040",
+        "dme-049"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "SQLite online backup",
+        "restore readback",
+        "recovery point",
+        "recovery time"
+      ],
+      "outcome": "Create and restore an actual consistent SQLite backup with checked evidence.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-053",
+      "title": "Migration between schemas, formats and consumers",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-026",
+        "dme-048",
+        "dme-049",
+        "dme-052"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "canonical migration",
+        "minor currency units",
+        "dual readers",
+        "controlled cutover"
+      ],
+      "outcome": "Maintain simultaneous compatible readers during a real local migration.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-054",
+      "title": "Operational drill: detection, rollback and learning",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-043",
+        "dme-047",
+        "dme-048",
+        "dme-049",
+        "dme-050",
+        "dme-052"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "real process exit",
+        "operation receipt",
+        "accepted-state readback",
+        "conditional rollback"
+      ],
+      "outcome": "Diagnose a bounded fault using actual recorded workflow/service evidence.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-055",
+      "title": "System-design interviews grounded in constraints",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-046",
+        "dme-049",
+        "dme-051",
+        "dme-054"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "hard constraints",
+        "workload assumptions",
+        "architecture alternatives",
+        "qualification evidence"
+      ],
+      "outcome": "Compare two defensible designs using explicit workload and correctness requirements.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-056",
+      "title": "An evidence-backed engineering portfolio",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dme-031",
+        "dme-040",
+        "dme-054",
+        "dme-055"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "reproducible bundle",
+        "independent oracle",
+        "source-bound receipt",
+        "evidence tiers"
+      ],
+      "outcome": "Assemble a reproducible local investigation with source, input, test and runtime evidence.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-057",
+      "title": "From an HTTP request to an admitted inference job",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-056"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "request identity",
+        "validation",
+        "authentication",
+        "idempotency"
+      ],
+      "outcome": "Trace a source-bound accepted request and reconcile unknown creation outcomes without duplicate execution.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-058",
+      "title": "Bytes, subwords and the tokenizer boundary",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-057"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "byte BPE",
+        "merge ranking",
+        "UTF-8",
+        "token budgets"
+      ],
+      "outcome": "Apply exact byte-BPE merges and decode UTF-8 correctly across arbitrary byte boundaries.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-059",
+      "title": "Token embeddings, positions and retrieval representations",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-058"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "token embeddings",
+        "positions",
+        "retrieval embeddings"
+      ],
+      "outcome": "Separate token lookup and position encoding from a retrieval representation and its evaluation.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-060",
+      "title": "Safe checkpoints, startup loading and readiness",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-059"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "safe checkpoints",
+        "hash validation",
+        "startup readiness"
+      ],
+      "outcome": "Reject changed or incompatible checkpoint tensors before readiness and explain startup-only loading.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-061",
+      "title": "Device placement, transfers and precision budgets",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-060"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "CPU placement",
+        "transfer bounds",
+        "precision",
+        "KV bytes"
+      ],
+      "outcome": "Verify actual CPU placement and calculate bounded weight-transfer and KV-memory estimates.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-062",
+      "title": "Bounded admission, queues and capacity ownership",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-061"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "admission control",
+        "FIFO",
+        "reservation ownership",
+        "Little law"
+      ],
+      "outcome": "Enforce request and token reservations and explain FIFO waiting under changed service durations.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-063",
+      "title": "Prefill, causal attention and a correct KV cache",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-062"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "prefill",
+        "causal masks",
+        "cached decoding",
+        "numerical equivalence"
+      ],
+      "outcome": "Verify actual cached attention against full-prefix logits and an independent causal formula.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-064",
+      "title": "Autoregressive decoding, sampling and stopping rules",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-063"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "temperature",
+        "top-k",
+        "random state",
+        "stopping"
+      ],
+      "outcome": "Derive sampling distributions and enforce stop strings across output boundaries.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-065",
+      "title": "Batching, continuous scheduling and fairness",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-064"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "dynamic batching",
+        "fairness",
+        "padding",
+        "continuous scheduling"
+      ],
+      "outcome": "Compare latency/fairness and padding tradeoffs without confusing scheduler simulation with runtime throughput.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-066",
+      "title": "Tensor layouts, fusion and attention kernels",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-065"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "strides",
+        "fusion",
+        "online softmax",
+        "kernel evidence"
+      ],
+      "outcome": "Inspect physical tensor strides and derive stable tiled softmax before interpreting kernel evidence.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-067",
+      "title": "KV memory planning, paging and shared-prefix ownership",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-066"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "KV pages",
+        "fragmentation",
+        "prefix sharing",
+        "copy-on-write"
+      ],
+      "outcome": "Calculate page fragmentation and preserve shared prefix state through copy-on-write.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-068",
+      "title": "Quantization and speculative decoding without exaggerated claims",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-067"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "quantization error",
+        "speculative acceptance",
+        "residual distribution"
+      ],
+      "outcome": "Bound quantization error and prove a speculative acceptance correction reconstructs its target distribution.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-069",
+      "title": "SSE, UTF-8, backpressure and explicit event readback",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-068"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "SSE framing",
+        "UTF-8",
+        "backpressure",
+        "cursor readback"
+      ],
+      "outcome": "Parse exact SSE across arbitrary network chunks and read retained event suffixes without generation.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-070",
+      "title": "Cancellation, errors and recovery without replay",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-069"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "cooperative cancellation",
+        "terminal errors",
+        "durable recovery"
+      ],
+      "outcome": "Preserve resource ownership during cancellation and mark interrupted requests without replay.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-071",
+      "title": "Latency metrics, profiling and workload evidence",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-070"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "TTFT",
+        "TPOT",
+        "percentiles",
+        "profiling"
+      ],
+      "outcome": "Define latency denominators and distinguish compute, wall time, cohort composition and actual profiling evidence.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    },
+    {
+      "id": "dme-072",
+      "title": "Operating the inference workshop and defending a release decision",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dme-071"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "release evidence",
+        "Docker lifecycle",
+        "diagnosis",
+        "capstone memo"
+      ],
+      "outcome": "Operate the complete local service and defend a source-bound CPU release decision with explicit limits.",
+      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
+      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+    }
+  ]
+}

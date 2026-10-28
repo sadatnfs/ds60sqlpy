@@ -1,0 +1,25 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-073", "apache-069"],
+  "concepts": ["graph persistence", "search index", "backup consistency", "recovery"],
+  "evidence": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution.",
+  "sources": [
+    ["Atlas REST types/entities/lineage API", "https://atlas.apache.org/api/v2/index.html"],
+    [
+      "Pinned type system documentation",
+      "https://github.com/apache/atlas/blob/release-2.5.0/docs/src/documents/TypeSystem.md"
+    ],
+    [
+      "Pinned authorization model",
+      "https://github.com/apache/atlas/blob/release-2.5.0/docs/src/documents/Security/AuthorizationModel.md"
+    ],
+    [
+      "Pinned installation and backing services",
+      "https://github.com/apache/atlas/blob/release-2.5.0/docs/src/documents/Setup/InstallationInstruction.md"
+    ],
+    ["Pinned dependency/JVM contract", "https://github.com/apache/atlas/blob/release-2.5.0/pom.xml"]
+  ]
+}

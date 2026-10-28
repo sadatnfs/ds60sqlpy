@@ -1,0 +1,64 @@
+{
+  "number": 2,
+  "title": "Evaluation data, grouping and contamination",
+  "concepts": [
+    "group splits",
+    "temporal split",
+    "contamination",
+    "availability time",
+    "artifact identity"
+  ],
+  "outcome": "Build a reproducible family/time split and detect identifier, near-duplicate and availability-time leakage before scoring.",
+  "level": "beginner",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-001"],
+  "exercises": [
+    {
+      "title": "Split paraphrases",
+      "task": "Put two paraphrases from one family into train and test.",
+      "expected": "Family validation fails.",
+      "hint": "Group by the dependency that the deployment claim must cross.",
+      "answer": "Row-level randomization can leak family-specific information. Entire groups must stay together under this protocol."
+    },
+    {
+      "title": "Include cutoff equality",
+      "task": "Use event and label times exactly equal to the cutoff.",
+      "expected": "The row is eligible under the stated inclusive policy.",
+      "hint": "Compare <= with <.",
+      "answer": "Boundary inclusion is a protocol choice. Here both observations are available at the cutoff and the validator uses an inclusive rule."
+    },
+    {
+      "title": "Reject a delayed label",
+      "task": "Use event 9, label 11, cutoff 10.",
+      "expected": "The row is excluded.",
+      "hint": "Event time does not imply information availability.",
+      "answer": "The target was unknown at deployment, so using it in training would be retrospective leakage."
+    },
+    {
+      "title": "Separate normalization from meaning",
+      "task": "Compare fingerprints of rate and rates.",
+      "expected": "The fingerprints differ.",
+      "hint": "This normalizer handles case and whitespace only.",
+      "answer": "A digest equality test is not a semantic paraphrase detector. Its known false negatives should be documented."
+    },
+    {
+      "title": "Version the retrieval corpus",
+      "task": "Explain why a document corrected after the cutoff needs another corpus version.",
+      "expected": "Historical evaluation uses the earlier available version.",
+      "hint": "Ask what the system could have observed then.",
+      "answer": "A later correction can change answer correctness and evidence. Preserve snapshot identity rather than silently substituting current content."
+    },
+    {
+      "title": "Audit an empty partition",
+      "task": "Create a valid group assignment with an empty test partition.",
+      "expected": "Grouping validation alone is insufficient for an evaluation.",
+      "hint": "Distinguish structural validity from adequate coverage.",
+      "answer": "The split guard accepts no conflicting groups, but a separate coverage gate must reject an empty final assessment."
+    }
+  ],
+  "sources": [
+    ["Datasheets for Datasets", "https://arxiv.org/abs/1803.09010"],
+    ["Existing group/time validation", "../../../python/professional/README.md"]
+  ]
+}

@@ -3,6 +3,7 @@
 BEGIN;
 SELECT
   pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0));
+
 -- Fail closed before deciding an existing manifest row is safe to skip.
 -- content_tag is a reviewed immutable fixture identity, not a cryptographic
 -- file checksum; production runners should record a real content digest.
@@ -77,6 +78,7 @@ BEGIN
     );
 END
 $preflight$;
+
 SELECT
   pg_catalog.current_setting('ds60.migration_applied')::boolean AS migration_applied
 \gset

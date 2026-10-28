@@ -1,25 +1,5 @@
 # SQL-TYPES-01: PostgreSQL-Native Types and Searchable Documents
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisite:** `sql-29`
-- **Prerequisites:** SQL Day 28 JSON,
-  [SQL Day 29 pattern matching](../../postgres-60day/companion-guides/day29_pattern_matching.md),
-  constraints, and basic index concepts.
-- **Artifacts:** [learner SQL](../lessons/sql_types_01_native_types_search.sql) ·
-  [solution reasoning](../solutions/sql_types_01_native_types_search_solutions.md) ·
-  [executable solution](../solutions/sql_types_01_native_types_search_solutions.sql)
-
-Run on Windows PowerShell, macOS, or Linux:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_types_01_native_types_search.sql
-```
-
-Only built-in PostgreSQL 16 features are used. The script inspects
-`pg_trgm` availability but does not enable any extension.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -84,6 +64,26 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisite:** `sql-29`
+- **Prerequisites:** SQL Day 28 JSON,
+  [SQL Day 29 pattern matching](../../postgres-60day/companion-guides/day29_pattern_matching.md),
+  constraints, and basic index concepts.
+- **Artifacts:** [learner SQL](../lessons/sql_types_01_native_types_search.sql) ·
+  [solution reasoning](../solutions/sql_types_01_native_types_search_solutions.md) ·
+  [executable solution](../solutions/sql_types_01_native_types_search_solutions.sql)
+
+Run on Windows PowerShell, macOS, or Linux:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_types_01_native_types_search.sql
+```
+
+Only built-in PostgreSQL 16 features are used. The script inspects
+`pg_trgm` availability but does not enable any extension.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -103,7 +103,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_types_01_native_types_search.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_types_01_native_types_search.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

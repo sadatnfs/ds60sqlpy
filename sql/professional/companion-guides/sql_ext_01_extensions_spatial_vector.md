@@ -1,26 +1,5 @@
 # SQL-EXT-01: Extensions, Spatial Data, and Vectors
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Catalog prerequisites:** `sql-types-01` and `sql-ops-01`
-- **Prerequisites:** [SQL-TYPES-01](sql_types_01_native_types_search.md),
-  [SQL-OPS-01](sql_ops_01_indexes_statistics_maintenance.md), privileges, and
-  a disposable PostgreSQL 16+ database.
-- **Artifacts:** [learner SQL](../lessons/sql_ext_01_extensions_spatial_vector.sql) ·
-  [solution reasoning](../solutions/sql_ext_01_extensions_spatial_vector_solutions.md) ·
-  [executable solution](../solutions/sql_ext_01_extensions_spatial_vector_solutions.sql)
-
-Run the offline default:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql
-```
-
-It reads extension catalogs, uses built-in fallbacks, and rolls back. It never
-executes `CREATE EXTENSION`, creates an FDW server/user mapping, or downloads an
-image.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -85,6 +64,27 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Catalog prerequisites:** `sql-types-01` and `sql-ops-01`
+- **Prerequisites:** [SQL-TYPES-01](sql_types_01_native_types_search.md),
+  [SQL-OPS-01](sql_ops_01_indexes_statistics_maintenance.md), privileges, and
+  a disposable PostgreSQL 16+ database.
+- **Artifacts:** [learner SQL](../lessons/sql_ext_01_extensions_spatial_vector.sql) ·
+  [solution reasoning](../solutions/sql_ext_01_extensions_spatial_vector_solutions.md) ·
+  [executable solution](../solutions/sql_ext_01_extensions_spatial_vector_solutions.sql)
+
+Run the offline default:
+
+```text
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql
+```
+
+It reads extension catalogs, uses built-in fallbacks, and rolls back. It never
+executes `CREATE EXTENSION`, creates an FDW server/user mapping, or downloads an
+image.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -104,7 +104,7 @@ The first runnable example has a concrete contract: Example 1 returns one row pe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

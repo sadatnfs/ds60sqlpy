@@ -29,6 +29,7 @@ main() {
   has_language=0
   expect_language=0
   want_r=0
+  want_julia=0
   want_main=0
   args=()
   for arg in "$@"; do
@@ -37,7 +38,7 @@ main() {
         echo '--language requires a language name.' >&2
         exit 2
       }
-      if [[ "$arg" == r ]]; then want_r=1; else want_main=1; fi
+      if [[ "$arg" == r ]]; then want_r=1; elif [[ "$arg" == julia ]]; then want_julia=1; else want_main=1; fi
       args+=("$arg")
       expect_language=0
       continue
@@ -69,7 +70,7 @@ main() {
           echo '--language requires a name.' >&2
           exit 2
         }
-        if [[ "$selected_language" == r ]]; then want_r=1; else want_main=1; fi
+        if [[ "$selected_language" == r ]]; then want_r=1; elif [[ "$selected_language" == julia ]]; then want_julia=1; else want_main=1; fi
         args+=("$arg")
         ;;
       --exclude-language* | --only-language*)
@@ -87,7 +88,7 @@ Default: format maintained sources and refresh generated readers.
 --list        Print coverage and preservation reasons without running formatters.
 --language    Select one language (repeatable); shared reader refresh is omitted.
 
-R uses a separate pinned R tools image. Other languages use the existing
+R and Julia use separate pinned tools images. Other languages use the existing
 Ubuntu formatting image. A full pass checks R first and refreshes shared
 readers only after all source adapters succeed. Listing needs no R tools image.
 Requires Bash and a local Linux Docker engine. Windows users run inside WSL 2.
@@ -104,10 +105,12 @@ HELP
   }
   if [[ "$has_language" == 0 ]]; then
     want_r=1
+    want_julia=1
     want_main=1
   fi
   if [[ "$list_only" == 1 ]]; then
     want_r=0
+    want_julia=0
     want_main=1
   fi
   command -v docker >/dev/null 2>&1 || {
@@ -161,6 +164,22 @@ HELP
     run_tools "$r_image" "${r_args[@]}"
     # A separate successful R pass permits the Ubuntu process to omit R.
     args+=(--exclude-language r)
+  fi
+  if [[ "$want_julia" == 1 ]]; then
+    julia_fingerprint=$(
+      cd "$root"
+      for file in docker/workers/Dockerfile.julia docker/workers/native/releases.lock.json docker/workers/native/install_native.py docker/workers/julia/Project.toml docker/workers/julia/Manifest.toml; do
+        cksum "$file" || exit 2
+      done | cksum | awk '{print $1 "-" $2}'
+    )
+    julia_image="ds60-formatting-julia:$julia_fingerprint"
+    if [[ "$force_build" == 1 ]] || ! docker image inspect "$julia_image" >/dev/null 2>&1; then
+      echo 'Preparing the locked Julia formatting tools.'
+      docker build --progress=plain --target toolchain -f "$root/docker/workers/Dockerfile.julia" -t "$julia_image" "$root"
+    fi
+    julia_args=(${args[@]+"${args[@]}"} --only-language julia)
+    run_tools "$julia_image" "${julia_args[@]}"
+    args+=(--exclude-language julia)
   fi
   if [[ "$want_main" == 0 ]]; then return 0; fi
   fingerprint=$(

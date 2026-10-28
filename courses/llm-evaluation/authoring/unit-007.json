@@ -1,0 +1,70 @@
+{
+  "number": 7,
+  "title": "Multiplicity and sequential release decisions",
+  "concepts": [
+    "familywise error",
+    "Bonferroni",
+    "alpha spending",
+    "optional stopping",
+    "decision rule"
+  ],
+  "outcome": "Prespecify a family of comparisons and monitoring times, calculate conservative error control, and separate statistical evidence from release policy.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-006"],
+  "exercises": [
+    {
+      "title": "One comparison",
+      "task": "Test one valid p-value 0.05 at alpha 0.05.",
+      "expected": "The declared non-strict rule rejects.",
+      "hint": "State whether equality is included.",
+      "answer": "With one prespecified comparison the threshold remains 0.05; this code uses <=."
+    },
+    {
+      "title": "Three equal findings",
+      "task": "Use p-values 0.02,0.02,0.02.",
+      "expected": "None crosses equal Bonferroni thresholds.",
+      "hint": "Each allocation is approximately 0.0167.",
+      "answer": "Three nominal findings are not three adjusted findings under this family definition."
+    },
+    {
+      "title": "Overspend the budget",
+      "task": "Allocate 0.03 and 0.03 while total alpha is 0.05.",
+      "expected": "The monitoring plan is rejected.",
+      "hint": "Validate budgets before observing results.",
+      "answer": "The advertised family bound requires the total allocation to remain within its declared budget."
+    },
+    {
+      "title": "Specify dependent looks",
+      "task": "Explain whether the union bound requires independent tests.",
+      "expected": "It does not; individual error bounds still need to hold.",
+      "hint": "Separate the bound from the illustrative independent calculation.",
+      "answer": "The formula 1-(1-alpha)^m uses independence; the union-bound inequality does not."
+    },
+    {
+      "title": "Unknown result",
+      "task": "Replace a p-value with NaN.",
+      "expected": "The decision function rejects it.",
+      "hint": "Do not silently drop the row and reduce the family.",
+      "answer": "Unknown evidence requires an explicit incomplete assessment, not a smaller multiplicity correction."
+    },
+    {
+      "title": "Separate value from significance",
+      "task": "A precise improvement is below the minimum useful effect.",
+      "expected": "The statistical result alone does not mandate deployment.",
+      "hint": "Use a declared practical margin and independent safety gates.",
+      "answer": "A release decision combines expected utility, uncertainty, constraints and costs; its logic must be recorded separately from a p-value."
+    }
+  ],
+  "sources": [
+    [
+      "Existing sequential and multiplicity chapter",
+      "../../../courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md"
+    ],
+    [
+      "SciPy exact binomial test",
+      "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binomtest.html"
+    ]
+  ]
+}

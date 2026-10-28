@@ -7,12 +7,12 @@ cataloged lesson, the target is `max(6, 2 × audited baseline)` and must
 be visible in the learner artifact, companion guide, and every
 explanatory solution artifact.
 
-- Lessons passing all three surfaces: **186/186**
+- Lessons passing all three surfaces: **201/201**
 - Audited baseline prompts: **534**
-- Required prompts per surface: **1420**
-- Current learner-artifact prompts: **1478**
-- Current companion-guide prompts: **1475**
-- Current explanatory-solution prompts: **1475**
+- Required prompts per surface: **1510**
+- Current learner-artifact prompts: **1568**
+- Current companion-guide prompts: **1565**
+- Current explanatory-solution prompts: **1565**
 
 | Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -105,6 +105,19 @@ explanatory solution artifact.
 | `python-algo-02` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `python-algo-03` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `python-algo-04` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-lang-02` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-lang-03` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-lang-04` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-05` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-06` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-07` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-08` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-05` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-06` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-07` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-05` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-06` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-07` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-start-01` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-start-02` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-start-03` | 0 | 6 | 6 | 6 | 6 | PASS |
@@ -189,6 +202,8 @@ explanatory solution artifact.
 | `sql-deep-04` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-deep-05` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-deep-06` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-write-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-json-01` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `bridge-01` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `bridge-02` | 6 | 12 | 12 | 12 | 12 | PASS |
 | `bridge-03` | 5 | 10 | 10 | 10 | 10 | PASS |

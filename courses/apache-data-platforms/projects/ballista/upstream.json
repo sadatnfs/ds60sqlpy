@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "ballista": "54.1.0",
+  "datafusion": "54.0.0",
+  "pyarrow": "23.0.1",
+  "python_base": "python:3.12.13-slim-trixie@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36",
+  "platforms": ["linux/amd64", "linux/arm64"],
+  "minimum_glibc": "2.39",
+  "topology": "one container host; independent native scheduler/executor/client processes; one executor with one or two task slots",
+  "native_execution": "Linux ARM64 qualified with explicit Swift/Noble fallback; normal pinned Trixie recipe descriptor-only"
+}

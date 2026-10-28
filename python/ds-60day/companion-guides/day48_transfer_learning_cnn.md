@@ -24,9 +24,13 @@ By the end of the lesson, you can:
 
 ## Network and resource contract
 
-`models.ResNet18_Weights.DEFAULT` downloads pretrained weights on first use
-unless they are already in the PyTorch cache. During a connected bootstrap, run
-the model-loading cell once and keep the cache. Later runs are offline.
+The default notebook uses `weights=None` and makes no weight request. To exercise
+pretrained transfer learning, deliberately prepare the trusted ResNet-18 checkpoint
+from the official TorchVision weight recipe in a connected setup, record its
+identity and provenance, then enable `USE_CACHED_PRETRAINED_WEIGHTS`. The notebook
+loads only the existing local file with `weights_only=True`; a missing file fails
+before inference rather than downloading. The random-weight branch proves only
+architecture and optimization mechanics.
 
 If weights are not cached and the machine is offline, use
 `models.resnet18(weights=None)` to practice the mechanics. That fallback is
@@ -51,8 +55,9 @@ CPU and a small image subset are the default; a GPU is optional.
 import torch
 from torchvision import models
 
-# DEFAULT requires a one-time download unless already cached.
-model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+# Offline mechanics only. Use the notebook's explicit cached-weight branch
+# after separately preparing the trusted checkpoint for transfer learning.
+model = models.resnet18(weights=None)
 for parameter in model.parameters():
     parameter.requires_grad = False
 
@@ -68,10 +73,13 @@ optimizer from trainable parameters so the intended phase is explicit.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-48` for its guide, notebook and capability notice. The default Core does not include the `deep-learning` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [prepared PyTorch CPU course](../../../courses/deep-learning-pytorch/guides/torch-002.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `deep-learning` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The default example constructs random weights and tests freeze/head mechanics. Actual transfer learning requires separately prepared trusted weights. The ImageFolder reference is a local dataset project requiring TorchVision, images, and a prepared notebook environment.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -80,8 +88,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 48 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -289,7 +296,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-48` — Day 48 — Transfer Learning with CNNs.
+Tutor me through `python-48` : Day 48 : Transfer Learning with CNNs.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize offline-safe transfer learning, frozen parameters, and cautious fine-tuning. Use exactly these maintained learner materials:

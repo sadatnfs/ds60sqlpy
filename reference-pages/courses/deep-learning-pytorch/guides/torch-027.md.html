@@ -259,19 +259,19 @@ optimizer<span class="syntax-operator">=</span>torch<span class="syntax-operator
 <ol>
 <li><strong>Freeze a known base.</strong> Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients. <strong>Expected:</strong> base output equals input; all base parameters frozen. <strong>Verify:</strong> Save the assertion results for exercise 1, including base output equals input; all base parameters frozen.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Train a new head.</strong> Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3. <strong>Expected:</strong> head changes; base remains exact identity. <strong>Verify:</strong> Save the assertion results for exercise 2, including head changes; base remains exact identity.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Inspect absent base gradients.</strong> Check the frozen base after head backward. <strong>Expected:</strong> base gradient None; head gradient present. <strong>Verify:</strong> Save the assertion results for exercise 3, including base gradient None; head gradient present.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose buffer updates despite freezing.</strong> Freeze BatchNorm affine parameters but call it in train mode on a nonzero batch. <strong>Expected:</strong> running mean changes. <strong>Verify:</strong> Save the assertion results for exercise 4, including running mean changes.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Freeze normalization behavior with eval.</strong> Switch that BatchNorm to eval and call a different batch. <strong>Expected:</strong> running mean remains unchanged. <strong>Verify:</strong> Save the assertion results for exercise 5, including running mean remains unchanged.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Begin an explicit unfreeze phase.</strong> Enable base gradients, create a new optimizer over base+head, and take one smaller-rate step. <strong>Expected:</strong> base weight now changes. <strong>Verify:</strong> Save the assertion results for exercise 6, including base weight now changes.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

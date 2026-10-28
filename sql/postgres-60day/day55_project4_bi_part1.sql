@@ -1,11 +1,11 @@
 -- Day 55: Project 4 - Complex BI (Part 1)
--- BEGINNER WORKFLOW — sql-55: Project4 BI Part1
+-- BEGINNER WORKFLOW - sql-55: Project 4 BI Part 1
 -- Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-55/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-55.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Multi-dimensional analysis (drill-down capability)
 BEGIN;
 SET search_path TO training, public;
+
 -- Use GROUPING SETS/ROLLUP/CUBE for flexible drilldowns.
 -- Dimensions: country, category, primary payment method, month.
 -- An order can have split payments, so first choose one reporting label:
@@ -84,6 +85,7 @@ ORDER BY
   category NULLS FIRST,
   payment_method NULLS FIRST,
   month NULLS FIRST;
+
 -- Drill-down example: country -> category -> product (top-N per level)
 WITH prod_rev AS (
   SELECT
@@ -121,6 +123,7 @@ ORDER BY
   country,
   category,
   rnk;
+
 -- Exercises
 -- 1. Replace ROLLUP with CUBE to get all subtotal combinations and compare row counts.
 --    Inputs: For sql-55 Exercise 1, read from `orders`, `customers`, `order_items`, and `products`. Compute `rollup_row_count`, and `cube_row_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.

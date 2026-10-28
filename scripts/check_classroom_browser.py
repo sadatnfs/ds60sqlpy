@@ -33,34 +33,20 @@ sys.path.insert(0, str(ROOT / "src"))
 from ds60sqlpy.http_server import LocalThreadingHTTPServer  # noqa: E402
 from scripts.check_classroom_profiles import ClassroomClient, classroom_origin  # noqa: E402
 
-SUBJECTS = {
-    "python",
-    "sql",
-    "bridge",
-    "cpp",
-    "c",
-    "go",
-    "csharp",
-    "rust",
-    "swift",
-    "docker",
-    "cuda",
-    "web-development",
-    "java",
-    "javascript-typescript",
-    "scala-spark",
-    "kubernetes",
-    "deep-learning-tensorflow",
-    "deep-learning-pytorch",
-    "statistics-ml",
-    "llm-theory",
-    "llm-applied",
-    "nlp",
-    "jax",
-    "dax",
-    "r",
-    "data-visualization",
-}
+
+def published_subjects(root: Path) -> set[str]:
+    """Derive expected public choices independently from checked-in admission files."""
+    legacy = set(json.loads((root / "curriculum/catalog.json").read_text())["tracks"])
+    modules = {
+        json.loads(path.read_text())["track_id"]
+        for path in (root / "courses").glob("*/lessons.json")
+    }
+    books = {"statistics-ml"} if (root / "courses/statistics-ml/manifest.json").is_file() else set()
+    return legacy | modules | books
+
+
+SUBJECTS = published_subjects(ROOT)
+
 NOTE = "Disposable browser acceptance note, not a learner mastery assessment."
 
 
@@ -269,6 +255,29 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         )
 
         choose_lesson(page, "python", "python-02", expect)
+        setup_heading = page.locator('#guide [id$="optional-contributor-notebook-route"]')
+        expect(setup_heading).to_have_count(1)
+        setup_numbers: list[int] = setup_heading.evaluate(
+            """heading => {
+              const numbers = [];
+              const level = Number(heading.tagName.slice(1));
+              for (let node = heading.nextElementSibling; node; node = node.nextElementSibling) {
+                if (/^H[1-6]$/.test(node.tagName) && Number(node.tagName.slice(1)) <= level) break;
+                if (node.tagName !== 'OL') continue;
+                let number = node.start;
+                for (const item of node.children) {
+                  if (item.tagName !== 'LI') continue;
+                  if (item.hasAttribute('value')) number = item.value;
+                  numbers.push(number++);
+                }
+              }
+              return numbers;
+            }"""
+        )
+        assert setup_numbers == [1, 2, 3, 4], (
+            "Contributor setup numbering restarted after a command block or paragraph."
+        )
+        audit.passed("Day 02 setup steps retain 1, 2, 3, 4 across commands and paragraphs")
         page.locator("#source").fill(python_source)
         page.locator("#phase-note").fill(NOTE)
         save(page, expect)

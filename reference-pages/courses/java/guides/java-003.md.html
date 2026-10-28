@@ -252,19 +252,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Guard a nullable value.</strong> Use text null and test text!=null before calling isEmpty. <strong>Expected:</strong> condition false with no NullPointerException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with condition false with no NullPointerException.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Trace a prefix sum.</strong> Sum array2,4,6 while retaining the invariant that sum covers indices belowi. <strong>Expected:</strong> prefix sums2,6,12;final12. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with prefix sums2,6,12;final12.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Handle an empty loop.</strong> Run the same sum pattern over an emptyint array. <strong>Expected:</strong> sum0 and zero iterations. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with sum0 and zero iterations.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Count a half-open interval.</strong> Count integers starting0 whilei&lt;5. <strong>Expected:</strong> visited0,1,2,3,4;count5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with visited0,1,2,3,4;count5.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Stop at the first match.</strong> Search3,8,8 for the first8 and stop immediately. <strong>Expected:</strong> index1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with index1.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Expose a wrong boundary.</strong> Compare a loop usingi&lt;=length with the validi&lt;length contract on a one-element array. <strong>Expected:</strong> wrong loop raises ArrayIndexOutOfBoundsException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with wrong loop raises ArrayIndexOutOfBoundsException.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

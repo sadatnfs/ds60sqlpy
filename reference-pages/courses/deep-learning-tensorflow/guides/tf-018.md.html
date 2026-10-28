@@ -359,19 +359,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Update and inspect moving state.</strong> Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-four probe. <strong>Expected:</strong> moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5]. <strong>Verify:</strong> Save the assertion results for exercise 1, including moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Freeze evaluation state.</strong> After one training call, evaluate the same batch and compare with the stored-statistic formula. <strong>Expected:</strong> moving state stays unchanged; inference output uses mean [1,2] and differs from training output. <strong>Verify:</strong> Save the assertion results for exercise 2, including moving state stays unchanged; inference output uses mean [1,2] and differs from training output.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Test LayerNorm row independence.</strong> Normalize [1,3] alone and as the first row beside [100,200]. <strong>Expected:</strong> the first output is unchanged; LayerNorm has no running-statistic variables. <strong>Verify:</strong> Save the assertion results for exercise 3, including the first output is unchanged; LayerNorm has no running-statistic variables.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose actual BatchNorm batch dependence.</strong> Compare the first row of training normalization with and without the added row [98,199]. <strong>Expected:</strong> the output changes and matches independent per-channel NumPy mean/variance calculations. <strong>Verify:</strong> Save the assertion results for exercise 4, including the output changes and matches independent per-channel NumPy mean/variance calculations.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Repeat updates and translate asymmetric momentum.</strong> Repeat the 0.5 update, then run a fresh Keras layer with momentum 0.8 and compare old/new-weight arithmetic. <strong>Expected:</strong> 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2. <strong>Verify:</strong> Save the assertion results for exercise 5, including 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Handle constant rows and frozen BatchNorm.</strong> Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with training=True. <strong>Expected:</strong> LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics. <strong>Verify:</strong> Save the assertion results for exercise 6, including LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

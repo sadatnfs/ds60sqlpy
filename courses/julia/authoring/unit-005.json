@@ -1,0 +1,58 @@
+{
+  "number": 5,
+  "title": "Loops, ranges, comprehensions and scope",
+  "concepts": ["iteration", "range", "comprehension", "generator", "function scope"],
+  "outcome": "Trace finite iteration and scope rules while using explicit empty-input and indexing policies.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-004"],
+  "sources": [
+    ["Julia control flow", "https://docs.julialang.org/en/v1/manual/control-flow/"],
+    ["Julia scope", "https://docs.julialang.org/en/v1/manual/variables-and-scoping/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Count an inclusive range",
+      "task": "List values from 1:3.",
+      "expected": "The range contains 1,2,3.",
+      "hint": "Check both endpoints.",
+      "answer": "Inclusive syntax must match the intended number of observations."
+    },
+    {
+      "title": "Use zero iterations",
+      "task": "Run the accumulator over 1:0.",
+      "expected": "The result is its initial zero.",
+      "hint": "An empty iterable performs no loop body.",
+      "answer": "The accumulator policy determines the empty-input result; other algorithms may need to reject emptiness."
+    },
+    {
+      "title": "Descend explicitly",
+      "task": "Construct 3,2,1 as a range.",
+      "expected": "Use 3:-1:1.",
+      "hint": "Specify the step direction.",
+      "answer": "A positive default step does not produce the requested descending traversal."
+    },
+    {
+      "title": "Keep identity separate",
+      "task": "Enumerate values 10 and 20.",
+      "expected": "Positions are 1 and 2; values remain 10 and 20.",
+      "hint": "Do not use a data value as an array index accidentally.",
+      "answer": "Record identity, position and measurement are distinct roles."
+    },
+    {
+      "title": "Avoid an unnecessary collection",
+      "task": "Compute only the sum of selected squares.",
+      "expected": "A generator can supply the reduction directly.",
+      "hint": "Ask whether the intermediate array is needed later.",
+      "answer": "This changes materialization, but performance claims still need a measured workload."
+    },
+    {
+      "title": "Trace scope",
+      "task": "Move a reusable accumulation into a function with explicit input.",
+      "expected": "Its local state is recreated on every call.",
+      "hint": "Compare the function boundary with ambient script globals.",
+      "answer": "Explicit inputs and outputs make both reasoning and runtime specialization easier to inspect."
+    }
+  ]
+}

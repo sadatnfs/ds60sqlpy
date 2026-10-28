@@ -1,0 +1,20 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 100,
+  "prerequisites": ["apache-038", "apache-056", "apache-062"],
+  "concepts": ["owned failure injection", "read-only recovery", "unknown outcome"],
+  "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
+  "sources": [
+    ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],
+    ["Arrow data format", "https://arrow.apache.org/docs/format/Columnar.html"],
+    [
+      "Flink stateful stream processing",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/"
+    ],
+    ["Kafka delivery/transaction design", "https://kafka.apache.org/44/design/design/"],
+    ["Atlas API and metadata boundaries", "https://atlas.apache.org/api/v2/index.html"],
+    ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"]
+  ]
+}

@@ -291,19 +291,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Verify a real local database.</strong> Open the fixture,inspect product metadata and count the two account rows. <strong>Expected:</strong> database product H2; 2 rows; auto-commit initially true. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with database product H2; 2 rows; auto-commit initially true.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Bind an injection-shaped value as data.</strong> Query byname usingAlice andthenAlicequoteOR1=1-shaped text through the same prepared statement. <strong>Expected:</strong> Alice matches 1 row;the injection-shaped value matches0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with Alice matches 1 row;the injection-shaped value matches0.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Roll back a transfer.</strong> Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,and rollback. <strong>Expected:</strong> inside80,70;afterrollback100,50. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with inside80,70;afterrollback100,50.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Commit and read from a second session.</strong> Transfer10cents,commit,and open another connection to the same owned memory database. <strong>Expected:</strong> second connection sees90,60 andtotal150. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with second connection sees90,60 andtotal150.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Handle a constraint failure and rollback.</strong> Attempt tosubtract200frombalance100,catch the SQL integrity error,and rollback. <strong>Expected:</strong> SQLState class23;balance remains100 after rollback. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with SQLState class23;balance remains100 after rollback.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Observe committed visibility under the declared isolation.</strong> Use twoH2connections atREAD_COMMITTED;updateaccount1 without commit,read from the other,then commit and read again. <strong>Expected:</strong> second session sees 100 before commit and 95 after commit. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with second session sees 100 before commit and 95 after commit.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

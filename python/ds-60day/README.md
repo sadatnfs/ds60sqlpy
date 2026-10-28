@@ -13,9 +13,10 @@ on macOS, Linux or Windows WSL 2.
 
 ## Learn at your pace
 
-The Python track contains **89 learning units**: the original 60 numbered
-lessons, four foundation checkpoints, thirteen professional modules, four
-NumPy units, four pandas units and four data-structure/algorithm units.
+The Python track contains **102 learning units**: the original 60 numbered
+lessons, four foundation checkpoints, thirteen professional modules, three
+additional language-mechanics units, eight NumPy units, seven pandas units and
+seven data-structure/algorithm units.
 Historical day numbers are stable labels, not a schedule. The classroom's
 prerequisite information helps you choose where to start or review.
 

@@ -1,5 +1,24 @@
 # Day 26: Interactive Visualization with Plotly and Altair
 
+The classroom displays captured Plotly figures. Altair examples here build
+and validate a Vega-Lite specification, which the reference publishes as a
+structured JSON report. Actual Vega-Lite interaction belongs to the separately
+prepared contributor notebook/export renderer; a validated specification alone
+does not establish that a browser interaction was tested. Use the Plotly route
+for native classroom interaction. A generated HTML filename is inside the
+execution environment and is not automatically a download to your host.
+
+Vega-Lite does not accept a variable parameter directly as a binning `maxbins`
+value. The reference uses a bounded menu of constant-bin layers and filters to
+the selected layer. `maxbins` is an approximate upper limit. See the official
+[adjustable histogram example](https://altair-viz.github.io/gallery/interactive_bin_size.html)
+for the underlying mechanism. Self-contained Plotly HTML uses its bundled
+JavaScript; Altair HTML needs deliberately prepared Vega assets for offline use.
+
+
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 Interaction should answer a reader question, inspect a point, filter a segment,
@@ -231,8 +250,8 @@ Do not use `include_plotlyjs="cdn"` for an offline deliverable.
 
 ## Dataset note
 
-The notebook uses Seaborn's `tips` sample and therefore may download/cache it on
-first use. The constructed example above avoids that dependency.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 ## Exercises and progressive hints
 

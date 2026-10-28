@@ -3,6 +3,8 @@
 The original professional-skill gaps listed below have dedicated published
 artifacts. This page is a coverage index and a way to assess new requests, not a
 queue of missing implementations or a historical machine qualification report.
+For the October scientist recommendations and their current implementations, use
+[the maintained scientist roadmap](scientist-roadmap.md).
 Use the classroom, current loaders and [validation](validation.md) for what is
 available and what has actually been tested.
 

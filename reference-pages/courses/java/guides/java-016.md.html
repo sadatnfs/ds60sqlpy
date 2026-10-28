@@ -274,19 +274,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Round-trip explicit UTF-8.</strong> Write Café and an emoji to an owned temporary file,then read it with UTF-8. <strong>Expected:</strong> exact text equality. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with exact text equality.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Distinguish a path from existence.</strong> Resolve a missing child inside the temporary directory and inspect existence before creating it. <strong>Expected:</strong> path object exists;filesystem entry absent. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with path object exists;filesystem entry absent.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Close a directory stream.</strong> Create two files and count them through atry-with-resourcesFiles.list stream. <strong>Expected:</strong> count2. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with count2.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Request atomic replacement honestly.</strong> Write old and staged files,requestATOMIC_MOVE,then verify the selected outcome without claiming a fallback is atomic. <strong>Expected:</strong> either targetnew with staged absent,or explicit unsupported result retaining old. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with either targetnew with staged absent,or explicit unsupported result retaining old.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose a lexical path escape.</strong> Resolve../outside under an owned root and normalize it before checking containment. <strong>Expected:</strong> normalized path is outside the root. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with normalized path is outside the root.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Verify cleanup after failure.</strong> Throw inside the owned temporary scope and confirm the directory is removed by the helper. <strong>Expected:</strong> original exception propagated; owned directory absent. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with original exception propagated; owned directory absent.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

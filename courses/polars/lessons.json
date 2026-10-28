@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "track_id": "polars",
+  "lessons": [
+    {
+      "id": "polars-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-001.md",
+      "source_path": "courses/polars/lessons/polars-001.py",
+      "solution_paths": [
+        "courses/polars/references/polars-001_reference.py",
+        "courses/polars/solutions/polars-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-002.md",
+      "source_path": "courses/polars/lessons/polars-002.py",
+      "solution_paths": [
+        "courses/polars/references/polars-002_reference.py",
+        "courses/polars/solutions/polars-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-003.md",
+      "source_path": "courses/polars/lessons/polars-003.py",
+      "solution_paths": [
+        "courses/polars/references/polars-003_reference.py",
+        "courses/polars/solutions/polars-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-004.md",
+      "source_path": "courses/polars/lessons/polars-004.py",
+      "solution_paths": [
+        "courses/polars/references/polars-004_reference.py",
+        "courses/polars/solutions/polars-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-005.md",
+      "source_path": "courses/polars/lessons/polars-005.py",
+      "solution_paths": [
+        "courses/polars/references/polars-005_reference.py",
+        "courses/polars/solutions/polars-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-006.md",
+      "source_path": "courses/polars/lessons/polars-006.py",
+      "solution_paths": [
+        "courses/polars/references/polars-006_reference.py",
+        "courses/polars/solutions/polars-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-007.md",
+      "source_path": "courses/polars/lessons/polars-007.py",
+      "solution_paths": [
+        "courses/polars/references/polars-007_reference.py",
+        "courses/polars/solutions/polars-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-008.md",
+      "source_path": "courses/polars/lessons/polars-008.py",
+      "solution_paths": [
+        "courses/polars/references/polars-008_reference.py",
+        "courses/polars/solutions/polars-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-009.md",
+      "source_path": "courses/polars/lessons/polars-009.py",
+      "solution_paths": [
+        "courses/polars/references/polars-009_reference.py",
+        "courses/polars/solutions/polars-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-010.md",
+      "source_path": "courses/polars/lessons/polars-010.py",
+      "solution_paths": [
+        "courses/polars/references/polars-010_reference.py",
+        "courses/polars/solutions/polars-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-011.md",
+      "source_path": "courses/polars/lessons/polars-011.py",
+      "solution_paths": [
+        "courses/polars/references/polars-011_reference.py",
+        "courses/polars/solutions/polars-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-012.md",
+      "source_path": "courses/polars/lessons/polars-012.py",
+      "solution_paths": [
+        "courses/polars/references/polars-012_reference.py",
+        "courses/polars/solutions/polars-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-013.md",
+      "source_path": "courses/polars/lessons/polars-013.py",
+      "solution_paths": [
+        "courses/polars/references/polars-013_reference.py",
+        "courses/polars/solutions/polars-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-014.md",
+      "source_path": "courses/polars/lessons/polars-014.py",
+      "solution_paths": [
+        "courses/polars/references/polars-014_reference.py",
+        "courses/polars/solutions/polars-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-015.md",
+      "source_path": "courses/polars/lessons/polars-015.py",
+      "solution_paths": [
+        "courses/polars/references/polars-015_reference.py",
+        "courses/polars/solutions/polars-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-016.md",
+      "source_path": "courses/polars/lessons/polars-016.py",
+      "solution_paths": [
+        "courses/polars/references/polars-016_reference.py",
+        "courses/polars/solutions/polars-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-017.md",
+      "source_path": "courses/polars/lessons/polars-017.py",
+      "solution_paths": [
+        "courses/polars/references/polars-017_reference.py",
+        "courses/polars/solutions/polars-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "polars-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "data-engineering",
+      "guide_path": "courses/polars/guides/polars-018.md",
+      "source_path": "courses/polars/lessons/polars-018.py",
+      "solution_paths": [
+        "courses/polars/references/polars-018_reference.py",
+        "courses/polars/solutions/polars-018_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

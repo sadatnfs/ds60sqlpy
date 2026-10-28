@@ -1,0 +1,45 @@
+services:
+  kafka:
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
+    pull_policy: never
+    hostname: kafka
+    user: "1000:1000"
+    entrypoint: [bash, /project/start-broker.sh]
+    environment:
+      CLUSTER_ID: ${DS60_KAFKA_CLUSTER_ID:?Missing owned cluster identity}
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+      LOG_DIR: /tmp/kafka-logs
+    volumes:
+      - .:/project:ro
+      - kafka-data:/var/lib/kafka/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,size=128m,uid=1000,gid=1000
+      - /etc/kafka/secrets:rw,nosuid,noexec,size=1m,uid=1000,gid=1000
+      - /mnt/shared/config:rw,nosuid,noexec,size=1m,uid=1000,gid=1000
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+    cpus: 1.0
+    mem_limit: 1g
+    stop_grace_period: 30s
+    healthcheck:
+      test: [CMD, /opt/kafka/bin/kafka-topics.sh, --bootstrap-server, "kafka:9092", --list]
+      interval: 8s
+      timeout: 15s
+      retries: 12
+      start_period: 15s
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-streaming
+volumes:
+  kafka-data:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-streaming
+networks:
+  default:
+    internal: true
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-streaming

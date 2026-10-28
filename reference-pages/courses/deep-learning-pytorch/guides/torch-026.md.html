@@ -268,19 +268,19 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <ol>
 <li><strong>Build an identity residual.</strong> Create a width 2 residual with zero kernel and scale buffer 1. <strong>Expected:</strong> output equals input; one parameter and one buffer. <strong>Verify:</strong> Save the assertion results for exercise 1, including output equals input; one parameter and one buffer.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Keep state stable across calls.</strong> Call the same module on a second batch with the same width. <strong>Expected:</strong> same kernel object and parameter count 4. <strong>Verify:</strong> Save the assertion results for exercise 2, including same kernel object and parameter count 4.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Check a known residual transform.</strong> Assign an identity kernel and scale.5. <strong>Expected:</strong> output <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.5</mn><mo>⋅</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">1.5\cdot x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1.5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>. <strong>Verify:</strong> Save the assertion results for exercise 3, including output <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.5</mn><mo>⋅</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">1.5\cdot x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1.5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject incompatible feature width.</strong> Pass a width 3 row to the width 2 module. <strong>Expected:</strong> ValueError naming feature width. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError naming feature width.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Validate a custom cube derivative.</strong> Run grad check on Cube.apply at float64 values.2, -.7. <strong>Expected:</strong> grad check True. <strong>Verify:</strong> Save the assertion results for exercise 5, including grad check True.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Inspect the incoming-gradient factor.</strong> Differentiate the sum of 2*Cube(x) atx 2. <strong>Expected:</strong> gradient 24. <strong>Verify:</strong> Save the assertion results for exercise 6, including gradient 24.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

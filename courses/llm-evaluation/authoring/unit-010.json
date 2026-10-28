@@ -1,0 +1,67 @@
+{
+  "number": 10,
+  "title": "Abstention, coverage and decision costs",
+  "concepts": [
+    "selective prediction",
+    "risk coverage",
+    "abstention",
+    "calibration",
+    "decision threshold"
+  ],
+  "outcome": "Choose and evaluate an abstention policy with explicit costs, coverage and held-out evidence instead of reporting only conditional accuracy.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-005", "eval-009"],
+  "exercises": [
+    {
+      "title": "Answer everything",
+      "task": "Use threshold 0 on the development fixture.",
+      "expected": "Coverage 1, accuracy 0.5 and cost 2.5.",
+      "hint": "Two of four answers are wrong.",
+      "answer": "The policy pays 5 twice and averages over all four eligible requests."
+    },
+    {
+      "title": "Abstain on everything",
+      "task": "Choose a threshold above every score.",
+      "expected": "Coverage 0, missing conditional accuracy and cost 0.4.",
+      "hint": "An empty answered set is not perfect accuracy.",
+      "answer": "The operational cost remains defined because every eligible request incurs the abstention cost."
+    },
+    {
+      "title": "Check equality",
+      "task": "Use score 0.5 and threshold 0.5.",
+      "expected": "The request is answered.",
+      "hint": "The policy uses >=.",
+      "answer": "Boundary behavior matters for reproducibility and should be written into the policy contract."
+    },
+    {
+      "title": "Derive the probability cutoff",
+      "task": "Use wrong-answer cost 5 and abstention cost 0.4.",
+      "expected": "The calibrated-probability cutoff is 0.92.",
+      "hint": "Compare 5(1-p) to 0.4.",
+      "answer": "The derivation assumes calibrated correctness probabilities and zero cost for correct answers. It does not justify using 0.92 on an arbitrary score."
+    },
+    {
+      "title": "Inspect subgroup coverage",
+      "task": "Compute the policy separately for routine and rare requests.",
+      "expected": "Report each eligible count, coverage and cost.",
+      "hint": "Overall utility can hide service allocation.",
+      "answer": "Differences can reflect calibration, difficulty or selection. Preserve group definitions and uncertainty before attributing them to a model mechanism."
+    },
+    {
+      "title": "Protect the final set",
+      "task": "The held-out case exposes a bad threshold. What follows?",
+      "expected": "Use it as a diagnosis and collect a new final assessment after changes.",
+      "hint": "Changing the policy consumes the old holdout.",
+      "answer": "A test failure can guide development, but the same labels cannot remain untouched evidence for the modified policy."
+    }
+  ],
+  "sources": [
+    ["Selective prediction with neural networks", "https://arxiv.org/abs/1705.08500"],
+    [
+      "Existing selective-inference chapter",
+      "../../../courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md"
+    ]
+  ]
+}

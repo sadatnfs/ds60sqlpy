@@ -1,11 +1,11 @@
 -- Day 8: Scalar & Inline Subqueries
--- BEGINNER WORKFLOW — sql-08: Scalar Inline Subqueries
+-- BEGINNER WORKFLOW - sql-08: Scalar Inline Subqueries
 -- Guide: sql/postgres-60day/companion-guides/day08_scalar_inline_subqueries.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-08/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-08.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use scalar and inline subqueries only when their one-row or one-value cardinality is guaranteed and visible.
 -- Assumptions: A scalar subquery returning no rows becomes NULL; more than one row is an error. Order a `LIMIT 1` subquery deterministically.
@@ -41,6 +42,7 @@ ORDER BY
   lifetime_revenue DESC,
   c.customer_id
 LIMIT 20;
+
 -- Inline subquery in FROM
 SELECT
   x.category,
@@ -62,6 +64,7 @@ GROUP BY
 ORDER BY
   avg_order_total DESC,
   x.category;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

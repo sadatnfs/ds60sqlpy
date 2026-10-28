@@ -234,10 +234,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Keep core, advanced/heavy, and development dependencies separate.</li>
 <li>Do not assume a package is present because another dependency happens to install it.</li>
 <li>Prefer local, generated, or package-bundled datasets.</li>
-<li>Seaborn first-run dataset downloads are allowed when disclosed and cached.</li>
+<li>Default historical examples use the reviewed original offline fixtures through <code>ds60sqlpy.teaching_data</code>. Preserve their synthetic provenance and do not describe their results as historical or population evidence. A real external dataset/model is a separate explicitly prepared route, with its source, license, cache and availability assumptions stated.</li>
 <li>Tag pretrained model or other network downloads and offer an offline fallback.</li>
 <li>CPU execution is the default; GPU work must be optional.</li>
 </ul>
+<h3 id="source-and-fixture-boundaries">Source and fixture boundaries<a class="heading-anchor" href="#source-and-fixture-boundaries" aria-label="Link to this section">#</a></h3>
+<p>The named language, NumPy, pandas and algorithm units are directly authored four-artifact bundles. Their six tasks need complete code references and explained answers; code-comment labels alone do not establish implementation coverage. Use the actual shared depth and practice gates before admission. The new legacy IDs live in <code>curriculum/extensions/python-modernization.json</code> with their separate practice expansion targets. Preserve established IDs, filenames, prerequisites and learner state.</p>
+<p>Use <code>teaching_fixture</code> or <code>load_teaching_frame</code> for their fixed reviewed names. A copied pad&#x27;s <code>__file__</code> identifies a temporary submission, not the course root. The thin Core worker has an explicit helper COPY and uses the fixed reviewed course assets; do not relax its sanitized environment to discover them. Other profiles need their own reviewed import/data preparation before using this API.</p>
+<p><code>python/authoring/</code> maintains only the synthetic fixture generator, not the whole Python curriculum. Read its guide before regenerating data. Its exact UTF-8 byte contract must agree with the loader&#x27;s digest, including line endings. Do not replace earlier execution receipts when a later prose or format change is validated by a separately recorded parity mapping.</p>
 <h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
 <p>Run:</p>
 <pre class="highlighted-code"><code class="language-text">python scripts/course.py validate

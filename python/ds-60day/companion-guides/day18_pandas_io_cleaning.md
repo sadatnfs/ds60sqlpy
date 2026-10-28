@@ -1,5 +1,8 @@
 # Day 18: pandas I/O and Data Cleaning
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 Cleaning is a documented conversion from messy input to a predictable table.
@@ -227,10 +230,8 @@ without review can hide a source-system change.
 
 ## Dataset and format notes
 
-The notebook's Titanic sample follows the same Seaborn first-use download/cache
-behavior described on Day 17. CSV and JSON work with course defaults. Parquet
-requires a compatible optional engine; do not assume a fresh environment has
-one unless the project declares and installs it.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 ## Exercises and progressive hints
 

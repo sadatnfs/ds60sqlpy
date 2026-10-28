@@ -1,11 +1,11 @@
 -- Day 3: INNER JOIN deep dive
--- BEGINNER WORKFLOW — sql-03: Inner Joins
+-- BEGINNER WORKFLOW - sql-03: Inner Joins
 -- Guide: sql/postgres-60day/companion-guides/day03_inner_joins.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-03/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-03.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
 -- Assumptions: Foreign keys define expected many-to-one relationships. Net line revenue is `unit_price * quantity * (1 - discount)`.
@@ -41,6 +42,7 @@ ORDER BY
   o.order_id DESC,
   p.product_id
 LIMIT 50;
+
 -- Multiple joins with filters
 SELECT
   o.order_id,
@@ -57,6 +59,7 @@ ORDER BY
   total_items DESC,
   o.order_id
 LIMIT 20;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

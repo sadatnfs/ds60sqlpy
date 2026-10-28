@@ -1,0 +1,67 @@
+{
+  "number": 18,
+  "title": "Train and audit a small reward model",
+  "concepts": [
+    "PyTorch reward model",
+    "pairwise training",
+    "shortcut learning",
+    "held-out preferences",
+    "autograd"
+  ],
+  "outcome": "Perform actual CPU gradient updates on a tiny reward predictor and expose a length shortcut using independent comparison features.",
+  "level": "advanced",
+  "runtime": "llm-torch-cpu",
+  "minutes": 120,
+  "prerequisites": ["eval-017", "torch-004"],
+  "exercises": [
+    {
+      "title": "Verify the initial gradient",
+      "task": "Compare autograd at zero weights with \\(D^{\\mathsf T}(0.5-y)/n\\).",
+      "expected": "The two vectors match in float64.",
+      "hint": "Use pairwise feature differences as rows.",
+      "answer": "The check tests the implemented likelihood and reduction denominator independently of whether the labels are meaningful."
+    },
+    {
+      "title": "Inspect the length coefficient",
+      "task": "Train the balanced design in case A.",
+      "expected": "The length coefficient remains approximately zero.",
+      "hint": "Its two tie comparisons are symmetric.",
+      "answer": "The authored design provides no systematic signal that longer is preferable, so the symmetric initialization and updates preserve the zero length direction."
+    },
+    {
+      "title": "Reverse a comparison",
+      "task": "Negate the held-out feature difference.",
+      "expected": "The linear reward margin changes sign.",
+      "hint": "There is no bias term.",
+      "answer": "This is a useful implementation invariant for a pairwise difference model."
+    },
+    {
+      "title": "Find a training shortcut",
+      "task": "Inspect the weights from case B.",
+      "expected": "Length receives more weight than either evidence coordinate.",
+      "hint": "The biased design makes length strongly predictive of labels.",
+      "answer": "An optimizer fits the provided associations. It cannot infer the intended target when the comparison design leaves that target confounded."
+    },
+    {
+      "title": "Recompute the final loss",
+      "task": "Evaluate the objective after the final optimizer step.",
+      "expected": "The final-state loss is distinct from the last pre-update loss.",
+      "hint": "Logging order is part of the artifact identity.",
+      "answer": "A reported result should identify the model state that produced it, especially when comparing training and held-out measurements."
+    },
+    {
+      "title": "State the model boundary",
+      "task": "Describe what the three learned weights establish.",
+      "expected": "A real small CPU reward fit, with no natural-language capability claim.",
+      "hint": "Identify the representation and its provenance.",
+      "answer": "The exercise uses authored features. It does not train a language encoder, judge real responses or establish the preferences of an external population."
+    }
+  ],
+  "sources": [
+    [
+      "PyTorch binary cross entropy with logits",
+      "https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html"
+    ],
+    ["Preference-based learning", "https://arxiv.org/abs/1706.03741"]
+  ]
+}

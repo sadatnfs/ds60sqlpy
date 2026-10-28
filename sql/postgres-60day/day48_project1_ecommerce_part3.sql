@@ -1,11 +1,11 @@
 -- Day 48: Project 1 - E-commerce Analytics (Part 3)
--- BEGINNER WORKFLOW — sql-48: Project1 Ecommerce Part3
+-- BEGINNER WORKFLOW - sql-48: Project 1 Ecommerce Part 3
 -- Guide: sql/postgres-60day/companion-guides/day48_project1_ecommerce_part3.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-48/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-48.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Topics: Product affinity and attribution analysis
 BEGIN;
 SET search_path TO training, public;
+
 -- Product affinity (market-basket pairs by order)
 WITH items AS (
   SELECT
@@ -54,6 +55,7 @@ FROM
 ORDER BY
   together DESC
 LIMIT 50;
+
 -- Attribution: first touch vs last touch (by event campaign)
 WITH ev AS (
   SELECT
@@ -85,6 +87,7 @@ GROUP BY
 ORDER BY
   COUNT(*) DESC
 LIMIT 50;
+
 -- Exercises
 -- 1. Compute assisted conversions: campaigns that appear before purchase within 7 days.
 --    Inputs: For sql-48 Exercise 1, read from `events`. Build the answer toward `campaign`, `assisted_conversions`, and `assisted_customers`; keep `campaign` visible whenever the result has row-level grain.

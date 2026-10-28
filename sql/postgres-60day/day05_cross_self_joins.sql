@@ -1,11 +1,11 @@
 -- Day 5: CROSS JOINs and Self-joins
--- BEGINNER WORKFLOW — sql-05: Cross Self Joins
+-- BEGINNER WORKFLOW - sql-05: Cross Self Joins
 -- Guide: sql/postgres-60day/companion-guides/day05_cross_self_joins.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-05/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-05.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.
 -- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.
@@ -45,6 +46,7 @@ FROM
 ORDER BY
   1,
   2;
+
 -- Self-join: employee-manager hierarchy
 SELECT
   e.employee_id,
@@ -59,6 +61,7 @@ ORDER BY
   employee,
   e.employee_id
 LIMIT 50;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

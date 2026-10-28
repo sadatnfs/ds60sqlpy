@@ -8,7 +8,7 @@ numbers identify lessons; they do not limit your pace or the number of subjects.
 1. Read the [front README](../README.md) for supported hosts and the subject directory.
 2. Follow [one-command setup](one-command-classroom.md), then [first success](setup/first-success.md).
 3. Use the [classroom guide](classroom-experience.md) for pads, live previews, results and language switching.
-4. Choose a route with [placement and pacing](learning-paths.md), lesson prerequisites and subject READMEs.
+4. Choose a route with [placement and pacing](learning-paths.md), the [scientist roadmap](scientist-roadmap.md), lesson prerequisites and subject READMEs.
 5. Consult [troubleshooting](troubleshooting.md) for an observed failure and [storage boundaries](local-files-and-caches.md) before cleanup.
 
 Windows uses [WSL 2](setup/windows.md); [macOS](setup/macos.md) and [Linux](setup/linux.md)
@@ -22,7 +22,7 @@ Normal startup is `./classroom`; strict return is `./classroom resume`.
 - [CUDA preparation](cuda-classroom.md) explains CPU study, optional NVIDIA execution and GPU evidence.
 - [Offline use](setup/offline.md) and [source readers](lesson-readers.md) separate prepared execution, reading and optional downloads.
 - [Python package customization](docker-profiles.md) covers deliberate app-image extras.
-- [Docker Hub distribution](dockerhub.md) covers publishing, pulling, architecture tags and the protected manual workflow.
+- [Docker Hub distribution](dockerhub.md) covers CI publication on marked main commits, combined release tags, manual architecture tags, pulling and safe resume.
 - [Guided SQL notebooks](guided-sql-notebooks.md), [PostgreSQL in Jupyter](setup/jupyter-postgresql.md) and [editor use](vscode.md) are optional prepared workflows.
 
 ## Learn with a coding assistant
@@ -74,3 +74,31 @@ and JavaScript implementations.
 
 See [textbook rendering](textbook-rendering.md) for TeX and typography and
 [plotting](plotting.md) for captured figures, interactive charts and saved results.
+
+## Applied science and engineering routes
+
+[Applied Science](../courses/applied-science/README.md) and
+[Bayesian Computing](../courses/bayesian-computing/README.md) provide complete
+worked tutorial answers. [Julia](../courses/julia/README.md),
+[Polars](../courses/polars/README.md), [dbt](../courses/dbt/README.md),
+[ML engineering](../courses/ml-engineering/README.md) and
+[LLM evaluation](../courses/llm-evaluation/README.md) add distinct programming and
+applied-system progressions. The [scientist roadmap](scientist-roadmap.md) maps
+these to the earlier recommendations and explains prerequisites and limits.
+
+The [Data and ML Engineering book](../courses/data-ml-engineering/README.md)
+connects these foundations through 72 worked chapters, including the complete
+LLM request, model loading, scheduling, decoding and SSE response lifecycle.
+[Apache and open-data platforms](../courses/apache-data-platforms/README.md)
+provides 88 tutorials and separately prepared service workshops. Its
+[qualification ledger](../courses/apache-data-platforms/authoring/ENVIRONMENTS.md)
+distinguishes actual library/service checks from prepared external routes.
+Delta Sharing is included as an open data protocol rather than an Apache project.
+
+Separate owned projects cover [dbt configuration](../courses/dbt/projects/retail/README.md),
+[a real local ML service](../courses/ml-engineering/projects/local-system/README.md),
+[data-product ingestion and publication](../courses/data-ml-engineering/projects/data-product/README.md),
+[LLM inference and streaming](../courses/data-ml-engineering/projects/inference-service/README.md)
+and [Stan with JSON data](../courses/bayesian-computing/projects/normal-mean/README.md).
+Their instructions explain preparation, saved outputs and cleanup independently
+of ordinary classroom pads.

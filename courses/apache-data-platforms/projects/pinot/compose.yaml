@@ -1,0 +1,117 @@
+x-labels: &labels
+  org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Use run.sh}
+  org.ds60.workshop.kind: apache-pinot
+x-service: &service
+  image: ${DS60_PINOT_IMAGE:?Use run.sh}
+  labels: *labels
+  pull_policy: never
+  restart: "no"
+  pids_limit: 256
+  cpus: 1.0
+  mem_limit: 768m
+  environment:
+    JAVA_OPTS: -Xms128m -Xmx384m -XX:MaxDirectMemorySize=128m -Dpinot.admin.system.exit=false
+  networks: [private]
+  tmpfs: ["/opt/pinot/configs:size=16m", "/opt/pinot/data:size=16m"]
+services:
+  zookeeper:
+    <<: *service
+    command: [StartZookeeper, -zkPort, "2181", -dataDir, /state/zookeeper]
+    volumes: ["coordination:/state"]
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'echo > /dev/tcp/127.0.0.1/2181'"]
+      interval: 3s
+      timeout: 2s
+      retries: 40
+  controller:
+    <<: *service
+    command:
+      [
+        StartController,
+        -controllerHost,
+        controller,
+        -controllerPort,
+        "9000",
+        -zkAddress,
+        "zookeeper:2181",
+        -clusterName,
+        DS60Pinot,
+        -dataDir,
+        /state/controller,
+      ]
+    volumes: ["metadata:/state"]
+    depends_on:
+      zookeeper: { condition: service_healthy }
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'echo > /dev/tcp/127.0.0.1/9000'"]
+      interval: 3s
+      timeout: 2s
+      retries: 60
+  broker:
+    <<: *service
+    command:
+      [
+        StartBroker,
+        -brokerHost,
+        broker,
+        -brokerPort,
+        "8099",
+        -zkAddress,
+        "zookeeper:2181",
+        -clusterName,
+        DS60Pinot,
+      ]
+    depends_on:
+      controller: { condition: service_healthy }
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'echo > /dev/tcp/127.0.0.1/8099'"]
+      interval: 3s
+      timeout: 2s
+      retries: 60
+  server:
+    <<: *service
+    command:
+      [
+        StartServer,
+        -serverHost,
+        server,
+        -zkAddress,
+        "zookeeper:2181",
+        -clusterName,
+        DS60Pinot,
+        -dataDir,
+        /state/server,
+        -segmentDir,
+        /state/segments,
+        -configOverride,
+        pinot.set.instance.id.to.hostname=true,
+      ]
+    volumes: ["segments:/state"]
+    depends_on:
+      controller: { condition: service_healthy }
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'echo > /dev/tcp/127.0.0.1/8097'"]
+      interval: 3s
+      timeout: 2s
+      retries: 60
+  client:
+    image: ${DS60_PLATFORM_IMAGE:?Use run.sh}
+    labels: *labels
+    pull_policy: never
+    entrypoint: [python3, /project/client.py]
+    command: [check]
+    cpus: 0.5
+    mem_limit: 256m
+    networks: [private]
+    volumes: [".:/project:ro"]
+  ingest:
+    <<: *service
+    command: [LaunchDataIngestionJob, -jobSpecFile, /project/ingestion.yaml]
+    volumes: [".:/project:ro", "staging:/staging"]
+volumes:
+  coordination: { labels: *labels }
+  metadata: { labels: *labels }
+  segments: { labels: *labels }
+  staging: { labels: *labels }
+networks:
+  private: { internal: true, labels: *labels }

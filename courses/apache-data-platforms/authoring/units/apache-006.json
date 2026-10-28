@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 60,
+  "prerequisites": ["apache-005"],
+  "concepts": ["idempotence", "atomic receipts", "retry boundaries"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    ["SQLite transactions", "https://www.sqlite.org/lang_transaction.html"],
+    ["Kafka delivery guarantees", "https://kafka.apache.org/44/design/design/"]
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-020", "apache-014"],
+  "concepts": ["scheduler", "executor", "plan serialization", "embedded control"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Ballista Python client",
+      "https://datafusion.apache.org/ballista/user-guide/python/quickstart.html"
+    ],
+    [
+      "Ballista architecture",
+      "https://datafusion.apache.org/ballista/contributors-guide/architecture.html"
+    ]
+  ]
+}

@@ -289,19 +289,19 @@ cache<span class="syntax-operator">=</span><span class="syntax-punctuation">[</s
 <ol>
 <li><strong>Count attention scores.</strong> Use batch1,heads2 and contexts16,32. <strong>Expected:</strong> 512 and2048 score elements. <strong>Verify:</strong> Save the assertion results for exercise 1, including 512 and2048 score elements.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Count raw cache bytes.</strong> Use1 layer,2 heads,width per head16,float32 bytes4 and contexts16,32. <strong>Expected:</strong> 4096 and8192 bytes. <strong>Verify:</strong> Save the assertion results for exercise 2, including 4096 and8192 bytes.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare element precision.</strong> Calculate cache bytes at context32 using 2-byte versus 4-byte elements. <strong>Expected:</strong> 4096 versus8192 bytes. <strong>Verify:</strong> Save the assertion results for exercise 3, including 4096 versus8192 bytes.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Scale batch size.</strong> Increase batch from 1 to3 with context32 and all other cache dimensions fixed. <strong>Expected:</strong> 24576 raw cache bytes. <strong>Verify:</strong> Save the assertion results for exercise 4, including 24576 raw cache bytes.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve total width.</strong> Compare4 heads of width8 with2 heads of width16. <strong>Expected:</strong> equal raw cache bytes for the same context. <strong>Verify:</strong> Save the assertion results for exercise 5, including equal raw cache bytes for the same context.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>State exclusions.</strong> Produce an estimate record naming omitted allocations and avoid calling it peak memory. <strong>Expected:</strong> record identifies parameters,temporary tensors,allocator overhead as excluded. <strong>Verify:</strong> Save the assertion results for exercise 6, including record identifies parameters,temporary tensors,allocator overhead as excluded.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

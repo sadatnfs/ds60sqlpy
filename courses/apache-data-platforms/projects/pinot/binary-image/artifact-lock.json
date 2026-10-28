@@ -1,0 +1,9 @@
+{
+  "product": "Apache Pinot",
+  "version": "1.5.1",
+  "route": "official Apache checksum-verified binary on the prepared native Java17 base",
+  "url": "https://downloads.apache.org/pinot/apache-pinot-1.5.1/apache-pinot-1.5.1-bin.tar.gz",
+  "bytes": 857203581,
+  "sha512": "0224b13b62e3a7a16f1409081526e07cb35143616d8b3563e2936de82128aaf09d785bd105b11d221f48784b3031f239fbf969cd53f410243e315cebee034dfa",
+  "checksum_source": "https://downloads.apache.org/pinot/apache-pinot-1.5.1/apache-pinot-1.5.1-bin.tar.gz.sha512"
+}

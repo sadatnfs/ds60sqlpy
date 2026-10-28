@@ -552,11 +552,11 @@ errors <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <li>Plot cumulative explained variance and choose a component count.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
-<ol>
+<ol start="2">
 <li>Compare PCA before and after feature standardization.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
-<ol>
+<ol start="3">
 <li>Try <code>SelectKBest</code> on a classification dataset and compare its validated performance with PCA.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
@@ -569,15 +569,15 @@ errors <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Use dimensionality reduction as a fitted transformation with measurable information loss. Keep scaling and supervised feature selection inside validation.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Reconstruction analysis:</strong> Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components. <strong>Progressive hint:</strong> Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.</li>
 </ol>
 <p><strong>Verify:</strong> Reconstruction analysis; for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.</p>
-<ol>
+<ol start="5">
 <li><strong>Interpretation edge case:</strong> Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent. <strong>Progressive hint:</strong> Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.</li>
 </ol>
 <p><strong>Verify:</strong> Interpretation edge case; fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.</p>
-<ol>
+<ol start="6">
 <li><strong>Leakage debugging:</strong> Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference. <strong>Progressive hint:</strong> Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.</li>
 </ol>
 <p><strong>Verify:</strong> Leakage debugging; print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.</p>
@@ -797,11 +797,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Plot cumulative explained variance and choose a component count.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — PCA geometry, scaling, variance, and reconstruction — fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
-<ol>
+<ol start="2">
 <li>Compare PCA before and after feature standardization.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — PCA geometry, scaling, variance, and reconstruction — on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
-<ol>
+<ol start="3">
 <li>Try <code>SelectKBest</code> on a classification dataset and compare its validated performance with PCA.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — PCA geometry, scaling, variance, and reconstruction — evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
@@ -814,15 +814,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Use dimensionality reduction as a fitted transformation with measurable information loss. Keep scaling and supervised feature selection inside validation.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Reconstruction analysis:</strong> Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components. <strong>Progressive hint:</strong> Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.</li>
 </ol>
 <p><strong>Verify:</strong> Reconstruction analysis — for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.</p>
-<ol>
+<ol start="5">
 <li><strong>Interpretation edge case:</strong> Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent. <strong>Progressive hint:</strong> Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.</li>
 </ol>
 <p><strong>Verify:</strong> Interpretation edge case — fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.</p>
-<ol>
+<ol start="6">
 <li><strong>Leakage debugging:</strong> Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference. <strong>Progressive hint:</strong> Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.</li>
 </ol>
 <p><strong>Verify:</strong> Leakage debugging — print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.</p>

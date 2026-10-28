@@ -465,39 +465,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The one-row output has case_name, any_larger and all_larger. ANY is false because no comparison succeeds; ALL is true because no comparison fails. The typed empty array is a known collection with zero elements, not an unknown array value. This distinction is the basis of the final requirement-set case.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
-<li><strong>Inspect unknown and NULL-safe comparison side by side.</strong> Using deep 1_values, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</li>
+<li><strong>Inspect unknown and NULL-safe comparison side by side.</strong> Using <code>deep1_values</code>, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</li>
 </ol>
-<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 1, Using deep 1_values, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 1, Using <code>deep1_values</code>, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1,2, NULL respectively. A WHERE filter is not part of this diagnostic.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 1, project predicates before filtering and compare all three row IDs. In particular, test NULL with IS NULL instead of equality and confirm the blocklist NULL makes the nonmatch unknown.</p>
-<ol>
+<ol start="2">
 <li><strong>Express a known-value anti-join policy.</strong> Return row_id, value for nonmissing candidate values that have no equal nonmissing blocklist value. Use NOT EXISTS and explicitly exclude missing candidate values. The result grain is one source row per row_id, ordered by row_id.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 2, Return row_id, value for nonmissing candidate values that have no equal nonmissing blocklist value. Use NOT EXISTS and explicitly exclude missing candidate values. The result grain is one source row per row_id, ordered by row_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 2, Only(row_id1, value 1) remains. Value 2 is blocked; row 3 is excluded because its candidate value is unknown, not because it matched a known blocklist value.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 2, check the returned ID against the known-value set difference {1,2} minus {2}; separately confirm row 3 is excluded by the outer nonmissing policy.</p>
-<ol>
+<ol start="3">
 <li><strong>Distinguish empty, mixed and unknown quantified collections.</strong> For five named integer-array cases, return case_id, any_larger, all_larger using 5&lt;ANY and 5&lt;ALL. Cases are empty,[6,7],[4,7],[4, NULL], and a NULL array. One row represents one case, ordered by case_id.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 3, For five named integer-array cases, return case_id, any_larger, all_larger using 5&lt;ANY and 5&lt;ALL. Cases are empty,[6,7],[4,7],[4, NULL], and a NULL array. One row represents one case, ordered by case_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 3, Case 1 gives false, true; case 2 true, true; case 3 true, false; case 4 NULL, false; case 5 NULL, NULL. A false element decides ALL even when another comparison is unknown.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 3, evaluate each array element by hand and apply the decisive true rule for ANY and decisive false rule for ALL; inspect both Boolean result columns for the empty and unknown-array cases.</p>
-<ol>
+<ol start="4">
 <li><strong>Compare missing values under an explicit reconciliation rule.</strong> Return row_id, value for candidates having a blocklist value that is not distinct from the candidate, using EXISTS and IS NOT DISTINCT FROM. Keep one row per row_id and order by row_id. Explain that this is value reconciliation, not an identity join.</li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 4, Return row_id, value for candidates having a blocklist value that is not distinct from the candidate, using EXISTS and IS NOT DISTINCT FROM. Keep one row per row_id and order by row_id. Explain that this is value reconciliation, not an identity join.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 4, Rows 2 and 3 remain, with values 2 and NULL. The NULL candidate matches the NULL blocklist value under this explicit value-comparison rule.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 4, count all input reconciliation rows and inspect the missing-to-known and missing-to-missing cases independently, using IS DISTINCT FROM as a total Boolean comparison.</p>
-<ol>
-<li><strong>Find people satisfying every required skill.</strong> Return person_id, person_name for people possessing every skill in deep 1_required. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</li>
+<ol start="5">
+<li><strong>Find people satisfying every required skill.</strong> Return person_id, person_name for people possessing every skill in <code>deep1_required</code>. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</li>
 </ol>
-<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in deep 1_required. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in <code>deep1_required</code>. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 5, People 1 Ada and 4 Dee pass. Ada has a duplicate sql record, Dee has extra rust, and neither changes the all-requirements result. Ben, Cy, Eli fail.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 5, list the required skill set for each returned person row, ignoring duplicate possessions; verify that an extra skill cannot compensate for a missing required skill.</p>
-<ol>
-<li><strong>Make empty-requirement policy visible.</strong> Inside the temporary fixture, empty deep 1_required and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</li>
+<ol start="6">
+<li><strong>Make empty-requirement policy visible.</strong> Inside the temporary fixture, empty <code>deep1_required</code> and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</li>
 </ol>
-<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 6, Inside the temporary fixture, empty deep 1_required and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 6, Inside the temporary fixture, empty <code>deep1_required</code> and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 6, All five people have all_requirements=true and nonempty_policy=false. The original two required skills must be restored by the exercise savepoint rollback.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 6, run the empty-requirement case inside a savepoint; compare the universal-logic population with the explicit nonempty-policy population and restore the fixture afterward.</p>
 <h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
@@ -536,7 +536,7 @@ Done when all six projected-result contracts and their counterexamples have insp
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_deep_01.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -558,28 +558,36 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_values <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  row_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  value <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_values</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_blocklist <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  value <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_blocklist</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_people <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  person_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  person_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_people</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Ada&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -587,17 +595,21 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Cy&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Dee&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Eli&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_required <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  skill <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_required</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;sql&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;python&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_skills <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  person_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  skill <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_skills</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -608,6 +620,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;python&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;rust&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Worked example 1</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;ordinary_inequality&#x27;</span> <span class="syntax-keyword">AS</span> comparison<span class="syntax-punctuation">,</span></span>
@@ -618,15 +631,17 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  comparison<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Worked example 2</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;empty_array&#x27;</span> <span class="syntax-keyword">AS</span> case_name<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-number">5</span> <span class="syntax-operator">&lt;</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> any_larger<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-number">5</span> <span class="syntax-operator">&lt;</span> <span class="syntax-keyword">ALL</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_larger<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Write attempts in your ignored working copy before the final ROLLBACK.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Inspect unknown and NULL-safe comparison side by side</span></span>
-<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-01 Exercise 1, Using deep 1_values, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-01 Exercise 1, Using `deep1_values`, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1,2, NULL respectively. A WHERE filter is not part of this diagnostic.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-01 Exercise 1, project predicates before filtering and compare all three row IDs. In particular, test NULL with IS NULL instead of equality and confirm the blocklist NULL makes the nonmatch unknown.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Express a known-value anti-join policy</span></span>
@@ -642,11 +657,11 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-01 Exercise 4, Rows 2 and 3 remain, with values 2 andNULL. The NULL candidate matches the NULL blocklist value under this explicit value-comparison rule.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-01 Exercise 4, count all input reconciliation rows and inspect the missing-to-known and missing-to-missing cases independently, using IS DISTINCT FROM as a total Boolean comparison.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Find people satisfying every required skill</span></span>
-<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in deep 1_required. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in `deep1_required`. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-01 Exercise 5, People 1 Ada and 4 Dee pass. Ada has a duplicate sql record, Dee has extra rust, and neither changes the all-requirements result. Ben, Cy, Eli fail.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-01 Exercise 5, list the required skill set for each returned person row, ignoring duplicate possessions; verify that an extra skill cannot compensate for a missing required skill.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Make empty-requirement policy visible</span></span>
-<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-01 Exercise 6, Inside the temporary fixture, empty deep 1_required and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-01 Exercise 6, Inside the temporary fixture, empty `deep1_required` and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-01 Exercise 6, All five people have all_requirements=true and nonempty_policy=false. The original two required skills must be restored by the exercise savepoint rollback.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-01 Exercise 6, run the empty-requirement case inside a savepoint; compare the universal-logic population with the explicit nonempty-policy population and restore the fixture afterward.</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
@@ -680,8 +695,8 @@ Done when all six projected-result contracts and their counterexamples have insp
 <p>Read <a href="sql-deep-01.html#guide">NULL-Aware Quantification, Anti-Joins, and Relational Division</a> and attempt its six queries before comparing. The <a href="sql-deep-01.html#solution-2">complete reference script</a> recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.</p>
 <h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-inspect-unknown-and-null-safe-comparison-side-by-side">Exercise 1: Inspect unknown and NULL-safe comparison side by side<a class="heading-anchor" href="#solution-1--exercise-1-inspect-unknown-and-null-safe-comparison-side-by-side" aria-label="Link to this section">#</a></h4>
-<p>Using deep 1_values, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</p>
-<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 1, Using deep 1_values, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</p>
+<p>Using <code>deep1_values</code>, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 1, Using <code>deep1_values</code>, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value&lt;&gt;2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1,2, NULL respectively. A WHERE filter is not part of this diagnostic.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 1, project predicates before filtering and compare all three row IDs. In particular, test NULL with IS NULL instead of equality and confirm the blocklist NULL makes the nonmatch unknown.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> row_id<span class="syntax-punctuation">,</span>value<span class="syntax-punctuation">,</span>value<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> not_two<span class="syntax-punctuation">,</span>
@@ -721,8 +736,8 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>row_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The NULL-safe predicate treats two missing value states as not distinct, which is useful for comparing corresponding attributes. EXISTS prevents duplicate blocklist rows from multiplying the candidate output. The rule must not be generalized to unknown entity keys: equal missingness is not evidence that two unknown people are the same person. The query states exactly which equality notion is intended for this bounded reconciliation.</p>
 <h4 id="solution-1--exercise-5-find-people-satisfying-every-required-skill">Exercise 5: Find people satisfying every required skill<a class="heading-anchor" href="#solution-1--exercise-5-find-people-satisfying-every-required-skill" aria-label="Link to this section">#</a></h4>
-<p>Return person_id, person_name for people possessing every skill in deep 1_required. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</p>
-<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in deep 1_required. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</p>
+<p>Return person_id, person_name for people possessing every skill in <code>deep1_required</code>. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 5, Return person_id, person_name for people possessing every skill in <code>deep1_required</code>. Use double NOT EXISTS so duplicate skill rows and extra skills do not alter completeness. One row represents one person, ordered by person_id.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 5, People 1 Ada and 4 Dee pass. Ada has a duplicate sql record, Dee has extra rust, and neither changes the all-requirements result. Ben, Cy, Eli fail.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 5, list the required skill set for each returned person row, ignoring duplicate possessions; verify that an extra skill cannot compensate for a missing required skill.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>person_id<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>person_name <span class="syntax-keyword">FROM</span> deep1_people <span class="syntax-keyword">AS</span> p
@@ -733,8 +748,8 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>person_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The inner subquery asks whether the current person has one particular required skill. The middle WHERE identifies a missing requirement, and the outer NOT EXISTS rules out all such counterexamples. Duplicate possessions do not matter because existence is Boolean, and extra skills never become requirements. A raw joined-row count could incorrectly treat Ada&#x27;s duplicate SQL row as evidence of another distinct required skill.</p>
 <h4 id="solution-1--exercise-6-make-empty-requirement-policy-visible">Exercise 6: Make empty-requirement policy visible<a class="heading-anchor" href="#solution-1--exercise-6-make-empty-requirement-policy-visible" aria-label="Link to this section">#</a></h4>
-<p>Inside the temporary fixture, empty deep 1_required and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</p>
-<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 6, Inside the temporary fixture, empty deep 1_required and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</p>
+<p>Inside the temporary fixture, empty <code>deep1_required</code> and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-01 Exercise 6, Inside the temporary fixture, empty <code>deep1_required</code> and return one row per person with person_id, all_requirements, nonempty_policy. The first flag uses pure universal logic; the second also requires that at least one requirement exists. Order by person_id and roll back this mutation after the case.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-01 Exercise 6, All five people have all_requirements=true and nonempty_policy=false. The original two required skills must be restored by the exercise savepoint rollback.</p>
 <p><strong>Verify:</strong> For sql-deep-01 Exercise 6, run the empty-requirement case inside a savepoint; compare the universal-logic population with the explicit nonempty-policy population and restore the fixture afterward.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">TRUNCATE</span> deep1_required<span class="syntax-punctuation">;</span>
@@ -764,7 +779,7 @@ Done when all six projected-result contracts and their counterexamples have insp
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_deep_01_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -784,28 +799,36 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_values <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  row_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  value <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_values</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_blocklist <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  value <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_blocklist</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_people <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  person_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  person_name <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_people</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Ada&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -813,17 +836,21 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Cy&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Dee&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Eli&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_required <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  skill <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_required</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;sql&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;python&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep1_skills <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  person_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  skill <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep1_skills</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -834,6 +861,7 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;python&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;rust&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -845,40 +873,47 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Inspect unknown and NULL-safe comparison side by side</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">,</span> value <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> not_two<span class="syntax-punctuation">,</span> value <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        value</span>
-<span class="source-line">      <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">        deep1_blocklist<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> not_in_block<span class="syntax-punctuation">,</span> value <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> null_safe_different</span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Inspect unknown and NULL-safe comparison side by side</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">,</span> value <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> not_two<span class="syntax-punctuation">,</span> value <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      value</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      deep1_blocklist<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> not_in_block<span class="syntax-punctuation">,</span> value <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> null_safe_different</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  deep1_values</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  row_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    value<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    not_two<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    not_in_block<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    null_safe_different</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_1</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  not_two<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  not_in_block<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  null_safe_different</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_1</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> row_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;row_id&quot;: 1, &quot;value&quot;: 1, &quot;not_two&quot;: true, &quot;not_in_block&quot;: null, &quot;null_safe_different&quot;: true}, {&quot;row_id&quot;: 2, &quot;value&quot;: 2, &quot;not_two&quot;: false, &quot;not_in_block&quot;: false, &quot;null_safe_different&quot;: false}, {&quot;row_id&quot;: 3, &quot;value&quot;: null, &quot;not_two&quot;: null, &quot;not_in_block&quot;: null, &quot;null_safe_different&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> row_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;row_id&quot;: 1, &quot;value&quot;: 1, &quot;not_two&quot;: true, &quot;not_in_block&quot;: null, &quot;null_safe_different&quot;: true}, {&quot;row_id&quot;: 2, &quot;value&quot;: 2, &quot;not_two&quot;: false, &quot;not_in_block&quot;: false, &quot;null_safe_different&quot;: false}, {&quot;row_id&quot;: 3, &quot;value&quot;: null, &quot;not_two&quot;: null, &quot;not_in_block&quot;: null, &quot;null_safe_different&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Express a known-value anti-join policy</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  v<span class="syntax-punctuation">.</span>row_id<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">.</span>value</span>
@@ -895,23 +930,29 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">      b<span class="syntax-punctuation">.</span>value <span class="syntax-operator">=</span> v<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  v<span class="syntax-punctuation">.</span>row_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    value</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_2</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  value</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_2</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> row_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;row_id&quot;: 1, &quot;value&quot;: 1}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> row_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;row_id&quot;: 1, &quot;value&quot;: 1}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Distinguish empty, mixed and unknown quantified collections</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> cases <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  case_id<span class="syntax-punctuation">,</span></span>
@@ -928,24 +969,30 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">  cases</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  case_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    case_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    any_larger<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    all_larger</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_3</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    case_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  case_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  any_larger<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  all_larger</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_3</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  case_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> case_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;case_id&quot;: 1, &quot;any_larger&quot;: false, &quot;all_larger&quot;: true}, {&quot;case_id&quot;: 2, &quot;any_larger&quot;: true, &quot;all_larger&quot;: true}, {&quot;case_id&quot;: 3, &quot;any_larger&quot;: true, &quot;all_larger&quot;: false}, {&quot;case_id&quot;: 4, &quot;any_larger&quot;: null, &quot;all_larger&quot;: false}, {&quot;case_id&quot;: 5, &quot;any_larger&quot;: null, &quot;all_larger&quot;: null}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> case_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;case_id&quot;: 1, &quot;any_larger&quot;: false, &quot;all_larger&quot;: true}, {&quot;case_id&quot;: 2, &quot;any_larger&quot;: true, &quot;all_larger&quot;: true}, {&quot;case_id&quot;: 3, &quot;any_larger&quot;: true, &quot;all_larger&quot;: false}, {&quot;case_id&quot;: 4, &quot;any_larger&quot;: null, &quot;all_larger&quot;: false}, {&quot;case_id&quot;: 5, &quot;any_larger&quot;: null, &quot;all_larger&quot;: null}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Compare missing values under an explicit reconciliation rule</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  v<span class="syntax-punctuation">.</span>row_id<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">.</span>value</span>
@@ -961,23 +1008,29 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">      b<span class="syntax-punctuation">.</span>value <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> v<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  v<span class="syntax-punctuation">.</span>row_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    value</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    answer_4</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    row_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  value</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_4</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  row_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> row_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;row_id&quot;: 2, &quot;value&quot;: 2}, {&quot;row_id&quot;: 3, &quot;value&quot;: null}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> row_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;row_id&quot;: 2, &quot;value&quot;: 2}, {&quot;row_id&quot;: 3, &quot;value&quot;: null}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Find people satisfying every required skill</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>person_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>person_name</span>
@@ -1000,24 +1053,31 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">          <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>skill <span class="syntax-operator">=</span> r<span class="syntax-punctuation">.</span>skill<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">    p<span class="syntax-punctuation">.</span>person_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  person_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  person_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_5</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  person_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      person_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      person_name</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      answer_5</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      person_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> person_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;person_id&quot;: 1, &quot;person_name&quot;: &quot;Ada&quot;}, {&quot;person_id&quot;: 4, &quot;person_name&quot;: &quot;Dee&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> person_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;person_id&quot;: 1, &quot;person_name&quot;: &quot;Ada&quot;}, {&quot;person_id&quot;: 4, &quot;person_name&quot;: &quot;Dee&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Make empty-requirement policy visible</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">TRUNCATE</span> deep1_required<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>person_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
@@ -1056,22 +1116,27 @@ Done when all six projected-result contracts and their counterexamples have insp
 <span class="source-line">    deep1_people <span class="syntax-keyword">AS</span> p</span>
 <span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">    p<span class="syntax-punctuation">.</span>person_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  person_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  all_requirements<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  nonempty_policy</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_6</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  person_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      person_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      all_requirements<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      nonempty_policy</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      answer_6</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      person_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span></span>
-<span class="source-line">            <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> person_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;person_id&quot;: 1, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 2, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 3, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 4, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 5, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> person_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;person_id&quot;: 1, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 2, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 3, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 4, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}, {&quot;person_id&quot;: 5, &quot;all_requirements&quot;: true, &quot;nonempty_policy&quot;: false}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-deep-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

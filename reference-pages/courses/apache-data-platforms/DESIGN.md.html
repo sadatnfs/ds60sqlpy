@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
+  >
+  <link rel="stylesheet" href="../../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
+  <title>Apache and open data platforms: authoring design · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    .katex{font:normal 1.21em KaTeX_Main,math,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.19.1"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.katex-newline{display:block}.katex .katex-base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .katex-base,.katex .katex-strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .katex-vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .katex-thinbox{display:inline-flex;flex-direction:row;max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline,.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-rule,.katex .katex-underline .underline-line,.katex .mfrac .frac-line{min-height:1px}.katex .mspace{display:inline-block}.katex .katex-smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.katex-inner,.katex .llap>.katex-inner,.katex .rlap>.katex-inner{position:absolute}.katex .clap>.katex-fix,.katex .llap>.katex-fix,.katex .rlap>.katex-fix{display:inline-block}.katex .llap>.katex-inner{right:0}.katex .clap>.katex-inner,.katex .rlap>.katex-inner{left:0}.katex .clap>.katex-inner>span{margin-left:-50%;margin-right:50%}.katex .katex-rule{border:0 solid;display:inline-block;position:relative}.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.katex-root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .katex-sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .katex-sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .katex-sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .katex-sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .katex-sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .katex-sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .katex-sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .katex-sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .katex-sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .katex-sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .katex-sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .katex-sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .katex-sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .katex-sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .katex-sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .katex-sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .katex-sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .katex-sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .katex-sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .katex-sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .katex-sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .katex-sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .katex-sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .katex-sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .katex-sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .katex-sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .katex-sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .katex-sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .katex-sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .katex-sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .katex-sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .katex-sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .katex-sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .katex-sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .katex-sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .katex-sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .katex-sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .katex-sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .katex-sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .katex-sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .katex-sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .katex-sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .katex-sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .katex-sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .katex-sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .katex-sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .katex-sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .katex-sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .katex-sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .katex-sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .katex-sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .katex-sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .katex-sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .katex-sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .katex-sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .katex-sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .katex-sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .katex-sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .katex-sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .katex-sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .katex-sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .katex-sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .katex-sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .katex-sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .katex-sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .katex-sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .katex-sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .katex-sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .katex-sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .katex-sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .katex-sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .katex-sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .katex-sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .katex-sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .katex-sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .katex-sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .katex-sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .katex-sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .katex-sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .katex-sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .katex-sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .katex-sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .katex-sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .katex-sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .katex-sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .katex-sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .katex-sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .katex-sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .katex-sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .katex-sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .katex-sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .katex-sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .katex-sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .katex-sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .katex-sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .katex-sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .katex-sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .katex-sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .katex-sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .katex-sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .katex-sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .katex-sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .katex-sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .katex-sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .katex-sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .katex-sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .katex-sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .katex-sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .katex-sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .katex-sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .katex-sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .katex-sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .katex-sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .katex-sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .katex-sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .katex-sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .katex-sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .katex-sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .katex-sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .katex-sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .katex-sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .katex-accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .katex-accent .accent-body{position:relative}.katex .katex-accent .accent-body:not(.accent-full){width:0}.katex .katex-overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .katex-stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .katex-stretchy:after,.katex .katex-stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .katex-sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .reflectbox{display:inline-block;transform:scaleX(-1)}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.katex-tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.katex-tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+
+
+.guide, .artifact-content, article.document {
+  font-family: "Latin Modern", "STIX Two Text", Georgia, serif;
+  font-size: var(--reading-size, 1.15rem); line-height: 1.7;
+  font-kerning: normal; text-wrap: pretty;
+}
+.guide p, .artifact-content p, article.document p { max-width: 72ch; }
+.guide h1, .guide h2, .guide h3, .guide h4,
+.artifact-content h2, .artifact-content h3, article.document h2, article.document h3 {
+  font-family: inherit; font-weight: 700; line-height: 1.25; text-wrap: balance;
+}
+.katex { font-size: 1.05em; text-align: initial; }
+.katex math { font-size: inherit; }
+.katex-display { margin: 0; }
+.katex .base { white-space: nowrap; }
+.tex-compiled { scrollbar-width: thin; }
+.guide, .artifact-content, article.document { counter-reset: equation; }
+.equation { margin: 1.4rem 0; counter-increment: equation; }
+.equation-label { text-align: right; font: .8rem/1.4 system-ui, sans-serif; opacity: .75; }
+.equation-label::after { content: " " counter(equation); }
+.equation-source { font: .8rem/1.4 system-ui, sans-serif; margin-top: .4rem; }
+.equation-source pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: .65rem; }
+.equation-source summary { cursor: pointer; }
+@media print {
+  .guide, .artifact-content, article.document { font-size: 11pt; line-height: 1.45; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  pre, table, .math-display { break-inside: avoid; }
+}
+
+/* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Apache and open data platforms: authoring design</h1>
+      <p class="source-path">Generated from <code>courses/apache-data-platforms/DESIGN.md</code></p>
+    </header>
+    <article class="document"><h2 id="apache-and-open-data-platforms-authoring-design">Apache and open data platforms: authoring design<a class="heading-anchor" href="#apache-and-open-data-platforms-authoring-design" aria-label="Link to this section">#</a></h2>
+<p>This maintained design reserves apache-001 through apache-088. It is not an authored admission manifest or runtime qualification. The completed route will use tutorial mode with complete worked answers and no compulsory examination.</p>
+<p>The route begins with Python and SQL vocabulary and links existing Rust, Java, Scala/Spark, Docker, Kubernetes and dbt foundations where those skills are needed. Apache products retain their project names. Delta Sharing belongs to the Delta Lake/Linux Foundation ecosystem.</p>
+<h3 id="learning-and-execution-contract">Learning and execution contract<a class="heading-anchor" href="#learning-and-execution-contract" aria-label="Link to this section">#</a></h3>
+<p>Each chapter explains its mechanism and syntax before the two contrasting cases below, derives relevant quantities, discusses mistakes and an answered interview question, and records the exact observation that supports its conclusion. A chapter will not infer distributed correctness from a local simulation. Prepared Python examples use actual libraries and tiny synthetic fixtures. Project-only chapters open an editable Markdown notebook containing complete commands and expected observations; the classroom does not run Docker commands.</p>
+<p>Every product has a real-product path. Separate Docker workshops build clients inside Linux containers, expose only loopback ports, preserve project-owned volumes, and require positive, negative and restart checks. Workshops start individually and are excluded from ordinary classroom startup.</p>
+<h3 id="foundations">Foundations<a class="heading-anchor" href="#foundations" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-001</td>
+<td>A platform is a set of contracts</td>
+<td>Trace an order from event to query result</td>
+<td>Compare a local batch with a delayed event</td>
+<td>Separate storage, transport, execution, catalog and governance responsibilities</td>
+</tr>
+<tr>
+<td>apache-002</td>
+<td>Rows, columns, types and missing values</td>
+<td>Represent money with decimal and preserve nulls</td>
+<td>Reject an incompatible schema rather than silently coerce</td>
+<td>Define logical types and physical representation before choosing a format</td>
+</tr>
+<tr>
+<td>apache-003</td>
+<td>Files, objects and tables</td>
+<td>Read projected Parquet columns</td>
+<td>Compare a file listing with a committed table snapshot</td>
+<td>Distinguish bytes, files, partitions, table metadata and atomic commits</td>
+</tr>
+<tr>
+<td>apache-004</td>
+<td>Processes, networks and ownership</td>
+<td>Resolve a Compose service name inside its network</td>
+<td>Diagnose a host localhost versus container localhost mistake</td>
+<td>Trace a connection through client, DNS, listener and advertised endpoint</td>
+</tr>
+<tr>
+<td>apache-005</td>
+<td>Partitioning, ordering and skew</td>
+<td>Hash a customer key into partitions</td>
+<td>Measure one hot key against evenly distributed keys</td>
+<td>Explain partition-local ordering and the cost of a shuffle</td>
+</tr>
+<tr>
+<td>apache-006</td>
+<td>Delivery, retries and idempotence</td>
+<td>Retry a stable event identifier</td>
+<td>Reject two conflicting payloads with the same identifier</td>
+<td>Specify the boundary at which a duplicate is suppressed</td>
+</tr>
+<tr>
+<td>apache-007</td>
+<td>Time, history and reproducibility</td>
+<td>Distinguish event, ingestion and processing time</td>
+<td>Reconstruct a versioned fixture with late corrections</td>
+<td>Record source version, clock and query assumptions</td>
+</tr>
+<tr>
+<td>apache-008</td>
+<td>Evidence and operational experiments</td>
+<td>Build a deterministic result oracle</td>
+<td>Separate restart survival from replication availability</td>
+<td>Design positive, negative and recovery checks without overclaiming production readiness</td>
+</tr>
+</tbody></table></div>
+<h3 id="arrow">Arrow<a class="heading-anchor" href="#arrow" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-009</td>
+<td>Arrays, buffers and null bitmaps</td>
+<td>Inspect integer value and validity buffers</td>
+<td>Trace a sliced array with a nonzero offset</td>
+<td>Explain why logical length, buffer length and offset differ</td>
+</tr>
+<tr>
+<td>apache-010</td>
+<td>Schemas, nested data and dictionaries</td>
+<td>Build a list of structs with null children</td>
+<td>Compare dictionary-encoded categories with plain strings</td>
+<td>Choose a schema that preserves missingness and semantic units</td>
+</tr>
+<tr>
+<td>apache-011</td>
+<td>Compute kernels and chunked tables</td>
+<td>Filter and aggregate a chunked table</td>
+<td>Demonstrate null propagation versus explicit fill</td>
+<td>Use vector kernels without confusing a chunk boundary with a partition</td>
+</tr>
+<tr>
+<td>apache-012</td>
+<td>IPC, streams and ownership</td>
+<td>Round-trip record batches through an IPC stream</td>
+<td>Read an IPC file with random batch access</td>
+<td>Compare zero-copy opportunities with allocations at conversion boundaries</td>
+</tr>
+<tr>
+<td>apache-013</td>
+<td>Parquet datasets and predicate pruning</td>
+<td>Read a partitioned fixture with projection and filter</td>
+<td>Show a filter that still requires residual evaluation</td>
+<td>Inspect metadata and distinguish pruning from proof of row-level correctness</td>
+</tr>
+<tr>
+<td>apache-014</td>
+<td>Language boundaries and Flight</td>
+<td>Exchange Arrow IPC between Python and prepared Rust</td>
+<td>Request batches from a real local Flight service</td>
+<td>Explain C Data Interface lifetime and Flight transport without calling either a database</td>
+</tr>
+</tbody></table></div>
+<h3 id="datafusion">DataFusion<a class="heading-anchor" href="#datafusion" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-015</td>
+<td>SessionContext, SQL and DataFrames</td>
+<td>Register Arrow batches and execute a grouped query</td>
+<td>Run the equivalent DataFrame expression</td>
+<td>Separate plan construction from execution and materialization</td>
+</tr>
+<tr>
+<td>apache-016</td>
+<td>Logical and physical plans</td>
+<td>Inspect projection and predicate pushdown</td>
+<td>Compare an aggregate before and after a selective filter</td>
+<td>Read operators and explain why plan text is evidence rather than a stable API</td>
+</tr>
+<tr>
+<td>apache-017</td>
+<td>Joins, SQL nulls and cardinality</td>
+<td>Join orders to a unique dimension</td>
+<td>Expose a duplicate dimension key that multiplies revenue</td>
+<td>Predict join output multiplicity and missing-key semantics</td>
+</tr>
+<tr>
+<td>apache-018</td>
+<td>Partitions, memory and spill</td>
+<td>Control target partitions on a bounded dataset</td>
+<td>Compare a selective scan with a sort under a memory budget</td>
+<td>Explain why more partitions can increase overhead and peak memory</td>
+</tr>
+<tr>
+<td>apache-019</td>
+<td>UDFs and engine extension boundaries</td>
+<td>Register a typed scalar Python UDF</td>
+<td>Contrast a native expression with a row callback</td>
+<td>Explain volatility, types and optimizer visibility</td>
+</tr>
+<tr>
+<td>apache-020</td>
+<td>Embedding an analytical engine</td>
+<td>Build an isolated parameterized query service project</td>
+<td>Reject an unapproved table or oversized result</td>
+<td>Define a bounded engine API with reproducible source and resource settings</td>
+</tr>
+</tbody></table></div>
+<h3 id="ballista">Ballista<a class="heading-anchor" href="#ballista" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-021</td>
+<td>From an engine to a distributed scheduler</td>
+<td>Run the released Python client against scheduler and executors</td>
+<td>Compare local DataFusion with the same Ballista SQL result</td>
+<td>Trace plan serialization, scheduling and Arrow Flight data movement</td>
+</tr>
+<tr>
+<td>apache-022</td>
+<td>Cluster configuration and shared data paths</td>
+<td>Query one mounted Parquet path from two executors</td>
+<td>Fail a query whose file exists only in the client</td>
+<td>Distinguish logical paths from filesystem visibility across processes</td>
+</tr>
+<tr>
+<td>apache-023</td>
+<td>Stages, shuffle and task placement</td>
+<td>Inspect distributed aggregation stages</td>
+<td>Compare balanced groups with a hot grouping key</td>
+<td>Explain stage barriers, shuffle files and scheduler decisions</td>
+</tr>
+<tr>
+<td>apache-024</td>
+<td>Clients and supported language APIs</td>
+<td>Submit from the matching Python client</td>
+<td>Submit a Rust client against the same cluster</td>
+<td>Respect protocol and release compatibility instead of assuming Spark API parity</td>
+</tr>
+<tr>
+<td>apache-025</td>
+<td>Failure, retry and retained evidence</td>
+<td>Stop an owned executor during a bounded workload</td>
+<td>Restart an owned scheduler and characterize observed job behavior</td>
+<td>Report precisely what recovered and what needs resubmission</td>
+</tr>
+<tr>
+<td>apache-026</td>
+<td>Capacity and operational decisions</td>
+<td>Compare one and two executor allocations</td>
+<td>Bound collect and inspect history/metrics</td>
+<td>Choose an embedded engine or a cluster from workload evidence</td>
+</tr>
+</tbody></table></div>
+<h3 id="airflow">Airflow<a class="heading-anchor" href="#airflow" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-027</td>
+<td>DAGs, tasks and data intervals</td>
+<td>Run a TaskFlow DAG over a fixed logical interval</td>
+<td>Show why wall-clock now changes a backfill</td>
+<td>Distinguish scheduler time, logical date and data interval</td>
+</tr>
+<tr>
+<td>apache-028</td>
+<td>Dependencies, retries and idempotent tasks</td>
+<td>Write an idempotent partition output</td>
+<td>Inject one transient task failure and inspect retry state</td>
+<td>Keep side effects safe across retries and task clearing</td>
+</tr>
+<tr>
+<td>apache-029</td>
+<td>Scheduling, catchup and backfills</td>
+<td>Materialize two historical intervals</td>
+<td>Correct one partition without recomputing unrelated history</td>
+<td>Choose a backfill plan with explicit completeness semantics</td>
+</tr>
+<tr>
+<td>apache-030</td>
+<td>Assets, mapping and bounded concurrency</td>
+<td>Trigger a consumer from an updated asset</td>
+<td>Map a bounded list with pool limits</td>
+<td>Separate orchestration metadata from bulk data transfer</td>
+</tr>
+<tr>
+<td>apache-031</td>
+<td>Connections, providers and security</td>
+<td>Use a local connection reference without embedding a secret in a DAG</td>
+<td>Reject a missing provider or invalid connection</td>
+<td>Keep parse-time side effects and credentials outside authored code</td>
+</tr>
+<tr>
+<td>apache-032</td>
+<td>Operations and recovery</td>
+<td>Restart scheduler and retain metadata/history</td>
+<td>Diagnose a stuck task from logs and state transitions</td>
+<td>Recover the owned installation without deleting orchestration history</td>
+</tr>
+</tbody></table></div>
+<h3 id="kafka">Kafka<a class="heading-anchor" href="#kafka" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-033</td>
+<td>The log, topics and partitions</td>
+<td>Produce keyed events with the official CLI</td>
+<td>Consume the same log with two independent groups</td>
+<td>Distinguish a durable log from a destructive queue</td>
+</tr>
+<tr>
+<td>apache-034</td>
+<td>Producer acknowledgements and idempotence</td>
+<td>Compare acknowledged delivery with a failed connection</td>
+<td>Retry using idempotent producer configuration</td>
+<td>Explain producer IDs, sequence numbers and the scope of deduplication</td>
+</tr>
+<tr>
+<td>apache-035</td>
+<td>Consumers, offsets and rebalances</td>
+<td>Commit only after successful processing</td>
+<td>Restart a consumer before committing and observe replay</td>
+<td>Explain at-least-once processing with a concrete offset timeline</td>
+</tr>
+<tr>
+<td>apache-036</td>
+<td>Transactions and isolation</td>
+<td>Commit one transaction and abort another</td>
+<td>Compare read_committed with read_uncommitted</td>
+<td>State exactly which Kafka operations are atomic</td>
+</tr>
+<tr>
+<td>apache-037</td>
+<td>Retention, compaction and schemas</td>
+<td>Compare deletion retention with keyed compaction</td>
+<td>Evolve an optional field and reject an incompatible payload</td>
+<td>Distinguish latest state from event history and schema compatibility</td>
+</tr>
+<tr>
+<td>apache-038</td>
+<td>KRaft, networking and operations</td>
+<td>Inspect controller/broker roles and advertised listeners</td>
+<td>Restart an owned broker and retain committed records</td>
+<td>Diagnose connectivity, consumer lag and disk bounds without claiming single-node HA</td>
+</tr>
+</tbody></table></div>
+<h3 id="iceberg">Iceberg<a class="heading-anchor" href="#iceberg" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-039</td>
+<td>Snapshots and the table abstraction</td>
+<td>Create a real local PyIceberg SQL catalog and append data</td>
+<td>Read the previous snapshot after a second append</td>
+<td>Explain metadata files, manifests and data-file references</td>
+</tr>
+<tr>
+<td>apache-040</td>
+<td>Field IDs and schema evolution</td>
+<td>Rename a field while retaining its identity</td>
+<td>Reject a required-field evolution that invalidates existing data</td>
+<td>Distinguish identity from column position or display name</td>
+</tr>
+<tr>
+<td>apache-041</td>
+<td>Hidden partitioning and evolution</td>
+<td>Partition by a transform and inspect planned files</td>
+<td>Evolve the partition specification without rewriting old data</td>
+<td>Explain residual predicates across multiple partition specs</td>
+</tr>
+<tr>
+<td>apache-042</td>
+<td>Concurrency and optimistic commits</td>
+<td>Commit from one table handle then detect a stale second handle</td>
+<td>Retry after reloading against the new snapshot</td>
+<td>Identify the catalog compare-and-swap boundary</td>
+</tr>
+<tr>
+<td>apache-043</td>
+<td>Deletes, maintenance and retention</td>
+<td>Perform a bounded overwrite or delete and inspect snapshots</td>
+<td>Expire only unreferenced old state under a retained-snapshot policy</td>
+<td>Separate logical deletion, physical cleanup and rollback promises</td>
+</tr>
+<tr>
+<td>apache-044</td>
+<td>Catalogs and cross-engine reads</td>
+<td>Read the same table through Hive Metastore and Spark workshop</td>
+<td>Compare a local SQL catalog with the external metastore contract</td>
+<td>Verify engine/version capabilities instead of treating all catalog protocols as interchangeable</td>
+</tr>
+</tbody></table></div>
+<h3 id="flink">Flink<a class="heading-anchor" href="#flink" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-045</td>
+<td>Streams, operators and a running job</td>
+<td>Submit a real Java bounded stream job</td>
+<td>Read the same event contract through Flink SQL</td>
+<td>Trace source, transformation, sink and execution graph</td>
+</tr>
+<tr>
+<td>apache-046</td>
+<td>Event time and watermarks</td>
+<td>Window out-of-order events with explicit timestamps</td>
+<td>Send an event beyond allowed lateness and inspect its route</td>
+<td>Explain that watermarks estimate completeness rather than guarantee it</td>
+</tr>
+<tr>
+<td>apache-047</td>
+<td>Keyed state and timers</td>
+<td>Maintain per-customer running state</td>
+<td>Fire an inactivity timer with event-time progress</td>
+<td>Distinguish operator state, keyed state and timer semantics</td>
+</tr>
+<tr>
+<td>apache-048</td>
+<td>Checkpoints and end-to-end guarantees</td>
+<td>Complete a checkpoint and restart the job</td>
+<td>Contrast a transactional Kafka sink with a nontransactional side effect</td>
+<td>Bound exactly-once claims by source, state and sink participation</td>
+</tr>
+<tr>
+<td>apache-049</td>
+<td>Backpressure and capacity</td>
+<td>Constrain a sink and observe upstream pressure</td>
+<td>Change parallelism while preserving compatible state</td>
+<td>Explain bottleneck propagation, slots and partition skew</td>
+</tr>
+<tr>
+<td>apache-050</td>
+<td>Savepoints and schema evolution</td>
+<td>Take a savepoint and restore compatible state</td>
+<td>Demonstrate a deliberately incompatible operator identity</td>
+<td>Treat upgrades as state migrations with a rollback plan</td>
+</tr>
+</tbody></table></div>
+<h3 id="cassandra">Cassandra<a class="heading-anchor" href="#cassandra" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-051</td>
+<td>Query-first modeling and CQL</td>
+<td>Create a time-bucketed partition for a concrete lookup</td>
+<td>Show why a cross-partition ad hoc filter is expensive</td>
+<td>Choose primary and clustering keys from access patterns</td>
+</tr>
+<tr>
+<td>apache-052</td>
+<td>Writes, SSTables and reads</td>
+<td>Write updates and inspect row visibility</td>
+<td>Compare a range within one partition with many-partition access</td>
+<td>Explain commit log, memtable, SSTable and read reconciliation</td>
+</tr>
+<tr>
+<td>apache-053</td>
+<td>Replication and consistency levels</td>
+<td>Run a small real multi-node optional topology</td>
+<td>Contrast ONE and QUORUM during an owned node outage</td>
+<td>Apply quorum reasoning only with its replication and failure assumptions</td>
+</tr>
+<tr>
+<td>apache-054</td>
+<td>Tombstones, TTL and compaction</td>
+<td>Expire a bounded fixture with TTL</td>
+<td>Inspect a delete and explain repair-before-GC requirements</td>
+<td>Connect tombstones and compaction to resurrection risk</td>
+</tr>
+<tr>
+<td>apache-055</td>
+<td>Transactions, indexes and drivers</td>
+<td>Use lightweight compare-and-set for one invariant</td>
+<td>Query a Storage Attached Index with selectivity checks</td>
+<td>Distinguish LWT, batch atomicity and ordinary last-write-wins semantics</td>
+</tr>
+<tr>
+<td>apache-056</td>
+<td>Repair, backup and operations</td>
+<td>Capture a snapshot and verify a restore in owned storage</td>
+<td>Restart a node and inspect ring and pending work</td>
+<td>Explain repair scope, consistency and restore boundaries</td>
+</tr>
+</tbody></table></div>
+<h3 id="pinot">Pinot<a class="heading-anchor" href="#pinot" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-057</td>
+<td>Segments and serving topology</td>
+<td>Load a bounded offline segment</td>
+<td>Query through broker and identify serving server</td>
+<td>Explain controller, broker, server, segment and ZooKeeper roles</td>
+</tr>
+<tr>
+<td>apache-058</td>
+<td>Kafka ingestion and real-time segments</td>
+<td>Ingest the shared event fixture from Kafka</td>
+<td>Observe malformed-event handling and ingestion lag</td>
+<td>Trace consuming segments into committed segments</td>
+</tr>
+<tr>
+<td>apache-059</td>
+<td>Indexes and query plans</td>
+<td>Compare filtered queries with and without an inverted index</td>
+<td>Test a range or sorted index on an appropriate column</td>
+<td>Explain index selection and memory/storage tradeoffs</td>
+</tr>
+<tr>
+<td>apache-060</td>
+<td>Time boundaries, hybrid tables and upserts</td>
+<td>Combine historical offline data with fresh real-time data</td>
+<td>Apply a versioned update with primary-key comparison</td>
+<td>Prevent overlap double-counting and define late-update semantics</td>
+</tr>
+<tr>
+<td>apache-061</td>
+<td>Multistage queries and capacity</td>
+<td>Join small dimension data using the supported engine</td>
+<td>Bound a query and inspect response exceptions</td>
+<td>Separate analytical serving latency from batch throughput</td>
+</tr>
+<tr>
+<td>apache-062</td>
+<td>Operations, recovery and data verification</td>
+<td>Restart owned Pinot services and verify query results</td>
+<td>Compare ingested counts with source event identities</td>
+<td>Diagnose segment, schema and consumption failures without deleting state</td>
+</tr>
+</tbody></table></div>
+<h3 id="hive-and-metastore">Hive and Metastore<a class="heading-anchor" href="#hive-and-metastore" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-063</td>
+<td>Warehouse, catalog and execution</td>
+<td>Create a namespace and external table in Hive</td>
+<td>Inspect the metastore record independently of querying data</td>
+<td>Separate HiveServer2, Metastore and storage responsibilities</td>
+</tr>
+<tr>
+<td>apache-064</td>
+<td>Schemas, partitions and serialization</td>
+<td>Register partition locations and read Parquet</td>
+<td>Demonstrate a wrong type or location with a controlled failure</td>
+<td>Explain SerDe, physical files and partition discovery</td>
+</tr>
+<tr>
+<td>apache-065</td>
+<td>Metastore durability and clients</td>
+<td>Persist metadata in PostgreSQL</td>
+<td>Restart Metastore and query from a second client</td>
+<td>Trace Thrift metadata calls without confusing them with data reads</td>
+</tr>
+<tr>
+<td>apache-066</td>
+<td>Hive SQL and execution plans</td>
+<td>Explain a selective aggregate over a partitioned fixture</td>
+<td>Compare map-side assumptions with observed execution</td>
+<td>Teach cost, statistics and execution-engine boundaries</td>
+</tr>
+<tr>
+<td>apache-067</td>
+<td>Transactional tables and Iceberg integration</td>
+<td>Compare Hive transactional-table semantics with Iceberg snapshots</td>
+<td>Read a compatible Iceberg table through the prepared integration</td>
+<td>Treat formats and commit protocols as explicit contracts</td>
+</tr>
+<tr>
+<td>apache-068</td>
+<td>Catalog upgrades and operational recovery</td>
+<td>Run schema verification before startup</td>
+<td>Reject an incompatible database schema and recover from an owned backup</td>
+<td>Plan metadata upgrades without assuming a rollback of binaries rolls back schema</td>
+</tr>
+</tbody></table></div>
+<h3 id="atlas">Atlas<a class="heading-anchor" href="#atlas" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-069</td>
+<td>Types, entities and metadata identity</td>
+<td>Create custom dataset and process type definitions</td>
+<td>Create two entity versions with stable qualified names</td>
+<td>Distinguish a type, entity, relationship and classification</td>
+</tr>
+<tr>
+<td>apache-070</td>
+<td>Lineage as recorded relationships</td>
+<td>Record a process with input and output datasets</td>
+<td>Query lineage and show an intentionally missing edge</td>
+<td>Explain that recorded lineage is evidence only for instrumented operations</td>
+</tr>
+<tr>
+<td>apache-071</td>
+<td>Classifications and discovery</td>
+<td>Attach a classification to a synthetic dataset</td>
+<td>Search by type and classification then remove it</td>
+<td>Separate metadata labels from enforcement in a data engine</td>
+</tr>
+<tr>
+<td>apache-072</td>
+<td>Hooks, notifications and integration</td>
+<td>Inspect a supported Hive hook or explicit API ingest path</td>
+<td>Retry a duplicate notification without inventing duplicate assets</td>
+<td>Define provenance and delivery boundaries of metadata ingestion</td>
+</tr>
+<tr>
+<td>apache-073</td>
+<td>Authorization and governance workflows</td>
+<td>Compare permitted and rejected local API requests</td>
+<td>Document a classification review and owner decision</td>
+<td>Keep policy intention distinct from actual enforcement</td>
+</tr>
+<tr>
+<td>apache-074</td>
+<td>Graph, indexes and recovery</td>
+<td>Restart the owned Atlas backing services</td>
+<td>Verify entity and lineage survival and diagnose index lag</td>
+<td>Understand graph storage, search indexes and backup consistency</td>
+</tr>
+</tbody></table></div>
+<h3 id="delta-sharing">Delta Sharing<a class="heading-anchor" href="#delta-sharing" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-075</td>
+<td>An open sharing protocol</td>
+<td>List shares, schemas and tables from the real reference server</td>
+<td>Reject an invalid recipient credential</td>
+<td>Distinguish Delta Sharing from an Apache project and from Delta table storage</td>
+</tr>
+<tr>
+<td>apache-076</td>
+<td>Metadata, file URLs and read paths</td>
+<td>Fetch a bounded table through the Python client</td>
+<td>Inspect metadata response and actual file reads separately</td>
+<td>Trace control-plane authorization and data-plane retrieval</td>
+</tr>
+<tr>
+<td>apache-077</td>
+<td>Snapshots, predicates and consistency</td>
+<td>Read a pinned table version</td>
+<td>Compare a server predicate hint with client-side correctness checks</td>
+<td>Keep predicate pushdown and access control conceptually separate</td>
+</tr>
+<tr>
+<td>apache-078</td>
+<td>Recipients and credential boundaries</td>
+<td>Use a fixture-only short-lived profile</td>
+<td>Rotate or invalidate access and observe rejection</td>
+<td>Avoid embedding recipient credentials in notebooks or published source</td>
+</tr>
+<tr>
+<td>apache-079</td>
+<td>History, changes and compatible readers</td>
+<td>Read supported table history or changes from the pinned server</td>
+<td>Reject an unsupported protocol or feature explicitly</td>
+<td>Negotiate capabilities rather than assuming every client reads every Delta feature</td>
+</tr>
+<tr>
+<td>apache-080</td>
+<td>Operating a bounded sharing service</td>
+<td>Restart the real server and retain the shared table</td>
+<td>Test missing data-file and unavailable-server failures</td>
+<td>Distinguish persisted data, share configuration and client retry behavior</td>
+</tr>
+</tbody></table></div>
+<h3 id="integration-and-capstones">Integration and capstones<a class="heading-anchor" href="#integration-and-capstones" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Chapter</th>
+<th>Worked case A</th>
+<th>Worked case B</th>
+<th>Observable outcome</th>
+</tr></thead><tbody>
+<tr>
+<td>apache-081</td>
+<td>Batch lakehouse with reproducible snapshots</td>
+<td>Materialize a bounded event batch into Iceberg</td>
+<td>Compare Spark and DataFusion reads through supported paths</td>
+<td>Produce an evidence bundle with schema, snapshot and result identity</td>
+</tr>
+<tr>
+<td>apache-082</td>
+<td>Streaming analytical serving</td>
+<td>Move Kafka events through Flink to Pinot</td>
+<td>Inject a duplicate and late correction and reconcile counts</td>
+<td>Document the guarantee at each source/state/sink boundary</td>
+</tr>
+<tr>
+<td>apache-083</td>
+<td>Orchestrated backfills and live data</td>
+<td>Use Airflow to correct a historical partition</td>
+<td>Keep a live event stream independent of the backfill</td>
+<td>Separate orchestration intervals from event-time semantics</td>
+</tr>
+<tr>
+<td>apache-084</td>
+<td>Catalog and governance integration</td>
+<td>Register Hive/Iceberg assets and process lineage in Atlas</td>
+<td>Compare metadata classification with an actual denied data access</td>
+<td>Show where governance information ends and enforcement begins</td>
+</tr>
+<tr>
+<td>apache-085</td>
+<td>Sharing a versioned data product</td>
+<td>Publish one bounded Delta table through the reference server</td>
+<td>Validate recipient access and reproducible table version</td>
+<td>Specify a consumer contract with provenance and revocation limits</td>
+</tr>
+<tr>
+<td>apache-086</td>
+<td>Failure and recovery game day</td>
+<td>Restart a stateful service and compare durable evidence</td>
+<td>Break one owned configuration then restore it</td>
+<td>Write a recovery report distinguishing loss, duplication and unavailability</td>
+</tr>
+<tr>
+<td>apache-087</td>
+<td>Capacity, costs and architectural tradeoffs</td>
+<td>Measure CPU, memory, storage and latency on a small workload</td>
+<td>Contrast embedded, batch, streaming and serving alternatives</td>
+<td>Extrapolate carefully and separate measured results from capacity forecasts</td>
+</tr>
+<tr>
+<td>apache-088</td>
+<td>An auditable data-platform capstone</td>
+<td>Build one selected end-to-end path with source-bound receipts</td>
+<td>Independently verify its failure and restart behavior</td>
+<td>Deliver a reproducible design, implementation, runbook and evidence dossier</td>
+</tr>
+</tbody></table></div></article>
+  </main>
+</body>
+</html>

@@ -1,13 +1,5 @@
 # Day 20: FIRST_VALUE, LAST_VALUE, NTH_VALUE (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Intermediate
-- **Prerequisites:** [Day 19; running aggregates](day19_running_aggregates.md)
-- **Artifacts:** [learner SQL](../day20_first_last_value.sql) ·
-  [solution reasoning](../solutions/day20_solutions.md) ·
-  [executable solution](../solutions/day20_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -72,6 +64,14 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Prerequisites:** [Day 19; running aggregates](day19_running_aggregates.md)
+- **Artifacts:** [learner SQL](../day20_first_last_value.sql) ·
+  [solution reasoning](../solutions/day20_solutions.md) ·
+  [executable solution](../solutions/day20_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -95,7 +95,7 @@ business question requires.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day20_first_last_value.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day20_first_last_value.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

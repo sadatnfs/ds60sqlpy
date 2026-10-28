@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "inspection_date": "2026-10-27",
+  "qualification": "descriptor-only; actual native service execution pending",
+  "images": [
+    {
+      "reference": "apache/airflow:3.3.2-python3.12",
+      "digest": "sha256:9df9c8be4096b9cc626bd7cb1f2b8c712eef66c59c615f8c7e6200871ca10bd1",
+      "platforms": [
+        {
+          "digest": "sha256:2ab95b4ac48ecfc935e8ecea3ab3999ea0a3ab799561cb300696c114d0605509",
+          "size": 4086,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:0a74ea83fbc3343071d53b2f5deaf72f51b0025c62f390debf75505f84f17870",
+          "size": 4086,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "apache/kafka:4.4.0",
+      "digest": "sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f",
+      "platforms": [
+        {
+          "digest": "sha256:76af3d0116abbb33b4cd964af410d4921c33d1f663e7a95d5453a9c35a84869b",
+          "size": 2576,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:77b56ddfb7104fc5814a3d0127fcff49983220c7c7ad9bfc1f0af4d439228329",
+          "size": 2576,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "library/flink:2.3.0-java17",
+      "digest": "sha256:1939f31f9fd7c2ef0ecd47ed08d9d5b3efb8a3d1f512caa9a3dc7ac84f110bc0",
+      "platforms": [
+        {
+          "digest": "sha256:5e206bde26f04f2d48a34bbeb63ec77141e0d5d4e431c602c58630d461371d80",
+          "size": 2911,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:af8ca1ac5f444d731c3997c5acf9030cfef0fc4614683230152623d594bb425f",
+          "size": 2913,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux",
+            "variant": "v8"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "library/cassandra:5.0.9",
+      "digest": "sha256:5f96b245d584a26b6622fee75da3712263fcf01bea38ab1691f6f3660190d449",
+      "platforms": [
+        {
+          "digest": "sha256:c1a180f2f47dcf60a05063e8ac6a315fd812151b0e0f6eabb0c85952e2255b51",
+          "size": 2489,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:4280287b9fa0edce64481a38f6573bdd31df0f41bae5c48dc04d3a23652385aa",
+          "size": 2491,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux",
+            "variant": "v8"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "apachepinot/pinot:1.5.1",
+      "digest": "sha256:dbb65d3732eea6edf2619b0b734f13466bf1c6fd73ab9abdfa98e08a807499b2",
+      "platforms": [
+        {
+          "digest": "sha256:81a634b1a87210e6da73af7f1e2aec313d174d53b5126e145e59b7f49fe75acc",
+          "size": 2418,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:737155256bbe955fcc146cda35a9c06528576b8cc97569a2d251141ad7044498",
+          "size": 2418,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "apache/hive:4.2.1",
+      "digest": "sha256:b19bb5bd01f233a3f99d941ebf08acaff68c55911dd5fa42ea03928e51860b91",
+      "platforms": [
+        {
+          "digest": "sha256:ec5d9c344d2b1d020fcf2d8a84408b6bd38be8eea0713b1df31243830d3535ee",
+          "size": 3149,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:feda444e4e2a873ee08e9d9a5c3ad507ea72e5242d47ef0cf530298e9d6bff13",
+          "size": 3149,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "library/postgres:17.6",
+      "digest": "sha256:00bc86618629af00d2937fdc5a5d63db3ff8450acf52f0636ec813c7f4902929",
+      "platforms": [
+        {
+          "digest": "sha256:b86568d3e0fe1dfaeff52714f9da36f206a30e4c49131b82bf96982d78627409",
+          "size": 3627,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:ac74e8c63c516b1f81fbaaede0663981399f80e42369431136b2455557f8547b",
+          "size": 3629,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux",
+            "variant": "v8"
+          }
+        }
+      ]
+    },
+    {
+      "reference": "library/zookeeper:3.9.4",
+      "digest": "sha256:dfa9ba46d14bd52bcb3c1dac3ba91f179cf4cebf7ee576e1c2df09c68fc1d30d",
+      "platforms": [
+        {
+          "digest": "sha256:6c49a3cafe63aa13a5397d4ec73d167f235748f763ea755c76b12dff27b2f4fd",
+          "size": 2874,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        },
+        {
+          "digest": "sha256:d8102fcaba464dd80e9ce580912174e35c785856c0249203f4dd2a8ee1a66df3",
+          "size": 2876,
+          "platform": {
+            "architecture": "arm64",
+            "os": "linux",
+            "variant": "v8"
+          }
+        }
+      ]
+    }
+  ]
+}

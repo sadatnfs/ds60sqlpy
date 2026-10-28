@@ -1,0 +1,55 @@
+jobmanager.rpc.address: jobmanager
+jobmanager.bind-host: 0.0.0.0
+jobmanager.memory.process.size: 768m
+jobmanager.memory.jvm-metaspace.size: 128m
+jobmanager.memory.jvm-overhead.min: 128m
+jobmanager.memory.jvm-overhead.max: 128m
+taskmanager.host: taskmanager
+taskmanager.bind-host: 0.0.0.0
+taskmanager.memory.process.size: 1024m
+taskmanager.memory.jvm-metaspace.size: 128m
+taskmanager.memory.jvm-overhead.min: 128m
+taskmanager.memory.jvm-overhead.max: 128m
+taskmanager.memory.network.min: 64m
+taskmanager.memory.network.max: 64m
+taskmanager.memory.managed.size: 128m
+taskmanager.numberOfTaskSlots: 2
+parallelism.default: 1
+rest.address: jobmanager
+rest.bind-address: 0.0.0.0
+rest.port: 8081
+execution.target: remote
+state.backend.type: hashmap
+state.checkpoints.dir: file:///state/checkpoints
+state.savepoints.dir: file:///state/savepoints
+execution.checkpointing.num-retained: 2
+execution.checkpointing.checkpoints-after-tasks-finish.enabled: true
+restart-strategy.type: fixed-delay
+restart-strategy.fixed-delay.attempts: 6
+restart-strategy.fixed-delay.delay: 5 s
+heartbeat.interval: 1000
+heartbeat.timeout: 10000
+env.java.opts.client: -Xms32m -Xmx128m
+metrics.fetcher.update-interval: 1 s
+
+# Reviewed module options shipped by the selected Flink2.3 release.
+env.java.opts.all: >-
+  --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+  --add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+  --add-opens=java.base/java.lang=ALL-UNNAMED
+  --add-opens=java.base/java.net=ALL-UNNAMED
+  --add-opens=java.base/java.io=ALL-UNNAMED
+  --add-opens=java.base/java.nio=ALL-UNNAMED
+  --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+  --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+  --add-opens=java.base/java.text=ALL-UNNAMED
+  --add-opens=java.base/java.time=ALL-UNNAMED
+  --add-opens=java.base/java.util=ALL-UNNAMED
+  --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+  --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+  --add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED

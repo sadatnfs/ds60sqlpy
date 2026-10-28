@@ -47,6 +47,7 @@ TEXT_ARTIFACT_SUFFIXES = {
     ".txt",
     ".py",
     ".sql",
+    ".hql",
     ".ipynb",
     ".cpp",
     ".cc",

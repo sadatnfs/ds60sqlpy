@@ -98,3 +98,7 @@ docker/workers/dotnet/bin/
 docker/workers/dotnet/obj/
 **/*.xcodeproj/**/xcuserdata/
 **/*.xcworkspace/**/xcuserdata/
+
+# Private optional-workshop checkpoints and request state.
+.workshop
+**/.workshop

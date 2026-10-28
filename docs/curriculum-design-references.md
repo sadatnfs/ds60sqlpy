@@ -2,9 +2,11 @@
 
 This course is original material, but its teaching structure should learn from
 successful beginner resources. The sources below were reviewed on 2026-07-30.
-They are design references, not content to copy. DS60 remains PostgreSQL 16+,
-Python 3.11–3.12, local-first, Windows-friendly, and runnable after one
-connected bootstrap.
+They are design references, not content to copy. The supported learner product
+is Linux Docker on Linux/macOS and Windows through WSL 2, with PostgreSQL 17
+and prepared language workers. Host compilers are not ordinary prerequisites.
+The [scientist roadmap](scientist-roadmap.md) and [statistics comparison](statistics-reference-map.md)
+record later scientific additions without changing the date of this design review.
 
 ## Patterns adopted from established tutorials
 
@@ -86,9 +88,9 @@ adapts the useful part of that pattern:
 
 - the rendered reader keeps the guide, learner preview, and optional solution
   together;
-- the private portal adds a fixed **Create/open guided SQL notebook** action;
-- the generated notebook preserves an editable learner copy and runs it
-  through a catalog-restricted `psql -f` path; and
+- the unified classroom provides a SQL pad and guarded whole-lesson execution;
+- the separately prepared contributor notebook workflow preserves an editable
+  learner copy and runs it through a catalog-restricted `psql -f` path; and
 - completion means explaining and demonstrating the objective, not merely
   opening the page.
 

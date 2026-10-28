@@ -1,0 +1,67 @@
+{
+  "number": 22,
+  "title": "Actual CPU PPO updates on a finite contextual policy",
+  "concepts": [
+    "PyTorch PPO",
+    "frozen rollout policy",
+    "critic",
+    "exact expectation",
+    "reward exploitation"
+  ],
+  "outcome": "Train a tiny categorical policy with the PPO surrogate and critic loss while testing frozen rollout state, optimization and independent task utility.",
+  "level": "advanced",
+  "runtime": "llm-torch-cpu",
+  "minutes": 120,
+  "prerequisites": ["eval-018", "eval-021"],
+  "exercises": [
+    {
+      "title": "Trace the expectation weights",
+      "task": "Sum old-policy weights across both contexts and actions.",
+      "expected": "The total is 1.",
+      "hint": "Each context contributes probability 0.5.",
+      "answer": "An unweighted average over actions would cease to represent the old-policy expectation once the policy becomes nonuniform."
+    },
+    {
+      "title": "Inspect frozen state",
+      "task": "Compare the old probability tensor before and after each inner update.",
+      "expected": "It is byte-for-byte numerically unchanged.",
+      "hint": "Detach and copy the collector snapshot.",
+      "answer": "Current-policy updates must not move the denominator of their own importance ratio."
+    },
+    {
+      "title": "Separate critic and actor gradients",
+      "task": "Explain why the advantage uses detached values.",
+      "expected": "The actor cannot improve its objective by changing its baseline through that path.",
+      "hint": "The critic is trained by a separate squared-error term.",
+      "answer": "Without this graph boundary the implemented gradient would contain an unintended optimization route."
+    },
+    {
+      "title": "Check symmetry",
+      "task": "Swap the two contexts and their useful actions.",
+      "expected": "The learned probability rows mirror each other.",
+      "hint": "Both start from the same logits and use symmetric rewards.",
+      "answer": "This invariant tests the small environment and update implementation independently of a particular random seed."
+    },
+    {
+      "title": "Optimize a bad proxy",
+      "task": "Run case B and evaluate the resulting policy under the original task utility.",
+      "expected": "Training reward exceeds 0.9 while task utility is below 0.1.",
+      "hint": "Keep the evaluation utility outside the optimizer.",
+      "answer": "Correct execution of PPO cannot validate a mistaken or exploitable reward definition."
+    },
+    {
+      "title": "State the scale boundary",
+      "task": "List what this actual training run omits from an LLM deployment.",
+      "expected": "Tokenization, sampled language rollouts, long-horizon credit, pretrained weights and serving are absent.",
+      "hint": "Name the finite state/action representation.",
+      "answer": "The run establishes a small CPU optimization mechanism, not a production language model or a guarantee of safe alignment."
+    }
+  ],
+  "sources": [
+    [
+      "PyTorch optimization mechanics",
+      "https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html"
+    ],
+    ["PPO algorithm", "https://arxiv.org/abs/1707.06347"]
+  ]
+}

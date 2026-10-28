@@ -1,11 +1,11 @@
 -- Day 59: Final Capstone - Integrated Data Challenge (Part 2)
--- BEGINNER WORKFLOW — sql-59: Final Capstone Part2
+-- BEGINNER WORKFLOW - sql-59: Final Capstone Part 2
 -- Guide: sql/postgres-60day/companion-guides/day59_final_capstone_part2.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-59/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-59.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Focus: Complex business logic, performance requirements, stakeholder queries
 BEGIN;
 SET search_path TO training, public;
+
 -- 1. Business KPI Suite (multi-level calculations)
 -- a) LTV by cohort and segment
 WITH order_values AS (
@@ -68,6 +69,7 @@ ORDER BY
   cohort.cohort_month DESC,
   avg_ltv DESC
 LIMIT 100;
+
 -- b) Ordered conversion funnel from events -> orders (last 90 days).
 -- First collect the earliest page view. Each later CTE can only choose a
 -- timestamp at or after the timestamp supplied by its previous stage.
@@ -150,6 +152,7 @@ SELECT
   COUNT(*) FILTER (WHERE bought) AS buyers
 FROM
   activity;
+
 -- c) Top product pairs by co-occurrence (market basket)
 WITH items AS (
   SELECT
@@ -185,11 +188,15 @@ FROM
 ORDER BY
   together DESC
 LIMIT 20;
+
 -- 2. Performance Aids (indexes/partitioning hints) - run EXPLAIN before/after
 -- Note: These DDLs are rolled back unless you COMMIT intentionally
 CREATE INDEX IF NOT EXISTS idx_orders_customer_date ON orders (customer_id, order_date);
+
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items (order_id);
+
 CREATE INDEX IF NOT EXISTS idx_payments_order_date ON payments (order_id, payment_date);
+
 EXPLAIN ANALYZE
 SELECT
   o.customer_id,
@@ -203,6 +210,7 @@ GROUP BY
 ORDER BY
   SUM(o.total_amount) DESC
 LIMIT 50;
+
 -- 3. Stakeholder Views
 -- a) Finance: Budget vs Actual YTD by category
 WITH ytd_exp AS (
@@ -243,6 +251,7 @@ FROM
   AND e.category = b.category
 ORDER BY
   category;
+
 -- b) Marketing: Campaign-assisted purchases (within 7 days)
 WITH first_purchase AS (
   SELECT
@@ -278,6 +287,7 @@ GROUP BY
 ORDER BY
   assisted_customers DESC
 LIMIT 20;
+
 -- 4. Large-scale considerations
 -- For 100M+ rows, favor partitioning by time on orders/events, and use partial indexes on recent partitions.
 -- Ensure queries constrain partition key (order_date, event_time) to enable pruning.

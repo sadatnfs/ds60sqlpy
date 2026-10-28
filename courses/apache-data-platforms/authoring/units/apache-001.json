@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 50,
+  "prerequisites": [],
+  "concepts": ["platform boundaries", "data contract", "independent oracle"],
+  "evidence": "Exact real-library outputs checked against small independent records, with explicit rejected inputs.",
+  "sources": [
+    ["Arrow Python data model", "https://arrow.apache.org/docs/python/data.html"],
+    [
+      "DataFusion Python introduction",
+      "https://datafusion.apache.org/python/user-guide/introduction.html"
+    ]
+  ]
+}

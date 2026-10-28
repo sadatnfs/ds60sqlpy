@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 60,
+  "prerequisites": ["apache-039", "apache-010"],
+  "concepts": ["field IDs", "schema evolution", "nullability"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    ["PyIceberg table API", "https://py.iceberg.apache.org/api/"],
+    ["Iceberg table specification", "https://iceberg.apache.org/spec/"]
+  ]
+}

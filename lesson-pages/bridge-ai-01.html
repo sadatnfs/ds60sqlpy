@@ -586,147 +586,147 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Progressive hint:</strong> Fail at construction so invalid state cannot cross later boundaries.</li>
 <li><strong>Verify:</strong> Parameterize every dataclass with blank IDs/text, empty audiences, non-positive bounds, non-finite scores/latency, and inconsistent budgets; assert exact construction failures and one fully valid object per type.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Math:</strong> Implement cosine similarity with mismatched-dimension and zero-vector handling.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Validate shape and norms before division.</li>
 <li><strong>Verify:</strong> Assert identical vectors score <code>1.0</code>, orthogonal vectors <code>0.0</code>, mismatched/empty dimensions and zero norms raise <code>ValueError</code>, and near-equal comparisons use the declared tolerance.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Authorization testing:</strong> Use a recording embedding double to prove sensitive, unauthorized, and quarantined documents are filtered before embedding.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Call history is the evidence that prohibited text never crossed the adapter.</li>
 <li><strong>Verify:</strong> Record embedding inputs for a mixed document set; assert the query and only authorized, non-sensitive, non-quarantined documents are embedded and forbidden text/IDs never cross the call boundary.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Ranking:</strong> Rank equal-score documents deterministically while enforcing top-k and total context-character bounds.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Use a stable document ID tie-breaker and apply the character budget without splitting trust rules.</li>
 <li><strong>Verify:</strong> Give equal-score documents in reversed input order; assert ranking uses ascending document ID, returns at most <code>top_k</code>, and total selected excerpt characters never exceed the policy limit.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Prompt boundary:</strong> Serialize context as untrusted JSON containing only approved document IDs and bounded excerpts.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Separate system instructions, user query, and retrieved data structurally.</li>
 <li><strong>Verify:</strong> Parse each serialized context line as JSON; assert exact approved ID/text fields plus the <code>untrusted_document_data</code> label, deterministic order, bounded excerpts, and no unauthorized field.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Schema validation:</strong> Implement exact structured-answer validation and test all malformed, extra-field, wrong-type, duplicate-citation, and inconsistent-abstention cases.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Parsing JSON is only the first step; validate exact shape and semantics.</li>
 <li><strong>Verify:</strong> Parameterize missing/extra fields, wrong types, duplicate/unknown citations, and inconsistent abstention; assert all raise <code>UnsafeModelOutput</code> while one exact valid object is accepted unchanged.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Adversarial testing:</strong> Use a malicious model double that cites an unretrieved document and prove validation rejects it.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Citations are authorization claims and must be a subset of retrieved evidence.</li>
 <li><strong>Verify:</strong> Return a citation ID absent from retrieved hits; assert parsing/orchestration raises <code>UnsafeModelOutput</code>, produces no accepted answer, and records the invalid model call once.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Leakage:</strong> Return a blocked private marker from the model and prove the output boundary fails closed without logging the answer.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Leakage inspection occurs after parsing but before return/logging.</li>
 <li><strong>Verify:</strong> Return a configured private marker; assert the run fails closed, the marker is absent from logs and returned objects, and only a bounded error class/outcome is observable.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Budgets:</strong> Test preflight input, actual input, output, cost-unit, and latency budget failures separately.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Each limit is independent evidence and needs its own failure case.</li>
 <li><strong>Verify:</strong> Trigger estimated-input, reported-input, output, cost-unit, and latency limits one at a time; assert each raises <code>BudgetExceeded</code> at its named gate and unaffected limits still pass.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Evaluation:</strong> Add deterministic grounded, abstention, injection-document, and unauthorized-private-document cases.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Expected citations and forbidden fragments make safety assertions inspectable.</li>
 <li><strong>Verify:</strong> Run grounded, abstention, injection-document, and unauthorized-private cases; compare exact citations/abstention, zero forbidden fragments, expected adapter calls, and per-case budget outcome.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Evidence limits:</strong> Explain which safety claims deterministic doubles prove and which require a separately authorized real-adapter evaluation.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A controlled harness proves orchestration, not provider behavior or real-world robustness.</li>
 <li><strong>Verify:</strong> Provide a two-column claim table: deterministic doubles prove orchestration/call order/schema gates; provider reliability, real model quality, billing, privacy policy, and adversarial robustness remain unproved.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Prompt injection:</strong> Insert retrieved text that says to ignore policy and reveal secrets; prove it stays data and cannot change allowed citations.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The model double should attempt the attack so downstream validation is exercised.</li>
 <li><strong>Verify:</strong> Insert an instruction-attack document and configure the model to follow it if seen; assert the document is quarantined or serialized only as data and allowed citations/output policy cannot expand.</li>
 </ul>
-<ol>
+<ol start="13">
 <li><strong>Text normalization:</strong> Choose normalization rules for blank IDs, Unicode text, and blocked-fragment matching without silently changing document meaning.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Normalization can close bypasses but can also merge distinct content.</li>
 <li><strong>Verify:</strong> Test whitespace-only IDs, composed/decomposed Unicode, and case/normalization variants of blocked markers; document which normalize to equality and which remain distinct without altering source meaning.</li>
 </ul>
-<ol>
+<ol start="14">
 <li><strong>Numeric determinism:</strong> Test equal and nearly equal embedding scores with a declared tolerance and deterministic tie-breaker.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not rely on platform-specific incidental sort order.</li>
 <li><strong>Verify:</strong> Rank equal and epsilon-different scores under the declared tolerance; assert deterministic ID tie-breaking and identical order across repeated runs.</li>
 </ul>
-<ol>
+<ol start="15">
 <li><strong>Token estimation:</strong> Design a conservative preflight token estimator and explain why it cannot replace actual adapter accounting.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Preflight should fail early on obvious excess and leave headroom.</li>
 <li><strong>Verify:</strong> For representative strings, record the conservative estimated token count and headroom; assert obvious oversize input fails preflight and actual adapter usage remains the authoritative post-call value.</li>
 </ul>
-<ol>
+<ol start="16">
 <li><strong>Adapter failure:</strong> Classify embedding/model timeout and provider-like errors without retrying unsafe or permanent failures.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Offline doubles can model exception classes and call order.</li>
 <li><strong>Verify:</strong> Configure timeout/transient/permanent/unsafe-output exceptions; assert only the explicitly retryable adapter class is retried within its bound and permanent or unsafe failures have one call.</li>
 </ul>
-<ol>
+<ol start="17">
 <li><strong>Abstention:</strong> Require abstention when no authorized evidence survives retrieval and test that the text model is not called.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> No evidence is a deterministic pre-model decision.</li>
 <li><strong>Verify:</strong> Use a query with no authorized hit; assert an abstaining <code>AssistantRun</code> is returned (or the declared abstention path), citations are empty, and text-model call count is zero.</li>
 </ul>
-<ol>
+<ol start="18">
 <li><strong>Observability:</strong> Design safe logs/metrics that exclude user query, context, embeddings, and raw model output.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Use bounded stage/outcome/error-class metadata only.</li>
 <li><strong>Verify:</strong> Capture logs and metrics for pass/failure; assert only bounded stage/outcome/error-class/count fields appear and query, context, embeddings, raw output, document IDs, and credentials are absent.</li>
 </ul>
-<ol>
+<ol start="19">
 <li><strong>Metric edge cases:</strong> Define evaluation metrics for an empty case set and zero expected citations without divide-by-zero ambiguity.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Denominators and conventions belong in the metric contract.</li>
 <li><strong>Verify:</strong> Evaluate an empty case set and a case with zero expected citations; assert documented finite metric values with no division error or NaN and retain the denominator in results.</li>
 </ul>
-<ol>
+<ol start="20">
 <li><strong>Regression gates:</strong> Set deterministic pass thresholds for citation recall, abstention accuracy, leakage, and budgets without hiding per-case failures.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Aggregate gates complement, not replace, case-level evidence.</li>
 <li><strong>Verify:</strong> Apply explicit citation-recall, abstention, leakage-zero, and budget thresholds; assert one failing case remains visible even if aggregate averages would otherwise pass.</li>
 </ul>
-<ol>
+<ol start="21">
 <li><strong>Real adapter boundary:</strong> Design an optional hosted adapter evaluation that keeps credentials external and never weakens the offline default.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Network, cost, and data authorization require an explicit opt-in gate.</li>
 <li><strong>Verify:</strong> Specify an opt-in environment flag, external credential source, bounded dataset/cost/time, adapter version record, and cleanup; assert the normal test command cannot import/call the hosted adapter.</li>
 </ul>
-<ol>
+<ol start="22">
 <li><strong>Threat model:</strong> Write residual risks for retrieval poisoning, embedding inversion, model memorization, authorization drift, and evaluator blind spots.</li>
 </ol>
 <ul>

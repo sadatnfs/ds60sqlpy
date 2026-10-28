@@ -1,0 +1,1120 @@
+[
+  {
+    "id": "dme-001",
+    "title": "From a record to an engineering decision",
+    "level": "beginner",
+    "minutes": 75,
+    "prerequisites": [],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["record grain", "input contract", "publication decision", "observable evidence"],
+    "outcome": "Trace a small record-to-metric pipeline and define its observable contract.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-001.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-001.py",
+    "related_paths": [
+      {
+        "label": "ML engineering decision workshop",
+        "path": "courses/ml-engineering/guides/mle-001.md"
+      },
+      {
+        "label": "Python program-reading workshop (python-foundations-01)",
+        "path": "lesson-pages/python-foundations-01.html"
+      }
+    ]
+  },
+  {
+    "id": "dme-002",
+    "title": "Files, paths, processes and the Linux container boundary",
+    "level": "beginner",
+    "minutes": 75,
+    "prerequisites": ["dme-001"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "process",
+      "working directory",
+      "filesystem boundary",
+      "stdout and stderr",
+      "exit status"
+    ],
+    "outcome": "Read and write owned UTF-8 files through explicit paths.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-002.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-002.py",
+    "related_paths": [
+      {
+        "label": "Docker learner setup",
+        "path": "README.md"
+      },
+      {
+        "label": "Python file and context-manager workshop (python-08)",
+        "path": "lesson-pages/python-08.html"
+      }
+    ]
+  },
+  {
+    "id": "dme-003",
+    "title": "Values, units, missingness and clocks",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["dme-001"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["types", "units", "missingness", "aware timestamps", "denominators"],
+    "outcome": "Normalize aware timestamps and retain the meaning of missing values.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-003.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-003.py",
+    "related_paths": [
+      {
+        "label": "Polars types workshop",
+        "path": "courses/polars/guides/polars-003.md"
+      },
+      {
+        "label": "Polars missing-data workshop",
+        "path": "courses/polars/guides/polars-004.md"
+      },
+      {
+        "label": "Python type foundations (python-02)",
+        "path": "lesson-pages/python-02.html"
+      }
+    ]
+  },
+  {
+    "id": "dme-004",
+    "title": "SQL, row grain, keys and relational reasoning",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["dme-001", "dme-003"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": ["relational grain", "primary keys", "join cardinality", "aggregation", "SQL NULL"],
+    "outcome": "Execute real DuckDB joins and grouped metrics with an independent row oracle.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-004.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-004.py",
+    "related_paths": [
+      {
+        "label": "dbt dependency and materialization workshop",
+        "path": "courses/dbt/guides/dbt-003.md"
+      },
+      {
+        "label": "SQL beginner workshop (sql-start-03)",
+        "path": "lesson-pages/sql-start-03.html"
+      }
+    ]
+  },
+  {
+    "id": "dme-005",
+    "title": "Python functions, collections and state boundaries",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["dme-001", "dme-003"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["function interface", "mutation", "iterator lifetime", "replay", "complexity"],
+    "outcome": "Build a pure transformation with explicit inputs and outputs.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-005.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-005.py",
+    "related_paths": [
+      {
+        "label": "Python functions workshop (python-05)",
+        "path": "lesson-pages/python-05.html"
+      }
+    ]
+  },
+  {
+    "id": "dme-006",
+    "title": "Tests, invariants and evidence that can falsify a claim",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["dme-005"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "independent oracle",
+      "unit tests",
+      "invariants",
+      "negative cases",
+      "evidence boundaries"
+    ],
+    "outcome": "Check hand-derived outputs, boundaries and changed inputs.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-006.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-006.py",
+    "related_paths": [
+      {
+        "label": "dbt real unit-test workshop",
+        "path": "courses/dbt/guides/dbt-006.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-007",
+    "title": "Structural schemas and semantic data contracts",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["dme-003", "dme-005", "dme-006"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "schema validation",
+      "strict types",
+      "compatibility direction",
+      "units",
+      "consumer contract"
+    ],
+    "outcome": "Validate a strict typed input and a compatible additive schema change.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-007.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-007.py",
+    "related_paths": [
+      {
+        "label": "dbt model contracts workshop",
+        "path": "courses/dbt/guides/dbt-011.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-008",
+    "title": "Source, dependency and data identities for reproducible work",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["dme-002", "dme-006", "dme-007"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "content identity",
+      "source control",
+      "dependency identity",
+      "reproducibility",
+      "provenance"
+    ],
+    "outcome": "Build a reviewable source/data/configuration hash manifest.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-008.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-008.py",
+    "related_paths": [
+      {
+        "label": "MLflow lineage workshop",
+        "path": "courses/ml-engineering/guides/mle-010.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-009",
+    "title": "File ingestion, manifests and resumable delivery",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-002", "dme-007", "dme-008"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "delivery manifest",
+      "content identity",
+      "explicit parsing",
+      "transactional acceptance",
+      "replay"
+    ],
+    "outcome": "Ingest a declared CSV/JSON delivery with checksums and row reconciliation.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-009.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-009.py",
+    "related_paths": [
+      {
+        "label": "dbt staging and quarantine workshop",
+        "path": "courses/dbt/guides/dbt-002.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-010",
+    "title": "HTTP APIs, pagination, retries and idempotency",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-007", "dme-009"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "HTTP contract",
+      "snapshot pagination",
+      "idempotency key",
+      "unknown outcome",
+      "ASGI boundary"
+    ],
+    "outcome": "Exercise an actual local ASGI pagination contract without network access.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-010.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-010.py",
+    "related_paths": [
+      {
+        "label": "ML API contract workshop",
+        "path": "courses/ml-engineering/guides/mle-012.md"
+      },
+      {
+        "label": "Actual local HTTP ML service",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-011",
+    "title": "Change-data capture events and ordered application",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-004", "dme-009", "dme-010"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "absolute versus delta events",
+      "source version",
+      "tombstone",
+      "transaction ownership",
+      "capture versus application"
+    ],
+    "outcome": "Apply synthetic insert/update/delete events to a real local SQLite table.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-011.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-011.py",
+    "related_paths": [
+      {
+        "label": "Observed-state snapshot workshop",
+        "path": "courses/dbt/guides/dbt-010.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-012",
+    "title": "Facts, dimensions and slowly changing business meaning",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-004", "dme-007", "dme-011"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "fact grain",
+      "dimension identity",
+      "valid-time interval",
+      "cardinality",
+      "historical meaning"
+    ],
+    "outcome": "Build and query a real dimensional product at a declared grain.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-012.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-012.py",
+    "related_paths": [
+      {
+        "label": "Temporal data-product workshop",
+        "path": "courses/dbt/guides/dbt-017.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-013",
+    "title": "JSON, CSV, Parquet and Arrow interoperability",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-003", "dme-007", "dme-009"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "serialization contract",
+      "Arrow schema",
+      "Parquet",
+      "validity bitmap",
+      "JSON representation"
+    ],
+    "outcome": "Round-trip typed columnar records and inspect actual Arrow/Parquet schemas.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-013.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-013.py",
+    "related_paths": [
+      {
+        "label": "Arrow interoperability workshop",
+        "path": "courses/polars/guides/polars-012.md"
+      },
+      {
+        "label": "Owned Arrow Flight project",
+        "path": "courses/apache-data-platforms/projects/arrow-flight/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-014",
+    "title": "Event time, availability time and late-known facts",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-003", "dme-011", "dme-012"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "event time",
+      "known time",
+      "prediction cutoff",
+      "temporal leakage",
+      "request coverage"
+    ],
+    "outcome": "Select only information known at a decision cutoff.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-014.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-014.py",
+    "related_paths": [
+      {
+        "label": "Historical availability workshop",
+        "path": "courses/polars/guides/polars-014.md"
+      },
+      {
+        "label": "Real Feast historical retrieval workshop",
+        "path": "courses/ml-engineering/guides/mle-006.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-015",
+    "title": "Atomic publication and consistent consumer views",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-002", "dme-008", "dme-009"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "immutable version",
+      "atomic pointer",
+      "manifest integrity",
+      "failure phase",
+      "consistent reader"
+    ],
+    "outcome": "Publish a checked local manifest through an atomic pointer replacement.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-015.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-015.py",
+    "related_paths": [
+      {
+        "label": "Accepted-version recovery workshop",
+        "path": "courses/dbt/guides/dbt-025.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-016",
+    "title": "Data quality, deduplication and explicit quarantine",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-004", "dme-007", "dme-011", "dme-013"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "physical schema",
+      "quarantine",
+      "audit identity",
+      "source-version conflict",
+      "current snapshot"
+    ],
+    "outcome": "Retain valid and rejected Polars records with concrete reason codes.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-016.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-016.py",
+    "related_paths": [
+      {
+        "label": "Polars quality publication workshop",
+        "path": "courses/polars/guides/polars-018.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-017",
+    "title": "Choosing and comparing local query engines",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-004", "dme-013", "dme-016"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": ["query engine", "null aggregate", "independent oracle", "row grain"],
+    "outcome": "Compare actual SQLite, DuckDB and Polars results under one contract.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-017.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-017.py",
+    "related_paths": [
+      {
+        "label": "Polars workshop",
+        "path": "courses/polars/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-018",
+    "title": "Columnar layout, partition pruning and bounded reads",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-013", "dme-017"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": ["Parquet fragment", "partition pruning", "projection", "small files"],
+    "outcome": "Inspect real partitioned Parquet fragments selected by a predicate.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-018.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-018.py",
+    "related_paths": [
+      {
+        "label": "Parquet and Arrow workshop",
+        "path": "courses/polars/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-019",
+    "title": "Spark partitions, shuffles and skew",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-017", "dme-018"],
+    "runtime_profile": "spark-local-python",
+    "language": "python",
+    "concepts": ["Spark partition", "shuffle exchange", "key skew", "partial aggregation"],
+    "outcome": "Execute and inspect a real Spark aggregation and its physical shuffle boundary.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-019.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-019.py",
+    "related_paths": [
+      {
+        "label": "Scala and Spark route",
+        "path": "courses/scala-spark/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-020",
+    "title": "Orchestration, dependencies and safe retries",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-008", "dme-015", "dme-016"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["dependency DAG", "checkpoint identity", "reconciliation", "task attempt"],
+    "outcome": "Execute a bounded local DAG with recorded completed artifact identities.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-020.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-020.py",
+    "related_paths": [
+      {
+        "label": "Local ML workflow project",
+        "path": "courses/ml-engineering/README.md"
+      },
+      {
+        "label": "Actual Airflow workshop",
+        "path": "courses/apache-data-platforms/projects/airflow/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-021",
+    "title": "Transactions, idempotency and the outbox pattern",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-010", "dme-011", "dme-020"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "transactional outbox",
+      "consumer inbox",
+      "idempotency",
+      "uncertain acknowledgement"
+    ],
+    "outcome": "Commit a state change and an outbox event in one actual SQLite transaction.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-021.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-021.py",
+    "related_paths": [
+      {
+        "label": "Local data product project",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-022",
+    "title": "Backfills, overlapping windows and correction policies",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-011", "dme-012", "dme-014", "dme-021"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": ["half-open interval", "partition revision", "backfill", "replacement semantics"],
+    "outcome": "Rebuild a declared half-open historical interval and reconcile it.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-022.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-022.py",
+    "related_paths": [
+      {
+        "label": "dbt incrementals and snapshots",
+        "path": "courses/dbt/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-023",
+    "title": "Stream windows, watermarks and state lifetime",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-014", "dme-021", "dme-022"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["event time", "watermark", "allowed lateness", "revision-aware sink"],
+    "outcome": "Trace a bounded event-time window mechanism under out-of-order arrivals.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-023.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-023.py",
+    "related_paths": [
+      {
+        "label": "Actual Flink workshop",
+        "path": "courses/apache-data-platforms/projects/flink/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-024",
+    "title": "Checkpoints, replay and state-schema evolution",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-015", "dme-020", "dme-021", "dme-023"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "checkpoint cursor",
+      "consistent prefix",
+      "source identity",
+      "state-schema evolution"
+    ],
+    "outcome": "Restore a versioned checkpoint and compare with a full replay oracle.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-024.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-024.py",
+    "related_paths": [
+      {
+        "label": "Persistent ML service workshop",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-025",
+    "title": "Object storage, object identity and conditional updates",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-015", "dme-021"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["object key", "generation precondition", "manifest publication", "ABA conflict"],
+    "outcome": "Model versioned object publication and conditional pointer updates explicitly.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-025.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-025.py",
+    "related_paths": [
+      {
+        "label": "Persistent data-product project",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-026",
+    "title": "Lake file organization, manifests and evolution",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-013", "dme-018", "dme-025"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "Parquet manifest",
+      "directional schema evolution",
+      "union by name",
+      "dataset grain"
+    ],
+    "outcome": "Query an actual versioned Parquet manifest with DuckDB.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-026.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-026.py",
+    "related_paths": [
+      {
+        "label": "Arrow Flight service workshop",
+        "path": "courses/apache-data-platforms/projects/arrow-flight/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-027",
+    "title": "Table formats: snapshots, transactions and concurrency",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-021", "dme-025", "dme-026"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "table snapshot",
+      "optimistic parent check",
+      "logical delete",
+      "orphan reachability"
+    ],
+    "outcome": "Investigate snapshot and delete invariants using real local files and a clearly labelled table-format model.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-027.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-027.py",
+    "related_paths": [
+      {
+        "label": "Apache data-platforms route",
+        "path": "courses/apache-data-platforms/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-028",
+    "title": "Catalogs, discovery, ownership and access decisions",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-007", "dme-027"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "dataset catalog",
+      "accepted version",
+      "resource action",
+      "semantic compatibility"
+    ],
+    "outcome": "Query a real local metadata catalog and resolve a versioned dataset contract.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-028.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-028.py",
+    "related_paths": [
+      {
+        "label": "Actual Hive Metastore workshop",
+        "path": "courses/apache-data-platforms/projects/hive/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-029",
+    "title": "Cassandra: access paths, partition keys and consistency",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-011", "dme-018", "dme-021"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "query-shaped partition key",
+      "time bucket",
+      "replica intersection",
+      "tombstone retention"
+    ],
+    "outcome": "Derive query-shaped partition keys and quantify a hot-partition case.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-029.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-029.py",
+    "related_paths": [
+      {
+        "label": "Actual Cassandra workshop",
+        "path": "courses/apache-data-platforms/projects/cassandra/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-030",
+    "title": "Pinot and low-latency analytical serving",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-017", "dme-022", "dme-023", "dme-029"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "analytical serving",
+      "entity upsert",
+      "comparison revision",
+      "aggregate retraction"
+    ],
+    "outcome": "Compute a query oracle and choose a compatible ingestion grain.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-030.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-030.py",
+    "related_paths": [
+      {
+        "label": "Actual Pinot workshop",
+        "path": "courses/apache-data-platforms/projects/pinot/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-031",
+    "title": "Lineage, provenance and reproducible investigations",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-008", "dme-020", "dme-026", "dme-028"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["artifact lineage", "recipe identity", "dependency invalidation", "provenance"],
+    "outcome": "Trace an actual artifact dependency graph using content identities.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-031.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-031.py",
+    "related_paths": [
+      {
+        "label": "Actual Atlas lineage workshop",
+        "path": "courses/apache-data-platforms/projects/atlas/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-032",
+    "title": "Governance, minimization, retention and review",
+    "level": "intermediate",
+    "minutes": 120,
+    "prerequisites": ["dme-013", "dme-028", "dme-031"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": ["purpose restriction", "minimization", "pseudonym linkage", "retention audit"],
+    "outcome": "Enforce a declared synthetic access/retention policy and preserve an audit record.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-032.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-032.py",
+    "related_paths": [
+      {
+        "label": "Governed sharing workshop",
+        "path": "courses/apache-data-platforms/projects/delta-sharing/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-041",
+    "title": "Batch and online inference as different contracts",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-034", "dme-036", "dme-040"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "batch inference",
+      "online request contract",
+      "feature event time",
+      "accepted model version"
+    ],
+    "outcome": "Compare real batch predictions with a local ASGI request contract.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-041.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-041.py",
+    "related_paths": [
+      {
+        "label": "Persistent ML prediction service",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-042",
+    "title": "HTTP serving, concurrency and cancellation boundaries",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-021", "dme-041"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "bounded admission",
+      "async cancellation",
+      "resource cleanup",
+      "uncertain effects"
+    ],
+    "outcome": "Exercise a bounded real ASGI contract and resource cleanup.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-042.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-042.py",
+    "related_paths": [
+      {
+        "label": "Persistent inference-service project",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-043",
+    "title": "Observability, SLOs and error budgets",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-042"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["eligible denominator", "timely success", "error budget", "multi-window burn"],
+    "outcome": "Compute request-based service indicators with explicit eligible denominators.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-043.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-043.py",
+    "related_paths": [
+      {
+        "label": "Local ML monitoring workshop",
+        "path": "courses/ml-engineering/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-044",
+    "title": "Data drift, model quality and delayed labels",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-014", "dme-038", "dme-043"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["distribution drift", "matured cohort", "label availability", "coverage"],
+    "outcome": "Measure a changed input distribution without inferring quality loss automatically.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-044.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-044.py",
+    "related_paths": [
+      {
+        "label": "Statistics and ML tutorial",
+        "path": "courses/statistics-ml/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-045",
+    "title": "Security boundaries, secrets and shared systems",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-028", "dme-032", "dme-040", "dme-042"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "resource authorization",
+      "fixed file mapping",
+      "POSIX descriptor",
+      "strict payload"
+    ],
+    "outcome": "Enforce a synthetic resource-authorization contract and safe request validation.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-045.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-045.py",
+    "related_paths": [
+      {
+        "label": "Docker isolation and operations",
+        "path": "courses/docker/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-046",
+    "title": "Capacity, latency and cost at the system boundary",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-018", "dme-019", "dme-042", "dme-043"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["queue model", "tail latency", "scan amplification", "cost units"],
+    "outcome": "Compute a bounded workload/capacity model and check its assumptions.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-046.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-046.py",
+    "related_paths": [
+      {
+        "label": "CUDA capacity and execution route",
+        "path": "courses/cuda/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-047",
+    "title": "Incidents, retries, failure domains and degraded service",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-021", "dme-042", "dme-043", "dme-046"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["retry budget", "circuit breaker", "failure domain", "degraded mode"],
+    "outcome": "Trace a declared circuit-breaker/retry mechanism with bounded probes.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-047.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-047.py",
+    "related_paths": [
+      {
+        "label": "Persistent data-product project",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-048",
+    "title": "Delivery, compatibility and rollback",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["dme-022", "dme-026", "dme-039", "dme-040", "dme-047"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "expand and contract",
+      "backfill readiness",
+      "consumer version",
+      "compatible rollback"
+    ],
+    "outcome": "Perform a compatible local schema migration and accepted-version switch.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-048.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-048.py",
+    "related_paths": [
+      {
+        "label": "dbt project migrations and accepted artifacts",
+        "path": "courses/dbt/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-049",
+    "title": "Capstone: a validated local data product",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-016", "dme-018", "dme-025", "dme-027", "dme-031"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "complete source contract",
+      "actual analytical pipeline",
+      "Parquet publication",
+      "quality rejection"
+    ],
+    "outcome": "Connect ingestion, quarantine, real analytical transformation and an accepted publication manifest.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-049.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-049.py",
+    "related_paths": [
+      {
+        "label": "Persistent HTTP data-product project",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-050",
+    "title": "Capstone: late data, replay and backfill repair",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-021", "dme-022", "dme-024", "dme-030", "dme-049"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "durable event log",
+      "current entity state",
+      "full-history oracle",
+      "atomic correction"
+    ],
+    "outcome": "Reconcile identified streaming-style updates with a full batch recomputation.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-050.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-050.py",
+    "related_paths": [
+      {
+        "label": "Persistent snapshot recovery project",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      },
+      {
+        "label": "Actual Kafka workshop",
+        "path": "courses/apache-data-platforms/projects/streaming/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-051",
+    "title": "Capstone: features, training, registry and inference",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-034", "dme-035", "dme-036", "dme-039", "dme-041", "dme-045"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "Feast historical retrieval",
+      "online materialization",
+      "MLflow artifact reload",
+      "ASGI inference"
+    ],
+    "outcome": "Connect actual Feast, fitted training, MLflow evidence and local inference.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-051.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-051.py",
+    "related_paths": [
+      {
+        "label": "Persistent ML service project",
+        "path": "courses/ml-engineering/projects/local-system/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-052",
+    "title": "Backup, restore and recovery objectives",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-024", "dme-040", "dme-049"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["SQLite online backup", "restore readback", "recovery point", "recovery time"],
+    "outcome": "Create and restore an actual consistent SQLite backup with checked evidence.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-052.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-052.py",
+    "related_paths": [
+      {
+        "label": "Owned data-product state lifecycle",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-053",
+    "title": "Migration between schemas, formats and consumers",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-026", "dme-048", "dme-049", "dme-052"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "canonical migration",
+      "minor currency units",
+      "dual readers",
+      "controlled cutover"
+    ],
+    "outcome": "Maintain simultaneous compatible readers during a real local migration.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-053.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-053.py",
+    "related_paths": [
+      {
+        "label": "dbt migration workshops",
+        "path": "courses/dbt/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-054",
+    "title": "Operational drill: detection, rollback and learning",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-043", "dme-047", "dme-048", "dme-049", "dme-050", "dme-052"],
+    "runtime_profile": "data-engineering",
+    "language": "python",
+    "concepts": [
+      "real process exit",
+      "operation receipt",
+      "accepted-state readback",
+      "conditional rollback"
+    ],
+    "outcome": "Diagnose a bounded fault using actual recorded workflow/service evidence.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-054.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-054.py",
+    "related_paths": [
+      {
+        "label": "Full HTTP, process-failure and Docker lifecycle drill",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-055",
+    "title": "System-design interviews grounded in constraints",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-046", "dme-049", "dme-051", "dme-054"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "hard constraints",
+      "workload assumptions",
+      "architecture alternatives",
+      "qualification evidence"
+    ],
+    "outcome": "Compare two defensible designs using explicit workload and correctness requirements.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-055.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-055.py",
+    "related_paths": [
+      {
+        "label": "Actual open-data platform workshops",
+        "path": "courses/apache-data-platforms/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-056",
+    "title": "An evidence-backed engineering portfolio",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["dme-031", "dme-040", "dme-054", "dme-055"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": [
+      "reproducible bundle",
+      "independent oracle",
+      "source-bound receipt",
+      "evidence tiers"
+    ],
+    "outcome": "Assemble a reproducible local investigation with source, input, test and runtime evidence.",
+    "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-056.md",
+    "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-056.py",
+    "related_paths": [
+      {
+        "label": "Data-product portfolio project",
+        "path": "courses/data-ml-engineering/projects/data-product/README.md"
+      },
+      {
+        "label": "Inference-service portfolio project",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      }
+    ]
+  }
+]

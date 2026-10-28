@@ -1,6 +1,14 @@
 # Day 58: Code Review, Refactoring, and Tests
 
-**Lesson ID:** `python-58` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
+The notebook reference creates a real, owned temporary `src/myproj`
+package and runs a fresh pytest process against it. The test output establishes
+the import boundary and three behavioral cases, then the temporary project is
+removed. The multi-file snippets below are separately prepared project layouts;
+save them at their declared paths when following that optional contributor route.
+Ordinary classroom learners need no host package or source-directory setup.
+
+
+**Lesson ID:** `python-58` · **Level:** advanced · **Dependencies:** `quality` · **Network:** offline
 
 Refactoring changes structure while preserving intended behavior. Today you move
 notebook logic behind importable interfaces, add focused tests, and use Ruff,
@@ -21,7 +29,7 @@ By the end of the lesson, you can:
 - Complete `python-57` (security, privacy, and ethics).
 - Recall modules, pytest, logging, and type hints from `python-05`, `python-09`,
   `python-10`, `python-11`, and `python-14`.
-- Install the `quality` dependency group.
+- The Docker Core image supplies the `quality` tools. Optional contributors prepare that declared group in their separate environment.
 
 ## Vocabulary and mental models
 

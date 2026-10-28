@@ -404,16 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--sql-analytics-01-reusable-analytical-query-patterns">SQL-ANALYTICS-01: Reusable Analytical Query Patterns<a class="heading-anchor" href="#guide--sql-analytics-01-reusable-analytical-query-patterns" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Catalog prerequisites:</strong> <code>sql-30</code> and <code>sql-test-01</code></li>
-<li><strong>Prerequisites:</strong> <a href="sql-30.html#guide">SQL Day 30 Phase 2 project</a>, CTEs, window functions, conditional aggregation, intervals, and <a href="sql-test-01.html#guide">SQL-TEST-01</a>.</li>
-<li><strong>Artifacts:</strong> <a href="sql-analytics-01.html#learner">learner SQL</a> · <a href="sql-analytics-01.html#solution-1">solution reasoning</a> · <a href="sql-analytics-01.html#solution-2">executable solution</a></li>
-</ul>
-<p>Run from the repository root:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_analytics_01_query_patterns.sql</code></pre>
-<p>Every timestamp is explicit and interpreted in UTC for business grouping. The lab rolls back its fixture.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-analytics-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -429,12 +419,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-analytics-01</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-30</code> and <code>sql-test-01</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-30.html#guide">SQL Day 30 Phase 2 project</a>, CTEs, window functions, conditional aggregation, intervals, and <a href="sql-test-01.html#guide">SQL-TEST-01</a>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-analytics-01.html#learner">learner SQL</a> · <a href="sql-analytics-01.html#solution-1">solution reasoning</a> · <a href="sql-analytics-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_analytics_01_query_patterns.sql</code></pre>
+<p>Every timestamp is explicit and interpreted in UTC for business grouping. The lab rolls back its fixture.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked SQL reads or creates <code>pro_analytics_lab.users</code>, <code>pro_analytics_lab.events</code>, <code>pro_analytics_lab.daily_activity</code>, <code>pro_analytics_lab.campaign_touches</code>, <code>pro_analytics_lab.tier_history</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: The raw event grain is one ingestion attempt, so sourceeventid can repeat. The canonical view partitions by source ID and chooses latest ingestedat, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_analytics_lab.users</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_analytics_01_query_patterns.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/professional/lessons/sql_analytics_01_query_patterns.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>users <span class="syntax-punctuation">(</span>
     user_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
@@ -567,7 +567,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_analytics_01_query_patterns.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -579,13 +579,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-ANALYTICS-01: Reusable analytical query patterns</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-analytics-01: Reusable Analytical Query Patterns</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-analytics-01: Reusable Analytical Query Patterns</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_analytics_01_query_patterns.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-analytics-01/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-analytics-01.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -601,11 +601,14 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">\echo <span class="syntax-string">&#x27;SQL-ANALYTICS-01: disposable analytical-pattern lab&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_analytics_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>users <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  user_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  signup_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  ingestion_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  source_event_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -614,17 +617,20 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  event_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  ingested_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>daily_activity <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  user_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> pro_analytics_lab<span class="syntax-punctuation">.</span>users <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  activity_date <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> activity_date<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>campaign_touches <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  touch_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  user_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> pro_analytics_lab<span class="syntax-punctuation">.</span>users <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  campaign <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  touched_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>tier_history <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  user_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> pro_analytics_lab<span class="syntax-punctuation">.</span>users <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  valid_from timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -633,11 +639,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>valid_to <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> valid_to <span class="syntax-operator">&gt;</span> valid_from<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>users <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> signup_at<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-15 10:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 08:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>source_event_id<span class="syntax-punctuation">,</span> user_id<span class="syntax-punctuation">,</span> event_name<span class="syntax-punctuation">,</span> event_at<span class="syntax-punctuation">,</span> ingested_at<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;E100&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;signup&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:01:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -656,6 +664,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;E300&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;signup&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 08:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 08:01:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;E301&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;view_item&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 08:05:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 08:06:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;E302&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;active&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-03 08:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-03 08:01:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>daily_activity <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> activity_date<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -671,18 +680,21 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-18&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-02-01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-02-03&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>campaign_touches <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">,</span> touched_at<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;search&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2025-12-30 10:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:15:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;search&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 12:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;social&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-20 12:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>tier_history <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> tier<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;basic&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;basic&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;basic&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Canonicalize duplicate ingestion with an explicit winner rule.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> pro_analytics_lab<span class="syntax-punctuation">.</span>deduplicated_events <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -700,6 +712,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">    pro_analytics_lab<span class="syntax-punctuation">.</span>events <span class="syntax-keyword">AS</span> e<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ranked</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  ranked<span class="syntax-punctuation">.</span>winner_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;Deduplication: one deterministic winner per source event&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  de<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">,</span></span>
@@ -1308,7 +1321,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1336,7 +1349,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">\<span class="syntax-keyword">set</span> ON_ERROR_STOP <span class="syntax-keyword">on</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_analytics_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  ingestion_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  source_event_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -1345,6 +1360,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  event_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  ingested_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>source_event_id<span class="syntax-punctuation">,</span> user_id<span class="syntax-punctuation">,</span> event_name<span class="syntax-punctuation">,</span> event_at<span class="syntax-punctuation">,</span> ingested_at<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;A1&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;signup&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:01+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -1358,6 +1374,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B1&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;signup&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-02 09:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-02 09:01+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B2&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;view_item&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-02 09:10+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-02 09:11+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;B3&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;purchase&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 09:30+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 09:31+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> pro_analytics_lab<span class="syntax-punctuation">.</span>deduplicated_events <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  ingestion_id<span class="syntax-punctuation">,</span></span>
@@ -1374,6 +1391,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    pro_analytics_lab<span class="syntax-punctuation">.</span>events <span class="syntax-keyword">AS</span> e<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ranked</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  rn <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  de<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">,</span></span>
@@ -1386,6 +1404,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  de<span class="syntax-punctuation">.</span>source_event_id</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  de<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Retried delivery is not automatically harmless. This diagnostic reveals one</span></span>
 <span class="source-line"><span class="syntax-comment">-- source ID carrying conflicting business fields; an empty result is expected</span></span>
 <span class="source-line"><span class="syntax-comment">-- for the reference fixture.</span></span>
@@ -1400,6 +1419,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">ROW</span> <span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_name<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: exactly 60 minutes remains in the same session because the rule</span></span>
 <span class="source-line"><span class="syntax-comment">-- starts a new session only when the gap is greater than 60 minutes.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> lagged <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
@@ -1439,6 +1459,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  user_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  session_number<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: ordered per-user funnel timestamps.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> signup <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1500,6 +1521,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  completed <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: derive islands only after reducing to one row per user/day. User</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1 has a positive Jan 1-Jan 2 island; many Jan 1 events still count as one</span></span>
 <span class="source-line"><span class="syntax-comment">-- active day.</span></span>
@@ -1532,6 +1554,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  n<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  island_start<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: attribution needs separate touch/purchase fixture rows. The</span></span>
 <span class="source-line"><span class="syntax-comment">-- reference rule is LEFT LATERAL, ordered touched_at DESC, touch_id DESC, so</span></span>
 <span class="source-line"><span class="syntax-comment">-- purchases with no qualifying touch remain with NULL attribution.</span></span>
@@ -1541,11 +1564,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  campaign <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  touched_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>campaign_touches <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">,</span> touched_at<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;search&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 08:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email-a&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:15+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;email-b&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 09:15+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span></span>
@@ -1574,6 +1599,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  p<span class="syntax-punctuation">.</span>event_name <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: expose cohort denominator and retained numerator before division.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1603,6 +1629,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">DECLARE</span></span>
 <span class="source-line">    january_cohort_users <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">;</span></span>
@@ -1640,6 +1667,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 7: the as-of contract is valid_from &lt;= event_at AND</span></span>
 <span class="source-line"><span class="syntax-comment">-- event_at &lt; valid_to. It must assert at most one match, not hide overlap with</span></span>
 <span class="source-line"><span class="syntax-comment">-- ORDER BY/LIMIT 1.</span></span>
@@ -1651,20 +1679,24 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>user_id<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>valid_to <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> valid_to <span class="syntax-operator">&gt;</span> valid_from<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>event_probes <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  probe_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  user_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>user_tiers</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;basic&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 00:00+00&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro&#x27;</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>event_probes</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;before&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-09 23:59:59+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;boundary&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;after&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-10 00:00:01+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>probe_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>event_at<span class="syntax-punctuation">,</span></span>
@@ -1682,6 +1714,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  p<span class="syntax-punctuation">.</span>event_at</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>probe_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
@@ -1698,6 +1731,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 8: a dense spine preserves calendar meaning for the trailing window.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> spine <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1719,6 +1753,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  spine <span class="syntax-keyword">AS</span> s</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>report_date<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 9: percentile input is exactly one row per derived session.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> lagged <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1758,6 +1793,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  percentile_cont<span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> WITHIN <span class="syntax-keyword">GROUP</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>duration<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> median_and_p90</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  sessions <span class="syntax-keyword">AS</span> s<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 10: compare rank semantics before choosing the top-N contract.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> counts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1780,11 +1816,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  row_number_position<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 11: carry a visited-ID path and refuse to recurse into it.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_analytics_lab<span class="syntax-punctuation">.</span>campaign_nodes <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  campaign_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  parent_campaign_id <span class="syntax-builtin">integer</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_analytics_lab<span class="syntax-punctuation">.</span>campaign_nodes</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -1793,6 +1831,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> tree <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>campaign_id<span class="syntax-punctuation">,</span></span>
@@ -1823,6 +1862,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  tree</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> reachable <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>campaign_id<span class="syntax-punctuation">,</span></span>
@@ -1854,6 +1894,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">      r<span class="syntax-punctuation">.</span>campaign_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>campaign_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>campaign_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 12: start from dates and keep event filters in the join/aggregate.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> spine <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -1873,12 +1914,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  s<span class="syntax-punctuation">.</span>report_date</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>report_date<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 13: core PostgreSQL gives an exact answer. An approximate sketch</span></span>
 <span class="source-line"><span class="syntax-comment">-- requires an approved implementation and a measured error/merge contract.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> de<span class="syntax-punctuation">.</span>user_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> exact_distinct_users</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  pro_analytics_lab<span class="syntax-punctuation">.</span>deduplicated_events <span class="syntax-keyword">AS</span> de<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
@@ -1889,6 +1932,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ownership&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;name monitoring, upgrade, privacy, and rebuild owners&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> approximation_review <span class="syntax-punctuation">(</span>criterion_number<span class="syntax-punctuation">,</span> criterion<span class="syntax-punctuation">,</span> required_evidence<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  criterion_number<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 14: reject invalid parameters before applying the half-open bound.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_analytics_lab<span class="syntax-punctuation">.</span>valid_time_window <span class="syntax-punctuation">(</span>p_starts_at timestamptz<span class="syntax-punctuation">,</span> p_ends_at timestamptz<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">boolean</span></span>
@@ -1907,16 +1951,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">parameters</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 00:00+00&#x27;</span> <span class="syntax-keyword">AS</span> starts_at<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 00:00+00&#x27;</span> <span class="syntax-keyword">AS</span> ends_at</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">parameters</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    de<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    de<span class="syntax-punctuation">.</span>event_at</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    pro_analytics_lab<span class="syntax-punctuation">.</span>deduplicated_events <span class="syntax-keyword">AS</span> de</span>
+<span class="source-line">    TIMESTAMPTZ <span class="syntax-string">&#x27;2026-01-01 00:00+00&#x27;</span> <span class="syntax-keyword">AS</span> starts_at<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    TIMESTAMPTZ <span class="syntax-string">&#x27;2026-02-01 00:00+00&#x27;</span> <span class="syntax-keyword">AS</span> ends_at</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  de<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  de<span class="syntax-punctuation">.</span>event_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_analytics_lab<span class="syntax-punctuation">.</span>deduplicated_events <span class="syntax-keyword">AS</span> de</span>
 <span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">parameters</span> <span class="syntax-keyword">AS</span> p</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  pro_analytics_lab<span class="syntax-punctuation">.</span>valid_time_window <span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>starts_at<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>ends_at<span class="syntax-punctuation">)</span></span>
@@ -1925,7 +1969,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  de<span class="syntax-punctuation">.</span>event_at<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  de<span class="syntax-punctuation">.</span>source_event_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">        PERFORM pro_analytics_lab<span class="syntax-punctuation">.</span>valid_time_window<span class="syntax-punctuation">(</span></span>
@@ -1939,7 +1984,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">        <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span></span>
@@ -1955,6 +2001,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

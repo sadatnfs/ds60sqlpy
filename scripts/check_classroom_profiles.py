@@ -20,6 +20,11 @@ from urllib.request import ProxyHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = {
+    "data-platforms-python": ("apache-data-platforms", "apache-009"),
+    "data-engineering": ("polars", "polars-001"),
+    "dbt-duckdb": ("dbt", "dbt-002@sql-model"),
+    "stan-cpu": ("bayesian-computing", "bayes-017"),
+    "julia": ("julia", "julia-001"),
     "jax-cpu": ("jax", "jax-007"),
     "bayesian-cpu": ("statistics-ml", "statistics-science-009"),
     "r-statistics": ("r", "r-001"),
@@ -43,6 +48,14 @@ CASES = {
 # These are outputs from the exact catalog references above, after their own
 # assertions. Generic run receipts do not claim independent typed worker checks.
 EXPECTED_OUTPUT = {
+    "data-platforms-python": (
+        "Narrowing rejected: 200 cannot fit in signed int8",
+        "Retained slice: [None, 30] offset: 1",
+    ),
+    "data-engineering": ("polars-001 reference checks passed",),
+    "dbt-duckdb": ("dbt model built successfully",),
+    "stan-cpu": ("Stan sampling completed", "mu"),
+    "julia": ("julia-001: all reference checks passed",),
     "r-statistics": ("r-001 reference checks passed",),
     "jax-cpu": ("jax-007: 8 asserted cases passed",),
     "bayesian-cpu": ("PyMC hierarchy and diagnostic evidence", "max_rhat", "divergences"),
@@ -131,7 +144,19 @@ def reference_source(profile: str, root: Path = ROOT) -> tuple[str, str, str]:
             raise ValueError(f"Qualification case {lesson_id} no longer uses {profile}.")
         if lesson.get("verification_id") != TYPED_VERIFIERS.get(profile):
             raise ValueError(f"Qualification case {lesson_id} changed its verification contract.")
-        source_path = next(path for path in lesson["solution_paths"] if not path.endswith(".md"))
+        plan_path = root / "courses" / track / "track.json"
+        mode = (
+            json.loads(plan_path.read_text("utf-8")).get("learning_mode", "practice")
+            if plan_path.is_file()
+            else "practice"
+        )
+        if mode not in {"practice", "tutorial"}:
+            raise ValueError("Invalid qualification learning mode")
+        source_path = (
+            lesson["source_path"]
+            if mode == "tutorial"
+            else next(path for path in lesson["solution_paths"] if not path.endswith(".md"))
+        )
     resolved = (root / source_path).resolve()
     if not resolved.is_relative_to(root.resolve()):
         raise ValueError("The qualification source must stay inside the repository.")
@@ -210,6 +235,8 @@ def qualify(
                 raise ValueError(f"{lesson_id} source did not survive container replacement.")
             if not any(item["job_id"] == job_id for item in saved["history"]):
                 raise ValueError(f"{lesson_id} run history did not survive container replacement.")
+        if job.get("job_id") != job_id:
+            raise ValueError(f"{lesson_id} returned a different run receipt identity.")
         verify_receipt(job, lesson_id, profile, source)
         receipts.append(
             {

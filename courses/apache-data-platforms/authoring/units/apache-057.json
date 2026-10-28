@@ -1,0 +1,31 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 80,
+  "prerequisites": ["apache-004", "apache-038"],
+  "concepts": ["segments", "broker", "controller", "server", "coordination"],
+  "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
+  "sources": [
+    [
+      "Pinot architecture",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/basics/architecture.md"
+    ],
+    [
+      "Batch ingestion",
+      "https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/batch-ingestion.md"
+    ],
+    [
+      "Pinned Quickstart source",
+      "https://github.com/apache/pinot/blob/release-1.5.1/pinot-tools/src/main/java/org/apache/pinot/tools/Quickstart.java"
+    ],
+    [
+      "Pinned server address initialization",
+      "https://github.com/apache/pinot/blob/release-1.5.1/pinot-server/src/main/java/org/apache/pinot/server/starter/helix/BaseServerStarter.java"
+    ],
+    [
+      "Pinned route-discovery helper",
+      "https://github.com/apache/pinot/blob/release-1.5.1/pinot-spi/src/main/java/org/apache/pinot/spi/utils/NetUtils.java"
+    ]
+  ]
+}

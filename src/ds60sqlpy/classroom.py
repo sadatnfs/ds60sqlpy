@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
+import math
 import re
 from collections.abc import Callable
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +26,82 @@ SUBJECT_DESCRIPTIONS = {
     "sql": "Learn PostgreSQL from the first query to analytical models and database engineering.",
     "bridge": "Connect Python and PostgreSQL through tested, reproducible data workflows.",
 }
+
+
+def _sql_display_view(receipt: dict[str, Any]) -> dict[str, Any] | None:
+    """Project only recognized SQL tables after the original receipt is validated."""
+    if receipt["language"] != "sql" or receipt["mode"] != "snippet":
+        return None
+
+    def integer(token: str) -> int | str:
+        value = int(token)
+        return value if -(2**53 - 1) <= value <= 2**53 - 1 else token
+
+    def floating(token: str) -> float:
+        value = float(token)
+        if not math.isfinite(value) or Decimal(str(value)) != Decimal(token):
+            raise ValueError("Stored SQL numeric text cannot be displayed without loss")
+        return value
+
+    def constant(token: str) -> None:
+        raise ValueError("Stored SQL output must contain standard JSON")
+
+    def object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Stored SQL output contains duplicate object keys")
+            result[key] = value
+        return result
+
+    def bounded(value: Any, depth: int = 0) -> None:
+        if depth > 32:
+            raise ValueError("Stored SQL display nesting exceeds its limit")
+        if isinstance(value, list):
+            for item in value:
+                bounded(item, depth + 1)
+        elif isinstance(value, dict):
+            for item in value.values():
+                bounded(item, depth + 1)
+
+    try:
+        data = json.loads(
+            receipt["result"]["output"],
+            parse_int=integer,
+            parse_float=floating,
+            parse_constant=constant,
+            object_pairs_hook=object_pairs,
+        )
+        bounded(data)
+        if (
+            not isinstance(data, dict)
+            or set(data) != {"results", "transaction"}
+            or not isinstance(data["results"], list)
+            or not isinstance(data["transaction"], str)
+        ):
+            return None
+        for result in data["results"]:
+            if not isinstance(result, dict):
+                return None
+            if set(result) == {"status"} and isinstance(result["status"], str):
+                continue
+            if (
+                set(result) != {"columns", "rows", "truncated"}
+                or not isinstance(result["columns"], list)
+                or not all(isinstance(column, str) for column in result["columns"])
+                or not isinstance(result["rows"], list)
+                or len(result["rows"]) > 100
+                or type(result["truncated"]) is not bool
+                or any(
+                    not isinstance(row, list) or len(row) != len(result["columns"])
+                    for row in result["rows"]
+                )
+            ):
+                return None
+        return {"results": data["results"]}
+    except (ValueError, TypeError, RecursionError, ArithmeticError):
+        # Keep unknown or malformed inner output available as its original text.
+        return None
 
 
 class ClassroomService:
@@ -68,7 +147,11 @@ class ClassroomService:
             receipt_id = payload.get("receipt_id")
             if not isinstance(receipt_id, str):
                 raise ValueError("Choose an existing saved run receipt.")
-            return {"receipt": self.runs.get(lesson_id, language, mode, receipt_id)}
+            receipt = self.runs.get(lesson_id, language, mode, receipt_id)
+            response: dict[str, Any] = {"receipt": receipt}
+            if language == "sql" and mode == "snippet":
+                response["sql_display"] = _sql_display_view(receipt)
+            return response
         if action == "classroom-highlight":
             source, language = payload.get("source"), payload.get("language", "text")
             if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_CODE_BYTES:

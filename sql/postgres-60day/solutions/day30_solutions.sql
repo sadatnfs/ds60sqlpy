@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Build a cohort-retention analysis through explicit grains, a stable denominator, a dense calendar, reconciled revenue, and clearly limited projections.
 -- Assumptions: Cohort month is customer creation month in UTC. Active means at least one order in the order month. Net revenue is computed from line items.
@@ -50,6 +51,7 @@ GROUP BY
   cohort_month
 ORDER BY
   cohort_month;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate active customers and net line revenue for each cohort/order month.
@@ -100,6 +102,7 @@ GROUP BY
 ORDER BY
   c.cohort_month,
   ov.order_month;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate cohort month offset and retention using original cohort size.
@@ -155,6 +158,7 @@ FROM
 ORDER BY
   a.cohort_month,
   month_offset;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Create a dense cohort/offset spine from offset 0 through 12 and show missing activity as zero.
@@ -219,6 +223,7 @@ FROM
   ORDER BY
     s.cohort_month,
     s.month_offset;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Calculate revenue per active customer and a trailing three-observation annualized teaching projection.
@@ -296,6 +301,7 @@ WHERE
 ORDER BY
   cohort_month,
   month_offset;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
@@ -383,5 +389,6 @@ SELECT
       WHERE (EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12 + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month)))::integer BETWEEN 0 AND 12), 2) AS revenue_difference
 FROM
   scoped;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

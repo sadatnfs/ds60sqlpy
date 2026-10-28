@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "product": "Apache Cassandra",
+  "version": "5.0.9",
+  "url": "https://downloads.apache.org/cassandra/5.0.9/apache-cassandra-5.0.9-bin.tar.gz",
+  "checksum_source": "https://downloads.apache.org/cassandra/5.0.9/apache-cassandra-5.0.9-bin.tar.gz.sha512",
+  "sha512": "beaf3df6342ef1a0ccc83fa80214f250b32c35cfbb1af591b00e3fd539eef0915bc3b89f0e7ae73f6d50cbb03f6075c4e4cf32d3c46ff9c33f745542fcc925df",
+  "archive_bytes": 73341539,
+  "java_major": 17,
+  "client_driver": "3.30.1",
+  "platforms": ["linux/amd64", "linux/arm64"],
+  "qualification": "source and wheel closure only; native service acceptance pending"
+}

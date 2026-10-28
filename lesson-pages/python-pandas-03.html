@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-pandas-03.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-pandas-03.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_pandas_03.py</code></pre>
 <p>Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-pandas-03.html#solution-1">explanatory solutions</a> and <a href="python-pandas-03.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -441,23 +441,23 @@ session <span class="syntax-operator">=</span> start<span class="syntax-operator
 <li><strong>Use transform without changing event grain.</strong> For nonmissing customer_id and finite nonnegative amount, return each row amount divided by its customer total, preserving the original index. For an all-zero customer return missing shares rather than dividing zero by zero. Do not mutate frame.</li>
 </ol>
 <p><strong>Expected:</strong> Customers[a, a, b, b] with amounts[1,3,0,0] yield [.25,.75, NaN, NaN]. Duplicate incidental index labels are allowed; a negative amount raises ValueError.</p>
-<ol>
+<ol start="2">
 <li><strong>Lag within customer using a stable tie break.</strong> Return event_id and previous_amount for each event, preserving input event order. Sort within customer by at then event_id, and use the previous row only within that customer. Require unique nonmissing event_id, known customer_id and nonmissing UTC timestamps.</li>
 </ol>
 <p><strong>Expected:</strong> For customer a events(id 2, time 10:00, amount 20),(id 1, time 10:00, amount 10),(id 3, time 11:00, amount 30), previous values in original order are 10, missing,20. Another customer starts with missing.</p>
-<ol>
+<ol start="3">
 <li><strong>Exclude every current-time event from a prior window.</strong> Return event_id and prior_amount for each event over its customer interval[at-window, at). Require unique event IDs, known customers, finite amounts and UTC times; window must be positive. Equal-time events must receive identical prior sums. Empty prior windows have known sum zero.</li>
 </ol>
 <p><strong>Expected:</strong> Customer a amounts at 10:00=1,10:30=2,10:30=3,11:00=4 with a 30-minute window yield prior sums[0,1,1,5]. The lower boundary counts and the current timestamp never counts.</p>
-<ol>
+<ol start="4">
 <li><strong>Turn an inactivity rule into session identity.</strong> Return event_id and a one-based session_id within each customer, preserving input order. Sort by at, event_id and start a new session only when elapsed gap is strictly greater than the positive threshold. Reuse identity/time validation from ordered_lag.</li>
 </ol>
 <p><strong>Expected:</strong> Times 10:00,10:30,11:01 with 30-minute threshold give sessions 1,1,2. Every other customer starts at 1; zero or negative threshold is rejected.</p>
-<ol>
+<ol start="5">
 <li><strong>Choose one final event deterministically.</strong> Return one row per customer with customer_id, event_id, at, amount, choosing greatest at then greatest event_id. Sort final rows by customer_id. Validate event/time identity using ordered_lag and preserve the original input.</li>
 </ol>
 <p><strong>Expected:</strong> Two equal-time events for a with IDs 1 and 2 choose 2. Customer b keeps its own last event. Output contains each customer once and sorted customer IDs.</p>
-<ol>
+<ol start="6">
 <li><strong>Distinguish no rows from no known measurements.</strong> Summarize declared unique categories in their declared order with category, row_count, known_count, total. Reject missing/undeclared category labels and nonnumeric or nonfinite known measurements. Include unobserved categories with row_count0, known_count0, total missing; an observed all-missing category also has missing total.</li>
 </ol>
 <p><strong>Expected:</strong> Rows a:1, a:NA, b:NA and declared [a, b, c] yield counts(2,1),(1,0),(0,0) and totals 1, missing, missing. Unknown category z is rejected.</p>

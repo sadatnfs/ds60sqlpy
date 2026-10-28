@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "tracks": {},
+  "lessons": [
+    {
+      "id": "python-lang-02",
+      "track": "python",
+      "day": 86,
+      "title": "Scope, Closures, and Observable Decorator Contracts",
+      "level": "advanced",
+      "phase": "Python language mechanics and structured execution",
+      "estimated_minutes": 180,
+      "prerequisites": ["python-lang-01", "python-11"],
+      "lesson_path": "python/professional/lessons/py_lang_02.py",
+      "guide_path": "python/professional/companion-guides/py_lang_02.md",
+      "solution_paths": [
+        "python/professional/solutions/py_lang_02_solutions.md",
+        "python/professional/solutions/py_lang_02_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": ["scope", "closures", "binding", "nonlocal", "decorators", "metadata"]
+    },
+    {
+      "id": "python-lang-03",
+      "track": "python",
+      "day": 87,
+      "title": "Iterators, Generator Pipelines, and Resource Lifetime",
+      "level": "advanced",
+      "phase": "Python language mechanics and structured execution",
+      "estimated_minutes": 180,
+      "prerequisites": ["python-lang-02", "python-08"],
+      "lesson_path": "python/professional/lessons/py_lang_03.py",
+      "guide_path": "python/professional/companion-guides/py_lang_03.md",
+      "solution_paths": [
+        "python/professional/solutions/py_lang_03_solutions.md",
+        "python/professional/solutions/py_lang_03_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": ["iterators", "generators", "laziness", "ownership", "closing", "cleanup"]
+    },
+    {
+      "id": "python-lang-04",
+      "track": "python",
+      "day": 88,
+      "title": "Structured Asyncio, Cancellation, and Context Ownership",
+      "level": "advanced",
+      "phase": "Python language mechanics and structured execution",
+      "estimated_minutes": 210,
+      "prerequisites": ["python-lang-03", "python-pro-02"],
+      "lesson_path": "python/professional/lessons/py_lang_04.py",
+      "guide_path": "python/professional/companion-guides/py_lang_04.md",
+      "solution_paths": [
+        "python/professional/solutions/py_lang_04_solutions.md",
+        "python/professional/solutions/py_lang_04_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": ["asyncio", "taskgroup", "cancellation", "timeout", "exceptiongroup", "contextvars"]
+    },
+    {
+      "id": "python-numpy-05",
+      "track": "python",
+      "day": 89,
+      "title": "NumPy Dtypes, Promotion, and Overflow Contracts",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": ["python-16", "python-numpy-01"],
+      "lesson_path": "python/professional/lessons/py_numpy_05.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_05.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_05_solutions.md",
+        "python/professional/solutions/py_numpy_05_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "dtype inspection",
+        "NumPy 2 scalar promotion",
+        "checked integer arithmetic",
+        "exact accumulation",
+        "float64 representability"
+      ]
+    },
+    {
+      "id": "python-numpy-06",
+      "track": "python",
+      "day": 90,
+      "title": "Reproducible Random Streams and Simulation State",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": ["python-numpy-05", "python-31"],
+      "lesson_path": "python/professional/lessons/py_numpy_06.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_06.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_06_solutions.md",
+        "python/professional/solutions/py_numpy_06_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "Generator and PCG64",
+        "SeedSequence child streams",
+        "task identity",
+        "simulation state",
+        "checkpoint replay"
+      ]
+    },
+    {
+      "id": "python-numpy-07",
+      "track": "python",
+      "day": 91,
+      "title": "SVD, Weighted Least Squares, and Low-Rank Approximation",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": ["python-33", "python-numpy-02", "python-numpy-04"],
+      "lesson_path": "python/professional/lessons/py_numpy_07.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_07.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_07_solutions.md",
+        "python/professional/solutions/py_numpy_07_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "reduced SVD",
+        "rank tolerance",
+        "prewhitening",
+        "weighted least squares",
+        "low-rank error",
+        "augmented ridge"
+      ]
+    },
+    {
+      "id": "python-numpy-08",
+      "track": "python",
+      "day": 92,
+      "title": "Sliding Windows, Convolution, and FFT Boundaries",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 100,
+      "prerequisites": ["python-numpy-01", "python-21", "python-33"],
+      "lesson_path": "python/professional/lessons/py_numpy_08.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_08.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_08_solutions.md",
+        "python/professional/solutions/py_numpy_08_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "sliding_window_view",
+        "weight orientation",
+        "padding boundaries",
+        "real FFT normalization",
+        "one-sided amplitude",
+        "linear versus circular convolution"
+      ]
+    },
+    {
+      "id": "python-pandas-05",
+      "track": "python",
+      "day": 93,
+      "title": "MultiIndex and Lossless Reshaping Contracts",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 180,
+      "prerequisites": ["python-pandas-01", "python-19"],
+      "lesson_path": "python/professional/lessons/py_pandas_05.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_05.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_05_solutions.md",
+        "python/professional/solutions/py_pandas_05_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "pandas",
+        "MultiIndex",
+        "label alignment",
+        "missingness",
+        "reshape",
+        "identity",
+        "export encoding"
+      ]
+    },
+    {
+      "id": "python-pandas-06",
+      "track": "python",
+      "day": 94,
+      "title": "Timezones, DST, and Calendar Boundaries",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 180,
+      "prerequisites": ["python-21", "python-pandas-02", "python-data-02"],
+      "lesson_path": "python/professional/lessons/py_pandas_06.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_06.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_06_solutions.md",
+        "python/professional/solutions/py_pandas_06_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": ["pandas", "timezone", "DST", "UTC", "calendar windows", "resampling", "coverage"]
+    },
+    {
+      "id": "python-pandas-07",
+      "track": "python",
+      "day": 95,
+      "title": "Typed I/O, Text, and Categorical Domains",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 180,
+      "prerequisites": ["python-18", "python-pandas-01", "python-pandas-03"],
+      "lesson_path": "python/professional/lessons/py_pandas_07.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_07.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_07_solutions.md",
+        "python/professional/solutions/py_pandas_07_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "pandas",
+        "CSV",
+        "nullable integers",
+        "text validation",
+        "categorical domains",
+        "Arrow",
+        "Parquet"
+      ]
+    },
+    {
+      "id": "python-algo-05",
+      "track": "python",
+      "day": 96,
+      "title": "Binary Trees, Tries, and Structural Invariants",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": ["python-12", "python-algo-03"],
+      "lesson_path": "python/professional/lessons/py_algo_05.py",
+      "guide_path": "python/professional/companion-guides/py_algo_05.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_05_solutions.md",
+        "python/professional/solutions/py_algo_05_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "tree ownership versus DAGs",
+        "iterative traversal",
+        "height",
+        "strict BST bounds",
+        "trie terminal markers",
+        "Unicode code-point prefixes"
+      ]
+    },
+    {
+      "id": "python-algo-06",
+      "track": "python",
+      "day": 97,
+      "title": "Disjoint Sets and Minimum Spanning Forests",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": ["python-algo-02", "python-algo-03"],
+      "lesson_path": "python/professional/lessons/py_algo_06.py",
+      "guide_path": "python/professional/companion-guides/py_algo_06.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_06_solutions.md",
+        "python/professional/solutions/py_algo_06_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "parent forest invariant",
+        "path compression",
+        "union by size",
+        "connectivity partitions",
+        "Kruskal edge selection",
+        "spanning versus minimum evidence"
+      ]
+    },
+    {
+      "id": "python-algo-07",
+      "track": "python",
+      "day": 98,
+      "title": "Streaming Summaries, Order Statistics, and Sampling",
+      "level": "advanced",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": ["python-31", "python-algo-02", "python-algo-03"],
+      "lesson_path": "python/professional/lessons/py_algo_07.py",
+      "guide_path": "python/professional/companion-guides/py_algo_07.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_07_solutions.md",
+        "python/professional/solutions/py_algo_07_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "Welford moments",
+        "mergeable summary state",
+        "sample variance",
+        "stable bounded top-k",
+        "exact two-heap medians",
+        "reservoir inclusion probabilities"
+      ]
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 -- Day 44: Monitoring & Diagnostics
--- BEGINNER WORKFLOW — sql-44: Monitoring Diagnostics
+-- BEGINNER WORKFLOW - sql-44: Monitoring Diagnostics
 -- Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-44/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-44.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Active sessions
 SELECT
   pid,
@@ -35,6 +36,7 @@ WHERE
 ORDER BY
   running_for DESC
 LIMIT 20;
+
 -- pg_stat_statements has three relevant states:
 --   1. absent: its view does not exist;
 --   2. installed but unusable: the view exists, but the server was not started
@@ -61,6 +63,7 @@ GROUP BY
   p.category
 ORDER BY
   qty DESC;
+
 -- Exercises
 -- 1. Identify the longest-running active queries on your system.
 --    Inputs: For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.

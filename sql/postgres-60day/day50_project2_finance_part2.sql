@@ -1,11 +1,11 @@
 -- Day 50: Project 2 - Financial/Operational Analysis (Part 2)
--- BEGINNER WORKFLOW — sql-50: Project2 Finance Part2
+-- BEGINNER WORKFLOW - sql-50: Project 2 Finance Part 2
 -- Guide: sql/postgres-60day/companion-guides/day50_project2_finance_part2.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-50/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-50.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Expense categorization, variance analysis vs budget
 BEGIN;
 SET search_path TO training, public;
+
 -- Monthly actual expenses by category
 WITH monthly_exp AS (
   SELECT
@@ -57,6 +58,7 @@ ORDER BY
   month DESC,
   category
 LIMIT 100;
+
 -- Rolling 3-month actuals and budget
 WITH monthly AS (
   SELECT
@@ -102,6 +104,7 @@ joined AS (
     month DESC,
     category
   LIMIT 100;
+
 -- Exercises
 -- 1. Compute YoY variance and highlight categories with >15% overspend.
 --    Inputs: For sql-50 Exercise 1, read from `expenses`, and `budgets`. Build the answer toward `month`, `category`, `actual`, `prior_year_actual`, `year_over_year_variance_pct`, `budget_variance_pct`, and `overspent_by_more_than_15_pct`; keep `month` visible whenever the result has row-level grain.

@@ -1,0 +1,61 @@
+{
+  "number": 15,
+  "title": "DataFrames transformations and grouped summaries",
+  "concepts": ["DataFrames", "column selection", "ByRow", "groupby", "row accounting"],
+  "outcome": "Transform a typed table and compute grouped summaries while preserving names, missingness and row counts.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-013", "julia-014"],
+  "sources": [
+    [
+      "DataFrames transformations",
+      "https://dataframes.juliadata.org/stable/man/split_apply_combine/"
+    ],
+    ["DataFrames indexing", "https://dataframes.juliadata.org/stable/lib/indexing/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Name the derived field",
+      "task": "Scale the score column by 10 using ByRow.",
+      "expected": "The output column contains 1,2,3 under the explicit name scaled.",
+      "hint": "Choose row-wise application deliberately.",
+      "answer": "Names and shape are part of the resulting schema."
+    },
+    {
+      "title": "Observe a shared column",
+      "task": "Mutate input[!, :score].",
+      "expected": "The source DataFrame changes.",
+      "hint": "The indexing operation can return the stored column.",
+      "answer": "A caller must request a copy when independent storage is required."
+    },
+    {
+      "title": "Retain a column snapshot",
+      "task": "Copy the column before later source mutation.",
+      "expected": "The copied values remain unchanged.",
+      "hint": "Check identity and content separately.",
+      "answer": "A snapshot is useful for comparison and provenance when future mutation is possible."
+    },
+    {
+      "title": "Report group coverage",
+      "task": "Summarize the group containing one missing score.",
+      "expected": "It reports 2 rows,1 observed score and mean 1.",
+      "hint": "A mean alone hides the denominator.",
+      "answer": "Row accounting remains necessary after grouping."
+    },
+    {
+      "title": "Handle an all-missing group",
+      "task": "Apply observed_mean to only missing values.",
+      "expected": "The result is missing.",
+      "hint": "An empty observed set needs a stated policy.",
+      "answer": "A fabricated zero could change later model or business decisions."
+    },
+    {
+      "title": "Interpret a mean of means",
+      "task": "Average the two group means with and without count weights.",
+      "expected": "The answers can differ.",
+      "hint": "State the target weighting.",
+      "answer": "Group-level and row-level summaries represent different populations."
+    }
+  ]
+}

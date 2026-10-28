@@ -262,19 +262,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Find the first duplicate boundary.</strong> Run lowerBound on 1,2,2,5 with target 2 and target 6. <strong>Expected:</strong> indices 1 and 4. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with indices 1 and 4.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Handle empty and outside searches.</strong> Search an empty array and a target below the first element. <strong>Expected:</strong> both return0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with both return0.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Preserve stable ties.</strong> Sort recordsa2,b1,c2 by key only and inspect the equal-key order. <strong>Expected:</strong> IDs b,a,c. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IDs b,a,c.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Solve a greedy counterexample.</strong> Find minimum coins foramount6 usingcoins1,3,4. <strong>Expected:</strong> 2 coins,using3+3 rather than4+1+1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 2 coins,using3+3 rather than4+1+1.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Represent an unreachable amount.</strong> Solveamount3 withonlycoin2 andamount0 withanypositivecoins. <strong>Expected:</strong> -1 forunreachable3;0 foramount0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with -1 forunreachable3;0 foramount0.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid recurrence inputs.</strong> Pass a negative amount or a zero-valued coin. <strong>Expected:</strong> IllegalArgumentException for both. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IllegalArgumentException for both.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

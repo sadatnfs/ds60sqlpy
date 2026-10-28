@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
 -- Assumptions: `PERCENT_RANK` ranges from 0 to 1 using rank; `CUME_DIST` is the fraction at or below the current value; `NTILE` balances row counts.
@@ -53,6 +54,7 @@ ORDER BY
   spend_quartile,
   stored_spend DESC,
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate salary percent rank within each department.
@@ -77,6 +79,7 @@ ORDER BY
   e.department_id,
   e.salary,
   e.employee_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate cumulative distribution of product price within category.
@@ -101,6 +104,7 @@ ORDER BY
   p.category,
   p.price,
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare percent rank and cumulative distribution for tied values 10, 10, and 20.
@@ -125,6 +129,7 @@ FROM (
     (3, 20)) AS sample (row_id, value)
 ORDER BY
   row_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Audit the row count in each customer spend decile rather than assuming exact equality.
@@ -165,6 +170,7 @@ GROUP BY
   decile
 ORDER BY
   decile;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Return customers in the top stored-spend decile with their spend and population share.
@@ -211,5 +217,6 @@ WHERE
 ORDER BY
   total_spend DESC,
   customer_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

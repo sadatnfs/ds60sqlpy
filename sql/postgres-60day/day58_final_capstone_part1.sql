@@ -1,11 +1,11 @@
 -- Day 58: Final Capstone - Integrated Data Challenge (Part 1)
--- BEGINNER WORKFLOW — sql-58: Final Capstone Part1
+-- BEGINNER WORKFLOW - sql-58: Final Capstone Part 1
 -- Guide: sql/postgres-60day/companion-guides/day58_final_capstone_part1.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-58/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-58.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Focus: Real-world messy data, data quality fixes, staging, and normalization
 BEGIN;
 SET search_path TO training, public;
+
 -- 1. Simulate messy incoming data (staging)
 CREATE TEMP TABLE stg_customers_raw (
   full_name TEXT,
@@ -28,11 +29,13 @@ CREATE TEMP TABLE stg_customers_raw (
   created_at TEXT,
   attributes TEXT
 );
+
 INSERT INTO stg_customers_raw (full_name, email, country, segment, created_at, attributes)
 VALUES
   ('  Customer 501  ', 'CUSTOMER501@EXAMPLE.COM ', ' us ', ' GOLD ', '2025/01/03 10:00', '{"channel":"Web","referrer":"SEO"}'),
   ('Customer 502', 'customer-502@example.com', 'GB', NULL, '03-01-2025', '{"channel":"mobile","referrer":"email"}'),
   ('Customer 503', 'invalid-email', 'DE', 'silver', '2025-01-05T12:34:56Z', '{"channel":"store"}');
+
 -- 2. Clean and conform the staging data into canonical types
 WITH cleaned AS (
   SELECT
@@ -67,6 +70,7 @@ SELECT
   *
 FROM
   validated;
+
 -- 3. Upsert valid rows into customers (demo only; rolled back)
 --    Here we only insert valid emails and countries
 INSERT INTO customers (full_name, email, country, segment, created_at, attributes)
@@ -107,6 +111,7 @@ WHERE
   AND v.country_valid
 ON CONFLICT (email)
   DO NOTHING;
+
 -- avoid dup per our schema constraint
 -- 4. Create a DQ report: invalid emails, invalid countries, null criticals
 WITH dq AS (
@@ -137,11 +142,13 @@ SELECT
   *
 FROM
   dq;
+
 -- 5. Normalize country names (demo mapping table)
 CREATE TEMP TABLE country_map (
   code TEXT PRIMARY KEY,
   normalized TEXT NOT NULL
 );
+
 INSERT INTO country_map
 VALUES
   ('US', 'US'),
@@ -154,12 +161,14 @@ VALUES
   ('IN', 'IN'),
   ('AU', 'AU'),
   ('BR', 'BR');
+
 SELECT
   src.country AS raw,
   COALESCE(cm.normalized, upper(trim(src.country))) AS normalized
 FROM
   stg_customers_raw src
   LEFT JOIN country_map cm ON cm.code = src.country;
+
 -- Exercises
 -- 1. Extend the parser to handle additional datetime formats.
 --    Inputs: For sql-58 Exercise 1, read from `stg_customers_raw`, `customers`, and `country_map`. Build the answer toward `parse_additional_datetime_formats_safely_answer`; keep `customer_id` visible whenever the result has row-level grain.

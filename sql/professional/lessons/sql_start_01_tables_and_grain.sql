@@ -1,6 +1,7 @@
 -- SQL-START-01: Reading Tables and Result Grain
 -- Guide: sql/professional/companion-guides/sql_start_01_tables_and_grain.md
--- Use Create/open guided SQL notebook and the ignored learner copy.
+-- Use ./classroom -> PostgreSQL -> sql-start-01 and its saved learner copy.
+-- Select "Whole SQL lesson (psql)"; Docker supplies the client.
 -- Run the complete file with psql -X -v ON_ERROR_STOP=1.
 -- Only the local disposable advanced_sql_training database is permitted.
 -- Setup is supplied. Write attempts before the final ROLLBACK.
@@ -12,14 +13,18 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE start_readings (
   reading_id integer PRIMARY KEY,
   station text NOT NULL,
   reading_day date NOT NULL,
   temperature numeric
 ) ON COMMIT DROP;
+
 INSERT INTO start_readings (reading_id, station, reading_day, temperature)
 VALUES
   (1, 'North', DATE '2024-01-01', 18),
@@ -28,6 +33,7 @@ VALUES
   (4, 'South', DATE '2024-01-02', NULL),
   (5, 'West', DATE '2024-01-01', -4),
   (6, 'North', DATE '2024-01-03', 20);
+
 -- Example 1: A full observation retains its identity
 -- Expected: Six rows with columns reading_id, station, reading_day, temperature; IDs 1 through 6 in order. ID 4 has NULL temperature.
 SELECT
@@ -39,6 +45,7 @@ FROM
   start_readings
 ORDER BY
   reading_id;
+
 -- Example 2: Two visually identical rows are still two observations
 -- Expected: Two rows, each (North, 18), with columns station and temperature. No table row is removed or updated.
 SELECT
@@ -50,6 +57,7 @@ WHERE
   reading_id <= 2
 ORDER BY
   reading_id;
+
 -- Exercises
 -- Keep predictions and attempts in your own working copy.
 -- 1. Trace identities.

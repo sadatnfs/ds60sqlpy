@@ -252,19 +252,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Publish a result through join.</strong> Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result. <strong>Expected:</strong> worker terminated; result 42. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with worker terminated; result 42.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Publish initial state through start.</strong> Assign7 before starting a worker that reads the holder. <strong>Expected:</strong> worker observes7. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with worker observes7.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Force a lost update.</strong> Make two workers read counter0,wait at a barrier,then each write its saved value plus1. <strong>Expected:</strong> final counter1 despite two increments. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with final counter1 despite two increments.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Use a volatile publication flag.</strong> Write data99 before setting a volatile ready flag;read after observing that flag. <strong>Expected:</strong> reader sees99 and finishes within the bound. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with reader sees99 and finishes within the bound.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Distinguish run from start.</strong> Invoke a Runnable directly and compare its thread identity with the caller. <strong>Expected:</strong> same thread identity for directrun. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with same thread identity for directrun.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Respond to interruption.</strong> Interrupt a worker waiting on a latch,restore its flag in the catch,and verify termination. <strong>Expected:</strong> interruption observed and worker terminated. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with interruption observed and worker terminated.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

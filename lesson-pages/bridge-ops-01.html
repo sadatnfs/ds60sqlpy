@@ -577,133 +577,133 @@ $env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="sy
 <li><strong>Progressive hint:</strong> Canonical serialization must distinguish structure and parameter types without depending on object repr.</li>
 <li><strong>Verify:</strong> Construct valid and invalid migrations; assert blank/bad IDs, blank description, empty commands, and missing verification fail, while two equal migrations have equal checksums and any identity/text/parameter change changes the hash.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Redaction:</strong> Implement <code>redact_fields()</code> for sensitive key names, URL-shaped values, non-serializable objects, and ordinary scalars.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Use key classification and safe type conversion; never echo rejected values.</li>
 <li><strong>Verify:</strong> Pass ordinary scalars, password/token keys, credential URLs, and an exception object; assert safe scalars survive, sensitive values become fixed markers, output is JSON-serializable, and no sentinel secret appears in <code>repr</code> or JSON.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Planning:</strong> Implement <code>plan_pending()</code> with duplicate/order validation, unknown applied-version rejection, and checksum-drift detection.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Applied history is immutable and must be a prefix of known ordered migrations.</li>
 <li><strong>Verify:</strong> Assert ordered known history returns only the pending suffix; duplicate/reordered source, database-only IDs, non-prefix history, and a changed stored checksum each raise before delivery.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Test double:</strong> Build a recording session fake that stores SQL separately from parameter tuples and never parses PostgreSQL through SQLite.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Model transactional state and prepared query results explicitly.</li>
 <li><strong>Verify:</strong> Use a session fake that records <code>(sql, params)</code> separately and queues results; assert it never parses SQL or imports SQLite and exposes commit/rollback/close event order.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Delivery:</strong> Implement the documented nine-step delivery order and prove rollback/close happen before injected retry delay.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</li>
 <li><strong>Verify:</strong> Record the nine delivery stages, open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report, and in failure assert rollback and close occur before the sleeper.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Commit uncertainty:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Re-check immutable metadata under lock before every attempt.</li>
 <li><strong>Verify:</strong> Make fake commit persist metadata then raise; on retry, assert matching metadata is read under the lock, migration commands are not called twice, and result reports the version skipped/applied once.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Observability:</strong> Add event and metric fakes; require request/migration IDs in logs, exclude request IDs from metric tags, and prove secrets are absent.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Logs support correlation; metrics require bounded dimensions.</li>
 <li><strong>Verify:</strong> Inspect events for request and migration IDs and metrics for bounded migration/outcome tags; assert request ID is absent from metric tags and URL/password/parameters/exception message are absent everywhere.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Readiness:</strong> Implement read-only readiness for current, pending, drifted, and unreachable states while keeping liveness database-independent.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Readiness describes safe traffic acceptance, not process existence.</li>
 <li><strong>Verify:</strong> Assert liveness succeeds without a session; readiness is true for matching current history and false with explicit reasons for pending, checksum drift, unknown history, or unreachable database.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Recovery:</strong> Build a scenario table for recovery decisions, including incomplete evidence that must pause.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Destructive or forward actions require rehearsed, compatible evidence.</li>
 <li><strong>Verify:</strong> Create scenario rows for unconfirmed diagnosis, committed writes, compatibility, and rehearsed paths; assert incomplete evidence returns <code>PAUSE_AND_GATHER_EVIDENCE</code> and only supported rows choose forward/rollback.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Optional integration:</strong> After fake tests, run the disposable live lab twice and inspect migration metadata with a read-only query.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The second run demonstrates idempotency; cleanup evidence is part of completion.</li>
 <li><strong>Verify:</strong> With explicit live opt-in, run the disposable migration set twice; assert the second applies nothing, metadata IDs/checksums match source, and the read-only inspection targets only course objects.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Immutability:</strong> Change only SQL whitespace after a migration is applied and decide whether checksum drift should be accepted.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A stored checksum is an immutable history contract, not a semantic SQL parser.</li>
 <li><strong>Verify:</strong> Change only whitespace in applied SQL; assert checksum mismatch is detected and delivery stops rather than accepting edited immutable history.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Concurrency:</strong> Model two deployers contending for the same advisory lock and specify timeout/ownership behavior.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Only one delivery transaction may make planning decisions at a time.</li>
 <li><strong>Verify:</strong> Simulate two sessions on the same advisory lock; assert only the lock holder plans/applies at a time, the waiter obeys the declared timeout, and both close their own sessions.</li>
 </ul>
-<ol>
+<ol start="13">
 <li><strong>PostgreSQL semantics:</strong> Identify which DDL is transactional in PostgreSQL and how non-transactional commands alter the migration policy.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not assume every administrative statement can share ordinary transaction rollback.</li>
 <li><strong>Verify:</strong> Produce a reviewed list separating transaction-safe DDL from commands requiring special handling; any non-transactional command must use a separate migration policy and recovery proof.</li>
 </ul>
-<ol>
+<ol start="14">
 <li><strong>Timeouts:</strong> Set statement and lock timeouts per attempt without leaking settings to later pooled work.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Transaction-local settings should expire with commit/rollback.</li>
 <li><strong>Verify:</strong> Record transaction-local statement and lock timeout commands before migration SQL; assert they end with commit/rollback and are absent when a later pooled session begins.</li>
 </ul>
-<ol>
+<ol start="15">
 <li><strong>Telemetry design:</strong> Define a bounded migration metric schema and a redaction test for exception objects and URL-like fields.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Migration IDs may still become unbounded over years; choose dimensions deliberately.</li>
 <li><strong>Verify:</strong> Define metric names/tags with a bounded outcome/error class and migration family/version policy; feed URL-like fields and exceptions through redaction and assert no secret/message becomes a label.</li>
 </ul>
-<ol>
+<ol start="16">
 <li><strong>Probe semantics:</strong> Distinguish current-but-stale application readiness from database reachability and migration currency.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Each probe should answer one operational question.</li>
 <li><strong>Verify:</strong> Return separate probe fields for database reachability, schema currency, application staleness, and process liveness; assert changing one condition changes only its corresponding reason.</li>
 </ul>
-<ol>
+<ol start="17">
 <li><strong>Decision analysis:</strong> Compare forward fix and release rollback when the new schema has already received writes.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Data written under the new contract can make old code incompatible even if DDL reversal is possible.</li>
 <li><strong>Verify:</strong> For schema that has received incompatible new writes, assert release rollback is rejected unless compatibility and reversal are rehearsed; choose a rehearsed forward fix or pause.</li>
 </ul>
-<ol>
+<ol start="18">
 <li><strong>Expand-contract:</strong> Design a three-release expand/migrate/contract sequence for renaming a populated column.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Maintain compatibility while old and new application versions overlap.</li>
 <li><strong>Verify:</strong> Document release A adding nullable new column, release B dual-writing/backfilling/reading both, and release C enforcing new contract/removing old only after compatibility evidence.</li>
 </ul>
-<ol>
+<ol start="19">
 <li><strong>Cleanup:</strong> Prove the optional live lab leaves no table, metadata row, lock, connection, or credential-bearing output behind.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A passing mutation test is incomplete without postconditions.</li>
 <li><strong>Verify:</strong> After the optional lab, query for course tables/metadata, inspect connection close calls, and scan captured output; assert no lab object, held lock/session, or credential sentinel remains.</li>
 </ul>
-<ol>
+<ol start="20">
 <li><strong>Failure simulation:</strong> Inject a network-like error immediately after fake commit and require the retry to gather evidence rather than blindly replay.</li>
 </ol>
 <ul>

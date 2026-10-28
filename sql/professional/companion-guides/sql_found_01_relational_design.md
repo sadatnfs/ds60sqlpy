@@ -1,24 +1,5 @@
 # SQL-FOUND-01: Relational Design, DDL, and Integrity Constraints
 
-## Level and prerequisites
-
-- **Level:** Intermediate
-- **Catalog prerequisite:** `sql-15`; [SQL Day 15; Phase 1 Project](../../postgres-60day/companion-guides/day15_phase1_project.md)
-- **Prerequisites:** Complete SQL Days 1–15 so you can query, join, aggregate,
-  modify, and verify the supplied training schema before designing one of your
-  own. PostgreSQL setup and the disposable database are also required.
-- **Artifacts:** [learner SQL](../lessons/sql_found_01_relational_design.sql) ·
-  [solution reasoning](../solutions/sql_found_01_relational_design_solutions.md) ·
-  [executable solution](../solutions/sql_found_01_relational_design_solutions.sql)
-
-Use the Docker classroom workflow below for this cataloged script. The optional
-contributor route requires its own prepared interpreter, psql client and
-explicit disposable-database connection.
-
-The file creates `pro_relational_lab` inside a transaction and rolls it back.
-Expected constraint failures are caught as notices; any unexpected error still
-stops the script.
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -83,6 +64,25 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Catalog prerequisite:** `sql-15`; [SQL Day 15; Phase 1 Project](../../postgres-60day/companion-guides/day15_phase1_project.md)
+- **Prerequisites:** Complete SQL Days 1–15 so you can query, join, aggregate,
+  modify, and verify the supplied training schema before designing one of your
+  own. PostgreSQL setup and the disposable database are also required.
+- **Artifacts:** [learner SQL](../lessons/sql_found_01_relational_design.sql) ·
+  [solution reasoning](../solutions/sql_found_01_relational_design_solutions.md) ·
+  [executable solution](../solutions/sql_found_01_relational_design_solutions.sql)
+
+Use the Docker classroom workflow below for this cataloged script. The optional
+contributor route requires its own prepared interpreter, psql client and
+explicit disposable-database connection.
+
+The file creates `pro_relational_lab` inside a transaction and rolls it back.
+Expected constraint failures are caught as notices; any unexpected error still
+stops the script.
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -102,7 +102,7 @@ The first runnable example has a concrete contract: Example 1 must print the exp
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/professional/lessons/sql_found_01_relational_design.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/professional/lessons/sql_found_01_relational_design.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

@@ -19,8 +19,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
+from ds60sqlpy.teaching_data import teaching_fixture
+
 ArtifactKind = Literal["wheel", "source distribution"]
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "tiny_package"
+
+FIXTURE = teaching_fixture("tiny-package-project").parent
 
 
 class BuildToolUnavailable(RuntimeError):

@@ -1,13 +1,5 @@
 # Day 51: Finance/Operations Project, Part 3: Cash Flow
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Prerequisites:** [Day 50; budget variance](day50_project2_finance_part2.md)
-- **Artifacts:** [learner SQL](../day51_project2_finance_part3.sql) ·
-  [solution reasoning](../solutions/day51_solutions.md) ·
-  [executable solution](../solutions/day51_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -72,6 +64,14 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Prerequisites:** [Day 50; budget variance](day50_project2_finance_part2.md)
+- **Artifacts:** [learner SQL](../day51_project2_finance_part3.sql) ·
+  [solution reasoning](../solutions/day51_solutions.md) ·
+  [executable solution](../solutions/day51_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -91,7 +91,7 @@ The first runnable example has a concrete contract: Example 1 returns one groupe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day51_project2_finance_part3.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day51_project2_finance_part3.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

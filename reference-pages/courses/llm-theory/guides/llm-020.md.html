@@ -284,19 +284,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Measure a small linear layer.</strong> Apply.01<em>identity to input[1,-1,2,-2]. <strong>Expected:</strong> output norm.01</em>sqrt10. <strong>Verify:</strong> Save the assertion results for exercise 1, including output norm.01*sqrt10.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Increase only the scale.</strong> Replace.01<em>identity with 100</em>identity. <strong>Expected:</strong> activation norm increases by factor10000. <strong>Verify:</strong> Save the assertion results for exercise 2, including activation norm increases by factor10000.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Trace gradients.</strong> Differentiate mean squared output for the small and large matrices and compare norms. <strong>Expected:</strong> both finite; large-scale gradient norm is larger. <strong>Verify:</strong> Save the assertion results for exercise 3, including both finite; large-scale gradient norm is larger.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Find the first overflow.</strong> Apply a float32 matrix scaled1e38, then inspect matrix product and squared loss. <strong>Expected:</strong> squared loss is nonfinite. <strong>Verify:</strong> Save the assertion results for exercise 4, including squared loss is nonfinite.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Repair on the same input.</strong> Restore the small scale and recalculate output and loss for the unchangedx. <strong>Expected:</strong> both output and loss finite. <strong>Verify:</strong> Save the assertion results for exercise 5, including both output and loss finite.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Check residual dimensions.</strong> Compare residualx+x@small with an incompatible three-feature branch. <strong>Expected:</strong> valid residual shape(1,4); width3 branch rejected. <strong>Verify:</strong> Save the assertion results for exercise 6, including valid residual shape(1,4); width3 branch rejected.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

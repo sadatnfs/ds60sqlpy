@@ -1,11 +1,11 @@
 -- Day 33: Index Optimization Strategies (composite, covering, partial)
--- BEGINNER WORKFLOW — sql-33: Index Optimization Strategies
+-- BEGINNER WORKFLOW - sql-33: Index Optimization Strategies
 -- Guide: sql/postgres-60day/companion-guides/day33_index_optimization_strategies.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-33/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-33.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,16 +18,20 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Composite index where predicates use (customer_id, order_date)
 CREATE INDEX idx_orders_customer_date ON orders (customer_id, order_date);
+
 -- Covering index (Postgres INCLUDE) for frequent query on order_items
 CREATE INDEX idx_oi_order_product_inc ON order_items (order_id, product_id) INCLUDE (quantity, unit_price, discount);
+
 -- Partial index for an active subset. Partial-index predicates must be
 -- immutable, so a moving expression such as now() - interval '90 days' is
 -- not valid in PostgreSQL.
 CREATE INDEX idx_orders_open ON orders (order_date)
 WHERE
   status IN ('placed', 'paid');
+
 -- Test with EXPLAIN
 EXPLAIN ANALYZE
 SELECT
@@ -38,6 +42,7 @@ FROM
 WHERE
   o.customer_id = 1
   AND o.order_date >= now() - interval '365 days';
+
 EXPLAIN ANALYZE
 SELECT
   oi.order_id,
@@ -54,6 +59,7 @@ WHERE
     WHERE
       status IN ('placed', 'paid')
       AND order_date >= now() - interval '90 days');
+
 -- Exercises
 -- 1. Add a composite index for (category, created_at) on products and test.
 --    Inputs: For sql-33 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.

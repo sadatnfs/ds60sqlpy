@@ -1,11 +1,11 @@
 -- Day 56: Project 4 - Complex BI (Part 2)
--- BEGINNER WORKFLOW — sql-56: Project4 BI Part2
+-- BEGINNER WORKFLOW - sql-56: Project 4 BI Part 2
 -- Guide: sql/postgres-60day/companion-guides/day56_project4_bi_part2.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-56/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-56.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Ranking and percentile reporting, multi-dimensional splits
 BEGIN;
 SET search_path TO training, public;
+
 -- Percentile distribution of order values per country-month
 WITH orders_m AS (
   SELECT
@@ -44,6 +45,7 @@ ORDER BY
   month DESC,
   country
 LIMIT 200;
+
 -- Top-N per dimension (category) within country using window rank
 WITH prod_rev AS (
   SELECT
@@ -82,6 +84,7 @@ ORDER BY
   country,
   category,
   rnk_in_cat;
+
 -- CUBE for multi-dimensional subtotals across country, category
 WITH line AS (
   SELECT
@@ -108,6 +111,7 @@ GROUP BY
 ORDER BY
   country NULLS FIRST,
   category NULLS FIRST;
+
 -- Exercises
 -- 1. Add payment method to the CUBE and measure row count increase.
 --    Inputs: For sql-56 Exercise 1, read from `payments`, `orders`, `customers`, `order_items`, and `products`. Compute `two_dimension_rows`, and `three_dimension_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.

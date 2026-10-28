@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+  "id": "ml-engineering",
+  "title": "Machine learning engineering",
+  "summary": "Build and investigate a connected local ML system: historical features, Feast, train/serve consistency, evaluation, MLflow, real API execution, safe deployment decisions, delayed labels, monitoring, rollback and governance.",
+  "lessons": [
+    {
+      "id": "mle-001",
+      "title": "Define the decision and the data-product contract",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "python-ml-02"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "decision unit",
+        "feature contract",
+        "label horizon",
+        "artifact graph",
+        "ownership"
+      ],
+      "outcome": "Define an ML product through its decision, information boundary and accepted artifacts.",
+      "lab": "Define an ML product through its decision, information boundary and accepted artifacts. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-001 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-002",
+      "title": "Event time, knowledge time and label maturity",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-001"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "event time",
+        "availability time",
+        "label delay",
+        "cutoff",
+        "leakage"
+      ],
+      "outcome": "Construct an eligible training cohort from explicit feature and label clocks.",
+      "lab": "Construct an eligible training cohort from explicit feature and label clocks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-002 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-003",
+      "title": "Build features without losing the request population",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-002",
+        "polars-006"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "feature window",
+        "Polars",
+        "request key",
+        "missingness",
+        "coverage"
+      ],
+      "outcome": "Build features at the decision grain while preserving all requests and missingness categories.",
+      "lab": "Build features at the decision grain while preserving all requests and missingness categories. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-003 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-004",
+      "title": "Validate structural and semantic feature contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-003"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "schema",
+        "domain",
+        "quarantine",
+        "semantic version",
+        "quality"
+      ],
+      "outcome": "Validate a feature interface structurally and semantically.",
+      "lab": "Validate a feature interface structurally and semantically. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-004 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-005",
+      "title": "Validation that matches deployment and time",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-002",
+        "mle-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "group split",
+        "time split",
+        "leakage",
+        "mature labels",
+        "target population"
+      ],
+      "outcome": "Design evaluation around the target population and information boundary.",
+      "lab": "Design evaluation around the target population and information boundary. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-005 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-006",
+      "title": "Register and retrieve actual Feast historical features",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-002",
+        "mle-003",
+        "mle-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Feast",
+        "entity",
+        "feature view",
+        "TTL",
+        "historical retrieval",
+        "coverage"
+      ],
+      "outcome": "Qualify a real feature-store retrieval against independent temporal and coverage checks.",
+      "lab": "Qualify a real feature-store retrieval against independent temporal and coverage checks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-006 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-007",
+      "title": "Materialization, online retrieval and freshness decisions",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-006"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "materialize",
+        "online store",
+        "feature age",
+        "serving policy",
+        "Feast"
+      ],
+      "outcome": "Populate a real online feature store and enforce a consumer freshness contract.",
+      "lab": "Populate a real online feature store and enforce a consumer freshness contract. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-007 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-008",
+      "title": "One fitted transformation for training and serving",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-004",
+        "mle-005"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "pipeline",
+        "preprocessing",
+        "fit versus transform",
+        "parity",
+        "leakage"
+      ],
+      "outcome": "Package and use a single fitted preprocessing/model interface.",
+      "lab": "Package and use a single fitted preprocessing/model interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-008 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-009",
+      "title": "Model evaluation, calibration and decision utility",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-005",
+        "mle-008"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Brier score",
+        "log loss",
+        "AUC",
+        "calibration",
+        "threshold",
+        "utility"
+      ],
+      "outcome": "Evaluate probabilities, ranking and actions with separately interpreted evidence.",
+      "lab": "Evaluate probabilities, ranking and actions with separately interpreted evidence. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-009 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-010",
+      "title": "Actual MLflow tracking and artifact lineage",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-008",
+        "mle-009"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "MLflow",
+        "run",
+        "parameter",
+        "metric",
+        "artifact",
+        "status"
+      ],
+      "outcome": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run.",
+      "lab": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-010 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-011",
+      "title": "Model artifacts, registry versions and trusted loading",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-004",
+        "mle-010"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "artifact integrity",
+        "feature schema",
+        "model registry",
+        "alias",
+        "trusted serialization"
+      ],
+      "outcome": "Publish and resolve a model artifact with an explicit trusted interface.",
+      "lab": "Publish and resolve a model artifact with an explicit trusted interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-011 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-012",
+      "title": "A real HTTP contract before a network deployment",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "mle-007",
+        "mle-008",
+        "mle-011"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "FastAPI",
+        "ASGI",
+        "request schema",
+        "validation",
+        "model version",
+        "inference"
+      ],
+      "outcome": "Define and test a serving contract with positive and negative requests.",
+      "lab": "Define and test a serving contract with positive and negative requests. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-012 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-013",
+      "title": "Orchestration, checkpoints and safe retries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "mle-003",
+        "mle-008",
+        "mle-010"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "DAG",
+        "checkpoint",
+        "idempotency",
+        "input identity",
+        "retry"
+      ],
+      "outcome": "Define checkpoint and retry behavior using artifact identities.",
+      "lab": "Define checkpoint and retry behavior using artifact identities. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-013 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-014",
+      "title": "Shadow comparison and stable rollout cohorts",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "mle-009",
+        "mle-012"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "shadow",
+        "canary",
+        "stable assignment",
+        "ramp",
+        "causal evidence"
+      ],
+      "outcome": "Design stable routing and shadow comparisons with bounded conclusions.",
+      "lab": "Design stable routing and shadow comparisons with bounded conclusions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-014 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-015",
+      "title": "Monitoring with delayed labels and bounded service metrics",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "mle-002",
+        "mle-009",
+        "mle-012"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "label maturity",
+        "coverage",
+        "drift",
+        "latency",
+        "monitoring population"
+      ],
+      "outcome": "Monitor operations, data contracts and mature outcomes as distinct signals.",
+      "lab": "Monitor operations, data contracts and mature outcomes as distinct signals. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-015 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-016",
+      "title": "Accepted model pointers and rollback after failure",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "mle-011",
+        "mle-014",
+        "mle-015"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "activation",
+        "artifact hash",
+        "atomic replace",
+        "rollback",
+        "durable state"
+      ],
+      "outcome": "Activate and recover model state through explicit accepted versions.",
+      "lab": "Activate and recover model state through explicit accepted versions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-016 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-017",
+      "title": "Model cards, slice evidence and data minimization",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "mle-001",
+        "mle-005",
+        "mle-009",
+        "mle-015"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "slice metrics",
+        "sample size",
+        "model card",
+        "data minimization",
+        "governance"
+      ],
+      "outcome": "Write a model card that is grounded in actual data, metrics and operational decisions.",
+      "lab": "Write a model card that is grounded in actual data, metrics and operational decisions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-017 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "mle-018",
+      "title": "A connected local ML product and real service lifecycle",
+      "level": "advanced",
+      "minutes": 180,
+      "prerequisites": [
+        "mle-006",
+        "mle-007",
+        "mle-010",
+        "mle-012",
+        "mle-013",
+        "mle-016",
+        "mle-017"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "capstone",
+        "Polars",
+        "Feast",
+        "MLflow",
+        "serving",
+        "publication",
+        "recovery"
+      ],
+      "outcome": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision.",
+      "lab": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
+      "verification": "Run the assertions and inspect mle-018 reference checks passed. Interpret the counterexample in the guide."
+    }
+  ]
+}

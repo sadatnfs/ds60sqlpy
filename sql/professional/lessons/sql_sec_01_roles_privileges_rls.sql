@@ -1,11 +1,11 @@
 -- SQL-SEC-01: Roles, privileges, schemas, and row-level security
--- BEGINNER WORKFLOW — sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security
+-- BEGINNER WORKFLOW - sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security
 -- Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-sec-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-sec-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -45,22 +45,33 @@ SELECT
 \echo 'SQL-SEC-01: role capability available; starting disposable lab'
 BEGIN;
 CREATE ROLE ds60_sec_owner NOLOGIN;
+
 CREATE ROLE ds60_sec_north NOLOGIN;
+
 CREATE ROLE ds60_sec_south NOLOGIN;
+
 -- Membership allows this course session to SET ROLE to the object owner.
 -- The transaction rollback removes this membership and all three roles.
 GRANT ds60_sec_owner TO CURRENT_USER WITH ADMIN OPTION;
+
 CREATE SCHEMA pro_security_lab AUTHORIZATION ds60_sec_owner;
+
 REVOKE ALL ON SCHEMA pro_security_lab FROM PUBLIC;
+
 SET LOCAL ROLE ds60_sec_owner;
+
 SET LOCAL search_path TO pg_catalog, pro_security_lab;
+
 -- Default privileges belong to the object-creating role and affect only
 -- future objects in this schema.
 ALTER DEFAULT PRIVILEGES IN SCHEMA pro_security_lab REVOKE ALL ON TABLES FROM PUBLIC;
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA pro_security_lab GRANT
 SELECT
   ON TABLES TO ds60_sec_north, ds60_sec_south;
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA pro_security_lab REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+
 CREATE TABLE pro_security_lab.documents (
   document_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   tenant_key text NOT NULL CHECK (tenant_key IN ('north', 'south')),
@@ -68,11 +79,14 @@ CREATE TABLE pro_security_lab.documents (
   body text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
+
 CREATE TABLE pro_security_lab.announcements (
   announcement_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   message text NOT NULL
 );
+
 ALTER TABLE pro_security_lab.documents ENABLE ROW LEVEL SECURITY;
+
 CREATE POLICY documents_tenant_select ON pro_security_lab.documents
   FOR SELECT TO ds60_sec_north, ds60_sec_south
   USING (tenant_key =
@@ -84,6 +98,7 @@ CREATE POLICY documents_tenant_select ON pro_security_lab.documents
     ELSE
       NULL
     END);
+
 CREATE POLICY documents_tenant_insert ON pro_security_lab.documents
   FOR INSERT TO ds60_sec_north, ds60_sec_south
   WITH CHECK (tenant_key =
@@ -95,6 +110,7 @@ CREATE POLICY documents_tenant_insert ON pro_security_lab.documents
     ELSE
       NULL
     END);
+
 CREATE POLICY documents_tenant_update ON pro_security_lab.documents
   FOR UPDATE TO ds60_sec_north, ds60_sec_south
   USING (tenant_key =
@@ -115,12 +131,15 @@ CREATE POLICY documents_tenant_update ON pro_security_lab.documents
     ELSE
       NULL
     END);
+
 INSERT INTO pro_security_lab.documents (tenant_key, title, body)
 VALUES
   ('north', 'North checklist', 'Visible to the north role.'),
   ('south', 'South checklist', 'Visible to the south role.');
+
 INSERT INTO pro_security_lab.announcements (message)
   VALUES ('This future table inherited default SELECT grants.');
+
 -- SECURITY INVOKER preserves the caller as the permission/RLS context.
 CREATE VIEW pro_security_lab.visible_documents WITH ( security_invoker = true
 ) AS
@@ -131,6 +150,7 @@ SELECT
   d.created_at
 FROM
   pro_security_lab.documents AS d;
+
 -- A default view uses its owner's access context for underlying
 -- relations. It is intentionally not exposed to tenant roles.
 CREATE VIEW pro_security_lab.owner_context_documents AS
@@ -140,6 +160,7 @@ SELECT
   d.title
 FROM
   pro_security_lab.documents AS d;
+
 CREATE FUNCTION pro_security_lab.visible_document_count ()
   RETURNS bigint
   LANGUAGE sql
@@ -151,31 +172,42 @@ CREATE FUNCTION pro_security_lab.visible_document_count ()
             FROM pro_security_lab.documents AS d
         $function$
 ;
-  -- SECURITY DEFINER changes current_user to the function owner. The fixed
-  -- search_path, qualified table, narrow return value, and explicit revoke
-  -- are minimum controls; this example is not granted to tenant roles.
-  CREATE FUNCTION pro_security_lab.owner_document_count (p_tenant_key text)
-    RETURNS bigint
-    LANGUAGE sql
-    STABLE
-    SECURITY DEFINER
-    SET search_path = pg_catalog AS $function$
+-- SECURITY DEFINER changes current_user to the function owner. The fixed
+-- search_path, qualified table, narrow return value, and explicit revoke
+-- are minimum controls; this example is not granted to tenant roles.
+CREATE FUNCTION pro_security_lab.owner_document_count (p_tenant_key text)
+  RETURNS bigint
+  LANGUAGE sql
+  STABLE
+  SECURITY DEFINER
+  SET search_path = pg_catalog
+  AS $function$
             SELECT COUNT(*)
             FROM pro_security_lab.documents AS d
             WHERE d.tenant_key = p_tenant_key
-        $function$;
-    REVOKE ALL ON FUNCTION pro_security_lab.visible_document_count () FROM PUBLIC;
-    REVOKE ALL ON FUNCTION pro_security_lab.owner_document_count (text) FROM PUBLIC;
-    RESET ROLE;
-    -- Schema USAGE permits name resolution; it does not grant table access.
-    GRANT USAGE ON SCHEMA pro_security_lab TO ds60_sec_north, ds60_sec_south;
-    -- Default privileges supplied SELECT. Add only the write operations and
-    -- columns required by the exercise.
-    GRANT INSERT (tenant_key, title, body), UPDATE (title, body) ON TABLE pro_security_lab.documents TO ds60_sec_north, ds60_sec_south;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA pro_security_lab TO ds60_sec_north, ds60_sec_south;
-    GRANT EXECUTE ON FUNCTION pro_security_lab.visible_document_count () TO ds60_sec_north, ds60_sec_south;
-    REVOKE ALL ON TABLE pro_security_lab.owner_context_documents FROM ds60_sec_north, ds60_sec_south;
-    REVOKE ALL ON FUNCTION pro_security_lab.owner_document_count (text) FROM ds60_sec_north, ds60_sec_south;
+        $function$
+;
+REVOKE ALL ON FUNCTION pro_security_lab.visible_document_count () FROM PUBLIC;
+
+REVOKE ALL ON FUNCTION pro_security_lab.owner_document_count (text) FROM PUBLIC;
+
+RESET ROLE;
+
+-- Schema USAGE permits name resolution; it does not grant table access.
+GRANT USAGE ON SCHEMA pro_security_lab TO ds60_sec_north, ds60_sec_south;
+
+-- Default privileges supplied SELECT. Add only the write operations and
+-- columns required by the exercise.
+GRANT INSERT (tenant_key, title, body), UPDATE (title, body) ON TABLE pro_security_lab.documents TO ds60_sec_north, ds60_sec_south;
+
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA pro_security_lab TO ds60_sec_north, ds60_sec_south;
+
+GRANT EXECUTE ON FUNCTION pro_security_lab.visible_document_count () TO ds60_sec_north, ds60_sec_south;
+
+REVOKE ALL ON TABLE pro_security_lab.owner_context_documents FROM ds60_sec_north, ds60_sec_south;
+
+REVOKE ALL ON FUNCTION pro_security_lab.owner_document_count (text) FROM ds60_sec_north, ds60_sec_south;
+
 \echo 'Privilege inspection before acting as tenant roles'
 SELECT
   access.role_name,

@@ -1,11 +1,11 @@
 -- SQL-TEST-01: SQL tests, migration checks, and data contracts
--- BEGINNER WORKFLOW — sql-test-01: SQL Tests, Migration Checks, and Data Contracts
+-- BEGINNER WORKFLOW - sql-test-01: SQL Tests, Migration Checks, and Data Contracts
 -- Guide: sql/professional/companion-guides/sql_test_01_contracts_migrations.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-test-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-test-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -21,7 +21,9 @@
 \echo 'SQL-TEST-01: disposable SQL contract-test lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_contract_test_lab;
+
 -- A minimal assertion helper: false and NULL both fail with a named message.
 CREATE FUNCTION pro_contract_test_lab.assert_true (p_test_name text, p_condition boolean, p_detail text)
   RETURNS void
@@ -38,45 +40,52 @@ BEGIN
 END
 $function$
 ;
-  CREATE TABLE pro_contract_test_lab.schema_migrations (
-    migration_id integer PRIMARY KEY,
-    migration_name text NOT NULL UNIQUE
+CREATE TABLE pro_contract_test_lab.schema_migrations (
+  migration_id integer PRIMARY KEY,
+  migration_name text NOT NULL UNIQUE
 );
-  CREATE TABLE pro_contract_test_lab.customers (
-    customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    customer_key text NOT NULL UNIQUE,
-    display_name text NOT NULL CHECK (btrim(display_name) <> '')
+
+CREATE TABLE pro_contract_test_lab.customers (
+  customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_key text NOT NULL UNIQUE,
+  display_name text NOT NULL CHECK (btrim(display_name) <> '')
 );
-  CREATE TABLE pro_contract_test_lab.orders (
-    order_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    order_key text NOT NULL UNIQUE,
-    customer_id bigint NOT NULL REFERENCES pro_contract_test_lab.customers (customer_id),
-    status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'paid', 'cancelled')),
-    reported_total numeric(12, 2) NOT NULL CHECK (reported_total >= 0),
-    created_at timestamptz NOT NULL
+
+CREATE TABLE pro_contract_test_lab.orders (
+  order_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  order_key text NOT NULL UNIQUE,
+  customer_id bigint NOT NULL REFERENCES pro_contract_test_lab.customers (customer_id),
+  status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'paid', 'cancelled')),
+  reported_total numeric(12, 2) NOT NULL CHECK (reported_total >= 0),
+  created_at timestamptz NOT NULL
 );
-  CREATE TABLE pro_contract_test_lab.order_lines (
-    order_line_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    order_id bigint NOT NULL REFERENCES pro_contract_test_lab.orders (order_id),
-    product_key text NOT NULL,
-    quantity integer NOT NULL CHECK (quantity > 0),
-    unit_price numeric(12, 2) NOT NULL CHECK (unit_price >= 0),
-    UNIQUE (order_id, product_key)
+
+CREATE TABLE pro_contract_test_lab.order_lines (
+  order_line_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  order_id bigint NOT NULL REFERENCES pro_contract_test_lab.orders (order_id),
+  product_key text NOT NULL,
+  quantity integer NOT NULL CHECK (quantity > 0),
+  unit_price numeric(12, 2) NOT NULL CHECK (unit_price >= 0),
+  UNIQUE (order_id, product_key)
 );
-  CREATE TABLE pro_contract_test_lab.fixture_manifest (
-    fixture_name text PRIMARY KEY,
-    fixture_owner text NOT NULL,
-    content_tag text NOT NULL,
-    expected_rows integer NOT NULL CHECK (expected_rows >= 0)
+
+CREATE TABLE pro_contract_test_lab.fixture_manifest (
+  fixture_name text PRIMARY KEY,
+  fixture_owner text NOT NULL,
+  content_tag text NOT NULL,
+  expected_rows integer NOT NULL CHECK (expected_rows >= 0)
 );
+
 INSERT INTO pro_contract_test_lab.schema_migrations
 VALUES
   (1, 'create_order_model'),
   (2, 'require_order_status');
+
 INSERT INTO pro_contract_test_lab.customers (customer_key, display_name)
 VALUES
   ('CUS-100', 'Avery'),
   ('CUS-101', 'Morgan');
+
 INSERT INTO pro_contract_test_lab.orders (order_key, customer_id, status, reported_total, created_at)
 SELECT
   fixture.order_key,
@@ -88,6 +97,7 @@ FROM (
   VALUES ('ORD-100'::text, 'CUS-100'::text, 'paid'::text, 25.00::numeric, TIMESTAMPTZ '2026-02-01 10:00:00+00'),
     ('ORD-101'::text, 'CUS-101'::text, 'open'::text, 14.00::numeric, TIMESTAMPTZ '2026-02-02 11:00:00+00')) AS fixture (order_key, customer_key, status, reported_total, created_at)
   JOIN pro_contract_test_lab.customers AS c ON c.customer_key = fixture.customer_key;
+
 INSERT INTO pro_contract_test_lab.order_lines (order_id, product_key, quantity, unit_price)
 SELECT
   o.order_id,
@@ -99,11 +109,13 @@ FROM (
     ('ORD-100'::text, 'ITEM-B'::text, 3, 5.00::numeric),
     ('ORD-101'::text, 'ITEM-A'::text, 2, 7.00::numeric)) AS fixture (order_key, product_key, quantity, unit_price)
   JOIN pro_contract_test_lab.orders AS o ON o.order_key = fixture.order_key;
+
 INSERT INTO pro_contract_test_lab.fixture_manifest
 VALUES
   ('customers', 'sql-test-01', 'customers-v1', 2),
   ('orders', 'sql-test-01', 'orders-v1', 2),
   ('order_lines', 'sql-test-01', 'order-lines-v1', 3);
+
 -- Expected producer/consumer contract for the orders relation.
 CREATE TABLE pro_contract_test_lab.expected_orders_contract (
   ordinal_position integer PRIMARY KEY,
@@ -111,6 +123,7 @@ CREATE TABLE pro_contract_test_lab.expected_orders_contract (
   data_type text NOT NULL,
   is_nullable text NOT NULL CHECK (is_nullable IN ('YES', 'NO'))
 );
+
 INSERT INTO pro_contract_test_lab.expected_orders_contract
 VALUES
   (1, 'order_id', 'bigint', 'NO'),
@@ -119,6 +132,7 @@ VALUES
   (4, 'status', 'text', 'NO'),
   (5, 'reported_total', 'numeric', 'NO'),
   (6, 'created_at', 'timestamp with time zone', 'NO');
+
 CREATE VIEW pro_contract_test_lab.orders_contract_mismatches AS
 WITH actual AS (
   SELECT
@@ -147,6 +161,7 @@ WHERE
   ROW (e.column_name, e.data_type, e.is_nullable) IS DISTINCT FROM ROW (a.column_name,
     a.data_type,
     a.is_nullable);
+
 \echo 'Contract and migration assertions'
 SELECT
   pro_contract_test_lab.assert_true ('orders column contract', NOT EXISTS (

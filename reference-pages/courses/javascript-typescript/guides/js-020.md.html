@@ -281,19 +281,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Handle a result union.</strong> Format both successful value 7 and a failure message. <strong>Expected:</strong> value:7 and error:offline. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Preserve an empty string during narrowing.</strong> Handle string or undefined using an explicit undefined comparison. <strong>Expected:</strong> empty string has length 0; absent value returns missing. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject access to another variant payload.</strong> Demonstrate that a failure branch cannot read value. <strong>Expected:</strong> expected compiler error on value; valid failure formatting remains unchanged. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Catch an unhandled new variant at compile time.</strong> Add a pending variant and intentionally omit it from a switch in an uncalled function. <strong>Expected:</strong> expected compiler error at assertNever for pending. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Use an honest unknown-value predicate.</strong> Check for a record with a finite numeric value before consuming it. <strong>Expected:</strong> valid record accepted; null, arrays and string-valued records rejected. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Expose the runtime limit of an asserted union.</strong> Force a malformed external value into Result for demonstration and call the handler. <strong>Expected:</strong> runtime fallback throws rather than fabricating success. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

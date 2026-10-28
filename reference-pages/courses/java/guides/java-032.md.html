@@ -253,19 +253,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Establish a numerical oracle.</strong> Sum 1..1000 with a loop and compare with n*(n+1)/2. <strong>Expected:</strong> 500500. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 500500.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Warm up without hiding results.</strong> Run the calculation100times and store each result in a volatile sink. <strong>Expected:</strong> sink500500 after warmup. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with sink500500 after warmup.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Measure repeated work with a checksum.</strong> Time20calculations and sum their outputs. <strong>Expected:</strong> checksum10010000;elapsednanosecondsnonnegative. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with checksum10010000;elapsednanosecondsnonnegative.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Record and read an actualJFR event.</strong> Create a bounded recording withoneCalculation event containinginput100 andoutput5050. <strong>Expected:</strong> one matching event with the declared fields. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with one matching event with the declared fields.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Collect a small timing distribution.</strong> Measure the same bounded work five times and inspect sorted samples. <strong>Expected:</strong> five nonnegative samples;minimum&lt;=maximum;checksums preserved. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with five nonnegative samples;minimum&lt;=maximum;checksums preserved.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep instrumented anduninstrumented claims separate.</strong> Record warmup,workload andprofiling state beside a measurement;refuse a universal speedup claim. <strong>Expected:</strong> metadata names 100 warmups and profiling false; universal claim false. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with metadata names 100 warmups and profiling false; universal claim false.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

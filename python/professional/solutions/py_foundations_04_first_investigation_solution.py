@@ -7,7 +7,9 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-FIXTURE = Path("python") / "professional" / "fixtures" / "data" / "beginner_orders.csv"
+from ds60sqlpy.teaching_data import teaching_fixture
+
+FIXTURE = teaching_fixture("beginner-orders")
 
 
 def load_rows(path: Path) -> list[dict[str, str]]:

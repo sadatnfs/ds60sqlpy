@@ -1,0 +1,9 @@
+# Portable local engines for the Apache/open-data teaching worker.
+# Delta Sharing and Ballista use separately qualified workshop environments.
+pyarrow==23.0.1
+datafusion==55.0.0
+pyiceberg[pyarrow,sql-sqlite]==0.12.0
+numpy==2.4.6
+pandas==2.3.3
+plotly==6.9.0
+matplotlib==3.11.1

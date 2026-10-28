@@ -74,10 +74,13 @@ everywhere.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+**Default Docker classroom:** open `python-46` for its guide, notebook and capability notice. The default Core does not include the `deep-learning` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+
+**Prepared browser alternative:** use the [prepared PyTorch CPU course](../../../courses/deep-learning-pytorch/guides/torch-002.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
+
+**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `deep-learning` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+
+The prepared PyTorch CPU course runs tensor and training examples in its own worker. It does not add PyTorch to this legacy lesson's Core worker. TensorFlow is a separate optional comparison, not used by the starter.
 
 **Optional native notebook/editor route:** the instructions below describe
 separately prepared host tools. They are useful alternatives, not prerequisites
@@ -86,8 +89,7 @@ for opening this lesson in the Docker classroom.
 1. Open the Day 46 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
+   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
 3. Keep experiments in new scratch cells. Do not edit the official
    solution while attempting the numbered practice.
 4. Restart the kernel and run from the first cell before calling the
@@ -291,7 +293,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-46` — Day 46 — Deep Learning Overview.
+Tutor me through `python-46` : Day 46 : Deep Learning Overview.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tensors, computation graphs, gradients, and the optimizer cycle. Use exactly these maintained learner materials:

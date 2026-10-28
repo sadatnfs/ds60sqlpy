@@ -243,19 +243,19 @@ g<span class="syntax-operator">=</span>tape<span class="syntax-operator">.</span
 <ol>
 <li><strong>Construct the local base.</strong> Create a fixed two-feature identity Dense base and freeze it. <strong>Expected:</strong> base output equals input; no trainable base variables. <strong>Verify:</strong> Save the assertion results for exercise 1, including base output equals input; no trainable base variables.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Train a new head.</strong> Attach a zero-initialized one-unit head; fit targets[1,2,3] for one SGD step. <strong>Expected:</strong> at least one head coefficient changes. <strong>Verify:</strong> Save the assertion results for exercise 2, including at least one head coefficient changes.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Prove base preservation.</strong> Compare the base kernel with identity after head training. <strong>Expected:</strong> base weights remain byte-identical to identity. <strong>Verify:</strong> Save the assertion results for exercise 3, including base weights remain byte-identical to identity.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Compare predictions.</strong> Evaluate the new head on all three local records and compare with initial zero predictions. <strong>Expected:</strong> all three predictions positive. <strong>Verify:</strong> Save the assertion results for exercise 4, including all three predictions positive.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Begin an explicit unfreeze phase.</strong> Unfreeze the base and initialize a new SGD optimizer; differentiate a combined loss. <strong>Expected:</strong> both base and head now have connected gradients. <strong>Verify:</strong> Save the assertion results for exercise 5, including both base and head now have connected gradients.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Detect changed base state.</strong> Compare the unfrozen base with its original identity after the explicit update. <strong>Expected:</strong> base is no longer identical. <strong>Verify:</strong> Save the assertion results for exercise 6, including base is no longer identical.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

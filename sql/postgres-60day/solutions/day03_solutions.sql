@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
 -- Assumptions: Foreign keys define expected many-to-one relationships. Net line revenue is `unit_price * quantity * (1 - discount)`.
@@ -45,6 +46,7 @@ FROM
 ORDER BY
   o.order_date DESC,
   o.order_id DESC;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate each order item's net line revenue with the product name and category.
@@ -71,6 +73,7 @@ FROM
 ORDER BY
   oi.order_id,
   oi.order_item_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: List payments with order status and customer name.
@@ -98,6 +101,7 @@ FROM
 ORDER BY
   p.payment_date DESC,
   p.payment_id DESC;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Predict the row count from joining one order with three items and two payments directly, then write a safe per-order reconciliation.
@@ -141,6 +145,7 @@ FROM
   LEFT JOIN payment_totals AS pt ON pt.order_id = o.order_id
 ORDER BY
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a customer/order join whose `ON` clause compares unrelated IDs.
@@ -158,6 +163,7 @@ SELECT
 FROM
   orders AS o
   JOIN customers AS c ON c.customer_id = o.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Calculate net line revenue by customer country without double-counting order totals.
@@ -183,5 +189,6 @@ GROUP BY
 ORDER BY
   net_revenue DESC,
   c.country;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

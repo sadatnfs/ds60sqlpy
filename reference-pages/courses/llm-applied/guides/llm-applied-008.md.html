@@ -307,19 +307,19 @@ ranked<span class="syntax-operator">=</span>rrf<span class="syntax-punctuation">
 <ol>
 <li><strong>Fuse two rankings.</strong> Fuse lexical[a, b, c] and dense[b, d, a] with constant 60. <strong>Expected:</strong> b ranks first, a second. <strong>Verify:</strong> Save the assertion results for exercise 1, including b ranks first, a second.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect one exact contribution.</strong> Calculate the fused score ofb as <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>1</mn><mn>62</mn></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>61</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{62}+\frac{1}{61}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">62</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">61</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>. <strong>Expected:</strong> computed b score equals that sum within 1e-12. <strong>Verify:</strong> Save the assertion results for exercise 2, including computed b score equals that sum within 1e-12.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Prevent duplicate votes.</strong> Repeatb inside one ranking and compare with its deduplicated form. <strong>Expected:</strong> fusion result unchanged. <strong>Verify:</strong> Save the assertion results for exercise 3, including fusion result unchanged.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Rerank a bounded candidate set.</strong> Use candidatesa, b, c with authored relevance features 0, 2, 1 and sort descending feature then ID. <strong>Expected:</strong> orderb, c, a. <strong>Verify:</strong> Save the assertion results for exercise 4, including orderb, c, a.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose a candidate-recall ceiling.</strong> Declare relevant documentd but supply only candidatesa, b, c. <strong>Expected:</strong> candidate recall 0 and reranker cannot return d. <strong>Verify:</strong> Save the assertion results for exercise 5, including candidate recall 0 and reranker cannot return d.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid fusion policy.</strong> Use constant 0 or a repeated non-string identifier and apply the declared validation. <strong>Expected:</strong> ValueError for nonpositive constant; TypeError for non-string ID. <strong>Verify:</strong> Save the assertion results for exercise 6, including ValueError for nonpositive constant; TypeError for non-string ID.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

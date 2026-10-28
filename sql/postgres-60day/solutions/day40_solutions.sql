@@ -81,7 +81,6 @@ SELECT
   percentile_cont(0.5) WITHIN GROUP (ORDER BY value) AS continuous_median
 FROM
 values;
-
 -- Exercise 4: first aggregate at month/category grain; the window denominator
 -- then sums only peer category rows within that month.
 WITH category_month AS (

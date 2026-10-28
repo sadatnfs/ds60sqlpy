@@ -202,19 +202,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> Predict both string values after ToUpperInvariant and explain ownership of the result.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Build an interpolated label containing a count and a unit.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Implement case-insensitive machine-key comparison with an explicit policy.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose code that takes one char from the emoji and assumes it is a complete symbol.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Compare ASCII, an emoji and a combining-mark sequence using code units and text elements.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.</li>
 </ol>
 <p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>

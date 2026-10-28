@@ -251,19 +251,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Derive a scalar gradient.</strong> Differentiate(w-2)² atw0 in float64. <strong>Expected:</strong> gradient-4 and loss4. <strong>Verify:</strong> Save the assertion results for exercise 1, including gradient-4 and loss4.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compare finite differences.</strong> Use central differenceh=.001 for the same scalar function. <strong>Expected:</strong> finite difference approximately-4 within1e-10. <strong>Verify:</strong> Save the assertion results for exercise 2, including finite difference approximately-4 within1e-10.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Observe accumulation.</strong> Call backward on a new loss without clearing the prior gradient. <strong>Expected:</strong> stored gradient becomes-8. <strong>Verify:</strong> Save the assertion results for exercise 3, including stored gradient becomes-8.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Clear gradient state.</strong> Set the gradient to None, recompute and backpropagate once. <strong>Expected:</strong> gradient returns to-4. <strong>Verify:</strong> Save the assertion results for exercise 4, including gradient returns to-4.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Inspect detachment.</strong> Detachw and compare its value and gradient-tracking status. <strong>Expected:</strong> same value0; requires_gradFalse. <strong>Verify:</strong> Save the assertion results for exercise 5, including same value0; requires_gradFalse.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Check an embedding table.</strong> Lookup IDs2,0,2 in a fixed4x2 table and compare repeated rows. <strong>Expected:</strong> shape(3,2); rows0 and2 both[2,2]. <strong>Verify:</strong> Save the assertion results for exercise 6, including shape(3,2); rows0 and2 both[2,2].</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

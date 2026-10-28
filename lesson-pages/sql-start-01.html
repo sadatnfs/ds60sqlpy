@@ -484,35 +484,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 1, Six rows, one per reading_id, with columns reading_id, station, temperature; final ORDER BY reading_id. IDs are 1,2,3,4,5,6 and ID 4 keeps its NULL measurement.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 1, Compare the six returned reading_id values with the fixture IDs 1 through 6 and inspect the NULL temperature at ID 4; no identity is repeated or absent.</p>
 <p><strong>Progressive hint:</strong> Start with FROM, then choose the three requested columns.</p>
-<ol>
+<ol start="2">
 <li><strong>Reveal repeated visible values.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 2, Show reading_id, station, reading_day, temperature for IDs 1 and 2. Explain why projecting only station and temperature produces two identical-looking rows rather than one row.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 2, Two observation rows with columns reading_id, station, reading_day, temperature; final ORDER BY reading_id. Both temperatures are 18, with dates January 1 and January 2 respectively.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 2, Inspect two different reading_id and reading_day values while confirming both station/temperature pairs are North/18. Removing the visible identity must not collapse the two observations.</p>
 <p><strong>Progressive hint:</strong> A column can repeat even when the primary key cannot.</p>
-<ol>
+<ol start="3">
 <li><strong>Filter observations without losing missing values.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 3, Return the South observations with reading_id, station, temperature, ordered by reading_id. Do not add a measurement condition.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 3, Two rows keyed by reading_id, columns reading_id, station, temperature, final ORDER BY reading_id: (3, South, 0), (4, South, NULL).</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 3, Inspect the two returned rows: reading_id 3 and 4, exactly one present zero temperature, and exactly one NULL measurement. Neither a missing field nor zero makes the South observation disappear.</p>
 <p><strong>Progressive hint:</strong> The question restricts station, not temperature.</p>
-<ol>
+<ol start="4">
 <li><strong>Calculate without editing storage.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 4, For IDs 1 and 3, return reading_id, temperature, and temperature + 2 named adjusted_temperature. Then rerun the original projection to show that the stored values did not change.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 4, Two rows keyed by reading_id, columns reading_id, temperature, adjusted_temperature, final ORDER BY reading_id: (1,18,20) and (3,0,2). Original temperatures remain 18 and 0.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 4, Inspect calculated values 20 and 2, then rerun the original reading_id/temperature projection and confirm the stored temperatures remain 18 and 0.</p>
 <p><strong>Progressive hint:</strong> An expression in SELECT calculates a result; UPDATE would change storage.</p>
-<ol>
+<ol start="5">
 <li><strong>Distinguish no rows from a missing field.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 5, Search for station East and project reading_id, station, temperature. Compare its output with the South result from Exercise 3.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-01 Exercise 5, Zero observation rows with columns reading_id, station, temperature and final ORDER BY reading_id. South has two rows, including a row with a NULL field; East has no stored observation.</p>
 <p><strong>Verify:</strong> For sql-start-01 Exercise 5, Inspect the zero-row message and compare it with the South row at ID 4, which has an identity and a NULL field. Do not manufacture an East row.</p>
 <p><strong>Progressive hint:</strong> A WHERE condition can produce an empty result without causing an error.</p>
-<ol>
+<ol start="6">
 <li><strong>Transfer grain to a new collection.</strong></li>
 </ol>
 <p><strong>Inputs/evidence:</strong> For sql-start-01 Exercise 6, Use a VALUES input containing (11, &#x27;North&#x27;, &#x27;battery&#x27;) and (12, &#x27;North&#x27;, &#x27;screen&#x27;) with columns ticket_id, station, issue. Return ticket_id, station, issue ordered by ticket_id. Explain why station is not a ticket key.</p>
@@ -571,7 +571,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_start_01_tables_and_grain.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -584,7 +584,8 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-START-01: Reading Tables and Result Grain</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_start_01_tables_and_grain.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use ./classroom -&gt; PostgreSQL -&gt; sql-start-01 and its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Select &quot;Whole SQL lesson (psql)&quot;; Docker supplies the client.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
@@ -596,14 +597,18 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> start_readings <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  reading_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  station <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  reading_day <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  temperature <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> start_readings <span class="syntax-punctuation">(</span>reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -612,6 +617,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;West&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 1: A full observation retains its identity</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Six rows with columns reading_id, station, reading_day, temperature; IDs 1 through 6 in order. ID 4 has NULL temperature.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -623,6 +629,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  start_readings</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example 2: Two visually identical rows are still two observations</span></span>
 <span class="source-line"><span class="syntax-comment">-- Expected: Two rows, each (North, 18), with columns station and temperature. No table row is removed or updated.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -634,6 +641,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Trace identities.</span></span>
@@ -749,7 +757,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_start_01_tables_and_grain_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -769,14 +777,18 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> start_readings <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  reading_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  station <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  reading_day <span class="syntax-builtin">date</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  temperature <span class="syntax-builtin">numeric</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> start_readings <span class="syntax-punctuation">(</span>reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -785,6 +797,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-02&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;West&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-01&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2024-01-03&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
@@ -796,33 +809,40 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$assert$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
-<span class="source-line">  <span class="syntax-comment">-- 1. Trace identities</span></span>
-<span class="source-line">  SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    station<span class="syntax-punctuation">,</span></span>
-<span class="source-line">    temperature</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_readings</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Trace identities</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  station<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_readings</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_readings</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">      start_readings</span>
-<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">      reading_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            array_agg<span class="syntax-punctuation">(</span>reading_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>reading_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 2. Reveal repeated visible values</span></span>
 <span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  station<span class="syntax-punctuation">,</span></span>
@@ -834,26 +854,32 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_readings</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> reading_day<span class="syntax-punctuation">,</span> temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_readings</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  reading_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> reading_day<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> reading_day<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 3. Filter observations without losing missing values</span></span>
 <span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  station<span class="syntax-punctuation">,</span></span>
@@ -864,24 +890,30 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;South&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_readings</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;South&#x27;</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_readings</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;South&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>reading_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>reading_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 4. Calculate without editing storage</span></span>
 <span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  temperature<span class="syntax-punctuation">,</span></span>
@@ -892,30 +924,36 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  reading_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">,</span> temperature <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> adjusted_temperature</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_readings</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    reading_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">,</span> temperature<span class="syntax-punctuation">,</span> temperature <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> adjusted_temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_readings</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  reading_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>adjusted_temperature <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">      <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          temperature</span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> start_readings</span>
-<span class="source-line">        <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">          reading_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>adjusted_temperature <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> reading_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      temperature</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> start_readings</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      reading_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 5. Distinguish no rows from a missing field</span></span>
 <span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  station<span class="syntax-punctuation">,</span></span>
@@ -926,24 +964,30 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">  station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;East&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">    start_readings</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">    station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;East&#x27;</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">    reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> temperature</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  start_readings</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  station <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;East&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  reading_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- 6. Transfer grain to a new collection</span></span>
 <span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  ticket_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  station<span class="syntax-punctuation">,</span></span>
@@ -953,20 +997,25 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;screen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> tickets <span class="syntax-punctuation">(</span>ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  ticket_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">    ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;battery&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;screen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> tickets <span class="syntax-punctuation">(</span>ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;battery&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;screen&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> tickets <span class="syntax-punctuation">(</span>ticket_id<span class="syntax-punctuation">,</span> station<span class="syntax-punctuation">,</span> issue<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  ticket_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      pg_temp<span class="syntax-punctuation">.</span>assert_true <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          array_agg<span class="syntax-punctuation">(</span>ticket_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ticket_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">]</span></span>
-<span class="source-line">        <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> station<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      array_agg<span class="syntax-punctuation">(</span>ticket_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ticket_id<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> station<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-start-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1006,7 +1055,7 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-algo-04.html"><small>Previous lesson</small><strong>python-algo-04</strong><span>Dynamic Programming, State Design, and Reconstructable Decisions</span></a>
+        <a class="nav-card" href="python-algo-07.html"><small>Previous lesson</small><strong>python-algo-07</strong><span>Streaming Summaries, Order Statistics, and Sampling</span></a>
         <a class="nav-card next" href="sql-start-02.html"><small>Next lesson</small><strong>sql-start-02</strong><span>Values NULL and Deterministic Order</span></a>
       </nav>
     </div>

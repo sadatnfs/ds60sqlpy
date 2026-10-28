@@ -199,19 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Name the units and roles.</strong> Create the seven-row demonstration table above. Mark which rows may influence a fitted mean and which are evaluated later.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Compare a fixed baseline.</strong> Calculate the training-target mean without using holdout labels, then compute its training and holdout MSE.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Separate a sum from a mean.</strong> For predictions [7,11] and targets [8,10], calculate the two residuals, squared-error sum and MSE. State the target units.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Find a grouped leak.</strong> Change only h1&#x27;s group to the same group as t1, retaining different row IDs. Explain the evaluation claim that now fails.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Refuse an empty score.</strong> Remove every holdout row. Decide whether its MSE is zero, perfect, or undefined, and design the smallest useful rejection message.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Bound the conclusion.</strong> A rule <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mn>2</mn><mo>⋅</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">y=2\cdot x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> has zero error on all seven published points. Write a defensible conclusion and one unsupported conclusion, then name a fresh assessment.</li>
 </ol>
 <h3 id="before-solution-comparison">Before solution comparison<a class="heading-anchor" href="#before-solution-comparison" aria-label="Link to this section">#</a></h3>

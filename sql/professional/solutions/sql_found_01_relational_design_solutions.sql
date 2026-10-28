@@ -15,7 +15,9 @@
 -- Creates and removes only pro_relational_lab.
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_relational_lab;
+
 -- The worked baseline and the exercises use the same core identities. Keeping
 -- them here makes the solution's catalog audit cover the same relationships a
 -- learner sees before beginning the numbered work.
@@ -24,10 +26,12 @@ CREATE TABLE pro_relational_lab.members (
   display_name text NOT NULL CHECK (btrim(display_name) <> ''),
   email text NOT NULL UNIQUE
 );
+
 CREATE TABLE pro_relational_lab.equipment_categories (
   category_code text PRIMARY KEY,
   display_name text NOT NULL UNIQUE
 );
+
 CREATE TABLE pro_relational_lab.equipment_items (
   item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   asset_tag text NOT NULL UNIQUE,
@@ -35,16 +39,20 @@ CREATE TABLE pro_relational_lab.equipment_items (
   description text NOT NULL CHECK (btrim(description) <> ''),
   current_daily_fee numeric(10, 2) NOT NULL CHECK (current_daily_fee >= 0)
 );
+
 INSERT INTO pro_relational_lab.equipment_categories (category_code, display_name)
 VALUES
   ('AUDIO', 'Audio equipment'),
   ('TOOL', 'Hand tools');
+
 INSERT INTO pro_relational_lab.members (display_name, email)
   VALUES ('Avery Chen', 'avery@example.test');
+
 INSERT INTO pro_relational_lab.equipment_items (asset_tag, category_code, description, current_daily_fee)
 VALUES
   ('AUD-001', 'AUDIO', 'Portable recorder', 12.00),
   ('TOL-001', 'TOOL', 'Torque wrench', 8.00);
+
 -- Exercise 1: one row is one maintenance visit for one physical item.
 CREATE TABLE pro_relational_lab.maintenance_visits (
   visit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -62,6 +70,7 @@ CREATE TABLE pro_relational_lab.maintenance_visits (
   END) STORED,
   CONSTRAINT maintenance_completion_order_ck CHECK (completed_on IS NULL OR completed_on >= opened_on)
 );
+
 -- Exercise 2: one valid visit.
 INSERT INTO pro_relational_lab.maintenance_visits (item_id, opened_on, completed_on, provider_name, service_note, cost, external_reference)
 SELECT
@@ -80,6 +89,7 @@ RETURNING
   visit_id,
   item_id,
   cost;
+
 -- Exercise 2: safely prove that the database rejects a negative cost.
 DO $solution$
 BEGIN
@@ -106,6 +116,7 @@ BEGIN
     END;
 END
 $solution$;
+
 -- Exercise 3: two NULL external references are valid with ordinary UNIQUE.
 INSERT INTO pro_relational_lab.maintenance_visits (item_id, opened_on, provider_name, service_note, cost, external_reference)
 SELECT
@@ -120,6 +131,7 @@ FROM
   JOIN (
     VALUES ('AUD-001'::text, DATE '2026-05-01', 'Cleaned controls'::text),
       ('TOL-001'::text, DATE '2026-05-02', 'Checked calibration'::text)) AS dates (asset_tag, opened_on, service_note) ON dates.asset_tag = i.asset_tag;
+
 SELECT
   mv.visit_id,
   i.asset_tag,
@@ -133,6 +145,7 @@ FROM
   JOIN pro_relational_lab.equipment_items AS i ON i.item_id = mv.item_id
 ORDER BY
   mv.visit_id;
+
 DO $solution$
 DECLARE
     visit_count integer;
@@ -152,6 +165,7 @@ BEGIN
     END IF;
 END
 $solution$;
+
 -- Exercise 4: daily_fee_at_checkout belongs on a loan because it is the quoted
 -- historical value. A later equipment price change must not rewrite it.
 CREATE TABLE pro_relational_lab.loans (
@@ -161,6 +175,7 @@ CREATE TABLE pro_relational_lab.loans (
   checked_out_on date NOT NULL,
   daily_fee_at_checkout numeric(10, 2) NOT NULL CHECK (daily_fee_at_checkout >= 0)
 );
+
 INSERT INTO pro_relational_lab.loans (item_id, member_id, checked_out_on, daily_fee_at_checkout)
 SELECT
   i.item_id,
@@ -172,12 +187,14 @@ FROM
   CROSS JOIN pro_relational_lab.members AS m
 WHERE
   i.asset_tag = 'AUD-001';
+
 UPDATE
   pro_relational_lab.equipment_items AS i
 SET
   current_daily_fee = 15.00
 WHERE
   i.asset_tag = 'AUD-001';
+
 SELECT
   l.loan_id,
   i.asset_tag,
@@ -188,31 +205,37 @@ FROM
   JOIN pro_relational_lab.equipment_items AS i ON i.item_id = l.item_id
 ORDER BY
   l.loan_id;
+
 SELECT
   *
 FROM (
   VALUES ('daily_fee_at_checkout'::text, 'deliberate denormalization'::text, 'one immutable quoted fee per loan'::text, 'What fee did the borrower agree to at checkout?'::text)) AS classification (attribute_name, classification, invariant, historical_question);
+
 -- Exercise 5: names become referenced entities; the bridge grain is one
 -- technician assignment to one maintenance visit.
 CREATE TABLE pro_relational_lab.providers (
   provider_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   provider_name text NOT NULL UNIQUE CHECK (btrim(provider_name) <> '')
 );
+
 CREATE TABLE pro_relational_lab.technicians (
   technician_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   technician_name text NOT NULL CHECK (btrim(technician_name) <> '')
 );
+
 CREATE TABLE pro_relational_lab.visit_technicians (
   visit_id bigint NOT NULL REFERENCES pro_relational_lab.maintenance_visits (visit_id) ON DELETE CASCADE,
   technician_id bigint NOT NULL REFERENCES pro_relational_lab.technicians (technician_id) ON DELETE RESTRICT,
   PRIMARY KEY (visit_id, technician_id)
 );
+
 -- One visit has one provider in this model, while one provider can serve many
 -- visits. A PRIMARY KEY on visit_id enforces that one-provider-per-visit rule.
 CREATE TABLE pro_relational_lab.visit_providers (
   visit_id bigint PRIMARY KEY REFERENCES pro_relational_lab.maintenance_visits (visit_id) ON DELETE CASCADE,
   provider_id bigint NOT NULL REFERENCES pro_relational_lab.providers (provider_id) ON DELETE RESTRICT
 );
+
 INSERT INTO pro_relational_lab.providers (provider_name)
 SELECT DISTINCT
   mv.provider_name
@@ -220,10 +243,12 @@ FROM
   pro_relational_lab.maintenance_visits AS mv
 ORDER BY
   mv.provider_name;
+
 INSERT INTO pro_relational_lab.technicians (technician_name)
 VALUES
   ('Riley Chen'),
   ('Sam Rivera');
+
 INSERT INTO pro_relational_lab.visit_providers (visit_id, provider_id)
 SELECT
   mv.visit_id,
@@ -231,10 +256,12 @@ SELECT
 FROM
   pro_relational_lab.maintenance_visits AS mv
   JOIN pro_relational_lab.providers AS p ON p.provider_name = mv.provider_name;
+
 -- The bridge is now the source of truth. Keeping a mutable provider_name on
 -- the visit would permit it to disagree with provider_id.
 ALTER TABLE pro_relational_lab.maintenance_visits
   DROP COLUMN provider_name;
+
 INSERT INTO pro_relational_lab.visit_technicians (visit_id, technician_id)
 SELECT
   mv.visit_id,
@@ -244,6 +271,7 @@ FROM
   CROSS JOIN pro_relational_lab.technicians AS t
 WHERE
   mv.external_reference = 'VISIT-100';
+
 SELECT
   *
 FROM (
@@ -253,6 +281,7 @@ FROM (
     ('visit_technicians', 'one technician assignment per visit', 'visit_id + technician_id')) AS grain_map (relation_name, row_grain, key_columns)
 ORDER BY
   relation_name;
+
 SELECT
   mv.visit_id,
   p.provider_name,
@@ -269,6 +298,7 @@ WHERE
 ORDER BY
   mv.visit_id,
   t.technician_id;
+
 -- Exercise 6: count a nullable-side key, not COUNT(*), so never-loaned items
 -- correctly report zero. A loan-side date predicate would belong in ON.
 SELECT
@@ -285,6 +315,7 @@ GROUP BY
 ORDER BY
   i.asset_tag,
   i.item_id;
+
 -- Exercise 7: compare the intended referential action with the action actually
 -- stored in pg_constraint. RESTRICT preserves historical facts; CASCADE is
 -- limited to assignment rows that have no meaning without their parent visit.
@@ -345,6 +376,7 @@ FROM
   ORDER BY
     e.child_table,
     e.parent_table;
+
 -- Exercise 8: inspect semantic catalog properties instead of generated names.
 SELECT
   con.conname,
@@ -359,6 +391,7 @@ WHERE
   AND rel.relname = 'maintenance_visits'
 ORDER BY
   con.conname;
+
 SELECT
   a.attname AS column_name,
   a.attgenerated,
@@ -376,6 +409,7 @@ WHERE
   AND NOT a.attisdropped
 ORDER BY
   a.attnum;
+
 SELECT
   idx.indisunique,
   idx.indnullsnotdistinct,
@@ -392,4 +426,5 @@ WHERE
   AND a.attnum = ANY (idx.indkey)
 ORDER BY
   idx.indexrelid;
+
 ROLLBACK;

@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-numpy-03.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-numpy-03.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_numpy_03.py</code></pre>
 <p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-03.html#solution-1">explanatory solutions</a> and <a href="python-numpy-03.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -439,23 +439,23 @@ np<span class="syntax-operator">.</span>add<span class="syntax-operator">.</span
 <li><strong>Gather with explicit index rules.</strong> Gather a one-dimensional source using a one-dimensional integer index array. Allow negative positions in the normal NumPy range and preserve duplicates/order. Reject Boolean, floating or out-of-range indices with ValueError. Return an independent result.</li>
 </ol>
 <p><strong>Expected:</strong> [10,20,30] with [2,-1,0] yields [30,30,10]. Empty integer positions return shape(0,). Position 3, float1.0 or a Boolean index array raises ValueError.</p>
-<ol>
+<ol start="2">
 <li><strong>Accumulate repeated category codes.</strong> Sum finite one-dimensional values into bins using one nonnegative integer code per value. Reject unequal lengths, invalid codes or negative/noninteger bin counts. Zero bins are allowed only with empty inputs. Preserve every repeated-code contribution.</li>
 </ol>
 <p><strong>Expected:</strong> Values[1,2,5] and codes[0,0,2] with 3 bins produce[3,0,5]. Empty inputs and zero bins produce shape(0,); code 3 for 3 bins raises ValueError.</p>
-<ol>
+<ol start="3">
 <li><strong>Validate a row mask.</strong> Filter a matrix using an exactly matching one-dimensional Boolean row mask. Preserve selected order and return independent storage. Reject integer flags, a cell-shaped mask or wrong row count with ValueError.</li>
 </ol>
 <p><strong>Expected:</strong> [[1,2],[3,4],[5,6]] with [True, False, True] gives [[1,2],[5,6]]. All false gives shape(0,2); an integer[1,0,1] mask is rejected.</p>
-<ol>
+<ol start="4">
 <li><strong>Select every row-column combination.</strong> Return a Cartesian submatrix from nonnegative integer row and column arrays. Preserve duplicates and index-array order in both axes. Reject out-of-range, Boolean or noninteger indices. An empty selection on either axis must preserve the other output dimension.</li>
 </ol>
 <p><strong>Expected:</strong> np.arange(12).reshape(3,4), rows[2,0], columns[3,1] gives [[11,9],[3,1]]. Empty rows with two columns returns shape(0,2), not a flat vector.</p>
-<ol>
+<ol start="5">
 <li><strong>Make top-k ties deterministic.</strong> Return indices of the k largest finite one-dimensional scores in descending score order, breaking ties by original position. Require an integer k between zero and the number of scores, rejecting Boolean k. Do not mutate scores.</li>
 </ol>
 <p><strong>Expected:</strong> [5,9,9,1] with k=3 returns [1,2,0]. k=0 returns an empty integer array; k=5 or a NaN score raises ValueError.</p>
-<ol>
+<ol start="6">
 <li><strong>Restore original observation order.</strong> Return the inverse of a one-dimensional integer permutation of 0 through n-1. Reject duplicates, missing positions, negative values and noninteger dtype. Support the empty permutation. Demonstrate recovery of records after reordering.</li>
 </ol>
 <p><strong>Expected:</strong> Order[2,0,1] has inverse[1,2,0], and original[order][inverse] equals original. Order[0,0] is invalid; an empty integer array returns empty.</p>

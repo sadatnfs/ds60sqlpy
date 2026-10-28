@@ -1,6 +1,9 @@
 # Day 51: Target Encoding and Leakage-Safe Features
 
-**Lesson ID:** `python-51` · **Level:** advanced · **Dependencies:** `data` · **Network:** first-run Seaborn cache
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
+**Lesson ID:** `python-51` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
 
 Target encoding replaces a category with a statistic derived from the target.
 It can represent high-cardinality categories compactly, but a naive
@@ -18,18 +21,16 @@ By the end of the lesson, you can:
 
 ## Prerequisites
 
-- Complete `python-50` (time-safe model evaluation).
-- Recall pipelines, cross-validation, and category handling.
-- Cache Seaborn's Titanic dataset once while connected before offline study.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 ## Dataset and offline contract
 
-The notebook calls `seaborn.load_dataset("titanic")`, which may download the
-small dataset on first use and cache it locally. That connected first run is
-accepted. Subsequent study can be offline on the same machine.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 The reference solution uses deterministic synthetic categories, so it remains a
-useful fully local comparison even without the Titanic cache.
+useful fully local comparison with no external dataset cache.
 
 ## Vocabulary and mental models
 
@@ -64,7 +65,7 @@ training = pd.DataFrame(
         "target": [1, 0, 1, 0, 1, 1],
     }
 )
-summary = training.groupby("category")["target"].agg(["mean", "count"])
+summary = training.groupby("category", observed=True)["target"].agg(["mean", "count"])
 print(summary)
 ```
 
@@ -150,7 +151,7 @@ import pandas as pd
 
 category = pd.Series(["common", "common", "only_zero", "only_one"])
 target = pd.Series([0, 1, 0, 1], dtype=float)
-full_map = target.groupby(category).mean()
+full_map = target.groupby(category, observed=True, dropna=True).mean()
 leaked = category.map(full_map)
 print(pd.DataFrame({"category": category, "target": target, "leaked": leaked}))
 assert leaked.iloc[2] == target.iloc[2]
@@ -172,13 +173,13 @@ import pandas as pd
 train_category = pd.Series(["a", "a", "a", "b"])
 train_target = pd.Series([1, 1, 0, 1], dtype=float)
 prior = train_target.mean()
-stats = train_target.groupby(train_category).agg(["mean", "count"])
+stats = train_target.groupby(train_category, observed=True, dropna=True).agg(["mean", "count"])
 strength = 3.0
 smoothed = (
     stats["mean"] * stats["count"] + prior * strength
 ) / (stats["count"] + strength)
 new_category = pd.Series(["a", "b", "unseen", None])
-encoded = new_category.map(smoothed).fillna(prior)
+encoded = new_category.map(smoothed).astype(float).fillna(prior)
 print({"prior": prior, "map": smoothed.to_dict(),
        "encoded": encoded.tolist()})
 assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
@@ -234,9 +235,28 @@ assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
 3. Reuse each split for both methods and report score differences per seed, not
    only the best run.
 
-The notebook's `kfold_target_encode` is an instructional utility, not a
-drop-in production transformer. Its Series indexes and positional fold indexes
-must remain aligned.
+The notebook's `kfold_target_encode` is an instructional Series helper, not a
+drop-in scikit-learn transformer. It requires identical category/target indexes
+in row order. Both the category statistics and the smoothing prior must be fit
+from each fold's training labels only; a prior computed before the split also
+leaks validation labels. The result retains the original index and row order.
+
+For later validation/test/inference rows, `fit_target_map` fits the same smoothing
+formula on all allowed training rows and `transform_target_encode` applies it
+without receiving new targets. This example explicitly ignores unused category
+levels (`observed=True`) and treats missing categories as prior fallbacks
+(`dropna=True`). A missing-category sentinel is a separate policy to explore in
+Practice 5. Converting the mapped result to float before `.fillna(prior)` avoids
+pandas retaining a categorical dtype that rejects the numeric fallback.
+
+A fitted estimator needs `fit_transform` to produce OOF training values and
+`transform` to reuse its stored full-training map and prior for new rows.
+`FunctionTransformer` alone does not supply that supervised fitting contract.
+Generating OOF features over the whole dataset before outer cross-validation
+is not automatically leak-free: outer validation labels can enter other rows'
+maps and priors. Recompute OOF features inside each outer training partition,
+fit the outer validation map from that partition alone, and use an inner CV loop
+for tuning smoothing or split choices when reporting an outer CV score.
 
 ### Additional mastery practice
 
@@ -300,7 +320,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-51` — Day 51 — Target Encoding and Leakage-Safe Features.
+Tutor me through `python-51` ; Day 51 ; Target Encoding and Leakage-Safe Features.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize out-of-fold target encoding, smoothing, and transform-time unknowns. Use exactly these maintained learner materials:

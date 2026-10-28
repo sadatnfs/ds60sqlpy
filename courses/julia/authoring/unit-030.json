@@ -1,0 +1,58 @@
+{
+  "number": 30,
+  "title": "Threads, ownership and deterministic reductions",
+  "concepts": ["Threads.@spawn", "race conditions", "locks", "task migration", "reductions"],
+  "outcome": "Run independent chunks on the prepared two-thread runtime, combine results deterministically and protect shared state with an explicit lock.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-026", "julia-029"],
+  "sources": [
+    ["Julia multithreading", "https://docs.julialang.org/en/v1/manual/multi-threading/"],
+    ["Task-local ownership guidance", "https://julialang.org/blog/2023/07/PSA-dont-use-threadid/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Derive the reduction oracle",
+      "task": "Compute the sum of squares through 100 from the closed-form formula.",
+      "expected": "The result is 338350.",
+      "hint": "Use n(n+1)(2n+1)/6.",
+      "answer": "The independent formula checks the reduction without copying its loop."
+    },
+    {
+      "title": "Trace an empty chunk",
+      "task": "Explain how the single-element input handles its second range.",
+      "expected": "The empty range contributes 0.",
+      "hint": "sum uses an explicit init.",
+      "answer": "The additive identity makes the empty partial result well-defined."
+    },
+    {
+      "title": "Explain lost updates",
+      "task": "Trace two unprotected increments that read the same value.",
+      "expected": "One update can overwrite the other.",
+      "hint": "An increment is not one abstract atomic step.",
+      "answer": "Locking the full read-modify-write operation prevents this schedule under the stated protocol."
+    },
+    {
+      "title": "Review scratch ownership",
+      "task": "Explain why threadid-indexed buffers can be unsafe.",
+      "expected": "Tasks may migrate or interleave.",
+      "hint": "A thread ID is not permanent task ownership.",
+      "answer": "Task-owned state or explicit synchronization is safer than undocumented schedule assumptions."
+    },
+    {
+      "title": "Analyze floating reduction",
+      "task": "Explain why changing grouping can change floating results.",
+      "expected": "Floating addition rounds intermediate values.",
+      "hint": "Associativity holds for real arithmetic, not all machine arithmetic.",
+      "answer": "Use a justified tolerance or a numerically stable reduction when extending the integer example."
+    },
+    {
+      "title": "Design a performance comparison",
+      "task": "State the boundaries needed to claim a parallel speedup.",
+      "expected": "Include scheduling, work, reduction and thread configuration.",
+      "hint": "Small workloads can be slower.",
+      "answer": "Measure the full warmed operation with identical correct outputs and representative data."
+    }
+  ]
+}

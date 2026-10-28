@@ -558,7 +558,7 @@ transformed <span class="syntax-operator">=</span> encoder<span class="syntax-op
 <li>Swap <code>LinearRegression</code> for <code>Ridge</code> and compare test scores.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; the scikit-learn estimator contract and leakage-safe pipelines; use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.</p>
-<ol>
+<ol start="2">
 <li>Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; the scikit-learn estimator contract and leakage-safe pipelines; print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.</p>
@@ -570,19 +570,19 @@ transformed <span class="syntax-operator">=</span> encoder<span class="syntax-op
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make preprocessing and estimation one fitted object. Data boundaries, feature names, and unknown-category behavior are part of the model contract.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Leakage prediction:</strong> Predict how cross-validation scores can change when a scaler is fit on the complete dataset before <code>cross_val_score</code>, then explain why the code still runs without warning. <strong>Progressive hint:</strong> The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold&#x27;s training rows.</li>
 </ol>
 <p><strong>Verify:</strong> Leakage prediction; on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.</p>
-<ol>
+<ol start="4">
 <li><strong>Mixed-type implementation:</strong> Build a <code>ColumnTransformer</code> for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value. <strong>Progressive hint:</strong> Use separate nested pipelines and <code>handle_unknown=&#x27;ignore&#x27;</code>; keep column lists explicit so schema drift is visible.</li>
 </ol>
 <p><strong>Verify:</strong> Mixed-type implementation; fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.</p>
-<ol>
+<ol start="5">
 <li><strong>Unknown-category debugging:</strong> Fit on regions <code>north</code> and <code>south</code>, then predict a row with region <code>west</code>. Compare <code>OneHotEncoder</code> default behavior with <code>handle_unknown=&#x27;ignore&#x27;</code> and explain the resulting representation. <strong>Progressive hint:</strong> The default raises on an unseen category. Ignore maps the unknown to all zeros for that feature block, which is operationally safe but lossy.</li>
 </ol>
 <p><strong>Verify:</strong> Unknown-category debugging; capture the default OneHotEncoder unknown-category ValueError for region=&#x27;west&#x27;; with handle_unknown=&#x27;ignore&#x27;, assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.</p>
-<ol>
+<ol start="6">
 <li><strong>Inspection and schema contract:</strong> After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order. <strong>Progressive hint:</strong> Use <code>get_feature_names_out()</code> from the fitted ColumnTransformer. Select by column name rather than trusting an incoming positional order.</li>
 </ol>
 <p><strong>Verify:</strong> Inspection and schema contract; print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.</p>
@@ -798,7 +798,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Swap <code>LinearRegression</code> for <code>Ridge</code> and compare test scores.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — the scikit-learn estimator contract and leakage-safe pipelines — use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.</p>
-<ol>
+<ol start="2">
 <li>Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — the scikit-learn estimator contract and leakage-safe pipelines — print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.</p>
@@ -810,19 +810,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make preprocessing and estimation one fitted object. Data boundaries, feature names, and unknown-category behavior are part of the model contract.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="3">
 <li><strong>Leakage prediction:</strong> Predict how cross-validation scores can change when a scaler is fit on the complete dataset before <code>cross_val_score</code>, then explain why the code still runs without warning. <strong>Progressive hint:</strong> The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold&#x27;s training rows.</li>
 </ol>
 <p><strong>Verify:</strong> Leakage prediction — on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.</p>
-<ol>
+<ol start="4">
 <li><strong>Mixed-type implementation:</strong> Build a <code>ColumnTransformer</code> for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value. <strong>Progressive hint:</strong> Use separate nested pipelines and <code>handle_unknown=&#x27;ignore&#x27;</code>; keep column lists explicit so schema drift is visible.</li>
 </ol>
 <p><strong>Verify:</strong> Mixed-type implementation — fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.</p>
-<ol>
+<ol start="5">
 <li><strong>Unknown-category debugging:</strong> Fit on regions <code>north</code> and <code>south</code>, then predict a row with region <code>west</code>. Compare <code>OneHotEncoder</code> default behavior with <code>handle_unknown=&#x27;ignore&#x27;</code> and explain the resulting representation. <strong>Progressive hint:</strong> The default raises on an unseen category. Ignore maps the unknown to all zeros for that feature block, which is operationally safe but lossy.</li>
 </ol>
 <p><strong>Verify:</strong> Unknown-category debugging — capture the default OneHotEncoder unknown-category ValueError for region=&#x27;west&#x27;; with handle_unknown=&#x27;ignore&#x27;, assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.</p>
-<ol>
+<ol start="6">
 <li><strong>Inspection and schema contract:</strong> After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order. <strong>Progressive hint:</strong> Use <code>get_feature_names_out()</code> from the fitted ColumnTransformer. Select by column name rather than trusting an incoming positional order.</li>
 </ol>
 <p><strong>Verify:</strong> Inspection and schema contract — print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.</p>

@@ -246,19 +246,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Predict and explain.</strong> State every precondition needed by from_raw_parts.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Guided modification.</strong> Reduce the borrowed length while retaining valid initialized storage.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Independent construction.</strong> Write a safe wrapper specification before considering an unsafe implementation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a defect.</strong> Diagnose returning a pointer after its owner is dropped.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Boundary evidence.</strong> Review zero-length and alignment rules without executing undefined behavior.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer and justify.</strong> Design an FFI ownership document stating allocation, release, encoding and error conventions.</li>
 </ol>
 <p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>

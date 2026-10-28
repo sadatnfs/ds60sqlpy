@@ -124,7 +124,7 @@ def _verified_answer(tutor: TutorAdapter, index: int) -> str:
         assert "checkpoint" in guide and "transaction" in guide
         assert "solutions/" in tutor.prompt(lesson_id)
         return lesson_id
-    lesson_id = _find(tutor, "group time", "python")
+    lesson_id = _find(tutor, "group time evaluation", "python")
     assert lesson_id in _route_ids(tutor, "machine-learning")
     guide = _guide(tutor, lesson_id).lower()
     assert "held-out groups" in guide and "forward time windows" in guide

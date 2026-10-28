@@ -404,12 +404,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day04_loops_comprehensions_generators.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day04_loops_comprehensions_generators.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -496,16 +496,16 @@ valid_squares <span class="syntax-operator">=</span> <span class="syntax-punctua
 <ol>
 <li>Start with <code>numbers = [-3, -1, 0, 2, 5]</code>. Write an ordinary loop that appends the <strong>squares of strictly positive values</strong> to <code>positive_squares</code>, then write an equivalent list comprehension named <code>compact_squares</code>. <strong>Expected result:</strong> both are <code>[4, 25]</code>. <strong>Constraints:</strong> do not mutate <code>numbers</code>, and keep the filter (<code>&gt; 0</code>) distinct from the transformation (<code>value ** 2</code>). <strong>Verify:</strong> assert the two results are equal and the input is unchanged.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Implement <code>evens_through(limit)</code> as a generator that yields even integers from <code>0</code> through <code>limit</code> <strong>inclusive</strong>. <strong>Inputs to verify:</strong> <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>. <strong>Expected results:</strong> <code>[]</code>, <code>[0]</code>, <code>[0]</code>, <code>[0, 2]</code>, and <code>[0, 2, 4, 6]</code>. <strong>Constraints:</strong> use <code>yield</code>, return no stored list, and document the inclusive endpoint. <strong>Verify:</strong> Assert the exact five expected lists for limits <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>; also confirm <code>inspect.isgenerator(evens_through(2))</code> is true.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>For <code>items = [&#x27;red&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;, &#x27;green&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;]</code>, build a frequency mapping whose expected value is <code>{&#x27;red&#x27;: 3, &#x27;blue&#x27;: 2, &#x27;green&#x27;: 1}</code>. <strong>First:</strong> implement an explicit one-pass loop with <code>dict.get</code>. <strong>Then:</strong> compare it with <code>collections.Counter</code>. <strong>Constraint:</strong> do not repeatedly call <code>items.count</code> in production code. <strong>Verify:</strong> assert both mappings agree and explain their time-cost difference.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> Create a generator expression, consume one item with <code>next</code>, then convert the rest to a list. Predict what remains and why. <strong>Progressive hint:</strong> Iterators remember their current position and are usually one-shot. <strong>Verify:</strong> Assert the first consumed square is <code>0</code>, the remaining list is <code>[1, 4, 9]</code>, and a third pass is empty; explain the saved iterator position.</li>
 <li><strong>Tracing:</strong> Trace <code>[n * 10 for n in range(6) if n % 2]</code> one input at a time. <strong>Progressive hint:</strong> Evaluate the filter before the output expression. <strong>Verify:</strong> Build a six-row trace for inputs <code>0..5</code> containing filter result and optional output; confirm the final list is <code>[10, 30, 50]</code>.</li>
 <li><strong>Implementation:</strong> Implement <code>batched(items, size)</code> yielding lists of at most <code>size</code>, including a final partial batch. <strong>Progressive hint:</strong> Accumulate, yield when full, then handle leftovers after the loop. <strong>Verify:</strong> Assert <code>list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]</code>, empty input yields no batches, and size <code>0</code> raises.</li>
@@ -659,16 +659,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Start with <code>numbers = [-3, -1, 0, 2, 5]</code>. Write an ordinary loop that appends the <strong>squares of strictly positive values</strong> to <code>positive_squares</code>, then write an equivalent list comprehension named <code>compact_squares</code>. <strong>Expected result:</strong> both are <code>[4, 25]</code>. <strong>Constraints:</strong> do not mutate <code>numbers</code>, and keep the filter (<code>&gt; 0</code>) distinct from the transformation (<code>value ** 2</code>). <strong>Verify:</strong> assert the two results are equal and the input is unchanged.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Implement <code>evens_through(limit)</code> as a generator that yields even integers from <code>0</code> through <code>limit</code> <strong>inclusive</strong>. <strong>Inputs to verify:</strong> <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>. <strong>Expected results:</strong> <code>[]</code>, <code>[0]</code>, <code>[0]</code>, <code>[0, 2]</code>, and <code>[0, 2, 4, 6]</code>. <strong>Constraints:</strong> use <code>yield</code>, return no stored list, and document the inclusive endpoint. <strong>Verify:</strong> Assert the exact five expected lists for limits <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>; also confirm <code>inspect.isgenerator(evens_through(2))</code> is true.</li>
 </ol>
-<ol>
+<ol start="3">
 <li>For <code>items = [&#x27;red&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;, &#x27;green&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;]</code>, build a frequency mapping whose expected value is <code>{&#x27;red&#x27;: 3, &#x27;blue&#x27;: 2, &#x27;green&#x27;: 1}</code>. <strong>First:</strong> implement an explicit one-pass loop with <code>dict.get</code>. <strong>Then:</strong> compare it with <code>collections.Counter</code>. <strong>Constraint:</strong> do not repeatedly call <code>items.count</code> in production code. <strong>Verify:</strong> assert both mappings agree and explain their time-cost difference.</li>
 </ol>
 <h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="4">
 <li><strong>Prediction:</strong> Create a generator expression, consume one item with <code>next</code>, then convert the rest to a list. Predict what remains and why. <strong>Progressive hint:</strong> Iterators remember their current position and are usually one-shot. <strong>Verify:</strong> Assert the first consumed square is <code>0</code>, the remaining list is <code>[1, 4, 9]</code>, and a third pass is empty; explain the saved iterator position.</li>
 <li><strong>Tracing:</strong> Trace <code>[n * 10 for n in range(6) if n % 2]</code> one input at a time. <strong>Progressive hint:</strong> Evaluate the filter before the output expression. <strong>Verify:</strong> Build a six-row trace for inputs <code>0..5</code> containing filter result and optional output; confirm the final list is <code>[10, 30, 50]</code>.</li>
 <li><strong>Implementation:</strong> Implement <code>batched(items, size)</code> yielding lists of at most <code>size</code>, including a final partial batch. <strong>Progressive hint:</strong> Accumulate, yield when full, then handle leftovers after the loop. <strong>Verify:</strong> Assert <code>list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]</code>, empty input yields no batches, and size <code>0</code> raises.</li>

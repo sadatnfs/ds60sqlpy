@@ -1,0 +1,24 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-027", "apache-006"],
+  "concepts": [
+    "task attempts",
+    "retry policy",
+    "idempotent partition writes",
+    "atomic replacement"
+  ],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Airflow task concepts",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/core-concepts/tasks.html"
+    ],
+    [
+      "Airflow best practices",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/best-practices.html"
+    ]
+  ]
+}

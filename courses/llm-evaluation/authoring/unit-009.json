@@ -1,0 +1,64 @@
+{
+  "number": 9,
+  "title": "Claim support, citations and evidence provenance",
+  "concepts": [
+    "citation precision",
+    "claim coverage",
+    "entailment labels",
+    "source version",
+    "access policy"
+  ],
+  "outcome": "Separate claim truth, citation support, evidence coverage and source availability using an auditable claim-document relation.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-008", "eval-003"],
+  "exercises": [
+    {
+      "title": "One supported claim",
+      "task": "Cite only c1 correctly among three eligible claims.",
+      "expected": "Precision 1, coverage 1/3.",
+      "hint": "The link and claim denominators differ.",
+      "answer": "Perfect precision does not imply that the full answer has adequate evidence coverage."
+    },
+    {
+      "title": "No citations",
+      "task": "Evaluate an answer with one eligible claim and no links.",
+      "expected": "Precision is missing; coverage is 0.",
+      "hint": "Distinguish an empty link denominator from absent claim support.",
+      "answer": "There are no links to judge, but no eligible claim has supported evidence."
+    },
+    {
+      "title": "Unknown support relation",
+      "task": "Add a link with no adjudicated support label.",
+      "expected": "The helper rejects it.",
+      "hint": "An unjudged pair is not a negative or positive label.",
+      "answer": "Retain missingness and acquire a label or use an explicit assessment-sampling protocol."
+    },
+    {
+      "title": "Duplicate a citation",
+      "task": "Repeat an identical claim-document link.",
+      "expected": "The helper rejects it.",
+      "hint": "Count distinct evidence relations.",
+      "answer": "Duplicated markup should not increase the apparent amount of evidence."
+    },
+    {
+      "title": "Use a newer document",
+      "task": "Evaluate a day 10 answer with a day 12 document.",
+      "expected": "That version is ineligible for the historical reconstruction.",
+      "hint": "Use availability time as well as content.",
+      "answer": "A later correction cannot be treated as information the original system had at decision time."
+    },
+    {
+      "title": "Disentangle truth and support",
+      "task": "Construct a claim that accurately quotes an erroneous source.",
+      "expected": "Support can be true while truth is false.",
+      "hint": "Audit source authority and the task ground truth separately.",
+      "answer": "Citation evaluation measures a relation to supplied evidence. It does not establish that all evidence is correct or current."
+    }
+  ],
+  "sources": [
+    ["Citation evaluation research", "https://arxiv.org/abs/2305.14627"],
+    ["Existing provenance and retrieval route", "../../../courses/llm-applied/README.md"]
+  ]
+}

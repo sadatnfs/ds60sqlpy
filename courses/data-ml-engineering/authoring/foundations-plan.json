@@ -1,0 +1,506 @@
+[
+  {
+    "id": "dme-001",
+    "title": "From a record to an engineering decision",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Trace a small record-to-metric pipeline and define its observable contract",
+      "Reject a plausible but invalid record without silently changing the population"
+    ]
+  },
+  {
+    "id": "dme-002",
+    "title": "Files, paths, processes and the Linux container boundary",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Read and write owned UTF-8 files through explicit paths",
+      "Separate successful output from a child process that fails on stderr"
+    ]
+  },
+  {
+    "id": "dme-003",
+    "title": "Values, units, missingness and clocks",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Normalize aware timestamps and retain the meaning of missing values",
+      "Expose a unit or timezone mismatch that otherwise produces valid-looking numbers"
+    ]
+  },
+  {
+    "id": "dme-004",
+    "title": "SQL, row grain, keys and relational reasoning",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Execute real DuckDB joins and grouped metrics with an independent row oracle",
+      "Detect duplicate-dimension fanout and a changed COUNT denominator"
+    ]
+  },
+  {
+    "id": "dme-005",
+    "title": "Python functions, collections and state boundaries",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Build a pure transformation with explicit inputs and outputs",
+      "Diagnose a mutable-state or exhausted-iterator mistake"
+    ]
+  },
+  {
+    "id": "dme-006",
+    "title": "Tests, invariants and evidence that can falsify a claim",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Check hand-derived outputs, boundaries and changed inputs",
+      "Show why a plausible invariant alone can accept an incorrect transformation"
+    ]
+  },
+  {
+    "id": "dme-007",
+    "title": "Structural schemas and semantic data contracts",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Validate a strict typed input and a compatible additive schema change",
+      "Reject a units or identity change that a basic type check cannot detect"
+    ]
+  },
+  {
+    "id": "dme-008",
+    "title": "Source, dependency and data identities for reproducible work",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Build a reviewable source/data/configuration hash manifest",
+      "Invalidate a claimed result when an input or transformation identity changes"
+    ]
+  },
+  {
+    "id": "dme-009",
+    "title": "File ingestion, manifests and resumable delivery",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Ingest a declared CSV/JSON delivery with checksums and row reconciliation",
+      "Reject a truncated or repeated delivery without publishing duplicate data"
+    ]
+  },
+  {
+    "id": "dme-010",
+    "title": "HTTP APIs, pagination, retries and idempotency",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Exercise an actual local ASGI pagination contract without network access",
+      "Compare retry-safe request identity with a duplicated non-idempotent action"
+    ]
+  },
+  {
+    "id": "dme-011",
+    "title": "Change-data capture events and ordered application",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Apply synthetic insert/update/delete events to a real local SQLite table",
+      "Reject stale versions and replay safely; distinguish this from capturing a database WAL"
+    ]
+  },
+  {
+    "id": "dme-012",
+    "title": "Facts, dimensions and slowly changing business meaning",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Build and query a real dimensional product at a declared grain",
+      "Resolve a historical dimension interval instead of using the current value"
+    ]
+  },
+  {
+    "id": "dme-013",
+    "title": "JSON, CSV, Parquet and Arrow interoperability",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Round-trip typed columnar records and inspect actual Arrow/Parquet schemas",
+      "Show the information lost by an unqualified text-format round-trip"
+    ]
+  },
+  {
+    "id": "dme-014",
+    "title": "Event time, availability time and late-known facts",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Select only information known at a decision cutoff",
+      "Separate a late arrival from an invalid future observation and report coverage"
+    ]
+  },
+  {
+    "id": "dme-015",
+    "title": "Atomic publication and consistent consumer views",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Publish a checked local manifest through an atomic pointer replacement",
+      "Fail before publication on partial writes or corrupted artifact bytes"
+    ]
+  },
+  {
+    "id": "dme-016",
+    "title": "Data quality, deduplication and explicit quarantine",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Retain valid and rejected Polars records with concrete reason codes",
+      "Handle conflicting duplicate identities without arbitrary row loss"
+    ]
+  },
+  {
+    "id": "dme-017",
+    "title": "Choosing and comparing local query engines",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Compare actual SQLite, DuckDB and Polars results under one contract",
+      "Explain a null, type or ordering difference without treating syntax parity as semantic parity"
+    ]
+  },
+  {
+    "id": "dme-018",
+    "title": "Columnar layout, partition pruning and bounded reads",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Inspect real partitioned Parquet fragments selected by a predicate",
+      "Compare small-file or partition-layout changes while preserving the same answer"
+    ]
+  },
+  {
+    "id": "dme-019",
+    "title": "Spark partitions, shuffles and skew",
+    "runtime_profile": "spark-local-python",
+    "worked_cases": [
+      "Execute and inspect a real Spark aggregation and its physical shuffle boundary",
+      "Use a two-stage hot-key strategy and reconcile it with an independent result"
+    ]
+  },
+  {
+    "id": "dme-020",
+    "title": "Orchestration, dependencies and safe retries",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Execute a bounded local DAG with recorded completed artifact identities",
+      "Reconcile an uncertain outcome before retrying; label the scheduler as a mechanism model"
+    ]
+  },
+  {
+    "id": "dme-021",
+    "title": "Transactions, idempotency and the outbox pattern",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Commit a state change and an outbox event in one actual SQLite transaction",
+      "Replay delivery without applying the same identified effect twice"
+    ]
+  },
+  {
+    "id": "dme-022",
+    "title": "Backfills, overlapping windows and correction policies",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Rebuild a declared half-open historical interval and reconcile it",
+      "Repair a late correction without overwriting a newer accepted partition"
+    ]
+  },
+  {
+    "id": "dme-023",
+    "title": "Stream windows, watermarks and state lifetime",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Trace a bounded event-time window mechanism under out-of-order arrivals",
+      "Account for late side outputs and deliberate state expiry without claiming a Flink runtime"
+    ]
+  },
+  {
+    "id": "dme-024",
+    "title": "Checkpoints, replay and state-schema evolution",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Restore a versioned checkpoint and compare with a full replay oracle",
+      "Reject incompatible or corrupted state before resuming publication"
+    ]
+  },
+  {
+    "id": "dme-025",
+    "title": "Object storage, object identity and conditional updates",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Model versioned object publication and conditional pointer updates explicitly",
+      "Demonstrate a stale-writer conflict; link the actual object-store workshop separately"
+    ]
+  },
+  {
+    "id": "dme-026",
+    "title": "Lake file organization, manifests and evolution",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Query an actual versioned Parquet manifest with DuckDB",
+      "Evolve a field and verify old/new reader behavior against declared compatibility rules"
+    ]
+  },
+  {
+    "id": "dme-027",
+    "title": "Table formats: snapshots, transactions and concurrency",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Investigate snapshot and delete invariants using real local files and a clearly labelled table-format model",
+      "Compare conflicting writers and explain the additional guarantees required from Iceberg, Delta or Hudi"
+    ]
+  },
+  {
+    "id": "dme-028",
+    "title": "Catalogs, discovery, ownership and access decisions",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Query a real local metadata catalog and resolve a versioned dataset contract",
+      "Detect an unauthorized or stale publication; distinguish application policy from external IAM"
+    ]
+  },
+  {
+    "id": "dme-029",
+    "title": "Cassandra: access paths, partition keys and consistency",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Derive query-shaped partition keys and quantify a hot-partition case",
+      "Trace version/tombstone and consistency choices without pretending the pad runs Cassandra"
+    ]
+  },
+  {
+    "id": "dme-030",
+    "title": "Pinot and low-latency analytical serving",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Compute a query oracle and choose a compatible ingestion grain",
+      "Contrast append and upsert interpretation; reserve actual Pinot execution for its owned service workshop"
+    ]
+  },
+  {
+    "id": "dme-031",
+    "title": "Lineage, provenance and reproducible investigations",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Trace an actual artifact dependency graph using content identities",
+      "Find the earliest invalidated descendant after an input or transformation changes"
+    ]
+  },
+  {
+    "id": "dme-032",
+    "title": "Governance, minimization, retention and review",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Enforce a declared synthetic access/retention policy and preserve an audit record",
+      "Show how pseudonymization or aggregate output can still retain identifying information"
+    ]
+  },
+  {
+    "id": "dme-033",
+    "title": "Frame an ML decision and establish a baseline",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Train and evaluate a real baseline for an explicitly defined synthetic decision",
+      "Contrast aggregate accuracy with missed-positive cost and cohort coverage"
+    ]
+  },
+  {
+    "id": "dme-034",
+    "title": "Point-in-time feature retrieval and the feature-store boundary",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Use actual local Feast retrieval against a two-clock independent oracle",
+      "Preserve the request population when unknown, expired or late-known features are missing"
+    ]
+  },
+  {
+    "id": "dme-035",
+    "title": "Feature quality and fitted transformations",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Fit a real preprocessing pipeline on training rows only",
+      "Handle missing values and unseen categories without leaking evaluation information"
+    ]
+  },
+  {
+    "id": "dme-036",
+    "title": "Train/serve consistency and safe model interfaces",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Compare fitted-pipeline predictions with a reviewed JSON inference interface",
+      "Reject changed feature order, units or schema before scoring"
+    ]
+  },
+  {
+    "id": "dme-037",
+    "title": "Reproducible training, snapshots and computation state",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Repeat a seeded training run with declared data/configuration identities",
+      "Separate numerical tolerance from false claims of cross-platform byte identity"
+    ]
+  },
+  {
+    "id": "dme-038",
+    "title": "Temporal evaluation, calibration and decision uncertainty",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Evaluate a realistic future or grouped cohort with calibrated metrics",
+      "Contrast immature labels or repeated-entity leakage with the proper evaluation population"
+    ]
+  },
+  {
+    "id": "dme-039",
+    "title": "Experiments, MLflow registry and acceptance decisions",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Create and read back real local MLflow runs and model versions",
+      "Withhold activation when the declared evidence gate fails, even if registration succeeded"
+    ]
+  },
+  {
+    "id": "dme-040",
+    "title": "Artifacts, integrity and the software supply chain",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Validate a bounded model manifest and its exact content hashes",
+      "Reject tampered or incompatible artifacts; distinguish integrity from source trust"
+    ]
+  },
+  {
+    "id": "dme-041",
+    "title": "Batch and online inference as different contracts",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Compare real batch predictions with a local ASGI request contract",
+      "Reject stale or invalid requests while keeping model/version identity explicit"
+    ]
+  },
+  {
+    "id": "dme-042",
+    "title": "HTTP serving, concurrency and cancellation boundaries",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Exercise a bounded real ASGI contract and resource cleanup",
+      "Reconcile a request whose outcome is unknown instead of blindly replaying it"
+    ]
+  },
+  {
+    "id": "dme-043",
+    "title": "Observability, SLOs and error budgets",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Compute request-based service indicators with explicit eligible denominators",
+      "Detect a burst and contrast fast versus slow burn windows using declared observations"
+    ]
+  },
+  {
+    "id": "dme-044",
+    "title": "Data drift, model quality and delayed labels",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Measure a changed input distribution without inferring quality loss automatically",
+      "Evaluate matured outcome cohorts and expose missing-label coverage"
+    ]
+  },
+  {
+    "id": "dme-045",
+    "title": "Security boundaries, secrets and shared systems",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Enforce a synthetic resource-authorization contract and safe request validation",
+      "Reject unauthorized access or an unsafe path while stating the limits of a local workshop"
+    ]
+  },
+  {
+    "id": "dme-046",
+    "title": "Capacity, latency and cost at the system boundary",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Compute a bounded workload/capacity model and check its assumptions",
+      "Compare burst behavior or scan amplification with average-based estimates and illustrative cost units"
+    ]
+  },
+  {
+    "id": "dme-047",
+    "title": "Incidents, retries, failure domains and degraded service",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Trace a declared circuit-breaker/retry mechanism with bounded probes",
+      "Quantify retry amplification and preserve a controlled fallback after failure"
+    ]
+  },
+  {
+    "id": "dme-048",
+    "title": "Delivery, compatibility and rollback",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Perform a compatible local schema migration and accepted-version switch",
+      "Roll back a rejected candidate while retaining the prior consumer contract"
+    ]
+  },
+  {
+    "id": "dme-049",
+    "title": "Capstone: a validated local data product",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Connect ingestion, quarantine, real analytical transformation and an accepted publication manifest",
+      "Withhold publication after a deliberate contract violation and retain diagnostic evidence"
+    ]
+  },
+  {
+    "id": "dme-050",
+    "title": "Capstone: late data, replay and backfill repair",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Reconcile identified streaming-style updates with a full batch recomputation",
+      "Restore a checkpoint and apply a late correction without duplicate effects"
+    ]
+  },
+  {
+    "id": "dme-051",
+    "title": "Capstone: features, training, registry and inference",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Connect actual Feast, fitted training, MLflow evidence and local inference",
+      "Reject a changed feature/model contract before activation and publish a compact model card"
+    ]
+  },
+  {
+    "id": "dme-052",
+    "title": "Backup, restore and recovery objectives",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Create and restore an actual consistent SQLite backup with checked evidence",
+      "Measure the declared recovery gap and reject an incompatible or corrupted backup"
+    ]
+  },
+  {
+    "id": "dme-053",
+    "title": "Migration between schemas, formats and consumers",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Maintain simultaneous compatible readers during a real local migration",
+      "Reconcile a failed cutover and preserve the accepted consumer version"
+    ]
+  },
+  {
+    "id": "dme-054",
+    "title": "Operational drill: detection, rollback and learning",
+    "runtime_profile": "data-engineering",
+    "worked_cases": [
+      "Diagnose a bounded fault using actual recorded workflow/service evidence",
+      "Recover an accepted state and document which external guarantees remain untested"
+    ]
+  },
+  {
+    "id": "dme-055",
+    "title": "System-design interviews grounded in constraints",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Compare two defensible designs using explicit workload and correctness requirements",
+      "Identify the missing evidence that would change a design decision instead of reciting tool names"
+    ]
+  },
+  {
+    "id": "dme-056",
+    "title": "An evidence-backed engineering portfolio",
+    "runtime_profile": "python-core",
+    "worked_cases": [
+      "Assemble a reproducible local investigation with source, input, test and runtime evidence",
+      "Invalidate an unsupported claim and distinguish local success from production qualification"
+    ]
+  }
+]

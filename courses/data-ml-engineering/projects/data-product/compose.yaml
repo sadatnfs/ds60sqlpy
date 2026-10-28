@@ -1,0 +1,89 @@
+x-runtime: &runtime
+  image: ${DS60_PRODUCT_IMAGE_ID:?Use ./run.sh start first}
+  pull_policy: never
+  init: true
+  user: "${DS60_PRODUCT_UID}:${DS60_PRODUCT_GID}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  cpus: 2
+  mem_limit: 2g
+  tmpfs:
+    - /tmp:rw,nosuid,noexec,mode=1777,size=128m
+  working_dir: /opt
+  environment: &environment
+    PYTHONPATH: /opt:/opt/worker/src
+    DS60_PRODUCT_OWNER: ${DS60_PRODUCT_OWNER}
+    DS60_PRODUCT_IMAGE_ID: ${DS60_PRODUCT_IMAGE_ID}
+    DS60_PRODUCT_PUBLIC_ORIGIN: "http://127.0.0.1:${DS60_PRODUCT_PORT}"
+    DS60_PRODUCT_TOKEN_FILE: /state/private/token
+    DS60_PRODUCT_RAW_DIR: /state/raw
+    DS60_PRODUCT_PUBLISHED_DIR: /state/published
+    DS60_PRODUCT_CONTROL_DIR: /state/control
+    DS60_PRODUCT_PRIVATE_DIR: /state/private
+    POLARS_MAX_THREADS: "2"
+    OMP_NUM_THREADS: "2"
+    OPENBLAS_NUM_THREADS: "2"
+    DO_NOT_TRACK: "true"
+  labels:
+    ds60.workshop.kind: data-product
+    ds60.workshop.owner: ${DS60_PRODUCT_OWNER}
+
+services:
+  api:
+    <<: *runtime
+    entrypoint: [python, -m, product.server]
+    networks: [ingress, private]
+    ports:
+      - "127.0.0.1:${DS60_PRODUCT_PORT}:8080"
+    volumes:
+      - ./product:/opt/product:ro
+      - ./.workshop/raw:/state/raw
+      - ./.workshop/published:/state/published:ro
+      - ./.workshop/private:/state/private:ro
+    healthcheck:
+      test:
+        [
+          CMD,
+          python,
+          -c,
+          "import os,urllib.request; origin=os.environ['DS60_PRODUCT_PUBLIC_ORIGIN']; req=urllib.request.Request('http://127.0.0.1:8080/healthz',headers={'Host':origin.removeprefix('http://')}); response=urllib.request.urlopen(req,timeout=3); assert response.status==200",
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+  publisher:
+    <<: *runtime
+    profiles: [tools]
+    network_mode: none
+    entrypoint: [python, -m, product.tool]
+    volumes:
+      - ./product:/opt/product:ro
+      - ./.workshop/raw:/state/raw:ro
+      - ./.workshop/published:/state/published
+      - ./.workshop/control:/state/control
+  client:
+    <<: *runtime
+    profiles: [tools]
+    networks: [private]
+    entrypoint: [python, -m, product.client]
+    environment:
+      <<: *environment
+      DS60_PRODUCT_BASE_URL: http://api:8080
+    volumes:
+      - ./product:/opt/product:ro
+      - ./fixtures:/fixtures:ro
+      - ./.workshop/private:/state/private:ro
+
+networks:
+  ingress:
+    labels:
+      ds60.workshop.kind: data-product
+      ds60.workshop.owner: ${DS60_PRODUCT_OWNER}
+  private:
+    internal: true
+    labels:
+      ds60.workshop.kind: data-product
+      ds60.workshop.owner: ${DS60_PRODUCT_OWNER}

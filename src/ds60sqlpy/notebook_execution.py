@@ -193,7 +193,22 @@ def execute_python_file(path: Path, runtime_directory: Path) -> int:
     original submitted-source line for the outer controller to range-check.
     """
 
+    # Worker launch arguments identify private source/output files; they are
+    # not learner program arguments. Give every execution its own argv list,
+    # then restore the exact caller object and contents even if code rebinds it.
     path = Path(path).resolve()
+    previous_argv = sys.argv
+    previous_arguments = previous_argv[:]
+    sys.argv = [str(path)]
+    try:
+        return _execute_python_file(path, runtime_directory)
+    finally:
+        previous_argv[:] = previous_arguments
+        sys.argv = previous_argv
+
+
+def _execute_python_file(path: Path, runtime_directory: Path) -> int:
+    """Execute the selected source with the public helper's isolated argv."""
     runtime_directory = Path(runtime_directory)
     with tokenize.open(path) as handle:
         source = handle.read()
@@ -224,7 +239,6 @@ def execute_python_file(path: Path, runtime_directory: Path) -> int:
     previous_directory = os.environ.get("IPYTHONDIR")
     os.environ["IPYTHONDIR"] = str(ipython_directory.resolve())
     shell: Any = None
-    previous_argv = sys.argv[:]
     try:
         try:
             import IPython
@@ -269,7 +283,6 @@ def execute_python_file(path: Path, runtime_directory: Path) -> int:
             shell.enable_gui(argument.strip() or None)
 
         shell.register_magic_function(headless_gui_magic, "line", "gui")
-        sys.argv[:] = [str(path), *previous_argv[1:]]
         sources: dict[str, PythonCell] = {}
         original_cache = shell.compile.cache
         current_cell = cells[0]
@@ -302,7 +315,6 @@ def execute_python_file(path: Path, runtime_directory: Path) -> int:
                 return status
         return 0
     finally:
-        sys.argv[:] = previous_argv
         if previous_directory is None:
             os.environ.pop("IPYTHONDIR", None)
         else:

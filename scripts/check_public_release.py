@@ -31,6 +31,7 @@ IGNORED_DIRECTORIES = frozenset(
         ".git",
         ".venv",
         ".learning",
+        ".workshop",
         ".classroom",
         ".serena",
         ".cache",

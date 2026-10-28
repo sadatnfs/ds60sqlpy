@@ -253,19 +253,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Observe virtual identity.</strong> Start a virtual thread that records isVirtual and join it. <strong>Expected:</strong> true and terminated. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with true and terminated.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Use a scoped virtual executor.</strong> Submit four square calculations and retrieve their results with timeouts. <strong>Expected:</strong> 1,4,9,16. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with 1,4,9,16.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Limit a scarce resource with a semaphore.</strong> Run six tasks but allow only two inside a gated resource section. <strong>Expected:</strong> maximum active count2;all six complete. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with maximum active count2;all six complete.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Preserve a CPU calculation contract.</strong> Compare a sequential sum1..1000 with four partitioned virtual tasks. <strong>Expected:</strong> both500500;no speed claim. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with both500500;no speed claim.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Cancel a blocked virtual task.</strong> Interrupt a virtual task waiting on a latch and observe its cleanup signal. <strong>Expected:</strong> Future cancelled;task exits cooperatively. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with Future cancelled;task exits cooperatively.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep a blocking wait outside a monitor.</strong> Read a state snapshot inside a synchronized block,then wait on a latch after leaving it. <strong>Expected:</strong> caller can acquire the monitor while the worker is waiting. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with caller can acquire the monitor while the worker is waiting.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

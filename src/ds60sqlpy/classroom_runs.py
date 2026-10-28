@@ -133,10 +133,14 @@ class ClassroomRunStore:
         return source, hashlib.sha256(source.encode("utf-8")).hexdigest()
 
     @staticmethod
-    def _result(result: object, language: str, mode: str, source_hash: str) -> dict[str, Any]:
+    def _result(
+        result: object, language: str, mode: str, source_hash: str, *, saved: bool = False
+    ) -> dict[str, Any]:
         if not isinstance(result, dict):
             raise ValueError("A completed run must have a result object.")
         _json_tree(result)
+        if "withheld_artifacts" in result:
+            raise ValueError("Saved results cannot contain derived figure-readback metadata.")
         if result.get("language") != RUNNERS[language].executor:
             raise ValueError("Run result language does not match its history context.")
         if (
@@ -183,10 +187,15 @@ class ClassroomRunStore:
                 raise ValueError("A run figure has invalid base64 content.") from exc
             if len(data) > MAX_FIGURE_BYTES or not data.startswith(b"\x89PNG\r\n\x1a\n"):
                 raise ValueError("A run figure has invalid PNG content or exceeds its size limit.")
+        visible: list[dict[str, Any]] = []
+        withheld: list[dict[str, Any]] = []
         if "artifacts" in result:
-            from ds60sqlpy.plot_artifacts import validate_artifacts
+            from ds60sqlpy.plot_artifacts import read_saved_artifacts, validate_artifacts
 
-            validate_artifacts(result["artifacts"])
+            if saved:
+                visible, withheld = read_saved_artifacts(result["artifacts"])
+            else:
+                validate_artifacts(result["artifacts"])
         metadata = {
             key: value for key, value in result.items() if key not in {"figures", "artifacts"}
         }
@@ -197,7 +206,13 @@ class ClassroomRunStore:
             raise ValueError("Run result exceeds its stored size limit.")
         # Snapshot callers' mutable lists/dicts so later UI annotation cannot
         # rewrite the receipt returned by this operation or written to disk.
-        return dict(json.loads(encoded))
+        snapshot: dict[str, Any] = json.loads(encoded)
+        # Original receipt budgets above apply before the bounded display-only
+        # metadata is added. Never write this projection back to its source file.
+        if saved and withheld:
+            snapshot["artifacts"] = visible
+            snapshot["withheld_artifacts"] = withheld
+        return snapshot
 
     @staticmethod
     def _metadata(receipt: dict[str, Any]) -> dict[str, Any]:
@@ -304,7 +319,7 @@ class ClassroomRunStore:
         _, fingerprint = self._source(receipt["source"])
         if receipt["source_sha256"] != fingerprint:
             raise ValueError("Run receipt source fingerprint is inconsistent.")
-        receipt["result"] = self._result(receipt["result"], language, mode, fingerprint)
+        receipt["result"] = self._result(receipt["result"], language, mode, fingerprint, saved=True)
         return dict(receipt)
 
     def history(

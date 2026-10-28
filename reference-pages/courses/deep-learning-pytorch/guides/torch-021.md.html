@@ -260,19 +260,19 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <ol>
 <li><strong>Lookup and mark padding.</strong> Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row. <strong>Expected:</strong> embedding shape 1, 3, 2; mask True, True, False. <strong>Verify:</strong> Save the assertion results for exercise 1, including embedding shape 1, 3, 2; mask True, True, False.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Verify padding-row gradient behavior.</strong> Sum embedding outputs and backpropagate. <strong>Expected:</strong> padding row gradient zero; rows 2 and 3nonzero. <strong>Verify:</strong> Save the assertion results for exercise 2, including padding row gradient zero; rows 2 and 3nonzero.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Compare packed and valid-prefix GRU state.</strong> Use fixed GRU parameters.1 and length 2; compare packed run with the unpadded first two embeddings. <strong>Expected:</strong> final states match within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 3, including final states match within 1e-6.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose an unmasked recurrent tail.</strong> Run GRU overall three positions including zero embedding padding. <strong>Expected:</strong> final state differs from the valid-prefix state. <strong>Verify:</strong> Save the assertion results for exercise 4, including final state differs from the valid-prefix state.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Average only valid token losses.</strong> Use losses log 2, log 2, 100with the valid mask. <strong>Expected:</strong> mean log 2, unchanged by the padding loss. <strong>Verify:</strong> Save the assertion results for exercise 5, including mean log 2, unchanged by the padding loss.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject zero-length recurrent input.</strong> Attempt to pack a sequence with length 0. <strong>Expected:</strong> RuntimeError for invalid length. <strong>Verify:</strong> Save the assertion results for exercise 6, including RuntimeError for invalid length.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

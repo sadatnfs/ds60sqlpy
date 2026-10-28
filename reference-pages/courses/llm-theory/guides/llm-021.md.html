@@ -251,19 +251,19 @@ manifest<span class="syntax-operator">=</span><span class="syntax-punctuation">{
 <ol>
 <li><strong>Fingerprint exact text.</strong> Hash two identical snippets and one paraphrase in the same family. <strong>Expected:</strong> identical texts share a hash; paraphrase differs. <strong>Verify:</strong> Save the assertion results for exercise 1, including identical texts share a hash; paraphrase differs.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Assign whole families.</strong> Use documentsa,a2 inF andb inG,c inH; mapF train,G validation,H test. <strong>Expected:</strong> a and a2 both train. <strong>Verify:</strong> Save the assertion results for exercise 2, including a and a2 both train.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Audit all partition pairs.</strong> Construct family sets for train,validation,test and compare pairwise intersections. <strong>Expected:</strong> all three intersections empty. <strong>Verify:</strong> Save the assertion results for exercise 3, including all three intersections empty.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inject a known leak.</strong> Movea2 into validation and rerun the family intersection. <strong>Expected:</strong> train/validation intersectionF. <strong>Verify:</strong> Save the assertion results for exercise 4, including train/validation intersectionF.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Preserve the manifest identity.</strong> Hash canonical manifest JSON before and after computing an evaluation summary. <strong>Expected:</strong> hash unchanged. <strong>Verify:</strong> Save the assertion results for exercise 5, including hash unchanged.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Distinguish normalization policy.</strong> Compare raw hashes for red square and red square followed by a space; compare hashes after explicit stripping. <strong>Expected:</strong> raw hashes differ; stripped hashes match. <strong>Verify:</strong> Save the assertion results for exercise 6, including raw hashes differ; stripped hashes match.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

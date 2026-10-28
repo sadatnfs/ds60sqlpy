@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-53 · Project3 DWH Part2 SCD · DS60</title>
+  <title>sql-53 · Project 3 DWH Part 2 SCD · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-53</p>
-        <h1>Project3 DWH Part2 SCD</h1>
+        <h1>Project 3 DWH Part 2 SCD</h1>
         <p class="hero-copy">Applied analytics and capstones</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -404,12 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-53-data-warehouse-project-part-2-scd-type-2">Day 53: Data Warehouse Project, Part 2: SCD Type 2<a class="heading-anchor" href="#guide--day-53-data-warehouse-project-part-2-scd-type-2" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> Run and verify committed <a href="sql-52.html#guide">Day 52; star-schema warehouse</a> in the same database.</li>
-<li><strong>Artifacts:</strong> <a href="sql-53.html#learner">learner SQL</a> · <a href="sql-53.html#solution-1">solution reasoning</a> · <a href="sql-53.html#solution-2">executable solution</a></li>
-</ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-53</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -425,12 +419,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-53</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> Run and verify committed <a href="sql-52.html#guide">Day 52; star-schema warehouse</a> in the same database.</li>
+<li><strong>Artifacts:</strong> <a href="sql-53.html#learner">learner SQL</a> · <a href="sql-53.html#solution-1">solution reasoning</a> · <a href="sql-53.html#solution-2">executable solution</a></li>
+</ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is SCD Type 2, Business key, Validity interval. Its worked SQL reads or creates <code>training.customers</code>, <code>dim_customer</code>, <code>training.products</code>, <code>dim_product</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two. The first runnable example has a concrete contract: Example 1 returns one row per <code>customer_id</code>, <code>full_name</code>, and <code>country</code>, capped at 10 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code> from <code>training.customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code>. Reselect the returned key columns from <code>training.customers</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_customers <span class="syntax-keyword">AS</span>
 <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
@@ -578,7 +578,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -590,13 +590,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 53: Project 3 - Data Warehouse Design (Part 2)</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-53: Project3 DWH Part2 SCD</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-53: Project 3 DWH Part 2 SCD</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-53/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-53.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -610,6 +610,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- Topics: Slowly Changing Dimensions (Type 2) for customers/products</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example SCD Type 2 upsert for dim_customer</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumption: source-of-truth is training.customers; we detect changes by comparing attributes</span></span>
 <span class="source-line"><span class="syntax-comment">-- Steps per changed business key:</span></span>
@@ -631,6 +632,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Detect current rows that differ from source attributes</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> current_dim <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
@@ -678,6 +680,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">TRUE</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  diffs d<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Verify multiple versions per customer</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
@@ -692,6 +695,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">versions</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  customer_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- SCD Type 2 for dim_product (similar pattern)</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_products <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -705,6 +709,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  p<span class="syntax-punctuation">.</span>product_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> current_p <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">    <span class="syntax-operator">*</span></span>
@@ -750,6 +755,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">TRUE</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  diffs d<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Fact table joins should point to is_current at load time; for historical facts you would key by date to choose appropriate SCD version.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from &lt;= order_date &lt;= coalesce(valid_to,&#x27;infinity&#x27;)).</span></span>
@@ -985,7 +991,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/solutions/day53_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1012,6 +1018,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $require_day52$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dwh.dim_customer&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
@@ -1019,13 +1026,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$require_day52$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: audit metadata on both changing dimensions.</span></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_customer</span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_product</span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- A deterministic customer change effective 30 days ago.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> staged_customer_change <span class="syntax-keyword">AS</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1043,6 +1053,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> is_current<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
 <span class="source-line">  dim_customer dc</span>
 <span class="source-line"><span class="syntax-keyword">SET</span></span>
@@ -1055,6 +1066,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> dc<span class="syntax-punctuation">.</span>is_current<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> country_sk<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">,</span> updated_by<span class="syntax-punctuation">,</span> updated_at<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
@@ -1070,6 +1082,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  staged_customer_change s</span>
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_country co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>country_code <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: rebuild a fact-key mapping by choosing the dimension versions</span></span>
 <span class="source-line"><span class="syntax-comment">-- whose validity intervals contain each order date.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> fact_sales_temporal_solution <span class="syntax-keyword">AS</span></span>
@@ -1093,6 +1106,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_product dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
 <span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dp<span class="syntax-punctuation">.</span>valid_from</span>
 <span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
@@ -1111,6 +1125,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">      dim_customer</span>
 <span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">      customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_versions<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: date-grain closed intervals cannot represent two ordered changes</span></span>
 <span class="source-line"><span class="syntax-comment">-- on one date without an invalid or overlapping range. Surface that limitation.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1125,6 +1140,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  valid_from<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: each pair is compared once. Inclusive validity ranges overlap</span></span>
 <span class="source-line"><span class="syntax-comment">-- when neither ends before the other begins.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1145,6 +1161,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    version_a<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    version_b<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: replay the SAME desired state used by the first application.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Comparing to training.customers here would be wrong: Exercise 2 deliberately</span></span>
 <span class="source-line"><span class="syntax-comment">-- changed the segment only in staged_customer_change and dim_customer.</span></span>
@@ -1167,11 +1184,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>full_name</span>
 <span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>country</span>
 <span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: timestamp-effective ranges support same-day ordering, but require</span></span>
 <span class="source-line"><span class="syntax-comment">-- source effective timestamps (or a source sequence), not load time guesses.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;[2026-01-15 09:00+00,2026-01-15 12:00+00)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange <span class="syntax-keyword">AS</span> first_version<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;[2026-01-15 12:00+00,infinity)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange <span class="syntax-keyword">AS</span> second_version<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1221,8 +1240,8 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-52.html"><small>Previous lesson</small><strong>sql-52</strong><span>Project3 DWH Part1</span></a>
-        <a class="nav-card next" href="sql-54.html"><small>Next lesson</small><strong>sql-54</strong><span>Project3 DWH Part3 Aggregations</span></a>
+        <a class="nav-card" href="sql-52.html"><small>Previous lesson</small><strong>sql-52</strong><span>Project 3 DWH Part 1</span></a>
+        <a class="nav-card next" href="sql-54.html"><small>Next lesson</small><strong>sql-54</strong><span>Project 3 DWH Part 3 Aggregations</span></a>
       </nav>
     </div>
   </main>

@@ -63,3 +63,10 @@ uv run --no-sync python scripts/check_published_links.py
 `authoring/README.md` first. Never hand-edit generated readers. Their generator
 rewrites local links and removes only stale HTML inside its owned output directories.
 Keep these outputs in source archives so reading remains available offline.
+
+The [scientist roadmap](scientist-roadmap.md) connects current numerical,
+statistical and engineering routes. New `.jl`, `.stan` and dbt `.sql` files
+remain readable highlighted source in the static library. Their compilers and
+project lifecycles belong to the Docker classroom or explicit owned project,
+not a static file page. Tutorial tracks expose complete worked answers; an
+optional solution field does not introduce an answer gate.

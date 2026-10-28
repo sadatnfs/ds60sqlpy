@@ -1,5 +1,8 @@
 # Day 17: pandas Series, DataFrames, and Indexing
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 A DataFrame is a labeled table. Unlike a spreadsheet cell reference, a pandas
@@ -215,10 +218,8 @@ This example is fully offline and deterministic. Inspect `.shape`, `.dtypes`,
 
 ## Dataset note
 
-The notebook uses Seaborn's `tips` sample. `sns.load_dataset("tips")` downloads
-it on the first uncached use and then reuses Seaborn's local cache. Run once
-while online before an offline session, or practice the same operations with a
-small constructed DataFrame like the one above.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 ## Exercises and progressive hints
 

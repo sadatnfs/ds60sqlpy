@@ -1,0 +1,1225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
+  <title>sql-json-01 · PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    .katex{font:normal 1.21em KaTeX_Main,math,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.19.1"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.katex-newline{display:block}.katex .katex-base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .katex-base,.katex .katex-strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .katex-vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .katex-thinbox{display:inline-flex;flex-direction:row;max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline,.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-rule,.katex .katex-underline .underline-line,.katex .mfrac .frac-line{min-height:1px}.katex .mspace{display:inline-block}.katex .katex-smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.katex-inner,.katex .llap>.katex-inner,.katex .rlap>.katex-inner{position:absolute}.katex .clap>.katex-fix,.katex .llap>.katex-fix,.katex .rlap>.katex-fix{display:inline-block}.katex .llap>.katex-inner{right:0}.katex .clap>.katex-inner,.katex .rlap>.katex-inner{left:0}.katex .clap>.katex-inner>span{margin-left:-50%;margin-right:50%}.katex .katex-rule{border:0 solid;display:inline-block;position:relative}.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.katex-root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .katex-sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .katex-sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .katex-sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .katex-sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .katex-sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .katex-sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .katex-sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .katex-sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .katex-sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .katex-sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .katex-sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .katex-sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .katex-sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .katex-sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .katex-sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .katex-sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .katex-sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .katex-sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .katex-sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .katex-sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .katex-sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .katex-sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .katex-sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .katex-sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .katex-sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .katex-sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .katex-sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .katex-sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .katex-sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .katex-sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .katex-sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .katex-sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .katex-sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .katex-sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .katex-sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .katex-sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .katex-sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .katex-sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .katex-sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .katex-sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .katex-sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .katex-sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .katex-sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .katex-sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .katex-sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .katex-sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .katex-sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .katex-sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .katex-sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .katex-sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .katex-sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .katex-sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .katex-sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .katex-sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .katex-sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .katex-sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .katex-sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .katex-sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .katex-sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .katex-sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .katex-sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .katex-sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .katex-sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .katex-sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .katex-sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .katex-sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .katex-sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .katex-sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .katex-sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .katex-sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .katex-sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .katex-sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .katex-sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .katex-sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .katex-sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .katex-sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .katex-sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .katex-sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .katex-sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .katex-sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .katex-sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .katex-sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .katex-sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .katex-sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .katex-sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .katex-sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .katex-sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .katex-sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .katex-sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .katex-sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .katex-sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .katex-sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .katex-sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .katex-sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .katex-sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .katex-sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .katex-sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .katex-sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .katex-sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .katex-sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .katex-sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .katex-sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .katex-sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .katex-sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .katex-sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .katex-sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .katex-sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .katex-sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .katex-sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .katex-sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .katex-sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .katex-sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .katex-sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .katex-sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .katex-sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .katex-sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .katex-sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .katex-sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .katex-sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .katex-sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .katex-sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .katex-accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .katex-accent .accent-body{position:relative}.katex .katex-accent .accent-body:not(.accent-full){width:0}.katex .katex-overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .katex-stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .katex-stretchy:after,.katex .katex-stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .katex-sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .reflectbox{display:inline-block;transform:scaleX(-1)}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.katex-tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.katex-tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+
+
+.guide, .artifact-content, article.document {
+  font-family: "Latin Modern", "STIX Two Text", Georgia, serif;
+  font-size: var(--reading-size, 1.15rem); line-height: 1.7;
+  font-kerning: normal; text-wrap: pretty;
+}
+.guide p, .artifact-content p, article.document p { max-width: 72ch; }
+.guide h1, .guide h2, .guide h3, .guide h4,
+.artifact-content h2, .artifact-content h3, article.document h2, article.document h3 {
+  font-family: inherit; font-weight: 700; line-height: 1.25; text-wrap: balance;
+}
+.katex { font-size: 1.05em; text-align: initial; }
+.katex math { font-size: inherit; }
+.katex-display { margin: 0; }
+.katex .base { white-space: nowrap; }
+.tex-compiled { scrollbar-width: thin; }
+.guide, .artifact-content, article.document { counter-reset: equation; }
+.equation { margin: 1.4rem 0; counter-increment: equation; }
+.equation-label { text-align: right; font: .8rem/1.4 system-ui, sans-serif; opacity: .75; }
+.equation-label::after { content: " " counter(equation); }
+.equation-source { font: .8rem/1.4 system-ui, sans-serif; margin-top: .4rem; }
+.equation-source pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: .65rem; }
+.equation-source summary { cursor: pointer; }
+@media print {
+  .guide, .artifact-content, article.document { font-size: 11pt; line-height: 1.45; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  pre, table, .math-display { break-inside: avoid; }
+}
+
+/* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-json-01" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-json-01</p>
+        <h1>PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain</h1>
+        <p class="hero-copy">Current PostgreSQL change and document contracts</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-types-01.html">sql-types-01</a> <a class="tag" href="sql-deep-02.html">sql-deep-02</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run SQL in the classroom</h2>
+          <p id="run-guidance">Run <code>./classroom</code>, choose this SQL lesson, and use its coding pad or whole-lesson controls. Whole lessons run the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> script after you prepare the course schema. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <div class="static-help">
+            This file is a reading preview. Run <code>./classroom</code> from the course folder and select this lesson to save your attempt and use its supported runtime. On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. External projects follow the prerequisites and cleanup in their own guide.
+          </div>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_json_01_json_table.sql">
+            Open learner artifact in VS Code
+          </a>
+          <a class="button lab-only" href="../learn?lesson=sql-json-01" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <ol class="run-steps">
+          <li><strong>Start the classroom.</strong>
+            <span>Run <code>./classroom</code>, then choose this SQL lesson.</span></li>
+          <li><strong>Read the database preparation notice.</strong>
+            <span>Use only the disposable <code>advanced_sql_training</code> database.
+            Preparing its training schema resets course tables. Existing pad text and
+            notes remain saved separately.</span></li>
+          <li><strong>Read, predict, edit, then run.</strong>
+            <span>Use the SQL pad for a focused statement, or whole-lesson mode when
+            the source requires fixed includes or transaction sequences.</span></li>
+          <li><strong>Inspect the result.</strong>
+            <span>Explain the columns, row grain and ordering. Save the complete
+            transcript and diagnose its first error before changing the query.</span></li>
+        </ol>
+        <p>Prepared contributors who prefer notebooks can follow the optional
+          <a href="../reference-pages/docs/guided-sql-notebooks.md.html">SQL notebook guide</a>.
+          A notebook preview alone does not run a query.</p>
+      </section>
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_json_01_json_table.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_json_01_json_table.md">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--postgresql-17-jsontable-typed-projection-and-result-grain">PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain<a class="heading-anchor" href="#guide--postgresql-17-jsontable-typed-projection-and-result-grain" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>sql-json-01</code>. This is a PostgreSQL 17 advanced practice lesson.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-json-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
+<ol>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
+<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-json-01/lesson/workspace/sql/professional/lessons/sql_json_01_json_table.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
+<li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
+<li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
+</ol>
+<p>If a relation is missing, inspect the lesson&#x27;s required fixture and predecessor rather than guessing a new table definition. If authentication or runtime readiness fails, use <code>./classroom status</code> and the setup guide. Keep credentials out of SQL, notebooks, screenshots and committed files. Repair the first error before trusting partial output, and reveal separate solutions only when you want to compare after an attempt.</p>
+<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
+<p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-json-01</code></pre>
+<p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced.</li>
+<li><strong>Direct prerequisite:</strong> <code>sql-types-01</code>, <a href="sql-types-01.html#guide">companion guide</a>.</li>
+<li><strong>Direct prerequisite:</strong> <code>sql-deep-02</code>, <a href="sql-deep-02.html#guide">companion guide</a>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-json-01.html#learner">learner</a> · <a href="sql-json-01.html#solution-1">explanations</a> · <a href="sql-json-01.html#solution-2">executable reference</a>.</li>
+</ul>
+<p>This advanced lesson follows <code>sql-types-01</code> and <code>sql-deep-02</code>. You should understand JSONB extraction, SQL NULL, outer joins and aggregation grain. The provided fixtures are temporary and independent of the training-schema data. The full script checks the disposable database and PostgreSQL 17 capability, then rolls back both worked examples and practice slots.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Turn a declared JSON array into typed relational columns with <code>JSON_TABLE</code>.</li>
+<li>Explain the output grain before and after outer-row preservation.</li>
+<li>Distinguish missing paths, explicit JSON null and conversion errors.</li>
+<li>Retain quantity coverage when computing monetary results.</li>
+<li>Add parent-level measures once after reducing child rows to parent grain.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Row path:</strong> The JSON path that chooses the contexts producing relational rows; <code>$.items[*]</code> selects item contexts here.</li>
+<li><strong>Column path:</strong> A path evaluated relative to one selected row context, such as <code>$.sku</code> or <code>$.qty</code>.</li>
+<li><strong>Typed projection:</strong> Converting selected JSON values into declared SQL types under an explicit empty/error policy.</li>
+<li><strong>Ordinality:</strong> A one-based position assigned to generated rows. It is not a permanent business identity.</li>
+<li><strong>Null extension:</strong> The placeholder row that a LEFT join supplies when an outer document has no matched item rows.</li>
+<li><strong>Coverage:</strong> Evidence that the fields needed to interpret a complete result are available, rather than merely a partial sum being computable.</li>
+</ul>
+<p>The main table has one row per <code>document_id</code>. Document one declares two items: P has quantity two at price five, and Q has quantity one at price three. Its document-level shipping fee is four. Document two declares an empty item array and zero shipping. Document three has no items field and shipping two. These states are intentionally different, even though both can yield no item rows.</p>
+<h4 id="guide--syntax-anatomy-and-query-reasoning">Syntax anatomy and query reasoning<a class="heading-anchor" href="#guide--syntax-anatomy-and-query-reasoning" aria-label="Link to this section">#</a></h4>
+<p><code>JSON_TABLE</code> is a row source. The row path selects contexts, and <code>COLUMNS</code> defines the SQL view of each context. <code>FOR ORDINALITY</code> supplies a position starting at one. Scalar columns name SQL types and extraction paths; their <code>ON EMPTY</code> and <code>ON ERROR</code> clauses state how selected conditions are handled.</p>
+<p>This fixture permits omitted quantity to mean one. It does not replace explicit JSON null with one: null remains an unknown SQL quantity. Prices use one declared currency and exact <code>numeric(10,2)</code> values. An invalid price or quantity cannot become zero revenue by accident under the strict worked policy.</p>
+<p>Typed projection is not a complete message-schema validator. For example, a conversion may accept a numeric-looking string under its coercion rules. The default lax path mode can also adapt shapes that an application intended to reject. A producer contract may require additional checks on field presence, root shape, array type, range, units and business identity before projection.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--worked-case-1-choose-item-grain-or-preserve-document-grain">Worked case 1: Choose item grain or preserve document grain<a class="heading-anchor" href="#guide--worked-case-1-choose-item-grain-or-preserve-document-grain" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>unit_price
+<span class="syntax-keyword">FROM</span> j17_documents <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> JSON_TABLE<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span>
+  COLUMNS <span class="syntax-punctuation">(</span>
+    item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span>
+    sku <span class="syntax-builtin">text</span> PATH <span class="syntax-string">&#x27;$.sku&#x27;</span><span class="syntax-punctuation">,</span>
+    qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span>
+    unit_price <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> PATH <span class="syntax-string">&#x27;$.price&#x27;</span> ERROR <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR
+  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></code></pre>
+<p>The actual result has two rows: document one&#x27;s P and Q. The output grain is one generated item position within a document. Empty or absent item selections do not produce cross-joined child rows. A document disappearing from this item relation does not mean it was absent from the input table.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>unit_price
+<span class="syntax-keyword">FROM</span> j17_documents <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> JSON_TABLE<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span>
+  COLUMNS <span class="syntax-punctuation">(</span>
+    item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span>
+    sku <span class="syntax-builtin">text</span> PATH <span class="syntax-string">&#x27;$.sku&#x27;</span><span class="syntax-punctuation">,</span>
+    qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span>
+    unit_price <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> PATH <span class="syntax-string">&#x27;$.price&#x27;</span> ERROR <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR
+  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j <span class="syntax-keyword">ON</span> <span class="syntax-keyword">true</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></code></pre>
+<p>The LEFT form produces four rows: two actual items and one null-extended row for each of documents two and three. A placeholder does not become an item. Count the generated <code>item_no</code>, rather than <code>COUNT(*)</code>, to measure actual child rows. Keep <code>document_id</code> visible throughout the investigation so a change in grain cannot be hidden by projecting only SKU or price.</p>
+<p>The ordered pair <code>(document_id,item_no)</code> identifies positions in this snapshot. JSONB array extraction by integer uses a different, zero-based indexing interface. Reordering an array changes positions, so ordinality alone is not a durable external item identifier across versions.</p>
+<h5 id="guide--worked-case-2-missing-null-and-malformed-values-have-different-policies">Worked case 2: Missing, null and malformed values have different policies<a class="heading-anchor" href="#guide--worked-case-2-missing-null-and-malformed-values-have-different-policies" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>qty_present
+<span class="syntax-keyword">FROM</span> JSON_TABLE<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:null},{}]}&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span>
+  COLUMNS <span class="syntax-punctuation">(</span>
+    item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span>
+    qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span>
+    qty_present <span class="syntax-builtin">boolean</span> <span class="syntax-keyword">EXISTS</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span>
+  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></code></pre>
+<p>The result is <code>(1,NULL,true)</code> followed by <code>(2,1,false)</code>. The first field exists but its JSON null becomes SQL NULL in the scalar quantity. The second path is empty, so the declared default supplies one. Presence and scalar value answer different questions.</p>
+<p>The script separately supplies quantity text <code>two</code> under <code>ERROR ON ERROR</code> and handles the actual PostgreSQL conversion error <code>22P02</code>. The reference also demonstrates <code>NULL ON ERROR</code>, which deliberately returns an unknown quantity instead. Neither policy authorizes treating malformed text as zero. A caller must know whether the resulting row is eligible for a complete business total.</p>
+<h4 id="guide--preserve-coverage-when-aggregating">Preserve coverage when aggregating<a class="heading-anchor" href="#guide--preserve-coverage-when-aggregating" aria-label="Link to this section">#</a></h4>
+<p>The practice fixture adds document four with R at price seven and explicit null quantity, plus S at price two with omitted quantity. Under this contract S has quantity one. The known partial line value is therefore two, while the complete order value remains unknown because R&#x27;s quantity is unknown.</p>
+<p>For a fully known order the line calculation is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>q</mi><mi>i</mi></msub><msub><mi>p</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\sum_i q_i p_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0497em;vertical-align:-0.2997em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, with item quantities <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">q_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> and unit prices <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">p_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>. SQL <code>SUM</code> ignores NULL inputs. It can therefore return a plausible partial value while omitting an unknown item. Compute unknown counts separately and gate the accepted total on coverage.</p>
+<p>Document two&#x27;s declared empty array can represent a known zero under the stated contract. Document three&#x27;s absent array does not establish the same fact. Inspect the original document with field-presence and array-type checks before using <code>COALESCE</code>. An outer join preserves a parent identity, but cannot recover meaning that the source never supplied.</p>
+<p>Shipping demonstrates another grain boundary. Document one&#x27;s known line value is thirteen and its parent shipping fee is four, so its complete value is seventeen. Summing the repeated fee at two-item grain would produce twenty-one. Aggregate child values to one row per document first, then add the single parent fee. A typed projection does not prevent this relational multiplication error.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Keep each supplied savepoint rollback and write the answer inside its slot.</p>
+<ol>
+<li><strong>Prediction:</strong> Compare CROSS and LEFT expansion for document IDs one through three. <strong>Inputs:</strong> For sql-json-01 Exercise 1, inspect document IDs 1, 2 and 3 in j17_practice_documents. They contain two items, an empty items array and an absent items field respectively. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 1, cROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result. <strong>Verify:</strong> For sql-json-01 Exercise 1, count non-NULL item_no independently and inspect the original field presence and type. A preserved outer placeholder is not an item, and empty and absent arrays are different source states.</li>
+<li><strong>Query writing:</strong> Produce all typed actual item rows from the four-document practice fixture. <strong>Inputs:</strong> For sql-json-01 Exercise 2, project every declared items array in the four-document fixture. Missing qty defaults to one, explicit JSON null remains unknown, and prices use the declared exact numeric type. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 2, display document_id, item_no, sku, qty, unit_price ordered by document_id, item_no as (1,1,P,2,5), (1,2,Q,1,3), (4,1,R,NULL,7), (4,2,S,1,2), one row per (document_id,item_no). <strong>Verify:</strong> For sql-json-01 Exercise 2, compare all projected values with the original array entries and assert four unique position pairs. R retains unknown quantity; S receives the declared absence default.</li>
+<li><strong>Debugging:</strong> Compare omitted quantity, JSON null and invalid quantity text under explicit policies. <strong>Inputs:</strong> For sql-json-01 Exercise 3, use the two-item worked literal with explicit JSON null and an omitted qty, then a separate literal whose qty is the text two. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 3, for the two-item literal, display item_no, qty, qty_present ordered by item_no as (1,NULL,true), (2,1,false). Invalid text produces SQL NULL under NULL ON ERROR and SQLSTATE 22P02 under ERROR ON ERROR; each generated literal position is identified by item_no. <strong>Verify:</strong> For sql-json-01 Exercise 3, check presence separately from scalar value and catch only the intended conversion error. Neither policy permits silently converting a malformed quantity to zero revenue.</li>
+<li><strong>Verification:</strong> Count real items and unknown quantities while retaining every document. <strong>Inputs:</strong> For sql-json-01 Exercise 4, use a LEFT JSON_TABLE relation for all four source documents and count only generated item positions when measuring item or unknown-quantity rows. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 4, display document_id, item_count, unknown_qty_count ordered by document_id as (1,2,0), (2,0,0), (3,0,0), (4,2,1), one row per document_id. <strong>Verify:</strong> For sql-json-01 Exercise 4, compare actual position counts with source array lengths. COUNT(*) would count an outer placeholder; unknown quantities count only rows with a non-NULL item_no.</li>
+<li><strong>Query writing:</strong> Report known partial line value and a separately accepted complete order value. <strong>Inputs:</strong> For sql-json-01 Exercise 5, use all four documents, one declared currency and the worked missing-qty policy. Preserve array presence/type and unknown item counts before accepting an order total. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 5, display document_id, known_line_value, accepted_order_value, coverage_state ordered by document_id, one row per document_id. Accepted values are 13, 0, NULL, NULL; document 4 has known partial value 2 and incomplete coverage. <strong>Verify:</strong> For sql-json-01 Exercise 5, compare each item contribution and unknown count with the displayed line values before checking the coverage CASE. Document 3 lacks its array, document 4 has an unknown quantity, and a partial SUM must not become a complete accepted amount.</li>
+<li><strong>Extension:</strong> Add document-level shipping once after child aggregation. <strong>Inputs:</strong> For sql-json-01 Exercise 6, use accepted child totals and one shipping_fee from each original document. Aggregate child rows to document grain before adding the parent amount. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 6, display document_id, accepted_total ordered by document_id as (1,17), (2,0), (3,NULL), (4,NULL), one row per document_id. <strong>Verify:</strong> For sql-json-01 Exercise 6, assert the deliberately incorrect output value 21 for document 1 when its fee is repeated at item grain, then assert accepted output 17 charges the parent fee four exactly once.</li>
+</ol>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<p>Counting LEFT placeholders inflates item counts. Applying a default to every NULL erases the distinction between omitted and explicitly unknown quantities. Converting errors to NULL and then summing can hide rejected measurements. Adding a parent amount to every child row repeats that amount.</p>
+<p>Inspect document IDs, generated positions, scalar types, presence flags and coverage counts before accepting aggregates. Use the full script&#x27;s deliberate transaction boundary while experimenting. On an unexpected error, preserve the first diagnostic and restore the exercise savepoint rather than changing error policies merely to obtain a numeric result.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>State the row identity and count in the original document table, CROSS item relation, LEFT relation and final document aggregate.</li>
+<li>Trace missing quantity, JSON null and malformed text through the declared policies. Explain which states establish a complete accepted amount.</li>
+<li>Reproduce seventeen versus the erroneous twenty-one for the parent shipping example, and show the independent item/presence evidence before adding the fee.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Apply the resulting grain and coverage checks in <a href="sql-analytics-01.html#guide">analytical query patterns</a> when its prerequisites are met. Keep parent identity and completeness visible before calculating metrics. The <a href="../reference-pages/sql/professional/README.md.html">professional learning path</a> lists the related operational and modelling routes.</p>
+<h4 id="guide--further-reading">Further reading<a class="heading-anchor" href="#guide--further-reading" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="https://www.postgresql.org/docs/17/functions-json.html">PostgreSQL 17 SQL/JSON and JSON_TABLE</a></li>
+<li><a href="https://www.postgresql.org/docs/17/queries-table-expressions.html">PostgreSQL 17 table expressions and LATERAL</a></li>
+<li><a href="https://www.postgresql.org/docs/17/functions-aggregate.html">PostgreSQL 17 aggregate functions</a></li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-json-01: PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain.
+Read sql/professional/companion-guides/sql_json_01_json_table.md and sql/professional/lessons/sql_json_01_json_table.sql. Direct prerequisites: sql-types-01 and sql-deep-02.
+Explain JSON row paths, typed columns, ordinality, missing/null/error policies, outer-row preservation and parent/child grain. Ask me to predict exact rows and values before my attempt, give progressive hints, review my evidence, then ask retrieval questions in my own words.
+Do not read solutions/ until I ask or have attempted the relevant exercise. Use only the disposable advanced_sql_training PostgreSQL 17 database; keep the savepoint and final ROLLBACK boundaries. I use the unified classroom Whole SQL lesson (psql) mode.
+Done when I can show exact item rows, preserve all parent identities, report incomplete quantities without inventing totals and add a parent fee once at the correct grain.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>SQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_json_01_json_table.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_json_01_json_table.sql">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-JSON-01: PostgreSQL 17 JSON_TABLE, typed projection and result grain</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_json_01_json_table.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use ./classroom -&gt; PostgreSQL -&gt; sql-json-01 -&gt; Whole SQL lesson (psql).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Only the disposable advanced_sql_training database; all objects roll back.</span></span>
+<span class="source-line">\<span class="syntax-keyword">set</span> ON_ERROR_STOP <span class="syntax-keyword">on</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">OR</span> current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;server_version_num&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">170000</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use the disposable advanced_sql_training PostgreSQL 17 runtime&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> j17_documents <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  document_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payload jsonb <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> j17_documents</span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:4.00,&quot;items&quot;:[{&quot;sku&quot;:&quot;P&quot;,&quot;qty&quot;:2,&quot;price&quot;:5.00},{&quot;sku&quot;:&quot;Q&quot;,&quot;qty&quot;:1,&quot;price&quot;:3.00}]}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:0.00,&quot;items&quot;:[]}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:2.00}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Worked case 1: CROSS flattening yields item rows; LEFT preserves outer documents.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The array ordinality starts at one. It is a position, not a permanent SKU key.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>unit_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> JSON_TABLE <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span> sku <span class="syntax-builtin">text</span> PATH <span class="syntax-string">&#x27;$.sku&#x27;</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span> unit_price <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  PATH <span class="syntax-string">&#x27;$.price&#x27;</span> ERROR <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: P and Q only, two item-grain rows from document one.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>unit_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> JSON_TABLE <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span> sku <span class="syntax-builtin">text</span> PATH <span class="syntax-string">&#x27;$.sku&#x27;</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span> unit_price <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  PATH <span class="syntax-string">&#x27;$.price&#x27;</span> ERROR <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j <span class="syntax-keyword">ON</span> <span class="syntax-keyword">true</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: four rows; documents two and three have NULL item positions.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Worked case 2: an empty path, explicit JSON null and bad text differ.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>qty_present</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  JSON_TABLE <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:null},{}]}&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span> qty_present <span class="syntax-builtin">boolean</span> <span class="syntax-keyword">EXISTS</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: (1,NULL,true), (2,1,false). Default one is a declared policy.</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $bad_quantity$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  PERFORM qty <span class="syntax-keyword">FROM</span> JSON_TABLE<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:&quot;two&quot;}]}&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;$.items[*]&#x27;</span></span>
+<span class="source-line">    COLUMNS<span class="syntax-punctuation">(</span>qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;The invalid integer unexpectedly succeeded&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXCEPTION</span> <span class="syntax-keyword">WHEN</span> invalid_text_representation <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">  RAISE NOTICE <span class="syntax-string">&#x27;Expected 22P02 conversion failure; it was not converted to a zero quantity&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$bad_quantity$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> j17_practice_documents <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">LIKE</span> j17_documents <span class="syntax-keyword">INCLUDING</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> j17_practice_documents</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payload</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> j17_practice_documents</span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:1.00,&quot;items&quot;:[{&quot;sku&quot;:&quot;R&quot;,&quot;qty&quot;:null,&quot;price&quot;:7.00},{&quot;sku&quot;:&quot;S&quot;,&quot;price&quot;:2.00}]}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Prediction] Compare CROSS and LEFT JSON_TABLE for documents one through three.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs: For sql-json-01 Exercise 1, inspect document IDs 1, 2 and 3 in j17_practice_documents. They contain two items, an empty items array and an absent items field respectively.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-json-01 Exercise 1, cROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-json-01 Exercise 1, count non-NULL item_no independently and inspect the original field presence and type. A preserved outer placeholder is not an item, and empty and absent arrays are different source states.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint ladder, rung 1: Count matched item_no, not the preserved outer placeholder.</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Write your prediction and inspection here.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Produce the typed item relation for all four documents.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs: For sql-json-01 Exercise 2, project every declared items array in the four-document fixture. Missing qty defaults to one, explicit JSON null remains unknown, and prices use the declared exact numeric type.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-json-01 Exercise 2, display document_id, item_no, sku, qty, unit_price ordered by document_id, item_no as (1,1,P,2,5), (1,2,Q,1,3), (4,1,R,NULL,7), (4,2,S,1,2), one row per (document_id,item_no).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-json-01 Exercise 2, compare all projected values with the original array entries and assert four unique position pairs. R retains unknown quantity; S receives the declared absence default.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint ladder, rung 1: Define scalar types, path expressions and ordinal position in COLUMNS.</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Write your query here.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Debugging] Compare missing qty, JSON null and qty=&quot;two&quot; under explicit error policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs: For sql-json-01 Exercise 3, use the two-item worked literal with explicit JSON null and an omitted qty, then a separate literal whose qty is the text two.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-json-01 Exercise 3, for the two-item literal, display item_no, qty, qty_present ordered by item_no as (1,NULL,true), (2,1,false). Invalid text produces SQL NULL under NULL ON ERROR and SQLSTATE 22P02 under ERROR ON ERROR; each generated literal position is identified by item_no.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-json-01 Exercise 3, check presence separately from scalar value and catch only the intended conversion error. Neither policy permits silently converting a malformed quantity to zero revenue.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint ladder, rung 1: ON EMPTY and ON ERROR govern different conditions.</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Write your policy comparison here.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Verification] Count actual items while retaining all documents.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs: For sql-json-01 Exercise 4, use a LEFT JSON_TABLE relation for all four source documents and count only generated item positions when measuring item or unknown-quantity rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-json-01 Exercise 4, display document_id, item_count, unknown_qty_count ordered by document_id as (1,2,0), (2,0,0), (3,0,0), (4,2,1), one row per document_id.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-json-01 Exercise 4, compare actual position counts with source array lengths. COUNT(*) would count an outer placeholder; unknown quantities count only rows with a non-NULL item_no.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint ladder, rung 1: Count item_no and count unknown qty only when item_no IS NOT NULL.</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Write your grouped query here.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Query writing] Separate known partial line value from accepted complete order value.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs: For sql-json-01 Exercise 5, use all four documents, one declared currency and the worked missing-qty policy. Preserve array presence/type and unknown item counts before accepting an order total.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-json-01 Exercise 5, display document_id, known_line_value, accepted_order_value, coverage_state ordered by document_id, one row per document_id. Accepted values are 13, 0, NULL, NULL; document 4 has known partial value 2 and incomplete coverage.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-json-01 Exercise 5, compare each item contribution and unknown count with the displayed line values before checking the coverage CASE. Document 3 lacks its array, document 4 has an unknown quantity, and a partial SUM must not become a complete accepted amount.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint ladder, rung 1: Preserve outer document shape and explicit unknown counts before applying COALESCE.</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Write your value and coverage query here.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Add a document-level shipping fee exactly once after item aggregation.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs: For sql-json-01 Exercise 6, use accepted child totals and one shipping_fee from each original document. Aggregate child rows to document grain before adding the parent amount.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-json-01 Exercise 6, display document_id, accepted_total ordered by document_id as (1,17), (2,0), (3,NULL), (4,NULL), one row per document_id.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-json-01 Exercise 6, assert the deliberately incorrect output value 21 for document 1 when its fee is repeated at item grain, then assert accepted output 17 charges the parent fee four exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint ladder, rung 1: Aggregate items first, then join to one parent row per document_id.</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Write your grain-safe total here.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_json_01_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_json_01_solutions.md">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-json-01-explained-jsontable-solutions">sql-json-01: Explained JSON_TABLE solutions<a class="heading-anchor" href="#solution-1--sql-json-01-explained-jsontable-solutions" aria-label="Link to this section">#</a></h3>
+<p>Attempt the <a href="sql-json-01.html#guide">lesson</a> before comparing these references. The <a href="sql-json-01.html#solution-2">complete executable solution</a> creates the four-document temporary fixture and actual typed item views, checks every answer against independently specified rows or values, and rolls back. No external extension, service or permanent table is required.</p>
+<h4 id="solution-1--exercise-1-distinguish-child-rows-from-preserved-parent-rows">Exercise 1: Distinguish child rows from preserved parent rows<a class="heading-anchor" href="#solution-1--exercise-1-distinguish-child-rows-from-preserved-parent-rows" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> For sql-json-01 Exercise 1, inspect document IDs 1, 2 and 3 in j17_practice_documents. They contain two items, an empty items array and an absent items field respectively. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 1, cROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result. <strong>Verify:</strong> For sql-json-01 Exercise 1, count non-NULL item_no independently and inspect the original field presence and type. A preserved outer placeholder is not an item, and empty and absent arrays are different source states.</p>
+<p>The first three documents contain two items, an explicitly empty array and an absent array. CROSS expansion produces only two item rows. LEFT expansion preserves all parent identities and produces four rows: two actual items plus one null-extended placeholder for each unmatched document.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span>
+       d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">?</span> <span class="syntax-string">&#x27;items&#x27;</span> <span class="syntax-keyword">AS</span> items_field_present<span class="syntax-punctuation">,</span>
+       jsonb_typeof<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> items_type
+<span class="syntax-keyword">FROM</span> j17_documents <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">WHERE</span> d<span class="syntax-punctuation">.</span>document_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></code></pre>
+<p>This inspection keeps the source meaning visible. Document two has a declared array with zero entries. Document three does not have the field. The projected absence of an item row alone cannot distinguish them. The reference checks the actual CROSS count of two and LEFT count of four, then shows source field presence and type. Do not replace the missing array with an assumed empty array unless that is an explicit producer policy.</p>
+<p><strong>Verify:</strong> Compare matched item positions with parent IDs rather than using the number of LEFT result rows as an item count.</p>
+<h4 id="solution-1--exercise-2-produce-the-actual-typed-item-relation">Exercise 2: Produce the actual typed item relation<a class="heading-anchor" href="#solution-1--exercise-2-produce-the-actual-typed-item-relation" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> For sql-json-01 Exercise 2, project every declared items array in the four-document fixture. Missing qty defaults to one, explicit JSON null remains unknown, and prices use the declared exact numeric type. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 2, display document_id, item_no, sku, qty, unit_price ordered by document_id, item_no as (1,1,P,2,5), (1,2,Q,1,3), (4,1,R,NULL,7), (4,2,S,1,2), one row per (document_id,item_no). <strong>Verify:</strong> For sql-json-01 Exercise 2, compare all projected values with the original array entries and assert four unique position pairs. R retains unknown quantity; S receives the declared absence default.</p>
+<p>The reference view <code>j17_lines</code> uses the lesson&#x27;s <code>JSON_TABLE</code> column definitions: one ordinal position, text SKU, integer quantity and exact numeric unit price. The quantity policy defaults an empty path to one and rejects conversion errors.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> document_id<span class="syntax-punctuation">,</span>item_no<span class="syntax-punctuation">,</span>sku<span class="syntax-punctuation">,</span>qty<span class="syntax-punctuation">,</span>unit_price
+<span class="syntax-keyword">FROM</span> j17_lines
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> document_id<span class="syntax-punctuation">,</span>item_no<span class="syntax-punctuation">;</span></code></pre>
+<p>The four rows are document one&#x27;s P/two/five and Q/one/three, followed by document four&#x27;s R/NULL/seven and S/one/two. R remains represented even though its quantity is unknown. S receives the declared default for omitted quantity. Empty or absent arrays have no rows in this CROSS item relation.</p>
+<p>The complete executable assertion compares all projected values in document and ordinal order. It also requires four distinct position pairs. That uniqueness applies to this snapshot; positions are not stable business identifiers when an array changes order between versions.</p>
+<p><strong>Verify:</strong> Match every actual row to its original JSON array context, including R&#x27;s retained unknown quantity.</p>
+<h4 id="solution-1--exercise-3-separate-empty-paths-json-null-and-conversion-errors">Exercise 3: Separate empty paths, JSON null and conversion errors<a class="heading-anchor" href="#solution-1--exercise-3-separate-empty-paths-json-null-and-conversion-errors" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> For sql-json-01 Exercise 3, use the two-item worked literal with explicit JSON null and an omitted qty, then a separate literal whose qty is the text two. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 3, for the two-item literal, display item_no, qty, qty_present ordered by item_no as (1,NULL,true), (2,1,false). Invalid text produces SQL NULL under NULL ON ERROR and SQLSTATE 22P02 under ERROR ON ERROR; each generated literal position is identified by item_no. <strong>Verify:</strong> For sql-json-01 Exercise 3, check presence separately from scalar value and catch only the intended conversion error. Neither policy permits silently converting a malformed quantity to zero revenue.</p>
+<p>The two-item literal produces one explicitly null field and one missing field. A presence projection complements the typed quantity:</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span>qty_present
+<span class="syntax-keyword">FROM</span> JSON_TABLE<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:null},{}]}&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;$.items[*]&#x27;</span>
+  COLUMNS <span class="syntax-punctuation">(</span>
+    item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span>
+    qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span>
+    qty_present <span class="syntax-builtin">boolean</span> <span class="syntax-keyword">EXISTS</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span>
+  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">;</span></code></pre>
+<p>The rows are <code>(1,NULL,true)</code> and <code>(2,1,false)</code>. An existing JSON null is not an empty path. The scalar projection maps it to SQL NULL rather than activating the default. With invalid quantity text <code>two</code>, <code>NULL ON ERROR</code> deliberately returns SQL NULL, while <code>ERROR ON ERROR</code> raises the observed conversion error <code>22P02</code>. The reference handles that specific error and fails if the malformed conversion unexpectedly succeeds.</p>
+<p>SQL NULL is also different from a stored JSON null value. Calling <code>to_jsonb</code> on an SQL NULL returns SQL NULL. The reference therefore tests the predicate <code>qty IS NULL</code> directly when checking the error-fallback result.</p>
+<p><strong>Verify:</strong> Inspect both existence and value, and preserve the distinction between a controlled fallback and successful typed measurement.</p>
+<h4 id="solution-1--exercise-4-count-only-actual-items-and-their-missing-quantities">Exercise 4: Count only actual items and their missing quantities<a class="heading-anchor" href="#solution-1--exercise-4-count-only-actual-items-and-their-missing-quantities" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> For sql-json-01 Exercise 4, use a LEFT JSON_TABLE relation for all four source documents and count only generated item positions when measuring item or unknown-quantity rows. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 4, display document_id, item_count, unknown_qty_count ordered by document_id as (1,2,0), (2,0,0), (3,0,0), (4,2,1), one row per document_id. <strong>Verify:</strong> For sql-json-01 Exercise 4, compare actual position counts with source array lengths. COUNT(*) would count an outer placeholder; unknown quantities count only rows with a non-NULL item_no.</p>
+<p><code>j17_outer</code> preserves the four documents, including placeholders for documents two and three. Count the generated ordinal to measure actual items. An unknown quantity counts only when a real item exists.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> document_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>item_no<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_count<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
+         <span class="syntax-keyword">WHERE</span> item_no <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> qty <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unknown_qty_count
+<span class="syntax-keyword">FROM</span> j17_outer
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> document_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> document_id<span class="syntax-punctuation">;</span></code></pre>
+<p>The exact triples are <code>(1,2,0)</code>, <code>(2,0,0)</code>, <code>(3,0,0)</code> and <code>(4,2,1)</code>. <code>COUNT(*)</code> instead would count one row for each empty or absent parent, while counting all NULL quantities without checking <code>item_no</code> would misclassify those placeholders as unknown items. The executable assertion checks the complete four-row result, not only an overall count.</p>
+<p><strong>Verify:</strong> Independently count each source array&#x27;s entries and identify the single actual unknown quantity, R.</p>
+<h4 id="solution-1--exercise-5-keep-partial-value-separate-from-complete-acceptance">Exercise 5: Keep partial value separate from complete acceptance<a class="heading-anchor" href="#solution-1--exercise-5-keep-partial-value-separate-from-complete-acceptance" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> For sql-json-01 Exercise 5, use all four documents, one declared currency and the worked missing-qty policy. Preserve array presence/type and unknown item counts before accepting an order total. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 5, display document_id, known_line_value, accepted_order_value, coverage_state ordered by document_id, one row per document_id. Accepted values are 13, 0, NULL, NULL; document 4 has known partial value 2 and incomplete coverage. <strong>Verify:</strong> For sql-json-01 Exercise 5, compare each item contribution and unknown count with the displayed line values before checking the coverage CASE. Document 3 lacks its array, document 4 has an unknown quantity, and a partial SUM must not become a complete accepted amount.</p>
+<p>Aggregate at document grain but preserve coverage. The reference first computes known line value and actual unknown-item count. It then rejoins each original document to inspect the declared array shape before accepting the total.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CASE</span>
+  <span class="syntax-keyword">WHEN</span> jsonb_typeof<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;array&#x27;</span>
+       <span class="syntax-keyword">OR</span> a<span class="syntax-punctuation">.</span>unknown_count <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">ELSE</span> a<span class="syntax-punctuation">.</span>known_line_value
+<span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> accepted_order_value</code></pre>
+<p>The accepted values are thirteen, zero, NULL and NULL. Document one has complete known contributions ten plus three. Document two explicitly declares zero items, so zero is accepted under this contract. Document three has no declared array and is labeled <code>missing_items_array</code>. Document four has one unknown quantity, so its known partial value of two is labeled separately from its unaccepted complete value.</p>
+<p>Using <code>COALESCE(SUM(...),0)</code> to produce a useful known-partial subtotal does not authorize publishing it as a complete amount. The reference compares both values and coverage labels, making that distinction inspectable.</p>
+<p><strong>Verify:</strong> Reconstruct ten plus three and the separate known two contribution from original items, then identify exactly which missing evidence blocks each complete total.</p>
+<h4 id="solution-1--exercise-6-add-a-parent-fee-after-reducing-item-grain">Exercise 6: Add a parent fee after reducing item grain<a class="heading-anchor" href="#solution-1--exercise-6-add-a-parent-fee-after-reducing-item-grain" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs:</strong> For sql-json-01 Exercise 6, use accepted child totals and one shipping_fee from each original document. Aggregate child rows to document grain before adding the parent amount. <strong>Expected result/shape:</strong> For sql-json-01 Exercise 6, display document_id, accepted_total ordered by document_id as (1,17), (2,0), (3,NULL), (4,NULL), one row per document_id. <strong>Verify:</strong> For sql-json-01 Exercise 6, assert the deliberately incorrect output value 21 for document 1 when its fee is repeated at item grain, then assert accepted output 17 charges the parent fee four exactly once.</p>
+<p>The prior answer has one row per document. Join it to the original one-row document relation and add its single parent fee:</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span>
+       a<span class="syntax-punctuation">.</span>accepted_order_value
+         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;shipping_fee&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> accepted_total
+<span class="syntax-keyword">FROM</span> j17_documents <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">JOIN</span> answer_5 <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>document_id<span class="syntax-operator">=</span>d<span class="syntax-punctuation">.</span>document_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></code></pre>
+<p>The results are seventeen, zero, NULL and NULL. Unknown complete item values remain unknown when a known shipping fee is added. The final result is ordered by the document identity, with exactly one row for each original parent.</p>
+<p>The executable reference also computes the tempting wrong item-grain result for document one: summing each line plus the repeated parent fee yields <code>2*5+4 + 1*3+4 = 21</code>. That deliberately wrong result is asserted so the counterexample remains visible. The correct calculation is <code>2*5 + 1*3 + 4 = 17</code>. Typed extraction and a valid numeric value do not prevent a relational grain error.</p>
+<p><strong>Verify:</strong> Count how many times shipping enters the expression and confirm that reducing to parent grain occurs before the fee is applied.</p>
+<h4 id="solution-1--final-evidence-review">Final evidence review<a class="heading-anchor" href="#solution-1--final-evidence-review" aria-label="Link to this section">#</a></h4>
+<p>Explain the grain of the document table, actual item view, outer-preserving view and accepted-total relation. Review exact NULL behavior, positions and coverage alongside numeric amounts. The final transaction rollback removes all reference objects. A successful reference run is comparison evidence; reconstruct the reasoning independently before treating the lesson as understood.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>SQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_json_01_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_json_01_solutions.sql">
+              Open this file in VS Code
+            </a>
+
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-JSON-01: complete typed-projection references and exact grain/value assertions</span></span>
+<span class="source-line">\<span class="syntax-keyword">set</span> ON_ERROR_STOP <span class="syntax-keyword">on</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line"> <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">OR</span> current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;server_version_num&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-operator">&lt;</span><span class="syntax-number">170000</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">  RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use the disposable advanced_sql_training PostgreSQL 17 runtime&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"> <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> j17_documents <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  document_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payload jsonb <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> j17_documents</span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:4.00,&quot;items&quot;:[{&quot;sku&quot;:&quot;P&quot;,&quot;qty&quot;:2,&quot;price&quot;:5.00},{&quot;sku&quot;:&quot;Q&quot;,&quot;qty&quot;:1,&quot;price&quot;:3.00}]}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:0.00,&quot;items&quot;:[]}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:2.00}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;shipping_fee&quot;:1.00,&quot;items&quot;:[{&quot;sku&quot;:&quot;R&quot;,&quot;qty&quot;:null,&quot;price&quot;:7.00},{&quot;sku&quot;:&quot;S&quot;,&quot;price&quot;:2.00}]}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">VIEW</span> j17_lines <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>unit_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> JSON_TABLE <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span> sku <span class="syntax-builtin">text</span> PATH <span class="syntax-string">&#x27;$.sku&#x27;</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span> unit_price <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  PATH <span class="syntax-string">&#x27;$.price&#x27;</span> ERROR <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">VIEW</span> j17_outer <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>unit_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> JSON_TABLE <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span> sku <span class="syntax-builtin">text</span> PATH <span class="syntax-string">&#x27;$.sku&#x27;</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span> unit_price <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  PATH <span class="syntax-string">&#x27;$.price&#x27;</span> ERROR <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j <span class="syntax-keyword">ON</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span>actual jsonb<span class="syntax-punctuation">,</span> expected jsonb<span class="syntax-punctuation">,</span> label <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> void</span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line"> <span class="syntax-keyword">IF</span> actual <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> expected <span class="syntax-keyword">THEN</span> RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;JSON projection contract failed: %; actual %&#x27;</span><span class="syntax-punctuation">,</span>label<span class="syntax-punctuation">,</span>actual<span class="syntax-punctuation">;</span><span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: complete executable references</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. two actual items become four LEFT rows after preserving parents.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;cross item rows for documents1-3&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_lines</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  document_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;4&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;left rows for documents1-3&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_outer</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  document_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">?</span> <span class="syntax-string">&#x27;items&#x27;</span> <span class="syntax-keyword">AS</span> items_field_present<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  jsonb_typeof<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> items_type</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  document_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. the typed relation preserves four actual item positions, including unknown qty.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  item_no<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  sku<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  qty<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  unit_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_lines</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  item_no<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> document_id<span class="syntax-punctuation">,</span> item_no<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> j17_lines <span class="syntax-keyword">AS</span> l<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[{&quot;document_id&quot;:1,&quot;item_no&quot;:1,&quot;sku&quot;:&quot;P&quot;,&quot;qty&quot;:2,&quot;unit_price&quot;:5},{&quot;document_id&quot;:1,&quot;item_no&quot;:2,&quot;sku&quot;:&quot;Q&quot;,&quot;qty&quot;:1,&quot;unit_price&quot;:3},{&quot;document_id&quot;:4,&quot;item_no&quot;:1,&quot;sku&quot;:&quot;R&quot;,&quot;qty&quot;:null,&quot;unit_price&quot;:7},{&quot;document_id&quot;:4,&quot;item_no&quot;:2,&quot;sku&quot;:&quot;S&quot;,&quot;qty&quot;:1,&quot;unit_price&quot;:2}]&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;typed item identity and values&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;4&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;composite item positions are unique&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span></span>
+<span class="source-line">    document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    item_no</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    j17_lines<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> keys<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. ON EMPTY is not the error policy or a replacement for explicit JSON null.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>item_no<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>qty<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>qty_present</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  JSON_TABLE <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:null},{}]}&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>item_no <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">ORDINALITY</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ON</span> EMPTY ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">,</span> qty_present <span class="syntax-builtin">boolean</span> <span class="syntax-keyword">EXISTS</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> item_no<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_3 <span class="syntax-keyword">AS</span> a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[{&quot;item_no&quot;:1,&quot;qty&quot;:null,&quot;qty_present&quot;:true},{&quot;item_no&quot;:2,&quot;qty&quot;:1,&quot;qty_present&quot;:false}]&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;null versus empty&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>qty <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;true&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;explicit NULL ON ERROR policy&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  JSON_TABLE <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:&quot;two&quot;}]}&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS <span class="syntax-punctuation">(</span>qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $strict_error$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line"> PERFORM qty <span class="syntax-keyword">FROM</span> JSON_TABLE<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;{&quot;items&quot;:[{&quot;qty&quot;:&quot;two&quot;}]}&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;$.items[*]&#x27;</span> COLUMNS<span class="syntax-punctuation">(</span>qty <span class="syntax-builtin">integer</span> PATH <span class="syntax-string">&#x27;$.qty&#x27;</span> ERROR <span class="syntax-keyword">ON</span> ERROR<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> j<span class="syntax-punctuation">;</span></span>
+<span class="source-line"> RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Expected strict conversion failure&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXCEPTION</span> <span class="syntax-keyword">WHEN</span> invalid_text_representation <span class="syntax-keyword">THEN</span> RAISE NOTICE <span class="syntax-string">&#x27;Expected22P02&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$strict_error$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. match counts exclude the null-extended row of an empty parent.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>item_no<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_count<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> item_no <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> qty <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unknown_qty_count</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_outer</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_4</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> document_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_4 <span class="syntax-keyword">AS</span> a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[{&quot;document_id&quot;:1,&quot;item_count&quot;:2,&quot;unknown_qty_count&quot;:0},{&quot;document_id&quot;:2,&quot;item_count&quot;:0,&quot;unknown_qty_count&quot;:0},{&quot;document_id&quot;:3,&quot;item_count&quot;:0,&quot;unknown_qty_count&quot;:0},{&quot;document_id&quot;:4,&quot;item_count&quot;:2,&quot;unknown_qty_count&quot;:1}]&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;outer counts and quantity coverage&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. preserve partial known value without publishing it as a complete total.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> amounts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span>item_no<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> item_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> item_no <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> qty <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unknown_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>qty <span class="syntax-operator">*</span> unit_price<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> known_line_value</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    j17_outer</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    document_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>known_line_value<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> jsonb_typeof<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;array&#x27;</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> a<span class="syntax-punctuation">.</span>unknown_count <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    a<span class="syntax-punctuation">.</span>known_line_value</span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> accepted_order_value<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> jsonb_typeof<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;items&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;array&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;missing_items_array&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> a<span class="syntax-punctuation">.</span>unknown_count <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;unknown_quantity&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;complete&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> coverage_state</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> amounts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>document_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_5</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> document_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_5 <span class="syntax-keyword">AS</span> a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[{&quot;document_id&quot;:1,&quot;known_line_value&quot;:13,&quot;accepted_order_value&quot;:13,&quot;coverage_state&quot;:&quot;complete&quot;},{&quot;document_id&quot;:2,&quot;known_line_value&quot;:0,&quot;accepted_order_value&quot;:0,&quot;coverage_state&quot;:&quot;complete&quot;},{&quot;document_id&quot;:3,&quot;known_line_value&quot;:0,&quot;accepted_order_value&quot;:null,&quot;coverage_state&quot;:&quot;missing_items_array&quot;},{&quot;document_id&quot;:4,&quot;known_line_value&quot;:2,&quot;accepted_order_value&quot;:null,&quot;coverage_state&quot;:&quot;unknown_quantity&quot;}]&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;accepted versus partial values&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. the parent shipping fee is added once after the item grain collapses.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>accepted_order_value <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;shipping_fee&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> accepted_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> answer_5 <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>document_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  answer_6</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> document_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span> answer_6 <span class="syntax-keyword">AS</span> a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[{&quot;document_id&quot;:1,&quot;accepted_total&quot;:17},{&quot;document_id&quot;:2,&quot;accepted_total&quot;:0},{&quot;document_id&quot;:3,&quot;accepted_total&quot;:null},{&quot;document_id&quot;:4,&quot;accepted_total&quot;:null}]&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;one parent shipping fee&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_temp<span class="syntax-punctuation">.</span>assert_equal <span class="syntax-punctuation">(</span>to_jsonb <span class="syntax-punctuation">(</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">.</span>qty <span class="syntax-operator">*</span> l<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>payload <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;shipping_fee&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;21&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;deliberately wrong parent-fee fanout is observable&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  j17_documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> j17_lines <span class="syntax-keyword">AS</span> l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>document_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>document_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through sql-json-01: PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain.
+Read sql/professional/companion-guides/sql_json_01_json_table.md and sql/professional/lessons/sql_json_01_json_table.sql. Direct prerequisites: sql-types-01 and sql-deep-02.
+Explain JSON row paths, typed columns, ordinality, missing/null/error policies, outer-row preservation and parent/child grain. Ask me to predict exact rows and values before my attempt, give progressive hints, review my evidence, then ask retrieval questions in my own words.
+Do not read solutions/ until I ask or have attempted the relevant exercise. Use only the disposable advanced_sql_training PostgreSQL 17 database; keep the savepoint and final ROLLBACK boundaries. I use the unified classroom Whole SQL lesson (psql) mode.
+Done when I can show exact item rows, preserve all parent identities, report incomplete quantities without inventing totals and add a parent fee once at the correct grain.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-write-01.html"><small>Previous lesson</small><strong>sql-write-01</strong><span>PostgreSQL 17 Change Application: MERGE and ON CONFLICT</span></a>
+        <a class="nav-card next" href="bridge-01.html"><small>Next lesson</small><strong>bridge-01</strong><span>Config Logging CLI</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+  </script>
+</body>
+</html>

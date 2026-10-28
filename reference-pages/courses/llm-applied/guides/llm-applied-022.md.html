@@ -303,19 +303,19 @@ huge<span class="syntax-punctuation">[</span><span class="syntax-number">1</span
 <ol>
 <li><strong>Execute a bounded grouped mean.</strong> Use rowsA 1, A3, B10 and the admittedgroup_mean request. <strong>Expected:</strong> A count 2 mean 2; B count 1 mean 10. <strong>Verify:</strong> Save the assertion results for exercise 1, including A count 2 mean 2; B count 1 mean 10.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject an arbitrary operation.</strong> Submitoperationrun_sql or an extra query field. <strong>Expected:</strong> ValueError before any computation. <strong>Verify:</strong> Save the assertion results for exercise 2, including ValueError before any computation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject invalid numeric values.</strong> Replace one value with True, NaN or None, then check large finite values and cancellation under the same numeric policy. <strong>Expected:</strong> invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0. <strong>Verify:</strong> Save the assertion results for exercise 3, including invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Enforce identity and work limits.</strong> Duplicatea 1, then supply 21 unique rows. <strong>Expected:</strong> duplicate identity and row-limit violations rejected. <strong>Verify:</strong> Save the assertion results for exercise 4, including duplicate identity and row-limit violations rejected.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Verify an explanation against the artifact.</strong> Check a proposed sentence saying groupAmean 2 against the result; reject a proposed mean 20. <strong>Expected:</strong> 2accepted; 20mismatch. <strong>Verify:</strong> Save the assertion results for exercise 5, including 2accepted; 20mismatch.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Refuse an unsupported causal interpretation.</strong> Attach a descriptive result to a claim that group caused the difference without assignment-design evidence. <strong>Expected:</strong> descriptive statistic available; causal claim not established. <strong>Verify:</strong> Save the assertion results for exercise 6, including descriptive statistic available; causal claim not established.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

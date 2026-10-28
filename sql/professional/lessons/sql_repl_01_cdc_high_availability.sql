@@ -1,11 +1,11 @@
 -- SQL-REPL-01: Replication, CDC, and high availability
--- BEGINNER WORKFLOW — sql-repl-01: Replication, Change Data Capture, and High Availability
+-- BEGINNER WORKFLOW - sql-repl-01: Replication, Change Data Capture, and High Availability
 -- Guide: sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-repl-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-repl-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -66,13 +66,16 @@ SELECT
 \echo 'SQL-REPL-01: disposable transactional outbox lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_replication_lab;
+
 CREATE TABLE pro_replication_lab.orders (
   order_key text PRIMARY KEY,
   status text NOT NULL CHECK (status IN ('open', 'paid', 'cancelled')),
   aggregate_version integer NOT NULL CHECK (aggregate_version > 0),
   updated_at timestamptz NOT NULL
 );
+
 CREATE TABLE pro_replication_lab.outbox_events (
   event_id text PRIMARY KEY,
   aggregate_type text NOT NULL,
@@ -85,6 +88,7 @@ CREATE TABLE pro_replication_lab.outbox_events (
   delivery_attempts integer NOT NULL DEFAULT 0 CHECK (delivery_attempts >= 0),
   UNIQUE (aggregate_type, aggregate_key, aggregate_version)
 );
+
 CREATE TABLE pro_replication_lab.consumer_inbox (
   consumer_name text NOT NULL,
   event_id text NOT NULL,
@@ -92,6 +96,7 @@ CREATE TABLE pro_replication_lab.consumer_inbox (
   payload_sha256 text NOT NULL CHECK (payload_sha256 ~ '^[0-9a-f]{64}$'),
   PRIMARY KEY (consumer_name, event_id)
 );
+
 CREATE TABLE pro_replication_lab.projected_orders (
   consumer_name text NOT NULL,
   order_key text NOT NULL,
@@ -100,11 +105,14 @@ CREATE TABLE pro_replication_lab.projected_orders (
   last_event_id text NOT NULL,
   PRIMARY KEY (consumer_name, order_key)
 );
+
 -- Business state and event are committed by the same database transaction.
 INSERT INTO pro_replication_lab.orders (order_key, status, aggregate_version, updated_at)
   VALUES ('ORD-100', 'open', 1, TIMESTAMPTZ '2026-06-01 10:00:00+00');
+
 INSERT INTO pro_replication_lab.outbox_events (event_id, aggregate_type, aggregate_key, aggregate_version, event_type, payload, occurred_at)
   VALUES ('EVT-100-v1', 'order', 'ORD-100', 1, 'order.opened', '{"order_key":"ORD-100","status":"open"}', TIMESTAMPTZ '2026-06-01 10:00:00+00');
+
 UPDATE
   pro_replication_lab.orders AS o
 SET
@@ -113,8 +121,10 @@ SET
   updated_at = TIMESTAMPTZ '2026-06-01 10:05:00+00'
 WHERE
   o.order_key = 'ORD-100';
+
 INSERT INTO pro_replication_lab.outbox_events (event_id, aggregate_type, aggregate_key, aggregate_version, event_type, payload, occurred_at)
   VALUES ('EVT-100-v2', 'order', 'ORD-100', 2, 'order.paid', '{"order_key":"ORD-100","status":"paid"}', TIMESTAMPTZ '2026-06-01 10:05:00+00');
+
 CREATE PROCEDURE pro_replication_lab.consume_outbox_batch (p_consumer_name text, p_batch_size integer)
 LANGUAGE plpgsql
 SECURITY INVOKER

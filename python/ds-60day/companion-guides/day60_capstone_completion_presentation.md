@@ -53,22 +53,14 @@ By the end of the lesson, you can:
 If a gate fails, label the capstone as a prototype and list the missing evidence.
 Do not weaken the gate after seeing the result.
 
-## Reproduction commands
+## Optional contributor-project reproduction
 
-Adapt module names to your project and run from its root.
-
-Windows PowerShell:
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e .
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m capstone.data
-.\.venv\Scripts\python.exe -m capstone.train
-.\.venv\Scripts\python.exe -m capstone.evaluate
-```
-
-macOS/Linux:
+These commands belong to a separately prepared capstone project whose own
+package modules are `capstone.data`, `capstone.train` and `capstone.evaluate`.
+They are not classroom startup commands or code-pad commands. Ordinary learners
+start the classroom with `./classroom`; no host Python installation is needed.
+For this optional contributor recipe, use the prepared POSIX environment on
+macOS/Linux or Ubuntu in Windows WSL 2, from the capstone project's root.
 
 ```bash
 python3.12 -m venv .venv

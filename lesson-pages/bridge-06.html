@@ -489,91 +489,91 @@ T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation"
 <li><strong>Progressive hint:</strong> Convert each field explicitly and translate only expected conversion failures.</li>
 <li><strong>Verify:</strong> Parse one valid mapping and compare exact typed fields; assert blank source ID, non-positive/non-integer customer ID, non-finite/non-positive amount, and bad ISO date raise <code>RowValidationError</code>, and the input mapping is unchanged.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Money:</strong> Quantize accepted amounts to two decimals and document the chosen rounding rule.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Quantization is a domain decision, not merely display formatting.</li>
 <li><strong>Verify:</strong> Check amounts with more than two places and a halfway value; assert the exact two-place <code>Decimal</code> results under the documented rounding mode, not merely formatted strings.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Partitioning:</strong> Implement <code>partition_rows()</code> so accepted sales and rejected source IDs/reasons retain input order without storing full raw rows.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Catch only <code>RowValidationError</code> from the conversion boundary.</li>
 <li><strong>Verify:</strong> Feed valid-invalid-valid rows; assert accepted sales and rejection <code>(source_id, reason)</code> records preserve input order and no rejected object stores the complete raw mapping.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Batching:</strong> Implement <code>batches()</code> with positive-size validation and tests for empty, exact, and remainder cases.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Slice deterministic tuples from the original sequence.</li>
 <li><strong>Verify:</strong> Assert <code>batches([], 2) == []</code>, exact division has no empty tail, a remainder becomes the last tuple, and sizes <code>0</code>/negative raise <code>ValueError</code>.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Bulk SQL:</strong> Implement a parameterized <code>executemany()</code> upsert into <code>pg_temp.bridge_sales</code> with no values in SQL text.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Convert typed sales to one parameter tuple per row.</li>
 <li><strong>Verify:</strong> Inspect one <code>executemany</code> call: SQL contains placeholders and the upsert clause, every sale value exists only in parameter rows, and empty input makes no driver call.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Accounting:</strong> Track accepted, rejected, submitted, inserted, and updated counts separately and state what <code>executemany()</code> cannot cheaply distinguish.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not infer business outcomes from submitted row count.</li>
 <li><strong>Verify:</strong> For a mixed fixture, report separate accepted, rejected, and submitted counts; label inserted/updated as unknown unless returned/reconciled database evidence distinguishes them.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Extension:</strong> Design the Psycopg COPY variant using typed <code>write_row()</code> calls and a staging table instead of hand-built delimited text.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> COPY handles transport; a later set-based statement owns merge semantics.</li>
 <li><strong>Verify:</strong> Provide a COPY design that calls typed <code>write_row</code> into a staging table, validates staging rows, and performs one set-based merge without constructing delimited text.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Edge cases:</strong> Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer IDs, and invalid dates.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Classify each rejection at the field boundary and keep its reason safe.</li>
 <li><strong>Verify:</strong> Parameterize <code>NaN</code>, both infinities, zero, negative amount, blank ID, leading-zero customer ID, and invalid dates; compare exact acceptance or <code>RowValidationError</code> outcome.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Idempotency:</strong> Choose a policy for duplicate <code>source_id</code> values within one input batch and test it before database submission.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Database upsert resolves persisted conflicts but may hide contradictory source rows.</li>
 <li><strong>Verify:</strong> Choose reject-first, reject-all, or deterministic-last-wins for duplicate <code>source_id</code>; assert the chosen result is decided before <code>executemany</code> and documented in counts.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Scale design:</strong> Compare materializing all accepted rows with a streaming validator and identify where bounded memory changes APIs.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A tuple return is convenient for lessons but not for unlimited sources.</li>
 <li><strong>Verify:</strong> Compare peak retained rows for materialized and streaming designs; the streaming API must emit bounded batches/rejections without requiring the entire input sequence.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Capacity:</strong> Select batch size from parameter count, row width, memory, and transaction duration rather than a universal constant.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Measure the real adapter and keep a safe configurable default.</li>
 <li><strong>Verify:</strong> Show a batch-size calculation using parameter count, row width, memory budget, and transaction-duration target; assert the selected size stays below every stated limit.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Transaction failure:</strong> Specify behavior when <code>executemany()</code> fails halfway and identify which layer owns rollback and retry.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Submission count is not committed count.</li>
 <li><strong>Verify:</strong> Inject a mid-load driver failure; assert the transaction owner rolls back the complete unit, the loader does not claim partial success, and retry starts from a defined boundary.</li>
 </ul>
-<ol>
+<ol start="13">
 <li><strong>Observability:</strong> Create a bounded rejection taxonomy and metrics that do not use source IDs or raw reasons as tags.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Metric labels must come from a fixed vocabulary.</li>
 <li><strong>Verify:</strong> Inspect metrics for a fixed rejection-reason enum and bounded outcome tags; assert no source ID, raw reason text, or complete rejected row appears as a tag.</li>
 </ul>
-<ol>
+<ol start="14">
 <li><strong>Reconciliation:</strong> Design a replay test that loads the same accepted sales twice and reconciles source IDs and total amount.</li>
 </ol>
 <ul>

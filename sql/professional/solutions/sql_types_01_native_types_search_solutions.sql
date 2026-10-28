@@ -15,7 +15,9 @@
 \set ON_ERROR_STOP on
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_types_lab;
+
 CREATE TABLE pro_types_lab.documents (
   document_id uuid PRIMARY KEY,
   state text NOT NULL CHECK (state IN ('draft', 'published')),
@@ -27,11 +29,13 @@ CREATE TABLE pro_types_lab.documents (
   metadata jsonb NOT NULL CHECK (jsonb_typeof(metadata) = 'object'),
   search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE(title, '')), 'A') || setweight(to_tsvector('english'::regconfig, COALESCE(body, '')), 'B')) STORED
 );
+
 INSERT INTO pro_types_lab.documents
 VALUES
   ('00000000-0000-0000-0000-000000000201', 'published', 'Safe schema migrations', 'Verify each schema migration and backfill before contract.', ARRAY['postgresql', 'sql', 'operations'], daterange(DATE '2026-01-01', DATE '2027-01-01', '[)'), datemultirange (daterange(DATE '2026-08-10', DATE '2026-08-12', '[)')), '{"minutes":45,"audience":["operator"]}', DEFAULT),
   ('00000000-0000-0000-0000-000000000202', 'published', 'SQL analytics', 'Build retention and funnel queries with explicit grain.', ARRAY['postgresql', 'sql', 'analytics'], daterange(DATE '2026-01-01', DATE '2027-01-01', '[)'), '{}'::datemultirange, '{"minutes":35,"audience":["analyst"]}', DEFAULT),
   ('00000000-0000-0000-0000-000000000203', 'draft', 'Python notes', 'Structured logs and configuration.', ARRAY['python'], daterange(DATE '2026-01-01', DATE '2026-06-01', '[)'), '{}'::datemultirange, '{"minutes":20,"audience":["developer"]}', DEFAULT);
+
 -- Exercise 1.
 SELECT
   d.document_id,
@@ -43,6 +47,7 @@ WHERE
   AND d.tags @> ARRAY['postgresql', 'operations']::text[]
 ORDER BY
   d.document_id;
+
 -- Exercise 2. Document 201 is excluded by its blackout; document 202 remains.
 SELECT
   d.document_id,
@@ -54,6 +59,7 @@ WHERE
   AND NOT (d.blackout_windows @> DATE '2026-08-11')
 ORDER BY
   d.document_id;
+
 SELECT
   probe.probe_name,
   probe.probe_date,
@@ -72,6 +78,7 @@ WHERE
   d.document_id = '00000000-0000-0000-0000-000000000201'::uuid
 ORDER BY
   probe.probe_date;
+
 -- Exercise 3. JSONPath tests the JSON type and numeric threshold before a
 -- numeric cast. It does not promise that every JSON number fits an integer.
 SELECT
@@ -84,6 +91,7 @@ WHERE
   d.metadata @? '$.minutes ? (@.type() == "number" && @ > 30)'
 ORDER BY
   d.document_id;
+
 -- Exercise 4.
 WITH query AS (
   SELECT
@@ -101,6 +109,7 @@ WHERE
 ORDER BY
   rank_score DESC,
   d.document_id;
+
 DO $solution$
 BEGIN
     IF (
@@ -123,6 +132,7 @@ BEGIN
     END IF;
 END
 $solution$;
+
 -- Exercise 5: choose an access method from the operators the workload really
 -- uses. `nonmatching_query` makes a common false assumption explicit.
 SELECT
@@ -134,6 +144,7 @@ FROM (
     ('range overlap/containment', 'availability @> date', 'GiST range_ops', 'lower(availability) = date', 'a lower-bound expression is not a range-containment search')) AS index_choice (workload, matching_operator, candidate_index, nonmatching_query, reason)
 ORDER BY
   workload;
+
 -- Exercise 6: type selection is a domain decision, not a fashion choice.
 SELECT
   *
@@ -147,6 +158,7 @@ FROM (
     ('many-to-many tags', 'normalized relation', 'foreign keys, canonical identity, and duplicate prevention')) AS type_decision (field_shape, candidate_type, decision_rule)
 ORDER BY
   field_shape;
+
 -- Exercise 7: discrete date multiranges canonicalize overlapping/adjacent
 -- members. Subtracting from the month produces the uncovered gaps.
 WITH schedule AS (
@@ -158,6 +170,7 @@ SELECT
   datemultirange (daterange(DATE '2026-08-01', DATE '2026-09-01', '[)')) - s.available AS august_gaps
 FROM
   schedule AS s;
+
 -- Exercise 8: longest prefix is the most-specific containing network.
 WITH rules (
   rule_id,
@@ -191,12 +204,15 @@ FROM
     LIMIT 1) AS best ON true
 ORDER BY
   c.client_id;
+
 -- Exercise 9: exact decimal storage with an explicit nonnegative reusable rule.
 CREATE DOMAIN pro_types_lab.nonnegative_money AS numeric(12, 2) CHECK (VALUE >= 0);
+
 SELECT
   10.10::pro_types_lab.nonnegative_money + 20.20::pro_types_lab.nonnegative_money AS exact_decimal_sum,
   round(10.125::numeric, 2) AS declared_rounding_example,
   NULL::pro_types_lab.nonnegative_money AS domain_null_without_column_rule;
+
 SELECT
   *
 FROM (
@@ -205,6 +221,7 @@ FROM (
     ('double precision', 'binary approximation', 'not exact for decimal equality', 'scientific measurement, not contractual money')) AS money_choice (storage, equality_model, rounding_policy, suitable_use)
 ORDER BY
   storage;
+
 -- Exercise 10: add malformed-for-this-property-but-valid-JSON probes before
 -- defining the generated column. The CASE must classify all of them safely.
 INSERT INTO pro_types_lab.documents (document_id, state, title, body, tags, availability, blackout_windows, metadata)
@@ -222,6 +239,7 @@ FROM (
     ('00000000-0000-0000-0000-000000000211'::uuid, 'Missing minutes', '{"audience":[]}'::jsonb),
     ('00000000-0000-0000-0000-000000000212'::uuid, 'Fractional minutes', '{"minutes":12.5}'::jsonb),
     ('00000000-0000-0000-0000-000000000213'::uuid, 'Out-of-range minutes', '{"minutes":999999999999}'::jsonb)) AS probe (document_id, title, metadata);
+
 ALTER TABLE pro_types_lab.documents
   ADD COLUMN estimated_minutes integer GENERATED ALWAYS AS ( CASE WHEN jsonb_typeof(metadata -> 'minutes') = 'number'
     AND (metadata ->> 'minutes')::numeric = trunc((metadata ->> 'minutes')::numeric)
@@ -230,7 +248,9 @@ ALTER TABLE pro_types_lab.documents
   ELSE
     NULL
   END) STORED;
+
 CREATE INDEX documents_estimated_minutes_idx ON pro_types_lab.documents (estimated_minutes);
+
 SELECT
   d.document_id,
   d.estimated_minutes
@@ -240,6 +260,7 @@ WHERE
   d.document_id >= '00000000-0000-0000-0000-000000000210'::uuid
 ORDER BY
   d.document_id;
+
 -- Exercise 11: inspect lexemes after the explicit English configuration.
 SELECT
   d.document_id,
@@ -248,17 +269,20 @@ FROM
   pro_types_lab.documents AS d
 ORDER BY
   d.document_id;
+
 -- Exercise 12: normalized vocabulary and bridge enforce tag identity and
 -- duplicate prevention through foreign keys plus a composite primary key.
 CREATE TABLE pro_types_lab.tags (
   tag_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   tag_name text NOT NULL UNIQUE
 );
+
 CREATE TABLE pro_types_lab.document_tags (
   document_id uuid NOT NULL REFERENCES pro_types_lab.documents (document_id) ON DELETE CASCADE,
   tag_id bigint NOT NULL REFERENCES pro_types_lab.tags (tag_id) ON DELETE RESTRICT,
   PRIMARY KEY (document_id, tag_id)
 );
+
 -- Deliberately inject duplicate/case/whitespace legacy spellings. The
 -- normalized bridge policy is lower(btrim(tag)); array order is discarded.
 UPDATE
@@ -267,6 +291,7 @@ SET
   tags = ARRAY['python', ' Python ', 'python']
 WHERE
   document_id = '00000000-0000-0000-0000-000000000203'::uuid;
+
 INSERT INTO pro_types_lab.tags (tag_name)
 SELECT DISTINCT
   lower(btrim(tag_name))
@@ -277,6 +302,7 @@ WHERE
   btrim(tag_name) <> ''
 ORDER BY
   lower(btrim(tag_name));
+
 INSERT INTO pro_types_lab.document_tags (document_id, tag_id)
 SELECT DISTINCT
   d.document_id,
@@ -287,6 +313,7 @@ FROM
   JOIN pro_types_lab.tags AS t ON t.tag_name = lower(btrim(item.tag_name))
 WHERE
   btrim(item.tag_name) <> '';
+
 SELECT
   d.document_id,
   d.title
@@ -303,4 +330,5 @@ HAVING
   COUNT(DISTINCT t.tag_name) = 2
 ORDER BY
   d.document_id;
+
 ROLLBACK;

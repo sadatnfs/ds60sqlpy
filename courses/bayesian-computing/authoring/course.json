@@ -1,0 +1,5 @@
+{
+  "title": "Bayesian computing: exact inference, PyMC and Stan",
+  "summary": "A complete worked route from probability and exact oracles through actual PyMC computation and self-contained Stan compilation, sampling, diagnostics and decisions.",
+  "introduction": "The course assumes basic Python and probability, with direct links to prerequisite concepts. Units 001-008 use Python Core, 009-016 use the prepared PyMC 5/ArviZ 0.23 InferenceData environment, and 017-024 compile real Stan in stan-cpu. PyMC demos use two serial chains with 120 warmup and 120 retained draws each. Stan pads use two seeded chains with 100 warmup and 100 retained draws, target acceptance 0.9. These small budgets demonstrate mechanisms and diagnostic limitations; they do not certify convergence. Stan pad data are explicit transformed-data constants. The separate [normal-mean project](projects/normal-mean/README.md) teaches real data.json workflows without implying a JSON editor exists in the classroom."
+}

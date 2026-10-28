@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.
 -- Assumptions: Stored event/order timestamps are `timestamptz`. Relative examples use the database clock; reports label UTC explicitly where conversion matters.
@@ -44,6 +45,7 @@ WHERE
 ORDER BY
   o.order_date DESC,
   o.order_id DESC;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Summarize orders and stored revenue by UTC month.
@@ -67,6 +69,7 @@ GROUP BY
   date_trunc('month', o.order_date AT TIME ZONE 'UTC')
 ORDER BY
   utc_month;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate each customer's age in whole days as of the current date.
@@ -87,6 +90,7 @@ FROM
   customers AS c
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Use a half-open interval to select one UTC calendar month and explain which boundary instant is excluded.
@@ -119,6 +123,7 @@ WHERE
 ORDER BY
   o.order_date,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Compare UTC and America/Los_Angeles display times without stripping the stored instant.
@@ -143,6 +148,7 @@ ORDER BY
   e.event_time,
   e.event_id
 LIMIT 20;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Create a seven-day UTC calendar and left join daily order counts so missing days appear as zero.
@@ -183,5 +189,6 @@ FROM
   LEFT JOIN daily_orders AS d ON d.utc_date = c.utc_date
 ORDER BY
   c.utc_date;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

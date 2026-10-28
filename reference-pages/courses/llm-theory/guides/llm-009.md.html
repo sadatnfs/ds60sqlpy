@@ -349,19 +349,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Trace three mixtures.</strong> Draw the three allowed rows and calculate the output of Example A by hand before executing it. Label query and key axes. <strong>Expected:</strong> weights <code>[1,0,0]</code>, <code>[1/2,1/2,0]</code>, <code>[1/3,1/3,1/3]</code>; outputs <code>[[2,0],[1,1],[8/3,8/3]]</code>. <strong>Verify:</strong> assert all output entries and row sums with <code>rtol=0, atol=1e-12</code>. State why these are feature vectors rather than next-token probabilities.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Change only the future.</strong> Repeat Example B with the third value <code>[100,200]</code>. Keep Q, K and the first two value rows fixed. Explain which output rows may change under the causal contract. <strong>Expected:</strong> first rows remain <code>[2,0]</code> and <code>[1,1]</code>; final row is <code>[34,202/3]</code>. All-allowed attention changes the first two rows too. <strong>Verify:</strong> compare the unchanged prefix separately from the final row. Preserve the original <code>v</code> and use a copy for the mutation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Construct a nonuniform prefix oracle.</strong> Use <code>Q=K=[[1,0],[0,1],[1,1],[-1,1]]</code> and <code>V=[[1,2],[3,4],[5,6],[7,8]]</code>. For cuts 1 through 4, compare the full result&#x27;s early rows with an independently recomputed prefix. Then perturb only Q, K and V rows at positions 2 and later and compare the first two outputs. <strong>Expected:</strong> every original-prefix comparison passes within <code>1e-12</code>, and future-only perturbations preserve the first two outputs within that tolerance. The example no longer relies on uniform scores. <strong>Verify:</strong> assert output values from a checker that slices all three arrays and constructs a new square mask for each cut. Reusing the full precomputed weights is not an independent oracle.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Diagnose a plausible-looking triangle.</strong> For the zero-score three-token example, a broken implementation computes an unmasked softmax first and then multiplies it by the lower triangle without renormalizing. Calculate the resulting row sums and outputs, then repair the score/mask order. <strong>Expected:</strong> broken row sums are <code>[1/3,2/3,1]</code>; broken outputs are <code>[[2/3,0],[2/3,2/3],[8/3,8/3]]</code>. The repaired result matches Example A. <strong>Verify:</strong> check row mass as well as output values. Explain why a visible triangle with zeros in forbidden positions was not sufficient.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Make invalid inputs fail clearly.</strong> Add tests for an empty token axis, an integer rather than boolean mask, a wrong mask shape, and an all-false second query row. Also try a NaN in V. <strong>Expected:</strong> the integer mask raises <code>TypeError</code>; the other supplied cases raise <code>ValueError</code>. The fully masked case says <code>each query needs at least one key</code>; no accepted result contains NaN. <strong>Verify:</strong> capture each exception independently and assert that the valid original fixture still works afterward. Do not catch every failure and return a zero matrix.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transfer to next-token labels.</strong> Given IDs <code>[2,5,7,3]</code>, construct the decoder inputs and next-token labels. Explain whether query zero may see its current input, whether it may see its target in the next input position, and one data-leakage failure that a correct mask does not address. <strong>Expected:</strong> inputs <code>[2,5,7]</code>, labels <code>[5,7,3]</code>, three target positions and pairs <code>[(2,5),(5,7),(7,3)]</code>. The diagonal is allowed; position 1 is forbidden to query zero. Tokenizer fitting on validation or duplicate document families can still contaminate assessment. <strong>Verify:</strong> inspect shifted arrays and an explicit allowed-row diagram. Supply a concrete duplicate-document or tokenizer-fit counterexample rather than saying that the model is safe because the prefix test passed.</li>
 </ol>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>

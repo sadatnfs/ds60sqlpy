@@ -14,6 +14,40 @@ from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
 
 RUNTIME_GUIDANCE: dict[str, str] = {
+    "dbt-duckdb": (
+        "Edit model.sql as actual dbt SQL/Jinja. Each run creates a fresh project "
+        "with the documented raw_orders/customers seeds, runs dbt seed/build and "
+        "returns the real model table and compilation metadata. Incremental state, "
+        "snapshots and configuration changes use the full project variant."
+    ),
+    "data-platforms-python": (
+        "Run main.py with prepared PyArrow, DataFusion and PyIceberg, plus pandas "
+        "and Plotly for inspection. Each run has fresh bounded local files and an "
+        "embedded SQLite catalog. Source, output and figures persist; temporary "
+        "Parquet, metadata and catalog files do not. Long-lived Flight, distributed "
+        "Ballista and external services use their separately prepared projects. "
+        "No package or service downloads occur during Run."
+    ),
+    "data-engineering": (
+        "Run main.py with prepared Polars, DuckDB, dbt, Feast and MLflow packages. "
+        "Examples create bounded local project files in a fresh scratch folder. "
+        "Tracking and feature stores are local to that run; saved source, output and "
+        "figures persist. Persistent services use the separately documented project. "
+        "Package downloads and telemetry are disabled."
+    ),
+    "stan-cpu": (
+        "The worker compiles main.stan with pinned CmdStan and runs two seeded CPU "
+        "chains with 100 warmup and 100 retained draws each. Choose the 120-second "
+        "deadline to allow compilation. Classroom models embed small fixtures in "
+        "transformed data; external data.json projects have separate instructions. "
+        "Short chains teach the workflow and do not establish reliable inference."
+    ),
+    "julia": (
+        "Run main.jl with Julia and prepared scientific packages in a fresh process. "
+        "The worker uses two CPU threads, an explicit locked environment and no "
+        "package downloads. DS60Plots can capture bounded Plotly figures. Temporary "
+        "project files are discarded; saved source, notes and results remain."
+    ),
     "jax-cpu": (
         "The worker executes main.py with pinned JAX/JAXLIB on CPU. JIT and automatic "
         "differentiation run locally; GPU/TPU and multi-host work require the "

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="workshop-token" content="WORKSHOP_TOKEN_PLACEHOLDER" />
+    <title>Inference lifecycle workshop</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">DATA AND ML ENGINEERING / SERVING SYSTEMS</p>
+      <h1>Inference lifecycle workshop</h1>
+      <p> Inspect a real, locally trained tiny Transformer from admission to retained output. </p>
+      <p class="scope">
+        Synthetic training corpus · CPU by default · One compute slot · No external model or API
+      </p>
+    </header>
+    <main>
+      <section class="card" aria-labelledby="readiness-heading">
+        <h2 id="readiness-heading">Loaded model and capacity</h2>
+        <p id="readiness" role="status">Reading startup state.</p>
+        <dl id="model-facts"></dl>
+        <p class="note">
+          Weights and tokenizer load once at service startup. Reading completed history does not run
+          inference.
+        </p>
+      </section>
+      <div class="columns">
+        <section class="card">
+          <h2>Create a request</h2>
+          <form id="request-form">
+            <label for="prompt">Prompt</label
+            ><textarea id="prompt" rows="5" maxlength="2048" spellcheck="false">
+A model learns</textarea
+            >
+            <div class="fields">
+              <label
+                >Maximum new tokens<input
+                  id="max-tokens"
+                  type="number"
+                  min="1"
+                  max="64"
+                  value="32"
+                  required
+              /></label>
+              <label
+                >Temperature<input
+                  id="temperature"
+                  type="number"
+                  min="0"
+                  max="2"
+                  step="0.05"
+                  value="0"
+                  required
+              /></label>
+              <label
+                >Top-k<input id="top-k" type="number" min="1" max="64" value="20" required
+              /></label>
+              <label
+                >Seed<input id="seed" type="number" min="0" max="2147483647" value="42" required
+              /></label>
+            </div>
+            <label for="stop-string">Optional stop string</label
+            ><input
+              id="stop-string"
+              maxlength="32"
+              placeholder="Leave blank for EOS or token limit"
+            />
+            <p class="note">
+              Temperature zero is greedy. The 96-token context includes BOS, prompt tokens and the
+              requested output reservation. This small model may produce fragments or invalid byte
+              sequences; replacement characters are counted.
+            </p>
+            <div class="actions">
+              <button id="submit" type="submit">Create and stream</button
+              ><button id="cancel" type="button" disabled> Cancel request </button>
+            </div>
+          </form>
+          <p id="request-status" role="status" aria-live="polite"> No request submitted. </p>
+        </section>
+        <section class="card">
+          <h2>Output and event trace</h2>
+          <p id="request-id" class="mono">No selected request</p>
+          <pre id="output" tabindex="0" aria-label="Generated output"></pre>
+          <p id="metrics" class="note">
+            Compute timing excludes deliberate pacing, event persistence and subscriber waits. Wall
+            time includes them.
+          </p>
+          <details>
+            <summary>Token and SSE event observations</summary>
+            <pre id="events" tabindex="0"></pre>
+          </details>
+          <div class="actions">
+            <button id="download" disabled>Download exact record</button
+            ><button id="readback" disabled>Read saved events</button>
+          </div>
+          <p class="note">
+            A model token, an SSE event and a network chunk are different units. The trace records
+            token IDs and bytes; the output decoder waits for complete UTF-8 characters.
+          </p>
+        </section>
+      </div>
+      <section class="card">
+        <h2>Retained requests</h2>
+        <p>
+          History is local to this workshop's state directory. Selecting a completed request reads
+          its original events, source and model identity.
+        </p>
+        <button id="refresh" type="button">Refresh history</button>
+        <div id="history" role="list"></div>
+      </section>
+    </main>
+    <footer>
+      Learning implementation: single-worker FIFO scheduling and contiguous KV caches. Advanced
+      batching, GPU kernels and paged KV allocation are taught separately.
+    </footer>
+  </body>
+</html>

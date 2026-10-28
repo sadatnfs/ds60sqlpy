@@ -1,11 +1,11 @@
 -- Day 37: Partitioning & Data Sharding (PostgreSQL native partitioning demo)
--- BEGINNER WORKFLOW — sql-37: Partitioning Sharding
+-- BEGINNER WORKFLOW - sql-37: Partitioning Sharding
 -- Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-37/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-37.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Create a partitioned table for large events (demo table)
 CREATE TABLE big_events (
   id BIGSERIAL,
@@ -26,11 +27,14 @@ CREATE TABLE big_events (
   payload JSONB
 )
 PARTITION BY RANGE (event_time);
+
 -- Create monthly partitions
 CREATE TABLE big_events_2025_01 PARTITION OF big_events
 FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
+
 CREATE TABLE big_events_2025_02 PARTITION OF big_events
 FOR VALUES FROM ('2025-02-01 00:00:00+00') TO ('2025-03-01 00:00:00+00');
+
 -- Insert sample rows
 INSERT INTO big_events (event_time, customer_id, payload)
 SELECT
@@ -39,6 +43,7 @@ SELECT
   jsonb_build_object('k', 'v', 'source_row', event_no)
 FROM
   generate_series(1, 1000) AS g (event_no);
+
 -- Query with partition pruning
 EXPLAIN ANALYZE
 SELECT
@@ -48,6 +53,7 @@ FROM
 WHERE
   event_time >= '2025-01-15'
   AND event_time < '2025-02-15';
+
 -- Exercises
 -- 1. Add more partitions and test pruning.
 --    Inputs: For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.

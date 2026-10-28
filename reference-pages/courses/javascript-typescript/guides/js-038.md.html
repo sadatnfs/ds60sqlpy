@@ -323,19 +323,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Handle and decode a successful request.</strong> Send 2 and 3 through the handler, JSON round-trip its reply, then decode it. <strong>Expected:</strong> status 200 and decoded total 5. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Return a stable invalid-input envelope.</strong> Submit a string operand instead of a number. <strong>Expected:</strong> status 400 with bad_request and matching request id. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Distinguish route and method failures.</strong> Use an unknown path and an unsupported method. <strong>Expected:</strong> 404 not_found versus 405 method_not_allowed. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject version or status/body disagreement.</strong> Decode an unsupported version and a success envelope paired with status 400. <strong>Expected:</strong> TypeError for both malformed replies. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Require success narrowing in checked client code.</strong> Attempt data access before checking ok in an uncalled function. <strong>Expected:</strong> expected compiler error; correctly narrowed success remains usable. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Keep invalid payload details out of response errors.</strong> Include a secret-looking extra field in an invalid request. <strong>Expected:</strong> bad_request response does not echo the supplied value. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

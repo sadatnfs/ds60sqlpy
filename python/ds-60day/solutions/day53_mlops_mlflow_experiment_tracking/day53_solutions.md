@@ -21,14 +21,34 @@ import numpy as np
 X, y = load_breast_cancer(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0, stratify=y)
 
-mlflow.set_experiment('rf-breast-cancer')
+from pathlib import Path
+
+# Explicit local metadata and artifact stores override ambient tracking settings.
+artifact_dir = Path("artifacts/day53").resolve()
+artifact_dir.mkdir(parents=True, exist_ok=True)
+tracking_uri = "sqlite:///" + str(artifact_dir / "tracking.sqlite")
+if mlflow.active_run() is not None:
+    raise RuntimeError("Finish the active run before opening this isolated lesson")
+mlflow.set_tracking_uri(tracking_uri)
+mlflow.set_registry_uri(tracking_uri)
+experiment_name = "ds60-day53-local"
+artifact_location = (artifact_dir / "runs").as_uri()
+experiment = mlflow.get_experiment_by_name(experiment_name)
+if experiment is None:
+    experiment_id = mlflow.create_experiment(experiment_name, artifact_location=artifact_location)
+else:
+    if experiment.artifact_location != artifact_location:
+        raise RuntimeError("Existing experiment has a different artifact location")
+    experiment_id = experiment.experiment_id
+mlflow.set_experiment(experiment_id=experiment_id)
+
 ```
 
 Worked reference for Exercise 1; Grid search with autologging
 ```python
-mlflow.sklearn.autolog()
+mlflow.sklearn.autolog(log_models=False, log_input_examples=False, silent=True)
 
-param_grid = {'n_estimators':[100,300], 'max_depth':[None,5,10]}
+param_grid = {'n_estimators':[30,60], 'max_depth':[None,5,10]}
 rf = RandomForestClassifier(random_state=0)
 cv = GridSearchCV(rf, param_grid=param_grid, scoring='roc_auc', cv=3, n_jobs=1, return_train_score=True)
 
@@ -41,7 +61,7 @@ with mlflow.start_run(run_name='rf_grid'):
 print('Best params:', cv.best_params_)
 ```
 Explanation
-- autolog captures params, metrics, and model artifacts automatically
+- autolog captures parameters and metrics; model inference/package inspection is disabled during the grid search. The winning model is logged explicitly using the already prepared locked environment.
 - Start a run context so logs are grouped
 
 ---
@@ -53,13 +73,17 @@ with mlflow.start_run(run_name='rf_best_model') as run:
     proba = best.predict_proba(Xte)[:,1]
     test_auc = roc_auc_score(yte, proba)
     mlflow.log_metric('test_auc', test_auc)
-    mlflow.sklearn.log_model(best, 'model')
+    model_info = mlflow.sklearn.log_model(
+        best, name="model", input_example=Xtr[:2], pip_requirements=[],
+        # Only our freshly fitted local RandomForest is trusted here.
+        skops_trusted_types=["sklearn.tree._tree.Tree"],
+    )
     run_id = run.info.run_id
 
 print('Logged under run:', run_id)
 
 # Load model later
-loaded = mlflow.sklearn.load_model(f'runs:/{run_id}/model')
+loaded = mlflow.sklearn.load_model(model_info.model_uri)
 print('Loaded AUC:', roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]))
 ```
 Notes

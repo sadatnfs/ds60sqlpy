@@ -1,15 +1,5 @@
 # Day 53: Data Warehouse Project, Part 2: SCD Type 2
 
-## Level and prerequisites
-
-- **Level:** Advanced
-- **Prerequisites:** Run and verify committed
-  [Day 52; star-schema warehouse](day52_project3_dwh_part1.md) in the same
-  database.
-- **Artifacts:** [learner SQL](../day53_project3_dwh_part2_scd.sql) ·
-  [solution reasoning](../solutions/day53_solutions.md) ·
-  [executable solution](../solutions/day53_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -74,6 +64,16 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Advanced
+- **Prerequisites:** Run and verify committed
+  [Day 52; star-schema warehouse](day52_project3_dwh_part1.md) in the same
+  database.
+- **Artifacts:** [learner SQL](../day53_project3_dwh_part2_scd.sql) ·
+  [solution reasoning](../solutions/day53_solutions.md) ·
+  [executable solution](../solutions/day53_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -93,7 +93,7 @@ The first runnable example has a concrete contract: Example 1 returns one row pe
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day53_project3_dwh_part2_scd.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day53_project3_dwh_part2_scd.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

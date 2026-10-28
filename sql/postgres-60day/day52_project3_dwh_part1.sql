@@ -1,11 +1,11 @@
 -- Day 52: Project 3 - Data Warehouse Design (Part 1)
--- BEGINNER WORKFLOW — sql-52: Project3 DWH Part1
+-- BEGINNER WORKFLOW - sql-52: Project 3 DWH Part 1
 -- Guide: sql/postgres-60day/companion-guides/day52_project3_dwh_part1.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-52/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-52.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,11 +19,15 @@
 -- Topics: Star schema design (facts/dimensions) and initial loads
 BEGIN;
 SET search_path TO training, public;
+
 -- This three-day project is intentionally stateful. Re-running Day 52 resets
 -- only the course-owned dwh schema, then commits it for Days 53 and 54.
 DROP SCHEMA IF EXISTS dwh CASCADE;
+
 CREATE SCHEMA dwh;
+
 SET search_path TO dwh, training, public;
+
 -- Dimension tables (surrogate keys)
 CREATE TABLE dim_date (
   date_key INT PRIMARY KEY, -- yyyymmdd
@@ -35,7 +39,9 @@ CREATE TABLE dim_date (
   day_name TEXT NOT NULL,
   is_weekend BOOLEAN NOT NULL
 );
+
 CREATE SEQUENCE dim_customer_sk_seq;
+
 CREATE TABLE dim_customer (
   customer_sk INT PRIMARY KEY DEFAULT nextval('dim_customer_sk_seq'),
   customer_id INT NOT NULL, -- business key
@@ -46,7 +52,9 @@ CREATE TABLE dim_customer (
   valid_to DATE,
   is_current BOOLEAN NOT NULL DEFAULT TRUE
 );
+
 CREATE SEQUENCE dim_product_sk_seq;
+
 CREATE TABLE dim_product (
   product_sk INT PRIMARY KEY DEFAULT nextval('dim_product_sk_seq'),
   product_id INT NOT NULL, -- business key
@@ -58,6 +66,7 @@ CREATE TABLE dim_product (
   valid_to DATE,
   is_current BOOLEAN NOT NULL DEFAULT TRUE
 );
+
 -- Fact table
 CREATE TABLE fact_sales (
   order_id INT NOT NULL,
@@ -70,6 +79,7 @@ CREATE TABLE fact_sales (
   discount NUMERIC(5, 2) NOT NULL,
   amount NUMERIC(12, 2) NOT NULL
 );
+
 -- Populate dim_date for every source order plus a useful planning horizon.
 -- Deriving the bounds from the source prevents old facts from missing a date key.
 WITH bounds AS (
@@ -96,6 +106,7 @@ SELECT
   (extract(isodow from d)::int >= 6)
 FROM
   cal;
+
 -- Initial load for customer dimension (Type 2 structure; initial current rows)
 INSERT INTO dim_customer (customer_id, full_name, country, segment, valid_from, valid_to, is_current)
 SELECT
@@ -108,6 +119,7 @@ SELECT
   TRUE
 FROM
   training.customers c;
+
 -- Initial load for product dimension
 INSERT INTO dim_product (product_id, name, category, price, cost, valid_from, valid_to, is_current)
 SELECT
@@ -121,6 +133,7 @@ SELECT
   TRUE
 FROM
   training.products p;
+
 -- Load fact from existing orders/items (map to dims using current rows)
 WITH oi AS (
   SELECT
@@ -162,6 +175,7 @@ keys AS (
     amount
   FROM
     keys;
+
 -- Sample star query
 SELECT
   dd.year,
@@ -181,6 +195,7 @@ ORDER BY
   dd.month DESC,
   revenue DESC
 LIMIT 50;
+
 -- Exercises
 -- 1. Add dim_country and link customers to it.
 --    Inputs: For sql-52 Exercise 1, read the target keys from `dim_country`, `training.customers`, `dim_customer`, and `dwh.dim_customer` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.

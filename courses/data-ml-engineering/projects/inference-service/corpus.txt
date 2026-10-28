@@ -1,0 +1,36 @@
+A table contains rows and columns.
+A row describes one observation.
+A key identifies a record.
+A join needs an explicit row grain.
+A model learns patterns from examples.
+A tokenizer maps bytes to token identifiers.
+A token embedding is a learned lookup vector.
+A retrieval embedding serves a different search objective.
+A position tells the model where a token appears.
+Attention combines information from the available prefix.
+A causal mask prevents a future token from leaking backward.
+Weights are loaded before the service becomes ready.
+A checkpoint has a format and a content hash.
+A hash checks integrity against a trusted manifest.
+A queue limits the amount of waiting work.
+A full queue rejects a new request explicitly.
+A request keeps its own key and value cache.
+Prefill processes the prompt.
+Decode adds one token to the prefix.
+Sampling chooses from a conditional distribution.
+A seed makes one bounded experiment reproducible.
+A stopped request releases its reserved capacity.
+A network chunk is not necessarily one token.
+An event identifier lets a reader detect duplicates.
+A completed event record can be read without running a model again.
+A timeout does not prove that a remote action never happened.
+A saved receipt records the submitted source and its outcome.
+A measurement needs a defined boundary.
+Server timing excludes the client's network and paint time.
+Artificial pacing is reported separately from model computation.
+A CPU demonstration does not prove GPU performance.
+A GPU kernel has device, dtype and layout requirements.
+A small synthetic model is a teaching mechanism.
+A deployment decision needs evidence about its actual population.
+A failed storage operation must not be hidden.
+A clear contract makes a failure easier to diagnose.

@@ -139,11 +139,11 @@ The result grain is one eligible job with columns job_id and priority. IDs 1,3,6
 
 **Verify:** For sql-deep-05 Exercise 2, project both the original and rewritten predicates on the same rows; retain the counterexample where their truth values differ instead of relying on coincidentally equal counts.
 
-3. **Inspect index existence without inventing a plan guarantee.** Return one row with index_name, is_partial, key_columns, ready_rows for the temporary deep 5_ready_idx. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
+3. **Inspect index existence without inventing a plan guarantee.** Return one row with index_name, is_partial, key_columns, ready_rows for the temporary `deep5_ready_idx`. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
 
-**Inputs/evidence:** For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary deep 5_ready_idx. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
+**Inputs/evidence:** For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary `deep5_ready_idx`. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
 
-**Expected result/shape:** For sql-deep-05 Exercise 3, The row is deep 5_ready_idx, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
+**Expected result/shape:** For sql-deep-05 Exercise 3, The row is `deep5_ready_idx`, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
 
 **Verify:** For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.
 

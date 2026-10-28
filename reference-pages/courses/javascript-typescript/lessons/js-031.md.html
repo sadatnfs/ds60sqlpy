@@ -199,19 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Render a markup-looking title as literal text.</strong> Save the snippet and inspect the resulting DOM and visible title. <strong>Expected:</strong> the angle-bracket text is visible; no img element is created. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Validate a URL before creating a link.</strong> Use a same-origin relative link and reject a javascript URL under the shown policy. <strong>Expected:</strong> local help is accepted; javascript: is rejected. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Install the complete fixture CSP.</strong> Inspect the reference HTML and load its external script and stylesheet under the meta policy. <strong>Expected:</strong> local resources load; no inline handlers or eval are needed. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject origin and credential tricks.</strong> Try a different port, an external origin, a data URL and embedded credentials. <strong>Expected:</strong> every candidate is rejected by the local-link policy. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Inspect dynamic text without changing policy.</strong> Enter strong-tag-looking text, render it, then inspect child element count. <strong>Expected:</strong> text remains literal and child element count stays zero. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Explain the actual policy boundary.</strong> Record what the meta policy proves and what needs headers or server authorization. <strong>Expected:</strong> no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol></article>
   </main>

@@ -1,5 +1,8 @@
 # Day 51: Solutions: Advanced Feature Engineering (Target Encoding, Hashing, Groups)
 
+**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 We implement K‑fold target encoding without leakage, feature hashing for high‑cardinality categories, and rolling group statistics in time order.
 
 Contents
@@ -17,7 +20,7 @@ from scipy import sparse
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import KFold, train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
@@ -42,25 +45,56 @@ test_df = test_df.reset_index(drop=True)
 
 Worked reference for Exercise 1; K‑fold target encoding
 ```python
-kf = KFold(n_splits=5, shuffle=True, random_state=0)
-train_target_encoded = pd.Series(index=train_df.index, dtype=float)
+def fit_target_map(cat: pd.Series, y: pd.Series, smoothing=10):
+    """Fit smoothed category means and a prior using only these training rows."""
+    if not cat.index.equals(y.index):
+        raise ValueError("Category and target indexes must match in row order.")
+    if len(y) == 0 or not np.isfinite(y.to_numpy(dtype=float)).all():
+        raise ValueError("Training targets must be nonempty and finite.")
+    if not np.isfinite(smoothing) or smoothing < 0:
+        raise ValueError("Smoothing must be finite and nonnegative.")
+    prior = float(y.mean())
+    # Ignore unused levels; missing categories use the prior at transform time.
+    stats = y.groupby(cat, observed=True, dropna=True).agg(["mean", "count"])
+    mapping = (stats["mean"] * stats["count"] + prior * smoothing) / (stats["count"] + smoothing)
+    return mapping, prior
 
-for fit_indices, validation_indices in kf.split(train_df):
-    fold_fit = train_df.iloc[fit_indices]
-    category_means = fold_fit.groupby("cat")["y"].mean()
-    fold_global_mean = fold_fit["y"].mean()
-    train_target_encoded.iloc[validation_indices] = (
-        train_df.iloc[validation_indices]["cat"]
-        .map(category_means)
-        .fillna(fold_global_mean)
-    )
 
-# The holdout is transformed only with statistics learned from all training rows.
-training_category_means = train_df.groupby("cat")["y"].mean()
-training_global_mean = train_df["y"].mean()
-test_target_encoded = (
-    test_df["cat"].map(training_category_means).fillna(training_global_mean)
-)
+def transform_target_encode(cat: pd.Series, mapping: pd.Series, prior: float):
+    """Apply fitted statistics without reading targets for these new rows."""
+    # Mapping a Categorical can retain its dtype. Convert before filling a prior.
+    encoded = cat.map(mapping).astype(float).fillna(prior)
+    if not np.isfinite(encoded.to_numpy()).all():
+        raise ValueError("Encoded values must be finite.")
+    return encoded
+
+
+def kfold_target_encode(cat: pd.Series, y: pd.Series, n_splits=5, smoothing=10):
+    """Return OOF features in source order; this is not an sklearn transformer."""
+    if not cat.index.equals(y.index):
+        raise ValueError("Category and target indexes must match in row order.")
+    if len(y) == 0 or not np.isfinite(y.to_numpy(dtype=float)).all():
+        raise ValueError("Training targets must be nonempty and finite.")
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    out = pd.Series(index=cat.index, dtype=float)
+    for fit_positions, validation_positions in skf.split(cat, y):
+        mapping, fold_prior = fit_target_map(
+            cat.iloc[fit_positions], y.iloc[fit_positions], smoothing=smoothing
+        )
+        # Positional assignment preserves row order even for a shuffled index.
+        out.iloc[validation_positions] = transform_target_encode(
+            cat.iloc[validation_positions], mapping, fold_prior
+        ).to_numpy()
+    if not np.isfinite(out.to_numpy()).all():
+        raise ValueError("Every training row must receive a finite OOF value.")
+    return out
+
+
+train_target_encoded = kfold_target_encode(train_df["cat"], train_df["y"], n_splits=5, smoothing=10)
+
+# The holdout uses the same smoothing policy fitted on all training rows only.
+training_mapping, training_prior = fit_target_map(train_df["cat"], train_df["y"], smoothing=10)
+test_target_encoded = transform_target_encode(test_df["cat"], training_mapping, training_prior)
 
 X_train_target = np.column_stack([train_df["num"], train_target_encoded])
 X_test_target = np.column_stack([test_df["num"], test_target_encoded])
@@ -101,10 +135,24 @@ one_hot_auc = roc_auc_score(
 print({"AUC_target_encoding": target_auc, "AUC_one_hot": one_hot_auc})
 ```
 Explanation
-- For each fold, compute category→mean strictly on training indices, then map to validation
-- Fill unknowns with global mean from training fold
-- Learn the holdout mapping from training data only; never use holdout targets in encoding
+- For each fold, fit both category statistics and the prior strictly on its training rows, then map its validation rows.
+- Use `(count * mean + smoothing * prior) / (count + smoothing)` for both OOF and holdout mappings.
+- Set `observed=True` to exclude unused categorical levels and `dropna=True` so missing values use the prior, as do unknown levels.
+- Convert mapped categories to float before filling the prior; pandas may otherwise preserve categorical dtype and reject the fallback.
+- Require aligned category/target indexes; assign folds by position and preserve source order and index.
+- Learn the holdout mapping from training data only; never use holdout targets in encoding.
 - `sparse_output=True` is the supported scikit-learn parameter (`sparse` was renamed)
+
+The helpers are not a drop-in scikit-learn transformer. A fitted estimator must
+produce OOF values during `fit_transform`, store the full-training map and prior,
+and apply only that stored state during `transform`. Wrapping these functions
+in `FunctionTransformer` alone does not establish that fitting contract.
+
+OOF construction over a whole dataset before outer cross-validation is not
+automatically leak-free: outer validation labels can enter other rows' maps or
+priors. Recompute OOF features within each outer training partition, then fit
+its validation mapping from that partition alone. Use an inner CV loop for
+smoothing or split-choice tuning when reporting an outer CV score.
 
 ---
 
@@ -151,7 +199,7 @@ df["group"] = rng.choice(list("ABC"), size=T)
 
 # Sort by group then time for leakage‑safe transforms
 df = df.sort_values(["group", "ts"]).reset_index(drop=True)
-df["grp_roll_mean_y"] = df.groupby("group")["y"].transform(
+df["grp_roll_mean_y"] = df.groupby("group", observed=True)["y"].transform(
     lambda values: values.shift(1).rolling(24, min_periods=5).mean()
 )
 

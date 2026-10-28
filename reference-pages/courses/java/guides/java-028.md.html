@@ -272,19 +272,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Call an owned loopback endpoint.</strong> Start the fixture and request <code>GET /health</code>. <strong>Expected:</strong> status 200 and body ok. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with status 200 and body ok.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect content metadata.</strong> ReadContent-Type on the successful response. <strong>Expected:</strong> text/plain with UTF-8 charset. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with text/plain with UTF-8 charset.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject an unsupported method.</strong> POSTto/health underaGET-onlycontract. <strong>Expected:</strong> status405 and method not allowed body. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with status405 and method not allowed body.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject a prefix lookalike.</strong> GET/health-extra,which matches the context prefix but not the declared exact path. <strong>Expected:</strong> status404. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with status404.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Keep error status separate from transport success.</strong> GETanunknownpathandinspectthecompletedresponse. <strong>Expected:</strong> HTTP exchange completes with404 rather than a fabricated200. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with HTTP exchange completes with404 rather than a fabricated200.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Verify local-only target and closure.</strong> Inspect the bound host and positive ephemeral port,then close the wrapper. <strong>Expected:</strong> host 127.0.0.1;port positive; closed flag true. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with host 127.0.0.1;port positive; closed flag true.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

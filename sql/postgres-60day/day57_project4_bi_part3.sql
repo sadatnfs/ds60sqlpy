@@ -1,11 +1,11 @@
 -- Day 57: Project 4 - Complex BI (Part 3)
--- BEGINNER WORKFLOW — sql-57: Project4 BI Part3
+-- BEGINNER WORKFLOW - sql-57: Project 4 BI Part 3
 -- Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-57/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-57.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Trend analysis, anomaly detection, and forecast accuracy
 BEGIN;
 SET search_path TO training, public;
+
 -- Daily revenue baseline
 WITH daily AS (
   SELECT
@@ -62,6 +63,7 @@ FROM
 ORDER BY
   d DESC
 LIMIT 60;
+
 -- MAD-based anomaly (more robust to outliers)
 WITH daily AS (
   SELECT
@@ -115,6 +117,7 @@ FROM
 ORDER BY
   dev.d DESC
 LIMIT 60;
+
 -- Forecast accuracy: compare MA(7) forecast to actual; compute MAPE for last 30 days
 WITH daily AS (
   SELECT
@@ -149,6 +152,7 @@ FROM
 ORDER BY
   d DESC
 LIMIT 30;
+
 -- Exercises
 -- 1. Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.
 --    Inputs: For sql-57 Exercise 1, read `orders` into a one-row-per-day calendar spine, calculate `ma7_forecast` and `seasonal_naive` in `forecasts`, and aggregate the final `model` and `mape`; the output grain is model, not order.

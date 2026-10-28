@@ -1,0 +1,58 @@
+{
+  "number": 10,
+  "title": "Composite types, constructors and nested mutability",
+  "concepts": ["struct", "constructor", "mutable struct", "invariant", "nested state"],
+  "outcome": "Use owned types to represent data contracts and distinguish immutable bindings from recursively immutable state.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-009"],
+  "sources": [
+    ["Julia composite types", "https://docs.julialang.org/en/v1/manual/types/"],
+    ["Julia constructors", "https://docs.julialang.org/en/v1/manual/constructors/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Validate a unit",
+      "task": "Attempt to construct a measurement with an unsupported unit.",
+      "expected": "Construction fails explicitly.",
+      "hint": "Check the invariant before new creates the object.",
+      "answer": "Field types alone cannot distinguish supported and unsupported physical units."
+    },
+    {
+      "title": "Inspect conversion",
+      "task": "Construct a measurement from integer 1.",
+      "expected": "Its stored value is Float64.",
+      "hint": "The constructor chooses that representation.",
+      "answer": "The conversion is deliberate and can have precision consequences for other numeric inputs."
+    },
+    {
+      "title": "Try field reassignment",
+      "task": "Reassign a field of an immutable measurement.",
+      "expected": "The operation is rejected.",
+      "hint": "The struct field binding is fixed after construction.",
+      "answer": "This says nothing about whether the original measurement was scientifically valid."
+    },
+    {
+      "title": "Mutate nested storage",
+      "task": "Change the vector inside VectorRecord.",
+      "expected": "Its contents can change despite the immutable outer struct.",
+      "hint": "The vector itself is mutable.",
+      "answer": "Deep immutability requires more than an immutable wrapper."
+    },
+    {
+      "title": "Create a snapshot",
+      "task": "Copy the vector before storing it in another record.",
+      "expected": "Later source-vector mutation does not affect that copied vector.",
+      "hint": "Choose the required storage independence explicitly.",
+      "answer": "A snapshot policy must account for every nested mutable layer."
+    },
+    {
+      "title": "Review a convenience constructor",
+      "task": "Add a constructor with a default unit in an owned copy.",
+      "expected": "It preserves the same validation contract.",
+      "hint": "Route convenience paths through validated construction.",
+      "answer": "An API becomes inconsistent if one creation path bypasses its stated invariant."
+    }
+  ]
+}

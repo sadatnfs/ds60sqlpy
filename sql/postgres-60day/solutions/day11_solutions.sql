@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.
 -- Assumptions: Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.
@@ -46,6 +47,7 @@ FROM
   orders AS o
 ORDER BY
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.
@@ -64,6 +66,7 @@ SELECT
   COUNT(*) AS all_orders
 FROM
   orders AS o;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Label missing customer segments separately from known segment values.
@@ -90,6 +93,7 @@ FROM
   customers AS c
 ORDER BY
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Predict the label for 500 when `>= 100` appears before `>= 500`, then repair the branch order.
@@ -118,6 +122,7 @@ FROM (
     (500::numeric)) AS sample (amount)
 ORDER BY
   amount;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Replace a CASE expression that returns mixed numeric and text types with one consistent output type.
@@ -146,6 +151,7 @@ FROM (
     (2)) AS sample (value)
 ORDER BY
   value NULLS FIRST;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Create payment-method display labels and preserve unknown future methods with an explicit fallback.
@@ -180,5 +186,6 @@ GROUP BY
   p.method
 ORDER BY
   p.method;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

@@ -363,19 +363,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Trace lower bound with duplicates.</strong> Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals. <strong>Expected:</strong> index 1; intervals shrink to the first duplicate. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Use a heap for repeated minimum extraction.</strong> Insert 5,1,3,1 and remove all values. <strong>Expected:</strong> pops 1,1,3,5, then undefined. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Cover empty and outside search boundaries.</strong> Search empty input, then targets below and above a sorted input. <strong>Expected:</strong> positions 0,0,3. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Measure comparisons without a timing claim.</strong> Search 1024 even integers for a missing value between two entries. <strong>Expected:</strong> insertion position 501 with no more than 11 comparisons. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject duplicate index keys.</strong> Build a Map keyed by id and reject repeated ids rather than silently replacing a row. <strong>Expected:</strong> valid lookup returns 7; duplicate id throws. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Check the heap invariant after every update.</strong> Push descending values and check each parent/child relation; reject NaN. <strong>Expected:</strong> all invariants hold; invalid value throws. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

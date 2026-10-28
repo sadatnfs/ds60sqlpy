@@ -1,0 +1,19 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 60,
+  "prerequisites": ["apache-016", "apache-005"],
+  "concepts": ["execution partitions", "memory pools", "spill evidence"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    [
+      "DataFusion runtime configuration",
+      "https://datafusion.apache.org/python/user-guide/configuration.html"
+    ],
+    [
+      "DataFusion memory management",
+      "https://docs.rs/datafusion-execution/55.0.0/datafusion_execution/memory_pool/index.html"
+    ]
+  ]
+}

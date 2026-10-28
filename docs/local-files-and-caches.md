@@ -16,6 +16,7 @@ code, results or the database.
 | Browser storage for `START_HERE.html` | Static-reader markers and preferences | Separate from server-backed classroom state |
 | `.venv/` | Optional contributor interpreter and packages | Recreate from the lock on each machine |
 | `artifacts/`, `mlruns/`, model/data caches | Experiments and prepared offline assets | Inspect and preserve anything you need |
+| Owned dbt, ML-service and Stan project copies under `work/` | Databases, trained models, tracking state, chain CSVs and diagnostics from separate projects | Back up needed evidence separately; do not include it in the source ZIP |
 | Python bytecode and test/lint caches | Regenerable tool state | Recreate when needed |
 | `START_HERE.html`, `lesson-pages/`, `reference-pages/` | Maintained offline readers | Keep in distributions; regenerate through their tools |
 | `uv.lock`, worker locks and course fixtures | Reproducible environment and lesson inputs | Keep in source control |

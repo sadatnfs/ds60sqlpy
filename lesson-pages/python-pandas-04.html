@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-pandas-04.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-pandas-04.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_pandas_04.py</code></pre>
 <p>Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-pandas-04.html#solution-1">explanatory solutions</a> and <a href="python-pandas-04.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -440,23 +440,23 @@ chunks <span class="syntax-operator">=</span> <span class="syntax-builtin">list<
 <li><strong>Retain the correct mean denominator.</strong> For a numeric Series containing finite values or missing entries, return accurate known-value sum and known-value count. Reject nonnumeric dtype or infinity with ValueError. An empty or all-missing numeric Series returns (0.0,0).</li>
 </ol>
 <p><strong>Expected:</strong> [1, NA,3] returns (4.0,2), not count 3. Empty Float64 and [NA] Float64 return (0.0,0); infinity fails.</p>
-<ol>
+<ol start="2">
 <li><strong>Combine uneven chunks correctly.</strong> Combine sum/count states into one mean, returning None if total count is zero. Require finite sums and nonnegative integer counts; a zero-count state must have zero sum. Reject invalid states with ValueError.</li>
 </ol>
 <p><strong>Expected:</strong> States(4,2),(100,1) yield 104/3. Adding(0,0) has no effect. Empty states return None; (5,0), negative count or Boolean count is rejected.</p>
-<ol>
+<ol start="3">
 <li><strong>Reduce typed amounts across batches.</strong> Consume an iterable of chunks with nonmissing string customer_id and nullable/integer amount_cents. Reject missing or nonstring customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.</li>
 </ol>
 <p><strong>Expected:</strong> Across chunks a:10, b:NA then a:20, b:NA, return a counts 2,2, total 30 and b counts 2,0, totalNA. Input chunk boundaries do not change the result.</p>
-<ol>
+<ol start="4">
 <li><strong>Detect conflicts across chunk boundaries.</strong> Consume chunks with nonmissing integer event_id and amount_cents that is integer or missing. Keep the first occurrence of identical event records in encounter order. Reject any repeated ID with a different amount, including missing versus zero, with ValueError.</li>
 </ol>
 <p><strong>Expected:</strong> Chunks[(1,10),(2, NA)] then[(1,10),(3,20)] return IDs 1,2,3. Repeating ID 2 with amount 0 raises ValueError; missing is not normalized to zero.</p>
-<ol>
+<ol start="5">
 <li><strong>Carry rolling history across batches.</strong> Yield full-window row-count rolling means across an iterable of finite numeric one-dimensional chunks. Require a positive non-Boolean integer window. Do not reset history at a chunk boundary, and yield nothing before a full window exists.</li>
 </ol>
 <p><strong>Expected:</strong> Chunks[1,2] then[3,4] with window 3 yield [2,3], the same as one chunk[1,2,3,4]. Empty input yields no values; window 0 and NaN input fail on iteration.</p>
-<ol>
+<ol start="6">
 <li><strong>Make parsing a typed batch boundary.</strong> Yield chunks from in-memory CSV text with exactly event_id, customer_id, amount_cents columns in that order. Parse IDs/amounts as Int64 and customers as string. Require positive integer chunksize, nonmissing IDs/customers and valid numeric text. Preserve missing amounts.</li>
 </ol>
 <p><strong>Expected:</strong> Three CSV rows with chunksize 2 yield lengths 2,1 and nullable Int64 amounts. An empty amount stays missing; amount bad or missing event_id raises ValueError during iteration.</p>

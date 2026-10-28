@@ -3,6 +3,7 @@
 \set ON_ERROR_STOP on
 BEGIN;
 SET LOCAL lock_timeout = '2s';
+
 DO $course_target$
 BEGIN
   IF current_database() <> 'advanced_sql_training' THEN
@@ -30,6 +31,7 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 DO $maintenance_ownership$
 DECLARE
   maintenance_database text;
@@ -43,7 +45,9 @@ BEGIN
   END LOOP;
 END
 $maintenance_ownership$;
+
 ALTER ROLE ds60 WITH NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+
 DO $memberships$
 DECLARE
   elevated_role text;
@@ -66,6 +70,9 @@ BEGIN
   END LOOP;
 END
 $memberships$;
+
 ALTER DATABASE advanced_sql_training OWNER TO ds60;
+
 GRANT USAGE, CREATE ON SCHEMA public TO ds60;
+
 COMMIT;

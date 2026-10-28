@@ -1,0 +1,61 @@
+{
+  "number": 23,
+  "title": "Optimization objectives, constraints and convergence",
+  "concepts": ["Optim", "BFGS", "gradient", "bounded optimization", "convergence"],
+  "outcome": "Use a prepared optimization library while checking the objective, feasible set and independent convergence evidence.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-021", "julia-022"],
+  "sources": [
+    [
+      "Optim minimization guide",
+      "https://julianlsolvers.github.io/Optim.jl/stable/user/minimization/"
+    ],
+    ["Optim convergence options", "https://julianlsolvers.github.io/Optim.jl/stable/user/config/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Check the objective sign",
+      "task": "Replace a minimization objective with its negative.",
+      "expected": "The mathematical problem changes.",
+      "hint": "State whether the goal is minimization or maximization.",
+      "answer": "Successful numerical progress cannot validate a mistaken objective definition."
+    },
+    {
+      "title": "Verify the known optimum",
+      "task": "Evaluate the quadratic at[1,-2].",
+      "expected": "Objective and gradient are zero.",
+      "hint": "Use the analytic structure independently.",
+      "answer": "The test supports this convex fixture rather than a blanket global-convergence claim."
+    },
+    {
+      "title": "Inspect the feasible set",
+      "task": "Minimize the scalar case only on[0,2].",
+      "expected": "The best feasible point is near 2.",
+      "hint": "The unconstrained minimizer 3 is unavailable.",
+      "answer": "Constraints are part of the problem, not an optional display filter."
+    },
+    {
+      "title": "Read convergence evidence",
+      "task": "Inspect the returned point, objective and gradient norm.",
+      "expected": "They agree with the known quadratic solution.",
+      "hint": "A status flag is only one diagnostic.",
+      "answer": "Independent mathematical checks make the optimization result more interpretable."
+    },
+    {
+      "title": "Scale a parameter",
+      "task": "Change a parameter unit in a real objective.",
+      "expected": "Update penalties and constraints consistently.",
+      "hint": "A numeric rescaling can change the scientific specification.",
+      "answer": "Conditioning improvements should retain the original interpretation and feasible decisions."
+    },
+    {
+      "title": "Assess a fitted model",
+      "task": "Observe a lower training objective after optimization.",
+      "expected": "Evaluate the frozen procedure on independent data.",
+      "hint": "Optimization and generalization are different questions.",
+      "answer": "A better fit can still reflect overfitting, leakage or a poor target."
+    }
+  ]
+}

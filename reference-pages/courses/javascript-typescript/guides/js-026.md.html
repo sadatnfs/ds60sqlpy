@@ -314,19 +314,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Maintain balance through methods.</strong> Start with 100 cents, deposit 50 and withdraw 30. <strong>Expected:</strong> balance 120; no enumerable balance field. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inject a deterministic clock.</strong> Create a receipt service using a fixed clock. <strong>Expected:</strong> timestamp 2026-01-01T00:00:00.000Z. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Reject invalid transitions without mutation.</strong> Try a negative deposit and an overdraw. <strong>Expected:</strong> both throw; balance stays 100. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Guard derived overflow.</strong> Deposit one cent into the maximum safe balance. <strong>Expected:</strong> RangeError; original balance preserved. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject an incompatible collaborator.</strong> Pass a clock returning text in an uncalled negative type check. <strong>Expected:</strong> expected compiler error; valid Date clock works. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Distinguish private storage from a lookalike property.</strong> Add an ordinary balance property to the wallet. <strong>Expected:</strong> ordinary property 999; private cents remain 2. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -445,37 +445,37 @@ label_available <span class="syntax-operator">=</span> datetime<span class="synt
 </ol>
 <p><strong>Verify:</strong> Each rule has a named test that captures ValueError. Equality at feature availability and equality at label availability both complete validation without exceptions.</p>
 <p><strong>Hint:</strong> The source boundary is checked before either split can hide an invalid record.</p>
-<ol>
+<ol start="2">
 <li><strong>Hold out whole entities.</strong> Implement <code>group_split(rows, held_out)</code> using explicit entity ids. Preserve source order and require nonempty training and validation sets.</li>
 </ol>
 <p><strong>Verify:</strong> Assert validation ids [A1, A2], training ids [B1, C1], and an empty entity-set intersection when A is held out; unknown or all-inclusive holdouts raise ValueError.</p>
 <p><strong>Hint:</strong> Choose entities once, rather than selecting individual event rows.</p>
-<ol>
+<ol start="3">
 <li><strong>Enforce delayed-label time policy.</strong> Implement <code>time_split</code> with aware cutoff, nonnegative gap, optional end, and strict label availability before cutoff minus gap.</li>
 </ol>
 <p><strong>Verify:</strong> A label exactly at cutoff minus gap is excluded; a label one second earlier is eligible when observation is also earlier than cutoff.</p>
 <p><strong>Hint:</strong> Write the predicate in words before combining its comparisons.</p>
-<ol>
+<ol start="4">
 <li><strong>Fit a transformation only on training.</strong> Implement <code>fit_mean</code> and use it to center feature values. Train on [2, 4] and transform validation value 100 with the fitted mean.</li>
 </ol>
 <p><strong>Verify:</strong> Training mean is 3, centered train values are -1 and 1, and centered validation is 97. Adding validation before fitting would change the mean and fails the test.</p>
 <p><strong>Hint:</strong> Transforming validation uses existing state; it does not fit new state.</p>
-<ol>
+<ol start="5">
 <li><strong>Calculate a transparent baseline.</strong> Implement <code>mae</code> and <code>evaluate_baseline</code> with the permitted training target mean. Use train targets [0, 0] and validation target [100].</li>
 </ol>
 <p><strong>Verify:</strong> The fitted prediction is 0 and MAE is 100; empty sets, unequal metric input lengths, and nonfinite values raise ValueError.</p>
 <p><strong>Hint:</strong> Validate both metric dimensions and numeric domain before calculating.</p>
-<ol>
+<ol start="6">
 <li><strong>Rehearse walk-forward windows.</strong> Create two consecutive one-day validation windows over a tiny aware-timestamp fixture. Refit the baseline using only each fold eligible past.</li>
 </ol>
 <p><strong>Verify:</strong> An observation at the shared boundary appears in the second validation window only; fold reports retain ids and counts for independent inspection.</p>
 <p><strong>Hint:</strong> Use an explicit end on each fold so future validation rows are not scored repeatedly.</p>
-<ol>
+<ol start="7">
 <li><strong>Demonstrate a misleading improvement.</strong> Intentionally fit the baseline mean on train plus validation in a scratch experiment. Compare its score with the valid [0,0] versus [100] case.</li>
 </ol>
 <p><strong>Verify:</strong> The leaked mean is about 33.333 and test error about 66.667, lower than 100; your note identifies target leakage rather than model progress.</p>
 <p><strong>Hint:</strong> A better score can be evidence of a broken experiment.</p>
-<ol>
+<ol start="8">
 <li><strong>Transfer to the deployment question.</strong> Write policies for returning-customer next-day predictions and new-customer next-day predictions. Explain which group/time constraints each needs and what a final test set protects.</li>
 </ol>
 <p><strong>Verify:</strong> The second policy explicitly checks both entity disjointness and future availability. Both report excluded coverage and reserve evaluation data outside policy selection.</p>

@@ -1,11 +1,11 @@
 -- Day 24: Recursive CTEs
--- BEGINNER WORKFLOW — sql-24: Recursive CTEs
+-- BEGINNER WORKFLOW - sql-24: Recursive CTEs
 -- Guide: sql/postgres-60day/companion-guides/day24_recursive_ctes.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-24/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-24.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Build recursive CTEs from compatible anchor and recursive members, carrying depth/path evidence and an explicit termination or cycle rule.
 -- Assumptions: Employee hierarchy roots have `manager_id IS NULL`; multiple roots are valid. Array paths use integer employee IDs.
@@ -61,6 +62,7 @@ ORDER BY
   full_name,
   employee_id
 LIMIT 100;
+
 -- Generate a sequence of dates (first day of month for last 12 months)
 WITH RECURSIVE months AS (
   SELECT
@@ -82,6 +84,7 @@ FROM
   months
 ORDER BY
   month_start;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

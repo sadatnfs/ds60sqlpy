@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 50,
+  "prerequisites": ["apache-002"],
+  "concepts": ["Parquet", "Iceberg snapshot", "catalog"],
+  "evidence": "Exact real-library outputs checked against small independent records, with explicit rejected inputs.",
+  "sources": [
+    ["PyIceberg local catalog and writes", "https://py.iceberg.apache.org/"],
+    ["Iceberg specification", "https://iceberg.apache.org/spec/"]
+  ]
+}

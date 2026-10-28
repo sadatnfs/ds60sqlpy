@@ -501,77 +501,77 @@ record_success<span class="syntax-punctuation">(</span><span class="syntax-punct
 <li><strong>Progressive hint:</strong> A consumer Protocol should describe what the consumer calls, not an entire driver object.</li>
 <li><strong>Verify:</strong> List the exact members each consumer calls: the managed connection boundary needs only <code>commit</code>, <code>rollback</code>, and <code>close</code>; any retained cursor member must have a named caller.</li>
 </ul>
-<ol>
+<ol start="2">
 <li><strong>Implementation:</strong> Implement <code>managed_connection(factory)</code> with acquire-once, yield-once, commit-on-success, rollback-on-failure, re-raise, and close-in-finally behavior.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Place closure in <code>finally</code>; keep commit after the yielded body returns.</li>
 <li><strong>Verify:</strong> Assert success events are <code>acquire, body, commit, close</code>; failure events are <code>acquire, body, rollback, close</code>; and the original body exception reaches the caller.</li>
 </ul>
-<ol>
+<ol start="3">
 <li><strong>Testing:</strong> Build a fake connection that records exact event order and test success, body failure, rollback, and close.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The order is part of the contract, so assert the entire event list.</li>
 <li><strong>Verify:</strong> Configure a recording fake for one success and one body failure; compare the complete event lists and assert commit and rollback are mutually exclusive.</li>
 </ul>
-<ol>
+<ol start="4">
 <li><strong>Implementation:</strong> Implement <code>logged()</code> with <code>ParamSpec</code>, <code>TypeVar</code>, <code>functools.wraps</code>, and an injected or module logger.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Type wrapper parameters as <code>P.args</code>/<code>P.kwargs</code> and return the original <code>R</code>.</li>
 <li><strong>Verify:</strong> Decorate a typed two-argument function; assert its result is unchanged, its name and docstring survive, and logs contain qualified function name plus success/failure only.</li>
 </ul>
-<ol>
+<ol start="5">
 <li><strong>Security:</strong> Restrict decorator logs to function identity and outcome; prove arguments, keyword values, return values, and connection representations are absent.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Treat every callable value as potentially sensitive.</li>
 <li><strong>Verify:</strong> Pass sentinel positional/keyword values and a secret-bearing connection repr; assert none of them, nor the return value, appears in captured log records.</li>
 </ul>
-<ol>
+<ol start="6">
 <li><strong>Typing:</strong> Verify that decoration preserves name, docstring, return behavior, exception identity, and a statically visible signature.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> <code>wraps</code> fixes runtime metadata; <code>ParamSpec</code> preserves the type-level call shape.</li>
 <li><strong>Verify:</strong> Compare <code>__name__</code>, <code>__doc__</code>, <code>inspect.signature</code>, returned value, and the identity of a raised exception before and after decoration; run the configured static type checker.</li>
 </ul>
-<ol>
+<ol start="7">
 <li><strong>Prediction:</strong> Predict cleanup when the managed body raises <code>KeyboardInterrupt</code> or cancellation-like <code>BaseException</code>; state whether your boundary catches it.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The exception scope is a policy decision, but closure must still be guaranteed.</li>
 <li><strong>Verify:</strong> Raise <code>KeyboardInterrupt</code> inside the managed body; assert rollback and close occur and the same interruption escapes rather than being converted to an ordinary error.</li>
 </ul>
-<ol>
+<ol start="8">
 <li><strong>Debugging:</strong> Analyze what happens if rollback or close raises while a body exception is active, and design a test that exposes exception masking.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Cleanup failures can replace the error that caused cleanup.</li>
 <li><strong>Verify:</strong> Make the body and rollback fail with different exception types, then make close fail in a separate case; inspect <code>__context__</code>/grouping so no cleanup failure is silently lost.</li>
 </ul>
-<ol>
+<ol start="9">
 <li><strong>Design:</strong> Compose two nested managed resources and decide which layer owns commit, rollback, and close.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Exactly one layer should own each lifecycle transition.</li>
 <li><strong>Verify:</strong> Record two nested resources and assert LIFO ownership: inner commit/rollback and close finish before the outer resource commits/rolls back and closes.</li>
 </ul>
-<ol>
+<ol start="10">
 <li><strong>Comparison:</strong> Sketch the async equivalent and identify which operations require <code>await</code> and which typing primitives change.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Preserve the same ownership state machine while changing the execution protocol.</li>
 <li><strong>Verify:</strong> Show an <code>asynccontextmanager</code> sketch where factory, commit, rollback, and close are awaited; identify <code>AsyncIterator</code> and async callable return types in the signature.</li>
 </ul>
-<ol>
+<ol start="11">
 <li><strong>Typing:</strong> Define a callable Protocol for the connection factory and compare it with <code>Callable[[], Connection]</code> in tests and adapters.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Use a Protocol when the boundary needs attributes or overloads beyond a bare call.</li>
 <li><strong>Verify:</strong> Run a type-checking example where both a named factory fake and a real adapter satisfy the callable Protocol; note the Protocol gives the boundary a reusable semantic name.</li>
 </ul>
-<ol>
+<ol start="12">
 <li><strong>Extension:</strong> Design a timing decorator with an injected monotonic clock while retaining the no-argument/no-result logging policy.</li>
 </ol>
 <ul>

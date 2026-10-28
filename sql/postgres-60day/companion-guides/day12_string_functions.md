@@ -1,13 +1,5 @@
 # Day 12: String Functions and Text Processing (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 11; CASE expressions](day11_case_expressions.md)
-- **Artifacts:** [learner SQL](../day12_string_functions.sql) ·
-  [solution reasoning](../solutions/day12_solutions.md) ·
-  [executable solution](../solutions/day12_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -72,6 +64,14 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Foundation (beginner)
+- **Prerequisites:** [Day 11; CASE expressions](day11_case_expressions.md)
+- **Artifacts:** [learner SQL](../day12_string_functions.sql) ·
+  [solution reasoning](../solutions/day12_solutions.md) ·
+  [executable solution](../solutions/day12_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -95,7 +95,7 @@ business question requires.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day12_string_functions.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day12_string_functions.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

@@ -1,11 +1,11 @@
 -- Day 54: Project 3 - Data Warehouse Design (Part 3)
--- BEGINNER WORKFLOW — sql-54: Project3 DWH Part3 Aggregations
+-- BEGINNER WORKFLOW - sql-54: Project 3 DWH Part 3 Aggregations
 -- Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-54/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-54.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- Topics: Aggregation tables and DQ checks in DWH
 BEGIN;
 SET search_path TO dwh, training, public;
+
 -- Aggregate tables (star-schema rollups)
 CREATE TABLE agg_sales_category_month (
   year INT NOT NULL,
@@ -27,6 +28,7 @@ CREATE TABLE agg_sales_category_month (
   revenue NUMERIC(14, 2) NOT NULL,
   PRIMARY KEY (year, month, category)
 );
+
 CREATE TABLE agg_sales_customer_month (
   year INT NOT NULL,
   month INT NOT NULL,
@@ -34,6 +36,7 @@ CREATE TABLE agg_sales_customer_month (
   revenue NUMERIC(14, 2) NOT NULL,
   PRIMARY KEY (year, month, customer_sk)
 );
+
 -- Initial full builds (would normally be incremental)
 INSERT INTO agg_sales_category_month (year, month, category, revenue)
 SELECT
@@ -49,6 +52,7 @@ GROUP BY
   dd.year,
   dd.month,
   dp.category;
+
 INSERT INTO agg_sales_customer_month (year, month, customer_sk, revenue)
 SELECT
   dd.year,
@@ -62,6 +66,7 @@ GROUP BY
   dd.year,
   dd.month,
   fs.customer_sk;
+
 -- Example incremental refresh for a given month (delete + insert)
 -- WITH target AS (
 --   SELECT 2026 AS y, 1 AS m
@@ -117,6 +122,7 @@ ORDER BY
   year DESC,
   month DESC,
   category;
+
 -- 2. Check for orphan SKs in agg_sales_customer_month
 SELECT
   a.customer_sk
@@ -126,6 +132,7 @@ FROM
 WHERE
   dc.customer_sk IS NULL
 LIMIT 10;
+
 -- Exercises
 -- 1. Add an agg table agg_sales_product_month and validate it.
 --    Inputs: For sql-54 Exercise 1, read from `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `product_sk`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.

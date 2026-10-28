@@ -20,6 +20,13 @@ grain and ordering, explicit transaction/persistence behavior, and only the
 local disposable database. Python notebooks need clean-kernel evidence in
 addition to JSON validation. Bridge fakes prove policy, not server behavior.
 
+Engine-specific query files keep their native identity. The owned Hive project
+uses `.hql` sources, generic SQL highlighting and a native Hive lifecycle gate;
+they are not PostgreSQL pad artifacts. Its two explicit layout-preservation
+entries explain that boundary. Do not bypass PostgreSQL syntax/control proofs
+to accommodate another dialect, or mark a new dialect executable merely because
+the reader can display it. Define and actually qualify its reviewed runtime.
+
 ## Authored modules
 
 Existing first-generation subjects use their plan under
@@ -40,9 +47,11 @@ Its alias, such as `spark-013@pyspark`, has separate saved source and jobs.
 Copy the exact existing schema, not a guessed field list. A new objective
 requires a new canonical lesson.
 
-The statistics book has a dedicated loader and coverage contract. Arbitrary
-books are not auto-discovered just because they have `manifest.json`. Extend
-that loader deliberately if a new tutorial subject is requested.
+The statistics book retains its dedicated loader and coverage contract. New
+additive tutorial subjects use normal track/lesson manifests with validated
+track-level `learning_mode: "tutorial"`; omitted mode is `practice`. Complete
+worked `source_path` remains required, while tutorial solution paths may be
+empty. Arbitrary books are not auto-discovered from a `manifest.json` filename.
 
 ## Runtime and UI
 
@@ -61,6 +70,8 @@ Inspect current definitions before declaring support:
 - `docker/workers/` and Compose: prepared dependencies, images and isolation.
 - `scripts/classroom.sh` and `scripts/classroom_images.sh`: profile and image selection.
 - `docker/classroom-images.tsv`: ordinary image inventory and explicit distribution tags.
+- `.github/workflows/publish-images.yml` and `scripts/docker_release.py`: native builds for marked main commits, staging and gated promotion.
+- `./classroom publish` and `scripts/publish-images`: separate single-architecture preview/`--push` route.
 - `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py`: portable source staging.
 - `scripts/format_repo.py`, `scripts/lint_repo.py`, `docker/formatting/`: prepared style and static validation.
 - `classroom.py` and `assets/classroom.js`: derived directory and accessible themes.
@@ -126,6 +137,21 @@ Persistent learner state belongs to its storage adapter, never a source file
 or container writable layer. Private worker credentials must stay out of
 portable exports. A new external adapter needs explicit resource identity and
 cleanup; manifests cannot supply arbitrary commands or host contexts.
+
+An ordinary runtime joins both native architecture groups in the CI Hub set.
+The opt-in trigger is a push to `main` with `[publish-docker]` in HEAD, using
+repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. Staging images and
+small receipts must bind the source/profile/platform before promotion. Combined
+tags use app `VERSION` and workers `VERSION-<catalog suffix>`; promote workers
+before the app and move app latest last. Conflicting released versions require
+a consistent source patch bump.
+
+The manual `./classroom publish --to-hub USER --tag VERSION` route checks
+existing images for one Linux architecture. Its `--profile` selects exact images
+without implicit app/Core. Manual consumers use `--architecture-tags`; new Hub
+selections otherwise use combined tags. Explicit latest resolves and saves a
+matching concrete source version, and ordinary resume never pulls. Keep learner
+volumes independent of image distribution and preserve older saved tag layouts.
 
 A new ordinary runtime also needs a deterministic cataloged reference in
 `CASES` of `scripts/check_classroom_profiles.py` and inclusion in the grouped
@@ -216,8 +242,57 @@ Never route its ready editing capability into ModuleJobs.start or infer executio
 from a matching draft hash. Additive statistics tutorials use tutorials/index.json,
 not another arbitrary manifest format.
 
-Use plot_artifacts.py for bounded figures, and the existing opaque Plotly renderer
+Use plot_artifacts.py for bounded figures, tables and JSON reports, and the existing opaque Plotly renderer
 for chart data. Never store an arbitrary HTML page as a trusted worker result.
 Test metadata escaping, frame/image restrictions, plot storage failures, lazy
 Python imports and saved-result readback. Compile TeX before shared reader
 publication and preserve source/code byte contracts.
+
+## Data, Stan and Julia adapters
+
+- `data-engineering`: `main.py` with prepared Polars/Arrow/DuckDB, dbt Core/adapter
+  and ML engineering packages. Root Python extras are a different environment.
+- `data-platforms-python`: `main.py` with separately locked Arrow, DataFusion and
+  PyIceberg library operations. Temporary files/catalogs do not persist between
+  Runs. Ballista and actual platform services have separate prepared projects.
+- `dbt-duckdb`: one `model.sql` in a fixed real project; compiled SQL, materialized
+  result and run metadata are observed. Full project configuration and persistent
+  state belong to the canonical Python examples or owned retail CLI fixture.
+- `stan-cpu`: native `main.stan`, CmdStan 2.40.0, self-contained transformed-data
+  fixtures, two seeded chains of 100 warmup plus 100 retained draws. Real data
+  blocks use the separate CmdStanPy 1.3.0 project with explicit JSON and output.
+- `julia`: `main.jl`, Julia 1.13.3, two threads and read-only prepared project/depot.
+  The `DS60Plots` helper is classroom-specific, not a promise of Plots.jl.
+
+The ML service fixture has owned training/control operations and a predictor
+with a read-only state mount. Its loopback HTTP and persisted project state are
+separate from ordinary pad execution and classroom learning volumes.
+The Data and ML Engineering book adds the owned data-product and inference
+projects: immutable data/pointer recovery and model/request/SSE history have
+their own private state and explicit lifecycle gates. Follow their closest
+guidance before changing schemas, receipt identities or failure behavior.
+
+The Apache/open-data projects use engine access only from their host launcher,
+never an ordinary worker. Consult the current environment ledger and each
+project's qualification contract. A portable Atlas/Delta Sharing payload plan
+is not server contact, and a checked component is not a complete topology.
+The common workshop qualifier checks selected real services and exact retained
+state. Its `--prepare` routes are explicit downloads, separate from lesson Run.
+
+The native CI required-check contract lives in `scripts/ci_classroom.py`: Flight
+and compiled Rust IPC join the data-platforms group, Kafka joins Java, inference
+with Chromium joins PyTorch, and the data product joins data engineering. Keep
+required checks, source/digest-bound receipts and publication validators aligned;
+source registration or mocked tests cannot substitute for those native gates.
+
+Formatting uses the pinned stanc adapter for Stan, JuliaFormatter/parse checks
+for Julia, and SQLfmt for dbt SQL/Jinja. Preserve durable authoring programs and
+refresh their exact guide fences. Package source/project/lock files deliberately;
+exclude dbt target/log directories, databases, compiled models and trained state.
+
+All captured kinds share the two-output/180,000-byte-per-payload/384,000-byte-total
+budget. Tables have at most 12 columns and 100 rows; encode large integer IDs as
+strings. Validate declarations through `scripts/declared_outputs.py` during the
+reference corpus, then inspect actual browser/history output and retained
+receipts after replacement. A capture warning cannot replace the real execution
+status. Preserve scientific numerical oracles separately from shape/count checks.

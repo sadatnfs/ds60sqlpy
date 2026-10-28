@@ -254,19 +254,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Read from a producer.</strong> Sum <code>List.of(1, 2, 3)</code> and <code>List.of(1.5, 2.5)</code> through List&lt;?extends Number&gt;. <strong>Expected:</strong> sums 6.0 and 4.0. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with sums 6.0 and 4.0.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Write to a consumer.</strong> Append integers1,2 to a List&lt;Number&gt; through List&lt;?superInteger&gt;. <strong>Expected:</strong> listcontains1,2. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with listcontains1,2.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Connect source and destination types.</strong> CopyList&lt;Integer&gt; intoList&lt;Number&gt; with a bounded generic method. <strong>Expected:</strong> destinationcontains3,4. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with destinationcontains3,4.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Preserve generic return type.</strong> Callfirst on a String list and assign directly toString. <strong>Expected:</strong> result alpha. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with result alpha.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Handle an empty input contract.</strong> Callfirst on an empty list and require a named failure. <strong>Expected:</strong> NoSuchElementException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with NoSuchElementException.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Observe erasure carefully.</strong> Compare runtime classes of ArrayList&lt;String&gt; and ArrayList&lt;Integer&gt;;explain why this does not permit unsafe assignments. <strong>Expected:</strong> runtime classes equal; compile-time contracts remain distinct. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with runtime classes equal; compile-time contracts remain distinct.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

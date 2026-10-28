@@ -1,11 +1,11 @@
 -- Day 16: Window Functions Fundamentals
--- BEGINNER WORKFLOW — sql-16: Window Functions Fundamentals
+-- BEGINNER WORKFLOW - sql-16: Window Functions Fundamentals
 -- Guide: sql/postgres-60day/companion-guides/day16_window_functions_fundamentals.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-16/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-16.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -19,6 +19,7 @@
 -- OVER(), PARTITION BY, ORDER BY, frames
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
 -- Assumptions: Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.
@@ -46,6 +47,7 @@ FROM
 ORDER BY
   category_revenue DESC,
   category;
+
 -- Row-wise metrics without collapsing rows
 SELECT
   o.order_id,
@@ -61,6 +63,7 @@ ORDER BY
   o.order_date,
   o.order_id
 LIMIT 100;
+
 -- Frame example. ROWS counts observed rows, not necessarily seven consecutive
 -- calendar days; a dense date spine is required when empty dates matter.
 WITH daily AS (
@@ -81,6 +84,7 @@ FROM
 ORDER BY
   d_utc DESC
 LIMIT 30;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

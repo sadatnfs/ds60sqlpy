@@ -1,5 +1,8 @@
 # Day 22: Advanced pandas: Vectorization, `query`, and Categoricals
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 Express column operations with pandas/NumPy primitives before reaching for
@@ -223,7 +226,7 @@ and no row-wise lookup is required.
 
 ## Dataset note
 
-The notebook uses Seaborn's cached `tips` data. A constructed DataFrame such as
+The notebook uses the original synthetic restaurant-bills fixture. A constructed DataFrame such as
 the example above keeps this lesson fully offline.
 
 ## Exercises and progressive hints

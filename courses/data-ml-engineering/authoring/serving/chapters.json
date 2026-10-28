@@ -1,0 +1,386 @@
+[
+  {
+    "id": "dme-057",
+    "title": "From an HTTP request to an admitted inference job",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-056"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["request identity", "validation", "authentication", "idempotency"],
+    "outcome": "Trace a source-bound accepted request and reconcile unknown creation outcomes without duplicate execution.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-057.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-057.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-058",
+    "title": "Bytes, subwords and the tokenizer boundary",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-057"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["byte BPE", "merge ranking", "UTF-8", "token budgets"],
+    "outcome": "Apply exact byte-BPE merges and decode UTF-8 correctly across arbitrary byte boundaries.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-058.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-058.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "NLP tokenization",
+        "path": "courses/nlp/guides/nlp-004.md"
+      },
+      {
+        "label": "LLM byte/tokenizer foundations",
+        "path": "courses/llm-theory/guides/llm-006.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-059",
+    "title": "Token embeddings, positions and retrieval representations",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-058"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["token embeddings", "positions", "retrieval embeddings"],
+    "outcome": "Separate token lookup and position encoding from a retrieval representation and its evaluation.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-059.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-059.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "PyTorch embeddings",
+        "path": "courses/deep-learning-pytorch/guides/torch-021.md"
+      },
+      {
+        "label": "Retrieval embeddings",
+        "path": "courses/llm-applied/guides/llm-applied-007.md"
+      },
+      {
+        "label": "Position theory",
+        "path": "courses/llm-theory/guides/llm-010.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-060",
+    "title": "Safe checkpoints, startup loading and readiness",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-059"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["safe checkpoints", "hash validation", "startup readiness"],
+    "outcome": "Reject changed or incompatible checkpoint tensors before readiness and explain startup-only loading.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-060.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-060.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "PyTorch inference contracts",
+        "path": "courses/deep-learning-pytorch/guides/torch-033.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-061",
+    "title": "Device placement, transfers and precision budgets",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-060"],
+    "runtime_profile": "llm-torch-cpu",
+    "language": "python",
+    "concepts": ["CPU placement", "transfer bounds", "precision", "KV bytes"],
+    "outcome": "Verify actual CPU placement and calculate bounded weight-transfer and KV-memory estimates.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-061.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-061.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "Pinned transfers and actual CUDA overlap",
+        "path": "courses/cuda/cpp/guides/cuda-040.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-062",
+    "title": "Bounded admission, queues and capacity ownership",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["dme-061"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["admission control", "FIFO", "reservation ownership", "Little law"],
+    "outcome": "Enforce request and token reservations and explain FIFO waiting under changed service durations.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-062.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-062.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-063",
+    "title": "Prefill, causal attention and a correct KV cache",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-062"],
+    "runtime_profile": "llm-torch-cpu",
+    "language": "python",
+    "concepts": ["prefill", "causal masks", "cached decoding", "numerical equivalence"],
+    "outcome": "Verify actual cached attention against full-prefix logits and an independent causal formula.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-063.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-063.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "PyTorch attention and masks",
+        "path": "courses/deep-learning-pytorch/guides/torch-022.md"
+      },
+      {
+        "label": "Causal attention foundations",
+        "path": "courses/llm-theory/guides/llm-009.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-064",
+    "title": "Autoregressive decoding, sampling and stopping rules",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-063"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["temperature", "top-k", "random state", "stopping"],
+    "outcome": "Derive sampling distributions and enforce stop strings across output boundaries.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-064.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-064.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "LLM evaluation route",
+        "path": "courses/llm-evaluation/README.md"
+      },
+      {
+        "label": "LLM sampling foundations",
+        "path": "courses/llm-theory/guides/llm-012.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-065",
+    "title": "Batching, continuous scheduling and fairness",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-064"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["dynamic batching", "fairness", "padding", "continuous scheduling"],
+    "outcome": "Compare latency/fairness and padding tradeoffs without confusing scheduler simulation with runtime throughput.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-065.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-065.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "Bounded PyTorch batching",
+        "path": "courses/deep-learning-pytorch/guides/torch-033.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-066",
+    "title": "Tensor layouts, fusion and attention kernels",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-065"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["strides", "fusion", "online softmax", "kernel evidence"],
+    "outcome": "Inspect physical tensor strides and derive stable tiled softmax before interpreting kernel evidence.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-066.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-066.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "CUDA fusion and traffic",
+        "path": "courses/cuda/cpp/guides/cuda-052.md"
+      },
+      {
+        "label": "Attention memory design",
+        "path": "courses/cuda/cpp/guides/cuda-054.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-067",
+    "title": "KV memory planning, paging and shared-prefix ownership",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-066"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["KV pages", "fragmentation", "prefix sharing", "copy-on-write"],
+    "outcome": "Calculate page fragmentation and preserve shared prefix state through copy-on-write.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-067.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-067.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "GPU inference and KV precision",
+        "path": "courses/cuda/python/guides/cuda-102.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-068",
+    "title": "Quantization and speculative decoding without exaggerated claims",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-067"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["quantization error", "speculative acceptance", "residual distribution"],
+    "outcome": "Bound quantization error and prove a speculative acceptance correction reconstructs its target distribution.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-068.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-068.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "LLM evaluation route",
+        "path": "courses/llm-evaluation/README.md"
+      },
+      {
+        "label": "Quantized frozen bases and QLoRA",
+        "path": "courses/llm-applied/guides/llm-applied-017.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-069",
+    "title": "SSE, UTF-8, backpressure and explicit event readback",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-068"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["SSE framing", "UTF-8", "backpressure", "cursor readback"],
+    "outcome": "Parse exact SSE across arbitrary network chunks and read retained event suffixes without generation.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-069.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-069.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-070",
+    "title": "Cancellation, errors and recovery without replay",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-069"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["cooperative cancellation", "terminal errors", "durable recovery"],
+    "outcome": "Preserve resource ownership during cancellation and mark interrupted requests without replay.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-070.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-070.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-071",
+    "title": "Latency metrics, profiling and workload evidence",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-070"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["TTFT", "TPOT", "percentiles", "profiling"],
+    "outcome": "Define latency denominators and distinguish compute, wall time, cohort composition and actual profiling evidence.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-071.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-071.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "Profiler-guided actual kernel case",
+        "path": "courses/cuda/python/guides/cuda-111.md"
+      },
+      {
+        "label": "Evaluation uncertainty and estimands",
+        "path": "courses/llm-evaluation/README.md"
+      }
+    ]
+  },
+  {
+    "id": "dme-072",
+    "title": "Operating the inference workshop and defending a release decision",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["dme-071"],
+    "runtime_profile": "python-core",
+    "language": "python",
+    "concepts": ["release evidence", "Docker lifecycle", "diagnosis", "capstone memo"],
+    "outcome": "Operate the complete local service and defend a source-bound CPU release decision with explicit limits.",
+    "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-072.md",
+    "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-072.py",
+    "related_paths": [
+      {
+        "label": "Complete inference service workshop",
+        "path": "courses/data-ml-engineering/projects/inference-service/README.md"
+      },
+      {
+        "label": "Data and model evaluation route",
+        "path": "courses/llm-evaluation/README.md"
+      }
+    ]
+  }
+]

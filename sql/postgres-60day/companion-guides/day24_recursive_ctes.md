@@ -1,13 +1,5 @@
 # Day 24: Recursive CTEs: Hierarchies, Trees, and Graph Walks (Companion Guide)
 
-## Level and prerequisites
-
-- **Level:** Intermediate
-- **Prerequisites:** [Day 23; common table expressions](day23_ctes_intro.md)
-- **Artifacts:** [learner SQL](../day24_recursive_ctes.sql) ·
-  [solution reasoning](../solutions/day24_solutions.md) ·
-  [executable solution](../solutions/day24_solutions.sql)
-
 ## How to run this lesson
 
 Start the Linux-container engine and run `./classroom` from the repository
@@ -72,6 +64,14 @@ from the Docker browser's named volume. Follow
 selection and kernel setup. Notebook generation does not execute SQL or
 authorize a reset.
 
+## Level and prerequisites
+
+- **Level:** Intermediate
+- **Prerequisites:** [Day 23; common table expressions](day23_ctes_intro.md)
+- **Artifacts:** [learner SQL](../day24_recursive_ctes.sql) ·
+  [solution reasoning](../solutions/day24_solutions.md) ·
+  [executable solution](../solutions/day24_solutions.sql)
+
 ## A beginner's mental model for this lesson
 
 A **table** stores facts in named columns. A **row** is one occurrence at the
@@ -95,7 +95,7 @@ business question requires.
 
 ## Two worked SQL examples
 
-These are answer-free worked excerpts from `sql/postgres-60day/day24_recursive_ctes.sql`. Run the complete file through the guided notebook or `psql` because setup and transaction context can matter.
+These worked excerpts come from `sql/postgres-60day/day24_recursive_ctes.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 

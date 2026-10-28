@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "eval-010@plotly",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "eval-011@plotly",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "eval-019@plotly",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    }
+  ]
+}

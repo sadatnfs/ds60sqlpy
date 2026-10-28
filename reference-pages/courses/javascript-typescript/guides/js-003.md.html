@@ -257,19 +257,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Compare false and truthy containers.</strong> Inspect Boolean conversions of 0, empty string, empty array and empty object. <strong>Expected:</strong> false, false, true, true. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Preserve a valid zero with nullish fallback.</strong> Compare 0||10 with 0??10, and null??10. <strong>Expected:</strong> 10, 0, 10. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Trace a prefix sum.</strong> Sum 2, 4, 6 and record the accumulator after each iteration. <strong>Expected:</strong> prefixes 2, 6, 12. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Handle an empty collection.</strong> Run the same accumulation pattern on an empty array. <strong>Expected:</strong> sum 0 and iterations 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Stop at the first match.</strong> Find the first 8 in 3, 8, 8 using an indexed loop and break. <strong>Expected:</strong> index 1. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Make a wrong boundary observable.</strong> Iterate with index&lt;=length over a one-element array and record the values. <strong>Expected:</strong> extra undefined element exposes the off-by-one. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

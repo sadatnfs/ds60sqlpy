@@ -1,0 +1,23 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "advanced",
+  "minutes": 75,
+  "prerequisites": ["apache-027", "apache-029"],
+  "concepts": ["asset events", "dynamic mapping", "pools", "source-version readback"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Airflow assets",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/authoring-and-scheduling/assets.html"
+    ],
+    [
+      "Airflow mapping",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/authoring-and-scheduling/dynamic-task-mapping.html"
+    ],
+    [
+      "Airflow pools",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/administration-and-deployment/pools.html"
+    ]
+  ]
+}

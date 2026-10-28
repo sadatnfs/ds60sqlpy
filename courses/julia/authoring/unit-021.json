@@ -1,0 +1,61 @@
+{
+  "number": 21,
+  "title": "Regression fitting, regularization and held-out assessment",
+  "concepts": ["design matrix", "ridge", "QR solve", "validation", "leakage"],
+  "outcome": "Fit a small regression procedure with stable linear algebra and select regularization without using final outcomes.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-018", "julia-019", "julia-020"],
+  "sources": [
+    ["Julia least-squares operations", "https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/"],
+    [
+      "Existing model procedure validation",
+      "../../../courses/statistics-ml/tutorials/learning/07-validation-as-a-procedure.md"
+    ]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Recover the known model",
+      "task": "Fit the exact line without a penalty.",
+      "expected": "The coefficients are approximately[1,2].",
+      "hint": "Use the authored equation as an independent reference.",
+      "answer": "A correct numerical recovery validates this fixture, not a population inference."
+    },
+    {
+      "title": "Trace penalty selection",
+      "task": "Compare all four development errors in case B.",
+      "expected": "The selected penalty is 2.",
+      "hint": "Use only the development labels for the choice.",
+      "answer": "The final outcomes remain assessment inputs rather than selection inputs."
+    },
+    {
+      "title": "Inspect the selected fit",
+      "task": "Derive the case B intercept and slope.",
+      "expected": "They are 12/7 and 13/7.",
+      "hint": "Use centered sums or the stated augmented system.",
+      "answer": "An independent derivation checks the implementation and penalty convention."
+    },
+    {
+      "title": "Keep the final set separate",
+      "task": "Alter only the final labels after selection.",
+      "expected": "The chosen penalty must remain unchanged.",
+      "hint": "Trace data flow into argmin.",
+      "answer": "If final labels change the selection, the procedure is leaking assessment information."
+    },
+    {
+      "title": "Reject nonidentification",
+      "task": "Fit an unpenalized design with identical predictor values.",
+      "expected": "The teaching helper raises an explicit error.",
+      "hint": "A coefficient interpretation requires the declared rank condition.",
+      "answer": "A numerical solution selection rule should not be mistaken for scientific identification."
+    },
+    {
+      "title": "Report scope",
+      "task": "Use two final rows to describe the model.",
+      "expected": "Report the observed error without a broad accuracy guarantee.",
+      "hint": "The fixture was designed for arithmetic inspection.",
+      "answer": "Real deployment evidence needs representative independent data, uncertainty and diagnostics."
+    }
+  ]
+}

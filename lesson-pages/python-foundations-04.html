@@ -448,37 +448,37 @@ by_region <span class="syntax-operator">=</span> <span class="syntax-punctuation
 </ol>
 <p><strong>Verify:</strong> The charter names the three columns and explicitly avoids claiming that accepted units equal true demand or that absent regions had zero demand.</p>
 <p><strong>Hint:</strong> A precise small question is easier to finish than an undefined analysis.</p>
-<ol>
+<ol start="2">
 <li><strong>Load the tracked CSV.</strong> Implement <code>load_rows(path)</code> using DictReader, UTF-8, and newline handling. Require the header sequence id, region, quantity.</li>
 </ol>
 <p><strong>Verify:</strong> The tracked file loads seven dictionaries in source order; a header lacking region raises ValueError before analysis.</p>
 <p><strong>Hint:</strong> Check fieldnames once at the file boundary.</p>
-<ol>
+<ol start="3">
 <li><strong>Validate and retain rejection evidence.</strong> Implement <code>analyze_rows</code> with nonempty id/region text, nonnegative integer quantity, and first-valid-id wins. Preserve inputs.</li>
 </ol>
 <p><strong>Verify:</strong> The fixture has four accepted rows and rejects source rows 4, 5, and 6. Raw records remain byte-for-byte equivalent as string values.</p>
 <p><strong>Hint:</strong> Reuse the prior lesson policy in your own code, but keep this project runnable as a single file.</p>
-<ol>
+<ol start="4">
 <li><strong>Aggregate to one result per region.</strong> Add by_region and total_quantity to the report. Keep valid zero-quantity regions and sort region keys for display.</li>
 </ol>
 <p><strong>Verify:</strong> The mapping equals north 7, south 0, west 4; the total is 11. No duplicate record contributes three extra units.</p>
 <p><strong>Hint:</strong> Aggregate accepted rows only; a zero adds a group even when it adds no units.</p>
-<ol>
+<ol start="5">
 <li><strong>Add independent checks.</strong> Write tests for count reconciliation, sum-of-groups reconciliation, and the tiny fixture manual total. Add empty input and one all-invalid batch.</li>
 </ol>
 <p><strong>Verify:</strong> The fixture checks are 7 = 4 + 3 and 11 = 7 + 0 + 4; empty input has all counts zero and an empty mapping.</p>
 <p><strong>Hint:</strong> Choose checks that fail for different possible mistakes.</p>
-<ol>
+<ol start="6">
 <li><strong>Write and read a local report.</strong> Implement <code>write_report</code> to UTF-8 JSON at a supplied learner-local path, then load it and compare content with the in-memory report.</li>
 </ol>
 <p><strong>Verify:</strong> The JSON round trip preserves counts, grouped totals, and rejected row numbers; no tracked source file changes.</p>
 <p><strong>Hint:</strong> Serialize plain dict/list/int/string values and create the output parent directory deliberately.</p>
-<ol>
+<ol start="7">
 <li><strong>Challenge the duplicate policy.</strong> Analyze two valid rows with the same id but different quantities, then reverse them. Explain the effect without claiming a bug in summation.</li>
 </ol>
 <p><strong>Verify:</strong> For duplicate id A with quantities 2 then 5, assert total_quantity 2; reversal yields 5. Both results report rejected_count 1, proving the order-sensitive policy.</p>
 <p><strong>Hint:</strong> Separate an intentional identity policy from arithmetic behavior.</p>
-<ol>
+<ol start="8">
 <li><strong>Present a reproducible conclusion.</strong> Run your own script from a new process, record its command and checks, and write a short conclusion with result, quality counts, and one unanswered question.</li>
 </ol>
 <p><strong>Verify:</strong> The conclusion states 11 accepted units, four accepted rows, three rejected rows, and the inability to establish actual demand from this source alone.</p>
@@ -535,7 +535,9 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <span class="source-line"><span class="syntax-keyword">import</span> csv</span>
 <span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
 <span class="source-line"></span>
-<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">professional</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beginner_orders.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> ds60sqlpy.teaching_data <span class="syntax-keyword">import</span> teaching_fixture</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> teaching_fixture<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">beginner-orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_rows</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
@@ -691,7 +693,9 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 <span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
 <span class="source-line"><span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory</span>
 <span class="source-line"></span>
-<span class="source-line">FIXTURE <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">professional</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixtures</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">beginner_orders.csv</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> ds60sqlpy.teaching_data <span class="syntax-keyword">import</span> teaching_fixture</span>
+<span class="source-line"></span>
+<span class="source-line">FIXTURE <span class="syntax-operator">=</span> teaching_fixture<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">beginner-orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_rows</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>

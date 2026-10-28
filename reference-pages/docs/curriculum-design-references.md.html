@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>docs/curriculum-design-references.md</code></p>
     </header>
     <article class="document"><h2 id="curriculum-design-references">Curriculum design references<a class="heading-anchor" href="#curriculum-design-references" aria-label="Link to this section">#</a></h2>
-<p>This course is original material, but its teaching structure should learn from successful beginner resources. The sources below were reviewed on 2026-07-30. They are design references, not content to copy. DS60 remains PostgreSQL 16+, Python 3.11–3.12, local-first, Windows-friendly, and runnable after one connected bootstrap.</p>
+<p>This course is original material, but its teaching structure should learn from successful beginner resources. The sources below were reviewed on 2026-07-30. They are design references, not content to copy. The supported learner product is Linux Docker on Linux/macOS and Windows through WSL 2, with PostgreSQL 17 and prepared language workers. Host compilers are not ordinary prerequisites. The <a href="scientist-roadmap.md.html">scientist roadmap</a> and <a href="statistics-reference-map.md.html">statistics comparison</a> record later scientific additions without changing the date of this design review.</p>
 <h3 id="patterns-adopted-from-established-tutorials">Patterns adopted from established tutorials<a class="heading-anchor" href="#patterns-adopted-from-established-tutorials" aria-label="Link to this section">#</a></h3>
 <h4 id="python-s-official-tutorial-explain-run-observe-contrast">Python&#x27;s official tutorial: explain, run, observe, contrast<a class="heading-anchor" href="#python-s-official-tutorial-explain-run-observe-contrast" aria-label="Link to this section">#</a></h4>
 <p>The <a href="https://docs.python.org/3/tutorial/controlflow.html">Python control-flow tutorial</a> introduces a construct with a small runnable example, shows the actual output, then immediately explains a boundary or contrast. Its <code>for</code> section, for example, contrasts Python iteration with index-oriented loops, warns about mutating a collection during iteration, shows several <code>range</code> boundaries, and explains why a <code>range</code> object is iterable rather than a stored list.</p>
@@ -235,8 +235,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>DS60 cannot safely turn a static <code>file://</code> page into a database client, so it adapts the useful part of that pattern:</p>
 <ul>
 <li>the rendered reader keeps the guide, learner preview, and optional solution together;</li>
-<li>the private portal adds a fixed <strong>Create/open guided SQL notebook</strong> action;</li>
-<li>the generated notebook preserves an editable learner copy and runs it through a catalog-restricted <code>psql -f</code> path; and</li>
+<li>the unified classroom provides a SQL pad and guarded whole-lesson execution;</li>
+<li>the separately prepared contributor notebook workflow preserves an editable learner copy and runs it through a catalog-restricted <code>psql -f</code> path; and</li>
 <li>completion means explaining and demonstrating the objective, not merely opening the page.</li>
 </ul>
 <h4 id="exercism-concept-scope-prerequisites-stubs-tests-and-hints">Exercism: concept scope, prerequisites, stubs, tests, and hints<a class="heading-anchor" href="#exercism-concept-scope-prerequisites-stubs-tests-and-hints" aria-label="Link to this section">#</a></h4>

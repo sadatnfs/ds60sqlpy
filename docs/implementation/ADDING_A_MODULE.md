@@ -12,7 +12,9 @@ repeatable contributor workflow.
 ## Route metadata and authored admission
 
 For a new subject, `courses/<subject>/track.json` uses schema version 1, an ID
-matching its directory, a title, a summary and `lessons`. Each lesson row has:
+matching its directory, a title, a summary and `lessons`. Optional track-level
+`learning_mode` accepts only `practice` or `tutorial`; omission means `practice`.
+It applies to that route and its variants. Each lesson row has:
 
 | Field | Meaning |
 | --- | --- |
@@ -83,8 +85,13 @@ one canonical lesson count. A different learning objective needs a new lesson.
 The statistics tutorial uses its dedicated `manifest.json` contract, exposed
 by `module_extensions.py`. Its chapter/example pairs are directly available,
 without exams, problem sets, verifiers or solution gates. Preserve its source
-outline and coverage identities. Adding a different tutorial book currently
-requires an explicit loader extension; a filename alone does not register one.
+outline and coverage identities. New tutorial subjects use the normal additive
+`track.json` plus `lessons.json` contract with `learning_mode: "tutorial"` on
+the track, as in Applied Science and Bayesian Computing. They keep complete
+worked source in `source_path`; `solution_paths` may be empty or expose extra
+worked examples, without a hidden-answer gate. Tutorial mode does not bypass
+path, language, runtime, prerequisite or artifact validation. An arbitrary
+`manifest.json` still does not register a new loader.
 
 ## Existing execution contracts
 
@@ -94,6 +101,10 @@ in `worker_operations.py` before choosing a profile. Examples include:
 | Profile | Artifact contract |
 | --- | --- |
 | `python-core`, `tensorflow-cpu`, `llm-torch-cpu` | Python source with the profile's prepared packages and small CPU fixtures |
+| `data-engineering` | `main.py` with prepared Polars/Arrow/DuckDB, real dbt and ML engineering packages |
+| `dbt-duckdb` | `model.sql`, one SQL/Jinja model in the fixed local dbt project; full configuration uses a separate project |
+| `stan-cpu` | `main.stan`, self-contained transformed-data fixture; fixed native compile and two short sampling chains |
+| `julia` | `main.jl`, Julia 1.13.3 and its read-only prepared project/depot, two threads and a fresh process |
 | `cpp20` | `main.cpp`, C++20, bounded compile and execution |
 | `c17` | `main.c`, C17 with prepared compiler and standard library |
 | `go` | `main.go`, prepared standard-library import configuration, bounded compile/link/run |
@@ -138,7 +149,7 @@ boundaries as applicable:
 | External resource ownership | A dedicated adapter such as `kubernetes_module.py` |
 | Image, packages and resource budget | `docker/workers/`, locks and Compose profiles |
 | Shared launch defaults | `scripts/classroom.sh` profile/service map and launcher tests |
-| Image selection and distribution | `scripts/classroom_images.sh`, `docker/classroom-images.tsv`, publisher tests and manual publication matrix |
+| Image selection and distribution | `scripts/classroom_images.sh`, `docker/classroom-images.tsv`, publisher tests and AMD64/ARM64 publication groups for marked main commits |
 | Formatting and static checks | `scripts/format_repo.py`, `scripts/lint_repo.py`, `docker/formatting/` and their tests |
 | Portable packaging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` and packaging tests |
 
@@ -211,3 +222,26 @@ Record what ran, on which revision and platform, and what remains unverified.
 A configured profile, container build or one architecture's success is not
 acceptance on every operating system. Preserve learning volumes and unrelated
 workloads when removing test resources.
+
+## Structured scientific results and authoring tools
+
+Use `publish_table` and `publish_report` from `ds60sqlpy.plot_artifacts` for
+bounded data results alongside captured PNG/Plotly charts. All kinds share the
+two-output budget, with 180,000 bytes per output and 384,000 bytes combined.
+Tables allow 12 columns and 100 rows. Finite JSON values and exact integer
+representation are required; large identifiers belong in strings. A result
+publication warning must preserve the actual computation status. Read saved
+results without replay and keep their source identity visible.
+
+Declare required reference outputs in the subject's `figure-contracts.json`.
+The corpus checker validates kind/count, descriptions and accessible tables
+through `scripts/declared_outputs.py`; a successful exit with missing declared
+outputs fails qualification. This contract describes expected output, not
+permission to execute code. See [plotting and reports](../plotting.md).
+
+Stan formatting/static checks use the pinned stanc adapter; Julia uses
+JuliaFormatter and parse checks in its prepared tool image. dbt `.sql` uses the
+SQLfmt adapter rather than the PostgreSQL formatter because Jinja is part of
+the language. Preserve each generator's source-to-guide contract, then regenerate
+shared TeX/readers after source formatting. None of these syntax checks replaces
+real compilation, dbt execution, numerical assertions or browser readback.

@@ -9,13 +9,17 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep6_users (
   user_id integer PRIMARY KEY,
   signup_at timestamptz NOT NULL,
   observed_through timestamptz NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep6_users
 VALUES
   (1, '2026-01-01T00:00Z', '2026-01-10T00:00Z'),
@@ -23,12 +27,14 @@ VALUES
   (3, '2026-01-02T00:00Z', '2026-01-10T00:00Z'),
   (4, '2026-01-09T00:00Z', '2026-01-10T00:00Z'),
   (5, '2026-01-01T00:00Z', '2026-01-10T00:00Z');
+
 CREATE TEMP TABLE deep6_events (
   event_id integer PRIMARY KEY,
   user_id integer NOT NULL,
   occurred_at timestamptz NOT NULL,
   available_at timestamptz NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep6_events
 VALUES
   (1, 1, '2026-01-08T00:00Z', '2026-01-08T00:00Z'),
@@ -40,6 +46,7 @@ VALUES
   (7, 1, '2025-12-31T00:00Z', '2025-12-31T00:00Z'),
   (8, 99, '2026-01-08T00:00Z', '2026-01-08T00:00Z'),
   (9, 1, '2026-01-12T00:00Z', '2026-01-12T00:00Z');
+
 -- Worked example 1
 WITH activity (
   event_id,
@@ -54,6 +61,7 @@ SELECT
   count(DISTINCT user_id) AS active_users
 FROM
   activity;
+
 -- Worked example 2
 WITH instants (
   position,
@@ -70,6 +78,7 @@ SELECT
     instants
   ORDER BY
     position;
+
 -- Exercises
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 -- 1. Expose invalid event relationships before aggregation
@@ -81,7 +90,7 @@ SELECT
 -- Expected result/shape: For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.
 -- Verify: For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.
 -- 3. Create one nullable retention label per user
--- Inputs/evidence: For sql-deep-06 Exercise 3, Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
+-- Inputs/evidence: For sql-deep-06 Exercise 3, Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
 -- Expected result/shape: For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1's multiple day 7 events still produce one true label; its exact window-end event is excluded.
 -- Verify: For sql-deep-06 Exercise 3, construct the expected label from each eligible user event history: one for observed qualifying retention, zero only for complete mature nonretention, and NULL for pending observation.
 -- 4. Report cohort rates with their denominators

@@ -70,3 +70,19 @@ a resolved lock does not prove execution on that platform.
 Weights, tokenizer assets, spaCy pipelines, map tiles and external services need
 the exact preparation declared by their lessons. Verify offline assets separately
 from package import success.
+
+## Data and scientific additions
+
+`data-engineering`, `data-platforms-python`, `dbt-duckdb`, `stan-cpu` and `julia` are ordinary launcher
+profiles, not root Python extras. Their images and reviewed locks own their
+dependencies. Polars and the canonical dbt/ML engineering programs run through
+`data-engineering`, including pinned skops for the current MLflow scikit-learn model format; beginner dbt SQL-model variants use `dbt-duckdb`. Stan uses
+native `main.stan` compilation; Julia uses `main.jl` and a prepared project/depot.
+PyArrow/DataFusion/PyIceberg use `data-platforms-python` with separate native AMD64 and ARM64 hash locks. Ballista needs its separately matched environment and newer glibc; it is not installed in that worker. PyMC/ArviZ remain in `bayesian-cpu`. Do not merge those package environments just
+because several courses contain Python source.
+
+New projects include these ordinary profiles in the default selection. Existing
+projects retain their saved selection; use `--all` or explicit profiles to add
+new runtimes deliberately. `resume` never prepares them. See the
+[scientist roadmap](scientist-roadmap.md) and [source contracts](modules-runtime.md)
+for lesson placement, single-source boundaries and separate project workflows.

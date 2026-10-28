@@ -38,6 +38,11 @@ class WorkerProfile:
 
 
 PROFILES = {
+    "dbt-duckdb": WorkerProfile("dbt-duckdb", "sql", "model.sql"),
+    "data-engineering": WorkerProfile("data-engineering", "python", "main.py"),
+    "data-platforms-python": WorkerProfile("data-platforms-python", "python", "main.py"),
+    "stan-cpu": WorkerProfile("stan-cpu", "stan", "main.stan"),
+    "julia": WorkerProfile("julia", "julia", "main.jl"),
     "jax-cpu": WorkerProfile("jax-cpu", "python", "main.py"),
     "bayesian-cpu": WorkerProfile("bayesian-cpu", "python", "main.py"),
     "r-statistics": WorkerProfile("r-statistics", "r", "main.R"),
@@ -170,6 +175,15 @@ def child_environment(
         HF_HOME=str(directory / "huggingface"),
         TOKENIZERS_PARALLELISM="false",
         UV_THREADPOOL_SIZE="2",
+        MLFLOW_DISABLE_AGENT_HINT="1",
+        MLFLOW_ENABLE_TELEMETRY="false",
+        FEAST_USAGE="False",
+        DBT_SEND_ANONYMOUS_USAGE_STATS="false",
+        DO_NOT_TRACK="true",
+        POLARS_MAX_THREADS="2",
+        TOKIO_WORKER_THREADS="2",
+        RAYON_NUM_THREADS="2",
+        NUMEXPR_NUM_THREADS="2",
         CUDA_VISIBLE_DEVICES="",
         OMP_NUM_THREADS="2",
         OPENBLAS_NUM_THREADS="2",
@@ -183,6 +197,16 @@ def child_environment(
         PYSPARK_PYTHON=sys.executable,
         PYSPARK_DRIVER_PYTHON=sys.executable,
     )
+    if profile_id == "julia":
+        environment.update(
+            JULIA_DEPOT_PATH="/opt/julia-depot",
+            JULIA_LOAD_PATH="/opt/julia-env:@stdlib",
+            JULIA_PKG_OFFLINE="true",
+            JULIA_CPU_TARGET="generic",
+            JULIA_NUM_THREADS="2",
+        )
+    if profile_id == "stan-cpu":
+        environment.update(STAN_NUM_THREADS="1", MAKEFLAGS="-j1")
     if profile_id == "jax-cpu":
         environment.update(JAX_PLATFORMS="cpu", XLA_FLAGS="--xla_cpu_multi_thread_eigen=false")
     if profile_id == "bayesian-cpu":
@@ -594,6 +618,28 @@ def validate_operation(profile_id: str, language: str, verification_id: str | No
 def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]], list[str]]:
     """Reviewed single-source toolchains; source cannot supply build flags or packages."""
     node = ["node", "--unhandled-rejections=strict", "--max-old-space-size=256"]
+    if profile_id == "dbt-duckdb":
+        return [], [sys.executable, "-u", "-m", "ds60sqlpy.dbt_runner"]
+    if profile_id == "stan-cpu":
+        return [["make", "--no-print-directory", "-C", "/opt/cmdstan", str(directory / "main")]], [
+            sys.executable,
+            "-u",
+            "-m",
+            "ds60sqlpy.stan_runner",
+        ]
+    if profile_id == "julia":
+        return [], [
+            "julia",
+            "--startup-file=no",
+            "--history-file=no",
+            "--color=no",
+            "--compiled-modules=existing",
+            "--project=/opt/julia-env",
+            "--threads=2",
+            "-L",
+            "/opt/worker/worker_figures.jl",
+            "main.jl",
+        ]
     if profile_id == "r-statistics":
         return [], ["Rscript", "--vanilla", str(Path(__file__).with_name("worker_figures.R"))]
     if profile_id == "php-cli":
@@ -779,6 +825,91 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
             from ds60sqlpy.gpu_runtime import probe_commands
 
             commands = probe_commands(profile_id, directory)
+        elif profile_id == "stan-cpu":
+            commands = [
+                ["/opt/cmdstan/bin/stanc", "--version"],
+                [
+                    "/opt/cmdstan/probe",
+                    "sample",
+                    "num_warmup=10",
+                    "num_samples=10",
+                    "random",
+                    "seed=17",
+                    "output",
+                    "file=probe.csv",
+                    "refresh=0",
+                ],
+                [
+                    sys.executable,
+                    "-c",
+                    (
+                        "import csv,math; "
+                        "r=list(csv.DictReader(x for x in open('probe.csv') "
+                        "if not x.startswith('#'))); "
+                        "assert len(r)==10 and all(math.isfinite(float(x['mu'])) for x in r); "
+                        "print('Stan sampler ready')"
+                    ),
+                ],
+            ]
+        elif profile_id == "julia":
+            commands = [
+                [
+                    "julia",
+                    "--startup-file=no",
+                    "--compiled-modules=existing",
+                    "--project=/opt/julia-env",
+                    "-e",
+                    (
+                        "using LinearAlgebra, DataFrames, ForwardDiff, JSON3; "
+                        "@assert sum([20,22])==42; "
+                        "@assert ForwardDiff.derivative(x->x*x,3.0)==6.0; println(VERSION)"
+                    ),
+                ]
+            ]
+        elif profile_id == "dbt-duckdb":
+            (directory / "model.sql").write_text("select 42 as answer\n", encoding="utf-8")
+            commands = [[sys.executable, "-u", "-m", "ds60sqlpy.dbt_runner"]]
+        elif profile_id == "data-platforms-python":
+            commands = [
+                [
+                    sys.executable,
+                    "-c",
+                    (
+                        "from pathlib import Path\n"
+                        "import pyarrow as pa\n"
+                        "from datafusion import SessionContext\n"
+                        "from pyiceberg.catalog.sql import SqlCatalog\n"
+                        "from pyiceberg.schema import Schema\n"
+                        "from pyiceberg.types import NestedField, LongType\n"
+                        "ctx=SessionContext()\n"
+                        "batch=pa.record_batch({'n':[20,22]})\n"
+                        "ctx.register_record_batches('numbers', [[batch]])\n"
+                        "rows=ctx.sql('select sum(n) as n from numbers').collect()\n"
+                        "assert pa.Table.from_batches(rows).to_pylist()==[{'n':42}]\n"
+                        "root=Path.cwd()\n"
+                        "catalog=SqlCatalog('probe',uri='sqlite:///'+str(root/'catalog.sqlite'),warehouse=(root/'warehouse').as_uri())\n"
+                        "catalog.create_namespace('probe')\n"
+                        "table=catalog.create_table('probe.numbers',schema=Schema(NestedField(1,'n',LongType(),required=False)))\n"
+                        "table.append(pa.table({'n':pa.array([42],type=pa.int64())}))\n"
+                        "assert table.scan().to_arrow().to_pylist()==[{'n':42}]\n"
+                        "print('Arrow, DataFusion and Iceberg ready')\n"
+                    ),
+                ]
+            ]
+        elif profile_id == "data-engineering":
+            commands = [
+                [
+                    sys.executable,
+                    "-c",
+                    (
+                        "import polars as pl, duckdb, feast, mlflow, skops.io; "
+                        "from dbt.cli.main import dbtRunner; "
+                        "assert pl.DataFrame({'x':[20,22]}).select(pl.col('x').sum()).item()==42; "
+                        "assert duckdb.sql('select 42').fetchall()[0][0]==42; "
+                        "print('Data engineering ready')"
+                    ),
+                ]
+            ]
         elif profile_id == "cpp20":
             compiler = _compiler()
             if compiler is None:
@@ -1031,6 +1162,9 @@ def execute_operation(
         "typescript-node",
         "php-cli",
         "r-statistics",
+        "dbt-duckdb",
+        "stan-cpu",
+        "julia",
     }:
         compiling, command = language_commands(profile_id, directory)
         if isolate_user:

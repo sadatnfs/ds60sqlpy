@@ -1,0 +1,19 @@
+ARG DS60_PYTHON_IMAGE=ghcr.io/astral-sh/uv:python3.12-bookworm-slim@sha256:e5b65587bce7de595f299855d7385fe7fca39b8a74baa261ba1b7147afa78e58
+FROM ${DS60_PYTHON_IMAGE} AS toolchain
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git libgomp1 libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+ARG TARGETARCH
+COPY docker/workers/native/releases.lock.json /tmp/native-releases.lock.json
+COPY docker/workers/native/install_native.py /tmp/install_native.py
+RUN TARGETARCH=${TARGETARCH} python /tmp/install_native.py julia && ln -s /opt/julia/bin/julia /usr/local/bin/julia
+ENV JULIA_DEPOT_PATH=/opt/julia-depot JULIA_CPU_TARGET=generic JULIA_NUM_PRECOMPILE_TASKS=2 JULIA_NUM_THREADS=2
+COPY docker/workers/julia/ /opt/julia-env/
+RUN julia --startup-file=no --project=/opt/julia-env -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()' \
+    && chmod -R a+rX /opt/julia-env /opt/julia-depot /opt/julia
+FROM toolchain
+WORKDIR /opt/worker
+RUN install -d -m 0700 /run/ds60
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
+COPY src/ds60sqlpy/worker_figures.jl /opt/worker/worker_figures.jl
+ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=julia
+ENTRYPOINT ["python", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

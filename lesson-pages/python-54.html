@@ -555,11 +555,11 @@ label_coverage <span class="syntax-operator">=</span> <span class="syntax-punctu
 <li>Compute PSI for multiple features or score windows over time.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; monitoring layers, drift signals, delayed labels, and governance decisions; for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
-<ol>
+<ol start="2">
 <li>Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; monitoring layers, drift signals, delayed labels, and governance decisions; save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
-<ol>
+<ol start="3">
 <li>Draft a governance policy covering roles, approvals, alerts, and rollback.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; monitoring layers, drift signals, delayed labels, and governance decisions; produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
@@ -572,15 +572,15 @@ label_coverage <span class="syntax-operator">=</span> <span class="syntax-punctu
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery, not dashboards that merely display numbers.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Label-delay analysis:</strong> Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts. <strong>Progressive hint:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</li>
 </ol>
 <p><strong>Verify:</strong> Label-delay analysis; print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
-<ol>
+<ol start="5">
 <li><strong>Alert hysteresis:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping. <strong>Progressive hint:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</li>
 </ol>
 <p><strong>Verify:</strong> Alert hysteresis; feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
-<ol>
+<ol start="6">
 <li><strong>Rollback drill:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence. <strong>Progressive hint:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</li>
 </ol>
 <p><strong>Verify:</strong> Rollback drill; record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p>
@@ -835,11 +835,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Compute PSI for multiple features or score windows over time.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
-<ol>
+<ol start="2">
 <li>Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
-<ol>
+<ol start="3">
 <li>Draft a governance policy covering roles, approvals, alerts, and rollback.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
@@ -852,15 +852,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-13--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-13--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery—not dashboards that merely display numbers.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Label-delay analysis:</strong> Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts. <strong>Progressive hint:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</li>
 </ol>
 <p><strong>Verify:</strong> Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
-<ol>
+<ol start="5">
 <li><strong>Alert hysteresis:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping. <strong>Progressive hint:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</li>
 </ol>
 <p><strong>Verify:</strong> Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
-<ol>
+<ol start="6">
 <li><strong>Rollback drill:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence. <strong>Progressive hint:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</li>
 </ol>
 <p><strong>Verify:</strong> Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p>

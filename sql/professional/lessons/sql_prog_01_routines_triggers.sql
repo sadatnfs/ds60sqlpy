@@ -1,11 +1,11 @@
 -- SQL-PROG-01: Functions, procedures, and triggers
--- BEGINNER WORKFLOW — sql-prog-01: Functions, Procedures, and Triggers
+-- BEGINNER WORKFLOW - sql-prog-01: Functions, Procedures, and Triggers
 -- Guide: sql/professional/companion-guides/sql_prog_01_routines_triggers.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-prog-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-prog-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -22,7 +22,9 @@
 \echo 'SQL-PROG-01: disposable routines and trigger lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_routines_lab;
+
 -- Declarative constraints are the first choice for row-local invariants.
 CREATE TABLE pro_routines_lab.work_items (
   item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -32,6 +34,7 @@ CREATE TABLE pro_routines_lab.work_items (
   created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
+
 CREATE TABLE pro_routines_lab.work_item_audit (
   audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   item_id bigint NOT NULL,
@@ -40,17 +43,20 @@ CREATE TABLE pro_routines_lab.work_item_audit (
   changed_by text NOT NULL,
   changed_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
+
 CREATE TABLE pro_routines_lab.statement_audit (
   statement_audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   changed_rows integer NOT NULL CHECK (changed_rows >= 0),
   item_ids bigint[] NOT NULL,
   changed_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
+
 INSERT INTO pro_routines_lab.work_items (owner_name, title, status)
 VALUES
   ('Avery', 'Review intake form', 'open'),
   ('Avery', 'Publish reference notes', 'in_progress'),
   ('Morgan', 'Archive completed records', 'open');
+
 -- Query functions can be composed inside SELECT. STABLE promises that this
 -- function does not modify data and sees one statement snapshot.
 CREATE FUNCTION pro_routines_lab.open_item_count (p_owner_name text)
@@ -66,29 +72,33 @@ CREATE FUNCTION pro_routines_lab.open_item_count (p_owner_name text)
       AND wi.status <> 'closed'
 $function$
 ;
-  -- A BEFORE row trigger may replace NEW before storage.
-  CREATE FUNCTION pro_routines_lab.set_work_item_updated_at ()
-    RETURNS trigger
-    LANGUAGE plpgsql
-    VOLATILE
-    SECURITY INVOKER
-    SET search_path = pg_catalog AS $function$
+-- A BEFORE row trigger may replace NEW before storage.
+CREATE FUNCTION pro_routines_lab.set_work_item_updated_at ()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  VOLATILE
+  SECURITY INVOKER
+  SET search_path = pg_catalog
+  AS $function$
 BEGIN
     NEW.updated_at := clock_timestamp();
     RETURN NEW;
 END
-$function$;
-    CREATE TRIGGER work_items_set_updated_at
-      BEFORE UPDATE ON pro_routines_lab.work_items
-      FOR EACH ROW
-      EXECUTE FUNCTION pro_routines_lab.set_work_item_updated_at ();
-      -- An AFTER row trigger records one audit row per status transition.
-      CREATE FUNCTION pro_routines_lab.audit_work_item_status ()
-        RETURNS trigger
-        LANGUAGE plpgsql
-        VOLATILE
-        SECURITY INVOKER
-        SET search_path = pg_catalog AS $function$
+$function$
+;
+CREATE TRIGGER work_items_set_updated_at
+  BEFORE UPDATE ON pro_routines_lab.work_items
+  FOR EACH ROW
+  EXECUTE FUNCTION pro_routines_lab.set_work_item_updated_at ();
+
+-- An AFTER row trigger records one audit row per status transition.
+CREATE FUNCTION pro_routines_lab.audit_work_item_status ()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  VOLATILE
+  SECURITY INVOKER
+  SET search_path = pg_catalog
+  AS $function$
 BEGIN
     IF OLD.status IS DISTINCT FROM NEW.status THEN
         INSERT INTO pro_routines_lab.work_item_audit (
@@ -106,19 +116,22 @@ BEGIN
     END IF;
     RETURN NULL;
 END
-$function$;
-        CREATE TRIGGER work_items_status_audit
-          AFTER UPDATE ON pro_routines_lab.work_items
-          FOR EACH ROW
-          EXECUTE FUNCTION pro_routines_lab.audit_work_item_status ();
-          -- A statement trigger runs once and can inspect transition tables containing
-          -- all OLD and NEW rows affected by that statement.
-          CREATE FUNCTION pro_routines_lab.audit_work_item_statement ()
-            RETURNS trigger
-            LANGUAGE plpgsql
-            VOLATILE
-            SECURITY INVOKER
-            SET search_path = pg_catalog AS $function$
+$function$
+;
+CREATE TRIGGER work_items_status_audit
+  AFTER UPDATE ON pro_routines_lab.work_items
+  FOR EACH ROW
+  EXECUTE FUNCTION pro_routines_lab.audit_work_item_status ();
+
+-- A statement trigger runs once and can inspect transition tables containing
+-- all OLD and NEW rows affected by that statement.
+CREATE FUNCTION pro_routines_lab.audit_work_item_statement ()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  VOLATILE
+  SECURITY INVOKER
+  SET search_path = pg_catalog
+  AS $function$
 BEGIN
     INSERT INTO pro_routines_lab.statement_audit (changed_rows, item_ids)
     SELECT
@@ -135,23 +148,27 @@ BEGIN
           ROW(o.owner_name, o.title, o.status);
     RETURN NULL;
 END
-$function$;
-            CREATE TRIGGER work_items_statement_audit
-              AFTER UPDATE ON pro_routines_lab.work_items REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
-              FOR EACH STATEMENT
-              EXECUTE FUNCTION pro_routines_lab.audit_work_item_statement ();
-              -- Procedures are invoked with CALL and do not return a query relation. This
-              -- procedure deliberately participates in its caller's transaction.
-              CREATE PROCEDURE pro_routines_lab.close_owner_items (p_owner_name text)
-              LANGUAGE plpgsql
-              SECURITY INVOKER AS $procedure$
+$function$
+;
+CREATE TRIGGER work_items_statement_audit
+  AFTER UPDATE ON pro_routines_lab.work_items REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION pro_routines_lab.audit_work_item_statement ();
+
+-- Procedures are invoked with CALL and do not return a query relation. This
+-- procedure deliberately participates in its caller's transaction.
+CREATE PROCEDURE pro_routines_lab.close_owner_items (p_owner_name text)
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $procedure$
 BEGIN
     UPDATE pro_routines_lab.work_items AS wi
     SET status = 'closed'
     WHERE wi.owner_name = p_owner_name
       AND wi.status <> 'closed';
 END
-$procedure$;
+$procedure$
+;
 \echo 'Function used as a query expression'
 SELECT
   owners.owner_name,

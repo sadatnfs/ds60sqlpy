@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 50,
+  "prerequisites": ["apache-010"],
+  "concepts": ["compute kernels", "chunks", "null policy"],
+  "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
+  "sources": [
+    ["Arrow compute functions", "https://arrow.apache.org/docs/python/compute.html"],
+    [
+      "Arrow filter null policy",
+      "https://arrow.apache.org/docs/python/generated/pyarrow.compute.filter.html"
+    ]
+  ]
+}

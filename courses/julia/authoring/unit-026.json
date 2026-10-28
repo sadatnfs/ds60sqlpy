@@ -1,0 +1,61 @@
+{
+  "number": 26,
+  "title": "Allocation, mutation and alias-safe numerical work",
+  "concepts": ["preallocation", "mul!", "views", "aliasing", "storage reuse"],
+  "outcome": "Implement a preallocated matrix step, explain ownership and aliasing, and compare semantic results before measuring storage behavior.",
+  "level": "advanced",
+  "minutes": 150,
+  "prerequisites": ["julia-007", "julia-013", "julia-025"],
+  "sources": [
+    [
+      "LinearAlgebra mul!",
+      "https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.mul!"
+    ],
+    ["Julia performance tips", "https://docs.julialang.org/en/v1/manual/performance-tips/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Trace a matrix step",
+      "task": "Compute the two entries before running the first case.",
+      "expected": "The final vector is[11,11].",
+      "hint": "Multiply rows by the input, then add bias.",
+      "answer": "The products[10,12] plus[1,-1] give[11,11]."
+    },
+    {
+      "title": "Repeat with new inputs",
+      "task": "Reuse the destination for input[1,2].",
+      "expected": "The new vector is[5,5].",
+      "hint": "Ensure old output is overwritten.",
+      "answer": "Multiplication overwrites both entries before adding the bias."
+    },
+    {
+      "title": "Debug a width mismatch",
+      "task": "Pass a2-by -3 matrix and a length 2 input.",
+      "expected": "DimensionMismatch occurs before output mutation.",
+      "hint": "Snapshot the destination first.",
+      "answer": "The declared matrix width must equal input length; validation preserves the previous output here."
+    },
+    {
+      "title": "Find view overlap",
+      "task": "Explain why two different view objects can be unsafe.",
+      "expected": "They may address the same parent elements.",
+      "hint": "Object identity is weaker than storage independence.",
+      "answer": "The rejection uses mightalias, which conservatively checks possible shared storage."
+    },
+    {
+      "title": "Design scratch ownership",
+      "task": "Describe a safe interface for repeated calls that must permit overlapping inputs.",
+      "expected": "Use a documented private scratch copy before mutation.",
+      "hint": "Account for allocation and concurrency.",
+      "answer": "A scratch buffer can preserve the original input, but its owner and lifetime must be explicit."
+    },
+    {
+      "title": "Evaluate a speed claim",
+      "task": "Explain why fewer measured bytes may not mean faster code.",
+      "expected": "Access patterns, dispatch and workload sizes also matter.",
+      "hint": "Views may be strided.",
+      "answer": "Allocation is one measurement. End-to-end timing and correctness remain necessary."
+    }
+  ]
+}

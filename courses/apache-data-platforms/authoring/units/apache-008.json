@@ -1,0 +1,13 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "beginner",
+  "minutes": 60,
+  "prerequisites": ["apache-007"],
+  "concepts": ["independent oracles", "negative checks", "evidence boundaries"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    ["Arrow Flight workshop protocol", "https://arrow.apache.org/docs/format/Flight.html"],
+    ["Kafka replication guarantees", "https://kafka.apache.org/44/design/design/"]
+  ]
+}

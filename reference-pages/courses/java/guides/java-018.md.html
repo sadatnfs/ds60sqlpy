@@ -261,19 +261,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Use independent table cases.</strong> Test clamp for values -2,0,3,9 under bounds 0..5. <strong>Expected:</strong> outputs 0,0,3,5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with outputs 0,0,3,5.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Check a boundary failure.</strong> Callclamp withlower5,upper2 and requireIllegalArgumentException. <strong>Expected:</strong> exception observed. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with exception observed.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Test an idempotence property.</strong> For values-10 through10,clamping an already clamped value leaves it unchanged. <strong>Expected:</strong> all21 cases satisfyidempotence. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with all21 cases satisfyidempotence.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Detect a broken implementation.</strong> Use a mutant that returns upper for values below lower and show the table rejects it. <strong>Expected:</strong> at least one mismatch. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with at least one mismatch.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Verify the exception checker itself.</strong> Ask the helper to expect an exception from a successful action and catch itsAssertionError. <strong>Expected:</strong> checker fails when no exception is thrown. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with checker fails when no exception is thrown.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Test a fresh transfer property.</strong> Reverse arrays oflength0,1,3 twice using a separate copy and compare with originals. <strong>Expected:</strong> all originals restored; input arrays unchanged. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with all originals restored; input arrays unchanged.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

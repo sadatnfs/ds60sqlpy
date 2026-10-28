@@ -1,11 +1,11 @@
 -- Day 9: Correlated Subqueries, EXISTS/IN
--- BEGINNER WORKFLOW — sql-09: Correlated Subqueries
+-- BEGINNER WORKFLOW - sql-09: Correlated Subqueries
 -- Guide: sql/postgres-60day/companion-guides/day09_correlated_subqueries.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-09/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-09.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
 -- Assumptions: `EXISTS` tests whether at least one row qualifies and ignores selected values. `NOT EXISTS` remains safe when inner columns can be NULL.
@@ -41,6 +42,7 @@ WHERE
       AND p.category = 'Electronics')
 ORDER BY
   c.customer_id;
+
 -- IN with correlated condition
 SELECT
   p.product_id,
@@ -57,6 +59,7 @@ WHERE
       o.order_date >= now() - interval '30 days')
 ORDER BY
   p.product_id;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

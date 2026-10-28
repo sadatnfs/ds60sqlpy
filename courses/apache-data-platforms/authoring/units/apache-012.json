@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 50,
+  "prerequisites": ["apache-011"],
+  "concepts": ["IPC", "schema", "record batch"],
+  "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
+  "sources": [
+    ["Arrow IPC documentation", "https://arrow.apache.org/docs/python/ipc.html"],
+    [
+      "Arrow IPC format",
+      "https://arrow.apache.org/docs/format/Columnar.html#serialization-and-interprocess-communication-ipc"
+    ]
+  ]
+}

@@ -12,7 +12,9 @@ from pathlib import Path
 from statistics import NormalDist, mean, stdev
 from typing import Literal, cast
 
-FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "data" / ("experiment_outcomes.csv")
+from ds60sqlpy.teaching_data import teaching_fixture
+
+FIXTURE = teaching_fixture("experiment-outcomes")
 Variant = Literal["control", "treatment"]
 ClaimScope = Literal["causal", "associational"]
 

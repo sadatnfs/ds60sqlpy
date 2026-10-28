@@ -18,10 +18,15 @@ from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 from ds60sqlpy.modules import MAX_SOURCE_BYTES, ModuleCatalog, ModuleState
-from ds60sqlpy.plot_artifacts import validate_artifacts
+from ds60sqlpy.plot_artifacts import read_saved_artifacts, validate_artifacts
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 SERVICES = {
+    "dbt-duckdb": "dbt-worker",
+    "data-engineering": "data-engineering-worker",
+    "data-platforms-python": "data-platforms-worker",
+    "stan-cpu": "stan-worker",
+    "julia": "julia-worker",
     "jax-cpu": "jax-worker",
     "bayesian-cpu": "bayesian-worker",
     "r-statistics": "r-worker",
@@ -197,6 +202,10 @@ class ModuleJobs:
         return self.state.safe_path(self.directory / f"{key}.json")
 
     def _read(self, key: str) -> dict[str, Any]:
+        return self._read_document(key)
+
+    def _read_document(self, key: str, *, for_storage: bool = False) -> dict[str, Any]:
+        """Validate stored evidence, projecting only reads intended for display."""
         value = json.loads(self._path(key).read_text("utf-8"))
         if (
             not isinstance(value, dict)
@@ -208,21 +217,33 @@ class ModuleJobs:
         ):
             raise ValueError("Invalid module job receipt; preserve it for recovery.")
         self.catalog.get(value.get("lesson_id"))
+        if "withheld_artifacts" in value:
+            raise ValueError("Saved jobs cannot contain derived figure-readback metadata.")
         if "artifacts" in value:
-            value["artifacts"] = validate_artifacts(value["artifacts"])
+            visible, withheld = read_saved_artifacts(value["artifacts"])
+            if not for_storage:
+                value["artifacts"] = visible
+                if withheld:
+                    value["withheld_artifacts"] = withheld
         return value
 
     def _update(self, key: str, change: dict[str, Any]) -> dict[str, Any]:
         path = self._path(key)
+        if "withheld_artifacts" in change:
+            raise ValueError("Figure-readback metadata cannot be written into a saved job.")
+        if "artifacts" in change:
+            validate_artifacts(change["artifacts"])
         with self.lock, locked_update(path):
-            value = self._read(key)
+            # Status recovery must retain historical raw artifacts rather than
+            # writing a display projection over the original evidence.
+            value = self._read_document(key, for_storage=True)
             # A late poll must never revive or replace a resolved attempt.
             if value["status"] in TERMINAL - {"interrupted"}:
-                return value
+                return self._read(key)
             value.update(change)
             value["updated_at"] = datetime.now(UTC).isoformat()
             atomic_json_write(path, value)
-        return value
+        return self._read(key)
 
     def _snapshot(self, value: dict[str, Any], key: str) -> dict[str, Any]:
         receipt = self._read(key)

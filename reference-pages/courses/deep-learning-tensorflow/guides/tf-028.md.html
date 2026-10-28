@@ -252,19 +252,19 @@ checkpoint<span class="syntax-operator">=</span>tf<span class="syntax-operator">
 <ol>
 <li><strong>Create nontrivial optimizer state.</strong> Take two Adam steps on(w-2)² fromw0 and inspect iterations. <strong>Expected:</strong> iteration count2 and positive weight. <strong>Verify:</strong> Save the assertion results for exercise 1, including iteration count2 and positive weight.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Save both state components.</strong> Save a checkpoint containingw and Adam into a TemporaryDirectory. <strong>Expected:</strong> checkpoint index exists; no course source file is written. <strong>Verify:</strong> Save the assertion results for exercise 2, including checkpoint index exists; no course source file is written.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Calculate the uninterrupted control.</strong> Snapshot the saved weight and take one further step without restoring. <strong>Expected:</strong> iteration count3; weight changes. <strong>Verify:</strong> Save the assertion results for exercise 3, including iteration count3; weight changes.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Restore in a fresh process.</strong> Launch the existing interpreter with fresh variable/Adam objects, restore the saved prefix and take one step. <strong>Expected:</strong> child weight matches control within 1e-6; child iterations3. <strong>Verify:</strong> Save the assertion results for exercise 4, including child weight matches control within 1e-6; child iterations3.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose a weights-only restart.</strong> Set a fresh Adam variable to the saved weight without restoring optimizer moments, then take one step. <strong>Expected:</strong> next weight differs from the full-state control by more than1e-6. <strong>Verify:</strong> Save the assertion results for exercise 5, including next weight differs from the full-state control by more than1e-6.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Verify cleanup.</strong> Remove the owned temporary checkpoint directory and verify it no longer exists. <strong>Expected:</strong> temporary checkpoint directory absent. <strong>Verify:</strong> Save the assertion results for exercise 6, including temporary checkpoint directory absent.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.
 -- Assumptions: All monetary summaries identify stored totals versus computed net line revenue. Reporting month uses UTC and empty populations remain visible where required.
@@ -51,6 +52,7 @@ GROUP BY
 ORDER BY
   stored_revenue DESC,
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Create a product profitability table from net order-line revenue and catalog cost.
@@ -82,6 +84,7 @@ GROUP BY
 ORDER BY
   gross_profit DESC,
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Build a UTC monthly order-status report with counts and stored revenue.
@@ -108,6 +111,7 @@ GROUP BY
 ORDER BY
   utc_month,
   o.status;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Debugging
 -- Prompt: Reconcile stored order total, computed line total, and paid total without multiplying details.
@@ -155,6 +159,7 @@ FROM
 ORDER BY
   ABS(o.total_amount - lt.line_total) DESC,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Prediction
 -- Prompt: Compare monthly budgets with actual expenses and preserve missing sides.
@@ -206,6 +211,7 @@ FROM
   ORDER BY
     period,
     category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments.
@@ -254,5 +260,6 @@ FROM
   CROSS JOIN order_kpis AS o
   CROSS JOIN line_kpis AS l
   CROSS JOIN payment_kpis AS p;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

@@ -1,0 +1,58 @@
+{
+  "number": 3,
+  "title": "Annotation rubrics and construct validity",
+  "concepts": ["rubric", "construct validity", "adjudication", "denominator", "label version"],
+  "outcome": "Turn an intended capability into auditable labels, distinguish disagreement from missing evidence, and preserve adjudication history.",
+  "level": "beginner",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-002"],
+  "exercises": [
+    {
+      "title": "Separate a missing dimension",
+      "task": "Score one level 2 criterion and one inapplicable criterion.",
+      "expected": "Score 1.0 with one applicable dimension.",
+      "hint": "Keep the denominator explicit.",
+      "answer": "Inapplicable is not the same as failure. The score is 2 divided by 2, while criterion coverage must be reported separately."
+    },
+    {
+      "title": "Add a critical failure",
+      "task": "Give a response all level 2 quality labels but a failed access gate.",
+      "expected": "The response is not admitted.",
+      "hint": "Quality and required constraints use separate logic.",
+      "answer": "A weighted mean cannot turn a known access violation into an acceptable result."
+    },
+    {
+      "title": "Reject malformed labels",
+      "task": "Supply Boolean True as an ordinal rubric level.",
+      "expected": "The validator rejects it.",
+      "hint": "Python bool is an int subclass unless checked deliberately.",
+      "answer": "An explicit label contract prevents accidental coercion of pass/fail fields into ordinal categories."
+    },
+    {
+      "title": "Retain reviewer disagreement",
+      "task": "Adjudicate labels 1 and 2 to final label 1.",
+      "expected": "Both original labels remain in the ledger.",
+      "hint": "Append a linked resolution.",
+      "answer": "The final operational label is a new observation with a reason, not a replacement for disagreement evidence."
+    },
+    {
+      "title": "Change the rubric version",
+      "task": "Combine labels from v1 and v2 without a crosswalk.",
+      "expected": "Adjudication rejects the mixed versions.",
+      "hint": "A label value only has meaning under its rubric.",
+      "answer": "A version change can alter category boundaries. Reannotation or a defensible crosswalk is required before aggregation."
+    },
+    {
+      "title": "Construct a proxy counterexample",
+      "task": "Write a citation-looking response whose cited passage is irrelevant.",
+      "expected": "Formatting succeeds while evidence support fails.",
+      "hint": "Separate the marker from the claim-passage relation.",
+      "answer": "The counterexample exposes a validity failure in a citation-marker metric even when annotators can apply it consistently."
+    }
+  ],
+  "sources": [
+    ["Model Cards for Model Reporting", "https://arxiv.org/abs/1810.03993"],
+    ["HELM multi-metric evaluation", "https://arxiv.org/abs/2211.09110"]
+  ]
+}

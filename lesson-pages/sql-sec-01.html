@@ -404,17 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--sql-sec-01-roles-privileges-and-row-level-security">SQL-SEC-01: Roles, Privileges, and Row-Level Security<a class="heading-anchor" href="#guide--sql-sec-01-roles-privileges-and-row-level-security" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Catalog prerequisites:</strong> <code>sql-found-02</code> and <code>sql-39</code></li>
-<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>, <a href="sql-found-02.html#guide">SQL-FOUND-02; migrations</a>, SQL Day 38 transactions, <a href="sql-39.html#guide">SQL Day 39 locks and deadlocks</a>, and the disposable <code>advanced_sql_training</code> database.</li>
-<li><strong>Optional capability:</strong> hands-on role tests require the connected PostgreSQL role to have <code>CREATEROLE</code> or superuser status. The default script checks first and safely skips without creating anything when that capability is absent.</li>
-<li><strong>Artifacts:</strong> <a href="sql-sec-01.html#learner">learner SQL</a> · <a href="sql-sec-01.html#solution-1">solution reasoning</a> · <a href="sql-sec-01.html#solution-2">executable solution</a></li>
-</ul>
-<p>This command is portable across Windows PowerShell, macOS, and Linux:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code></pre>
-<p>Do not connect as an administrator to a shared or valuable database merely to make the optional path run. The lab creates only NOLOGIN roles inside one transaction and ends with <code>ROLLBACK</code>; it never sets passwords, changes server configuration, or grants broad access.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-sec-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -430,12 +419,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-sec-01</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-found-02</code> and <code>sql-39</code></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>, <a href="sql-found-02.html#guide">SQL-FOUND-02; migrations</a>, SQL Day 38 transactions, <a href="sql-39.html#guide">SQL Day 39 locks and deadlocks</a>, and the disposable <code>advanced_sql_training</code> database.</li>
+<li><strong>Optional capability:</strong> hands-on role tests require the connected PostgreSQL role to have <code>CREATEROLE</code> or superuser status. The default script checks first and safely skips without creating anything when that capability is absent.</li>
+<li><strong>Artifacts:</strong> <a href="sql-sec-01.html#learner">learner SQL</a> · <a href="sql-sec-01.html#solution-1">solution reasoning</a> · <a href="sql-sec-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>This command is portable across Windows PowerShell, macOS, and Linux:</p>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code></pre>
+<p>Do not connect as an administrator to a shared or valuable database merely to make the optional path run. The lab creates only NOLOGIN roles inside one transaction and ends with <code>ROLLBACK</code>; it never sets passwords, changes server configuration, or grants broad access.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked SQL reads or creates <code>pg_catalog.pg_roles</code>, <code>pro_security_lab.documents</code>, <code>pro_security_lab.announcements</code>, <code>pro_security_lab.owner_context_documents</code>, <code>pro_security_lab.visible_documents</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup. The first runnable example has a concrete contract: Example 1 returns one row per <code>rolcreaterole</code> with columns <code>rolcreaterole</code> from <code>pg_catalog.pg_roles</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>rolcreaterole</code>. Reselect the returned key columns from <code>pg_catalog.pg_roles</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>
     <span class="syntax-punctuation">(</span>
@@ -588,7 +588,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -600,13 +600,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-SEC-01: Roles, privileges, schemas, and row-level security</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-sec-01/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-sec-01.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -646,22 +646,33 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">\echo <span class="syntax-string">&#x27;SQL-SEC-01: role capability available; starting disposable lab&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_north NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_south NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Membership allows this course session to SET ROLE to the object owner.</span></span>
 <span class="source-line"><span class="syntax-comment">-- The transaction rollback removes this membership and all three roles.</span></span>
 <span class="source-line"><span class="syntax-keyword">GRANT</span> ds60_sec_owner <span class="syntax-keyword">TO</span> <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">ADMIN</span> <span class="syntax-keyword">OPTION</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">AUTHORIZATION</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> pro_security_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Default privileges belong to the object-creating role and affect only</span></span>
 <span class="source-line"><span class="syntax-comment">-- future objects in this schema.</span></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">GRANT</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> FUNCTIONS <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  document_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  tenant_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;south&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -669,11 +680,14 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  body <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  created_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>announcements <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  announcement_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  message <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents ENABLE <span class="syntax-keyword">ROW</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">SECURITY</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY documents_tenant_select <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south</span>
 <span class="source-line">  <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span></span>
@@ -685,6 +699,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
 <span class="source-line">      <span class="syntax-keyword">NULL</span></span>
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY documents_tenant_insert <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south</span>
 <span class="source-line">  <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span></span>
@@ -696,6 +711,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
 <span class="source-line">      <span class="syntax-keyword">NULL</span></span>
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY documents_tenant_update <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south</span>
 <span class="source-line">  <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span></span>
@@ -716,12 +732,15 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
 <span class="source-line">      <span class="syntax-keyword">NULL</span></span>
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-punctuation">(</span>tenant_key<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North checklist&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Visible to the north role.&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;south&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South checklist&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Visible to the south role.&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_security_lab<span class="syntax-punctuation">.</span>announcements <span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;This future table inherited default SELECT grants.&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- SECURITY INVOKER preserves the caller as the permission/RLS context.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> pro_security_lab<span class="syntax-punctuation">.</span>visible_documents <span class="syntax-keyword">WITH</span> <span class="syntax-punctuation">(</span> security_invoker <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span></span>
@@ -732,6 +751,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  d<span class="syntax-punctuation">.</span>created_at</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- A default view uses its owner&#x27;s access context for underlying</span></span>
 <span class="source-line"><span class="syntax-comment">-- relations. It is intentionally not exposed to tenant roles.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">VIEW</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_context_documents <span class="syntax-keyword">AS</span></span>
@@ -741,6 +761,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  d<span class="syntax-punctuation">.</span>title</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>visible_document_count <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">bigint</span></span>
 <span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
@@ -752,31 +773,42 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">            <span class="syntax-keyword">FROM</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
 <span class="source-line">        $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-comment">-- SECURITY DEFINER changes current_user to the function owner. The fixed</span></span>
-<span class="source-line">  <span class="syntax-comment">-- search_path, qualified table, narrow return value, and explicit revoke</span></span>
-<span class="source-line">  <span class="syntax-comment">-- are minimum controls; this example is not granted to tenant roles.</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_document_count <span class="syntax-punctuation">(</span>p_tenant_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">bigint</span></span>
-<span class="source-line">    <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
-<span class="source-line">    <span class="syntax-keyword">STABLE</span></span>
-<span class="source-line">    <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">DEFINER</span></span>
-<span class="source-line">    <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-comment">-- SECURITY DEFINER changes current_user to the function owner. The fixed</span></span>
+<span class="source-line"><span class="syntax-comment">-- search_path, qualified table, narrow return value, and explicit revoke</span></span>
+<span class="source-line"><span class="syntax-comment">-- are minimum controls; this example is not granted to tenant roles.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_document_count <span class="syntax-punctuation">(</span>p_tenant_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">bigint</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
+<span class="source-line">  <span class="syntax-keyword">STABLE</span></span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">DEFINER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line">            <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">            <span class="syntax-keyword">FROM</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
 <span class="source-line">            <span class="syntax-keyword">WHERE</span> d<span class="syntax-punctuation">.</span>tenant_key <span class="syntax-operator">=</span> p_tenant_key</span>
-<span class="source-line">        $<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>visible_document_count <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_document_count <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-comment">-- Schema USAGE permits name resolution; it does not grant table access.</span></span>
-<span class="source-line">    <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-comment">-- Default privileges supplied SELECT. Add only the write operations and</span></span>
-<span class="source-line">    <span class="syntax-comment">-- columns required by the exercise.</span></span>
-<span class="source-line">    <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-punctuation">(</span>tenant_key<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-punctuation">(</span>title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">ALL</span> SEQUENCES <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>visible_document_count <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_context_documents <span class="syntax-keyword">FROM</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_document_count <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line">        $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>visible_document_count <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_document_count <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Schema USAGE permits name resolution; it does not grant table access.</span></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Default privileges supplied SELECT. Add only the write operations and</span></span>
+<span class="source-line"><span class="syntax-comment">-- columns required by the exercise.</span></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-punctuation">(</span>tenant_key<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-punctuation">(</span>title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">ALL</span> SEQUENCES <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>visible_document_count <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_context_documents <span class="syntax-keyword">FROM</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>owner_document_count <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;Privilege inspection before acting as tenant roles&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">access</span><span class="syntax-punctuation">.</span>role_name<span class="syntax-punctuation">,</span></span>
@@ -1198,7 +1230,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1247,30 +1279,48 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">\<span class="syntax-keyword">if</span> <span class="syntax-punctuation">:</span>ds60_role_names_available</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_north NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_south NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_auditor NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_writer NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ROLE</span> ds60_sec_other_owner NOLOGIN<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">GRANT</span> ds60_sec_owner <span class="syntax-keyword">TO</span> <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">ADMIN</span> <span class="syntax-keyword">OPTION</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">GRANT</span> ds60_sec_other_owner <span class="syntax-keyword">TO</span> <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">ADMIN</span> <span class="syntax-keyword">OPTION</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">GRANT</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">,</span> ds60_sec_auditor<span class="syntax-punctuation">,</span> ds60_sec_writer <span class="syntax-keyword">TO</span> <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">ADMIN</span> <span class="syntax-keyword">OPTION</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">AUTHORIZATION</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">GRANT</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">,</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> FUNCTIONS <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  document_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  tenant_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;south&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  title <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  body <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents ENABLE <span class="syntax-keyword">ROW</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">SECURITY</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY tenant_read <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south</span>
 <span class="source-line">  <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span></span>
@@ -1282,19 +1332,23 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
 <span class="source-line">      <span class="syntax-keyword">NULL</span></span>
 <span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: auditor has a deliberate read-all policy.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY auditor_read <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
 <span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">TO</span> ds60_sec_auditor</span>
 <span class="source-line">  <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-punctuation">(</span>tenant_key<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North note&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;North body&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;south&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South note&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;South body&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: created after the default privilege declaration.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>audit_notes <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  audit_note_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  note <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: a narrow definer function for an already read-all auditor.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span>p_tenant_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">bigint</span></span>
@@ -1318,60 +1372,76 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line"><span class="syntax-punctuation">;</span></span>
-<span class="source-line">  <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-keyword">OUT</span> authenticated_identity name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">OUT</span> effective_identity name<span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-keyword">RETURNS</span> record</span>
-<span class="source-line">    <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
-<span class="source-line">    <span class="syntax-keyword">STABLE</span></span>
-<span class="source-line">    <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">DEFINER</span></span>
-<span class="source-line">    <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-keyword">OUT</span> authenticated_identity name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">OUT</span> effective_identity name<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> record</span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> <span class="syntax-keyword">sql</span></span>
+<span class="source-line">  <span class="syntax-keyword">STABLE</span></span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">DEFINER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line">            <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SESSION_USER</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_USER</span></span>
-<span class="source-line">        $<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-comment">-- Exercise 1, stage A: table SELECT was granted by the owner&#x27;s default</span></span>
-<span class="source-line">    <span class="syntax-comment">-- privileges, but no caller can resolve/use the schema yet.</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">      <span class="syntax-string">&#x27;table grant without schema usage&#x27;</span> <span class="syntax-keyword">AS</span> evidence_stage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_schema_usage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">      pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_select<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">,</span> ds60_sec_auditor<span class="syntax-punctuation">,</span> ds60_sec_writer<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-comment">-- Exercise 1, stage B: prove the inverse combination too, then restore</span></span>
-<span class="source-line">      <span class="syntax-comment">-- the required SELECT before the tenant-isolation tests.</span></span>
-<span class="source-line">      <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">FROM</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">        <span class="syntax-string">&#x27;schema usage without table select&#x27;</span> <span class="syntax-keyword">AS</span> evidence_stage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_schema_usage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">        pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_select<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">TO</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-comment">-- Exercise 1: both schema and table layers are visible independently.</span></span>
-<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">          role_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">          pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_schema_usage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">          pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_select<span class="syntax-punctuation">,</span></span>
-<span class="source-line">          pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;INSERT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_insert</span>
-<span class="source-line">        <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">          <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">            <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> roles <span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">)</span></span>
-<span class="source-line">      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">        role_name<span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
-<span class="source-line">          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">            <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> active_role<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span></span>
-<span class="source-line">            d<span class="syntax-punctuation">.</span>title</span>
-<span class="source-line">          <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">            pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
-<span class="source-line">          <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">            d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">              pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> north_document_count<span class="syntax-punctuation">,</span></span>
-<span class="source-line">              pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;south&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> south_document_count<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line">        $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1, stage A: table SELECT was granted by the owner&#x27;s default</span></span>
+<span class="source-line"><span class="syntax-comment">-- privileges, but no caller can resolve/use the schema yet.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;table grant without schema usage&#x27;</span> <span class="syntax-keyword">AS</span> evidence_stage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_schema_usage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_select<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_north<span class="syntax-punctuation">,</span> ds60_sec_south<span class="syntax-punctuation">,</span> ds60_sec_auditor<span class="syntax-punctuation">,</span> ds60_sec_writer<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1, stage B: prove the inverse combination too, then restore</span></span>
+<span class="source-line"><span class="syntax-comment">-- the required SELECT before the tenant-isolation tests.</span></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">FROM</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;schema usage without table select&#x27;</span> <span class="syntax-keyword">AS</span> evidence_stage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_schema_usage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_select<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">TO</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: both schema and table layers are visible independently.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  role_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_schema_usage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_select<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;INSERT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> has_document_insert</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> roles <span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  role_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> active_role<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>title</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> north_document_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;south&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> south_document_count<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">                PERFORM pro_security_lab<span class="syntax-punctuation">.</span>document_count_for_tenant<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;unknown&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
@@ -1382,7 +1452,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">                <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-punctuation">(</span>tenant_key<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span></span>
@@ -1394,18 +1465,24 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-comment">-- Exercise 3: default privileges are owner-specific. Give a second</span></span>
-<span class="source-line">              <span class="syntax-comment">-- owner CREATE authority, then prove ds60_sec_owner&#x27;s defaults do not</span></span>
-<span class="source-line">              <span class="syntax-comment">-- leak onto the second owner&#x27;s future table.</span></span>
-<span class="source-line">              <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_other_owner<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_other_owner<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>other_owner_notes <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                note_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                note <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: default privileges are owner-specific. Give a second</span></span>
+<span class="source-line"><span class="syntax-comment">-- owner CREATE authority, then prove ds60_sec_owner&#x27;s defaults do not</span></span>
+<span class="source-line"><span class="syntax-comment">-- leak onto the second owner&#x27;s future table.</span></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">USAGE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">TO</span> ds60_sec_other_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_other_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>other_owner_notes <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  note_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  note <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span></span>
 <span class="source-line">                <span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span><span class="syntax-punctuation">,</span></span>
@@ -1434,35 +1511,39 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">              <span class="syntax-comment">-- Exercise 4: inspect the actual definer boundary, not only its DDL.</span></span>
-<span class="source-line">              <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                pg_catalog<span class="syntax-punctuation">.</span>pg_get_function_identity_arguments<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_arguments<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                pg_catalog<span class="syntax-punctuation">.</span>pg_get_userbyid<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>proowner<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> owner_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                p<span class="syntax-punctuation">.</span>prosecdef <span class="syntax-keyword">AS</span> security_definer<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                p<span class="syntax-punctuation">.</span>proconfig <span class="syntax-keyword">AS</span> routine_settings<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                p<span class="syntax-punctuation">.</span>proacl <span class="syntax-keyword">AS</span> execute_acl</span>
-<span class="source-line">              <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                pg_catalog<span class="syntax-punctuation">.</span>pg_proc <span class="syntax-keyword">AS</span> p</span>
-<span class="source-line">                <span class="syntax-keyword">JOIN</span> pg_catalog<span class="syntax-punctuation">.</span>pg_namespace <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">ON</span> n<span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>pronamespace</span>
-<span class="source-line">              <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                n<span class="syntax-punctuation">.</span>nspname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span></span>
-<span class="source-line">              <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                identity_arguments<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                <span class="syntax-comment">-- Exercise 5: prove each tenant sees its own row and no cross-tenant</span></span>
-<span class="source-line">                <span class="syntax-comment">-- row. SET ROLE removes owner/superuser bypass from the test identity.</span></span>
-<span class="source-line">                <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_north<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> active_role<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                  d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                  d<span class="syntax-punctuation">.</span>title</span>
-<span class="source-line">                <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                  pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
-<span class="source-line">                <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                  <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: inspect the actual definer boundary, not only its DDL.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>pg_get_function_identity_arguments<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>oid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_arguments<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>pg_get_userbyid<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>proowner<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> owner_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>prosecdef <span class="syntax-keyword">AS</span> security_definer<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proconfig <span class="syntax-keyword">AS</span> routine_settings<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proacl <span class="syntax-keyword">AS</span> execute_acl</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>pg_proc <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> pg_catalog<span class="syntax-punctuation">.</span>pg_namespace <span class="syntax-keyword">AS</span> n <span class="syntax-keyword">ON</span> n<span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>pronamespace</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  n<span class="syntax-punctuation">.</span>nspname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>proname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  identity_arguments<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: prove each tenant sees its own row and no cross-tenant</span></span>
+<span class="source-line"><span class="syntax-comment">-- row. SET ROLE removes owner/superuser bypass from the test identity.</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_north<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> active_role<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>title</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">IF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pro_security_lab<span class="syntax-punctuation">.</span>documents<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
 <span class="source-line">               <span class="syntax-keyword">OR</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
@@ -1474,18 +1555,22 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                  <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                  <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                  <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                    <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> active_role<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                    d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                    d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                    d<span class="syntax-punctuation">.</span>title</span>
-<span class="source-line">                  <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                    pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
-<span class="source-line">                  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                    d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                    <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_south<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> active_role<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>title</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">IF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pro_security_lab<span class="syntax-punctuation">.</span>documents<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
 <span class="source-line">               <span class="syntax-keyword">OR</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
@@ -1497,115 +1582,134 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                    <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                    <span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">FORCE</span> <span class="syntax-keyword">ROW</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">SECURITY</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                    <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                    <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                      <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> forced_owner_role<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rows_visible_after_force</span>
-<span class="source-line">                    <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                      pro_security_lab<span class="syntax-punctuation">.</span>documents<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                      <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-keyword">FORCE</span> <span class="syntax-keyword">ROW</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">SECURITY</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> forced_owner_role<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rows_visible_after_force</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>documents<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">IF</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> pro_security_lab<span class="syntax-punctuation">.</span>documents<span class="syntax-punctuation">)</span> <span class="syntax-keyword">THEN</span></span>
 <span class="source-line">                RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;FORCE RLS did not constrain the table owner&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                      <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                      <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                        r<span class="syntax-punctuation">.</span>rolname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                        r<span class="syntax-punctuation">.</span>rolsuper<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                        r<span class="syntax-punctuation">.</span>rolbypassrls<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                        <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> r<span class="syntax-punctuation">.</span>rolsuper</span>
-<span class="source-line">                          <span class="syntax-keyword">OR</span> r<span class="syntax-punctuation">.</span>rolbypassrls <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                          <span class="syntax-string">&#x27;always bypasses RLS; never use for tenant tests&#x27;</span></span>
-<span class="source-line">                        <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                          <span class="syntax-string">&#x27;subject to RLS unless table owner without FORCE RLS&#x27;</span></span>
-<span class="source-line">                        <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> rls_effect</span>
-<span class="source-line">                      <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                        pg_catalog<span class="syntax-punctuation">.</span>pg_roles <span class="syntax-keyword">AS</span> r</span>
-<span class="source-line">                      <span class="syntax-keyword">WHERE</span></span>
-<span class="source-line">                        r<span class="syntax-punctuation">.</span>rolname <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_owner&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                        r<span class="syntax-punctuation">.</span>rolname<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                        <span class="syntax-comment">-- Exercise 6: has_*_privilege reports effective access, including</span></span>
-<span class="source-line">                        <span class="syntax-comment">-- ownership, membership, and PUBLIC. Keep privilege kinds separate.</span></span>
-<span class="source-line">                        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                          role_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> schema_usage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> table_select<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          pg_catalog<span class="syntax-punctuation">.</span>has_column_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;title&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> title_select<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          pg_catalog<span class="syntax-punctuation">.</span>has_sequence_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents_document_id_seq&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_sequence_usage<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          pg_catalog<span class="syntax-punctuation">.</span>has_function_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.document_count_for_tenant(text)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;EXECUTE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> count_function_execute<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                          <span class="syntax-keyword">CASE</span> role_name</span>
-<span class="source-line">                          <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;owner default SELECT + direct function EXECUTE&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                            <span class="syntax-string">&#x27;owner default SELECT; no PUBLIC grants&#x27;</span></span>
-<span class="source-line">                          <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> effective_source</span>
-<span class="source-line">                        <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                          <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                            <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                            <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> roles <span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                      <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                        role_name<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                          <span class="syntax-comment">-- Exercise 7: SESSION_USER remains the authenticated identity while</span></span>
-<span class="source-line">                          <span class="syntax-comment">-- CURRENT_USER follows SET ROLE and becomes a SECURITY DEFINER owner</span></span>
-<span class="source-line">                          <span class="syntax-comment">-- inside that function. Audit both identities when the distinction</span></span>
-<span class="source-line">                          <span class="syntax-comment">-- matters.</span></span>
-<span class="source-line">                          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                            <span class="syntax-keyword">SESSION_USER</span> <span class="syntax-keyword">AS</span> authenticated_identity<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                            <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> effective_identity<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                            <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                            <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                              <span class="syntax-keyword">SESSION_USER</span> <span class="syntax-keyword">AS</span> authenticated_identity<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                              <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> effective_identity<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                              <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                <span class="syntax-operator">*</span></span>
-<span class="source-line">                              <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                <span class="syntax-comment">-- Exercise 8: unknown/NULL identities map to NULL, so the policy</span></span>
-<span class="source-line">                                <span class="syntax-comment">-- predicate is not true. A pooled-session tenant setting would need the</span></span>
-<span class="source-line">                                <span class="syntax-comment">-- same validation plus guaranteed reset.</span></span>
-<span class="source-line">                                <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                  candidate_role<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">CASE</span> candidate_role</span>
-<span class="source-line">                                  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;ds60_sec_north&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                                    <span class="syntax-string">&#x27;north&#x27;</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">                                    <span class="syntax-string">&#x27;south&#x27;</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">ELSE</span></span>
-<span class="source-line">                                    <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> derived_tenant<span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                  candidate_role <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">AS</span> accepted_identity</span>
-<span class="source-line">                                <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;DS60_SEC_NORTH&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;unknown&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                    <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identities <span class="syntax-punctuation">(</span>candidate_role<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                              <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                                candidate_role NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                  <span class="syntax-comment">-- Exercise 9: use one coherent API-only writer model. The writer gets</span></span>
-<span class="source-line">                                  <span class="syntax-comment">-- neither table nor identity-sequence privileges; a hardened definer</span></span>
-<span class="source-line">                                  <span class="syntax-comment">-- API validates input and returns only its inserted north row.</span></span>
-<span class="source-line">                                  <span class="syntax-keyword">CREATE</span> POLICY owner_north_api_read <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
-<span class="source-line">                                    <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">TO</span> ds60_sec_owner</span>
-<span class="source-line">                                    <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                    <span class="syntax-keyword">CREATE</span> POLICY owner_north_api_insert <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
-<span class="source-line">                                      <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">TO</span> ds60_sec_owner</span>
-<span class="source-line">                                      <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                      <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                      <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span>p_title <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> p_body <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                          document_id <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          tenant_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                          title <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
-<span class="source-line">                                        <span class="syntax-keyword">VOLATILE</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">DEFINER</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  r<span class="syntax-punctuation">.</span>rolname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  r<span class="syntax-punctuation">.</span>rolsuper<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  r<span class="syntax-punctuation">.</span>rolbypassrls<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> r<span class="syntax-punctuation">.</span>rolsuper</span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> r<span class="syntax-punctuation">.</span>rolbypassrls <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;always bypasses RLS; never use for tenant tests&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;subject to RLS unless table owner without FORCE RLS&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> rls_effect</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>pg_roles <span class="syntax-keyword">AS</span> r</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  r<span class="syntax-punctuation">.</span>rolname <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_owner&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  r<span class="syntax-punctuation">.</span>rolname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: has_*_privilege reports effective access, including</span></span>
+<span class="source-line"><span class="syntax-comment">-- ownership, membership, and PUBLIC. Keep privilege kinds separate.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  role_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_schema_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> schema_usage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> table_select<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_column_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;title&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;SELECT&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> title_select<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_sequence_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.documents_document_id_seq&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;USAGE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identity_sequence_usage<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pg_catalog<span class="syntax-punctuation">.</span>has_function_privilege<span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;pro_security_lab.document_count_for_tenant(text)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;EXECUTE&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> count_function_execute<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> role_name</span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;owner default SELECT + direct function EXECUTE&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;owner default SELECT; no PUBLIC grants&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> effective_source</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_auditor&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> roles <span class="syntax-punctuation">(</span>role_name<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  role_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 7: SESSION_USER remains the authenticated identity while</span></span>
+<span class="source-line"><span class="syntax-comment">-- CURRENT_USER follows SET ROLE and becomes a SECURITY DEFINER owner</span></span>
+<span class="source-line"><span class="syntax-comment">-- inside that function. Audit both identities when the distinction</span></span>
+<span class="source-line"><span class="syntax-comment">-- matters.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SESSION_USER</span> <span class="syntax-keyword">AS</span> authenticated_identity<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> effective_identity<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SESSION_USER</span> <span class="syntax-keyword">AS</span> authenticated_identity<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_USER</span> <span class="syntax-keyword">AS</span> effective_identity<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>identity_probe <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 8: unknown/NULL identities map to NULL, so the policy</span></span>
+<span class="source-line"><span class="syntax-comment">-- predicate is not true. A pooled-session tenant setting would need the</span></span>
+<span class="source-line"><span class="syntax-comment">-- same validation plus guaranteed reset.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  candidate_role<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> candidate_role</span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;ds60_sec_north&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;north&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;south&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> derived_tenant<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  candidate_role <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">TRUE</span> <span class="syntax-keyword">AS</span> accepted_identity</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;DS60_SEC_NORTH&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;unknown&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> identities <span class="syntax-punctuation">(</span>candidate_role<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  candidate_role NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 9: use one coherent API-only writer model. The writer gets</span></span>
+<span class="source-line"><span class="syntax-comment">-- neither table nor identity-sequence privileges; a hardened definer</span></span>
+<span class="source-line"><span class="syntax-comment">-- API validates input and returns only its inserted north row.</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY owner_north_api_read <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">TO</span> ds60_sec_owner</span>
+<span class="source-line">  <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> POLICY owner_north_api_insert <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">TO</span> ds60_sec_owner</span>
+<span class="source-line">  <span class="syntax-keyword">WITH</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>tenant_key <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_owner<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span>p_title <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> p_body <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">RETURNS</span> <span class="syntax-keyword">TABLE</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    document_id <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    tenant_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    title <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">LANGUAGE</span> plpgsql</span>
+<span class="source-line">  <span class="syntax-keyword">VOLATILE</span></span>
+<span class="source-line">  <span class="syntax-keyword">SECURITY</span> <span class="syntax-keyword">DEFINER</span></span>
+<span class="source-line">  <span class="syntax-keyword">SET</span> search_path <span class="syntax-operator">=</span> pg_catalog</span>
+<span class="source-line">  <span class="syntax-keyword">AS</span> $<span class="syntax-keyword">function</span>$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">IF</span> p_title <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> btrim<span class="syntax-punctuation">(</span>p_title<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span></span>
 <span class="source-line">               <span class="syntax-keyword">OR</span> p_body <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> btrim<span class="syntax-punctuation">(</span>p_body<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">THEN</span></span>
@@ -1622,11 +1726,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;north&#x27;</span><span class="syntax-punctuation">,</span> p_title<span class="syntax-punctuation">,</span> p_body<span class="syntax-punctuation">)</span></span>
 <span class="source-line">            RETURNING d<span class="syntax-punctuation">.</span>document_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>tenant_key<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>title<span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
-<span class="source-line">        $<span class="syntax-keyword">function</span>$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_writer<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line">        $<span class="syntax-keyword">function</span>$</span>
+<span class="source-line"><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">REVOKE</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">PUBLIC</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">EXECUTE</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">FUNCTION</span> pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> ds60_sec_writer<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">IF</span> pg_catalog<span class="syntax-punctuation">.</span>has_table_privilege<span class="syntax-punctuation">(</span></span>
 <span class="source-line">                <span class="syntax-string">&#x27;ds60_sec_writer&#x27;</span><span class="syntax-punctuation">,</span></span>
@@ -1642,12 +1750,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_writer<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                          <span class="syntax-operator">*</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">FROM</span></span>
-<span class="source-line">                                          pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Writer-created note&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Narrow insert path&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">DO</span> $solution$</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">ROLE</span> ds60_sec_writer<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pro_security_lab<span class="syntax-punctuation">.</span>insert_north_document <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Writer-created note&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Narrow insert path&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line">        <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">            <span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">                <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_security_lab<span class="syntax-punctuation">.</span>documents <span class="syntax-punctuation">(</span>tenant_key<span class="syntax-punctuation">,</span> title<span class="syntax-punctuation">,</span> body<span class="syntax-punctuation">)</span></span>
@@ -1683,22 +1794,26 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">            <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-keyword">END</span></span>
 <span class="source-line">        $solution$<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                          <span class="syntax-comment">-- Exercise 10: an executable plan matrix, not destructive cluster-wide</span></span>
-<span class="source-line">                                          <span class="syntax-comment">-- offboarding SQL.</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">SELECT</span></span>
-<span class="source-line">                                            <span class="syntax-operator">*</span></span>
-<span class="source-line">                                          <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">                                            <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;fence login and terminate reviewed sessions&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;session inventory and incident owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;reassign owned objects&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;REASSIGN OWNED dry-run inventory&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;remove direct and inherited memberships&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;role-membership diff&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;remove current grants and default privileges&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;object/default ACL diff&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;rotate dependent credentials and APIs&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;secret-owner confirmation&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;verify denied access and application health&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;negative login/query plus smoke tests&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                                              <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;retain a separate recovery administrator&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;break-glass test and audit record&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> offboarding <span class="syntax-punctuation">(</span>step_number<span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">,</span> required_evidence<span class="syntax-punctuation">)</span></span>
-<span class="source-line">                                        <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
-<span class="source-line">                                          step_number<span class="syntax-punctuation">;</span></span>
-<span class="source-line">                                    <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">RESET</span> <span class="syntax-keyword">ROLE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 10: an executable plan matrix, not destructive cluster-wide</span></span>
+<span class="source-line"><span class="syntax-comment">-- offboarding SQL.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;fence login and terminate reviewed sessions&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;session inventory and incident owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;reassign owned objects&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;REASSIGN OWNED dry-run inventory&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;remove direct and inherited memberships&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;role-membership diff&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;remove current grants and default privileges&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;object/default ACL diff&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;rotate dependent credentials and APIs&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;secret-owner confirmation&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;verify denied access and application health&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;negative login/query plus smoke tests&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;retain a separate recovery administrator&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;break-glass test and audit record&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> offboarding <span class="syntax-punctuation">(</span>step_number<span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">,</span> required_evidence<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  step_number<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;SQL-SEC-01 solution complete: all roles and objects rolled back&#x27;</span></span>
 <span class="source-line">\<span class="syntax-keyword">else</span></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;SAFE SKIP: course role names already exist; no objects were changed&#x27;</span></span>
@@ -1764,7 +1879,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-60.html"><small>Previous lesson</small><strong>sql-60</strong><span>Final Capstone Part3</span></a>
+        <a class="nav-card" href="sql-60.html"><small>Previous lesson</small><strong>sql-60</strong><span>Final Capstone Part 3</span></a>
         <a class="nav-card next" href="sql-prog-01.html"><small>Next lesson</small><strong>sql-prog-01</strong><span>Functions, Procedures, and Triggers</span></a>
       </nav>
     </div>

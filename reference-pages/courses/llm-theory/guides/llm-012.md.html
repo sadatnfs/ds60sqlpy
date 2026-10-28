@@ -245,19 +245,19 @@ p<span class="syntax-operator">=</span>softmax<span class="syntax-punctuation">(
 <ol>
 <li><strong>Calculate greedy choice.</strong> Use scores[2,1,0] and choose the maximum index. <strong>Expected:</strong> token0. <strong>Verify:</strong> Save the assertion results for exercise 1, including token0.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Change temperature.</strong> Compare probabilities at temperatures1 and.5 using stable softmax. <strong>Expected:</strong> token0 probability increases; argmax stays0. <strong>Verify:</strong> Save the assertion results for exercise 2, including token0 probability increases; argmax stays0.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Use fixed draws.</strong> Sample from probabilities[.5,.3,.2] with draws .1,.6,.9. <strong>Expected:</strong> tokens0,1,2. <strong>Verify:</strong> Save the assertion results for exercise 3, including tokens0,1,2.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Retain two candidates.</strong> Apply top-k2 to scores[2,1,0] and normalize only retained candidates. <strong>Expected:</strong> token 2 probability0; first two sum1. <strong>Verify:</strong> Save the assertion results for exercise 4, including token 2 probability0; first two sum1.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Declare ties.</strong> Use equal scores[1,1,0] and choose the smallest-index maximum. <strong>Expected:</strong> token0 under the stated rule. <strong>Verify:</strong> Save the assertion results for exercise 5, including token0 under the stated rule.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Reject invalid draws.</strong> Validate draws0,.999,1 and-.1 before cumulative lookup. <strong>Expected:</strong> 0 and.999 accepted;1 and-.1 rejected. <strong>Verify:</strong> Save the assertion results for exercise 6, including 0 and.999 accepted;1 and-.1 rejected.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

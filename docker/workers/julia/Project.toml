@@ -1,0 +1,18 @@
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
+
+[compat]
+julia = "=1.13.3"
+CSV = "=0.10.17"
+DataFrames = "=1.8.2"
+Distributions = "=0.25.132"
+ForwardDiff = "=1.4.6"
+Optim = "=2.3.2"
+JSON3 = "=1.14.3"
+JuliaFormatter = "=2.14.0"

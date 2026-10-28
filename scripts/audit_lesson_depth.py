@@ -654,13 +654,7 @@ def _guide_issues(
                 issues.append(f"SQL guide does not name {label}")
         if re.search(r"\bwhole[- ](?:SQL[- ])?lesson\b", source, flags=re.IGNORECASE) is None:
             issues.append("SQL guide does not explain the whole-lesson execution mode")
-        retired_routes = (
-            "START_DS60.cmd",
-            "scripts/learning_portal.py",
-            "scripts\\learning_portal.py",
-            "Create/open guided SQL notebook",
-        )
-        if any(route.casefold() in source.casefold() for route in retired_routes):
+        if _has_retired_sql_route(source):
             issues.append("SQL guide still prescribes a retired native portal action")
 
     if solution_words < MIN_SOLUTION_WORDS:
@@ -670,6 +664,17 @@ def _guide_issues(
     if solution_code_blocks < 1:
         issues.append("solution explanation has no fenced code or query example")
     return issues
+
+
+def _has_retired_sql_route(source: str) -> bool:
+    """Recognize obsolete learner-facing launch instructions on any SQL surface."""
+    retired_routes = (
+        "START_DS60.cmd",
+        "scripts/learning_portal.py",
+        "scripts\\learning_portal.py",
+        "Create/open guided SQL notebook",
+    )
+    return any(route.casefold() in source.casefold() for route in retired_routes)
 
 
 def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
@@ -696,7 +701,10 @@ def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
             "with the exercise's actual concept, grain, objects, and evidence"
         )
     if lesson.runner == "sql":
-        malformed_orders = _malformed_final_orders(_artifact_text(lesson_path))
+        learner_source = _artifact_text(lesson_path)
+        if _has_retired_sql_route(learner_source):
+            issues.append(f"{lesson.lesson_path} still prescribes a retired native portal action")
+        malformed_orders = _malformed_final_orders(learner_source)
         if malformed_orders:
             issues.append(
                 f"{lesson.lesson_path} contains {len(malformed_orders)} SQL exercise "

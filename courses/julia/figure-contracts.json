@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "julia-020",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "julia-024",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    },
+    {
+      "id": "julia-032",
+      "kind": "plotly",
+      "count": 1,
+      "description_required": true,
+      "table_required": true
+    }
+  ]
+}

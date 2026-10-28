@@ -1,0 +1,51 @@
+x-base: &base
+  image: ${DS60_BALLISTA_IMAGE:?Prepare the owned Ballista image}
+  pull_policy: never
+  entrypoint: [python3]
+  working_dir: /project
+  volumes:
+    - .:/project:ro
+    - fixture:/state
+  user: "1000:1000"
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,noexec,size=512m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  cpus: 2.0
+  mem_limit: 2g
+  environment:
+    PYTHONPATH: /opt/ballista
+    PYTHONDONTWRITEBYTECODE: "1"
+  labels:
+    org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+    org.ds60.workshop.kind: apache-ballista
+services:
+  initialize:
+    <<: *base
+    user: "0:0"
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    command: [fixture.py]
+  cluster:
+    <<: *base
+    command: [supervisor.py]
+    depends_on:
+      initialize:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python3, /project/control.py, health]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+      start_period: 3s
+volumes:
+  fixture:
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-ballista
+networks:
+  default:
+    internal: true
+    labels:
+      org.ds60.workshop.owner: ${DS60_WORKSHOP_OWNER:?Missing ownership marker}
+      org.ds60.workshop.kind: apache-ballista

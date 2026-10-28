@@ -57,11 +57,14 @@ COURSE_GUIDE_REFERENCE_PATHS = (
     "docs/validation.md",
 )
 _SOURCE_LANGUAGES = {
+    ".jl": "julia",
+    ".stan": "stan",
     ".py": "python",
     ".R": "r",
     ".r": "r",
     ".dax": "dax",
     ".sql": "sql",
+    ".hql": "sql",
     ".cpp": "cpp",
     ".cu": "cuda",
     ".cuh": "cuda",
@@ -106,7 +109,7 @@ _PRIVATE_REFERENCE_NAMES = {
 _FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})\s*([^`]*)$")
 _FENCE_LINE_RE = re.compile(r"^[ \t]*(?:`{3,}|~{3,})", re.MULTILINE)
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
-_LIST_RE = re.compile(r"^\s*(?P<marker>[-+*]|\d+[.)])\s+(?P<body>.*)$")
+_LIST_RE = re.compile(r"^\s*(?P<marker>[-+*]|[0-9]{1,9}[.)])\s+(?P<body>.*)$")
 _TABLE_SEPARATOR_RE = re.compile(r"^:?-{3,}:?$")
 _LINK_OR_CODE_RE = re.compile(
     r"(?P<code>`+)(?P<code_text>.+?)(?P=code)"
@@ -789,6 +792,8 @@ def render_markdown(
         if list_match:
             ordered = list_match.group("marker")[0].isdigit()
             tag = "ol" if ordered else "ul"
+            start = int(list_match.group("marker")[:-1]) if ordered else 1
+            start_attribute = f' start="{start}"' if ordered and start != 1 else ""
             items: list[str] = []
             while index < len(lines):
                 current = _LIST_RE.match(lines[index])
@@ -805,7 +810,7 @@ def render_markdown(
                     item_lines.append(lines[index].strip())
                     index += 1
                 items.append(" ".join(item_lines))
-            output.append(f"<{tag}>")
+            output.append(f"<{tag}{start_attribute}>")
             output.extend(f"<li>{render_inline(item, resolver)}</li>" for item in items)
             output.append(f"</{tag}>")
             continue
@@ -960,10 +965,15 @@ def render_artifact(
         )
     if suffix in _SOURCE_LANGUAGES or path.name == "LICENSE":
         language = _SOURCE_LANGUAGES.get(suffix, "text")
+        if suffix == ".sql" and path.relative_to(repo_root).parts[:2] == ("courses", "dbt"):
+            language = "sql+jinja"
         guidance = (
             "DAX references are hand-derived. The classroom provides an offline editor "
             "and comparison tables without executing DAX."
             if language == "dax"
+            else "Follow the separately prepared owned Hive project for execution. "
+            "This readable Hive SQL source is highlighted with the shared SQL lexer."
+            if suffix == ".hql"
             else "This page does not execute source code. Use the classroom for supported "
             "runnable lessons, or follow the lesson's external project instructions."
         )
@@ -982,8 +992,11 @@ def _path_kind(path: str) -> str:
         ".ipynb": "Jupyter notebook",
         ".py": "Python source file",
         ".r": "R source file",
+        ".jl": "Julia source file",
+        ".stan": "Stan model",
         ".dax": "DAX expression or query",
-        ".sql": "PostgreSQL script",
+        ".sql": "SQL script",
+        ".hql": "Hive SQL script",
         ".md": "lesson notes",
         ".cpp": "C++ source file",
         ".cc": "C++ source file",

@@ -404,16 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle">SQL-OPS-01 - Index Types, Statistics, and Maintenance Lifecycle<a class="heading-anchor" href="#guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Catalog prerequisites:</strong> <code>sql-35</code> and <code>sql-types-01</code></li>
-<li><strong>Prerequisites:</strong> SQL Days 31–34 on plans and B-tree indexes, <a href="sql-35.html#guide">SQL Day 35 query pitfalls</a>, plus <a href="sql-types-01.html#guide">SQL-TYPES-01</a> for array/range operators.</li>
-<li><strong>Artifacts:</strong> <a href="sql-ops-01.html#learner">learner SQL</a> · <a href="sql-ops-01.html#solution-1">solution reasoning</a> · <a href="sql-ops-01.html#solution-2">executable solution</a></li>
-</ul>
-<p>Run from the repository root:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code></pre>
-<p>The same command works in PowerShell and POSIX shells. The default lab rolls back. It reads configuration/statistics but never changes host settings, runs <code>VACUUM</code>, or enables <code>pg_stat_statements</code>.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-ops-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -429,12 +419,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-ops-01</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-35</code> and <code>sql-types-01</code></li>
+<li><strong>Prerequisites:</strong> SQL Days 31–34 on plans and B-tree indexes, <a href="sql-35.html#guide">SQL Day 35 query pitfalls</a>, plus <a href="sql-types-01.html#guide">SQL-TYPES-01</a> for array/range operators.</li>
+<li><strong>Artifacts:</strong> <a href="sql-ops-01.html#learner">learner SQL</a> · <a href="sql-ops-01.html#solution-1">solution reasoning</a> · <a href="sql-ops-01.html#solution-2">executable solution</a></li>
+</ul>
+<p>Run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code></pre>
+<p>The same command works in PowerShell and POSIX shells. The default lab rolls back. It reads configuration/statistics but never changes host settings, runs <code>VACUUM</code>, or enables <code>pg_stat_statements</code>.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. Its worked SQL reads or creates <code>pro_ops_lab.events</code>, <code>pg_catalog.pg_index</code>, <code>pg_catalog.pg_class</code>, <code>pg_catalog.pg_namespace</code>, <code>pg_catalog.pg_am</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: The fixture inserts 6,000 events in timestamp order. That physical correlation makes time a plausible BRIN candidate in a much larger append-oriented table. The teaching table is intentionally small, so PostgreSQL may still prefer a sequential scan; that is a valid cost decision. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_ops_lab.events</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>
     event_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
@@ -606,7 +606,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -620,11 +620,11 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-OPS-01: Index types, statistics, and maintenance lifecycle</span></span>
 <span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-ops-01/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-ops-01.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -641,7 +641,9 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">\echo <span class="syntax-string">&#x27;SQL-OPS-01: disposable index and statistics lab&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_ops_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  device_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -651,6 +653,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">location</span> point <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  message <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">,</span> occurred_at<span class="syntax-punctuation">,</span> severity<span class="syntax-punctuation">,</span> tags<span class="syntax-punctuation">,</span> <span class="syntax-keyword">location</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;device-&#x27;</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> lpad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">g</span><span class="syntax-punctuation">.</span>n <span class="syntax-operator">%</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;0&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -671,24 +674,34 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  <span class="syntax-keyword">END</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span> <span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- B-tree: equality and ordered/range access.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_device_time_btree <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">,</span> occurred_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- BRIN: compact summaries for a large table physically correlated with time.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_occurred_at_brin <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-keyword">USING</span> brin <span class="syntax-punctuation">(</span>occurred_at<span class="syntax-punctuation">)</span> <span class="syntax-keyword">WITH</span> <span class="syntax-punctuation">(</span>pages_per_range <span class="syntax-operator">=</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- GIN: inverted membership over array elements.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_tags_gin <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-keyword">USING</span> gin <span class="syntax-punctuation">(</span>tags<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- GiST: nearest-neighbour and geometric operators for point.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_location_gist <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-keyword">USING</span> gist <span class="syntax-punctuation">(</span><span class="syntax-keyword">location</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- SP-GiST: partitioned search structure with a text operator class.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_device_spgist <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-keyword">USING</span> spgist <span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Expression and partial indexes require query expressions/predicates that are</span></span>
 <span class="source-line"><span class="syntax-comment">-- compatible with their stored expressions.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_lower_message_btree <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span><span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_high_severity_partial <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>occurred_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> device_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  severity <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">STATISTICS</span> pro_ops_lab<span class="syntax-punctuation">.</span>events_device_severity_stats <span class="syntax-punctuation">(</span>dependencies<span class="syntax-punctuation">,</span> mcv<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> device_id<span class="syntax-punctuation">,</span> severity <span class="syntax-keyword">FROM</span> pro_ops_lab<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ANALYZE</span> pro_ops_lab<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">\echo <span class="syntax-string">&#x27;Catalog every index method, definition, predicate, and measured size&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  ci<span class="syntax-punctuation">.</span>relname <span class="syntax-keyword">AS</span> index_name<span class="syntax-punctuation">,</span></span>
@@ -1119,7 +1132,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -1147,7 +1160,9 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">\<span class="syntax-keyword">set</span> ON_ERROR_STOP <span class="syntax-keyword">on</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> pg_catalog<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">SCHEMA</span> pro_ops_lab<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  device_id <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -1156,6 +1171,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  category <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  message <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">,</span> occurred_at<span class="syntax-punctuation">,</span> severity<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-string">&#x27;device-&#x27;</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> lpad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">g</span><span class="syntax-punctuation">.</span>n <span class="syntax-operator">%</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;0&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -1173,10 +1189,12 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">END</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span> <span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: query and predicate-compatible covering partial index.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_high_device_time_covering <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">,</span> occurred_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  severity <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  COSTS <span class="syntax-keyword">OFF</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
@@ -1192,6 +1210,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>occurred_at <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">25</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>occurred_at<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>severity<span class="syntax-punctuation">,</span></span>
@@ -1204,6 +1223,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>occurred_at <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">25</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: access method, operator class, and query operator form one</span></span>
 <span class="source-line"><span class="syntax-comment">-- contract. An index family name alone is not a design.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1215,9 +1235,12 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;BRIN&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;physically correlated large tables&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;range exclusion by block summaries&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;tiny and cheap, but returns lossy candidate blocks&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> access_method <span class="syntax-punctuation">(</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span> suitable_types<span class="syntax-punctuation">,</span> target_operators<span class="syntax-punctuation">,</span> tradeoff<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">method</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: category and severity are correlated by fixture construction.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">STATISTICS</span> pro_ops_lab<span class="syntax-punctuation">.</span>events_category_severity_stats <span class="syntax-punctuation">(</span>dependencies<span class="syntax-punctuation">,</span> mcv<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> category<span class="syntax-punctuation">,</span> severity <span class="syntax-keyword">FROM</span> pro_ops_lab<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ANALYZE</span> pro_ops_lab<span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>statistics_name<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>kinds<span class="syntax-punctuation">,</span></span>
@@ -1228,6 +1251,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  s<span class="syntax-punctuation">.</span>schemaname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_ops_lab&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>statistics_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: a compact lifecycle inventory, not an automatic drop list.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  ci<span class="syntax-punctuation">.</span>relname <span class="syntax-keyword">AS</span> index_name<span class="syntax-punctuation">,</span></span>
@@ -1256,6 +1280,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">AND</span> ct<span class="syntax-punctuation">.</span>relname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;events&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  ci<span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">    <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span></span>
@@ -1278,6 +1303,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: this transaction does not run VACUUM. Return a maintenance</span></span>
 <span class="source-line"><span class="syntax-comment">-- decision matrix that separates reclaim/freeze/visibility from estimates.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1289,12 +1315,14 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;VACUUM FULL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;exceptional file compaction evidence&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;rewrite and return file space to the OS&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;takes an ACCESS EXCLUSIVE lock; not routine maintenance&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> maintenance <span class="syntax-punctuation">(</span>command<span class="syntax-punctuation">,</span> evidence_domain<span class="syntax-punctuation">,</span> primary_effect<span class="syntax-punctuation">,</span> important_limit<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  command<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: detect capability state without enabling an extension or</span></span>
 <span class="source-line"><span class="syntax-comment">-- exposing query text. Query-text access and retention require privacy review.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> ds60_pgss_probe <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  capability_state <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  detail <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $solution$</span>
 <span class="source-line"><span class="syntax-keyword">DECLARE</span></span>
 <span class="source-line">    installed <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">;</span></span>
@@ -1363,11 +1391,13 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$solution$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  capability_state<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  detail</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  ds60_pgss_probe<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
@@ -1377,6 +1407,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;publish aggregate fingerprints/latency, not raw query text&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;observability owner&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> pgss_privacy <span class="syntax-punctuation">(</span>step_number<span class="syntax-punctuation">,</span> control<span class="syntax-punctuation">,</span> <span class="syntax-keyword">owner</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  step_number<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 7: show semantic index properties for human review. Similarity is a</span></span>
 <span class="source-line"><span class="syntax-comment">-- candidate signal, never an automatic DROP decision.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1411,9 +1442,11 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">AND</span> ct<span class="syntax-punctuation">.</span>relname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;events&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  ci<span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 8: the query expression must match the indexed expression and its</span></span>
 <span class="source-line"><span class="syntax-comment">-- collation/operator semantics.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> events_device_lower_idx <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">(</span><span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  COSTS <span class="syntax-keyword">OFF</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
@@ -1427,6 +1460,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>device_id</span>
@@ -1437,6 +1471,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 9: observe rather than assert a HOT rate; page space, indexed</span></span>
 <span class="source-line"><span class="syntax-comment">-- columns, vacuum horizons, and asynchronous statistics affect the result.</span></span>
 <span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
@@ -1450,6 +1485,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">END</span></span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>event_id <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>n_tup_upd<span class="syntax-punctuation">,</span></span>
@@ -1459,6 +1495,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>schemaname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_ops_lab&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>relname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;events&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- The cumulative view is historical and can lag the current transaction. It is</span></span>
 <span class="source-line"><span class="syntax-comment">-- displayed separately rather than used to assert the immediately preceding</span></span>
 <span class="source-line"><span class="syntax-comment">-- UPDATE.</span></span>
@@ -1474,6 +1511,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  s<span class="syntax-punctuation">.</span>schemaname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pro_ops_lab&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> s<span class="syntax-punctuation">.</span>relname <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;events&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 10: disposable two-month fixture proves partition routing, pruning,</span></span>
 <span class="source-line"><span class="syntax-comment">-- and per-partition index realization.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events <span class="syntax-punctuation">(</span></span>
@@ -1483,17 +1521,22 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span>occurred_on<span class="syntax-punctuation">,</span> event_id<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
 <span class="source-line">PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>occurred_on<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events_2026_01 PARTITION <span class="syntax-keyword">OF</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2026-02-01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events_2026_02 PARTITION <span class="syntax-keyword">OF</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2026-02-01&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2026-03-01&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> partitioned_events_device_idx <span class="syntax-keyword">ON</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events <span class="syntax-punctuation">(</span>device_id<span class="syntax-punctuation">,</span> occurred_on<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> pro_ops_lab<span class="syntax-punctuation">.</span>partitioned_events</span>
 <span class="source-line"><span class="syntax-keyword">VALUES</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-10&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;device-007&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-01-20&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;device-008&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-02-10&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;device-007&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">DATE</span> <span class="syntax-string">&#x27;2026-02-20&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;device-009&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  COSTS <span class="syntax-keyword">OFF</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
@@ -1509,6 +1552,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">AND</span> pe<span class="syntax-punctuation">.</span>device_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;device-007&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  pe<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pe<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  pe<span class="syntax-punctuation">.</span>occurred_on<span class="syntax-punctuation">,</span></span>
@@ -1521,6 +1565,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">  <span class="syntax-keyword">AND</span> pe<span class="syntax-punctuation">.</span>device_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;device-007&#x27;</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  pe<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  pt<span class="syntax-punctuation">.</span>relid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> partition_relation<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  pt<span class="syntax-punctuation">.</span>parentrelid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> parent_relation<span class="syntax-punctuation">,</span></span>
@@ -1533,6 +1578,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  pt<span class="syntax-punctuation">.</span><span class="syntax-keyword">level</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  pt<span class="syntax-punctuation">.</span>relid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  parent_index<span class="syntax-punctuation">.</span>relname <span class="syntax-keyword">AS</span> parent_index<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  child_table<span class="syntax-punctuation">.</span>relname <span class="syntax-keyword">AS</span> child_partition<span class="syntax-punctuation">,</span></span>
@@ -1551,6 +1597,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  child_table<span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  child_index<span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 11: ANALYZE executes this read. BUFFERS is cache/I/O evidence for</span></span>
 <span class="source-line"><span class="syntax-comment">-- this fixture, not a production benchmark.</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
@@ -1566,6 +1613,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>device_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;device-005&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>severity <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> matching_rows</span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
@@ -1573,6 +1621,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  e<span class="syntax-punctuation">.</span>device_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;device-005&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>severity <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-operator">*</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
@@ -1581,6 +1630,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;DDL/maintenance&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;test only in disposable targets with explicit lock and recovery plans&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> explain_safety <span class="syntax-punctuation">(</span>statement_class<span class="syntax-punctuation">,</span> execution_warning<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  statement_class<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 12: an owned scorecard attaches source, budget, cadence, and action</span></span>
 <span class="source-line"><span class="syntax-comment">-- instead of pretending one threshold fits every workload.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -1592,6 +1642,7 @@ INCLUDE <span class="syntax-punctuation">(</span>severity<span class="syntax-pun
 <span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;replication lag&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;replay LSN and user SLO&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;HA owner&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;RPO/RTO-derived byte and time lag&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;continuous&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;page before recovery-point or read-staleness budget is breached&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;runbooks/replication-lag.md&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;throttle workload or follow HA incident plan&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> scorecard <span class="syntax-punctuation">(</span>signal<span class="syntax-punctuation">,</span> evidence_source<span class="syntax-punctuation">,</span> <span class="syntax-keyword">owner</span><span class="syntax-punctuation">,</span> budget<span class="syntax-punctuation">,</span> cadence<span class="syntax-punctuation">,</span> escalation<span class="syntax-punctuation">,</span> runbook<span class="syntax-punctuation">,</span> action<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  signal<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

@@ -21,4 +21,5 @@ BEGIN
   END IF;
 END
 $bootstrap$;
+
 COMMIT;

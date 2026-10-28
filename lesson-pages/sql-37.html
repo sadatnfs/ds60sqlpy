@@ -404,12 +404,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-37-partitioning-and-sharding">Day 37: Partitioning and Sharding<a class="heading-anchor" href="#guide--day-37-partitioning-and-sharding" aria-label="Link to this section">#</a></h3>
-<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
-<ul>
-<li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> <a href="sql-36.html#guide">Day 36; materialized views</a></li>
-<li><strong>Artifacts:</strong> <a href="sql-37.html#learner">learner SQL</a> · <a href="sql-37.html#solution-1">solution reasoning</a> · <a href="sql-37.html#solution-2">executable solution</a></li>
-</ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-37</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
@@ -425,12 +419,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-37</code></pre>
 <p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced</li>
+<li><strong>Prerequisites:</strong> <a href="sql-36.html#guide">Day 36; materialized views</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-37.html#learner">learner SQL</a> · <a href="sql-37.html#solution-1">solution reasoning</a> · <a href="sql-37.html#solution-2">executable solution</a></li>
+</ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Partition bound, Partition pruning, Sharding. Its worked SQL reads or creates <code>big_events</code>, <code>big_events_2025_01</code>, <code>big_events_2025_02</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
 <p>The worked walkthrough&#x27;s lesson-specific task is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>big_events</code>. Verify the object in <code>pg_catalog.pg_inherits</code>, and <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day37_partitioning_sharding.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<p>These worked excerpts come from <code>sql/postgres-60day/day37_partitioning_sharding.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events <span class="syntax-punctuation">(</span>
   id BIGSERIAL<span class="syntax-punctuation">,</span>
@@ -547,7 +547,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Practice actively</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/day37_partitioning_sharding.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -559,13 +559,13 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 37: Partitioning &amp; Data Sharding (PostgreSQL native partitioning demo)</span></span>
-<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-37: Partitioning Sharding</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW - sql-37: Partitioning Sharding</span></span>
 <span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md</span></span>
-<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
-<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
-<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-37/ copy, and prints the full</span></span>
-<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
-<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: ./classroom -&gt; PostgreSQL -&gt; sql-37.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Choose &quot;Whole SQL lesson (psql)&quot; and edit its saved learner copy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Docker supplies the client and the disposable advanced_sql_training database.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read the full transcript and retain the declared transaction/cleanup boundary.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The optional contributor notebook route is described separately in the guide.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
 <span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
@@ -578,6 +578,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Create a partitioned table for large events (demo table)</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  id BIGSERIAL<span class="syntax-punctuation">,</span></span>
@@ -586,11 +587,14 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  payload JSONB</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
 <span class="source-line">PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Create monthly partitions</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> big_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events_2025_02 PARTITION <span class="syntax-keyword">OF</span> big_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Insert sample rows</span></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> big_events <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -599,6 +603,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">  jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;k&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;v&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span> <span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Query with partition pruning</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -608,6 +613,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2025-01-15&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> <span class="syntax-string">&#x27;2025-02-15&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Add more partitions and test pruning.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
@@ -876,7 +882,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
         <header class="artifact-head">
           <div>
             <p class="eyebrow">Reference solution 2</p>
-            <h2>PostgreSQL script</h2>
+            <h2>SQL script</h2>
             <p class="artifact-path"><code>sql/postgres-60day/solutions/day37_solutions.sql</code></p>
           </div>
           <div class="artifact-actions">
@@ -903,6 +909,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  event_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_time timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
@@ -910,15 +917,20 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  payload jsonb</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
 <span class="source-line">PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_02 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: add March and April partitions.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_03 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_2025_04 PARTITION <span class="syntax-keyword">OF</span> solution_events</span>
 <span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-05-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_events <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n <span class="syntax-operator">*</span> <span class="syntax-number">47</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-punctuation">(</span><span class="syntax-number">120</span> <span class="syntax-operator">*</span> <span class="syntax-number">24</span> <span class="syntax-operator">*</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 minute&#x27;</span><span class="syntax-punctuation">,</span></span>
@@ -926,6 +938,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span> <span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  BUFFERS</span>
@@ -937,8 +950,10 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: a partitioned index creates one child index per partition.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_solution_events_customer_time <span class="syntax-keyword">ON</span> solution_events <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  BUFFERS</span>
@@ -951,6 +966,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  customer_id <span class="syntax-operator">=</span> <span class="syntax-number">42</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: the unbounded query can visit every partition; the bounded query</span></span>
 <span class="source-line"><span class="syntax-comment">-- lets PostgreSQL prune to March.</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
@@ -958,6 +974,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span></span>
 <span class="source-line">  solution_events<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
@@ -966,11 +983,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: original exercises already created April, so June is the</span></span>
 <span class="source-line"><span class="syntax-comment">-- deliberately uncovered value routed to DEFAULT.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> solution_events_default PARTITION <span class="syntax-keyword">OF</span> solution_events <span class="syntax-keyword">DEFAULT</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_events <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-06-15 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;source&quot;:&quot;default&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  tableoid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> physical_partition<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_time</span>
@@ -978,6 +998,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  solution_events</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  event_time <span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-06-15 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: this catalog query shows the covered named ranges. Without the</span></span>
 <span class="source-line"><span class="syntax-comment">-- DEFAULT partition, an insert outside them raises “no partition ... found”.</span></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
@@ -990,10 +1011,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  pt<span class="syntax-punctuation">.</span>isleaf</span>
 <span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
 <span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>relname<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: the exact February boundary belongs to February because lower</span></span>
 <span class="source-line"><span class="syntax-comment">-- FROM bounds are inclusive and upper TO bounds are exclusive.</span></span>
 <span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_events <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;{&quot;source&quot;:&quot;boundary&quot;}&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">SELECT</span></span>
 <span class="source-line">  tableoid<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> physical_partition<span class="syntax-punctuation">,</span></span>
 <span class="source-line">  event_time</span>
@@ -1001,6 +1024,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  solution_events</span>
 <span class="source-line"><span class="syntax-keyword">WHERE</span></span>
 <span class="source-line">  payload <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;boundary&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

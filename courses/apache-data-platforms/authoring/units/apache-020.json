@@ -1,0 +1,19 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "advanced",
+  "minutes": 60,
+  "prerequisites": ["apache-017", "apache-018", "apache-019"],
+  "concepts": ["embedded engine", "fixed query API", "resource limits", "source-bound results"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    [
+      "DataFusion embedding overview",
+      "https://datafusion.apache.org/library-user-guide/index.html"
+    ],
+    [
+      "DataFusion Python configuration",
+      "https://datafusion.apache.org/python/user-guide/configuration.html"
+    ]
+  ]
+}

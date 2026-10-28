@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.
 -- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.
@@ -43,6 +44,7 @@ FROM
 ORDER BY
   o.customer_id,
   recency_number;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Rank products by price within category using both `RANK` and `DENSE_RANK`.
@@ -68,6 +70,7 @@ ORDER BY
   p.category,
   p.price DESC,
   p.product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Return the three highest-priced products per category, including price ties.
@@ -104,6 +107,7 @@ ORDER BY
   category,
   price_rank,
   product_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare row number, rank, and dense rank on values 100, 100, and 90.
@@ -129,6 +133,7 @@ FROM (
     (3, 90)) AS sample (sample_id, score)
 ORDER BY
   sample_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Return exactly one latest order per customer even when timestamps tie.
@@ -163,6 +168,7 @@ WHERE
   recency_number = 1
 ORDER BY
   customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Rank employee salaries within department and show only the top two distinct salary levels.
@@ -199,5 +205,6 @@ ORDER BY
   department_id,
   salary_rank,
   employee_id;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

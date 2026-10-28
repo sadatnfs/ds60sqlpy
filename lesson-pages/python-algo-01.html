@@ -391,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
-<p>Open the <a href="python-algo-01.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Open the <a href="python-algo-01.html#learner">learner script</a> in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored <code>.learning/</code> copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/lessons/py_algo_01.py</code></pre>
 <p>Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-algo-01.html#solution-1">explanatory solutions</a> and <a href="python-algo-01.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
@@ -438,23 +438,23 @@ difference <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <li><strong>Count work rather than guessing from timing.</strong> Count unordered distinct index pairs with explicit nested loops, requiring a nonnegative non-Boolean integer size. Return the number of pair visits. Compare the result with n*(n-1)//2; do not use the formula as the implementation.</li>
 </ol>
 <p><strong>Expected:</strong> Sizes 0,1,4,8 return 0,0,6,28. Negative size, True and 2.5 raise ValueError.</p>
-<ol>
+<ol start="2">
 <li><strong>Return the first repeated occurrence.</strong> Scan integer values left to right and return the value whose repeated occurrence is encountered first. Return None when all values are distinct. Preserve input and distinguish a duplicate zero from no duplicate.</li>
 </ol>
 <p><strong>Expected:</strong> [4,1,4,1] returns 4, [1,2,2,1] returns 2, [0,0] returns 0 and [] returns None.</p>
-<ol>
+<ol start="3">
 <li><strong>Build counts while preserving first appearance.</strong> Return a dictionary of occurrence counts for string values in first-appearance order. Do not remove repeated values or sort the input. Empty input returns an empty dictionary.</li>
 </ol>
 <p><strong>Expected:</strong> [b, a, b, c, a, b] yields insertion order[b, a, c] and counts 3,2,1. The sum of counts equals input length for every fixture.</p>
-<ol>
+<ol start="4">
 <li><strong>Reconcile occurrences in both directions.</strong> Return sorted string keys whose left count minus right count is nonzero. Preserve negative differences as well as positive ones. Do not mutate either list.</li>
 </ol>
 <p><strong>Expected:</strong> [a, a, b] versus[a, b, b] returns{a:1, b:-1}; identical bags with different order return{}; an empty left versus[x, x] gives{x:-2}.</p>
-<ol>
+<ol start="5">
 <li><strong>Index every occurrence instead of overwriting.</strong> Build a key-to-list-of-positions index for string values. Preserve positions in ascending encounter order and keys in first-appearance order. Empty input returns{}.</li>
 </ol>
 <p><strong>Expected:</strong> [a, b, a] yields{a:[0,2], b:[1]}. Every input position occurs exactly once among index lists, including repeated keys.</p>
-<ol>
+<ol start="6">
 <li><strong>Produce an output-sensitive equality join.</strong> Return every matching(left_position, right_position) pair using a hash index of right. Order results by left encounter position, then right encounter position. Preserve duplicate matches and inputs; do not compare every unrelated pair.</li>
 </ol>
 <p><strong>Expected:</strong> Left[a, a, b], right[a, b, a] yields [(0,0),(0,2),(1,0),(1,2),(2,1)]. No common keys gives []; two repeated left and right a values produce four pairs.</p>

@@ -1,11 +1,11 @@
 -- Day 6: UNION, UNION ALL, INTERSECT, EXCEPT
--- BEGINNER WORKFLOW — sql-06: Set Operations
+-- BEGINNER WORKFLOW - sql-06: Set Operations
 -- Guide: sql/postgres-60day/companion-guides/day06_set_operations.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-06/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-06.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.
 -- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.
@@ -49,6 +50,7 @@ FROM
   supporters
 ORDER BY
   customer_id;
+
 -- Customers who browsed but never purchased
 WITH browsers AS (
   SELECT DISTINCT
@@ -75,6 +77,7 @@ FROM
   purchasers
 ORDER BY
   customer_id;
+
 -- UNION vs UNION ALL (dedupe demo)
 SELECT
   country
@@ -91,6 +94,7 @@ WHERE
   country IN ('CA', 'GB')
 ORDER BY
   country;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

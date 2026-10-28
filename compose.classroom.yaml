@@ -26,7 +26,7 @@ services:
       - "127.0.0.1:${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}:${DS60_LAB_PORT:-8765}"
 
   classroom-init:
-    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:0.5.0}
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:1.0.0}
     pull_policy: never
     build:
       context: .
@@ -76,7 +76,9 @@ services:
         "cuda-python":"http://cuda-python-worker:8081","pytorch-cuda":"http://pytorch-cuda-worker:8081",
         "tensorflow-cuda":"http://tensorflow-cuda-worker:8081",
         "jax-cpu":"http://jax-worker:8081","bayesian-cpu":"http://bayesian-worker:8081",
-        "r-statistics":"http://r-worker:8081"}
+        "r-statistics":"http://r-worker:8081","data-engineering":"http://data-engineering-worker:8081",
+        "data-platforms-python":"http://data-platforms-worker:8081",
+        "stan-cpu":"http://stan-worker:8081","julia":"http://julia-worker:8081","dbt-duckdb":"http://dbt-worker:8081"}
     volumes:
       - type: volume
         source: classroom-learning
@@ -177,6 +179,26 @@ services:
   tensorflow-cuda-worker:
     <<: *classroom-worker
     extends: { file: compose.modules.yaml, service: tensorflow-cuda-worker }
+
+  dbt-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: dbt-worker }
+
+  data-platforms-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: data-platforms-worker }
+
+  data-engineering-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: data-engineering-worker }
+
+  stan-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: stan-worker }
+
+  julia-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: julia-worker }
 
   jax-worker:
     <<: *classroom-worker

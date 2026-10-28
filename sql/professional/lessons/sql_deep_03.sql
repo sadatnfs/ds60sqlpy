@@ -9,14 +9,18 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep3_events (
   event_id integer PRIMARY KEY,
   customer_id text NOT NULL,
   occurred_at timestamptz NOT NULL,
   amount integer NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep3_events
 VALUES
   (1, 'a', '2026-01-01T10:00Z', 1),
@@ -26,6 +30,7 @@ VALUES
   (5, 'a', '2026-01-01T11:11Z', 5),
   (6, 'b', '2026-01-01T10:05Z', 10),
   (7, 'b', '2026-01-01T10:35Z', 20);
+
 -- Worked example 1
 WITH samples (
   event_id,
@@ -43,6 +48,7 @@ FROM
   samples
 ORDER BY
   event_id;
+
 -- Worked example 2
 WITH samples (
   event_id,
@@ -58,6 +64,7 @@ FROM
   samples
 ORDER BY
   event_id;
+
 -- Exercises
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 -- 1. Compare row and peer running totals

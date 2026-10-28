@@ -1,5 +1,8 @@
 # Day 24: Exploratory Data Analysis Best Practices
 
+**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+
+
 **Level:** Intermediate
 
 EDA is a reproducible investigation, not a gallery of plots. Begin with the
@@ -231,8 +234,8 @@ be visible.
 
 ## Dataset note
 
-The notebook uses Seaborn's `penguins` sample, which downloads on first uncached
-use and is then cached. Constructed/local data is the fully offline route.
+The checked-in synthetic teaching fixtures load without network access.
+Their generated values demonstrate programming methods, not real-world population facts.
 
 ## Exercises and progressive hints
 

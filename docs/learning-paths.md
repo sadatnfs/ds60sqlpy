@@ -77,3 +77,12 @@ without mandatory exercises, exams or prediction gates. Read and revisit them at
 a chosen schedule; reading markers record review status. Other language and systems
 subjects have their own beginner entry points and explicit project/runtime boundaries.
 Use the common subject chooser and the [documentation map](README.md) to explore them.
+
+## Scientist and ML engineer specializations
+
+Use [the maintained scientist roadmap](scientist-roadmap.md) for a route from
+foundations through experimentation, applied scientific analysis, Bayesian
+computation, data/ML engineering and LLM evaluation. It links the actual current
+subjects instead of treating earlier planning proposals as missing features.
+Choose the branch relevant to your work and follow its direct prerequisites;
+no learner must complete every language first.

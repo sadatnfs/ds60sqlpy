@@ -318,7 +318,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           <span class="tag">intermediate</span>
           <span class="tag">90 minutes</span>
           <span class="tag">data setup</span>
-          <span class="tag">first-run-seaborn-cache</span>
+          <span class="tag">offline</span>
         </div>
         <p><strong>Prerequisites:</strong></p>
         <div class="prerequisite-list"><a class="tag" href="python-21.html">python-21</a></div>
@@ -382,6 +382,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-22-advanced-pandas-vectorization-query-and-categoricals">Day 22: Advanced pandas: Vectorization, <code>query</code>, and Categoricals<a class="heading-anchor" href="#guide--day-22-advanced-pandas-vectorization-query-and-categoricals" aria-label="Link to this section">#</a></h3>
+<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
 <p><strong>Level:</strong> Intermediate</p>
 <p>Express column operations with pandas/NumPy primitives before reaching for row-wise <code>apply</code>. Then measure memory and performance on representative data.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,12 +406,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
    uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
 <p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol>
+<ol start="2">
 <li>Read <code>python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md</code>, then launch the notebook directory:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>Open <code>python/ds-60day/notebooks/day22_advanced_pandas_apply_query_eval.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol>
+<ol start="3">
 <li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
 <li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
 </ol>
@@ -499,19 +500,19 @@ sales<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;
 large <span class="syntax-operator">=</span> sales<span class="syntax-operator">.</span>query<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">regional_share &gt;= 0.5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><code>transform</code> returns one aligned value per original row, so division is direct and no row-wise lookup is required.</p>
 <h4 id="guide--dataset-note">Dataset note<a class="heading-anchor" href="#guide--dataset-note" aria-label="Link to this section">#</a></h4>
-<p>The notebook uses Seaborn&#x27;s cached <code>tips</code> data. A constructed DataFrame such as the example above keeps this lesson fully offline.</p>
+<p>The notebook uses the original synthetic restaurant-bills fixture. A constructed DataFrame such as the example above keeps this lesson fully offline.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
 <li>Find one row-wise <code>apply(axis=1)</code> in a supplied example and replace it with column arithmetic, string methods, mapping, masks, <code>np.select</code>, or group transform as appropriate. <strong>Expected behavior:</strong> values and index match the original for normal and missing inputs. <strong>Constraints:</strong> do not optimize by changing the contract. <strong>Verify:</strong> use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Convert a repeated string column to categorical only after profiling. <strong>Evidence:</strong> record row count, unique count, object memory, categorical memory, and the category levels. <strong>Expected behavior:</strong> keep the categorical version only if it reduces memory for this data. <strong>Verify:</strong> values remain equivalent and explain why a nearly unique ID may become larger.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Prefer vectorized operations and labeled expressions, but measure rather than assuming. Use categoricals only when repetition justifies them.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict why row-wise <code>apply(axis=1)</code> is usually slower than column arithmetic for a simple ratio. <strong>Progressive hint:</strong> Vectorized operations avoid constructing/calling Python work per row. <strong>Verify:</strong> Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.</li>
 <li><strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>, not a column, controls the result.</li>
 <li><strong>Implementation:</strong> Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. <strong>Progressive hint:</strong> Use <code>memory_usage(deep=True)</code> on the Series. <strong>Verify:</strong> Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.</li>
@@ -583,13 +584,14 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-22-advanced-pandas-apply-vs-vectorization-query-eval-categoricals">Day 22 — Advanced pandas: apply vs vectorization, query/eval, categoricals<a class="heading-anchor" href="#learner--cell-1--day-22-advanced-pandas-apply-vs-vectorization-query-eval-categoricals" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-22-advanced-pandas-apply-vs-vectorization-query-eval-categoricals">Day 22 : Advanced pandas: apply vs vectorization, query/eval, categoricals<a class="heading-anchor" href="#learner--cell-1--day-22-advanced-pandas-apply-vs-vectorization-query-eval-categoricals" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Replace apply with vectorized ops where possible.</li>
 <li>Use query/eval for performance.</li>
 <li>Use Categorical dtype to reduce memory.</li>
-</ul></article>
+</ul>
+<p><strong>Offline teaching data:</strong> These examples use original synthetic fixtures from the <a href="../reference-pages/python/fixtures/README.md.html">reviewed fixture collection</a>. They are not the remote Seaborn sample tables or historical observations. The loader makes no download; inference and model scores describe the teaching fixture only.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-22</code>. Read <code>python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
@@ -608,7 +610,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <p><code>frame.query(&quot;amount &gt; @threshold&quot;)</code> resolves <code>amount</code> as a column and <code>@threshold</code> from Python scope. <code>frame.eval(&quot;rate = part / whole&quot;)</code> can assign an expression result. <code>series.astype(&quot;category&quot;)</code> creates codes and categories; <code>memory_usage(deep=True)</code> includes referenced string storage for a more honest comparison.</p>
-<h5 id="learner--cell-4--worked-example-1-replace-row-wise-conditional-logic-with-masks">Worked example 1 — Replace row-wise conditional logic with masks<a class="heading-anchor" href="#learner--cell-4--worked-example-1-replace-row-wise-conditional-logic-with-masks" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-4--worked-example-1-replace-row-wise-conditional-logic-with-masks">Worked example 1 : Replace row-wise conditional logic with masks<a class="heading-anchor" href="#learner--cell-4--worked-example-1-replace-row-wise-conditional-logic-with-masks" aria-label="Link to this section">#</a></h5>
 <p>Column expressions state each rule and preserve index alignment. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
 <span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
@@ -623,7 +625,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>[{&#x27;amount&#x27;: 5, &#x27;band&#x27;: &#x27;low&#x27;}, {&#x27;amount&#x27;: 20, &#x27;band&#x27;: &#x27;medium&#x27;}, {&#x27;amount&#x27;: 60, &#x27;band&#x27;: &#x27;high&#x27;}]</code>.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
-<h5 id="learner--cell-6--worked-example-2-measure-categorical-conversion">Worked example 2 — Measure categorical conversion<a class="heading-anchor" href="#learner--cell-6--worked-example-2-measure-categorical-conversion" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-6--worked-example-2-measure-categorical-conversion">Worked example 2 : Measure categorical conversion<a class="heading-anchor" href="#learner--cell-6--worked-example-2-measure-categorical-conversion" aria-label="Link to this section">#</a></h5>
 <p>Keep the conversion only when data characteristics justify it. Predict first; then run the next cell.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">labels <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">1_000</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">categorical <span class="syntax-operator">=</span> labels<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
@@ -646,9 +648,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> A named Python function plus <code>apply</code> is acceptable for truly irregular per-row objects; benchmark and keep the contract explicit.</p>
 <p><strong>Boundary to test:</strong> Missing values in conditions, divide-by-zero, nearly unique strings, unseen category levels, and unsafe dynamic expressions require care.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd<span class="syntax-operator">,</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> seaborn <span class="syntax-keyword">as</span> sns</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> ds60sqlpy.teaching_data <span class="syntax-keyword">import</span> load_teaching_frame</span>
+<span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd<span class="syntax-operator">,</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> seaborn <span class="syntax-keyword">as</span> sns</span>
 <span class="source-line"></span>
-<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">tips</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> load_teaching_frame<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">restaurant-bills</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-comment"># Vectorized tip %</span></span>
 <span class="source-line">df<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip_pct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> df<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> df<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
 <span class="source-line"><span class="syntax-comment"># Categoricals</span></span>
@@ -662,103 +665,96 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <ol>
 <li>Find one row-wise <code>apply(axis=1)</code> in a supplied example and replace it with column arithmetic, string methods, mapping, masks, <code>np.select</code>, or group transform as appropriate. <strong>Expected behavior:</strong> values and index match the original for normal and missing inputs. <strong>Constraints:</strong> do not optimize by changing the contract. <strong>Verify:</strong> use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.</li>
 </ol>
-<ol>
+<ol start="2">
 <li>Convert a repeated string column to categorical only after profiling. <strong>Evidence:</strong> record row count, unique count, object memory, categorical memory, and the category levels. <strong>Expected behavior:</strong> keep the categorical version only if it reduces memory for this data. <strong>Verify:</strong> values remain equivalent and explain why a nearly unique ID may become larger.</li>
 </ol>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Prefer vectorized operations and labeled expressions, but measure rather than assuming. Use categoricals only when repetition justifies them.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
-<ol>
+<ol start="3">
 <li><strong>Prediction:</strong> Predict why row-wise <code>apply(axis=1)</code> is usually slower than column arithmetic for a simple ratio. <strong>Progressive hint:</strong> Vectorized operations avoid constructing/calling Python work per row. <strong>Verify:</strong> Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.</li>
-<li><strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>—not a column—controls the result.</li>
+<li><strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>:not a column:controls the result.</li>
 <li><strong>Implementation:</strong> Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. <strong>Progressive hint:</strong> Use <code>memory_usage(deep=True)</code> on the Series. <strong>Verify:</strong> Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.</li>
 <li><strong>Debugging:</strong> Replace a row-wise conditional <code>apply</code> with <code>np.select</code> or <code>.where</code> while preserving missing-value behavior. <strong>Progressive hint:</strong> List conditions from most specific to fallback. <strong>Verify:</strong> Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.</li>
 <li><strong>Edge case and explanation:</strong> Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. <strong>Progressive hint:</strong> Categories store both codes and a level table. <strong>Verify:</strong> Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Find one row-wise <code>apply(axis=1)</code> in a supplied example and replace it with column arithmetic, string methods, mapping, masks, <code>np.select</code>, or group transform as appropriate. <strong>Expected behavior:</strong> values and index match the original for normal and missing inputs. <strong>Constraints:</strong> do not optimize by changing the contract. <strong>Verify:</strong> use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Find one row-wise `apply(axis=1)` in a supplied example and replace it with column arithmetic, string methods, mapping, masks, `np.select`, or group transform as appropriate. va...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Convert a repeated string column to categorical only after profiling. <strong>Evidence:</strong> record row count, unique count, object memory, categorical memory, and the category levels. <strong>Expected behavior:</strong> keep the categorical version only if it reduces memory for this data. <strong>Verify:</strong> values remain equivalent and explain why a nearly unique ID may become larger.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Convert a repeated string column to categorical only after profiling. record row count, unique count, object memory, categorical memory, and the category levels. keep the catego...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict why row-wise <code>apply(axis=1)</code> is usually slower than column arithmetic for a simple ratio. <strong>Progressive hint:</strong> Vectorized operations avoid constructing/calling Python work per row. <strong>Verify:</strong> Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Predict why row-wise `apply(axis=1)` is usually slower than column arithmetic for a simple ratio. Vectorized operations avoid constructing/calling Python work per row. Assert ro...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
-<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>—not a column—controls the result.</p>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>:not a column:controls the result.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Trace `frame.query(&#x27;amount &gt; @threshold&#x27;)`: which name comes from a column and which comes from Python scope? `@` marks an external Python variable. Set a known threshold and as...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. <strong>Progressive hint:</strong> Use <code>memory_usage(deep=True)</code> on the Series. <strong>Verify:</strong> Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. Use `memory_usage(deep=True)` on the Series. Assert...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Replace a row-wise conditional <code>apply</code> with <code>np.select</code> or <code>.where</code> while preserving missing-value behavior. <strong>Progressive hint:</strong> List conditions from most specific to fallback. <strong>Verify:</strong> Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Replace a row-wise conditional `apply` with `np.select` or `.where` while preserving missing-value behavior. List conditions from most specific to fallback. Use rows covering ev...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 : prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. <strong>Progressive hint:</strong> Categories store both codes and a level table. <strong>Verify:</strong> Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 : your work</span></span>
 <span class="source-line"><span class="syntax-comment"># Short contract: Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. Categories store both codes and a level...</span></span>
 <span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span></code></pre>
 </article></div>
       </section>
 
@@ -786,6 +782,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals">Day 22: Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)<a class="heading-anchor" href="#solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals" aria-label="Link to this section">#</a></h3>
+<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>pandas vectorization, expression APIs, and memory-aware categoricals</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Pandas is fastest and clearest when an operation can be expressed over entire columns: arithmetic, comparisons, string/datetime accessors, mapping, masks, or group transforms. A row-wise <code>apply(axis=1)</code> builds a Series and calls Python for each row, so it should be a last resort for genuinely row-dependent logic, not a default.</p>

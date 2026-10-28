@@ -1,11 +1,11 @@
 -- Day 17: ROW_NUMBER, RANK, DENSE_RANK
--- BEGINNER WORKFLOW — sql-17: Rank Functions
+-- BEGINNER WORKFLOW - sql-17: ROW_NUMBER, RANK and DENSE_RANK
 -- Guide: sql/postgres-60day/companion-guides/day17_rank_functions.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-17/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-17.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -18,6 +18,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Study contract
 -- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.
 -- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.
@@ -50,6 +51,7 @@ ORDER BY
   revenue DESC,
   customer_id
 LIMIT 30;
+
 -- Rank employees by salary within department
 SELECT
   e.department_id,
@@ -67,6 +69,7 @@ ORDER BY
   e.salary DESC,
   e.employee_id
 LIMIT 50;
+
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.

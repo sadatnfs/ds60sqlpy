@@ -239,19 +239,19 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <ol>
 <li><strong>Convert scores.</strong> Convert logits[-2,0,2] into probabilities and inspect the central value. <strong>Expected:</strong> middle probability 0.5; probabilities increase. <strong>Verify:</strong> Save the assertion results for exercise 1, including middle probability 0.5; probabilities increase.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Check the midpoint loss.</strong> Calculate positive-label binary cross entropy at zero logit. <strong>Expected:</strong> loss <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span> within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span> within 1e-6.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Move the threshold.</strong> Compare decisions at thresholds.5 and.8 with &gt;= ties. <strong>Expected:</strong> decisions[False,True,True] versus[False,False,True]. <strong>Verify:</strong> Save the assertion results for exercise 3, including decisions[False,True,True] versus[False,False,True].</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Expose a convention mismatch.</strong> Treat probability 0.5 as if it were a logit and compare the positive-label loss with log2. <strong>Expected:</strong> wrong loss differs from log2 by more than.1. <strong>Verify:</strong> Save the assertion results for exercise 4, including wrong loss differs from log2 by more than.1.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Stress large scores.</strong> Calculate losses for logits 1000,-1000 with labels1,0 using the logits-aware form. <strong>Expected:</strong> both finite losses approximately0. <strong>Verify:</strong> Save the assertion results for exercise 5, including both finite losses approximately0.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Count decisions separately.</strong> For labels[0,1,1], count errors under the two thresholds. <strong>Expected:</strong> 0 errors at.5 and 1 at.8 on this fixture. <strong>Verify:</strong> Save the assertion results for exercise 6, including 0 errors at.5 and 1 at.8 on this fixture.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

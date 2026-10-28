@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Local prediction workshop</title>
+    <style>
+      :root { color-scheme: light dark; font: 18px/1.6 system-ui, sans-serif; }
+      body { max-width: 52rem; margin: 3rem auto; padding: 0 1.5rem; }
+      h1 { line-height: 1.2; letter-spacing: -0.025em; }
+      form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; margin: 2rem 0; }
+      label { display: block; font-weight: 600; }
+      input, button { font: inherit; padding: 0.65rem 1rem; border-radius: 0.5rem; }
+      input { width: 6rem; border: 1px solid #808997; }
+      button { border: 0; background: #2458c2; color: white; cursor: pointer; }
+      button:disabled { opacity: 0.6; cursor: wait; }
+      :focus-visible { outline: 3px solid #dc9a16; outline-offset: 4px; }
+      pre { overflow: auto; padding: 1.25rem; border: 1px solid #808997; border-radius: 0.5rem; }
+      .note { border-left: 4px solid #6684d4; padding-left: 1rem; }
+      a { color: #477fe7; }
+      @media (prefers-color-scheme: dark) { a { color: #a9c4ff; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>ML engineering / local service</p>
+      <h1>Inspect an actual model prediction</h1>
+      <p>
+        Select a synthetic customer to retrieve features from the local Feast store and score them
+        with the accepted model. The response identifies the model version and feature age used for
+        this request.
+      </p>
+      <form id="prediction-form">
+        <div>
+          <label for="customer">Customer ID (0 to 11)</label>
+          <input id="customer" type="number" min="0" max="11" step="1" value="1" required />
+        </div>
+        <button id="submit" type="submit">Run prediction</button>
+      </form>
+      <p id="status" role="status" aria-live="polite">No request submitted.</p>
+      <pre id="result" aria-label="Prediction response">{}</pre>
+      <p class="note">
+        This is a synthetic local workshop. Scores do not establish suitability for a real
+        population. Model activation and feature changes use the documented control CLI; this
+        service has no administrative write endpoint.
+      </p>
+      <p
+        ><a href="/health">Health</a> / <a href="/metrics">Process metrics</a> /
+        <a href="/openapi.json">API schema</a></p
+      >
+    </main>
+    <script>
+      const form = document.getElementById("prediction-form");
+      const submit = document.getElementById("submit");
+      const status = document.getElementById("status");
+      const result = document.getElementById("result");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        submit.disabled = true;
+        status.textContent = "Request in progress.";
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ customer_id: Number(document.getElementById("customer").value) }),
+          });
+          result.textContent = JSON.stringify(await response.json(), null, 2);
+          status.textContent = response.ok ? "Prediction received." : `Request rejected (HTTP ${response.status}).`;
+        } catch (error) {
+          result.textContent = String(error);
+          status.textContent = "The service could not be reached.";
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

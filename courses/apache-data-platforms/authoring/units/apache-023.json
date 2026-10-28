@@ -1,0 +1,16 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-021", "apache-005", "apache-011"],
+  "concepts": ["stages", "shuffle", "partial aggregates", "skew"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Ballista shuffle design",
+      "https://datafusion.apache.org/ballista/contributors-guide/shuffle.html"
+    ],
+    ["Ballista tuning", "https://datafusion.apache.org/ballista/user-guide/tuning-guide.html"]
+  ]
+}

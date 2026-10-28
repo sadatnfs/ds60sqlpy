@@ -1,0 +1,19 @@
+{
+  "language": "markdown",
+  "runtime": "reading",
+  "level": "intermediate",
+  "minutes": 75,
+  "prerequisites": ["apache-027", "apache-004"],
+  "concepts": ["connection identifiers", "SDK runtime lookup", "providers", "redacted diagnostics"],
+  "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
+  "sources": [
+    [
+      "Airflow connections",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/howto/connection.html"
+    ],
+    [
+      "Airflow public Task SDK",
+      "https://airflow.apache.org/docs/apache-airflow/3.3.2/public-airflow-interface.html"
+    ]
+  ]
+}

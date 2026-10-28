@@ -311,19 +311,19 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <ol>
 <li><strong>Compute a full-prefix oracle.</strong> Initialize seed7 decoder and evaluate IDs2,5,7,3 at once. <strong>Expected:</strong> logits shape(1,4,16). <strong>Verify:</strong> Save the assertion results for exercise 1, including logits shape(1,4,16).</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Run one token at a time.</strong> Carry returned K/V through four one-token calls and concatenate logits. <strong>Expected:</strong> incremental logits match full within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 2, including incremental logits match full within 1e-6.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Inspect cache growth.</strong> Check final cache token count and per-head width. <strong>Expected:</strong> cache shape(1,2,4,16). <strong>Verify:</strong> Save the assertion results for exercise 3, including cache shape(1,2,4,16).</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Bind ownership.</strong> Associate the cache with requestA and modelv1; reject requestB. <strong>Expected:</strong> ValueError for foreign request. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError for foreign request.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Start a fresh request empty.</strong> Run token 2 with no cache and compare with the first full-prefix position. <strong>Expected:</strong> logits match the original first position. <strong>Verify:</strong> Save the assertion results for exercise 5, including logits match the original first position.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Invalidate after a model change.</strong> Attempt to use the v1-owned cache with versionv2. <strong>Expected:</strong> ValueError for stale version. <strong>Verify:</strong> Save the assertion results for exercise 6, including ValueError for stale version.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

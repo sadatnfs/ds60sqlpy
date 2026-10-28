@@ -318,7 +318,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           <span class="tag">intermediate</span>
           <span class="tag">105 minutes</span>
           <span class="tag">data setup</span>
-          <span class="tag">first-run-seaborn-cache</span>
+          <span class="tag">offline</span>
         </div>
         <p><strong>Prerequisites:</strong></p>
         <div class="prerequisite-list"><a class="tag" href="python-44.html">python-44</a></div>
@@ -382,7 +382,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-45-end-to-end-modeling-mini-project">Day 45: End-to-End Modeling Mini-Project<a class="heading-anchor" href="#guide--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
-<p><strong>Lesson ID:</strong> <code>python-45</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> first-run Seaborn cache</p>
+<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
+<p><strong>Lesson ID:</strong> <code>python-45</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>This checkpoint integrates data loading, leak-safe preprocessing, validation, evaluation, and a saved pipeline. The objective is reproducible evidence, not the highest possible score.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of the project, you can:</p>
@@ -400,7 +401,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Cache the Seaborn Titanic dataset while connected before an offline session.</li>
 </ul>
 <h4 id="guide--dataset-and-offline-contract">Dataset and offline contract<a class="heading-anchor" href="#guide--dataset-and-offline-contract" aria-label="Link to this section">#</a></h4>
-<p>The learner notebook calls <code>seaborn.load_dataset(&quot;titanic&quot;)</code>. That first call may download the small dataset and place it in Seaborn&#x27;s local cache. This one-time connected bootstrap is accepted. Once cached, the project can run offline on that machine.</p>
+<p>The checked-in synthetic teaching fixtures load without network access. Their generated values demonstrate programming methods, not real-world population facts.</p>
 <p>The separate reference solution uses scikit-learn&#x27;s package-bundled breast-cancer dataset to demonstrate the same engineering gates without a network dependency. It is intentionally a transferable reference, not a line-for-line Titanic answer.</p>
 <h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
 <div class="table-wrap"><table><thead><tr>
@@ -603,27 +604,27 @@ gates <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <li>Load the dataset and create train/validation/test boundaries.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; an end-to-end evidence chain from decision to reproducible artifact; record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
-<ol>
+<ol start="2">
 <li>Preprocess with <code>ColumnTransformer</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; an end-to-end evidence chain from decision to reproducible artifact; fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
-<ol>
+<ol start="3">
 <li>Train a baseline model.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; an end-to-end evidence chain from decision to reproducible artifact; fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
-<ol>
+<ol start="4">
 <li>Evaluate with appropriate metrics and cross-validation.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 4; an end-to-end evidence chain from decision to reproducible artifact; print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
-<ol>
+<ol start="5">
 <li>Save the model and preprocessing together with <code>joblib</code>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 5; an end-to-end evidence chain from decision to reproducible artifact; save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
-<ol>
+<ol start="6">
 <li>Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 6; an end-to-end evidence chain from decision to reproducible artifact; include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
-<ol>
+<ol start="7">
 <li>Optionally adapt the Day 44 FastAPI service.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 7; an end-to-end evidence chain from decision to reproducible artifact; if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
@@ -637,31 +638,31 @@ gates <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Finish one reproducible modeling system rather than a notebook demo. Every data boundary, fitted transform, metric, artifact, and handoff claim needs evidence.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="8">
 <li><strong>Data-contract gate:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint. <strong>Progressive hint:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</li>
 </ol>
 <p><strong>Verify:</strong> Data-contract gate; run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
-<ol>
+<ol start="9">
 <li><strong>Leakage audit:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field. <strong>Progressive hint:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</li>
 </ol>
 <p><strong>Verify:</strong> Leakage audit; save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
-<ol>
+<ol start="10">
 <li><strong>Baseline ladder:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results. <strong>Progressive hint:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</li>
 </ol>
 <p><strong>Verify:</strong> Baseline ladder; print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
-<ol>
+<ol start="11">
 <li><strong>Operating-policy selection:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it. <strong>Progressive hint:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</li>
 </ol>
 <p><strong>Verify:</strong> Operating-policy selection; print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
-<ol>
+<ol start="12">
 <li><strong>Error-slice analysis:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values. <strong>Progressive hint:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</li>
 </ol>
 <p><strong>Verify:</strong> Error-slice analysis; for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
-<ol>
+<ol start="13">
 <li><strong>Artifact manifest:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes. <strong>Progressive hint:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</li>
 </ol>
 <p><strong>Verify:</strong> Artifact manifest; validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
-<ol>
+<ol start="14">
 <li><strong>Fresh-process acceptance:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance. <strong>Progressive hint:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</li>
 </ol>
 <p><strong>Verify:</strong> Fresh-process acceptance; run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p>
@@ -768,8 +769,9 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-45-end-to-end-modeling-mini-project">Day 45 — End-to-end modeling mini-project<a class="heading-anchor" href="#learner--cell-1--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
-<p>Goal: deliver a reproducible pipeline from data → model → evaluation → saved artifacts.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-45-end-to-end-modeling-mini-project">Day 45 : End-to-end modeling mini-project<a class="heading-anchor" href="#learner--cell-1--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
+<p>Goal: deliver a reproducible pipeline from data → model → evaluation → saved artifacts.</p>
+<p><strong>Offline teaching data:</strong> These examples use original synthetic fixtures from the <a href="../reference-pages/python/fixtures/README.md.html">reviewed fixture collection</a>. They are not the remote Seaborn sample tables or historical observations. The loader makes no download; inference and model scores describe the teaching fixture only.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--checklist">Checklist<a class="heading-anchor" href="#learner--cell-2--checklist" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Load dataset and split train/valid/test.</li>
@@ -779,7 +781,8 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Save model + preprocessing (joblib).</li>
 <li>Write a short README section in this notebook.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> ds60sqlpy.teaching_data <span class="syntax-keyword">import</span> load_teaching_frame</span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">import</span> joblib</span>
 <span class="source-line"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd</span>
@@ -792,7 +795,9 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"></span>
 <span class="source-line">artifact_dir <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">artifacts/day45</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">artifact_dir<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span>parents<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> exist_ok<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">df <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">titanic</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span>subset<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">survived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sex</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fare</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">age</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">df <span class="syntax-operator">=</span> load_teaching_frame<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">passenger-outcomes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    subset<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">survived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sex</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fare</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">age</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
 <span class="source-line">X <span class="syntax-operator">=</span> df<span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">sex</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fare</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">age</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></span>
 <span class="source-line">y <span class="syntax-operator">=</span> df<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">survived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></span>
 <span class="source-line">pre <span class="syntax-operator">=</span> ColumnTransformer<span class="syntax-punctuation">(</span></span>
@@ -817,7 +822,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-5--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-5--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-5--concept-lab-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact">Concept lab — an end-to-end evidence chain from decision to reproducible artifact<a class="heading-anchor" href="#learner--cell-5--concept-lab-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-5--concept-lab-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact">Concept lab : an end-to-end evidence chain from decision to reproducible artifact<a class="heading-anchor" href="#learner--cell-5--concept-lab-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-5--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-5--mental-model" aria-label="Link to this section">#</a></h5>
 <p>An end-to-end project is a sequence of contracts, not one long notebook: problem framing defines the decision and prediction time; data validation defines row grain and allowed values; splitting protects the evaluation boundary; a pipeline binds preprocessing to the model; metrics and error analysis support a scoped claim; artifact packaging preserves the exact fitted workflow.</p>
 <p>A baseline is a decision checkpoint. Added complexity is justified only if it improves a declared metric or operational property under the same data and evaluation design. Reproducibility also requires data identity, environment, seed, commands, and limitations.</p>
@@ -828,7 +833,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong>manifest + acceptance gates:</strong> connect data hash, schema, code/environment, metrics, limitations, and artifact identity.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-6--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline">Focused example A — require the candidate to beat a same-split baseline<a class="heading-anchor" href="#learner--cell-6--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-6--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline">Focused example A : require the candidate to beat a same-split baseline<a class="heading-anchor" href="#learner--cell-6--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> ROC AUC and this split reflect the decision; the test result was not repeatedly consulted during development.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
@@ -854,7 +859,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The model must improve the declared held-out metric over the simple prior baseline on identical rows.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-9--focused-example-b-turn-completion-into-explicit-acceptance-gates">Focused example B — turn completion into explicit acceptance gates<a class="heading-anchor" href="#learner--cell-9--focused-example-b-turn-completion-into-explicit-acceptance-gates" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-9--focused-example-b-turn-completion-into-explicit-acceptance-gates">Focused example B : turn completion into explicit acceptance gates<a class="heading-anchor" href="#learner--cell-9--focused-example-b-turn-completion-into-explicit-acceptance-gates" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Thresholds and evidence requirements were set before viewing the final candidate result.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">evidence <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
@@ -918,31 +923,31 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Load the dataset and create train/validation/test boundaries.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — an end-to-end evidence chain from decision to reproducible artifact — record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 1 : an end-to-end evidence chain from decision to reproducible artifact : record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
+<ol start="2">
 <li>Preprocess with <code>ColumnTransformer</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — an end-to-end evidence chain from decision to reproducible artifact — fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 2 : an end-to-end evidence chain from decision to reproducible artifact : fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
+<ol start="3">
 <li>Train a baseline model.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — an end-to-end evidence chain from decision to reproducible artifact — fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 3 : an end-to-end evidence chain from decision to reproducible artifact : fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
+<ol start="4">
 <li>Evaluate with appropriate metrics and cross-validation.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 4 — an end-to-end evidence chain from decision to reproducible artifact — print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 4 : an end-to-end evidence chain from decision to reproducible artifact : print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
+<ol start="5">
 <li>Save the model and preprocessing together with <code>joblib</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 5 — an end-to-end evidence chain from decision to reproducible artifact — save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 5 : an end-to-end evidence chain from decision to reproducible artifact : save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
+<ol start="6">
 <li>Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 6 — an end-to-end evidence chain from decision to reproducible artifact — include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
-<ol>
+<p><strong>Verify:</strong> Practice 6 : an end-to-end evidence chain from decision to reproducible artifact : include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
+<ol start="7">
 <li>Optionally adapt the Day 44 FastAPI service.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 7 — an end-to-end evidence chain from decision to reproducible artifact — if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
+<p><strong>Verify:</strong> Practice 7 : an end-to-end evidence chain from decision to reproducible artifact : if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
 <h5 id="learner--cell-12--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-12--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Start by writing the target, row unit, and split before feature engineering.</li>
@@ -953,60 +958,59 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Finish one reproducible modeling system rather than a notebook demo. Every data boundary, fitted transform, metric, artifact, and handoff claim needs evidence.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="8">
 <li><strong>Data-contract gate:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint. <strong>Progressive hint:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</li>
 </ol>
-<p><strong>Verify:</strong> Data-contract gate — run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
-<ol>
+<p><strong>Verify:</strong> Data-contract gate : run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
+<ol start="9">
 <li><strong>Leakage audit:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field. <strong>Progressive hint:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</li>
 </ol>
-<p><strong>Verify:</strong> Leakage audit — save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
-<ol>
+<p><strong>Verify:</strong> Leakage audit : save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
+<ol start="10">
 <li><strong>Baseline ladder:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results. <strong>Progressive hint:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</li>
 </ol>
-<p><strong>Verify:</strong> Baseline ladder — print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
-<ol>
+<p><strong>Verify:</strong> Baseline ladder : print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
+<ol start="11">
 <li><strong>Operating-policy selection:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it. <strong>Progressive hint:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</li>
 </ol>
-<p><strong>Verify:</strong> Operating-policy selection — print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
-<ol>
+<p><strong>Verify:</strong> Operating-policy selection : print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
+<ol start="12">
 <li><strong>Error-slice analysis:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values. <strong>Progressive hint:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</li>
 </ol>
-<p><strong>Verify:</strong> Error-slice analysis — for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
-<ol>
+<p><strong>Verify:</strong> Error-slice analysis : for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
+<ol start="13">
 <li><strong>Artifact manifest:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes. <strong>Progressive hint:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</li>
 </ol>
-<p><strong>Verify:</strong> Artifact manifest — validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
-<ol>
+<p><strong>Verify:</strong> Artifact manifest : validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
+<ol start="14">
 <li><strong>Fresh-process acceptance:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance. <strong>Progressive hint:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</li>
 </ol>
-<p><strong>Verify:</strong> Fresh-process acceptance — run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p>
+<p><strong>Verify:</strong> Fresh-process acceptance : run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
 <span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
 <span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 8 — Data-contract gate</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 8 : Data-contract gate</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 9 — Leakage audit</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 9 : Leakage audit</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 10 — Baseline ladder</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 10 : Baseline ladder</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 11 — Operating-policy selection</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 11 : Operating-policy selection</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 12 — Error-slice analysis</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 12 : Error-slice analysis</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 13 — Artifact manifest</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 13 : Artifact manifest</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 14 — Fresh-process acceptance</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Practice 14 : Fresh-process acceptance</span></span></code></pre>
 </article></div>
       </section>
 
@@ -1034,6 +1038,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-45-solutions-end-to-end-modeling-project">Day 45: Solutions: End-to-End Modeling Project<a class="heading-anchor" href="#solution-1--day-45-solutions-end-to-end-modeling-project" aria-label="Link to this section">#</a></h3>
+<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
 <p>We deliver a reproducible baseline solution: clean data pipeline with validation and features, model training with CV/tuning, holdout evaluation with thresholding, saved artifacts, and a minimal FastAPI service.</p>
 <p>Contents</p>
 <ul>
@@ -1159,7 +1164,7 @@ curl -s -X POST http://127.0.0.1:8000/predict -H <span class="syntax-string">&#x
 <p><strong>Why this approach is appropriate:</strong> Separating contracts and gates makes each project stage testable and connects model performance to a reproducible decision claim.</p>
 <p><strong>Useful alternative:</strong> A simpler rule-based or statistical model may meet the decision need with lower maintenance and explanation cost.</p>
 <p><strong>Trade-off:</strong> A richer model can improve metrics while increasing data, compute, monitoring, privacy, and operational obligations.</p>
-<p><strong>Edge case to test:</strong> Missing categories, changed schema, data drift, tiny slices, artifact incompatibility, and unavailable first-run Seaborn cache need explicit behavior.</p>
+<p><strong>Edge case to test:</strong> Missing categories, changed schema, data drift, tiny slices, artifact incompatibility, and unavailable offline need explicit behavior.</p>
 <p><strong>Evidence of correctness:</strong> Reproduce from a fresh environment, validate data and split hashes, beat a same-split baseline, reload the complete pipeline, test slices, and connect every claim to an artifact.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>

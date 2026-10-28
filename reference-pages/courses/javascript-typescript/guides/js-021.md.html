@@ -272,19 +272,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Use structural compatibility.</strong> Pass a wider named object with id and count to a function requiring only id. <strong>Expected:</strong> label A; original count remains 2. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Observe mutation through an alias.</strong> Create a readonly view of a mutable record, then mutate the original reference. <strong>Expected:</strong> readonly view observes count changing from 1 to 4. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Handle absent and zero-valued optional counts.</strong> Use a nullish fallback on an optional count. <strong>Expected:</strong> absent becomes 10; explicit 0 remains 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Distinguish runtime presence from undefined.</strong> Compare an absent property with an explicitly present undefined property. <strong>Expected:</strong> hasOwn is false versus true; JSON serializes both as empty objects. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Show shallow readonly and shallow freeze boundaries.</strong> Freeze an outer record containing a nested mutable object and update the nested count. <strong>Expected:</strong> nested count becomes 3; outer object is frozen. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Transform a readonly array without mutation.</strong> Accept readonly numbers, return a doubled array, and demonstrate push is rejected statically. <strong>Expected:</strong> new array 2,4; input remains 1,2. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

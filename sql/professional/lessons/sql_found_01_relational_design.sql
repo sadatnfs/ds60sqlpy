@@ -1,11 +1,11 @@
 -- SQL-FOUND-01: Relational design, DDL, and integrity constraints
--- BEGINNER WORKFLOW — sql-found-01: Relational Design, DDL, and Integrity Constraints
+-- BEGINNER WORKFLOW - sql-found-01: Relational Design, DDL, and Integrity Constraints
 -- Guide: sql/professional/companion-guides/sql_found_01_relational_design.md
--- Recommended runner: open the private lesson reader and choose
--- "Create/open guided SQL notebook". It verifies advanced_sql_training,
--- creates an ignored .learning/sql/sql-found-01/ copy, and prints the full
--- psql transcript below the run cell. Edit that private copy, not this official
--- source, while studying.
+-- Recommended runner: ./classroom -> PostgreSQL -> sql-found-01.
+-- Choose "Whole SQL lesson (psql)" and edit its saved learner copy.
+-- Docker supplies the client and the disposable advanced_sql_training database.
+-- Read the full transcript and retain the declared transaction/cleanup boundary.
+-- The optional contributor notebook route is described separately in the guide.
 -- Read every SELECT as FROM/JOIN -> WHERE -> GROUP BY/aggregate -> HAVING ->
 -- window calculation -> SELECT -> ORDER BY -> LIMIT. Before each statement,
 -- declare what one input row and one output row represent. A displayed result
@@ -26,7 +26,9 @@
 \echo 'SQL-FOUND-01: building a disposable equipment-lending model'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_relational_lab;
+
 -- Requirement: one row represents one person who can borrow equipment.
 -- The row grain is "one member", and member_id is its surrogate key.
 CREATE TABLE pro_relational_lab.members (
@@ -36,12 +38,14 @@ CREATE TABLE pro_relational_lab.members (
   backup_contact text UNIQUE,
   joined_on date NOT NULL DEFAULT CURRENT_DATE
 );
+
 -- Requirement: one row represents one reusable category, not one physical item.
 CREATE TABLE pro_relational_lab.equipment_categories (
   category_code text PRIMARY KEY,
   display_name text NOT NULL UNIQUE,
   standard_loan_days integer NOT NULL CHECK (standard_loan_days BETWEEN 1 AND 90)
 );
+
 -- Requirement: one row represents one physical item.
 -- The foreign key encodes many items belonging to one category.
 CREATE TABLE pro_relational_lab.equipment_items (
@@ -54,6 +58,7 @@ CREATE TABLE pro_relational_lab.equipment_items (
   item_condition text NOT NULL DEFAULT 'ready' CHECK (item_condition IN ('ready', 'on_loan', 'maintenance', 'retired')),
   catalog_label text GENERATED ALWAYS AS (asset_tag || ' - ' || description) STORED
 );
+
 -- Requirement: one row represents one checkout of one item to one member.
 -- A member can have many loans; an item can appear in many historical loans.
 CREATE TABLE pro_relational_lab.loans (
@@ -72,20 +77,24 @@ CREATE TABLE pro_relational_lab.loans (
   CONSTRAINT loans_return_after_checkout_ck CHECK (returned_on IS NULL OR returned_on >= checked_out_on),
   CONSTRAINT loans_item_checkout_uk UNIQUE (item_id, checked_out_on)
 );
+
 INSERT INTO pro_relational_lab.equipment_categories (category_code, display_name, standard_loan_days)
 VALUES
   ('AUDIO', 'Audio equipment', 7),
   ('TOOL', 'Hand tools', 14);
+
 -- PostgreSQL's ordinary UNIQUE constraint permits multiple NULL values because
 -- NULL means "unknown", and two unknowns are not considered equal.
 INSERT INTO pro_relational_lab.members (display_name, email, backup_contact, joined_on)
 VALUES
   ('Avery Chen', 'avery@example.test', NULL, DATE '2026-01-10'),
   ('Morgan Diaz', 'morgan@example.test', NULL, DATE '2026-01-12');
+
 INSERT INTO pro_relational_lab.equipment_items (asset_tag, category_code, description, replacement_cost, daily_fee)
 VALUES
   ('AUD-001', 'AUDIO', 'Portable recorder', 180.00, 3.50),
   ('TOL-001', 'TOOL', 'Torque wrench', 95.00, 2.00);
+
 INSERT INTO pro_relational_lab.loans (item_id, member_id, checked_out_on, due_on, daily_fee_at_checkout, notes)
 SELECT
   i.item_id,
@@ -99,6 +108,7 @@ FROM
   JOIN pro_relational_lab.members AS m ON m.email = 'avery@example.test'
 WHERE
   i.asset_tag = 'AUD-001';
+
 \echo 'A normalized join reconstructs a useful loan description'
 SELECT
   l.loan_id,

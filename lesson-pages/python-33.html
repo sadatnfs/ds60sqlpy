@@ -544,11 +544,11 @@ max_prediction_error <span class="syntax-operator">=</span> np<span class="synta
 <li>Add an intercept column of ones and recompute the coefficients.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
-<ol>
+<ol start="2">
 <li>Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
-<ol>
+<ol start="3">
 <li>Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
@@ -561,15 +561,15 @@ max_prediction_error <span class="syntax-operator">=</span> np<span class="synta
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat shapes, rank, and conditioning as part of every matrix contract. Prefer stable solvers to symbolic formulas that require an explicit inverse.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Shape tracing:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1). <strong>Progressive hint:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</li>
 </ol>
 <p><strong>Verify:</strong> Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
-<ol>
+<ol start="5">
 <li><strong>Rank-deficiency debugging:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank. <strong>Progressive hint:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</li>
 </ol>
 <p><strong>Verify:</strong> Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
-<ol>
+<ol start="6">
 <li><strong>Robust vector operation:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector. <strong>Progressive hint:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</li>
 </ol>
 <p><strong>Verify:</strong> Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p>
@@ -780,11 +780,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Add an intercept column of ones and recompute the coefficients.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 1 — matrix shapes, linear transformations, rank, and stable least squares — assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
-<ol>
+<ol start="2">
 <li>Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — matrix shapes, linear transformations, rank, and stable least squares — fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
-<ol>
+<ol start="3">
 <li>Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — matrix shapes, linear transformations, rank, and stable least squares — construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
@@ -797,15 +797,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat shapes, rank, and conditioning as part of every matrix contract. Prefer stable solvers to symbolic formulas that require an explicit inverse.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
-<ol>
+<ol start="4">
 <li><strong>Shape tracing:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1). <strong>Progressive hint:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</li>
 </ol>
 <p><strong>Verify:</strong> Shape tracing — print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
-<ol>
+<ol start="5">
 <li><strong>Rank-deficiency debugging:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank. <strong>Progressive hint:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</li>
 </ol>
 <p><strong>Verify:</strong> Rank-deficiency debugging — use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
-<ol>
+<ol start="6">
 <li><strong>Robust vector operation:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector. <strong>Progressive hint:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</li>
 </ol>
 <p><strong>Verify:</strong> Robust vector operation — assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p>

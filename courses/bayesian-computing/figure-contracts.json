@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "units": [
+    {
+      "id": "bayes-009",
+      "kind": "png",
+      "count": 1,
+      "description_required": true
+    },
+    {
+      "id": "bayes-017",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-018",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-019",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-020",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-021",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-022",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-023",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    },
+    {
+      "id": "bayes-024",
+      "kinds": [
+        "table",
+        "plotly"
+      ],
+      "count": 2,
+      "origin": "actual Stan CSV summary and sampled parameter traces",
+      "limits": "Undefined constant diagnostics remain explicit; short traces do not certify inference."
+    }
+  ]
+}

@@ -1,5 +1,13 @@
 # Day 58: Solutions: Code Review, Refactoring, and Tests
 
+The notebook reference creates a real, owned temporary `src/myproj`
+package and runs a fresh pytest process against it. The test output establishes
+the import boundary and three behavioral cases, then the temporary project is
+removed. The multi-file snippets below are separately prepared project layouts;
+save them at their declared paths when following that optional contributor route.
+Ordinary classroom learners need no host package or source-directory setup.
+
+
 We refactor notebook logic into a module, write unit tests, configure pre‑commit hooks, and add a CI workflow.
 
 Contents

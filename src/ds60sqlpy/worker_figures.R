@@ -1,5 +1,6 @@
 # Capture script graphics in the bounded worker directory without opening a browser.
 .ds60_run <- function() {
+  run_directory <- getwd()
   saved <- list()
   capture_plotly <- function(x, ...) {
     if (length(saved) >= 2L) {
@@ -25,7 +26,12 @@
     }
     retained <- tryCatch(
       {
-        writeLines(encoded, "ds60-figures.json", useBytes = TRUE)
+        temporary <- tempfile(".ds60-output-", tmpdir = run_directory)
+        on.exit(unlink(temporary), add = TRUE)
+        writeLines(encoded, temporary, useBytes = TRUE)
+        if (!file.rename(temporary, file.path(run_directory, "ds60-figures.json"))) {
+          stop("Could not atomically retain the chart")
+        }
         TRUE
       },
       error = function(error) {
@@ -44,7 +50,7 @@
   } else {
     setHook(packageEvent("plotly", "onLoad"), register_plotly, action = "append")
   }
-  grDevices::png(".ds60-r-%02d.png", width = 900L, height = 600L, res = 100L, type = "cairo")
+  grDevices::png(file.path(run_directory, ".ds60-r-%02d.png"), width = 900L, height = 600L, res = 100L, type = "cairo")
   on.exit(
     {
       while (grDevices::dev.cur() > 1L) grDevices::dev.off()

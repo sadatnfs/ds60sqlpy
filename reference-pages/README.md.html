@@ -222,20 +222,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>A terminal in your Linux session</td>
 </tr>
 </tbody></table></div>
-<p>Follow the <a href="docs/one-command-classroom.md.html">beginner setup guide</a> for installation links, WSL integration and resource guidance. The course&#x27;s Python, PostgreSQL, Java, C, C++, Go, C#, Rust, Swift, R, Node, PHP, JAX, PyMC, TensorFlow, PyTorch and Spark tools run inside Docker, so you do not need to install those language toolchains on your machine.</p>
+<p>Follow the <a href="docs/one-command-classroom.md.html">beginner setup guide</a> for installation links, WSL integration and resource guidance. The course&#x27;s Python, PostgreSQL, Java, C, C++, Go, C#, Rust, Swift, R, Julia, Node, PHP, JAX, PyMC, Stan, Polars, dbt, TensorFlow, PyTorch and Spark tools run inside Docker. You do not need to install those language toolchains on your machine.</p>
 <p>Check your engine from that terminal before continuing:</p>
 <pre class="highlighted-code"><code class="language-bash">docker info
 docker compose version
 bash --version</code></pre>
 <p><code>docker info</code> must connect successfully to a Linux-container engine. The Compose version must be at least 2.28.0. If a command is unavailable or cannot connect, finish the engine installation or WSL integration before starting the course.</p>
 <h4 id="2-get-the-course-and-start-it">2. Get the course and start it<a class="heading-anchor" href="#2-get-the-course-and-start-it" aria-label="Link to this section">#</a></h4>
-<p>The repository currently requires access from its owner. Sign in to a GitHub account with repository access before cloning or downloading a ZIP. For HTTPS cloning, use a Git credential manager or authenticated GitHub CLI; do not paste a personal access token into the clone URL. The local classroom itself needs no GitHub login after you have downloaded it.</p>
+<p>The public repository can be cloned or downloaded as a ZIP without a GitHub login. If you use a restricted fork, sign in with an account that has access. For authenticated HTTPS cloning, use a Git credential manager or GitHub CLI; do not paste a personal access token into the clone URL. The local classroom needs no GitHub login after you have downloaded it.</p>
 <p>Clone the repository, enter its folder, check prerequisites and launch:</p>
 <pre class="highlighted-code"><code class="language-bash">git clone https://github.com/sadatnfs/ds60sqlpy.git
 <span class="syntax-builtin">cd</span> ds60sqlpy
 ./classroom doctor
 ./classroom</code></pre>
-<p><code>doctor</code> checks the local engine and configuration without starting services. On a new project, the final command prepares PostgreSQL and the ordinary CPU and language runtime workers. It builds <strong>only missing images</strong>, with visible logs, starts the services, waits for readiness and opens the browser. Keep the terminal open while it works. First preparation needs internet, several gigabytes of downloads and time to install image dependencies. Nothing is pushed to a registry.</p>
+<p>If the owner has completed CI publication for this release, replace the final startup command with <code>./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0</code>. Use the actual publisher&#x27;s namespace. This downloads matching images without building locally; see <a href="#optional-docker-hub-distribution">Docker Hub distribution</a>.</p>
+<p><code>doctor</code> checks the local engine and configuration without starting services. In local-build mode, the final command prepares PostgreSQL and the ordinary CPU and language runtime workers. It builds <strong>only missing images</strong>, with visible logs, starts the services, waits for readiness and opens the browser. Keep the terminal open while it works. First preparation needs internet, several gigabytes of downloads and time to install image dependencies. Nothing is pushed to a registry.</p>
 <p><strong>Returning to study? Run the same <code>./classroom</code> command.</strong> It remembers the project&#x27;s selected profiles, reuses local images and starts existing containers without rebuilding images. If Docker changes an automatically assigned browser port on restart, the launcher recreates only the app from its existing image to use that address; your volumes and worker containers are retained. Interrupted first preparation also keeps the selection and completed images, so the next start prepares only what is still missing.</p>
 <p><strong>Using a ZIP instead:</strong> download the repository ZIP or a complete starter ZIP, extract it fully, and open a terminal in the extracted folder containing <code>classroom</code>. Run <code>./classroom doctor</code>, then <code>./classroom</code> there. If extraction removed executable permissions, use <code>bash classroom doctor</code> and <code>bash classroom</code>. After the prerequisites above are ready, Windows users can also double-click <strong>START_DOCKER_CLASSROOM.cmd</strong>; Mac users can double-click <strong>START_DOCKER_CLASSROOM.command</strong>.</p>
 <p>For a smaller first build, replace the last command with:</p>
@@ -280,6 +281,51 @@ bash --version</code></pre>
 <td>Statistics and machine learning</td>
 <td><a href="courses/statistics-ml/README.md.html">Tutorial book</a></td>
 <td>Theory, modeling choices, worked Python examples and interview explanations</td>
+</tr>
+<tr>
+<td>Applied scientific methods</td>
+<td><a href="courses/applied-science/README.md.html">Applied Science</a></td>
+<td>Causal identification, forecasting, survival, ranking, optimization and evidence synthesis</td>
+</tr>
+<tr>
+<td>Bayesian computation</td>
+<td><a href="courses/bayesian-computing/README.md.html">PyMC, ArviZ and Stan</a></td>
+<td>Generative models, actual posterior fitting, diagnostics, predictive checks and decisions</td>
+</tr>
+<tr>
+<td>Polars</td>
+<td><a href="courses/polars/README.md.html">Polars data engineering</a></td>
+<td>Expressions, lazy plans, Arrow, temporal joins and validated feature publication</td>
+</tr>
+<tr>
+<td>dbt</td>
+<td><a href="courses/dbt/README.md.html">dbt and DuckDB</a></td>
+<td>Real models, tests, snapshots, incremental data, contracts and controlled publication</td>
+</tr>
+<tr>
+<td>ML engineering</td>
+<td><a href="courses/ml-engineering/README.md.html">ML engineering</a></td>
+<td>Features, experiment tracking, model decisions, serving, monitoring and rollback</td>
+</tr>
+<tr>
+<td>Data and ML Engineering</td>
+<td><a href="courses/data-ml-engineering/README.md.html">Engineering tutorial book</a></td>
+<td>72 chapters connecting data contracts, storage, streaming, features, model delivery and the complete LLM request-to-SSE lifecycle</td>
+</tr>
+<tr>
+<td>Apache and open-data platforms</td>
+<td><a href="courses/apache-data-platforms/README.md.html">Platform tutorials and workshops</a></td>
+<td>88 units covering Arrow, DataFusion, Ballista, Airflow, Kafka, Iceberg, Flink, Cassandra, Pinot, Hive, Atlas and Delta Sharing</td>
+</tr>
+<tr>
+<td>LLM evaluation</td>
+<td><a href="courses/llm-evaluation/README.md.html">Evaluation and alignment</a></td>
+<td>Sampling, annotation, uncertainty, retrieval, preference models, DPO, PPO and GRPO</td>
+</tr>
+<tr>
+<td>Julia</td>
+<td><a href="courses/julia/README.md.html">Julia scientific computing</a></td>
+<td>Language, dispatch, data analysis, numerical methods, differentiation and concurrency</td>
 </tr>
 <tr>
 <td>R</td>
@@ -392,22 +438,42 @@ bash --version</code></pre>
 <td>Semantic pages, responsive layouts, accessibility, browser interactions and server-side applications</td>
 </tr>
 </tbody></table></div>
+<p>The engineering book includes separately owned <a href="courses/data-ml-engineering/projects/data-product/README.md.html">data-product</a> and <a href="courses/data-ml-engineering/projects/inference-service/README.md.html">inference-service</a> workshops with their own persistent state. Apache library examples run in the ordinary <code>data-platforms-python</code> worker; distributed services use explicit project preparation. The <a href="courses/apache-data-platforms/authoring/ENVIRONMENTS.md.html">platform qualification ledger</a> records actual runtime scope and separately prepared Atlas/Delta Sharing routes. Opening a chapter does not start those services or install their dependencies.</p>
+<p>The <a href="docs/scientist-roadmap.md.html">scientist roadmap</a> connects the statistics, experimentation, data engineering and ML routes, showing what each adds and where external systems or hardware are still required.</p>
 <p>The catalog lists canonical lessons, tutorial chapters and separately saved language/framework variants. The current inventory is shown in the classroom and can be checked with <code>python scripts/check_modules.py --json</code>. The statistics book maps its chapters to 1,005 topics in the source outline. The <a href="docs/learning/llm-textbook.md.html">72-chapter LLM reading route</a> connects mechanisms to a running subject-assistant case study; <a href="docs/learning/inside-a-transformer.md.html">Inside a Transformer</a> provides a connected numerical explanation of the architecture.</p>
 <p>For a first SQL course, start with <code>sql-start-01</code>, <code>sql-start-02</code> and <code>sql-start-03</code>, then continue to <code>sql-01</code>. The classroom keeps this on-ramp ahead of schema and operations topics.</p>
 <p>Prerequisites and estimated durations support study planning. Access is not restricted by completion markers. Each subject retains its own drafts, notes and results when you change courses.</p>
-<p>Mathematics is compiled from explicit TeX during the image build, with bundled fonts and accessible MathML. Lesson prose uses textbook typography. Tagged code blocks remain highlighted and copyable. The classroom needs no font or math CDN. DAX uses an offline editor and fixed, hand-derived reference tables; it has no Run operation. JAX and Bayesian examples run on CPU in their dedicated profiles. Python and R plots can be retained with run history, and JavaScript Plotly examples run in the isolated browser preview. See <a href="docs/plotting.md.html">plotting</a> for limits and <a href="docs/textbook-rendering.md.html">textbook rendering</a> for the authoring contract.</p>
+<p>Mathematics is compiled from explicit TeX during the image build, with bundled fonts and accessible MathML. Lesson prose uses textbook typography. Tagged code blocks remain highlighted and copyable. The classroom needs no font or math CDN. DAX uses an offline editor and fixed, hand-derived reference tables; it has no Run operation. JAX and Bayesian examples run on CPU in their dedicated profiles. Python, R and Julia charts, plus bounded data tables and JSON reports, can be retained with their exact run source. JavaScript Plotly examples run in the isolated browser preview. See <a href="docs/plotting.md.html">plotting</a> for limits and <a href="docs/textbook-rendering.md.html">textbook rendering</a> for the authoring contract.</p>
 <h3 id="read-code-and-keep-your-work">Read, code and keep your work<a class="heading-anchor" href="#read-code-and-keep-your-work" aria-label="Link to this section">#</a></h3>
 <h4 id="optional-docker-hub-distribution">Optional Docker Hub distribution<a class="heading-anchor" href="#optional-docker-hub-distribution" aria-label="Link to this section">#</a></h4>
-<p>Local builds remain the default. After the owner has published a matching release and architecture, a learner can download the images instead:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.5.0</code></pre>
-<p>Replace the placeholder with the actual publisher&#x27;s Docker Hub namespace. The project remembers that choice; later <code>./classroom resume</code> still performs no builds or pulls. No public image release is implied by the command above. See <a href="docs/dockerhub.md.html">building, testing, publishing and pulling images</a> for step-by-step instructions, account authentication, architecture tags and the disabled-by-default manual GitHub publication workflow.</p>
-<p>To install this source release locally with visible build logs:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">0</span>.5.0 --rebuild</code></pre>
-<p>Keep your existing <code>--project NAME</code> on every command when using a custom project.</p>
+<p>Ordinary startup uploads nothing. Once a publisher&#x27;s CI release is complete, use the matching checkout or starter ZIP and start the full classroom from Hub:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
+<p>The CI app tags are <code>YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0</code> and <code>:latest</code>; workers use versioned tags such as <code>:1.0.0-worker-python-core</code> in the same repository. Docker selects the engine&#x27;s native architecture from the combined Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.</p>
+<p>You can request <code>--tag latest</code> instead. The launcher resolves it to a concrete app release, requires the matching source checkout, selects that release&#x27;s worker tags, and saves the concrete version. Later <code>./classroom resume</code> never builds, pulls or follows a moving latest tag.</p>
+<p>Download without starting services with <code>./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0</code>. For an existing project, switching image source/layout or applying an update requires the same command without <code>pull</code> and with <code>--rebuild</code>. In Hub mode that pulls and applies images without compiling. Keep the same custom <code>--project NAME</code> to retain its volumes. Images do not carry saved progress; moving machines needs a separate learning/database backup.</p>
+<h5 id="publish-through-github-actions">Publish through GitHub Actions<a class="heading-anchor" href="#publish-through-github-actions" aria-label="Link to this section">#</a></h5>
+<p>The publication workflow builds and pushes only for a push to <code>main</code> whose HEAD commit message contains <code>[publish-docker]</code>. Configure the two repository Actions secrets <code>DOCKERHUB_USERNAME</code> and <code>DOCKERHUB_TOKEN</code>. No extra enable variables or protected-environment setup is required.</p>
+<p>After staging and validating the reviewed release changes on <code>main</code>:</p>
+<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release 1.0.0 [publish-docker]&quot;</span>
+git push origin main</code></pre>
+<p>Native AMD64 and ARM64 jobs build and qualify the app, Core and worker groups. Commit-specific staging uploads precede final promotion. Only the complete successful checks allow versioned worker tags, then the app version, followed by latest aliases with app <code>latest</code> last. Small receipts record the evidence; large Docker archives are not transferred through Actions artifacts.</p>
+<p>The version comes from checked-in source. An incompatible existing version is refused; changes after publication should use a new patch release such as <code>1.0.1</code>. The first upload can be large, and later runs reuse unchanged layers where available. Account pull limits, fair use and runner capacity still apply. A workflow configuration or staging upload does not prove final publication.</p>
+<h5 id="publish-an-existing-local-image-set-manually">Publish an existing local image set manually<a class="heading-anchor" href="#publish-an-existing-local-image-set-manually" aria-label="Link to this section">#</a></h5>
+<p>The local publisher remains a separate, single-architecture route. If this machine needs authentication, the operator runs:</p>
+<pre class="highlighted-code"><code class="language-bash">docker login</code></pre>
+<p>Preview already built and tested images without uploading:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
+<p>After reviewing the mapping, explicitly upload:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0 --push</code></pre>
+<p>This requires the complete ordinary local set by default. It checks all selected images before tagging/pushing and does not build, log in, create another architecture or publish combined manifests. Prepare missing images with <code>./classroom build --all --local-build --tag 1.0.0</code>, then qualify them.</p>
+<p>Manual tags include architecture, such as <code>1.0.0-lab-arm64</code>. A matching-architecture learner selects that layout explicitly:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0 --architecture-tags</code></pre>
+<p>An ARM64-only Mac publication does not supply AMD64 tags for a typical Windows/WSL machine. See <a href="docs/dockerhub.md.html">Docker Hub distribution</a> for complete account, tag, lifecycle, compatibility and publication instructions.</p>
 <h4 id="reading-and-execution">Reading and execution<a class="heading-anchor" href="#reading-and-execution" aria-label="Link to this section">#</a></h4>
 <p>Mathematical explanations render as typeset equations, including fractions, subscripts, vectors and matrices. Fenced code examples carry language-aware syntax highlighting. Both work from bundled local rendering resources without an external CDN. Code remains selectable so you can copy an example into its appropriate workspace.</p>
-<p>C, C++, Go, C#, Rust, Swift and Java compile in Linux Docker workers. JavaScript uses Node for server-side lessons and an isolated browser preview for the D3 specialization. TypeScript is checked and compiled before Node execution. Python, TensorFlow, PyTorch and Spark use their declared profiles.</p>
+<p>C, C++, Go, C#, Rust, Swift and Java compile in Linux Docker workers. JavaScript uses Node for server-side lessons and an isolated browser preview for the D3 specialization. TypeScript is checked and compiled before Node execution. Python, TensorFlow, PyTorch, Spark, Polars and dbt use their declared profiles. Julia runs with its prepared scientific packages. Stan compiles native model source and samples two short seeded chains; its diagnostic output requires interpretation, not just a successful exit code.</p>
 <p>HTML and CSS render in an isolated offline browser preview, including inline JavaScript interactions. PHP runs in its own CLI worker with PDO SQLite. Real HTTP sessions and multi-file applications use the web subject&#x27;s separate, loopback-only Docker project. The pad and the web server are explicitly different execution environments.</p>
+<p>For dbt, beginner SQL-model variants accept one SQL/Jinja model in a fixed project. Complete dbt projects and the <a href="courses/ml-engineering/projects/local-system/README.md.html">local ML service</a> have separate, explicit Docker workflows and storage. They do not create a multi-file editor or long-running server inside an ordinary pad. Stan models with a separate JSON data file use the <a href="courses/bayesian-computing/projects/normal-mean/README.md.html">complete project fixture</a>.</p>
 <p>Turn on <strong>Live preview</strong> in an HTML/CSS or browser JavaScript/D3 workspace to see edits after a short pause. Switch between desktop, tablet and phone widths, inspect the console, and pause or stop the preview whenever you need. Automatic updates preserve your draft without filling run history; use Run or explicitly save an observation when you want a durable result.</p>
 <p>The 128-chapter CUDA subject is useful on CPU-only machines: read the theory, save reasoning and run small CPU models. Selected C++, CuPy, PyTorch and TensorFlow variants can use optional NVIDIA workers after explicit setup and a real device probe. GPU images are excluded from <code>--all</code>; Apple, AMD and Intel GPUs are not made CUDA-compatible by Docker. See the <a href="docs/cuda-classroom.md.html">platform and evidence guide</a>, including non-CUDA options.</p>
 <p>D3 7.9.0 is bundled locally. Its 24 lessons render real SVG or Canvas charts in the classroom, including accessible controls, brushing, zooming and dashboards. The preview has an opaque origin and blocks external connections. Its saved console results are clearly labeled browser observations, not independent server verification. Viewing a saved observation preserves your current source and does not rerun it.</p>

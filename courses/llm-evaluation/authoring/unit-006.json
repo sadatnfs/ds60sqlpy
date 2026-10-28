@@ -1,0 +1,70 @@
+{
+  "number": 6,
+  "title": "Paired comparisons and clustered uncertainty",
+  "concepts": [
+    "paired comparison",
+    "permutation test",
+    "cluster bootstrap",
+    "exchangeability",
+    "confidence interval"
+  ],
+  "outcome": "Compute paired and family-level uncertainty while distinguishing a randomization null, a bootstrap approximation and a deployment claim.",
+  "level": "intermediate",
+  "runtime": "python-core",
+  "minutes": 120,
+  "prerequisites": ["eval-004", "eval-005", "statistics-003"],
+  "exercises": [
+    {
+      "title": "All differences vanish",
+      "task": "Use paired differences 0,0.",
+      "expected": "The exact tail probability is 1.",
+      "hint": "Every allowed statistic equals the observed statistic.",
+      "answer": "There is no observed contrast. All sign assignments are at least as extreme under the non-strict tail convention."
+    },
+    {
+      "title": "Four favorable pairs",
+      "task": "Use differences 1,1,1,1.",
+      "expected": "The two-sided exact tail is 2/16=0.125.",
+      "hint": "Count both all-positive and all-negative assignments.",
+      "answer": "Even four uniformly favorable pairs cannot attain a two-sided 0.05 threshold under this small sign space."
+    },
+    {
+      "title": "Reverse model labels",
+      "task": "Negate every difference in case A.",
+      "expected": "The two-sided p-value is unchanged.",
+      "hint": "Absolute extremeness is symmetric.",
+      "answer": "A two-sided sign-reference test does not favor a naming convention; a one-sided analysis would require a prespecified direction."
+    },
+    {
+      "title": "State the quantile convention",
+      "task": "Compare linear interpolation with empirical inverse-CDF percentiles in case B.",
+      "expected": "Linear endpoints are approximately +/-0.925; inverse-CDF endpoints are +/-1.",
+      "hint": "A discrete bootstrap distribution needs an explicit quantile rule.",
+      "answer": "Both calculations use the same four resamples. Different interpolation rules do not constitute additional evidence."
+    },
+    {
+      "title": "Add a third family",
+      "task": "Enumerate resamples of 0,1,2.",
+      "expected": "There are 27 ordered draws of three families.",
+      "hint": "Each of three positions has three choices.",
+      "answer": "The calculation expands to 3 cubed assignments, while the original independent sample still has only three families."
+    },
+    {
+      "title": "Bound an exact algorithm",
+      "task": "Request 17 paired differences.",
+      "expected": "The fixture rejects the request.",
+      "hint": "Enumeration grows exponentially.",
+      "answer": "A bounded classroom example should not silently allocate an enormous sign space. A larger analysis needs a declared Monte Carlo or analytical method."
+    }
+  ],
+  "sources": [
+    [
+      "SciPy paired permutation tests",
+      "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.permutation_test.html"
+    ],
+    [
+      "SciPy bootstrap conventions",
+      "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"
+    ]
+  ]
+}

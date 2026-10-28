@@ -16,6 +16,7 @@
 -- ON_ERROR_STOP is supplied by the documented psql command.
 BEGIN;
 SET search_path TO training, public;
+
 -- Shared teaching contract
 -- Focus: Use scalar and inline subqueries only when their one-row or one-value cardinality is guaranteed and visible.
 -- Assumptions: A scalar subquery returning no rows becomes NULL; more than one row is an error. Order a `LIMIT 1` subquery deterministically.
@@ -47,6 +48,7 @@ WHERE
 ORDER BY
   o.total_amount DESC,
   o.order_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Add the total customer count as a scalar column beside each country-level customer count.
@@ -74,6 +76,7 @@ GROUP BY
 ORDER BY
   country_customers DESC,
   c.country;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show each customer with their latest order timestamp using a scalar correlated subquery.
@@ -101,6 +104,7 @@ FROM
 ORDER BY
   latest_order_date DESC NULLS LAST,
   c.customer_id;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Demonstrate that a scalar subquery with no matching rows returns NULL.
@@ -120,6 +124,7 @@ SELECT
       products AS p
     WHERE
       p.product_id = -1) IS NULL AS no_row_becomes_null;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a scalar subquery that returns many product prices by aggregating to the intended single value.
@@ -146,6 +151,7 @@ GROUP BY
   p.category
 ORDER BY
   p.category;
+
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report.
@@ -180,5 +186,6 @@ GROUP BY
 ORDER BY
   customer_share DESC,
   c.country;
+
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

@@ -261,19 +261,19 @@ torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">
 <ol>
 <li><strong>Create Adam history.</strong> Take two float32 Adam updates of(w-2)² fromw0. <strong>Expected:</strong> positive weight and optimizer step2. <strong>Verify:</strong> Save the assertion results for exercise 1, including positive weight and optimizer step2.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Save a trusted local checkpoint.</strong> Write the scalar weight and optimizer state into an owned temporary file. <strong>Expected:</strong> checkpoint file exists. <strong>Verify:</strong> Save the assertion results for exercise 2, including checkpoint file exists.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Calculate the uninterrupted next step.</strong> Take one more update and save the expected weight. <strong>Expected:</strong> step3 and changed weight. <strong>Verify:</strong> Save the assertion results for exercise 3, including step3 and changed weight.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Restore in a new interpreter.</strong> Load the trusted checkpoint into fresh weight and Adam objects, then take one step. <strong>Expected:</strong> child weight agrees within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 4, including child weight agrees within 1e-6.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Expose weights-only continuation.</strong> Initialize a fresh optimizer at the saved weight and compare its next update. <strong>Expected:</strong> weight differs from full-state continuation. <strong>Verify:</strong> Save the assertion results for exercise 5, including weight differs from full-state continuation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Verify evaluation and cleanup.</strong> Use Dropout(.5) in eval mode on ones and remove only the owned temporary checkpoint. <strong>Expected:</strong> dropout returns ones; temporary path absent. <strong>Verify:</strong> Save the assertion results for exercise 6, including dropout returns ones; temporary path absent.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

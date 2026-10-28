@@ -7,13 +7,17 @@ BEGIN
   END IF;
 END
 $course_target$;
+
 SET LOCAL TIME ZONE 'UTC';
+
 SET LOCAL statement_timeout = '15s';
+
 CREATE TEMP TABLE deep6_users (
   user_id integer PRIMARY KEY,
   signup_at timestamptz NOT NULL,
   observed_through timestamptz NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep6_users
 VALUES
   (1, '2026-01-01T00:00Z', '2026-01-10T00:00Z'),
@@ -21,12 +25,14 @@ VALUES
   (3, '2026-01-02T00:00Z', '2026-01-10T00:00Z'),
   (4, '2026-01-09T00:00Z', '2026-01-10T00:00Z'),
   (5, '2026-01-01T00:00Z', '2026-01-10T00:00Z');
+
 CREATE TEMP TABLE deep6_events (
   event_id integer PRIMARY KEY,
   user_id integer NOT NULL,
   occurred_at timestamptz NOT NULL,
   available_at timestamptz NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO deep6_events
 VALUES
   (1, 1, '2026-01-08T00:00Z', '2026-01-08T00:00Z'),
@@ -38,6 +44,7 @@ VALUES
   (7, 1, '2025-12-31T00:00Z', '2025-12-31T00:00Z'),
   (8, 99, '2026-01-08T00:00Z', '2026-01-08T00:00Z'),
   (9, 1, '2026-01-12T00:00Z', '2026-01-12T00:00Z');
+
 CREATE FUNCTION pg_temp.assert_true (ok boolean, message text)
   RETURNS void
   LANGUAGE plpgsql
@@ -49,42 +56,49 @@ BEGIN
 END
 $assert$
 ;
-  -- Exercises
-  -- 1. Expose invalid event relationships before aggregation
-  SAVEPOINT exercise_1;
-  CREATE TEMP TABLE answer_1 ON COMMIT DROP AS
-  SELECT
-    e.event_id, e.user_id, CASE WHEN u.user_id IS NULL THEN
-      'unknown_user'
-    ELSE
-      'before_signup'
-    END AS reason
-  FROM
-    deep6_events AS e
+-- Exercises
+-- 1. Expose invalid event relationships before aggregation
+SAVEPOINT exercise_1;
+
+CREATE TEMP TABLE answer_1 ON COMMIT DROP AS
+SELECT
+  e.event_id, e.user_id, CASE WHEN u.user_id IS NULL THEN
+    'unknown_user'
+  ELSE
+    'before_signup'
+  END AS reason
+FROM
+  deep6_events AS e
   LEFT JOIN deep6_users AS u ON u.user_id = e.user_id
 WHERE
   u.user_id IS NULL
   OR e.occurred_at < u.signup_at
 ORDER BY
   e.event_id;
-  SELECT
-    event_id,
-    user_id,
-    reason
-  FROM
-    answer_1
-  ORDER BY
-    event_id;
+
+SELECT
+  event_id,
+  user_id,
+  reason
+FROM
+  answer_1
+ORDER BY
+  event_id;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_1)
-          ORDER BY event_id), '[]'::jsonb)
-        FROM answer_1) = '[{"event_id": 7, "user_id": 1, "reason": "before_signup"}, {"event_id": 8, "user_id": 99, "reason": "unknown_user"}]'::jsonb, 'sql-deep-06 exercise 1');
+      COALESCE(jsonb_agg(to_jsonb (answer_1)
+      ORDER BY event_id), '[]'::jsonb)
+    FROM answer_1) = '[{"event_id": 7, "user_id": 1, "reason": "before_signup"}, {"event_id": 8, "user_id": 99, "reason": "unknown_user"}]'::jsonb, 'sql-deep-06 exercise 1');
+
 ROLLBACK TO SAVEPOINT exercise_1;
+
 RELEASE SAVEPOINT exercise_1;
+
 -- 2. Define denominator eligibility using both clocks
 SAVEPOINT exercise_2;
+
 CREATE TEMP TABLE answer_2 ON COMMIT DROP AS
 SELECT
   user_id, signup_at::date AS cohort_day, observed_through >= signup_at + INTERVAL '8 days'
@@ -93,24 +107,30 @@ FROM
   deep6_users
 ORDER BY
   user_id;
-  SELECT
-    user_id,
-    cohort_day,
-    eligible
-  FROM
-    answer_2
-  ORDER BY
-    user_id;
+
+SELECT
+  user_id,
+  cohort_day,
+  eligible
+FROM
+  answer_2
+ORDER BY
+  user_id;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_2)
-          ORDER BY user_id), '[]'::jsonb)
-        FROM answer_2) = '[{"user_id": 1, "cohort_day": "2026-01-01", "eligible": true}, {"user_id": 2, "cohort_day": "2026-01-01", "eligible": false}, {"user_id": 3, "cohort_day": "2026-01-02", "eligible": true}, {"user_id": 4, "cohort_day": "2026-01-09", "eligible": false}, {"user_id": 5, "cohort_day": "2026-01-01", "eligible": true}]'::jsonb, 'sql-deep-06 exercise 2');
+      COALESCE(jsonb_agg(to_jsonb (answer_2)
+      ORDER BY user_id), '[]'::jsonb)
+    FROM answer_2) = '[{"user_id": 1, "cohort_day": "2026-01-01", "eligible": true}, {"user_id": 2, "cohort_day": "2026-01-01", "eligible": false}, {"user_id": 3, "cohort_day": "2026-01-02", "eligible": true}, {"user_id": 4, "cohort_day": "2026-01-09", "eligible": false}, {"user_id": 5, "cohort_day": "2026-01-01", "eligible": true}]'::jsonb, 'sql-deep-06 exercise 2');
+
 ROLLBACK TO SAVEPOINT exercise_2;
+
 RELEASE SAVEPOINT exercise_2;
+
 -- 3. Create one nullable retention label per user
 SAVEPOINT exercise_3;
+
 CREATE TEMP TABLE answer_3 ON COMMIT DROP AS
 WITH eligibility AS (
   SELECT
@@ -149,24 +169,30 @@ FROM
   labels
 ORDER BY
   user_id;
-  SELECT
-    user_id,
-    eligible,
-    day7_retained
-  FROM
-    answer_3
-  ORDER BY
-    user_id;
+
+SELECT
+  user_id,
+  eligible,
+  day7_retained
+FROM
+  answer_3
+ORDER BY
+  user_id;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_3)
-          ORDER BY user_id), '[]'::jsonb)
-        FROM answer_3) = '[{"user_id": 1, "eligible": true, "day7_retained": true}, {"user_id": 2, "eligible": false, "day7_retained": null}, {"user_id": 3, "eligible": true, "day7_retained": true}, {"user_id": 4, "eligible": false, "day7_retained": null}, {"user_id": 5, "eligible": true, "day7_retained": false}]'::jsonb, 'sql-deep-06 exercise 3');
+      COALESCE(jsonb_agg(to_jsonb (answer_3)
+      ORDER BY user_id), '[]'::jsonb)
+    FROM answer_3) = '[{"user_id": 1, "eligible": true, "day7_retained": true}, {"user_id": 2, "eligible": false, "day7_retained": null}, {"user_id": 3, "eligible": true, "day7_retained": true}, {"user_id": 4, "eligible": false, "day7_retained": null}, {"user_id": 5, "eligible": true, "day7_retained": false}]'::jsonb, 'sql-deep-06 exercise 3');
+
 ROLLBACK TO SAVEPOINT exercise_3;
+
 RELEASE SAVEPOINT exercise_3;
+
 -- 4. Report cohort rates with their denominators
 SAVEPOINT exercise_4;
+
 CREATE TEMP TABLE answer_4 ON COMMIT DROP AS
 WITH eligibility AS (
   SELECT
@@ -207,26 +233,32 @@ GROUP BY
   cohort_day
 ORDER BY
   cohort_day;
-  SELECT
-    cohort_day,
-    total_users,
-    eligible_users,
-    retained_users,
-    retention_rate
-  FROM
-    answer_4
-  ORDER BY
-    cohort_day;
+
+SELECT
+  cohort_day,
+  total_users,
+  eligible_users,
+  retained_users,
+  retention_rate
+FROM
+  answer_4
+ORDER BY
+  cohort_day;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_4)
-          ORDER BY cohort_day), '[]'::jsonb)
-        FROM answer_4) = '[{"cohort_day": "2026-01-01", "total_users": 3, "eligible_users": 2, "retained_users": 1, "retention_rate": 0.5}, {"cohort_day": "2026-01-02", "total_users": 1, "eligible_users": 1, "retained_users": 1, "retention_rate": 1}, {"cohort_day": "2026-01-09", "total_users": 1, "eligible_users": 0, "retained_users": 0, "retention_rate": null}]'::jsonb, 'sql-deep-06 exercise 4');
+      COALESCE(jsonb_agg(to_jsonb (answer_4)
+      ORDER BY cohort_day), '[]'::jsonb)
+    FROM answer_4) = '[{"cohort_day": "2026-01-01", "total_users": 3, "eligible_users": 2, "retained_users": 1, "retention_rate": 0.5}, {"cohort_day": "2026-01-02", "total_users": 1, "eligible_users": 1, "retained_users": 1, "retention_rate": 1}, {"cohort_day": "2026-01-09", "total_users": 1, "eligible_users": 0, "retained_users": 0, "retention_rate": null}]'::jsonb, 'sql-deep-06 exercise 4');
+
 ROLLBACK TO SAVEPOINT exercise_4;
+
 RELEASE SAVEPOINT exercise_4;
+
 -- 5. Detect a historical feature or label leakage candidate
 SAVEPOINT exercise_5;
+
 CREATE TEMP TABLE answer_5 ON COMMIT DROP AS
 SELECT
   event_id, user_id, occurred_at <= TIMESTAMPTZ '2026-01-10T00:00Z' AS event_before_cutoff, available_at <= TIMESTAMPTZ '2026-01-10T00:00Z' AS available_by_cutoff
@@ -237,25 +269,31 @@ WHERE
   AND available_at > TIMESTAMPTZ '2026-01-10T00:00Z'
 ORDER BY
   event_id;
-  SELECT
-    event_id,
-    user_id,
-    event_before_cutoff,
-    available_by_cutoff
-  FROM
-    answer_5
-  ORDER BY
-    event_id;
+
+SELECT
+  event_id,
+  user_id,
+  event_before_cutoff,
+  available_by_cutoff
+FROM
+  answer_5
+ORDER BY
+  event_id;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_5)
-          ORDER BY event_id), '[]'::jsonb)
-        FROM answer_5) = '[{"event_id": 5, "user_id": 2, "event_before_cutoff": true, "available_by_cutoff": false}]'::jsonb, 'sql-deep-06 exercise 5');
+      COALESCE(jsonb_agg(to_jsonb (answer_5)
+      ORDER BY event_id), '[]'::jsonb)
+    FROM answer_5) = '[{"event_id": 5, "user_id": 2, "event_before_cutoff": true, "available_by_cutoff": false}]'::jsonb, 'sql-deep-06 exercise 5');
+
 ROLLBACK TO SAVEPOINT exercise_5;
+
 RELEASE SAVEPOINT exercise_5;
+
 -- 6. Distinguish empty cohorts from pending-only cohorts
 SAVEPOINT exercise_6;
+
 CREATE TEMP TABLE answer_6 ON COMMIT DROP AS
 WITH eligibility AS (
   SELECT
@@ -318,21 +356,26 @@ FROM
   LEFT JOIN summary AS m ON m.cohort_day = s.cohort_day
 ORDER BY
   s.cohort_day;
-  SELECT
-    cohort_day,
-    cohort_state,
-    eligible_users,
-    retention_rate
-  FROM
-    answer_6
-  ORDER BY
-    cohort_day;
+
+SELECT
+  cohort_day,
+  cohort_state,
+  eligible_users,
+  retention_rate
+FROM
+  answer_6
+ORDER BY
+  cohort_day;
+
+SELECT
+  pg_temp.assert_true ((
     SELECT
-      pg_temp.assert_true ((
-        SELECT
-          COALESCE(jsonb_agg(to_jsonb (answer_6)
-          ORDER BY cohort_day), '[]'::jsonb)
-        FROM answer_6) = '[{"cohort_day": "2026-01-01", "cohort_state": "has_eligible", "eligible_users": 2, "retention_rate": 0.5}, {"cohort_day": "2026-01-02", "cohort_state": "has_eligible", "eligible_users": 1, "retention_rate": 1}, {"cohort_day": "2026-01-03", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-04", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-05", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-06", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-07", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-08", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-09", "cohort_state": "pending_only", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-10", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}]'::jsonb, 'sql-deep-06 exercise 6');
+      COALESCE(jsonb_agg(to_jsonb (answer_6)
+      ORDER BY cohort_day), '[]'::jsonb)
+    FROM answer_6) = '[{"cohort_day": "2026-01-01", "cohort_state": "has_eligible", "eligible_users": 2, "retention_rate": 0.5}, {"cohort_day": "2026-01-02", "cohort_state": "has_eligible", "eligible_users": 1, "retention_rate": 1}, {"cohort_day": "2026-01-03", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-04", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-05", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-06", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-07", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-08", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-09", "cohort_state": "pending_only", "eligible_users": 0, "retention_rate": null}, {"cohort_day": "2026-01-10", "cohort_state": "empty", "eligible_users": 0, "retention_rate": null}]'::jsonb, 'sql-deep-06 exercise 6');
+
 ROLLBACK TO SAVEPOINT exercise_6;
+
 RELEASE SAVEPOINT exercise_6;
+
 ROLLBACK;

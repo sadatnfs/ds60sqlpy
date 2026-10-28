@@ -19,7 +19,8 @@ import numpy as np
 
 # 2) Reproducibility and device
 torch.manual_seed(0)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cpu")
+torch.set_num_threads(2)
 
 # 3) Toy regression dataset: y = sin(x) + noise
 n = 200
@@ -39,7 +40,7 @@ va_dl = DataLoader(TensorDataset(Xva, yva), batch_size=bs)
 ```
 Explanation
 - Imports: torch core, nn modules, DataLoader utilities, plotting
-- Seed: fixes random draws for comparable runs; device: CUDA if available
+- Seed: fixes random draws for comparable runs; device: CPU by default; CUDA is a separately prepared optional extension
 - Data: 200 evenly spaced x in [-3,3]; target is sin with Gaussian noise
 - Split: 160 train / 40 valid via random permutation indices
 - Dataloaders: mini-batches for stochastic gradient descent

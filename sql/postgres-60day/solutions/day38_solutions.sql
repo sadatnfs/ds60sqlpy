@@ -14,31 +14,38 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Isolation anomalies require two concurrent database sessions; one .sql file
 -- cannot create genuine concurrency by itself. This runnable portion verifies
 -- the session and demonstrates a recoverable savepoint.
 SHOW transaction_isolation;
+
 CREATE TEMP TABLE isolation_solution (
   id int PRIMARY KEY,
   quantity int NOT NULL
 );
+
 INSERT INTO isolation_solution
 VALUES
   (1, 10),
   (2, 20);
+
 SAVEPOINT before_change;
+
 UPDATE
   isolation_solution
 SET
   quantity = quantity + 5
 WHERE
   id = 1;
+
 SELECT
   *
 FROM
   isolation_solution
 ORDER BY
   id;
+
 ROLLBACK TO SAVEPOINT before_change;
 
 SELECT

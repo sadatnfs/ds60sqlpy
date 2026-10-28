@@ -14,6 +14,7 @@
 --
 BEGIN;
 SET search_path TO training, public;
+
 -- Exercise 2: deadlocks are prevented when every writer locks shared keys in
 -- the same consistent order.
 WITH keys AS (
@@ -34,18 +35,21 @@ ORDER BY
   o.order_id
   FOR UPDATE
     OF o;
+
 -- Exercise 3: a runnable job-queue pattern.
 CREATE TEMP TABLE solution_jobs (
   job_id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   payload text NOT NULL,
   processed_at timestamptz
 );
+
 INSERT INTO solution_jobs (payload)
 VALUES
   ('first'),
   ('second'),
   ('third'),
   ('fourth');
+
 SELECT
   job_id,
   payload
@@ -58,9 +62,11 @@ ORDER BY
 FOR UPDATE
   SKIP LOCKED
 LIMIT 2;
+
 -- Transaction-scoped advisory locks release automatically at transaction end.
 SELECT
   pg_try_advisory_xact_lock(3901) AS acquired_course_lock;
+
 -- Exercise 1: manual deadlock reproduction requires two concurrent sessions:
 -- A: BEGIN; UPDATE orders SET status=status WHERE order_id=1;
 -- B: BEGIN; UPDATE orders SET status=status WHERE order_id=2;
@@ -79,6 +85,7 @@ WHERE
   order_id = 1
 FOR UPDATE
   NOWAIT;
+
 -- Exercise 5: select and update claimed jobs in one statement. SKIP LOCKED lets
 -- concurrent workers choose different available rows.
 WITH claimed AS (
@@ -105,6 +112,7 @@ RETURNING
   j.job_id,
   j.payload,
   j.processed_at;
+
 -- Exercise 6: both selection and locking retain the same unique order_id order;
 -- every competing transaction must follow that contract.
 WITH ordered_keys AS MATERIALIZED (
@@ -127,11 +135,14 @@ ORDER BY
   o.order_id
   FOR UPDATE
     OF o;
+
 -- Exercise 7: transaction-scoped advisory locks cannot be forgotten after
 -- COMMIT/ROLLBACK. The second attempt in this transaction remains successful
 -- because this backend already owns the same lock.
 SELECT
   pg_try_advisory_xact_lock(3902) AS first_attempt;
+
 SELECT
   pg_try_advisory_xact_lock(3902) AS same_owner_attempt;
+
 ROLLBACK;

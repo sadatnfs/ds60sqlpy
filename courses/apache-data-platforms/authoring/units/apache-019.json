@@ -1,0 +1,16 @@
+{
+  "language": "python",
+  "runtime": "data-platforms-python",
+  "level": "intermediate",
+  "minutes": 60,
+  "prerequisites": ["apache-015", "apache-011"],
+  "concepts": ["typed scalar UDF", "volatility", "vectorization", "null semantics"],
+  "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
+  "sources": [
+    [
+      "DataFusion UDF guide",
+      "https://datafusion.apache.org/python/user-guide/common-operations/udf-and-udfa.html"
+    ],
+    ["Arrow compute functions", "https://arrow.apache.org/docs/python/compute.html"]
+  ]
+}

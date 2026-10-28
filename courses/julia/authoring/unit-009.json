@@ -1,0 +1,58 @@
+{
+  "number": 9,
+  "title": "Errors, tests and explicit input contracts",
+  "concepts": ["ArgumentError", "DomainError", "test set", "boundary case", "rethrow"],
+  "outcome": "Validate scientific inputs, test expected failures and preserve unexpected errors instead of turning them into successful results.",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["julia-006", "julia-008"],
+  "sources": [
+    ["Julia exceptions", "https://docs.julialang.org/en/v1/manual/control-flow/"],
+    ["Julia Test standard library", "https://docs.julialang.org/en/v1/stdlib/Test/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Keep valid zero",
+      "task": "Calculate the mean of -1 and 1.",
+      "expected": "The result is the valid number 0.",
+      "hint": "Do not confuse a zero result with rejection.",
+      "answer": "The input satisfies the contract and its arithmetic mean happens to be zero."
+    },
+    {
+      "title": "Reject empty input",
+      "task": "Call the helper on an empty vector.",
+      "expected": "ArgumentError identifies the missing observation requirement.",
+      "hint": "The denominator cannot be zero.",
+      "answer": "A fabricated zero would hide the absence of evidence."
+    },
+    {
+      "title": "Reject nonfinite values",
+      "task": "Include NaN or Inf in the input.",
+      "expected": "DomainError is raised.",
+      "hint": "Check the numeric domain before aggregation.",
+      "answer": "Nonfinite values need a declared policy rather than silent propagation into a report."
+    },
+    {
+      "title": "Preserve an unexpected error",
+      "task": "Pass a value for which the required methods do not exist.",
+      "expected": "The unexpected method error is rethrown.",
+      "hint": "Catch only the failures that the boundary promises to handle.",
+      "answer": "A broad catch can hide a programming defect behind a normal-looking outcome."
+    },
+    {
+      "title": "Test independently",
+      "task": "Validate a result using a hand calculation and a limiting case.",
+      "expected": "The assertion has an independent basis.",
+      "hint": "Avoid copying the same implementation expression.",
+      "answer": "Different reasoning paths reduce the chance that code and test share one unnoticed error."
+    },
+    {
+      "title": "Report rejected rows",
+      "task": "Aggregate valid outcomes from a mixed input stream.",
+      "expected": "Retain counts and reasons for rejected rows.",
+      "hint": "The valid-result denominator needs provenance.",
+      "answer": "Selection through validation can change the target population and should remain visible."
+    }
+  ]
+}

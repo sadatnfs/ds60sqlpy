@@ -7,8 +7,8 @@ runner. You do not need a host database installation. Start with the
 
 ## Choose the right starting point
 
-The SQL track contains **84 learning units**: the original 60 numbered lessons
-and 24 named units that add a gentler entry, foundations, deeper analysis and
+The SQL track contains **86 learning units**: the original 60 numbered lessons
+and 26 named units that add a gentler entry, foundations, deeper analysis and
 professional practice. The day numbers are labels, not deadlines.
 
 New SQL learners should begin with the three small-fixture lessons in the

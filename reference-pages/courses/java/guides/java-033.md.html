@@ -261,19 +261,19 @@ java -ea Main</code></pre>
 <ol>
 <li><strong>Read an admitted owned file.</strong> Create <code>input.txt</code> inside an owned root and read at most 10 bytes. <strong>Expected:</strong> content hello. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with content hello.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Reject lexical traversal and absolute paths.</strong> Attempt../outside.txt andanabsolutechildpath. <strong>Expected:</strong> SecurityException for both. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with SecurityException for both.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Enforce the byte limit after reading a bounded amount.</strong> Writefivebytes and request a four-byte maximum. <strong>Expected:</strong> IOException for oversized content. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with IOException for oversized content.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject symbolic-link access under the declared policy.</strong> Create a link inside the owned root to another owned file and attempt to read throughit. <strong>Expected:</strong> link rejected when platform supports creation;unsupported capability recorded explicitly. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with link rejected when platform supports creation;unsupported capability recorded explicitly.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Keep operation names out of code execution.</strong> Admitonlyread_fixture andrejectrun_shell. <strong>Expected:</strong> unknownoperationIllegalArgumentException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with unknownoperationIllegalArgumentException.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Build a restricted diagnostic record.</strong> Copy onlyrequest_id,operation and status from a map containing token andsource_text. <strong>Expected:</strong> diagnostic excludes both sensitive fields. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with diagnostic excludes both sensitive fields.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

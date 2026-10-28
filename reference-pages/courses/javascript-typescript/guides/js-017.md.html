@@ -342,19 +342,19 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
 <ol>
 <li><strong>Request a valid local calculation.</strong> GET /sum with a=2 and b=3 and inspect status, content type and JSON. <strong>Expected:</strong> status 200; application/json; total 5. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Inspect an HTTP error without expecting fetch rejection.</strong> Request an unknown route and inspect the actual response. <strong>Expected:</strong> fetch resolves; status 404, ok false, error not_found. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Encode query values through the URL API.</strong> Round-trip a query containing spaces, ampersand and equals without contacting a server. <strong>Expected:</strong> the value round-trips as one parameter. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Reject repeated or invalid parameters.</strong> Request repeated a values and a non-integer b value. <strong>Expected:</strong> both responses are 400 with invalid_parameters. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Reject an unsupported method.</strong> POST to the read-only sum route without a body. <strong>Expected:</strong> status 405 and Allow: GET. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Guard arithmetic overflow after parsing.</strong> Add one to Number.MAX_SAFE_INTEGER through the endpoint. <strong>Expected:</strong> status 400 rather than a rounded success value. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

@@ -199,19 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li><strong>Inspect the pinned artifact contract.</strong> Read the supplied model manifest and identify model ID, revision and license note before any download. <strong>Expected:</strong> exact 40-character revision and Apache-2.0 card note are present. <strong>Verify:</strong> Save the reasoning table for exercise 1, including exact 40-character revision and Apache-2.0 card note are present.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Separate acquisition from execution.</strong> Trace the optional workflow from dependency preparation to snapshot acquisition to offline training. <strong>Expected:</strong> training requires existing local assets and never falls back to a remote model ID. <strong>Verify:</strong> Save the reasoning table for exercise 2, including training requires existing local assets and never falls back to a remote model ID.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Verify chat-template boundaries.</strong> For each local prompt/completion record, compare full conversation token IDs with the prompt rendered usingadd_generation_prompt=True. <strong>Expected:</strong> prompt IDs are an exact prefix; at least one completion token remains. <strong>Verify:</strong> Save the reasoning table for exercise 3, including prompt IDs are an exact prefix; at least one completion token remains.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Inspect trainer labels before training.</strong> Read one collated batch and compare labels with the prompt/completion boundary. <strong>Expected:</strong> prompt labels-100; active completion labels match their input token IDs. <strong>Verify:</strong> Save the reasoning table for exercise 4, including prompt labels-100; active completion labels match their input token IDs.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Compare full and adapter configuration.</strong> Inspectmodefull versusmodelora, rank 4, alpha 8, target modulesq_proj/v_proj, with the same local data and 10-step cap. <strong>Expected:</strong> mode and trainable-parameter count recorded; no automatic quality winner. <strong>Verify:</strong> Save the reasoning table for exercise 5, including mode and trainable-parameter count recorded; no automatic quality winner.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Distinguish an unexecuted learner scenario.</strong> For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe. <strong>Expected:</strong> pretrained execution unverified; no generated success receipt. <strong>Verify:</strong> Save the reasoning table for exercise 6, including pretrained execution unverified; no generated success receipt.</li>
 </ol></article>
   </main>

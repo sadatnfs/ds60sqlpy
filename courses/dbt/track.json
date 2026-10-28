@@ -1,0 +1,572 @@
+{
+  "schema_version": 1,
+  "id": "dbt",
+  "title": "dbt and analytics engineering",
+  "summary": "A complete SQL-first route from real Core/DuckDB project files through tests, macros, snapshots, incremental correctness, contracts, documentation, targets, state/defer CI, governance and accepted data-product recovery.",
+  "lessons": [
+    {
+      "id": "dbt-001",
+      "title": "A real dbt project and its execution stages",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "sql-start-03"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "dbt project",
+        "profile",
+        "parse",
+        "compile",
+        "run",
+        "build"
+      ],
+      "outcome": "Build and inspect a local dbt project through its real adapter.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-001 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-002",
+      "title": "Seeds, staging and rejected records",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-001"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "seed",
+        "staging model",
+        "casting",
+        "raw records",
+        "quarantine"
+      ],
+      "outcome": "Create a staging boundary with complete record accounting.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-002 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-003",
+      "title": "Dependency graphs and materialization choices",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-001",
+        "dbt-002"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "ref",
+        "DAG",
+        "view",
+        "table",
+        "ephemeral",
+        "dependency"
+      ],
+      "outcome": "Choose a materialization using observed database behavior and a stated workload.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-003 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-004",
+      "title": "Data tests and the meaning of a failed build",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-002",
+        "dbt-003"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "not_null",
+        "unique",
+        "data tests",
+        "run results",
+        "failure recovery"
+      ],
+      "outcome": "Use data tests as explicit evidence for a declared contract.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-004 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-005",
+      "title": "Source freshness and clock assumptions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-002",
+        "dbt-003"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "source",
+        "freshness",
+        "loaded_at",
+        "clock",
+        "SLA"
+      ],
+      "outcome": "Define and test a source freshness policy with an explicit clock and response.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-005 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-006",
+      "title": "Unit fixtures and integration tests",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "unit test",
+        "fixture",
+        "expected rows",
+        "integration",
+        "boundary case"
+      ],
+      "outcome": "Use controlled fixtures to test transformation logic and real-data checks to test integration.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-006 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-007",
+      "title": "Jinja macros and compiled SQL evidence",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-001",
+        "dbt-003"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "Jinja",
+        "macro",
+        "compilation",
+        "identifier",
+        "safe ratio"
+      ],
+      "outcome": "Review a macro through its source, emitted SQL and actual result.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-007 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-008",
+      "title": "Incremental watermarks and late-arriving records",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-002",
+        "dbt-003",
+        "dbt-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "incremental",
+        "watermark",
+        "append",
+        "late data",
+        "full refresh"
+      ],
+      "outcome": "State the assumptions under which an incremental result equals a full recomputation.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-008 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-009",
+      "title": "Keyed updates, lookback windows and idempotency",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-004",
+        "dbt-008"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "unique_key",
+        "delete+insert",
+        "lookback",
+        "idempotency",
+        "backfill"
+      ],
+      "outcome": "Implement a keyed incremental contract with tested boundary and repeat-run behavior.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-009 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-010",
+      "title": "Snapshots and observed historical state",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-004",
+        "dbt-005"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "snapshot",
+        "SCD2",
+        "check strategy",
+        "validity interval",
+        "deletion"
+      ],
+      "outcome": "Explain what a snapshot actually observed and what it cannot reconstruct.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-010 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-011",
+      "title": "Enforced model schemas and constraint boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "model contract",
+        "data type",
+        "not-null constraint",
+        "compatibility",
+        "failure timing"
+      ],
+      "outcome": "Define a model schema contract and verify both accepted and rejected changes.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-011 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-012",
+      "title": "Model versions and semantic compatibility",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-011"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "versioned ref",
+        "latest version",
+        "semantic change",
+        "consumer contract",
+        "migration"
+      ],
+      "outcome": "Manage a semantic model change with explicit consumer versioning.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-012 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-013",
+      "title": "Selectors, graph expansion and state comparison",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "selector",
+        "tag",
+        "graph expansion",
+        "state",
+        "manifest"
+      ],
+      "outcome": "Construct and inspect a reproducible selection against an explicit baseline.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-013 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-014",
+      "title": "Documentation, catalogs, exposures and ownership",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-004"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "catalog",
+        "manifest",
+        "description",
+        "exposure",
+        "lineage",
+        "ownership"
+      ],
+      "outcome": "Build documentation that joins observed structure with authored meaning and ownership.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-014 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-015",
+      "title": "Publication gates after materialization",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-004",
+        "dbt-011"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "publication",
+        "test outcome",
+        "accepted artifact",
+        "failure state",
+        "consumer boundary"
+      ],
+      "outcome": "Separate candidate computation from accepted publication.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-015 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-016",
+      "title": "Metric contracts and valid denominators",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-004",
+        "dbt-007"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "metric grain",
+        "denominator",
+        "weighted rate",
+        "semantic model",
+        "reconciliation"
+      ],
+      "outcome": "Publish a metric with a complete numerator/denominator contract and an independent check.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-016 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-017",
+      "title": "Temporal data products and late-known facts",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "dbt-005",
+        "dbt-009",
+        "dbt-010"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "event time",
+        "availability time",
+        "bitemporal selection",
+        "window",
+        "feature leakage"
+      ],
+      "outcome": "Produce a historical feature relation with explicit entity, time and version semantics.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-017 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-018",
+      "title": "Local packages and reusable project dependencies",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-007"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "package",
+        "dependency preparation",
+        "macro namespace",
+        "lockfile",
+        "offline"
+      ],
+      "outcome": "Prepare and inspect a real reusable dbt dependency with an explicit source boundary.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-018 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-019",
+      "title": "Targets, environments and owned database routing",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-014"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "target",
+        "profile",
+        "schema",
+        "environment",
+        "routing"
+      ],
+      "outcome": "Run a project against an explicitly identified owned target and verify its actual destination.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-019 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-020",
+      "title": "Deferral and the choice of upstream state",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-013",
+        "dbt-019"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "defer",
+        "state manifest",
+        "relation resolution",
+        "favor-state",
+        "baseline"
+      ],
+      "outcome": "Use deferral with an explicit upstream-state contract.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-020 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-021",
+      "title": "Slim CI with actual builds and data tests",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-004",
+        "dbt-006",
+        "dbt-013",
+        "dbt-020"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "CI",
+        "state selection",
+        "deferred baseline",
+        "test evidence",
+        "isolated target"
+      ],
+      "outcome": "Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-021 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-022",
+      "title": "Diagnose template, database and semantic failures",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-004",
+        "dbt-007",
+        "dbt-011"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "compilation",
+        "binding error",
+        "semantic test",
+        "diagnosis",
+        "evidence"
+      ],
+      "outcome": "Diagnose failures using the layer that actually rejected the work.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-022 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-023",
+      "title": "Query plans, measured cost and semantic equivalence",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-003",
+        "dbt-008",
+        "dbt-022"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "EXPLAIN",
+        "query timing",
+        "materialization cost",
+        "multiset",
+        "benchmark"
+      ],
+      "outcome": "Measure database work with a correctness oracle and a clearly defined interval.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-023 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-024",
+      "title": "Groups, model access and governance boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-012",
+        "dbt-014",
+        "dbt-019"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "group",
+        "model access",
+        "ownership",
+        "reference policy",
+        "database permissions"
+      ],
+      "outcome": "Use groups and model access to define supported project interfaces, while keeping database authorization claims separate.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-024 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-025",
+      "title": "Recovery, accepted versions and atomic pointers",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "dbt-015",
+        "dbt-019",
+        "dbt-021"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "rollback",
+        "candidate",
+        "accepted release",
+        "transaction",
+        "recovery"
+      ],
+      "outcome": "Recover a data product through explicit accepted versions and a tested pointer mechanism.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-025 reference checks passed. Interpret the counterexample in the guide."
+    },
+    {
+      "id": "dbt-026",
+      "title": "Publish a complete validated analytics product",
+      "level": "advanced",
+      "minutes": 180,
+      "prerequisites": [
+        "dbt-009",
+        "dbt-010",
+        "dbt-011",
+        "dbt-014",
+        "dbt-016",
+        "dbt-017",
+        "dbt-018",
+        "dbt-021",
+        "dbt-024",
+        "dbt-025"
+      ],
+      "runtime": "data-engineering",
+      "concepts": [
+        "capstone",
+        "staging",
+        "tests",
+        "lineage",
+        "publication",
+        "decision receipt"
+      ],
+      "outcome": "Deliver a complete local analytics product with a reviewable acceptance decision.",
+      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "verification": "Run the assertions and inspect dbt-026 reference checks passed. Interpret the counterexample in the guide."
+    }
+  ]
+}

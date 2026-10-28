@@ -307,19 +307,19 @@ manifest_path<span class="syntax-operator">=</span>folder<span class="syntax-ope
 <ol>
 <li><strong>Freeze the scalar experiment.</strong> Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs. <strong>Expected:</strong> 3 training and 2 holdout records. <strong>Verify:</strong> Save the assertion results for exercise 1, including 3 training and 2 holdout records.</li>
 </ol>
-<ol>
+<ol start="2">
 <li><strong>Train within a declared budget.</strong> Zero-initialize float64 Linear and run 30 SGD.01 updates. <strong>Expected:</strong> finite weights; holdout error below constant training-mean baseline 26. <strong>Verify:</strong> Save the assertion results for exercise 2, including finite weights; holdout error below constant training-mean baseline 26.</li>
 </ol>
-<ol>
+<ol start="3">
 <li><strong>Build the owned release bundle.</strong> Save weights, schema and split manifest with a weight SHA256. <strong>Expected:</strong> manifest has feature x, float64, width 1 and matching hash. <strong>Verify:</strong> Save the assertion results for exercise 3, including manifest has feature x, float64, width 1 and matching hash.</li>
 </ol>
-<ol>
+<ol start="4">
 <li><strong>Verify fresh-process prediction parity.</strong> Run the checked loader in a fresh interpreter and compare holdout predictions. <strong>Expected:</strong> predictions match within 1e-12. <strong>Verify:</strong> Save the assertion results for exercise 4, including predictions match within 1e-12.</li>
 </ol>
-<ol>
+<ol start="5">
 <li><strong>Make a corrupted artifact fail.</strong> Replace the declared weight hash with 64 zeros and rerun the loader. <strong>Expected:</strong> nonzero child exit and weight hash mismatch diagnostic. <strong>Verify:</strong> Save the assertion results for exercise 5, including nonzero child exit and weight hash mismatch diagnostic.</li>
 </ol>
-<ol>
+<ol start="6">
 <li><strong>Record a bounded decision and cleanup.</strong> Record local parity pass, holdout count 2, previous artifact v1 and production no-go, then remove owned files. <strong>Expected:</strong> local checks True; production no-go; directory absent. <strong>Verify:</strong> Save the assertion results for exercise 6, including local checks True; production no-go; directory absent.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>

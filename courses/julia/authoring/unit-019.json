@@ -1,0 +1,58 @@
+{
+  "number": 19,
+  "title": "Linear algebra, conditioning and nonunique solutions",
+  "concepts": ["linear solve", "factorization", "rank", "pseudoinverse", "adjoint"],
+  "outcome": "Solve small linear systems, inspect residuals and distinguish a fitted prediction from an identified coefficient vector.",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["julia-012", "julia-013"],
+  "sources": [
+    ["Julia LinearAlgebra", "https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/"],
+    ["Complex arithmetic", "https://docs.julialang.org/en/v1/manual/complex-and-rational-numbers/"]
+  ],
+  "figure": 0,
+  "exercises": [
+    {
+      "title": "Verify a solution",
+      "task": "Multiply the computed vector by the original matrix.",
+      "expected": "The residual is near zero.",
+      "hint": "Keep the original equation and units visible.",
+      "answer": "A residual is a useful numerical check but must be interpreted alongside conditioning."
+    },
+    {
+      "title": "Reuse a factorization",
+      "task": "Double the right-hand side without refactorizing.",
+      "expected": "The solution doubles for this linear system.",
+      "hint": "The matrix is unchanged.",
+      "answer": "Reusable factorization separates setup from repeated solves."
+    },
+    {
+      "title": "Expose nonidentification",
+      "task": "Move the repeated-column coefficients along[0,1,-1].",
+      "expected": "Predictions on the design remain unchanged.",
+      "hint": "The displacement lies in the null space.",
+      "answer": "Fitted-value agreement does not uniquely identify every parameter."
+    },
+    {
+      "title": "Interpret a pseudoinverse",
+      "task": "Compare coefficient norms in case B.",
+      "expected": "The pseudoinverse solution has smaller norm than the shifted alternative.",
+      "hint": "Minimum norm is a selection rule among compatible solutions.",
+      "answer": "It does not supply missing scientific identification assumptions."
+    },
+    {
+      "title": "Use the correct transpose",
+      "task": "Compare adjoint and transpose for the complex vector.",
+      "expected": "The products are 7 and 3-2im.",
+      "hint": "Conjugation changes the calculation.",
+      "answer": "Matching dimensions alone is insufficient to choose the correct complex inner-product convention."
+    },
+    {
+      "title": "Assess sensitivity",
+      "task": "Perturb an ill-conditioned problem before trusting its coefficients.",
+      "expected": "Inspect conditioning as well as residuals.",
+      "hint": "A small residual need not imply stable parameters.",
+      "answer": "Numerical accuracy and scientific interpretation require the appropriate assumptions and scales."
+    }
+  ]
+}

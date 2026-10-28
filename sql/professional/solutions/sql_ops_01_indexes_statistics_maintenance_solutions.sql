@@ -15,7 +15,9 @@
 \set ON_ERROR_STOP on
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
+
 CREATE SCHEMA pro_ops_lab;
+
 CREATE TABLE pro_ops_lab.events (
   event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   device_id text NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE pro_ops_lab.events (
   category text NOT NULL,
   message text NOT NULL
 );
+
 INSERT INTO pro_ops_lab.events (device_id, occurred_at, severity, category, message)
 SELECT
   'device-' || lpad(((g.n % 20) + 1)::text, 3, '0'),
@@ -41,10 +44,12 @@ SELECT
   END
 FROM
   generate_series(1, 3000) AS g (n);
+
 -- Exercise 1: query and predicate-compatible covering partial index.
 CREATE INDEX events_high_device_time_covering ON pro_ops_lab.events (device_id, occurred_at DESC) INCLUDE (severity, message)
 WHERE
   severity >= 4;
+
 EXPLAIN (
   COSTS OFF
 )
@@ -60,6 +65,7 @@ WHERE
 ORDER BY
   e.occurred_at DESC
 LIMIT 25;
+
 SELECT
   e.occurred_at,
   e.severity,
@@ -72,6 +78,7 @@ WHERE
 ORDER BY
   e.occurred_at DESC
 LIMIT 25;
+
 -- Exercise 2: access method, operator class, and query operator form one
 -- contract. An index family name alone is not a design.
 SELECT
@@ -83,9 +90,12 @@ FROM (
     ('BRIN', 'physically correlated large tables', 'range exclusion by block summaries', 'tiny and cheap, but returns lossy candidate blocks')) AS access_method (method, suitable_types, target_operators, tradeoff)
 ORDER BY
   method;
+
 -- Exercise 3: category and severity are correlated by fixture construction.
 CREATE STATISTICS pro_ops_lab.events_category_severity_stats (dependencies, mcv) ON category, severity FROM pro_ops_lab.events;
+
 ANALYZE pro_ops_lab.events;
+
 SELECT
   s.statistics_name,
   s.kinds,
@@ -96,6 +106,7 @@ WHERE
   s.schemaname = 'pro_ops_lab'
 ORDER BY
   s.statistics_name;
+
 -- Exercise 4: a compact lifecycle inventory, not an automatic drop list.
 SELECT
   ci.relname AS index_name,
@@ -124,6 +135,7 @@ WHERE
   AND ct.relname = 'events'
 ORDER BY
   ci.relname;
+
 DO $solution$
 BEGIN
     IF NOT EXISTS (
@@ -146,6 +158,7 @@ BEGIN
     END IF;
 END
 $solution$;
+
 -- Exercise 5: this transaction does not run VACUUM. Return a maintenance
 -- decision matrix that separates reclaim/freeze/visibility from estimates.
 SELECT
@@ -157,12 +170,14 @@ FROM (
     ('VACUUM FULL', 'exceptional file compaction evidence', 'rewrite and return file space to the OS', 'takes an ACCESS EXCLUSIVE lock; not routine maintenance')) AS maintenance (command, evidence_domain, primary_effect, important_limit)
 ORDER BY
   command;
+
 -- Exercise 6: detect capability state without enabling an extension or
 -- exposing query text. Query-text access and retention require privacy review.
 CREATE TEMP TABLE ds60_pgss_probe (
   capability_state text NOT NULL,
   detail text NOT NULL
 ) ON COMMIT DROP;
+
 DO $solution$
 DECLARE
     installed boolean;
@@ -231,11 +246,13 @@ BEGIN
     END IF;
 END
 $solution$;
+
 SELECT
   capability_state,
   detail
 FROM
   ds60_pgss_probe;
+
 SELECT
   *
 FROM (
@@ -245,6 +262,7 @@ FROM (
     (4, 'publish aggregate fingerprints/latency, not raw query text', 'observability owner')) AS pgss_privacy (step_number, control, owner)
 ORDER BY
   step_number;
+
 -- Exercise 7: show semantic index properties for human review. Similarity is a
 -- candidate signal, never an automatic DROP decision.
 SELECT
@@ -279,9 +297,11 @@ WHERE
   AND ct.relname = 'events'
 ORDER BY
   ci.relname;
+
 -- Exercise 8: the query expression must match the indexed expression and its
 -- collation/operator semantics.
 CREATE INDEX events_device_lower_idx ON pro_ops_lab.events (lower(device_id));
+
 EXPLAIN (
   COSTS OFF
 )
@@ -295,6 +315,7 @@ WHERE
 ORDER BY
   e.event_id
 LIMIT 10;
+
 SELECT
   e.event_id,
   e.device_id
@@ -305,6 +326,7 @@ WHERE
 ORDER BY
   e.event_id
 LIMIT 10;
+
 -- Exercise 9: observe rather than assert a HOT rate; page space, indexed
 -- columns, vacuum horizons, and asynchronous statistics affect the result.
 UPDATE
@@ -318,6 +340,7 @@ SET
   END
 WHERE
   e.event_id <= 100;
+
 SELECT
   s.relname,
   s.n_tup_upd,
@@ -327,6 +350,7 @@ FROM
 WHERE
   s.schemaname = 'pro_ops_lab'
   AND s.relname = 'events';
+
 -- The cumulative view is historical and can lag the current transaction. It is
 -- displayed separately rather than used to assert the immediately preceding
 -- UPDATE.
@@ -342,6 +366,7 @@ FROM
 WHERE
   s.schemaname = 'pro_ops_lab'
   AND s.relname = 'events';
+
 -- Exercise 10: disposable two-month fixture proves partition routing, pruning,
 -- and per-partition index realization.
 CREATE TABLE pro_ops_lab.partitioned_events (
@@ -351,17 +376,22 @@ CREATE TABLE pro_ops_lab.partitioned_events (
   PRIMARY KEY (occurred_on, event_id)
 )
 PARTITION BY RANGE (occurred_on);
+
 CREATE TABLE pro_ops_lab.partitioned_events_2026_01 PARTITION OF pro_ops_lab.partitioned_events
 FOR VALUES FROM ('2026-01-01') TO ('2026-02-01');
+
 CREATE TABLE pro_ops_lab.partitioned_events_2026_02 PARTITION OF pro_ops_lab.partitioned_events
 FOR VALUES FROM ('2026-02-01') TO ('2026-03-01');
+
 CREATE INDEX partitioned_events_device_idx ON pro_ops_lab.partitioned_events (device_id, occurred_on);
+
 INSERT INTO pro_ops_lab.partitioned_events
 VALUES
   (1, DATE '2026-01-10', 'device-007'),
   (2, DATE '2026-01-20', 'device-008'),
   (3, DATE '2026-02-10', 'device-007'),
   (4, DATE '2026-02-20', 'device-009');
+
 EXPLAIN (
   COSTS OFF
 )
@@ -377,6 +407,7 @@ WHERE
   AND pe.device_id = 'device-007'
 ORDER BY
   pe.event_id;
+
 SELECT
   pe.event_id,
   pe.occurred_on,
@@ -389,6 +420,7 @@ WHERE
   AND pe.device_id = 'device-007'
 ORDER BY
   pe.event_id;
+
 SELECT
   pt.relid::regclass AS partition_relation,
   pt.parentrelid::regclass AS parent_relation,
@@ -401,6 +433,7 @@ FROM
 ORDER BY
   pt.level,
   pt.relid::regclass::text;
+
 SELECT
   parent_index.relname AS parent_index,
   child_table.relname AS child_partition,
@@ -419,6 +452,7 @@ WHERE
 ORDER BY
   child_table.relname,
   child_index.relname;
+
 -- Exercise 11: ANALYZE executes this read. BUFFERS is cache/I/O evidence for
 -- this fixture, not a production benchmark.
 EXPLAIN (
@@ -434,6 +468,7 @@ FROM
 WHERE
   e.device_id = 'device-005'
   AND e.severity >= 4;
+
 SELECT
   COUNT(*) AS matching_rows
 FROM
@@ -441,6 +476,7 @@ FROM
 WHERE
   e.device_id = 'device-005'
   AND e.severity >= 4;
+
 SELECT
   *
 FROM (
@@ -449,6 +485,7 @@ FROM (
     ('DDL/maintenance', 'test only in disposable targets with explicit lock and recovery plans')) AS explain_safety (statement_class, execution_warning)
 ORDER BY
   statement_class;
+
 -- Exercise 12: an owned scorecard attaches source, budget, cadence, and action
 -- instead of pretending one threshold fits every workload.
 SELECT
@@ -460,4 +497,5 @@ FROM (
     ('replication lag', 'replay LSN and user SLO', 'HA owner', 'RPO/RTO-derived byte and time lag', 'continuous', 'page before recovery-point or read-staleness budget is breached', 'runbooks/replication-lag.md', 'throttle workload or follow HA incident plan')) AS scorecard (signal, evidence_source, owner, budget, cadence, escalation, runbook, action)
 ORDER BY
   signal;
+
 ROLLBACK;
