@@ -184,11 +184,25 @@ build logs, use:
 ### Install a combined CI release
 
 Use a checkout or starter ZIP matching the published version. The default Hub
-layout is the combined Linux AMD64/ARM64 release produced by the GitHub workflow for marked pushes to main:
+layout is the combined Linux AMD64/ARM64 release produced by the full
+`[publish-docker]` GitHub workflow for marked pushes to main:
 
 ```sh
 ./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
+
+For a new Hub selection, you may omit `--tag`. The launcher resolves the
+app's `latest` alias once, uses that concrete version for workers and saves
+it. A partial app/Core plus JavaScript and TypeScript release needs only its
+published profiles:
+
+```sh
+./classroom --profile javascript-node --profile typescript-node --from-hub YOUR_DOCKERHUB_USER
+```
+
+Python Core is included automatically. `--all` requires every ordinary
+worker at the selected app version and fails if a partial release omitted
+one. A missing worker never causes a local fallback build.
 
 The app uses `USER/ds60sqlpy:1.0.0` and workers use tags such as
 `USER/ds60sqlpy:1.0.0-worker-python-core`. Docker selects the native architecture
@@ -196,7 +210,7 @@ from each index. Startup validates the resolved Linux platform and does not
 fall back to local builds. Use `--starter` instead of `--all` for a smaller
 installation. Private Hub repositories require Docker authentication.
 
-For a new project, separate downloading from startup:
+For a new project using a completed full release, separate downloading from startup:
 
 ```sh
 ./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
@@ -204,32 +218,69 @@ For a new project, separate downloading from startup:
 ```
 
 The project remembers profiles, namespace, layout and version. `resume` and
-`--no-build` never pull or build. A later bare `./classroom` prepares only missing
+`--no-build` never pull, build or resolve latest. A later bare `./classroom` prepares only missing
 images from the saved source. Pull-only preparation does not replace existing
 containers.
 
 ### Pin latest to a concrete release
 
-To select the current completed CI release deliberately:
+To select the current completed full CI release for a new Hub project:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag latest
+./classroom --all --from-hub YOUR_DOCKERHUB_USER
 ```
 
-The launcher resolves the app version and requires a matching source checkout.
+When `latest` points to a partial release, use the selected-profile command
+above instead of `--all`. The launcher resolves the app version and requires
+a matching source checkout.
 It then uses the corresponding immutable worker version tags and saves that
 concrete release. A mismatch asks you to update the checkout or ZIP. Later
 resume keeps that resolved version; it does not advance automatically.
 `latest` is available only for the combined Hub layout.
+Repeating `--from-hub` for the same saved namespace also keeps its pin. To
+choose a newer completed release, use `--tag latest --rebuild` with the same
+project and a matching checkout or ZIP.
+
+### Choose a version for each image
+
+`--tag VERSION` chooses the default app and worker release. Add repeatable
+`--image-tag PROFILE=VERSION` options to select individual images, including
+`app`. For example:
+
+```sh
+./classroom --profile javascript-node --profile typescript-node \
+  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 \
+  --image-tag app=1.0.0 \
+  --image-tag javascript-node=1.0.0 \
+  --image-tag typescript-node=1.0.0
+```
+
+You may use `latest` for one image, such as
+`--image-tag javascript-node=latest`. The launcher checks the worker's
+published index metadata with Docker Buildx, then saves its concrete version.
+Any different worker patch version must stay in the app's major.minor line
+and share its qualified source revision. Current CI binds one checked-in
+version to each revision, so its releases do not qualify mixing workers from
+different versions. Missing or incompatible workers stop startup with saved
+volumes intact. Strict resume uses saved versions without querying the registry.
+To clear a saved worker pin, run
+`./classroom --image-tag javascript-node=default --rebuild` with your
+selected project. That worker
+then inherits the app's version. Supplying a new `--tag VERSION` also resets
+previous worker pins unless you repeat them.
 
 ### Publish through GitHub or from a local machine
 
-GitHub publication runs only on a push to `main` with `[publish-docker]` in
-the HEAD commit message. It uses repository secrets `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN`, with no extra enable variable or protected environment.
-Native AMD64/ARM64 jobs stage and qualify the image set before promoting
-completed version tags and then latest. The checked-in source version controls
-the release; conflicting existing versions are not overwritten. See
+Full GitHub publication runs only on a push to `main` with `[publish-docker]`
+in the HEAD commit message. The targeted workflow accepts
+`[build-test-ALIAS]` on a branch without uploading and
+`[publish-ALIAS]` on `main` for a partial versioned release. Use exactly
+one Docker marker. Publication uses repository secrets `DOCKERHUB_USERNAME`
+and `DOCKERHUB_TOKEN`, with no extra enable variable or protected environment.
+Native AMD64/ARM64 jobs stage and qualify the selected image set before
+promoting completed version tags and then latest. The checked-in source
+version controls the release; conflicting existing versions are not
+overwritten. See
 [the publication guide](dockerhub.md#5-github-actions-publication) before
 creating a marked release commit.
 

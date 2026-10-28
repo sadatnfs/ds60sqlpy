@@ -1,11 +1,14 @@
 # Publish and install a classroom release
 
 Docker Hub distribution is optional. Ordinary `./classroom` startup, builds,
-pulls and resumes never upload images. There are two explicit publication routes:
+pulls and resumes never upload images. There are three explicit publication routes:
 
 - **GitHub Actions:** a push to `main` whose HEAD commit message contains
   `[publish-docker]` builds and qualifies Linux AMD64 and ARM64 images, then
-  promotes combined release tags.
+  promotes combined release tags for every ordinary profile.
+- **Targeted GitHub Actions:** `[build-test-ALIAS]` qualifies a complete
+  native group without uploading. `[publish-ALIAS]` on `main` publishes a
+  partial versioned release with App, Core and that complete group.
 - **Local publisher:** `./classroom publish` previews already built images.
   Adding `--push` uploads the selected images for their one actual architecture.
 
@@ -137,12 +140,25 @@ immutable and use a new checked-in version when image content changes.
 ## 4. Start from published images
 
 Download the checkout or starter ZIP matching the release for its launcher
-and Compose files. After CI has completed publication, pull and start the
+and Compose files. After a full `[publish-docker]` publication, pull and start the
 combined release:
 
 ```sh
 ./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
+
+For a new project, omitting `--tag` resolves the app's `latest` alias and
+saves its concrete version. If only the app, Core, JavaScript and TypeScript
+were published for a partial release, select those available workers:
+
+```sh
+./classroom --profile javascript-node --profile typescript-node --from-hub YOUR_DOCKERHUB_USER
+```
+
+The launcher includes Python Core with any profile selection. `--all`
+requires every ordinary worker at the app version, which a partial release
+may not provide. A missing selected worker stops before containers start and
+keeps saved volumes.
 
 Hub mode pulls the selected images and validates their native Linux platform
 before creating or refreshing services. It never falls back to local builds
@@ -151,25 +167,57 @@ Docker authentication. Use `--starter` for a smaller prepared installation.
 
 ### Choosing latest safely
 
-For the current completed CI release:
+For a new Hub selection after a completed full release:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag latest
+./classroom --all --from-hub YOUR_DOCKERHUB_USER
 ```
 
-The launcher resolves the app's `latest` tag to a concrete release, requires
+For a partial release, use the selected-profile command above in place of
+`--all`. The launcher resolves the app's `latest` tag to a concrete release, requires
 that release to match the source checkout, and uses its immutable versioned
 worker tags. It saves the concrete version for the project. A mismatch asks
 you to update the checkout or starter ZIP before continuing. `latest` works
 only with the combined Hub layout, not local builds or `--architecture-tags`.
 
-Later `./classroom` and `./classroom resume` retain the saved concrete version;
-they do not follow a moving `latest` tag automatically. No worker is selected
-from an independently moving latest alias.
+Later `./classroom`, `./classroom resume` and a repeated same-namespace
+`--from-hub USER` retain the saved concrete version. They do not follow a
+moving `latest` tag automatically. Use `--tag latest --rebuild` to choose a
+new completed app release. No worker is selected from an independently moving
+latest alias unless you ask for that worker with `--image-tag PROFILE=latest`.
+
+### Pin each selected image
+
+`--tag VERSION` sets the default app and worker version. Repeat
+`--image-tag PROFILE=VERSION` to choose individual images from the catalog,
+including `app`. For example:
+
+```sh
+./classroom --profile javascript-node --profile typescript-node \
+  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 \
+  --image-tag app=1.0.0 \
+  --image-tag javascript-node=1.0.0 \
+  --image-tag typescript-node=1.0.0
+```
+
+An individual `VERSION` may be `latest`. The launcher uses Docker Buildx to
+read that worker alias's published OCI index, checks its profile, source
+revision and Linux AMD64/ARM64 platforms, and saves its actual version. If
+Buildx or valid index metadata is unavailable, choose a concrete version.
+Any different worker patch version must stay in the app's major.minor line
+and have the same published source revision. Current CI binds one checked-in
+version to each source revision, so its releases do not qualify mixing worker
+images from different versions. A different revision stops before startup.
+Manual architecture tags do not support latest aliases or mixed-version selections.
+The project's saved image settings remain compatible with older three-field
+and four-field selections.
+Use `--image-tag javascript-node=default --rebuild` to remove a saved worker
+pin and make it inherit the app's version again. An explicit `--tag VERSION`
+sets a new default and resets previous worker pins unless you repeat them.
 
 ### Pull-only setup and strict resume
 
-For a new project, separate downloading from startup:
+For a new project using a completed full release, separate downloading from startup:
 
 ```sh
 ./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
@@ -177,7 +225,7 @@ For a new project, separate downloading from startup:
 ```
 
 The project records the namespace, layout, profiles and concrete release.
-`resume` and `--no-build` never pull or build. Ordinary startup can prepare
+`resume` and `--no-build` never pull, build or resolve latest. Ordinary startup can prepare
 missing images from the saved source. Pull-only preparation leaves existing
 containers unchanged.
 
@@ -189,7 +237,7 @@ add `--architecture-tags` when selecting a manual/older architecture release.
 
 For an existing local project, an architecture-layout project moving to CI
 tags, or an intentional Hub version update, keep the project name and apply
-the intended release explicitly:
+the intended full release explicitly:
 
 ```sh
 ./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --rebuild
@@ -213,12 +261,22 @@ Named volumes retain that state. Moving machines requires the separate
 
 ## 5. GitHub Actions publication
 
-The publication workflow runs only for a **push to `main` whose HEAD commit
-message contains `[publish-docker]`**. HEAD is the newest commit in that push. An unmarked push, a pull request, a
-tag push, or a marker only on an earlier commit does not opt in. Routine validation
-workflows retain their own configured triggers. Any occurrence of the marker
-in the HEAD message opts in, so leave it out of ordinary checkpoint messages,
-including descriptions of this publishing feature, unless publication is intended.
+The separate [targeted image workflow](targeted-images.md) accepts a HEAD
+marker such as `[build-test-js]` to qualify the JavaScript and TypeScript
+group on both native platforms without publishing. `[publish-js]` on `main`
+publishes App, Core and that group after the required checks. Profile names
+are aliases for their complete qualification group. Its partial versioned
+release needs selected profiles in the install command above.
+
+The **full publication workflow** runs only for a push to `main` whose HEAD
+message contains `[publish-docker]`. The targeted workflow accepts one
+`[build-test-ALIAS]` on a branch or one `[publish-ALIAS]` on `main`.
+The marker must identify a declared complete group or ordinary profile alias.
+HEAD is the newest commit in that push. An unmarked push, a pull request, a
+tag push, or a marker only on an earlier commit does not opt in. Unknown,
+malformed or multiple Docker markers are rejected by the matching intent
+check. Routine validation retains its own triggers. Leave publication markers
+out of ordinary checkpoint messages unless publication is intended.
 
 Set these two repository secrets under **Settings → Secrets and variables →
 Actions → Repository secrets**:

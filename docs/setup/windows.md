@@ -57,9 +57,9 @@ Keep the same engine when returning to existing course volumes.
 
 ## 3. Get the course folder
 
-Use an owner-provided starter ZIP, a repository ZIP or a Git clone. Repository
-downloads currently require GitHub access from the owner. A ZIP does not require
-Git on your machine. Extract the complete folder before launching; do not run
+Use a starter ZIP, a repository ZIP or a Git clone. A public repository can be
+downloaded without signing in; a restricted fork requires an account with
+access or an owner-provided archive. A ZIP does not require Git on your machine. Extract the complete folder before launching; do not run
 files from the archive preview.
 
 A Windows folder such as `C:\Users\Ada\Downloads\DS60LearningLab` appears in

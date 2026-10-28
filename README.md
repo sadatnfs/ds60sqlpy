@@ -50,8 +50,9 @@ finish the engine installation or WSL integration before starting the course.
 
 ### 2. Get the course and start it
 
-The public repository can be cloned or downloaded as a ZIP without a GitHub
-login. If you use a restricted fork, sign in with an account that has access.
+A public copy can be cloned or downloaded as a ZIP without a GitHub login.
+If this repository or a fork is restricted, sign in with an account that has
+access.
 For authenticated HTTPS cloning, use a Git credential manager or GitHub CLI;
 do not paste a personal access token into the clone URL. The local classroom
 needs no GitHub login after you have downloaded it.
@@ -65,8 +66,8 @@ cd ds60sqlpy
 ./classroom
 ```
 
-If the owner has completed CI publication for this release, replace the final
-startup command with `./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0`.
+If the owner has completed a full `[publish-docker]` CI release, replace the final
+startup command with `./classroom --all --from-hub YOUR_DOCKERHUB_USER`.
 Use the actual publisher's namespace. This downloads matching images without
 building locally; see [Docker Hub distribution](#optional-docker-hub-distribution).
 
@@ -240,25 +241,51 @@ and [textbook rendering](docs/textbook-rendering.md) for the authoring contract.
 
 ### Optional Docker Hub distribution
 
-Ordinary startup uploads nothing. Once a publisher's CI release is complete,
+Ordinary startup uploads nothing. Once a full `[publish-docker]` CI release is complete,
 use the matching checkout or starter ZIP and start the full classroom from Hub:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+./classroom --all --from-hub YOUR_DOCKERHUB_USER
 ```
 
-The CI app tags are `YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0` and `:latest`;
+For a new Hub selection, omitting `--tag` resolves the app's `latest` alias to
+a concrete release, requires the matching checkout or starter ZIP, and saves
+that version for the project. The CI app tags are
+`YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0` and `:latest`;
 workers use versioned tags such as `:1.0.0-worker-python-core` in the same
 repository. Docker selects the engine's native architecture from the combined
 Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.
 
-You can request `--tag latest` instead. The launcher resolves it to a concrete
-app release, requires the matching source checkout, selects that release's
-worker tags, and saves the concrete version. Later `./classroom resume` never
-builds, pulls or follows a moving latest tag.
+For a partial publication, select only its available workers. For example, an
+app/Core plus JavaScript and TypeScript publication is installed with:
 
-Download without starting services with
+```sh
+./classroom --profile javascript-node --profile typescript-node --from-hub YOUR_DOCKERHUB_USER
+```
+
+`--all` requires every ordinary worker at the selected app release and fails
+if a partial publication omitted one. Use `--tag VERSION` to select a default
+release explicitly. Repeat `--image-tag PROFILE=VERSION` to choose a particular
+Hub image, including `app`; for example, `--image-tag app=1.0.0
+--image-tag javascript-node=1.0.0`. `VERSION` may also be `latest` for an
+individual profile. The launcher resolves it to a concrete version and checks
+the published worker's profile, platforms and source revision before saving it.
+Selected workers must share the app's qualified source revision. Current CI
+binds one checked-in version to each revision, so its releases do not support
+mixing worker images from different versions. The launcher also requires any
+different patch versions to stay in the app's major.minor line. Missing or
+incompatible images stop startup with the project volumes retained.
+Use `--image-tag javascript-node=default --rebuild` to clear a saved worker
+pin and return that worker to the app's version.
+
+A same-namespace saved Hub project keeps its pinned release when you repeat
+`--from-hub USER` without `--tag`. Use `--tag latest --rebuild` to choose a newer
+completed release deliberately. Later bare `./classroom resume` never builds,
+pulls or follows a moving latest tag.
+
+For a completed full release, download without starting services with
 `./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0`.
+For a partial release, use only its published profiles.
 For an existing project, switching image source/layout or applying an update
 requires the same command without `pull` and with `--rebuild`. In Hub mode
 that pulls and applies images without compiling. Keep the same custom
@@ -267,10 +294,21 @@ moving machines needs a separate learning/database backup.
 
 #### Publish through GitHub Actions
 
-The publication workflow builds and pushes only for a push to `main` whose
-HEAD commit message contains `[publish-docker]`. Configure the two repository
-Actions secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. No extra enable
-variables or protected-environment setup is required.
+The full publication workflow builds and pushes only for a push to `main`
+whose HEAD commit message contains `[publish-docker]`. The targeted
+workflow accepts `[build-test-ALIAS]` on a branch for native qualification
+without uploading, and `[publish-ALIAS]` on `main` for a partial
+versioned release. Use exactly one Docker marker in the HEAD message.
+Configure the two repository Actions secrets `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN` for publication. No extra enable variables or
+protected-environment setup is required.
+
+For a smaller native check, `[build-test-js]` builds and qualifies the
+JavaScript and TypeScript group without publishing. `[publish-js]` publishes
+App, Core and that group from a marked `main` commit after its gates pass.
+Profile names such as `javascript-node` are aliases for their complete
+qualification group. See [targeted image checks and partial publication](docs/targeted-images.md)
+for accepted markers, version rules and the selected-profile install command.
 
 After staging and validating the reviewed release changes on `main`:
 

@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 
+from scripts import ci_profiles
 from scripts.ci_profiles import matrix
 
 yaml = pytest.importorskip("yaml", reason="Workflow policy parsing requires PyYAML")
@@ -86,6 +87,64 @@ def test_native_seed_and_workers_cover_both_platforms_and_all_ordinary_profiles(
     assert "--native --workers-only" in json.dumps(jobs["gate"])
 
 
+def test_native_worker_project_names_fit_launcher_and_keep_full_group_identity() -> None:
+    workers = workflow()["jobs"]["workers"]
+    assert workers["env"]["CI_PROJECT"] == (
+        "ds60-pub-${{ matrix.project_group }}-${{ matrix.architecture }}-"
+        "${{ github.run_id }}-${{ github.run_attempt }}"
+    )
+    assert workers["env"]["CI_GROUP"] == "${{ matrix.group }}"
+    assert workers["name"] == "Qualify ${{ matrix.group }} (${{ matrix.architecture }})"
+    receipt = next(
+        step
+        for step in workers["steps"]
+        if step.get("name") == "Retain selected native candidate digests"
+    )
+    assert receipt["with"]["name"] == (
+        "release-receipt-${{ matrix.group }}-${{ matrix.architecture }}-"
+        "attempt-${{ github.run_attempt }}"
+    )
+    assert all(set(row) == {"group", "profiles", "project_group"} for row in matrix()["include"])
+    application: dict[str, Any] = yaml.load(
+        (ROOT / ".github/workflows/app-build.yml").read_text(), Loader=yaml.BaseLoader
+    )
+    assert application["jobs"]["docker"]["env"]["CI_PROJECT"] == (
+        "ds60-ci-${{ matrix.project_group }}-${{ github.run_id }}-${{ github.run_attempt }}"
+    )
+    for row in matrix()["include"]:
+        assert row["project_group"] == ci_profiles.project_group_slug(row["group"])
+        project = f"ds60-ci-{row['project_group']}-{'9' * 15}-99"
+        assert len(project) <= 49
+
+    rows = matrix(native=True, workers_only=True)["include"]
+    slugs: dict[str, str] = {}
+    for row in rows:
+        assert set(row) == {"group", "profiles", "project_group", "architecture", "runner"}
+        slug = row["project_group"]
+        assert slug == ci_profiles.project_group_slug(row["group"])
+        assert re.fullmatch(r"[a-z][a-z0-9-]{0,14}", slug)
+        assert slugs.setdefault(row["group"], slug) == slug
+        project = f"ds60-pub-{slug}-{row['architecture']}-{'9' * 15}-99"
+        assert re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,48}", project)
+    assert len(set(slugs.values())) == len(slugs)
+
+    longest_group = "a" * 41
+    assert re.fullmatch(r"[a-z][a-z0-9-]{0,40}", longest_group)
+    longest_slug = ci_profiles.project_group_slug(longest_group)
+    assert longest_slug not in set(slugs.values())
+    longest_project = f"ds60-pub-{longest_slug}-amd64-{'9' * 15}-99"
+    assert len(longest_project) == 49
+    assert re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,48}", longest_project)
+
+
+def test_native_worker_matrix_rejects_project_slug_collisions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(ci_profiles, "project_group_slug", lambda _group: "duplicate")
+    with pytest.raises(ValueError, match="project group slugs must be unique"):
+        matrix(native=True, workers_only=True)
+
+
 def test_inspection_precedes_qualification_and_staging_uses_both_reports() -> None:
     for job_id in ("seed", "workers"):
         job = workflow()["jobs"][job_id]
@@ -126,7 +185,7 @@ def test_login_is_short_lived_and_never_places_a_token_in_command_arguments() ->
                 assert 'DOCKER_CONFIG="$RUNNER_TEMP/' in command
                 assert "docker logout" in command and "trap " in command
                 assert step["env"]["DOCKERHUB_TOKEN"] == "${{ secrets.DOCKERHUB_TOKEN }}"
-    assert count == 3
+    assert count == 4
     for filename in ("ci.yml", "app-build.yml", "kubernetes.yml"):
         assert "secrets.DOCKERHUB" not in (WORKFLOW.parent / filename).read_text()
 

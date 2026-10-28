@@ -149,15 +149,25 @@ user's separately authorized scope.
 A new ordinary runtime changes `docker/classroom-images.tsv` and the grouped
 native AMD64/ARM64 publication coverage. Keep service names, local repositories,
 catalog suffixes, staging identities and qualification receipts aligned.
-CI publication requires a push to `main` with `[publish-docker]` in HEAD and the
-two repository secrets `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN`; ordinary commits
-do not opt in. Only add the marker with publication authorization.
+Full CI publication requires a push to `main` with `[publish-docker]` in HEAD.
+`[build-test-ALIAS]` selects native App/Core plus one complete ordinary CI
+group without Hub writes; `[publish-ALIAS]` on `main` publishes that
+qualified partial set. A profile alias expands to its entire group; `js`
+selects both JavaScript and TypeScript. Use one exact Docker marker in HEAD.
+Publication uses repository secrets
+`DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN`; ordinary commits do not opt in.
+Only add a publication marker with authorization.
 
-Staging uploads precede full qualification; combined version/latest promotion
-must wait for all checks. Existing version conflicts require a checked-in patch
-bump, not an overwritten tag. Combined tags use app `VERSION` and workers
-`VERSION-<suffix>`. Explicit latest is resolved and pinned before selecting
-workers; learner progress stays outside images.
+Staging uploads precede complete selected qualification; combined version/latest
+promotion must wait for every required selected check. A partial release carries
+App, Core and one complete group, while `[publish-docker]` requires all ordinary
+profiles. Existing version conflicts require a checked-in patch bump, not an
+overwritten tag. Combined tags use app `VERSION` and workers
+`VERSION-<suffix>`. New Hub projects resolve App latest to a concrete saved
+version; saved resumes never follow it. `--image-tag PROFILE=VERSION|latest|default`
+can pin or clear an ordinary image selection, with cross-revision mixes rejected.
+Current CI binds one version to each source revision; do not advertise
+arbitrary mixed-release stacks. Learner progress stays outside images.
 
 The manual `./classroom publish` route still previews local images and needs
 `--push` for an upload. It publishes one actual architecture, with no fabricated

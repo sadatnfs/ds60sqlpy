@@ -154,13 +154,25 @@ Do not describe a skipped platform as validated.
 
 The workflow files are the executable source of truth. Routine validation uses
 read-only repository permissions, pinned action revisions and local image builds.
-The separate [image publication workflow](dockerhub.md) opts in only on a push
-to `main` with `[publish-docker]` in the HEAD message. It uses the two repository
-secrets, builds/qualifies native AMD64 and ARM64 groups, uploads commit-specific
-staging images and small receipts, then promotes combined version/latest tags
-only after all required checks. It requires no extra enable variable or protected
-environment. Staging uploads are not a completed release; conflicting source
-versions are refused rather than overwritten.
+The separate [full image publication workflow](dockerhub.md) opts in only on a
+push to `main` with `[publish-docker]` in the HEAD message. The
+[targeted workflow](targeted-images.md) accepts a single
+`[build-test-ALIAS]` on a branch for native App/Core plus one complete group
+without Hub credentials, staging or publication. A single
+`[publish-ALIAS]` on `main` publishes App, Core and that complete group as a
+partial versioned release. Both publication modes use the two repository
+secrets, require the exact revision's source/starter checks, qualify native
+AMD64 and ARM64 groups, upload commit-specific staging images and small
+receipts, and promote combined version/latest tags only after their required
+checks. Neither needs an extra enable variable or protected environment.
+Staging uploads are not a completed release; conflicting source versions are
+refused rather than overwritten. After promotion, separate native AMD64 and
+ARM64 jobs inspect the promotion receipt and published indexes, pull a fresh
+Hub classroom and verify stop/resume retention. For a full release the fresh
+runtime exercise uses App and Python Core; for a partial release it includes
+the selected group.
+Promotion can write canonical tags before this later acceptance fails, so
+inspect its distinct result before calling the release usable.
 
 Linux core jobs use UTF-8 and create their test workspace before starting
 four grouped pytest workers. Native Windows ACLs,
@@ -174,19 +186,24 @@ gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
 | Course validation: Contributor bootstrap | Same triggers; Ubuntu Python 3.12 | Fresh Linux contributor environment and diagnostics, also used by the WSL development route |
 | Course validation: PostgreSQL 17 end-to-end | Same triggers; disposable Linux PostgreSQL service | All cataloged SQL learner/reference sequences, live database tests and the PostgreSQL magic notebook against the course database |
 | Course validation: Advanced imports | Manual dispatch and weekly schedule; Ubuntu Python 3.12 | Frozen all-extras installation and isolated imports, without downloading pretrained models or proving full model training |
-| Application builds: Portable Docker classroom starter | Push, pull request and manual dispatch; Ubuntu | A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners |
-| Image publication | Push to main with `[publish-docker]` in HEAD | Native AMD64/ARM64 qualification and source/digest-bound promotion; staging images are distinct from completed version/latest tags |
-| Application builds: Docker classroom | Push, pull request and manual dispatch, except marked main publication pushes; isolated Linux groups cover all ordinary profiles | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
+| Application builds: Portable Docker classroom starter | Push, pull request and manual dispatch, except targeted build-test pushes; Ubuntu | A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners |
+| Targeted image check | Push with one `[build-test-ALIAS]` in HEAD; native AMD64 and ARM64 | App/Core plus the alias's complete ordinary group build and qualify without Hub writes or a starter ZIP |
+| Targeted partial publication | Push to main with one `[publish-ALIAS]` in HEAD | Exact-revision source/starter gates, native App/Core and complete-group qualification, selected version/latest indexes and source/digest-bound promotion |
+| Full image publication | Push to main with `[publish-docker]` in HEAD | Native AMD64/ARM64 qualification of every ordinary profile and source/digest-bound promotion; staging images are distinct from completed version/latest tags |
+| Hosted Hub pull acceptance | After successful full or partial promotion; native AMD64 and ARM64 runners | Published-index and exact-receipt checks, fresh Hub classroom pull/start, then stop/resume with container and volume retention; a separate post-publication receipt, not proof from staging alone |
+| Application builds: Docker classroom | Push, pull request and manual dispatch, except targeted build-test or any marked publication push; isolated Linux groups cover all ordinary profiles on other events | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
 | Application builds: Scientific figures | Python Core and R Docker groups, before and after container replacement | Declared source-bound figures are captured, original drafts are restored, and the original figure receipts survive replacement without replay |
 | Application builds: Chromium acceptance | Python Core Docker group, with container replacement checks | Real browser navigation, isolated pads/results, saved progress, contrast, typeset mathematics, web live previews, all 24 D3 references, all eight Plotly variants and the offline DAX editor/reference flow pass their stated checks |
 | Owned Kubernetes runtime | Manual dispatch and weekly schedule; disposable Linux kind cluster | Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup |
 
 A marked main publication push keeps source validation and the starter ZIP
-mandatory, then uses the publication workflow's native AMD64/ARM64 seed and
-worker groups instead of duplicating the ordinary Docker matrix. The publisher
-waits for the exact revision's required source/starter success and rechecks it
-before promotion. Successful same-run/revision receipts can be reused across
-failed-job retries with exact seed-digest binding; cross-run reuse is rejected.
+mandatory, then uses the selected publisher's native AMD64/ARM64 seed and
+worker groups instead of duplicating the ordinary Docker matrix. A targeted
+build-test push also skips the duplicate ordinary matrix and starter job, while
+routine source validation still runs. Each publisher waits for the exact
+revision's required source/starter success and rechecks it before promotion.
+Successful same-run/revision receipts can be reused across failed-job retries
+with exact seed-digest binding; cross-run reuse is rejected.
 
 The Docker groups cover Python Core, C, C++, Go, C#, Rust, Swift, Java,
 JavaScript/TypeScript, PHP, Scala/Spark, TensorFlow, PyTorch, JAX CPU, Bayesian CPU,

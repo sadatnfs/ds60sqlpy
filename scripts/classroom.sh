@@ -46,7 +46,9 @@ Windows: use Ubuntu in WSL 2 with your Docker engine's integration enabled.
   --no-build                Like resume: never build or pull missing images
   --rebuild                 Rebuild local images, or refresh Hub images; apply updates
   --from-hub USER            Pull native multi-platform images from USER/ds60sqlpy
-  --tag VERSION             Select a release; Hub latest resolves to a saved version
+  --tag VERSION             Select the default release; Hub latest resolves once
+  --image-tag PROFILE=VERSION  Pin one Hub image, including app (repeatable)
+                            VERSION may be latest; default clears a saved worker pin
   --architecture-tags       Use manual/legacy per-architecture Hub tags
   --local-build             Return this project to locally built images
   --gpu-device ID           Explicit NVIDIA device index/UUID for optional CUDA profiles
@@ -61,6 +63,7 @@ Examples:
   ./classroom
   ./classroom --starter
   ./classroom --profile cpp20 --profile java21
+  ./classroom --starter --from-hub USER --image-tag python-core=1.0.1
   ./classroom resume
   ./classroom --rebuild
   ./classroom stop
@@ -115,7 +118,7 @@ while [ "$#" -gt 0 ]; do
       image_source_explicit=1
       shift
       ;;
-    --profile | --port | --database-port | --project | --registry | --from-hub | --tag | --gpu-device)
+    --profile | --port | --database-port | --project | --registry | --from-hub | --tag | --image-tag | --gpu-device)
       [ "$#" -ge 2 ] || fail "Missing value after $1. Use ./classroom --help."
       case "$1" in
         --profile)
@@ -135,6 +138,7 @@ while [ "$#" -gt 0 ]; do
           image_tag="$2"
           image_tag_explicit=1
           ;;
+        --image-tag) request_image_tag "$2" ;;
         --registry)
           registry="$2"
           registry_explicit=1
@@ -149,6 +153,11 @@ while [ "$#" -gt 0 ]; do
     *) fail "Unknown option: $1. Use ./classroom --help." ;;
   esac
 done
+if [ "$image_source" = hub ] && [ "$image_source_explicit" -eq 1 ] && [ "$image_tag_explicit" -eq 0 ]; then
+  # load_image_selection reuses a same-namespace saved pin; a new Hub choice
+  # resolves the app's latest alias before selecting worker versions.
+  image_tag=latest
+fi
 case "$registry" in mirrors | upstream) ;; *) fail 'Registry must be mirrors or upstream.' ;; esac
 valid_port() { [[ "$1" =~ ^[0-9]{1,5}$ ]] && [ "$((10#$1))" -le 65535 ]; }
 for port in "$requested_port" "$requested_db_port"; do
@@ -294,6 +303,13 @@ for profile in ${profiles[@]+"${profiles[@]}"}; do
     done
   fi
 done
+for requested in ${requested_image_tag_profiles[@]+"${requested_image_tag_profiles[@]}"}; do
+  [ "$requested" = app ] && continue
+  found=0
+  for profile in "${selected_profiles[@]}"; do [ "$requested" != "$profile" ] || found=1; done
+  [ "$found" -eq 1 ] || fail "--image-tag $requested requires selecting that worker with --profile $requested, --starter or --all."
+done
+validate_image_tag_compatibility
 if [ -e "$state_dir/gpu.env" ] || [ -L "$state_dir/gpu.env" ]; then
   [ -f "$state_dir/gpu.env" ] && [ ! -L "$state_dir/gpu.env" ] || fail 'GPU selection must be a regular file.'
   saved_gpu=''
@@ -395,7 +411,27 @@ release_lock() {
     rmdir "$lock" 2>/dev/null || true
   fi
 }
-trap release_lock EXIT
+state_snapshot_dir=''
+finish_launcher() {
+  local code=$? item
+  trap - EXIT
+  if [ -n "$state_snapshot_dir" ]; then
+    if [ "$code" -ne 0 ]; then
+      for item in images.env selection.env ports.env gpu.env; do
+        if [ -f "$state_snapshot_dir/$item" ]; then
+          cp -p "$state_snapshot_dir/$item" "$state_dir/$item"
+        else
+          rm -f "$state_dir/$item"
+        fi
+      done
+    fi
+    for item in images.env selection.env ports.env gpu.env; do rm -f "$state_snapshot_dir/$item"; done
+    rmdir "$state_snapshot_dir"
+  fi
+  release_lock
+  return "$code"
+}
+trap finish_launcher EXIT
 trap 'printf "\nInterrupted. Saved volumes are retained; rerun ./classroom when ready.\n" >&2; exit 130' INT TERM
 handle_classroom_error() {
   local code=$?
@@ -407,6 +443,12 @@ if [ "$action" = stop ]; then
   "$docker_cli" compose --project-directory "$repo_dir" -p "$project_name" -f "$repo_dir/compose.classroom.yaml" --profile '*' stop --timeout 20
   printf 'Classroom stopped. All project learning/database volumes were retained.\n'
   exit 0
+fi
+if [ -f "$state_dir/images.env" ]; then
+  state_snapshot_dir="$(mktemp -d "$state_dir/selection-snapshot.XXXXXX")"
+  for item in images.env selection.env ports.env gpu.env; do
+    if [ -f "$state_dir/$item" ]; then cp -p "$state_dir/$item" "$state_snapshot_dir/$item"; fi
+  done
 fi
 save_profile_selection() {
   local selection_temp profile_csv
@@ -514,6 +556,7 @@ restore_app_image_name() {
   "$docker_cli" image tag "$image_id" "$app_image"
 }
 missing_services=()
+missing_descriptions=()
 build_services=()
 if [ "$rebuild" -eq 1 ]; then
   build_services=(lab "${services[@]}")
@@ -521,7 +564,13 @@ else
   for service in lab "${services[@]}"; do
     if [ -z "$(container_id "$service")" ]; then
       image="$(image_for "$service")"
-      if ! "$docker_cli" image inspect "$image" >/dev/null 2>&1; then missing_services+=("$service"); fi
+      if ! "$docker_cli" image inspect "$image" >/dev/null 2>&1; then
+        missing_services+=("$service")
+        if [ "$image_source" = hub ]; then
+          profile="$(image_profile_for_service "$service")"
+          missing_descriptions+=("$profile=$(image_tag_for "$profile")")
+        fi
+      fi
     fi
   done
   build_services=(${missing_services[@]+"${missing_services[@]}"})
@@ -540,13 +589,14 @@ if [ "$need_initializer" -eq 1 ] && ! restore_app_image_name; then
   [ "$have_lab_build" -eq 1 ] || build_services=(lab ${build_services[@]+"${build_services[@]}"})
 fi
 if [ "$no_build" -eq 1 ] && { [ "$need_database" -eq 1 ] || [ "${#build_services[@]}" -gt 0 ]; }; then
-  fail "Required local images are missing (database=$need_database; services: ${build_services[*]-}). Resume never builds or pulls. Run ./classroom with the same project/options to prepare only missing images."
+  fail "Required local images are missing (database=$need_database; services: ${build_services[*]-}; Hub profiles: ${missing_descriptions[*]-}). Resume never builds or pulls. Run ./classroom with the same project/options to prepare only missing images."
 fi
 if [ "$need_database" -eq 1 ]; then "${compose[@]}" pull postgres; fi
 for service in ${build_services[@]+"${build_services[@]}"}; do
   if [ "$image_source" = hub ]; then
-    printf '\nPulling published %s for %s...\n' "$service" "$image_arch"
-    "${compose[@]}" pull --policy always "$service"
+    profile="$(image_profile_for_service "$service")"
+    printf '\nPulling published %s (%s) for %s...\n' "$profile" "$(image_tag_for "$profile")" "$image_arch"
+    "${compose[@]}" pull --policy always "$service" || fail "Could not pull the published $profile image at version $(image_tag_for "$profile") for Linux/$image_arch. Check that this profile and version were published. Saved volumes are retained."
     continue
   fi
   printf '\nBuilding missing/requested %s locally...\n' "$service"

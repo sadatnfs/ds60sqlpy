@@ -222,7 +222,7 @@ def readme(records):
         "From the repository root:",
         "",
         "```bash",
-        "./classroom --profiles r-statistics",
+        "./classroom --profile r-statistics",
         "```",
         "",
         (

@@ -1,0 +1,363 @@
+name: Targeted classroom images
+
+on:
+  push:
+
+permissions:
+  contents: read
+  actions: read
+
+# Build-test has no Hub writes. Publish shares the complete publisher's key.
+concurrency:
+  group: >-
+    ${{ contains(github.event.head_commit.message, '[publish-') &&
+    'classroom-dockerhub-publication' ||
+    format('classroom-docker-build-test-{0}', github.ref) }}
+  cancel-in-progress: false
+
+jobs:
+  intent:
+    if: >-
+      github.event_name == 'push' &&
+      (contains(github.event.head_commit.message, '[build-test-') ||
+      contains(github.event.head_commit.message, '[publish-'))
+    runs-on: ubuntu-24.04
+    outputs:
+      mode: ${{ steps.selection.outputs.mode }}
+      group: ${{ steps.selection.outputs.group }}
+      version: ${{ steps.selection.outputs.version }}
+      matrix: ${{ steps.selection.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Validate one exact HEAD marker and select its complete group
+        id: selection
+        run: python scripts/ci_targeted_images.py intent --github-output "$GITHUB_OUTPUT"
+
+  publication-gate:
+    needs: intent
+    if: needs.intent.outputs.mode == 'publish'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      mode: ${{ steps.release.outputs.mode }}
+      version: ${{ steps.release.outputs.version }}
+    env:
+      TARGET_GROUP: ${{ needs.intent.outputs.group }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Validate exact main HEAD, selected group and registry permissions
+        id: release
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: >-
+          python scripts/docker_release.py gate --target-group "$TARGET_GROUP"
+          --output work/release/gate.json --github-output "$GITHUB_OUTPUT"
+      - name: Wait for source and portable starter checks at this revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/ci_release_status.py --report work/source-qualification.json
+      - name: Retain the source-bound targeted gate
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: release-gate-attempt-${{ github.run_attempt }}
+          path: work/release/gate.json
+          if-no-files-found: error
+          retention-days: 7
+
+  seed:
+    name: Qualify application and Core (${{ matrix.architecture }})
+    needs: [intent, publication-gate]
+    if: >-
+      always() && needs.intent.result == 'success' &&
+      (needs.intent.outputs.mode == 'build-test' ||
+      (needs.intent.outputs.mode == 'publish' &&
+      needs.publication-gate.result == 'success' &&
+      needs.publication-gate.outputs.mode == 'build'))
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      RELEASE_VERSION: ${{ needs.intent.outputs.version }}
+      ARCHITECTURE: ${{ matrix.architecture }}
+      CI_PROJECT: ds60-${{ needs.intent.outputs.mode == 'publish' && 'pub' || 'ci' }}-seed-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Download the current run's targeted publication gate
+        if: needs.intent.outputs.mode == 'publish'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/ci_release_artifacts.py gate --destination work/release
+      - name: Build native application and Core through the learner entrypoint
+        run: >-
+          python scripts/ci_classroom.py prepare --group python-core --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Record immutable seed image IDs before qualification
+        if: needs.intent.outputs.mode == 'publish'
+        run: >-
+          python scripts/docker_release.py inspect --gate work/release/gate.json
+          --profiles "app python-core" --architecture "$ARCHITECTURE" --output work/tested-images.json
+      - name: Qualify Core references, SQL, failures, browser and persistence
+        run: >-
+          python scripts/ci_classroom.py qualify --group python-core --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Stage only the qualified native seed IDs
+        if: needs.intent.outputs.mode == 'publish'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-seed-stage"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/docker_release.py stage --gate work/release/gate.json \
+            --tested-images work/tested-images.json --qualification work/module-reference-results.json \
+            --qualification work/ci-qualification.json --output work/release-receipt.json
+      - name: Retain qualified seed digests for this run
+        if: needs.intent.outputs.mode == 'publish'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: release-receipt-seed-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/release-receipt.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Capture owned service diagnostics
+        if: failure()
+        run: >-
+          python scripts/ci_classroom.py diagnostics --group python-core --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Remove only this disposable seed project
+        if: always()
+        run: >-
+          python scripts/ci_classroom.py cleanup --group python-core --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+
+  workers:
+    name: Qualify ${{ matrix.group }} (${{ matrix.architecture }})
+    needs: [intent, publication-gate, seed]
+    if: >-
+      always() && needs.intent.result == 'success' &&
+      needs.intent.outputs.group != 'python-core' && needs.seed.result == 'success' &&
+      (needs.intent.outputs.mode == 'build-test' ||
+      (needs.intent.outputs.mode == 'publish' &&
+      needs.publication-gate.result == 'success' &&
+      needs.publication-gate.outputs.mode == 'build'))
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.intent.outputs.matrix) }}
+    env:
+      RELEASE_VERSION: ${{ needs.intent.outputs.version }}
+      ARCHITECTURE: ${{ matrix.architecture }}
+      CI_GROUP: ${{ matrix.group }}
+      PROFILES: ${{ matrix.profiles }}
+      CI_PROJECT: ds60-${{ needs.intent.outputs.mode == 'publish' && 'pub' || 'ci' }}-${{ matrix.project_group }}-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Download the current run's gate and native seed receipt
+        if: needs.intent.outputs.mode == 'publish'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ci_release_artifacts.py gate --destination work/release
+          python scripts/ci_release_artifacts.py seed --architecture "$ARCHITECTURE" --destination work/seed
+      - name: Import the qualified app and Core by native digest
+        if: needs.intent.outputs.mode == 'publish'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-seed-import"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/docker_release.py import-seed --gate work/release/gate.json \
+            --receipt work/seed/release-receipt.json --architecture "$ARCHITECTURE"
+      - name: Build the complete selected group through the learner entrypoint
+        run: >-
+          python scripts/ci_classroom.py prepare --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Record immutable selected worker IDs before qualification
+        if: needs.intent.outputs.mode == 'publish'
+        run: >-
+          python scripts/docker_release.py inspect --gate work/release/gate.json
+          --profiles "$PROFILES" --architecture "$ARCHITECTURE"
+          --seed-receipt work/seed/release-receipt.json --output work/tested-images.json
+      - name: Qualify every selected reference, failure and lifecycle contract
+        run: >-
+          python scripts/ci_classroom.py qualify --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Stage only the qualified selected worker IDs
+        if: needs.intent.outputs.mode == 'publish'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-worker-stage"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/docker_release.py stage --gate work/release/gate.json \
+            --tested-images work/tested-images.json --qualification work/module-reference-results.json \
+            --qualification work/ci-qualification.json --output work/release-receipt.json
+      - name: Retain qualified selected native digests
+        if: needs.intent.outputs.mode == 'publish'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: release-receipt-${{ matrix.group }}-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/release-receipt.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Capture owned service diagnostics
+        if: failure()
+        run: >-
+          python scripts/ci_classroom.py diagnostics --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Remove only this disposable worker project
+        if: always()
+        run: >-
+          python scripts/ci_classroom.py cleanup --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+
+  promote:
+    name: Promote only the selected two-platform images
+    needs: [intent, publication-gate, seed, workers]
+    if: >-
+      always() && needs.intent.outputs.mode == 'publish' &&
+      needs.publication-gate.result == 'success' &&
+      (needs.publication-gate.outputs.mode == 'promote-existing' ||
+      (needs.publication-gate.outputs.mode == 'build' && needs.seed.result == 'success' &&
+      (needs.intent.outputs.group == 'python-core' || needs.workers.result == 'success')))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TARGET_GROUP: ${{ needs.intent.outputs.group }}
+      RELEASE_MODE: ${{ needs.publication-gate.outputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Download this run's gate and selected qualified receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ci_release_artifacts.py gate --destination work/release
+          if [ "$RELEASE_MODE" = build ]; then
+            python scripts/ci_targeted_images.py receipts --group "$TARGET_GROUP" --destination work/receipts
+          fi
+      - name: Recheck exact-revision source and starter qualification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/ci_release_status.py --timeout-minutes 15 --report work/source-qualification-final.json
+      - name: Promote selected immutable indexes and then selected latest aliases
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: >-
+          python scripts/docker_release.py promote --gate work/release/gate.json
+          --receipts-dir work/receipts --output work/release/release.json
+      - name: Retain the partial published digest inventory
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: published-targeted-release-attempt-${{ github.run_attempt }}
+          path: work/release/release.json
+          if-no-files-found: error
+          retention-days: 30
+
+  hub-acceptance:
+    name: Pull published classroom (${{ matrix.architecture }})
+    needs: [intent, promote]
+    if: needs.intent.outputs.mode == 'publish' && needs.promote.result == 'success'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      ARCHITECTURE: ${{ matrix.architecture }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Select this run's completed partial promotion receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python scripts/ci_hub_acceptance.py fetch --mode partial
+          --destination work/hub-release/release.json
+      - name: Inspect published indexes and run a fresh native Hub classroom
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-hub-acceptance"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_hub_acceptance.py accept --mode partial \
+            --receipt work/hub-release/release.json --architecture "$ARCHITECTURE" \
+            --report work/hub-acceptance.json
+      - name: Retain distinct post-publication pull evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: hub-acceptance-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: |
+            work/hub-acceptance.json
+            work/hub-acceptance-diagnostics.json
+          if-no-files-found: ignore
+          retention-days: 30

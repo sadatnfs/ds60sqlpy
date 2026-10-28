@@ -128,11 +128,26 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
                 "${{ matrix.runner }}",
                 "${{ matrix.runner }}",
                 "ubuntu-24.04",
+                "${{ matrix.runner }}",
             ]
             assert "runner: ubuntu-24.04-arm" in workflow
             assert "runner: ubuntu-24.04" in workflow
             assert "workflow_dispatch:" not in workflow
             assert "branches: [main]" in workflow
+            assert "contains(github.event.head_commit.message, '[publish-docker]')" in workflow
+        elif path.name == "targeted-images.yml":
+            assert runners == [
+                "ubuntu-24.04",
+                "ubuntu-24.04",
+                "${{ matrix.runner }}",
+                "${{ matrix.runner }}",
+                "ubuntu-24.04",
+                "${{ matrix.runner }}",
+            ]
+            assert "runner: ubuntu-24.04-arm" in workflow
+            assert "runner: ubuntu-24.04" in workflow
+            assert "workflow_dispatch:" not in workflow
+            assert "on:\n  push:" in workflow
         else:
             assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow
@@ -169,10 +184,15 @@ def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts(
     from scripts.ci_profiles import groups
 
     workflow = (WORKFLOW.parent / "app-build.yml").read_text()
+    intent = workflow.split("  select-images:", 1)[1].split("  docker-starter:", 1)[0]
+    starter = workflow.split("  docker-starter:", 1)[1].split("  docker-matrix:", 1)[0]
     selection = workflow.split("  docker-matrix:", 1)[1].split("  docker:", 1)[0]
-    assert "!(github.event_name == 'push'" in selection
-    assert "github.ref == 'refs/heads/main'" in selection
-    assert "contains(github.event.head_commit.message, '[publish-docker]')" in selection
+    assert "scripts/ci_targeted_images.py app-build-intent" in intent
+    assert "mode: ${{ steps.intent.outputs.mode }}" in intent
+    assert "needs: select-images" in starter
+    assert "if: needs.select-images.outputs.mode != 'build-test'" in starter
+    assert "needs: select-images" in selection
+    assert "if: needs.select-images.outputs.mode == 'ordinary'" in selection
     assert "  push:" in workflow and "  pull_request:" in workflow
     assert "paths:" not in workflow
     docker = workflow.split("  docker:", 1)[1]

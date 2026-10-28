@@ -336,6 +336,155 @@ def test_complete_promotion_orders_workers_before_each_app_pointer(
     assert release.gate_release(context, profiles, registry)["mode"] == "noop"
 
 
+def add_unselected_group(root: Path) -> dict[str, release.Profile]:
+    image_catalog = root / "docker/classroom-images.tsv"
+    image_catalog.write_text(
+        image_catalog.read_text()
+        + "cpp20 cpp ds60sqlpy-worker-cpp20 worker-cpp20 DS60_CPP_IMAGE ordinary\n"
+    )
+    group_catalog = root / "docker/ci-profile-groups.json"
+    groups = json.loads(group_catalog.read_text())
+    groups["groups"].append({"id": "cpp", "profiles": ["cpp20"]})
+    group_catalog.write_text(json.dumps(groups))
+    return release.catalog(root)
+
+
+def test_targeted_publication_binds_exact_group_and_only_moves_selected_aliases(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    profiles = add_unselected_group(tmp_path)
+    registry = FakeRegistry()
+    gate = release.gate_release(context, profiles, registry, target_group="java", root=tmp_path)
+    assert gate["mode"] == "build"
+    assert gate["selection"] == {"group": "java", "profiles": ["app", "java21", "python-core"]}
+    complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    inputs = release.promotion_inputs(
+        tmp_path / "receipts", context, profiles, registry, tmp_path, target_group="java"
+    )
+    assert set(inputs) == {"app", "python-core", "java21"}
+    report = release.promote_release(
+        context,
+        profiles,
+        registry,
+        natives=inputs,
+        output=tmp_path / "partial.json",
+        target_group="java",
+        root=tmp_path,
+    )
+    assert report["scope"] == "partial" and report["group"] == "java"
+    assert report["profiles"] == ["app", "java21", "python-core"]
+    assert registry.puts == [
+        "1.0.0-worker-python-core",
+        "1.0.0-worker-java21",
+        "1.0.0",
+        "latest-worker-python-core",
+        "latest-worker-java21",
+        "latest",
+    ]
+    assert not any("cpp20" in tag for tag in registry.tags)
+    for key in ("app", "python-core", "java21"):
+        manifest = registry.get(release.version_tag(profiles[key], context.version))
+        assert manifest.document["annotations"][release.SCOPE] == "partial"
+        assert manifest.document["annotations"][release.GROUP] == "java"
+    assert (
+        release.gate_release(context, profiles, registry, target_group="java", root=tmp_path)[
+            "mode"
+        ]
+        == "noop"
+    )
+    with pytest.raises(ReleaseError, match="partial version tag"):
+        release.gate_release(context, profiles, registry, root=tmp_path)
+    newer = replace(context, version="1.0.1", revision="b" * 40)
+    assert release.gate_release(newer, profiles, registry, root=tmp_path)["mode"] == "build"
+    full = complete_receipts(tmp_path / "new-receipts", registry, newer, profiles)
+    for architecture in release.ARCHITECTURES:
+        cpp, _ = native(registry, "new-cpp-" + architecture)
+        full["cpp20"][architecture] = cpp.descriptor
+    complete = release.promote_release(
+        newer,
+        profiles,
+        registry,
+        natives=full,
+        output=tmp_path / "complete.json",
+    )
+    assert complete["status"] == "published"
+    assert registry.puts[-1] == "latest"
+    assert "latest-worker-cpp20" in registry.puts
+
+
+def test_targeted_publication_rejects_other_source_version_before_any_write(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    profiles = add_unselected_group(tmp_path)
+    registry = FakeRegistry()
+    complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    inputs = release.promotion_inputs(
+        tmp_path / "receipts", context, profiles, registry, tmp_path, target_group="java"
+    )
+    other = replace(context, revision="b" * 40)
+    amd64, _ = native(registry, "occupied-cpp-amd64")
+    arm64, _ = native(registry, "occupied-cpp-arm64")
+    registry.add(
+        release.index_body(other, "cpp20", {"amd64": amd64.descriptor, "arm64": arm64.descriptor}),
+        release.version_tag(profiles["cpp20"], context.version),
+    )
+    with pytest.raises(ReleaseError, match="occupied by another revision"):
+        release.promote_release(
+            context,
+            profiles,
+            registry,
+            natives=inputs,
+            output=tmp_path / "denied.json",
+            target_group="java",
+            root=tmp_path,
+        )
+    assert registry.puts == []
+
+
+def test_targeted_promotion_requires_only_selected_but_both_native_receipts(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    profiles = add_unselected_group(tmp_path)
+    registry = FakeRegistry()
+    folder = tmp_path / "receipts"
+    complete_receipts(folder, registry, context, profiles)
+    (folder / "java-arm64/release-receipt.json").unlink()
+    with pytest.raises(ReleaseError, match="selected native qualification group"):
+        release.promotion_inputs(folder, context, profiles, registry, tmp_path, target_group="java")
+
+
+def test_core_only_targeted_publication_needs_no_worker_receipts(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    registry = FakeRegistry()
+    folder = tmp_path / "receipts"
+    folder.mkdir()
+    for architecture in release.ARCHITECTURES:
+        seed = receipt(registry, context, profiles, architecture, "python-core")
+        child = folder / f"seed-{architecture}"
+        child.mkdir()
+        (child / "release-receipt.json").write_text(json.dumps(seed))
+    inputs = release.promotion_inputs(
+        folder, context, profiles, registry, tmp_path, target_group="python-core"
+    )
+    assert set(inputs) == {"app", "python-core"}
+    release.promote_release(
+        context,
+        profiles,
+        registry,
+        natives=inputs,
+        output=tmp_path / "core-only.json",
+        target_group="python-core",
+        root=tmp_path,
+    )
+    assert registry.puts == [
+        "1.0.0-worker-python-core",
+        "1.0.0",
+        "latest-worker-python-core",
+        "latest",
+    ]
+
+
 def test_partial_version_failure_keeps_app_and_latest_unpublished_then_resumes_exact_digests(
     tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
 ) -> None:
@@ -788,7 +937,8 @@ def github_environment(
 
 
 @pytest.mark.parametrize(
-    "change", ["pull-request", "branch", "head-message", "head-id", "deleted", "dirty"]
+    "change",
+    ["pull-request", "branch", "head-message", "mixed-marker", "head-id", "deleted", "dirty"],
 )
 def test_gate_requires_the_actual_main_push_head_marker_before_auth(
     tmp_path: Path, context: release.Context, monkeypatch: pytest.MonkeyPatch, change: str
@@ -815,6 +965,8 @@ def test_gate_requires_the_actual_main_push_head_marker_before_auth(
         if change == "head-message":
             value["head_commit"]["message"] = "ordinary change"
             value["commits"] = [{"message": "old [publish-docker]"}]
+        elif change == "mixed-marker":
+            value["head_commit"]["message"] = "Release [publish-docker] [publish-js]"
         elif change == "head-id":
             value["head_commit"]["id"] = "b" * 40
         else:
@@ -837,6 +989,41 @@ def test_earlier_same_run_gate_returns_current_context_for_fresh_job_receipts(
     path.write_text(json.dumps(gate))
     loaded, found, mode = release.load_gate(path, tmp_path)
     assert loaded == current and found == profiles and mode == "build"
+
+
+def test_targeted_gate_revalidates_group_and_selected_profiles(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current = replace(context, run_attempt="2")
+    event = github_environment(tmp_path, current, monkeypatch)
+    payload = json.loads(event.read_text())
+    payload["head_commit"]["message"] = "Release [publish-java]"
+    event.write_text(json.dumps(payload))
+    monkeypatch.setattr(
+        release,
+        "git_output",
+        lambda root, args: (
+            ""
+            if args[:1] == ["status"]
+            else "Release [publish-java]"
+            if args[:1] == ["log"]
+            else current.revision
+        ),
+    )
+    gate = release.gate_release(
+        context, profiles, FakeRegistry(), target_group="java", root=tmp_path
+    )
+    path = tmp_path / "gate.json"
+    path.write_text(json.dumps(gate))
+    loaded, found, mode = release.load_gate(path, tmp_path)
+    assert loaded == current and found == profiles and mode == "build"
+    gate["selection"]["profiles"].remove("python-core")
+    path.write_text(json.dumps(gate))
+    with pytest.raises(ReleaseError, match="Invalid targeted release group"):
+        release.load_gate(path, tmp_path)
 
 
 def test_docker_layer_transfers_do_not_buffer_or_limit_progress_output(

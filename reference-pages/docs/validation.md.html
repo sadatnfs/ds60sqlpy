@@ -244,7 +244,7 @@ make test-serial</code></pre>
 <p>Keep <code>--dist loadgroup</code>. Tests that use the same disposable PostgreSQL fixtures belong to the <code>shared-postgres</code> group and run serially within that group. The suite rejects unsafe distribution when those shared fixtures are enabled. Changing the scheduler can cause destructive fixture races even if individual tests pass. Use <code>-n 0</code> for focused serial diagnosis, and reduce worker count on machines with little memory. More workers do not guarantee shorter runtimes.</p>
 <p>Record the passed, failed and skipped totals from the actual run. Explain skips by surface, such as an optional framework, a live database or historical optional services or platform-specific filesystem cases. Do not describe a skipped platform as validated.</p>
 <h3 id="what-hosted-workflows-check">What hosted workflows check<a class="heading-anchor" href="#what-hosted-workflows-check" aria-label="Link to this section">#</a></h3>
-<p>The workflow files are the executable source of truth. Routine validation uses read-only repository permissions, pinned action revisions and local image builds. The separate <a href="dockerhub.md.html">image publication workflow</a> opts in only on a push to <code>main</code> with <code>[publish-docker]</code> in the HEAD message. It uses the two repository secrets, builds/qualifies native AMD64 and ARM64 groups, uploads commit-specific staging images and small receipts, then promotes combined version/latest tags only after all required checks. It requires no extra enable variable or protected environment. Staging uploads are not a completed release; conflicting source versions are refused rather than overwritten.</p>
+<p>The workflow files are the executable source of truth. Routine validation uses read-only repository permissions, pinned action revisions and local image builds. The separate <a href="dockerhub.md.html">full image publication workflow</a> opts in only on a push to <code>main</code> with <code>[publish-docker]</code> in the HEAD message. The <a href="targeted-images.md.html">targeted workflow</a> accepts a single <code>[build-test-ALIAS]</code> on a branch for native App/Core plus one complete group without Hub credentials, staging or publication. A single <code>[publish-ALIAS]</code> on <code>main</code> publishes App, Core and that complete group as a partial versioned release. Both publication modes use the two repository secrets, require the exact revision&#x27;s source/starter checks, qualify native AMD64 and ARM64 groups, upload commit-specific staging images and small receipts, and promote combined version/latest tags only after their required checks. Neither needs an extra enable variable or protected environment. Staging uploads are not a completed release; conflicting source versions are refused rather than overwritten. After promotion, separate native AMD64 and ARM64 jobs inspect the promotion receipt and published indexes, pull a fresh Hub classroom and verify stop/resume retention. For a full release the fresh runtime exercise uses App and Python Core; for a partial release it includes the selected group. Promotion can write canonical tags before this later acceptance fails, so inspect its distinct result before calling the release usable.</p>
 <p>Linux core jobs use UTF-8 and create their test workspace before starting four grouped pytest workers. Native Windows ACLs, PowerShell backend diagnostics and native executable bundles are not release gates. Windows Docker wrappers remain supported entrypoints into WSL 2.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Workflow and job</th>
@@ -278,17 +278,32 @@ make test-serial</code></pre>
 </tr>
 <tr>
 <td>Application builds: Portable Docker classroom starter</td>
-<td>Push, pull request and manual dispatch; Ubuntu</td>
+<td>Push, pull request and manual dispatch, except targeted build-test pushes; Ubuntu</td>
 <td>A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners</td>
 </tr>
 <tr>
-<td>Image publication</td>
+<td>Targeted image check</td>
+<td>Push with one <code>[build-test-ALIAS]</code> in HEAD; native AMD64 and ARM64</td>
+<td>App/Core plus the alias&#x27;s complete ordinary group build and qualify without Hub writes or a starter ZIP</td>
+</tr>
+<tr>
+<td>Targeted partial publication</td>
+<td>Push to main with one <code>[publish-ALIAS]</code> in HEAD</td>
+<td>Exact-revision source/starter gates, native App/Core and complete-group qualification, selected version/latest indexes and source/digest-bound promotion</td>
+</tr>
+<tr>
+<td>Full image publication</td>
 <td>Push to main with <code>[publish-docker]</code> in HEAD</td>
-<td>Native AMD64/ARM64 qualification and source/digest-bound promotion; staging images are distinct from completed version/latest tags</td>
+<td>Native AMD64/ARM64 qualification of every ordinary profile and source/digest-bound promotion; staging images are distinct from completed version/latest tags</td>
+</tr>
+<tr>
+<td>Hosted Hub pull acceptance</td>
+<td>After successful full or partial promotion; native AMD64 and ARM64 runners</td>
+<td>Published-index and exact-receipt checks, fresh Hub classroom pull/start, then stop/resume with container and volume retention; a separate post-publication receipt, not proof from staging alone</td>
 </tr>
 <tr>
 <td>Application builds: Docker classroom</td>
-<td>Push, pull request and manual dispatch, except marked main publication pushes; isolated Linux groups cover all ordinary profiles</td>
+<td>Push, pull request and manual dispatch, except targeted build-test or any marked publication push; isolated Linux groups cover all ordinary profiles on other events</td>
 <td>Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked</td>
 </tr>
 <tr>
@@ -307,7 +322,7 @@ make test-serial</code></pre>
 <td>Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup</td>
 </tr>
 </tbody></table></div>
-<p>A marked main publication push keeps source validation and the starter ZIP mandatory, then uses the publication workflow&#x27;s native AMD64/ARM64 seed and worker groups instead of duplicating the ordinary Docker matrix. The publisher waits for the exact revision&#x27;s required source/starter success and rechecks it before promotion. Successful same-run/revision receipts can be reused across failed-job retries with exact seed-digest binding; cross-run reuse is rejected.</p>
+<p>A marked main publication push keeps source validation and the starter ZIP mandatory, then uses the selected publisher&#x27;s native AMD64/ARM64 seed and worker groups instead of duplicating the ordinary Docker matrix. A targeted build-test push also skips the duplicate ordinary matrix and starter job, while routine source validation still runs. Each publisher waits for the exact revision&#x27;s required source/starter success and rechecks it before promotion. Successful same-run/revision receipts can be reused across failed-job retries with exact seed-digest binding; cross-run reuse is rejected.</p>
 <p>The Docker groups cover Python Core, C, C++, Go, C#, Rust, Swift, Java, JavaScript/TypeScript, PHP, Scala/Spark, TensorFlow, PyTorch, JAX CPU, Bayesian CPU, R, data engineering, Apache data-platform libraries, dbt/DuckDB, Stan and Julia. Their separately prepared worker images preserve incompatible dependency and compiler contracts. The Core group runs compatible statistics-book, NLP and LLM examples; dedicated groups execute references requiring their own frameworks. Representative smoke cases establish only their selected behaviors; the catalog-driven corpus separately executes every admitted reference in each selected profile. Bounded Bayesian diagnostics remain evidence to interpret, not a declaration of convergence. PySpark and tutorial example variants are discovered from the same catalog used by the classroom. There is no second hand-maintained executable lesson list. Reading/manual lessons, offline DAX and owned-cluster operations appear as explicit exclusions from the ordinary corpus, never successful ordinary-worker runs. DAX has no execution engine or compiler requirement; its saved editing and hand-derived comparison flow is browser-tested. CUDA CPU models and the selected CPU framework/Spark variants run in those ordinary groups. Optional NVIDIA profiles remain explicitly excluded: CPU execution, compiler-only acceptance and GPU device execution require separate receipts.</p>
 <p>Each group owns a disposable project. At most four Docker groups run together. One classroom controller admits one active module job across all profiles, so parallel runtime qualification requires separate disposable projects. The grouped unit suite independently supports four workers. The corpus records failures, source hashes, actual exit status and typed checks where registered. An overall time budget leaves unexecuted cases visibly pending and fails the job. Artifact JSON distinguishes reference execution from independent typed verification. Negative probes restore the previous source and notes, and container replacement checks read the original successful receipts without replay.</p>
 <p>Chromium runs only in a separate CI browser environment with hash-locked packages. It is absent from the production image. Browser reports contain check results and screenshots, without session credentials or network traces. The separate Kubernetes workflow prepares checksum-verified host tools and a short-lived owned cluster, checks all supported reference manifests and cleanup behavior, then releases only its recorded resources. The owned project gates below qualify selected local services separately from the ordinary reference corpus. Optional pretrained-model downloads and other external environments retain their explicit preparation and qualification boundaries.</p>

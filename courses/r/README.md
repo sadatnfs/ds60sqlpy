@@ -7,7 +7,7 @@ This 60-lesson course starts with expressions and vectors, then develops functio
 From the repository root:
 
 ```bash
-./classroom --profiles r-statistics
+./classroom --profile r-statistics
 ```
 
 Choose **R** in the classroom directory. The launcher prepares missing local images and retains this project selection for later resumes. Keep the same custom project name if you use one. See the [front README](../../README.md) for Docker setup on macOS/Linux and Windows through WSL 2. You do not need a host R installation.

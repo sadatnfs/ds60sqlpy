@@ -16,8 +16,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  select-images:
+    name: Select exact Docker build intent
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.intent.outputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Validate HEAD Docker marker and select image workload
+        id: intent
+        run: python scripts/ci_targeted_images.py app-build-intent --github-output "$GITHUB_OUTPUT"
+
   docker-starter:
     name: Portable Docker classroom starter
+    needs: select-images
+    if: needs.select-images.outputs.mode != 'build-test'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -47,9 +65,8 @@ jobs:
 
   docker-matrix:
     name: Select ordinary Docker qualification
-    if: >-
-      !(github.event_name == 'push' && github.ref == 'refs/heads/main' &&
-      contains(github.event.head_commit.message, '[publish-docker]'))
+    needs: select-images
+    if: needs.select-images.outputs.mode == 'ordinary'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.selection.outputs.matrix }}
@@ -84,7 +101,7 @@ jobs:
       matrix: ${{ fromJSON(needs.docker-matrix.outputs.matrix) }}
     env:
       CI_GROUP: ${{ matrix.group }}
-      CI_PROJECT: ds60-ci-${{ matrix.group }}-${{ github.run_id }}-${{ github.run_attempt }}
+      CI_PROJECT: ds60-ci-${{ matrix.project_group }}-${{ github.run_id }}-${{ github.run_attempt }}
       RELEASE_VERSION: ${{ needs.docker-matrix.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

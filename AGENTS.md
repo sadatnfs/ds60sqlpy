@@ -42,7 +42,7 @@ given for the current task rather than asking repeatedly.
 | Concern | Source |
 | --- | --- |
 | Startup, resume and image selection | `classroom`, `scripts/classroom.sh`, `scripts/classroom_images.sh`, `docker/classroom-images.tsv` |
-| Image publication | `.github/workflows/publish-images.yml`, `scripts/docker_release.py`, `./classroom publish`, `docker/classroom-images.tsv` |
+| Image publication and hosted pull acceptance | `.github/workflows/publish-images.yml`, `.github/workflows/targeted-images.yml`, `scripts/ci_targeted_images.py`, `scripts/docker_release.py`, `scripts/ci_hub_acceptance.py`, `./classroom publish`, `docker/classroom-images.tsv` |
 | Product composition and runtime preparation | `compose.classroom.yaml`, `compose.modules.yaml`, `docker/workers/`, reviewed optional overlays |
 | Unified directory, editor and preview | `classroom.py`, `assets/classroom.*`, `browser_runs.py` |
 | Historical Python/SQL/bridge identity | `catalog_builder.py`, source artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
@@ -120,12 +120,19 @@ or pull. `build` prepares local images without startup. Hub `--rebuild` pulls
 and applies updates without compiling; keep the same project and volumes.
 
 New `--from-hub` selections use combined release tags: app `VERSION`, workers
-`VERSION-<catalog suffix>`. Explicit `latest` resolves to the app's concrete
-version after the project lock, must match the source checkout, and is saved
-as that concrete version before worker selection. Bare resume never follows
-latest. Manual publisher tags need `--architecture-tags`; old three-field saved
-Hub settings retain that legacy layout. Validate native Linux architecture,
-preserve progress outside images, and do not switch projects to hide a defect.
+`VERSION-<catalog suffix>`. Omitting `--tag` resolves the app's `latest`
+alias to a concrete version after the project lock, requires a matching source
+checkout, and saves that version. A same-namespace saved project retains its
+pin; bare resume never follows latest or contacts the registry. Repeatable
+`--image-tag PROFILE=VERSION|latest|default` selects a particular ordinary
+image or clears a saved worker pin. Validate a worker latest alias through its
+OCI index and require the same qualified source revision as the app before
+mixing versions. Current CI binds one version to each revision, so releases
+from different revisions cannot be mixed. A partial publish has only its
+selected profiles; `--all` requires a completed full release. Manual publisher
+tags need `--architecture-tags`; old three-field saved Hub settings retain
+that legacy layout. Validate native Linux architecture, preserve progress
+outside images, and do not switch projects to hide a defect.
 
 Launcher preferences under `.classroom/<project>/` are separate from named
 learning, PostgreSQL and private-runtime volumes. Preserve all learner state.
@@ -256,8 +263,12 @@ Portable payloads exclude learner state, credentials, caches, local logs and Git
 history. Preserve source licenses and use neutral public/synthetic examples.
 Review the chosen repository-local public commit identity without exposing
 private identity values. Git-push authorization alone does not authorize adding
-a publication marker. The CI publication workflow builds/uploads only for a
-push to `main` with `[publish-docker]` in the HEAD message, using repository
+a publication marker. The full CI publisher runs only for a push to `main`
+with `[publish-docker]` in the HEAD message. The targeted workflow accepts
+one `[build-test-ALIAS]` on a branch for native App/Core plus complete-group
+qualification without Hub writes, or one `[publish-ALIAS]` on `main` for
+partial versioned publication. A profile alias expands to its entire CI group;
+`js` includes both JavaScript and TypeScript. Publication uses repository
 secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. There is no extra enable
 variable or protected-environment requirement. Keep secret values out of source,
 logs, build arguments and reports.
@@ -267,15 +278,25 @@ the inference/SSE/browser gate in PyTorch, Flight/Rust IPC in data platforms and
 Kafka semantics/lifecycle in Java. Keep `scripts/ci_classroom.py` required check
 sets and source-bound publication receipt validation aligned when changing them.
 
-Native AMD64/ARM64 seed and worker jobs upload commit-specific staging images
-and small evidence receipts. Promote only after every required check succeeds:
-worker version tags before the app version, then latest aliases with app latest
-last. Refuse conflicting existing source versions; use a consistent checked-in
-patch bump instead of registry-only renumbering or overwriting released tags.
+Native AMD64/ARM64 seed and worker publication jobs upload commit-specific
+staging images and small evidence receipts. Build-test jobs do not stage or
+publish. Promote only after every required selected check succeeds: worker
+version tags before the app version, then selected latest aliases with app
+latest last. The full publisher requires every ordinary profile; the partial
+publisher requires only App, Core and its complete selected group. Refuse
+conflicting existing source versions; a later full release after a partial
+release from another commit needs a consistent checked-in patch bump instead
+of registry-only renumbering or overwriting released tags.
 Successful earlier-attempt receipts may be reused only within the same run
 and revision, with exact app/Core seed bindings; cross-run or mismatched-seed
 reuse is rejected. Failed promotion retries retain original qualified digests.
-Staging uploads and completed release promotion are distinct evidence.
+Staging uploads and completed release promotion are distinct evidence. A
+separate post-promotion native AMD64/ARM64 job checks the published index and
+exact promotion receipt, then pulls and starts an owned fresh Hub classroom,
+stops it and resumes its saved containers and volumes. Its acceptance receipt
+is separate. Canonical tags can already be published if this later check
+fails; inspect that failure rather than claiming a usable release or deleting
+learner state.
 
 The manual `./classroom publish --to-hub USER --tag VERSION` remains a
 preview-first publisher of existing images for one architecture. Only `--push`

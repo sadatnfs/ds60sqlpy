@@ -19,6 +19,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_VERSION: str = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+_major, _minor, _patch = (int(part) for part in RELEASE_VERSION.split("."))
+NEXT_PATCH_VERSION = f"{_major}.{_minor}.{_patch + 1}"
 IMAGE_ROWS = [
     line.split()
     for line in (ROOT / "docker/classroom-images.tsv").read_text().splitlines()
@@ -106,6 +108,32 @@ elif a[:2]==['compose','version']:print(c.get('version','2.28.0'))
 elif a[:1]==['info']:
  if c.get('engine_down'):sys.exit(7)
  print(c.get('architecture','amd64') if '{{.Architecture}}' in a else c.get('engine_os','linux'))
+elif a[:2]==['buildx','version']:
+ if c.get('buildx_unavailable'):sys.exit(7)
+ print('github.com/docker/buildx v0.30.0')
+elif a[:3]==['buildx','imagetools','inspect']:
+ if c.get('buildx_unavailable') or c.get('fail')=='index':sys.exit(7)
+ reference=a[-1];tag=reference.rsplit(':',1)[-1]
+ profile='app'
+ for line in (Path.cwd()/'docker/classroom-images.tsv').read_text().splitlines():
+  if not line or line.startswith('#'):continue
+  name,service,repository,suffix,variable,kind=line.split()
+  if tag.endswith('-'+suffix) and name!='app':profile=name;break
+ release=c.get('index_versions',{}).get(reference)
+ if release is None:
+  if tag.startswith('latest'):
+   release=c.get('latest_worker_release',c.get('latest_release',version))
+  else:release=tag.split('-worker-')[0]
+ record='|'.join((
+  c.get('index_media',{}).get(reference,'application/vnd.oci.image.index.v1+json'),
+  c.get('index_schema',{}).get(reference,'1'),
+  c.get('index_profiles',{}).get(reference,profile),
+  release,
+  c.get('index_revisions',{}).get(reference,'a'*40),
+  c.get('index_sources',{}).get(reference,'https://github.com/sadatnfs/ds60sqlpy'),
+  c.get('index_platforms',{}).get(reference,'linux/amd64;linux/arm64;'),
+ ))
+ print(c.get('index_records',{}).get(reference,record))
 elif a[:2]==['image','tag']:
  assert a[-1] not in c.get('built_images',[]),'must not overwrite a prepared tag'
  c.setdefault('built_images',[]).append(a[-1]);save()
@@ -1139,7 +1167,15 @@ def test_saved_hub_resume_preserves_exact_containers_without_pull_or_build(launc
 
 def test_hub_strict_resume_with_missing_images_never_downloads(launcher: Any) -> None:
     launcher.set(missing_images=True)
-    result = launcher.run("resume", "--starter", "--from-hub", "exampleuser", "--no-browser")
+    result = launcher.run(
+        "resume",
+        "--starter",
+        "--from-hub",
+        "exampleuser",
+        "--tag",
+        RELEASE_VERSION,
+        "--no-browser",
+    )
     assert result.returncode != 0 and "Resume never builds or pulls" in result.stderr
     assert not any(
         any(action in call["args"] for action in ("build", "pull", "up"))
@@ -1592,9 +1628,24 @@ def test_latest_strict_resume_never_fetches_an_uncached_pointer(launcher: Any) -
     result = launcher.run(
         "resume", "--starter", "--from-hub", "exampleuser", "--tag", "latest", "--no-browser"
     )
-    assert result.returncode != 0 and "latest is not cached locally" in result.stderr
+    assert result.returncode != 0 and "Resume never pulls or follows latest" in result.stderr
     assert not any(
         any(action in call["args"] for action in ("pull", "build", "up", "start"))
+        for call in launcher.calls()
+    )
+
+
+def test_saved_unresolved_latest_cannot_follow_pointer_during_bare_resume(
+    launcher: Any,
+) -> None:
+    saved = _image_state(launcher, "hub", "exampleuser", "latest")
+    saved.write_text(saved.read_text() + "DS60_IMAGE_LAYOUT=manifest\n")
+    before = saved.read_bytes()
+    result = launcher.run("resume", "--starter", "--no-browser")
+    assert result.returncode != 0 and "Resume never pulls or follows latest" in result.stderr
+    assert saved.read_bytes() == before
+    assert not any(
+        "pull" in call["args"] or "build" in call["args"] or "buildx" in call["args"]
         for call in launcher.calls()
     )
 
@@ -1651,6 +1702,245 @@ def test_interrupted_first_latest_pull_remembers_hub_and_starter_selection(launc
     assert not built_services(calls)
     assert not any("java-worker" in call["args"] for call in calls)
     assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in (state / "images.env").read_text()
+
+
+def test_new_hub_selection_defaults_to_latest_and_same_namespace_stays_pinned(
+    launcher: Any,
+) -> None:
+    launcher.set(missing_images=True)
+    first = launcher.run("--starter", "--from-hub", "exampleuser", "--no-browser")
+    assert first.returncode == 0, first.stdout + first.stderr
+    saved = launcher.directory / ".classroom/ds60-classroom/images.env"
+    assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in saved.read_text()
+    calls = launcher.calls()
+    assert [call["args"][-1] for call in calls if call["args"][:2] == ["image", "pull"]] == [
+        "exampleuser/ds60sqlpy:latest"
+    ]
+    before = len(calls)
+    repeated = launcher.run("--starter", "--from-hub", "exampleuser", "--no-browser")
+    assert repeated.returncode == 0, repeated.stdout + repeated.stderr
+    assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in saved.read_text()
+    assert not any(
+        "pull" in call["args"] or "build" in call["args"] for call in launcher.calls()[before:]
+    )
+
+
+def test_per_profile_version_pin_is_saved_and_strict_resume_is_offline(launcher: Any) -> None:
+    launcher.set(missing_images=True)
+    first = launcher.run(
+        "--starter",
+        "--profile",
+        "javascript-node",
+        "--from-hub",
+        "exampleuser",
+        "--tag",
+        RELEASE_VERSION,
+        "--image-tag",
+        "app=" + RELEASE_VERSION,
+        "--image-tag",
+        "javascript-node=" + NEXT_PATCH_VERSION,
+        "--no-browser",
+    )
+    assert first.returncode == 0, first.stdout + first.stderr
+    calls = launcher.calls()
+    assert any(
+        call["image_env"].get("DS60_WORKER_JAVASCRIPT_NODE_IMAGE")
+        == f"exampleuser/ds60sqlpy:{NEXT_PATCH_VERSION}-worker-javascript-node"
+        for call in calls
+    )
+    saved = launcher.directory / ".classroom/ds60-classroom/images.env"
+    assert f"DS60_IMAGE_TAG_javascript-node={NEXT_PATCH_VERSION}\n" in saved.read_text()
+    assert "DS60_IMAGE_REVISION=" + "a" * 40 in saved.read_text()
+    before = len(calls)
+    resumed = launcher.run("resume", "--no-browser")
+    assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+    assert not any(
+        "pull" in call["args"] or "build" in call["args"] or "buildx" in call["args"]
+        for call in launcher.calls()[before:]
+    )
+
+
+def test_mixed_worker_revision_mismatch_preserves_previous_selection(launcher: Any) -> None:
+    saved = _image_state(launcher, "hub", "exampleuser", RELEASE_VERSION)
+    saved.write_text(saved.read_text() + "DS60_IMAGE_LAYOUT=manifest\n")
+    before = saved.read_bytes()
+    worker = f"exampleuser/ds60sqlpy:{NEXT_PATCH_VERSION}-worker-javascript-node"
+    launcher.set(index_revisions={worker: "b" * 40})
+    result = launcher.run(
+        "--starter",
+        "--profile",
+        "javascript-node",
+        "--image-tag",
+        "javascript-node=" + NEXT_PATCH_VERSION,
+        "--rebuild",
+        "--no-browser",
+    )
+    assert result.returncode != 0
+    assert "not qualified with app" in result.stderr
+    assert saved.read_bytes() == before
+    assert not any("pull" in call["args"] or "up" in call["args"] for call in launcher.calls())
+
+
+def test_worker_latest_reads_index_and_saves_concrete_version(launcher: Any) -> None:
+    launcher.set(missing_images=True)
+    result = launcher.run(
+        "--starter",
+        "--profile",
+        "javascript-node",
+        "--from-hub",
+        "exampleuser",
+        "--tag",
+        RELEASE_VERSION,
+        "--image-tag",
+        "javascript-node=latest",
+        "--no-browser",
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = launcher.calls()
+    assert any(
+        call["args"][:3] == ["buildx", "imagetools", "inspect"]
+        and call["args"][-1] == "exampleuser/ds60sqlpy:latest-worker-javascript-node"
+        for call in calls
+    )
+    assert any(
+        call["args"] == ["image", "pull", "exampleuser/ds60sqlpy:latest-worker-javascript-node"]
+        for call in calls
+    )
+    saved = launcher.directory / ".classroom/ds60-classroom/images.env"
+    assert f"DS60_IMAGE_TAG_javascript-node={RELEASE_VERSION}\n" in saved.read_text()
+    before = len(calls)
+    resumed = launcher.run("resume", "--no-browser")
+    assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+    assert not any(
+        "pull" in call["args"] or "buildx" in call["args"] for call in launcher.calls()[before:]
+    )
+
+
+def test_explicit_app_latest_image_tag_resolves_and_saves_version(launcher: Any) -> None:
+    launcher.set(missing_images=True)
+    result = launcher.run(
+        "--starter",
+        "--from-hub",
+        "exampleuser",
+        "--tag",
+        RELEASE_VERSION,
+        "--image-tag",
+        "app=latest",
+        "--no-browser",
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert any(
+        call["args"] == ["image", "pull", "exampleuser/ds60sqlpy:latest"]
+        for call in launcher.calls()
+    )
+    saved = launcher.directory / ".classroom/ds60-classroom/images.env"
+    assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in saved.read_text()
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {"buildx_unavailable": True},
+        {"index_profiles": {"exampleuser/ds60sqlpy:latest-worker-javascript-node": "java21"}},
+        {
+            "index_platforms": {
+                "exampleuser/ds60sqlpy:latest-worker-javascript-node": "linux/amd64;"
+            }
+        },
+        {"index_revisions": {"exampleuser/ds60sqlpy:latest-worker-javascript-node": "b" * 40}},
+    ],
+)
+def test_worker_latest_metadata_failure_preserves_saved_selection(
+    launcher: Any, settings: dict[str, Any]
+) -> None:
+    saved = _image_state(launcher, "hub", "exampleuser", RELEASE_VERSION)
+    saved.write_text(saved.read_text() + "DS60_IMAGE_LAYOUT=manifest\n")
+    before = saved.read_bytes()
+    launcher.set(**settings)
+    result = launcher.run(
+        "--starter",
+        "--profile",
+        "javascript-node",
+        "--image-tag",
+        "javascript-node=latest",
+        "--rebuild",
+        "--no-browser",
+    )
+    assert result.returncode != 0
+    assert saved.read_bytes() == before
+    assert not any("up" in call["args"] for call in launcher.calls())
+
+
+def test_default_image_tag_clears_saved_worker_pin(launcher: Any) -> None:
+    saved = _image_state(launcher, "hub", "exampleuser", RELEASE_VERSION)
+    saved.write_text(
+        saved.read_text()
+        + "DS60_IMAGE_LAYOUT=manifest\n"
+        + "DS60_IMAGE_REVISION="
+        + "a" * 40
+        + "\n"
+        + f"DS60_IMAGE_TAG_python-core={NEXT_PATCH_VERSION}\n"
+    )
+    result = launcher.run(
+        "--starter", "--image-tag", "python-core=default", "--rebuild", "--no-browser"
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "DS60_IMAGE_TAG_python-core=" not in saved.read_text()
+    assert any(
+        call["image_env"].get("DS60_WORKER_PYTHON_CORE_IMAGE")
+        == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-worker-python-core"
+        for call in launcher.calls()
+    )
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        ("--image-tag", "unknown=1.0.0"),
+        ("--image-tag", "cuda-cpp=1.0.0"),
+        ("--image-tag", "javascript-node=1.0.0;touch injected"),
+        ("--image-tag", "javascript-node=1.0.0", "--image-tag", "javascript-node=1.0.1"),
+        ("--image-tag", "javascript-node=1.0.0"),
+    ],
+)
+def test_invalid_image_tag_selection_stops_before_preparation(
+    launcher: Any, options: tuple[str, ...]
+) -> None:
+    result = launcher.run("--starter", "--from-hub", "exampleuser", *options, "--no-browser")
+    assert result.returncode != 0
+    assert not (launcher.directory / "injected").exists()
+    assert not any(
+        "pull" in call["args"] or "build" in call["args"] or "up" in call["args"]
+        for call in launcher.calls()
+    )
+
+
+def test_other_major_minor_worker_version_is_rejected_before_pull(launcher: Any) -> None:
+    other = f"{_major}.{_minor + 1}.0"
+    result = launcher.run(
+        "--starter",
+        "--from-hub",
+        "exampleuser",
+        "--tag",
+        RELEASE_VERSION,
+        "--image-tag",
+        "python-core=" + other,
+        "--no-browser",
+    )
+    assert result.returncode != 0
+    assert "incompatible with app" in result.stderr
+    assert not any("pull" in call["args"] or "up" in call["args"] for call in launcher.calls())
+
+
+def test_failed_rebuild_restores_previous_image_and_profile_settings(launcher: Any) -> None:
+    saved = _image_state(launcher, "hub", "exampleuser", RELEASE_VERSION)
+    saved.write_text(saved.read_text() + "DS60_IMAGE_LAYOUT=manifest\n")
+    original = saved.read_bytes()
+    launcher.set(fail="pull", missing_images=True)
+    result = launcher.run("--starter", "--tag", NEXT_PATCH_VERSION, "--rebuild", "--no-browser")
+    assert result.returncode != 0
+    assert saved.read_bytes() == original
+    assert not (saved.parent / "launcher.lock").exists()
 
 
 @pytest.mark.parametrize("profile", ["cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"])

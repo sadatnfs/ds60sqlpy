@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -10,6 +11,15 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNERS = {"amd64": "ubuntu-24.04", "arm64": "ubuntu-24.04-arm"}
+# ds60-{ci|pub}-{slug}-amd64-{15-digit run ID}-{2-digit attempt} must fit 49 characters.
+MAX_PROJECT_GROUP_LENGTH = 15
+
+
+def project_group_slug(group: str) -> str:
+    """Fit a group in the 49-character native CI project name."""
+    if len(group) <= MAX_PROJECT_GROUP_LENGTH:
+        return group
+    return group[:6] + "-" + hashlib.sha256(group.encode("ascii")).hexdigest()[:8]
 
 
 def groups(root: Path = ROOT) -> list[dict[str, Any]]:
@@ -57,10 +67,19 @@ def matrix(
     *, native: bool = False, workers_only: bool = False, root: Path = ROOT
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
+    project_groups: set[str] = set()
     for group in groups(root):
         if workers_only and group["id"] == "python-core":
             continue
-        item = {"group": group["id"], "profiles": " ".join(group["profiles"])}
+        slug = project_group_slug(group["id"])
+        if slug in project_groups:
+            raise ValueError("CI project group slugs must be unique")
+        project_groups.add(slug)
+        item = {
+            "group": group["id"],
+            "profiles": " ".join(group["profiles"]),
+            "project_group": slug,
+        }
         if native:
             rows.extend(
                 {**item, "architecture": arch, "runner": runner} for arch, runner in RUNNERS.items()

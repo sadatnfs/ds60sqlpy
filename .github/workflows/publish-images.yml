@@ -154,7 +154,7 @@ jobs:
       ARCHITECTURE: ${{ matrix.architecture }}
       CI_GROUP: ${{ matrix.group }}
       PROFILES: ${{ matrix.profiles }}
-      CI_PROJECT: ds60-pub-${{ matrix.group }}-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+      CI_PROJECT: ds60-pub-${{ matrix.project_group }}-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -283,4 +283,60 @@ jobs:
           name: published-release-attempt-${{ github.run_attempt }}
           path: work/release/release.json
           if-no-files-found: error
+          retention-days: 30
+
+  hub-acceptance:
+    name: Pull published classroom (${{ matrix.architecture }})
+    needs: promote
+    if: needs.promote.result == 'success'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      ARCHITECTURE: ${{ matrix.architecture }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Select this run's completed full promotion receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python scripts/ci_hub_acceptance.py fetch --mode full
+          --destination work/hub-release/release.json
+      - name: Inspect all published indexes and run a native Core starter
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-hub-acceptance"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_hub_acceptance.py accept --mode full \
+            --receipt work/hub-release/release.json --architecture "$ARCHITECTURE" \
+            --report work/hub-acceptance.json
+      - name: Retain distinct post-publication pull evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: hub-acceptance-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: |
+            work/hub-acceptance.json
+            work/hub-acceptance-diagnostics.json
+          if-no-files-found: ignore
           retention-days: 30

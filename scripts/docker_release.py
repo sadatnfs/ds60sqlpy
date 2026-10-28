@@ -59,6 +59,8 @@ PROFILE = "io.ds60.release.profile"
 REVISION = "org.opencontainers.image.revision"
 RELEASE_VERSION = "org.opencontainers.image.version"
 SOURCE = "org.opencontainers.image.source"
+SCOPE = "io.ds60.release.scope"
+GROUP = "io.ds60.release.group"
 
 
 @dataclass(frozen=True)
@@ -192,7 +194,7 @@ def git_output(root: Path, args: list[str]) -> str:
     return result.stdout.strip()
 
 
-def github_context(root: Path, namespace: str) -> Context:
+def github_context(root: Path, namespace: str, *, target_group: str | None = None) -> Context:
     if (
         os.environ.get("GITHUB_ACTIONS") != "true"
         or os.environ.get("GITHUB_EVENT_NAME") != "push"
@@ -220,17 +222,29 @@ def github_context(root: Path, namespace: str) -> Context:
         or not isinstance(head, dict)
         or head.get("id") != context.revision
         or not isinstance(head.get("message"), str)
-        or "[publish-docker]" not in head["message"]
         or not isinstance(event.get("repository"), dict)
         or event["repository"].get("full_name") != context.source_repository
     ):
-        raise ReleaseError("The main push HEAD commit must contain [publish-docker]")
-    if git_output(
-        root, ["rev-parse", "HEAD"]
-    ) != context.revision or "[publish-docker]" not in git_output(
-        root, ["log", "-1", "--format=%B"]
+        raise ReleaseError("The main push HEAD commit does not match the release context")
+    from scripts.ci_targeted_images import parse_marker
+
+    try:
+        event_intent = parse_marker(head["message"], root)
+        checkout_intent = parse_marker(git_output(root, ["log", "-1", "--format=%B"]), root)
+    except ValueError as error:
+        raise ReleaseError("Invalid Docker publication marker: " + str(error)) from None
+    if (
+        git_output(root, ["rev-parse", "HEAD"]) != context.revision
+        or event_intent != checkout_intent
     ):
         raise ReleaseError("Checkout HEAD differs from the marked push commit")
+    if target_group is None:
+        if event_intent is None or event_intent.mode != "full":
+            raise ReleaseError("The main push HEAD commit must contain only [publish-docker]")
+    elif (
+        event_intent is None or event_intent.mode != "publish" or event_intent.group != target_group
+    ):
+        raise ReleaseError("The main push HEAD commit must select this targeted publish group")
     if git_output(root, ["status", "--porcelain", "--untracked-files=normal"]):
         raise ReleaseError("Release source must be a clean exact checkout")
     return context
@@ -309,9 +323,24 @@ def select_native(manifest: Manifest, architecture: str) -> Descriptor:
     return selected[0]
 
 
-def index_body(context: Context, profile: str, natives: dict[str, Descriptor]) -> bytes:
+def index_body(
+    context: Context,
+    profile: str,
+    natives: dict[str, Descriptor],
+    *,
+    target_group: str | None = None,
+) -> bytes:
     if set(natives) != set(ARCHITECTURES):
         raise ReleaseError("Promotion requires both native architectures")
+    annotations = {
+        SCHEMA: "1",
+        PROFILE: profile,
+        REVISION: context.revision,
+        RELEASE_VERSION: context.version,
+        SOURCE: "https://github.com/" + context.source_repository,
+    }
+    if target_group is not None:
+        annotations.update({SCOPE: "partial", GROUP: target_group})
     body = {
         "schemaVersion": 2,
         "mediaType": OCI_INDEX,
@@ -319,13 +348,7 @@ def index_body(context: Context, profile: str, natives: dict[str, Descriptor]) -
             {**natives[arch].record(), "platform": {"os": "linux", "architecture": arch}}
             for arch in ARCHITECTURES
         ],
-        "annotations": {
-            SCHEMA: "1",
-            PROFILE: profile,
-            REVISION: context.revision,
-            RELEASE_VERSION: context.version,
-            SOURCE: "https://github.com/" + context.source_repository,
-        },
+        "annotations": annotations,
     }
     return json.dumps(body, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
 
@@ -381,15 +404,42 @@ def load_published(registry: Registry, profile: Profile, context: Context) -> Ma
     return value
 
 
+def require_scope(manifest: Manifest, target_group: str | None) -> None:
+    annotations = manifest.document.get("annotations", {})
+    if target_group is None:
+        if SCOPE in annotations or GROUP in annotations:
+            raise ReleaseError("A partial version tag cannot complete a full release")
+    elif annotations.get(SCOPE) != "partial" or annotations.get(GROUP) != target_group:
+        raise ReleaseError("Existing version tag belongs to another publication scope")
+
+
+def selected_release_profiles(
+    profiles: dict[str, Profile], target_group: str | None, root: Path
+) -> set[str]:
+    if target_group is None:
+        return set(profiles)
+    declared_groups = release_groups(profiles, root)
+    if target_group not in declared_groups:
+        raise ReleaseError("Unknown targeted release group")
+    return set(SEEDS | declared_groups[target_group])
+
+
 def gate_release(
-    context: Context, profiles: dict[str, Profile], registry: Registry
+    context: Context,
+    profiles: dict[str, Profile],
+    registry: Registry,
+    *,
+    target_group: str | None = None,
+    root: Path = ROOT,
 ) -> dict[str, Any]:
+    selected = selected_release_profiles(profiles, target_group, root)
     published: dict[str, Manifest] = {}
     for key, profile in profiles.items():
         value = load_published(registry, profile, context)
-        if value is not None:
+        if value is not None and key in selected:
+            require_scope(value, target_group)
             published[key] = value
-    if published and set(published) != set(profiles):
+    if published and set(published) != selected:
         raise ReleaseError(
             "Version tags are incomplete or occupied. Retry the original failed promotion "
             "with its successful receipts, or bump the patch version; do not rebuild over them."
@@ -415,25 +465,29 @@ def gate_release(
                 latest is not None
                 and latest.digest == published["app"].descriptor.digest
                 and all(
-                    same_head(registry.head(latest_tag(profile)), published[key].descriptor)
-                    for key, profile in profiles.items()
+                    same_head(registry.head(latest_tag(profiles[key])), published[key].descriptor)
+                    for key in selected
                 )
             )
         ):
             mode = "noop"
-    return {
+    result = {
         "schema_version": 1,
         "kind": "ds60-release-gate",
         "context": asdict(context),
         "mode": mode,
         "profiles": [asdict(p) for p in profiles.values()],
     }
+    if target_group is not None:
+        result["selection"] = {"group": target_group, "profiles": sorted(selected)}
+    return result
 
 
 def load_gate(path: Path, root: Path = ROOT) -> tuple[Context, dict[str, Profile], str]:
     raw = read_json(path)
+    base_fields = {"schema_version", "kind", "context", "mode", "profiles"}
     if (
-        set(raw) != {"schema_version", "kind", "context", "mode", "profiles"}
+        set(raw) not in (base_fields, base_fields | {"selection"})
         or type(raw.get("schema_version")) is not int
         or raw["schema_version"] != 1
         or raw.get("kind") != "ds60-release-gate"
@@ -441,11 +495,24 @@ def load_gate(path: Path, root: Path = ROOT) -> tuple[Context, dict[str, Profile
     ):
         raise ReleaseError("Invalid release gate receipt")
     context = context_record(raw["context"])
-    current = github_context(root, context.namespace)
-    bound_context({"context": asdict(context)}, current, earlier=True)
     profiles = catalog(root)
     if raw["profiles"] != [asdict(p) for p in profiles.values()]:
         raise ReleaseError("Image catalog changed after the publication gate")
+    target_group = None
+    if "selection" in raw:
+        selection = raw["selection"]
+        declared_groups = release_groups(profiles, root)
+        if (
+            not isinstance(selection, dict)
+            or set(selection) != {"group", "profiles"}
+            or not isinstance(selection["group"], str)
+            or selection["group"] not in declared_groups
+            or selection["profiles"] != sorted(SEEDS | declared_groups[selection["group"]])
+        ):
+            raise ReleaseError("Invalid targeted release group in gate receipt")
+        target_group = selection["group"]
+    current = github_context(root, context.namespace, target_group=target_group)
+    bound_context({"context": asdict(context)}, current, earlier=True)
     return current, profiles, str(raw["mode"])
 
 
@@ -1212,6 +1279,8 @@ def promotion_inputs(
     profiles: dict[str, Profile],
     registry: Registry,
     root: Path = ROOT,
+    *,
+    target_group: str | None = None,
 ) -> dict[str, dict[str, Descriptor]]:
     selected: dict[tuple[str, str], dict[str, Any]] = {}
     for path in receipt_files(directory):
@@ -1226,9 +1295,14 @@ def promotion_inputs(
         if prior is None or attempt > int(prior["context"]["run_attempt"]):
             selected[identity] = raw
     groups = release_groups(profiles, root)
-    if set(selected) != {(group, arch) for group in groups for arch in ARCHITECTURES}:
+    required_groups = set(groups) if target_group is None else {"python-core", target_group}
+    if target_group is not None and target_group not in groups:
+        raise ReleaseError("Unknown targeted promotion group")
+    if set(selected) != {(group, arch) for group in required_groups for arch in ARCHITECTURES}:
         raise ReleaseError(
             "Promotion requires every native qualification group on both architectures"
+            if target_group is None
+            else "Promotion requires each selected native qualification group on both architectures"
         )
     seeds = {
         arch: {
@@ -1237,7 +1311,8 @@ def promotion_inputs(
         }
         for arch in ARCHITECTURES
     }
-    result: dict[str, dict[str, Descriptor]] = {key: {} for key in profiles}
+    selected_profiles = set(profiles) if target_group is None else set(SEEDS | groups[target_group])
+    result: dict[str, dict[str, Descriptor]] = {key: {} for key in selected_profiles}
     for (group, arch), raw in selected.items():
         if group != "python-core" and raw["seed_native_digests"] != seeds[arch]:
             raise ReleaseError(
@@ -1257,7 +1332,11 @@ def promotion_inputs(
                 raise ReleaseError("Qualified native manifest is missing")
             result[key][arch] = expected
     if any(set(items) != set(ARCHITECTURES) for items in result.values()):
-        raise ReleaseError("Promotion requires complete catalog coverage on amd64 and arm64")
+        raise ReleaseError(
+            "Promotion requires complete catalog coverage on amd64 and arm64"
+            if target_group is None
+            else "Promotion requires complete selected coverage on amd64 and arm64"
+        )
     return result
 
 
@@ -1313,18 +1392,32 @@ def promote_release(
     *,
     natives: dict[str, dict[str, Descriptor]] | None,
     output: Path,
+    target_group: str | None = None,
+    root: Path = ROOT,
 ) -> dict[str, Any]:
+    selected = selected_release_profiles(profiles, target_group, root)
+    if natives is not None and set(natives) != selected:
+        raise ReleaseError("Qualified native selection differs from the promotion scope")
+    scoped_profiles = {key: profile for key, profile in profiles.items() if key in selected}
     releases: dict[str, Manifest] = {}
     # Validate the entire version set before any canonical write, including when
     # recovering a previous invocation that committed only part of the set.
-    for key, profile in profiles.items():
-        existing = load_published(registry, profile, context)
+    published = {
+        key: load_published(registry, profile, context) for key, profile in profiles.items()
+    }
+    # Even an unselected occupied version tag must have the same source revision.
+    for key in profiles:
+        if key not in selected:
+            continue
+        existing = published[key]
+        if existing is not None:
+            require_scope(existing, target_group)
         if natives is None:
             if existing is None:
                 raise ReleaseError("Existing-release recovery requires every immutable version tag")
             releases[key] = existing
             continue
-        body = index_body(context, key, natives[key])
+        body = index_body(context, key, natives[key], target_group=target_group)
         expected = Manifest(Descriptor(OCI_INDEX, sha256(body), len(body)), json_object(body), body)
         if existing is not None:
             _, _, recorded = published_index(existing, key, context.source_repository)
@@ -1334,7 +1427,7 @@ def promote_release(
         else:
             releases[key] = expected
     latest = current_latest(registry, context)
-    skip_latest = latest_would_downgrade(registry, context, profiles, releases, latest)
+    skip_latest = latest_would_downgrade(registry, context, scoped_profiles, releases, latest)
     latest_snapshot = latest.descriptor.digest if latest is not None else None
     report: dict[str, Any] = {
         "schema_version": 1,
@@ -1345,8 +1438,12 @@ def promote_release(
         "latest_tags": [],
         "latest_skipped_newer_release": skip_latest,
     }
+    if target_group is not None:
+        report["scope"] = "partial"
+        report["group"] = target_group
+        report["profiles"] = sorted(selected)
     write_json(output, report)
-    order = [key for key in profiles if key != "app"] + ["app"]
+    order = [key for key in scoped_profiles if key != "app"] + ["app"]
     for key in order:
         tag = version_tag(profiles[key], context.version)
         expected = releases[key]
@@ -1412,6 +1509,7 @@ def main(argv: list[str] | None = None) -> int:
     gate = sub.add_parser("gate")
     gate.add_argument("--output", required=True, type=Path)
     gate.add_argument("--github-output", type=Path)
+    gate.add_argument("--target-group")
     for name in ("inspect", "stage", "import-seed", "promote"):
         command = sub.add_parser(name)
         command.add_argument("--gate", required=True, type=Path)
@@ -1433,10 +1531,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         args = parser.parse_args(argv)
         if args.command == "gate":
-            context = github_context(ROOT, os.environ.get("DOCKERHUB_USERNAME", ""))
+            context = github_context(
+                ROOT, os.environ.get("DOCKERHUB_USERNAME", ""), target_group=args.target_group
+            )
             registry = registry_for(context, push=True)
             registry.check_push_grant()
-            value = gate_release(context, catalog(ROOT), registry)
+            value = gate_release(context, catalog(ROOT), registry, target_group=args.target_group)
             write_json(args.output, value)
             if args.github_output:
                 with args.github_output.open("a", encoding="utf-8") as stream:
@@ -1444,9 +1544,15 @@ def main(argv: list[str] | None = None) -> int:
             print("Release gate: " + value["mode"] + " for " + context.version)
             return 0
         context, profiles, mode = load_gate(args.gate)
+        selection = read_json(args.gate).get("selection")
+        target_group = selection["group"] if selection is not None else None
         if args.command == "inspect":
             if mode != "build":
                 raise ReleaseError("Image inspection is only part of a new qualified build")
+            if target_group is not None and image_group(
+                set(args.profiles.split()), profiles
+            ) not in {"python-core", target_group}:
+                raise ReleaseError("Inspected profiles differ from the targeted gate")
             value = inspect_images(
                 context,
                 profiles,
@@ -1460,6 +1566,11 @@ def main(argv: list[str] | None = None) -> int:
             if mode != "build":
                 raise ReleaseError("Existing releases cannot stage replacement images")
             tested = load_tested(args.tested_images, context, profiles)
+            if target_group is not None and tested["group"] not in {
+                "python-core",
+                target_group,
+            }:
+                raise ReleaseError("Staged profiles differ from the targeted gate")
             records = qualification_records(
                 args.qualification,
                 context,
@@ -1487,11 +1598,24 @@ def main(argv: list[str] | None = None) -> int:
                 raise ReleaseError("A no-op gate does not authorize another promotion")
             registry = registry_for(context, push=True)
             natives = (
-                promotion_inputs(args.receipts_dir, context, profiles, registry)
+                promotion_inputs(
+                    args.receipts_dir,
+                    context,
+                    profiles,
+                    registry,
+                    target_group=target_group,
+                )
                 if mode == "build"
                 else None
             )
-            promote_release(context, profiles, registry, natives=natives, output=args.output)
+            promote_release(
+                context,
+                profiles,
+                registry,
+                natives=natives,
+                output=args.output,
+                target_group=target_group,
+            )
         print("Release operation completed: " + args.command)
         return 0
     except ReleaseError as error:

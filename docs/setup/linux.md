@@ -33,8 +33,9 @@ by everyone or run the classroom as root merely to hide a permission problem.
 
 ## 2. Get the course
 
-Use an authorized Git clone or an extracted starter ZIP. The repository is
-currently private and requires access from its owner.
+Clone a public repository normally, or use an extracted starter ZIP. For a
+restricted fork, sign in with an account that has access or use an
+owner-provided archive.
 
 ```sh
 git clone https://github.com/sadatnfs/ds60sqlpy.git

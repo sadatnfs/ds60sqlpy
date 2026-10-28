@@ -32,9 +32,9 @@ without a reachable engine is not ready for the classroom.
 
 ## 2. Open the course directory
 
-Clone the repository if you have access, or extract the complete starter ZIP.
-Repository access is currently private; use an authenticated Git credential
-manager or the owner's supplied archive. Never put a token in a clone URL.
+Clone the repository or extract the complete starter ZIP. A public repository
+can be cloned without signing in. For a restricted fork, use an account with
+access or an owner-provided archive. Never put a token in a clone URL.
 
 ```sh
 git clone https://github.com/sadatnfs/ds60sqlpy.git
