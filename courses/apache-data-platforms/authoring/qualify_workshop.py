@@ -358,6 +358,17 @@ def qualify(
         report["passed"] = True
     except Exception as error:
         report["error"] = safe_diagnostic(str(error))
+        # The launcher verifies saved ownership before reading service logs.
+        # Retain bounded diagnostics before the synthetic resources disappear.
+        if (workspace / ".env").is_file() and not (workspace / ".env").is_symlink():
+            try:
+                logs = safe_diagnostic(command(["bash", "run.sh", "logs"], workspace, timeout=30))[
+                    -6000:
+                ]
+                (workspace / "failure.log").write_text(logs + "\n")
+                report["failure_logs"] = logs
+            except Exception as diagnostic_error:
+                report["failure_logs_error"] = safe_diagnostic(str(diagnostic_error))[-6000:]
     finally:
         if (workspace / ".env").is_file():
             try:

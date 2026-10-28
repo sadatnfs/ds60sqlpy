@@ -10,7 +10,7 @@ if [[ ! -f $data/meta.properties ]]; then
     echo 'Data exists without meta.properties. Refusing to reformat; inspect the owned volume.' >&2
     exit 2
   }
-  /opt/kafka/bin/kafka-storage.sh format --cluster-id "$CLUSTER_ID" --config /project/server.properties
+  /opt/kafka/bin/kafka-storage.sh format --cluster-id="$CLUSTER_ID" --config /project/server.properties
 else
   recorded=$(sed -n 's/^cluster.id=//p' "$data/meta.properties")
   [[ $recorded == "$CLUSTER_ID" ]] || {
