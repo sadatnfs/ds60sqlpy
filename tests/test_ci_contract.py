@@ -148,6 +148,14 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             assert "runner: ubuntu-24.04" in workflow
             assert "workflow_dispatch:" not in workflow
             assert "on:\n  push:" in workflow
+        elif path.name == "verify-published-images.yml":
+            assert runners == ["${{ matrix.runner }}"]
+            assert "runner: ubuntu-24.04-arm" in workflow
+            assert "runner: ubuntu-24.04" in workflow
+            assert "workflow_dispatch:" in workflow and "  push:" not in workflow
+            assert "fetch-depth: 0" in workflow
+            assert "docker_release.py promote" not in workflow
+            assert "docker_release.py stage" not in workflow
         else:
             assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow

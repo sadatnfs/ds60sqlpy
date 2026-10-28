@@ -373,6 +373,15 @@ def test_partial_hub_start_resolves_latest_and_checks_app_worker_resume(
     monkeypatch.setattr(hub, "read_selection", lambda *args: None)
     monkeypatch.setattr(
         hub,
+        "classroom_url",
+        lambda *args: ("http://127.0.0.1:32769/classroom", 32769),
+    )
+    monkeypatch.setattr(hub, "browser_readback", lambda *args: None)
+    monkeypatch.setattr(hub, "lab_image_and_port", lambda *args: ("sha256:" + "a" * 64, 32769))
+    monkeypatch.setattr(hub, "write_learning_marker", lambda *args: None)
+    monkeypatch.setattr(hub, "read_learning_marker", lambda *args: None)
+    monkeypatch.setattr(
+        hub,
         "docker_items",
         lambda kind, project, root: ["learning", "database"] if kind == "volume" else [],
     )
@@ -391,7 +400,10 @@ def test_partial_hub_start_resolves_latest_and_checks_app_worker_resume(
     result = hub.launch_and_resume(
         context(), "partial", "javascript-typescript", False, "amd64", root / "work/diag.txt", root
     )
-    assert result["stop_resume_same_containers"] is True
+    assert result["stop_resume_same_stateful_containers"] is True
+    assert result["app_recreated_for_port_repair"] is False
+    assert result["learning_marker_retained"] is True
+    assert result["browser_readback_ok"] is True
     assert (
         "--profile" in commands[0]
         and "javascript-node" in commands[0]
@@ -399,9 +411,200 @@ def test_partial_hub_start_resolves_latest_and_checks_app_worker_resume(
     )
     assert "javascript-node=latest" in commands[0]
     assert services.count("lab") == 2 and services.count("postgres") == 2
+    assert services.count("python-core-worker") == 2
     assert commands[1][:3] == ["bash", "classroom", "stop"]
     assert commands[2][:3] == ["bash", "classroom", "resume"]
     assert commands[3][0] == "cleanup"
+
+
+def fake_resumable_hub(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    *,
+    port_changed: bool = True,
+    app_recreated: bool = True,
+    worker_changed: bool = False,
+    volume_changed: bool = False,
+    image_changed: bool = False,
+    marker_lost: bool = False,
+    selection_lost: bool = False,
+    browser_broken: bool = False,
+) -> tuple[Path, list[str]]:
+    """Model one disposable hosted project without Docker or registry traffic."""
+    root = tmp_path / "repo"
+    root.mkdir()
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    phase = {"resumed": False}
+    calls: list[str] = []
+    monkeypatch.setattr(hub, "assert_new_project", lambda *args: calls.append("new-project"))
+    monkeypatch.setattr(hub, "save_diagnostics", lambda *args: calls.append("diagnostics"))
+    monkeypatch.setattr(hub, "cleanup_project", lambda *args: calls.append("cleanup"))
+
+    def visible(args: list[str], **kwargs: Any) -> None:
+        calls.append("command:" + " ".join(args[:3]))
+        if args[:3] == ["bash", "classroom", "resume"]:
+            phase["resumed"] = True
+
+    def container_id(project: str, service: str, root: Path) -> str:
+        if phase["resumed"] and service == "lab" and app_recreated:
+            return "lab-after"
+        if phase["resumed"] and service == "python-core-worker" and worker_changed:
+            return "core-after"
+        return service + "-before"
+
+    def volumes(kind: str, project: str, root: Path) -> list[str]:
+        if kind != "volume":
+            return []
+        if phase["resumed"] and volume_changed:
+            return ["learning-new", "database"]
+        return ["learning", "database"]
+
+    def url(project: str, root: Path) -> tuple[str, int]:
+        port = 32771 if phase["resumed"] and port_changed else 32769
+        return f"http://127.0.0.1:{port}/classroom", port
+
+    def app_identity(container_id: str, root: Path) -> tuple[str, int]:
+        port = 32771 if phase["resumed"] and port_changed else 32769
+        image = "b" * 64 if phase["resumed"] and image_changed else "a" * 64
+        return "sha256:" + image, port
+
+    def selection(*args: Any) -> None:
+        calls.append("selection")
+        if phase["resumed"] and selection_lost:
+            raise ReleaseError("saved release changed")
+
+    def marker(*args: Any) -> None:
+        calls.append("marker-read")
+        if marker_lost:
+            raise ReleaseError("learner marker missing")
+
+    def browser(address: str) -> None:
+        calls.append("browser")
+        if phase["resumed"] and browser_broken:
+            raise ReleaseError("browser did not return HTML")
+
+    monkeypatch.setattr(hub, "run_visible", visible)
+    monkeypatch.setattr(hub, "compose_ids", container_id)
+    monkeypatch.setattr(hub, "docker_items", volumes)
+    monkeypatch.setattr(hub, "classroom_url", url)
+    monkeypatch.setattr(hub, "lab_image_and_port", app_identity)
+    monkeypatch.setattr(hub, "read_selection", selection)
+    monkeypatch.setattr(hub, "write_learning_marker", lambda *args: calls.append("marker-write"))
+    monkeypatch.setattr(hub, "read_learning_marker", marker)
+    monkeypatch.setattr(hub, "browser_readback", browser)
+    return root, calls
+
+
+def test_changed_browser_port_allows_only_same_image_app_repair(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, calls = fake_resumable_hub(monkeypatch, tmp_path)
+    result = hub.launch_and_resume(
+        context(),
+        "full",
+        None,
+        False,
+        "amd64",
+        root / "work/diag.json",
+        root,
+        project="ds60-hub-amd64-12345-2",
+    )
+    assert result["stop_resume_same_stateful_containers"] is True
+    assert result["app_recreated_for_port_repair"] is True
+    assert result["app_image_unchanged"] is True
+    assert result["learning_marker_retained"] is True
+    assert result["browser_readback_ok"] is True
+    assert (result["browser_port_before"], result["browser_port_after"]) == (32769, 32771)
+    assert calls.count("selection") == 2
+    assert calls.count("browser") == 2
+    assert "marker-write" in calls and "marker-read" in calls
+    assert calls[-1] == "cleanup"
+
+
+@pytest.mark.parametrize(
+    ("options", "message"),
+    [
+        ({"port_changed": False}, "App recreation does not match"),
+        ({"app_recreated": False}, "App recreation does not match"),
+        ({"worker_changed": True}, "python-core-worker container changed"),
+        ({"volume_changed": True}, "named learning or database volumes changed"),
+        ({"image_changed": True}, "App image ID changed"),
+        ({"marker_lost": True}, "learner marker missing"),
+        ({"selection_lost": True}, "saved Hub image selection changed"),
+        ({"browser_broken": True}, "browser did not return HTML"),
+    ],
+)
+def test_resume_rejects_state_loss_or_unexplained_app_replacement(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    options: dict[str, bool],
+    message: str,
+) -> None:
+    root, calls = fake_resumable_hub(monkeypatch, tmp_path, **options)
+    with pytest.raises(ReleaseError, match=message):
+        hub.launch_and_resume(
+            context(),
+            "full",
+            None,
+            False,
+            "amd64",
+            root / "work/diag.json",
+            root,
+            project="ds60-hub-amd64-12345-2",
+        )
+    assert "marker-read" in calls and calls.count("selection") == 2
+    assert calls[-2:] == ["diagnostics", "cleanup"]
+
+
+def test_explicit_project_must_match_native_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        hub, "assert_new_project", lambda *args: pytest.fail("wrong project admitted")
+    )
+    with pytest.raises(ReleaseError, match="not owned by this architecture"):
+        hub.launch_and_resume(
+            context(),
+            "full",
+            None,
+            False,
+            "amd64",
+            tmp_path / "diag.json",
+            tmp_path,
+            project="ds60-hub-arm64-12345-2",
+        )
+
+
+def test_browser_url_is_bounded_local_state_and_never_an_external_route(tmp_path: Path) -> None:
+    project = "ds60-hub-amd64-12345-2"
+    path = tmp_path / ".classroom" / project / "classroom.url"
+    path.parent.mkdir(parents=True)
+    path.write_text("http://127.0.0.1:32771/classroom\n")
+    assert hub.classroom_url(project, tmp_path) == ("http://127.0.0.1:32771/classroom", 32771)
+    path.write_text("http://example.com:32771/classroom\n")
+    with pytest.raises(ReleaseError, match="loopback classroom route"):
+        hub.classroom_url(project, tmp_path)
+    with pytest.raises(ReleaseError, match="loopback classroom URL"):
+        hub.browser_readback("http://example.com:32771/classroom")
+    path.unlink()
+    path.symlink_to(tmp_path / "other")
+    with pytest.raises(ReleaseError, match="bounded browser URL"):
+        hub.classroom_url(project, tmp_path)
+
+
+def test_app_identity_reads_exact_image_id_and_one_public_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    image_id = "sha256:" + "a" * 64
+    values = {
+        "{{.Image}}": (image_id + "\n").encode(),
+        "{{range .Config.Env}}{{println .}}{{end}}": b"HOME=/tmp\nDS60_PUBLIC_PORT=32771\n",
+    }
+    monkeypatch.setattr(hub, "run_output", lambda args, **kwargs: values[args[3]])
+    assert hub.lab_image_and_port("container-id") == (image_id, 32771)
+    values["{{range .Config.Env}}{{println .}}{{end}}"] += b"DS60_PUBLIC_PORT=32772\n"
+    with pytest.raises(ReleaseError, match="single valid public-port"):
+        hub.lab_image_and_port("container-id")
 
 
 def test_failed_start_retains_diagnostics_before_owned_cleanup(

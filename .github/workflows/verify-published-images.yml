@@ -1,0 +1,96 @@
+name: Reverify published classroom images
+
+on:
+  workflow_dispatch:
+    inputs:
+      published_run_id:
+        description: GitHub Actions run that promoted the partial 1.0.0 release
+        required: true
+        type: string
+      published_sha:
+        description: Exact published main commit SHA
+        required: true
+        type: string
+      published_attempt:
+        description: Attempt that uploaded the published promotion receipt
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+# Keep latest aliases stable while the old release is read back on both runners.
+concurrency:
+  group: classroom-dockerhub-publication
+  cancel-in-progress: false
+
+jobs:
+  native-pull:
+    name: Reverify partial 1.0.0 (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      ARCHITECTURE: ${{ matrix.architecture }}
+      PUBLISHED_RUN_ID: ${{ inputs.published_run_id }}
+      PUBLISHED_SHA: ${{ inputs.published_sha }}
+      PUBLISHED_ATTEMPT: ${{ inputs.published_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Bind current source checks and the old immutable promotion receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python scripts/ci_hub_reverify.py preflight
+          --published-run-id "$PUBLISHED_RUN_ID"
+          --published-sha "$PUBLISHED_SHA"
+          --published-attempt "$PUBLISHED_ATTEMPT"
+          --receipt work/reverify/release.json
+          --preflight work/reverify/preflight.json
+      - name: Inspect immutable indexes and pull a fresh native classroom
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-hub-reverify"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_hub_reverify.py accept \
+            --published-run-id "$PUBLISHED_RUN_ID" \
+            --published-sha "$PUBLISHED_SHA" \
+            --published-attempt "$PUBLISHED_ATTEMPT" \
+            --receipt work/reverify/release.json \
+            --preflight work/reverify/preflight.json \
+            --architecture "$ARCHITECTURE" \
+            --report work/reverify/acceptance.json
+      - name: Retain read-only native verification evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: hub-reverification-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: |
+            work/reverify/preflight.json
+            work/reverify/release.json
+            work/reverify/acceptance.json
+            work/reverify/hub-reverify-diagnostics.json
+          if-no-files-found: ignore
+          retention-days: 30

@@ -16,6 +16,8 @@ import re
 import stat
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 import zipfile
 from contextlib import suppress
 from pathlib import Path
@@ -55,6 +57,7 @@ MAX_ARCHIVE = 512 * 1024
 MAX_REPORT = 256 * 1024
 MAX_INDEX = 64 * 1024
 PROJECT = re.compile(r"ds60-hub-(amd64|arm64)-([1-9][0-9]{0,19})-([1-9][0-9]{0,5})\Z")
+CLASSROOM_URL = re.compile(r"http://127\.0\.0\.1:([1-9][0-9]{0,4})/classroom\Z")
 
 
 def environment() -> dict[str, str]:
@@ -590,6 +593,113 @@ def read_selection(
         raise ReleaseError("Hosted launcher did not resolve and pin the worker latest alias")
 
 
+def classroom_url(project: str, root: Path = ROOT) -> tuple[str, int]:
+    """Read only the launcher-owned loopback URL, including its actual host port."""
+    path = root / ".classroom" / project / "classroom.url"
+    if path.is_symlink() or not path.is_file() or not 0 < path.stat().st_size <= 128:
+        raise ReleaseError("Hosted launcher did not save a bounded browser URL")
+    raw = path.read_bytes()
+    if raw.endswith(b"\n"):
+        raw = raw[:-1]
+    try:
+        url = raw.decode("ascii")
+    except UnicodeError:
+        raise ReleaseError("Hosted browser URL is not ASCII loopback text") from None
+    match = CLASSROOM_URL.fullmatch(url)
+    if match is None or int(match[1]) > 65535:
+        raise ReleaseError("Hosted browser URL is not one valid loopback classroom route")
+    return url, int(match[1])
+
+
+def browser_readback(url: str) -> None:
+    """Prove the host-facing classroom still serves HTML after startup or repair."""
+    match = CLASSROOM_URL.fullmatch(url)
+    if match is None or int(match[1]) > 65535:
+        raise ReleaseError("Hosted browser readback requires a loopback classroom URL")
+
+    class _NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(
+            self,
+            req: Any,
+            fp: Any,
+            code: int,
+            msg: str,
+            headers: Any,
+            newurl: str,
+        ) -> None:
+            return None
+
+    request = urllib.request.Request(url, headers={"User-Agent": "ds60-hub-acceptance"})
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
+        with opener.open(request, timeout=10) as response:
+            body = response.read(1_000_001)
+            if (
+                response.status != 200
+                or response.headers.get_content_type() != "text/html"
+                or not 0 < len(body) <= 1_000_000
+            ):
+                raise ReleaseError("Hosted browser route did not return bounded HTML")
+    except (OSError, TimeoutError, urllib.error.URLError):
+        raise ReleaseError("Hosted browser route is not reachable on loopback") from None
+
+
+def lab_image_and_port(container_id: str, root: Path = ROOT) -> tuple[str, int]:
+    """Bind App identity to its immutable local image and public-port setting."""
+    image_id = (
+        run_output(["docker", "inspect", "--format", "{{.Image}}", container_id], root=root)
+        .decode("ascii")
+        .strip()
+    )
+    if re.fullmatch(r"sha256:[a-f0-9]{64}", image_id) is None:
+        raise ReleaseError("Hosted App image ID is invalid")
+    environment = run_output(
+        [
+            "docker",
+            "inspect",
+            "--format",
+            "{{range .Config.Env}}{{println .}}{{end}}",
+            container_id,
+        ],
+        root=root,
+    ).decode("utf-8", "strict")
+    matches = [
+        line.split("=", 1)[1]
+        for line in environment.splitlines()
+        if line.startswith("DS60_PUBLIC_PORT=")
+    ]
+    if len(matches) != 1 or re.fullmatch(r"[1-9][0-9]{0,4}", matches[0]) is None:
+        raise ReleaseError("Hosted App has no single valid public-port setting")
+    port = int(matches[0])
+    if port > 65535:
+        raise ReleaseError("Hosted App public port is out of range")
+    return image_id, port
+
+
+_MARKER_PATH = "/workspace/.learning/.ds60-hub-acceptance-marker"
+_WRITE_MARKER = (
+    "from pathlib import Path\n"
+    "import sys\n"
+    f"with Path({_MARKER_PATH!r}).open('x', encoding='ascii') as output:\n"
+    "    output.write(sys.argv[1])\n"
+)
+_READ_MARKER = (
+    "from pathlib import Path\n"
+    "import sys\n"
+    f"sys.stdout.write(Path({_MARKER_PATH!r}).read_text(encoding='ascii'))\n"
+)
+
+
+def write_learning_marker(container_id: str, marker: str, root: Path = ROOT) -> None:
+    run_output(["docker", "exec", container_id, "python", "-c", _WRITE_MARKER, marker], root=root)
+
+
+def read_learning_marker(container_id: str, marker: str, root: Path = ROOT) -> None:
+    actual = run_output(["docker", "exec", container_id, "python", "-c", _READ_MARKER], root=root)
+    if actual != marker.encode("ascii"):
+        raise ReleaseError("Hosted learner volume lost its saved marker across stop/resume")
+
+
 def launch_and_resume(
     context: Any,
     mode: str,
@@ -598,8 +708,13 @@ def launch_and_resume(
     architecture: str,
     diagnostics: Path,
     root: Path = ROOT,
+    *,
+    project: str | None = None,
 ) -> dict[str, Any]:
-    project = project_name(architecture)
+    project = project_name(architecture) if project is None else project
+    match = PROJECT.fullmatch(project)
+    if len(project) > 49 or match is None or match[1] != architecture:
+        raise ReleaseError("Hosted disposable project name is not owned by this architecture")
     assert_new_project(project, root)
     workers = (
         ["python-core"]
@@ -622,25 +737,29 @@ def launch_and_resume(
     primary_error: Exception | None = None
     try:
         run_visible(command, timeout=2700, root=root)
+        initial_url, initial_port = classroom_url(project, root)
+        browser_readback(initial_url)
         read_selection(project, context, latest_profile, root)
+        worker_services = ["python-core-worker"]
+        worker_services.extend(
+            next(
+                line.split()[1]
+                for line in (root / "docker/classroom-images.tsv").read_text().splitlines()
+                if line.startswith(worker + " ")
+            )
+            for worker in workers
+            if worker != "python-core"
+        )
+        stateful_services = ["postgres", *worker_services]
         before = {
-            service: compose_ids(project, service, root)
-            for service in [
-                "postgres",
-                "lab",
-                *[
-                    "python-core-worker"
-                    if worker == "python-core"
-                    else next(
-                        line.split()[1]
-                        for line in (root / "docker/classroom-images.tsv").read_text().splitlines()
-                        if line.startswith(worker + " ")
-                    )
-                    for worker in workers
-                ],
-            ]
+            service: compose_ids(project, service, root) for service in [*stateful_services, "lab"]
         }
-        volumes_before = docker_items("volume", project, root)
+        initial_image, initial_app_port = lab_image_and_port(before["lab"], root)
+        if initial_app_port != initial_port:
+            raise ReleaseError("Hosted App public port differs from its first browser URL")
+        marker = f"ds60-hub-acceptance:{context.revision}:{architecture}"
+        write_learning_marker(before["lab"], marker, root)
+        volumes_before = set(docker_items("volume", project, root))
         if len(volumes_before) < 2:
             raise ReleaseError(
                 "Hosted classroom did not create persistent learning and database volumes"
@@ -651,15 +770,49 @@ def launch_and_resume(
             timeout=600,
             root=root,
         )
+        resumed_url, resumed_port = classroom_url(project, root)
         after = {service: compose_ids(project, service, root) for service in before}
-        if before != after or docker_items("volume", project, root) != volumes_before:
-            raise ReleaseError("Hosted stop/resume replaced a worker, database or learning volume")
-        read_selection(project, context, latest_profile, root)
+        volumes_after = set(docker_items("volume", project, root))
+        resumed_image, resumed_app_port = lab_image_and_port(after["lab"], root)
+        port_changed = initial_port != resumed_port
+        app_recreated = before["lab"] != after["lab"]
+        violations: list[str] = []
+        for service in stateful_services:
+            if before[service] != after[service]:
+                violations.append(f"{service} container changed across stop/resume")
+        if volumes_before != volumes_after:
+            violations.append("named learning or database volumes changed across stop/resume")
+        if resumed_image != initial_image:
+            violations.append("App image ID changed across stop/resume")
+        if resumed_app_port != resumed_port:
+            violations.append("resumed App public port differs from the browser URL")
+        if app_recreated != port_changed:
+            violations.append("App recreation does not match the observed browser port change")
+        try:
+            read_learning_marker(after["lab"], marker, root)
+        except ReleaseError as error:
+            violations.append(str(error))
+        try:
+            read_selection(project, context, latest_profile, root)
+        except (OSError, ReleaseError) as error:
+            violations.append("saved Hub image selection changed: " + str(error))
+        try:
+            browser_readback(resumed_url)
+        except ReleaseError as error:
+            violations.append(str(error))
+        if violations:
+            raise ReleaseError("Hosted stop/resume failed: " + "; ".join(violations))
         return {
             "profiles_started": workers,
             "saved_version": context.version,
             "latest_resolved": not skip_latest,
-            "stop_resume_same_containers": True,
+            "stop_resume_same_stateful_containers": True,
+            "app_recreated_for_port_repair": app_recreated,
+            "app_image_unchanged": True,
+            "learning_marker_retained": True,
+            "browser_readback_ok": True,
+            "browser_port_before": initial_port,
+            "browser_port_after": resumed_port,
             "persistent_volumes": len(volumes_before),
         }
     except Exception as error:
