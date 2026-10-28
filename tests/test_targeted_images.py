@@ -8,8 +8,9 @@ from typing import Any
 
 import pytest
 
+from scripts import ci_release_artifacts as release_artifacts
 from scripts import ci_targeted_images as targeted
-from scripts.ci_profiles import groups
+from scripts.ci_profiles import RUNNERS, groups, project_group_slug
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -49,18 +50,20 @@ def test_every_ordinary_group_and_profile_alias_selects_the_complete_group() -> 
                 assert targeted.parse_marker(f"Source change [{mode}-{alias}]") == targeted.Intent(
                     mode, row["id"], f"[{mode}-{alias}]"
                 )
-    assert targeted.parse_marker("[publish-js]").group == "javascript-typescript"
-    assert targeted.parse_marker("[build-test-js]").group == "javascript-typescript"
+    publish = targeted.parse_marker("[publish-js]")
+    build_test = targeted.parse_marker("[build-test-js]")
+    assert publish is not None and publish.group == "javascript-typescript"
+    assert build_test is not None and build_test.group == "javascript-typescript"
     assert targeted.selected_matrix("javascript-typescript") == {
         "include": [
             {
                 "group": "javascript-typescript",
                 "profiles": "javascript-node typescript-node",
-                "project_group": targeted.project_group_slug("javascript-typescript"),
+                "project_group": project_group_slug("javascript-typescript"),
                 "architecture": arch,
                 "runner": runner,
             }
-            for arch, runner in targeted.RUNNERS.items()
+            for arch, runner in RUNNERS.items()
         ]
     }
 
@@ -202,16 +205,16 @@ def test_targeted_receipt_download_selects_only_seed_and_requested_group(
         monkeypatch.setenv(key, value)
     observed: list[str] = []
 
-    def select(pages: Any, keys: list[str], attempt: int) -> list[targeted.artifacts.Artifact]:
+    def select(pages: Any, keys: list[str], attempt: int) -> list[release_artifacts.Artifact]:
         assert pages == [] and attempt == 2
         observed.extend(keys)
         return [
-            targeted.artifacts.Artifact(key, 2, index + 1, key) for index, key in enumerate(keys)
+            release_artifacts.Artifact(key, 2, index + 1, key) for index, key in enumerate(keys)
         ]
 
-    monkeypatch.setattr(targeted.artifacts, "gh", lambda args, maximum: b"[]")
-    monkeypatch.setattr(targeted.artifacts, "select_artifacts", select)
-    monkeypatch.setattr(targeted.artifacts, "receipt_bytes", lambda *args, **kwargs: b"{}")
+    monkeypatch.setattr(release_artifacts, "gh", lambda args, maximum: b"[]")
+    monkeypatch.setattr(release_artifacts, "select_artifacts", select)
+    monkeypatch.setattr(release_artifacts, "receipt_bytes", lambda *args, **kwargs: b"{}")
     root = tmp_path / "source"
     root.mkdir()
     (root / "work").mkdir()

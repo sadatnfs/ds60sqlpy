@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import subprocess
 import zipfile
 from dataclasses import asdict
 from pathlib import Path
@@ -12,7 +13,8 @@ from typing import Any
 import pytest
 
 from scripts import ci_hub_acceptance as hub
-from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError, sha256
+from scripts import ci_release_artifacts as artifacts
+from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError, descriptor, sha256
 from scripts.docker_release import Context, catalog, index_body, latest_tag, version_tag
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -155,7 +157,7 @@ def test_fetch_receipt_uses_latest_published_attempt_from_exact_run(
         assert args[-1].endswith("/11/zip")
         return bundle.getvalue()
 
-    monkeypatch.setattr(hub.artifacts, "gh", gh)
+    monkeypatch.setattr(artifacts, "gh", gh)
     root = tmp_path / "repo"
     (root / "work").mkdir(parents=True)
     target = root / "work/release.json"
@@ -185,7 +187,7 @@ def test_fetch_receipt_rejects_stage_or_wrong_source(
         }
     ]
     monkeypatch.setattr(
-        hub.artifacts,
+        artifacts,
         "gh",
         lambda args, maximum: (
             json.dumps(pages).encode()
@@ -235,7 +237,7 @@ def test_index_inspection_rejects_content_swap_and_wrong_scope(
 ) -> None:
     value, bodies = receipt("partial")
     tag = "1.0.0"
-    expected = hub.descriptor(value["version_tags"][-1])
+    expected = descriptor(value["version_tags"][-1])
     monkeypatch.setattr(hub, "run_output", lambda *args, **kwargs: bodies[tag] + b"tampered")
     with pytest.raises(ReleaseError, match="content differs"):
         hub.inspect_index(
@@ -375,11 +377,12 @@ def test_partial_hub_start_resolves_latest_and_checks_app_worker_resume(
         lambda kind, project, root: ["learning", "database"] if kind == "volume" else [],
     )
     services: list[str] = []
-    monkeypatch.setattr(
-        hub,
-        "compose_ids",
-        lambda project, service, root: services.append(service) or service + "-id",
-    )
+
+    def compose_id(project: str, service: str, root: Path) -> str:
+        services.append(service)
+        return service + "-id"
+
+    monkeypatch.setattr(hub, "compose_ids", compose_id)
     commands: list[list[str]] = []
     monkeypatch.setattr(hub, "run_visible", lambda args, **kwargs: commands.append(args))
     monkeypatch.setattr(
@@ -440,19 +443,16 @@ def test_diagnostics_redact_token_before_bounded_export(
     (root / "work").mkdir(parents=True)
     monkeypatch.setenv("DOCKERHUB_TOKEN", "secret-token-value")
 
-    def completed(*args: Any, **kwargs: Any) -> Any:
-        return type(
-            "Result",
-            (),
-            {
-                "returncode": 0,
-                "stdout": b"x" * 23_997
-                + b"secret-token-value\nAuthorization: Bearer secret-token-value\n",
-                "stderr": b"",
-            },
-        )()
+    def completed(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.CompletedProcess(
+            args,
+            0,
+            stdout=b"x" * 23_997
+            + b"secret-token-value\nAuthorization: Bearer secret-token-value\n",
+            stderr=b"",
+        )
 
-    monkeypatch.setattr(hub.subprocess, "run", completed)
+    monkeypatch.setattr(subprocess, "run", completed)
     target = root / "work/hub-acceptance-diagnostics.json"
     hub.save_diagnostics("ds60-hub-amd64-12345-2", target, root)
     document = json.loads(target.read_text())
