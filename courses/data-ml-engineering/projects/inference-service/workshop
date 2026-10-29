@@ -18,7 +18,7 @@ Inference lifecycle workshop (owned copy, Docker required)
   ./workshop status    Show this project's containers
   ./workshop logs      Follow this project's service logs
 Initial settings: WORKSHOP_PORT=8892 WORKSHOP_PROJECT=ds60-inference
-WORKSHOP_BASE_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.0.0
+WORKSHOP_BASE_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.0.1
 WORKSHOP_PACING=0 (optional pedagogical seconds per token, at most 0.2)
 No action publishes an image or deletes model/history files.
 HELP
@@ -47,7 +47,7 @@ if [[ ! -f .workshop/settings.env ]]; then
   mkdir -p .workshop/state
   project=${WORKSHOP_PROJECT:-ds60-inference}
   port=${WORKSHOP_PORT:-8892}
-  base=${WORKSHOP_BASE_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:1.0.0}
+  base=${WORKSHOP_BASE_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:1.0.1}
   pacing=${WORKSHOP_PACING:-0}
   [[ "$project" =~ ^[a-z0-9][a-z0-9_-]{2,50}$ ]] || {
     printf '%s\n' 'Invalid WORKSHOP_PROJECT.' >&2
@@ -119,7 +119,7 @@ done <<<"$owned_containers"
 compose=(docker compose --project-name "$project" --env-file .workshop/settings.env -f compose.yaml)
 if [[ "$action" == build || "$action" == prepare ]]; then
   docker image inspect "$base" >/dev/null 2>&1 || {
-    printf '%s\n' "Prepare the CPU Torch classroom image first: $base" 'From the classroom root: ./classroom build --profile llm-torch-cpu --local-build --tag 1.0.0' >&2
+    printf '%s\n' "Prepare the CPU Torch classroom image first: $base" 'From the classroom root: ./classroom build --profile llm-torch-cpu --local-build --tag 1.0.1' >&2
     exit 1
   }
   docker build --pull=false --progress plain --build-arg "BASE_IMAGE=$base" --tag "$image" .

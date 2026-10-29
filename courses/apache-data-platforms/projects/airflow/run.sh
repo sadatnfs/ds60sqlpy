@@ -90,7 +90,7 @@ prepare_image() {
       ;;
   esac
   if [[ $image == ds60-apache-airflow-core:3.3.2 ]]; then
-    base=ds60sqlpy-worker-python-core:1.0.0
+    base=ds60sqlpy-worker-python-core:1.0.1
     [[ $("$docker_cmd" image inspect --format '{{.Os}}|{{.Architecture}}' "$base") == "$native" ]] || {
       echo 'Prepare the matching native Core classroom image first.' >&2
       exit 2

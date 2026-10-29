@@ -32,11 +32,12 @@ tags are verified, and App latest moves last. An older rerun does not move
 latest backward.
 
 Use a matching source checkout or starter ZIP and select only published
-profiles. For the JS group:
+profiles. The accepted partial 1.0.0 App/Core/JS/TS release is explicitly
+selected with:
 
 ```sh
 ./classroom --profile javascript-node --profile typescript-node \
-  --from-hub YOUR_DOCKERHUB_USER --tag VERSION
+  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
 
 `./classroom` includes Python Core with explicit worker selections. The same
@@ -64,12 +65,21 @@ After successful promotion, a separate hosted acceptance job reads that run's
 published receipt, checks the selected combined indexes, then pulls and starts
 a fresh classroom on native AMD64 and ARM64 runners. It verifies that the
 launcher pins the release, that the selected worker is available, and that
-stop/resume retains its containers and learning/database volumes. The result
-and any bounded diagnostics are retained as separate acceptance artifacts.
+stop/resume retains PostgreSQL and worker container IDs, saved selections,
+learning/database volume names and a learner marker. If Docker reassigns the
+dynamic browser port, only the App container may be recreated from the same
+image to repair its public-port setting. The result and any bounded diagnostics
+are retained as separate acceptance artifacts.
 Canonical version and latest tags may already be published if this later
 acceptance fails. Inspect its receipt and repair the concrete failure before
 describing the release as ready for learners; do not treat promotion alone as
-a passed fresh-install check.
+a passed fresh-install check. The partial 1.0.0 promotion succeeded,
+but its original post-promotion assertion rejected an expected App-only port
+repair. A separate [read-only native reverification](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40787547771)
+accepted the same immutable tags on both architectures with saved-volume and
+browser readback checks. The old publisher run remains failed overall; no
+1.0.0 tag was repushed. A full release from later source requires a new
+checked-in version such as 1.0.1 and its own acceptance.
 
 If a qualification job fails, re-run the failed job and use successful receipts
 from the same workflow run and revision. A failed promotion may finish matching

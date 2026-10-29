@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 project_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
-image=${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.0}
+image=${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.1}
 exec docker run --rm --pull never --init --network none --read-only --cap-drop ALL \
   --security-opt no-new-privileges --user "$(id -u):$(id -g)" \
   --tmpfs /tmp:rw,nosuid,size=256m --env HOME=/tmp \

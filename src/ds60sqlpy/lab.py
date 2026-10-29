@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import math
 import os
@@ -348,7 +349,8 @@ class LabRequestHandler(CourseRequestHandler):
                 "object-src 'none'; frame-ancestors 'self'",
             )
             self.end_headers()
-            self.wfile.write(encoded)
+            with contextlib.suppress(BrokenPipeError, ConnectionResetError):
+                self.wfile.write(encoded)
             return
         if route == "/assets/rich-content.css":
             from ds60sqlpy.reader_content import rich_content_styles
@@ -379,7 +381,8 @@ class LabRequestHandler(CourseRequestHandler):
         )
         self.send_header("Content-Security-Policy", policy)
         self.end_headers()
-        self.wfile.write(encoded)
+        with contextlib.suppress(BrokenPipeError, ConnectionResetError):
+            self.wfile.write(encoded)
 
     def do_POST(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path

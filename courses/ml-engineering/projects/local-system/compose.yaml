@@ -1,6 +1,6 @@
 name: ds60-mle-workshop
 x-common: &common
-  image: ${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.0}
+  image: ${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.1}
   pull_policy: never
   user: "${DS60_WORKSHOP_UID:-1000}:${DS60_WORKSHOP_GID:-1000}"
   working_dir: /project

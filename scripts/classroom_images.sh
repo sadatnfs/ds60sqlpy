@@ -2,7 +2,7 @@
 # Sourced by the launcher. Values are data, never evaluated as shell code.
 image_source=local
 image_namespace=''
-release_version=1.0.0
+release_version=1.0.1
 image_tag="$release_version"
 image_source_explicit=0
 image_tag_explicit=0

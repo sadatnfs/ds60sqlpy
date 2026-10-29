@@ -242,9 +242,9 @@ bash run.sh evidence</code></pre>
 <p>The54.1.0 Python scheduler wrapper configures the listener but does not expose its advertised external host. The native default remains localhost. Actual testing found that separate-container executors could listen successfully while callbacks to that advertised address failed. The first query timed out and its failed receipt was retained. This project therefore uses separate processes in one container namespace, where the advertised loopback address is correct. It does not rewrite DNS or claim cross-host shuffle. A configurable native-binary multi- executor deployment requires separate preparation and qualification.</p>
 <h3 id="reuse-a-published-classroom-base-from-docker-hub">Reuse a published classroom base from Docker Hub<a class="heading-anchor" href="#reuse-a-published-classroom-base-from-docker-hub" aria-label="Link to this section">#</a></h3>
 <p>If the matching release is published, prepare the same local base alias without rebuilding it. Replace <code>yourname</code> with the publisher&#x27;s namespace. Docker selects the native architecture from the combined manifest:</p>
-<pre class="highlighted-code"><code class="language-bash">docker pull yourname/ds60sqlpy:1.0.0-worker-swift-linux
-docker tag yourname/ds60sqlpy:1.0.0-worker-swift-linux ds60sqlpy-worker-swift-linux:1.0.0</code></pre>
-<p>Then use the explicit <code>--reuse-swift</code> preparation in a fresh copied workshop. The launcher still verifies the native image architecture. This pulls and locally retags an existing Swift/Noble base; it does not push an image or rebuild that base. The separate workshop dependencies are prepared by the explicit workshop command. Combined worker tags include <code>worker-</code>; <code>1.0.0-swift-linux</code> is not this layout.</p></article>
+<pre class="highlighted-code"><code class="language-bash">docker pull yourname/ds60sqlpy:1.0.1-worker-swift-linux
+docker tag yourname/ds60sqlpy:1.0.1-worker-swift-linux ds60sqlpy-worker-swift-linux:1.0.1</code></pre>
+<p>Then use the explicit <code>--reuse-swift</code> preparation in a fresh copied workshop. The launcher still verifies the native image architecture. This pulls and locally retags an existing Swift/Noble base; it does not push an image or rebuild that base. The separate workshop dependencies are prepared by the explicit workshop command. Combined worker tags include <code>worker-</code>; <code>1.0.1-swift-linux</code> is not this layout.</p></article>
   </main>
 </body>
 </html>

@@ -9,7 +9,7 @@ This is an optional complete project for Data and ML Engineering chapters dme-05
 From the classroom repository root, prepare the ordinary CPU Torch image if it is missing:
 
 ```sh
-./classroom build --profile llm-torch-cpu --local-build --tag 1.0.0
+./classroom build --profile llm-torch-cpu --local-build --tag 1.0.1
 ```
 
 If you installed the classroom from Docker Hub, use the exact corresponding pulled Torch image as WORKSHOP_BASE_IMAGE below. The workshop never silently pulls or builds a missing base image. The initial HTTP image build installs only the seven small, hash-locked packages listed in requirements.lock, using network access during this explicit preparation step. Training and service startup perform no package or model downloads.
@@ -33,7 +33,7 @@ To choose another port, project name or compatible already-pulled base image, se
 ```sh
 WORKSHOP_PORT=8893 WORKSHOP_PROJECT=ds60-inference-two ./workshop prepare
 # A Hub-installed base can be supplied explicitly:
-# WORKSHOP_BASE_IMAGE=YOUR_ACCOUNT/ds60sqlpy:1.0.0-worker-llm-torch-cpu ./workshop prepare
+# WORKSHOP_BASE_IMAGE=YOUR_ACCOUNT/ds60sqlpy:1.0.1-worker-llm-torch-cpu ./workshop prepare
 ```
 
 Check the actual catalog suffix/tag in the classroom Docker Hub instructions before selecting a base. Do not invent a tag or use an incompatible architecture. Initial values are saved in .workshop/settings.env. Later commands use that saved selection; they do not silently change projects or ports from environment overrides.
@@ -120,7 +120,7 @@ workshop copy, train its small original model, exercise the real API, verify
 exact-container resume, replace the service and read the original records:
 
 ```sh
-python scripts/check_inference_project.py --project ds60-infer-ci-local100 --image ds60sqlpy-worker-llm-torch-cpu:1.0.0 --confirm-disposable --report work/inference-project-receipts.json
+python scripts/check_inference_project.py --project ds60-infer-ci-local100 --image ds60sqlpy-worker-llm-torch-cpu:1.0.1 --confirm-disposable --report work/inference-project-receipts.json
 ```
 
 The versioned CPU image must already exist and match the native Linux engine.

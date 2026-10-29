@@ -175,6 +175,18 @@ second platform or combined index; learners use `--architecture-tags` for that
 layout. See [distribution](../../../docs/dockerhub.md) before changing either
 contract. Local passes and staged images do not prove completed publication.
 
+When a new full version follows a partial release, update the checked-in Python
+package and editable lock stanza, App OCI label, launcher, Compose image
+defaults, Core base, owned service-workshop defaults and current full-install
+examples as one source change. Keep independent third-party and project image
+versions and saved `.workshop` selections. An immutable partial version tag is
+never reused for a different source revision. Run the exact source, starter,
+native worker and Hub pull gates before describing the new version as released.
+The dispatch-only `verify-published-images.yml` is a read-only historical
+recovery path for the accepted partial 1.0.0 image set, not a shortcut for
+publishing a new version. It compares the old promotion receipt and allowed
+verifier-only source delta, then tests native pulls without changing tags.
+
 ## Reuse the data and scientific execution contracts
 
 Arrow, DataFusion and PyIceberg library lessons use the separately locked

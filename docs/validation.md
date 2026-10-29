@@ -135,6 +135,7 @@ The equivalent Make targets are:
 ```text
 make test
 make test TEST_WORKERS=2
+make test TEST_WORKERS=6
 make test-serial
 ```
 
@@ -143,7 +144,10 @@ belong to the `shared-postgres` group and run serially within that group. The
 suite rejects unsafe distribution when those shared fixtures are enabled.
 Changing the scheduler can cause destructive fixture races even if individual
 tests pass. Use `-n 0` for focused serial diagnosis, and reduce worker count on
-machines with little memory. More workers do not guarantee shorter runtimes.
+machines with little memory. On a machine with spare CPU and memory, measure
+six workers before increasing further. The 4,913-case local release suite took
+about 8.5 minutes with four workers; a long individual reader test and shared
+fixtures still set a floor. More workers do not guarantee shorter runtimes.
 
 Record the passed, failed and skipped totals from the actual run. Explain skips
 by surface, such as an optional framework, a live database or historical
@@ -172,7 +176,20 @@ Hub classroom and verify stop/resume retention. For a full release the fresh
 runtime exercise uses App and Python Core; for a partial release it includes
 the selected group.
 Promotion can write canonical tags before this later acceptance fails, so
-inspect its distinct result before calling the release usable.
+inspect its distinct result before calling the release usable. A changing
+dynamic browser host port permits only an app-container repair from the same
+image; PostgreSQL, workers, named volumes, learner content and the saved image
+pin must remain stable.
+
+The dispatch-only `verify-published-images.yml` workflow is a read-only
+recovery check for the already-promoted partial 1.0.0 tags. It binds the old
+successful promotion receipt and source revision, accepts only verifier-file
+changes, and inspects/pulls the existing combined indexes on native AMD64 and
+ARM64. It cannot stage, promote or overwrite Hub tags. Its separate
+[successful native run](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40787547771)
+qualified that partial release after the old publisher's post-promotion test
+failed. The original run remains failed overall; a new full release needs its
+own complete qualification and automatic pull acceptance.
 
 Linux core jobs use UTF-8 and create their test workspace before starting
 four grouped pytest workers. Native Windows ACLs,
@@ -190,7 +207,8 @@ gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
 | Targeted image check | Push with one `[build-test-ALIAS]` in HEAD; native AMD64 and ARM64 | App/Core plus the alias's complete ordinary group build and qualify without Hub writes or a starter ZIP |
 | Targeted partial publication | Push to main with one `[publish-ALIAS]` in HEAD | Exact-revision source/starter gates, native App/Core and complete-group qualification, selected version/latest indexes and source/digest-bound promotion |
 | Full image publication | Push to main with `[publish-docker]` in HEAD | Native AMD64/ARM64 qualification of every ordinary profile and source/digest-bound promotion; staging images are distinct from completed version/latest tags |
-| Hosted Hub pull acceptance | After successful full or partial promotion; native AMD64 and ARM64 runners | Published-index and exact-receipt checks, fresh Hub classroom pull/start, then stop/resume with container and volume retention; a separate post-publication receipt, not proof from staging alone |
+| Hosted Hub pull acceptance | After successful full or partial promotion; native AMD64 and ARM64 runners | Published-index and exact-receipt checks, fresh Hub classroom pull/start, then stop/resume with stable stateful containers, volumes and saved learning; app-only port repair is verified separately |
+| Published-image read-only reverify | Manual dispatch on main for an already-promoted immutable partial 1.0.0 release | Old promotion artifact, source-diff allowlist, combined indexes and fresh native pull/resume are rechecked without a Hub write; its acceptance report is distinct from the original publishing run |
 | Application builds: Docker classroom | Push, pull request and manual dispatch, except targeted build-test or any marked publication push; isolated Linux groups cover all ordinary profiles on other events | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
 | Application builds: Scientific figures | Python Core and R Docker groups, before and after container replacement | Declared source-bound figures are captured, original drafts are restored, and the original figure receipts survive replacement without replay |
 | Application builds: Chromium acceptance | Python Core Docker group, with container replacement checks | Real browser navigation, isolated pads/results, saved progress, contrast, typeset mathematics, web live previews, all 24 D3 references, all eight Plotly variants and the offline DAX editor/reference flow pass their stated checks |

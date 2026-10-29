@@ -1,4 +1,4 @@
-ARG DS60_CORE_IMAGE=ds60sqlpy-lab:1.0.0
+ARG DS60_CORE_IMAGE=ds60sqlpy-lab:1.0.1
 FROM ${DS60_CORE_IMAGE}
 USER root
 RUN install -d -m 0700 /run/ds60

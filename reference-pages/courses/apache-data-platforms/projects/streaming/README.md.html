@@ -258,8 +258,8 @@ bash run.sh down</code></pre>
 <p>The Compose file pins the combined upstream image digest, not an ARM-only child. Each platform&#x27;s published descriptor still needs actual native acceptance. Kafka is an Apache project. Future Delta Sharing integration belongs to its separately identified Delta Lake/Linux Foundation service pack.</p>
 <h3 id="reuse-a-published-java-base-from-docker-hub">Reuse a published Java base from Docker Hub<a class="heading-anchor" href="#reuse-a-published-java-base-from-docker-hub" aria-label="Link to this section">#</a></h3>
 <p>If the matching combined release exists, replace <code>yourname</code> with its publisher&#x27;s namespace and prepare the same local Java 21 alias without rebuilding the base:</p>
-<pre class="highlighted-code"><code class="language-bash">docker pull yourname/ds60sqlpy:1.0.0-worker-java21
-docker tag yourname/ds60sqlpy:1.0.0-worker-java21 ds60sqlpy-worker-java21:1.0.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">docker pull yourname/ds60sqlpy:1.0.1-worker-java21
+docker tag yourname/ds60sqlpy:1.0.1-worker-java21 ds60sqlpy-worker-java21:1.0.1</code></pre>
 <p>Docker chooses the native architecture from that manifest; the workshop verifies it before the explicit <code>prepare --binary</code> build. This is a pull and local tag, with no registry push. Combined worker tags include <code>worker-</code>. The workshop still prepares its checksum-verified Kafka distribution separately.</p></article>
   </main>
 </body>

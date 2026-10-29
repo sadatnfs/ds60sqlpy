@@ -178,34 +178,37 @@ Local builds are the default. To install the current local source with visible
 build logs, use:
 
 ```sh
-./classroom --all --local-build --tag 1.0.0 --rebuild
+./classroom --all --local-build --tag 1.0.1 --rebuild
 ```
 
 ### Install a combined CI release
 
 Use a checkout or starter ZIP matching the published version. The default Hub
 layout is the combined Linux AMD64/ARM64 release produced by the full
-`[publish-docker]` GitHub workflow for marked pushes to main:
+`[publish-docker]` GitHub workflow for marked pushes to main. After that full
+1.0.1 workflow completes successfully, start it with:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1
 ```
 
 For a new Hub selection, you may omit `--tag`. The launcher resolves the
 app's `latest` alias once, uses that concrete version for workers and saves
-it. A partial app/Core plus JavaScript and TypeScript release needs only its
-published profiles:
+it. The accepted partial 1.0.0 App/Core plus JavaScript and TypeScript release
+needs only its published profiles. Pin 1.0.0 explicitly after full latest moves:
 
 ```sh
-./classroom --profile javascript-node --profile typescript-node --from-hub YOUR_DOCKERHUB_USER
+./classroom --profile javascript-node --profile typescript-node \
+  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
 
 Python Core is included automatically. `--all` requires every ordinary
 worker at the selected app version and fails if a partial release omitted
 one. A missing worker never causes a local fallback build.
 
-The app uses `USER/ds60sqlpy:1.0.0` and workers use tags such as
-`USER/ds60sqlpy:1.0.0-worker-python-core`. Docker selects the native architecture
+A completed full release uses `USER/ds60sqlpy:1.0.1` for the App and
+workers use tags such as
+`USER/ds60sqlpy:1.0.1-worker-python-core`. Docker selects the native architecture
 from each index. Startup validates the resolved Linux platform and does not
 fall back to local builds. Use `--starter` instead of `--all` for a smaller
 installation. Private Hub repositories require Docker authentication.
@@ -213,7 +216,7 @@ installation. Private Hub repositories require Docker authentication.
 For a new project using a completed full release, separate downloading from startup:
 
 ```sh
-./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1
 ./classroom resume
 ```
 
@@ -287,7 +290,7 @@ creating a marked release commit.
 The independent local publisher previews existing images:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1
 ```
 
 After local testing and preview review, add `--push` to upload that selection.
@@ -300,7 +303,7 @@ Local publication provides one actual architecture and does not create
 combined manifests. Consume its architecture tags explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --architecture-tags
 ```
 
 Publishing only ARM64 does not provide AMD64 images. Existing saved Hub
@@ -314,7 +317,7 @@ Keep the same project and matching checkout when switching from local images,
 changing tag layout, or applying a published release:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --rebuild
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --rebuild
 ```
 
 Use the intended source release/version. For an intentional latest update,
@@ -324,7 +327,7 @@ Strict resume cannot apply a changed source/version configuration.
 
 Keep the same custom `--project NAME` on every command. A new project name
 selects different volumes rather than moving progress. Return to local
-development deliberately with `./classroom --local-build --tag 1.0.0 --rebuild`.
+development deliberately with `./classroom --local-build --tag 1.0.1 --rebuild`.
 `--registry` controls public base-image sources for local preparation;
 `--from-hub` selects published classroom images.
 

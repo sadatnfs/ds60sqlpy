@@ -26,7 +26,7 @@ services:
       - "127.0.0.1:${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}:${DS60_LAB_PORT:-8765}"
 
   classroom-init:
-    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:1.0.0}
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:1.0.1}
     pull_policy: never
     build:
       context: .

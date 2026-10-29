@@ -39,11 +39,11 @@ copy at its saved location while its containers exist. A source-only copy gets a
 new owner, token and state. Do not copy another working folder's `.workshop/` as
 part of an ordinary new-project setup.
 
-The default image is `ds60sqlpy-worker-data-engineering:1.0.0`. For a previously
+The default image is `ds60sqlpy-worker-data-engineering:1.0.1`. For a previously
 pulled combined Hub release image, select its existing reference on first start:
 
 ```sh
-DS60_PRODUCT_IMAGE=YOUR_NAMESPACE/ds60sqlpy:1.0.0-worker-data-engineering ./run.sh start
+DS60_PRODUCT_IMAGE=YOUR_NAMESPACE/ds60sqlpy:1.0.1-worker-data-engineering ./run.sh start
 ```
 
 The helper never builds or pulls an image. It checks the selected image against
@@ -202,7 +202,7 @@ disposable state. It performs real HTTP, analytical and process-exit operations,
 then exact resume/replacement, rollback, corruption rejection and scoped cleanup:
 
 ```sh
-python3 check_project.py --workspace /tmp/ds60-data-product-check --image ds60sqlpy-worker-data-engineering:1.0.0 --report /tmp/ds60-data-product-report.json --confirm-disposable
+python3 check_project.py --workspace /tmp/ds60-data-product-check --image ds60sqlpy-worker-data-engineering:1.0.1 --report /tmp/ds60-data-product-report.json --confirm-disposable
 ```
 
 The full source checkout includes `check_project.py`; add it to a copied working

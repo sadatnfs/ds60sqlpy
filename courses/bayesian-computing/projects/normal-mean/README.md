@@ -31,7 +31,7 @@ root, prepare the locally built image once:
 The build installs the pinned CmdStan 2.40.0 toolchain and CmdStanPy 1.3.0. It
 needs network access to prepare dependencies. Running the project below needs
 no network access and does not rebuild the image. The image name shown here is
-for release 1.0.0; use the matching local release tag if working on a later release.
+for release 1.0.1; use the matching local release tag if working on a later release.
 
 ## Compile, sample and save results
 
@@ -53,7 +53,7 @@ docker run --rm --init \
   --env HOME=/tmp --tmpfs /tmp:rw,nosuid,exec,size=256m \
   --mount "type=bind,src=$PWD,dst=/project,readonly" \
   --mount "type=bind,src=$PWD/work,dst=/output" \
-  --entrypoint python ds60sqlpy-worker-stan-cpu:1.0.0 \
+  --entrypoint python ds60sqlpy-worker-stan-cpu:1.0.1 \
   /project/run.py --cmdstan /opt/cmdstan --output /output/normal-mean-run
 ```
 

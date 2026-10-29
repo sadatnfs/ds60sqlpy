@@ -42,7 +42,7 @@ given for the current task rather than asking repeatedly.
 | Concern | Source |
 | --- | --- |
 | Startup, resume and image selection | `classroom`, `scripts/classroom.sh`, `scripts/classroom_images.sh`, `docker/classroom-images.tsv` |
-| Image publication and hosted pull acceptance | `.github/workflows/publish-images.yml`, `.github/workflows/targeted-images.yml`, `scripts/ci_targeted_images.py`, `scripts/docker_release.py`, `scripts/ci_hub_acceptance.py`, `./classroom publish`, `docker/classroom-images.tsv` |
+| Image publication and hosted pull acceptance | `.github/workflows/publish-images.yml`, `.github/workflows/targeted-images.yml`, `.github/workflows/verify-published-images.yml`, `scripts/ci_targeted_images.py`, `scripts/docker_release.py`, `scripts/ci_hub_acceptance.py`, `scripts/ci_hub_reverify.py`, `./classroom publish`, `docker/classroom-images.tsv` |
 | Product composition and runtime preparation | `compose.classroom.yaml`, `compose.modules.yaml`, `docker/workers/`, reviewed optional overlays |
 | Unified directory, editor and preview | `classroom.py`, `assets/classroom.*`, `browser_runs.py` |
 | Historical Python/SQL/bridge identity | `catalog_builder.py`, source artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
@@ -297,6 +297,25 @@ stops it and resumes its saved containers and volumes. Its acceptance receipt
 is separate. Canonical tags can already be published if this later check
 fails; inspect that failure rather than claiming a usable release or deleting
 learner state.
+
+A dispatch-only verifier can audit the already-published partial 1.0.0
+App/Core/JavaScript/TypeScript tags without rebuilding or writing to Hub. It
+requires the original promotion receipt, an ancestor SHA and a verifier-only
+source diff, then performs native pull/start/stop/resume checks on both
+platforms. Its successful separate run 40787547771 does not change the
+original publisher's failed post-promotion result or create a new version.
+On dynamic host-port reassignment, the launcher may recreate only the app
+from the same image while worker IDs, PostgreSQL ID, saved volume set and
+learner content remain stable. Do not require the app container ID to survive
+that documented repair. A new full 1.0.1 release still needs fresh complete
+qualification and post-promotion acceptance.
+
+A checked-in patch bump must update the Python package and editable lock stanza,
+App label, launcher version, Compose image defaults, Core base, owned workshop
+defaults and current full-install examples together. Preserve independent
+third-party and project-image versions, historical release receipts, saved
+project selections and learner volumes. An occupied immutable tag is never
+renumbered only in the registry.
 
 The manual `./classroom publish --to-hub USER --tag VERSION` remains a
 preview-first publisher of existing images for one architecture. Only `--push`

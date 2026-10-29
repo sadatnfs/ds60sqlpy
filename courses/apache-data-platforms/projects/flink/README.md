@@ -22,8 +22,8 @@ repository root, prepare it locally or reuse a matching published Hub release:
 For a published combined manifest, replace `yourname` with its publisher:
 
 ```bash
-docker pull yourname/ds60sqlpy:1.0.0-worker-scala-jvm
-docker tag yourname/ds60sqlpy:1.0.0-worker-scala-jvm ds60sqlpy-worker-scala-jvm:1.0.0
+docker pull yourname/ds60sqlpy:1.0.1-worker-scala-jvm
+docker tag yourname/ds60sqlpy:1.0.1-worker-scala-jvm ds60sqlpy-worker-scala-jvm:1.0.1
 ```
 
 Docker selects the native architecture. The project verifies the actual local

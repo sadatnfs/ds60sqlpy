@@ -225,7 +225,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-tag">services</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">  <span class="syntax-tag">dbt-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_DBT_DUCKDB_IMAGE:-ds60sqlpy-worker-dbt-duckdb:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_DBT_DUCKDB_IMAGE:-ds60sqlpy-worker-dbt-duckdb:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>dbt-duckdb<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">tmpfs</span><span class="syntax-punctuation">:</span></span>
@@ -239,7 +239,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> dbt-duckdb</span>
 <span class="source-line">  <span class="syntax-tag">data-platforms-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_DATA_PLATFORMS_PYTHON_IMAGE:-ds60sqlpy-worker-data-platforms-python:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_DATA_PLATFORMS_PYTHON_IMAGE:-ds60sqlpy-worker-data-platforms-python:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>data-platforms-python<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -250,7 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> data-platforms-python</span>
 <span class="source-line">  <span class="syntax-tag">data-engineering-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_DATA_ENGINEERING_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_DATA_ENGINEERING_IMAGE:-ds60sqlpy-worker-data-engineering:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>data-engineering<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">tmpfs</span><span class="syntax-punctuation">:</span></span>
@@ -264,7 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> data-engineering</span>
 <span class="source-line">  <span class="syntax-tag">stan-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_STAN_CPU_IMAGE:-ds60sqlpy-worker-stan-cpu:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_STAN_CPU_IMAGE:-ds60sqlpy-worker-stan-cpu:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>stan-cpu<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">tmpfs</span><span class="syntax-punctuation">:</span></span>
@@ -278,7 +278,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> stan-cpu</span>
 <span class="source-line">  <span class="syntax-tag">julia-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JULIA_IMAGE:-ds60sqlpy-worker-julia:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JULIA_IMAGE:-ds60sqlpy-worker-julia:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>julia<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">tmpfs</span><span class="syntax-punctuation">:</span></span>
@@ -292,7 +292,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> julia</span>
 <span class="source-line">  <span class="syntax-tag">jax-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JAX_CPU_IMAGE:-ds60sqlpy-worker-jax-cpu:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JAX_CPU_IMAGE:-ds60sqlpy-worker-jax-cpu:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>jax-cpu<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
@@ -304,7 +304,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> jax-cpu</span>
 <span class="source-line">  <span class="syntax-tag">bayesian-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_BAYESIAN_CPU_IMAGE:-ds60sqlpy-worker-bayesian-cpu:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_BAYESIAN_CPU_IMAGE:-ds60sqlpy-worker-bayesian-cpu:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>bayesian-cpu<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
@@ -316,7 +316,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> bayesian-cpu</span>
 <span class="source-line">  <span class="syntax-tag">r-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_R_STATISTICS_IMAGE:-ds60sqlpy-worker-r-statistics:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_R_STATISTICS_IMAGE:-ds60sqlpy-worker-r-statistics:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>r-statistics<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
@@ -328,18 +328,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> r-statistics</span>
 <span class="source-line">  <span class="syntax-tag">python-core-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_PYTHON_CORE_IMAGE:-ds60sqlpy-worker-python-core:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_PYTHON_CORE_IMAGE:-ds60sqlpy-worker-python-core:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python-core<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.python-core</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_CORE_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_CORE_IMAGE:-ds60sqlpy-lab:1.0.0}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_CORE_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_CORE_IMAGE:-ds60sqlpy-lab:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> python-core</span>
 <span class="source-line">  <span class="syntax-tag">cpp-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CPP20_IMAGE:-ds60sqlpy-worker-cpp20:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CPP20_IMAGE:-ds60sqlpy-worker-cpp20:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>cpp20<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -350,7 +350,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> cpp20</span>
 <span class="source-line">  <span class="syntax-tag">tensorflow-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_TENSORFLOW_CPU_IMAGE:-ds60sqlpy-worker-tensorflow-cpu:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_TENSORFLOW_CPU_IMAGE:-ds60sqlpy-worker-tensorflow-cpu:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>tensorflow-cpu<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
@@ -362,7 +362,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> tensorflow-cpu</span>
 <span class="source-line">  <span class="syntax-tag">llm-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_LLM_TORCH_CPU_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_LLM_TORCH_CPU_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>llm-torch-cpu<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
@@ -374,7 +374,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> llm-torch-cpu</span>
 <span class="source-line">  <span class="syntax-tag">scala-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SCALA_JVM_IMAGE:-ds60sqlpy-worker-scala-jvm:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SCALA_JVM_IMAGE:-ds60sqlpy-worker-scala-jvm:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>scala-jvm<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -386,7 +386,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> scala-jvm</span>
 <span class="source-line">  <span class="syntax-tag">spark-scala-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SPARK_LOCAL_SCALA_IMAGE:-ds60sqlpy-worker-spark-local-scala:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SPARK_LOCAL_SCALA_IMAGE:-ds60sqlpy-worker-spark-local-scala:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>spark-local-scala<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">pids_limit</span><span class="syntax-punctuation">:</span> 384</span>
@@ -400,7 +400,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> spark-local-scala</span>
 <span class="source-line">  <span class="syntax-tag">spark-python-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SPARK_LOCAL_PYTHON_IMAGE:-ds60sqlpy-worker-spark-local-python:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SPARK_LOCAL_PYTHON_IMAGE:-ds60sqlpy-worker-spark-local-python:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>spark-local-python<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 3g</span>
 <span class="source-line">    <span class="syntax-tag">pids_limit</span><span class="syntax-punctuation">:</span> 384</span>
@@ -415,7 +415,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">java-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JAVA21_IMAGE:-ds60sqlpy-worker-java21:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JAVA21_IMAGE:-ds60sqlpy-worker-java21:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>java21<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -427,7 +427,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> java21</span>
 <span class="source-line">  <span class="syntax-tag">javascript-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JAVASCRIPT_NODE_IMAGE:-ds60sqlpy-worker-javascript-node:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_JAVASCRIPT_NODE_IMAGE:-ds60sqlpy-worker-javascript-node:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>javascript-node<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -439,7 +439,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> javascript-node</span>
 <span class="source-line">  <span class="syntax-tag">typescript-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_TYPESCRIPT_NODE_IMAGE:-ds60sqlpy-worker-typescript-node:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_TYPESCRIPT_NODE_IMAGE:-ds60sqlpy-worker-typescript-node:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>typescript-node<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -452,7 +452,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">c-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_C17_IMAGE:-ds60sqlpy-worker-c17:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_C17_IMAGE:-ds60sqlpy-worker-c17:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>c17<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -464,7 +464,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">go-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_GO_IMAGE:-ds60sqlpy-worker-go:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_GO_IMAGE:-ds60sqlpy-worker-go:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>go<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -476,7 +476,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">csharp-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CSHARP_DOTNET_IMAGE:-ds60sqlpy-worker-csharp-dotnet:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CSHARP_DOTNET_IMAGE:-ds60sqlpy-worker-csharp-dotnet:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>csharp-dotnet<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -488,7 +488,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">rust-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_RUST_STABLE_IMAGE:-ds60sqlpy-worker-rust-stable:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_RUST_STABLE_IMAGE:-ds60sqlpy-worker-rust-stable:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>rust-stable<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -500,7 +500,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">swift-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SWIFT_LINUX_IMAGE:-ds60sqlpy-worker-swift-linux:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_SWIFT_LINUX_IMAGE:-ds60sqlpy-worker-swift-linux:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>swift-linux<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -512,7 +512,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">php-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_PHP_CLI_IMAGE:-ds60sqlpy-worker-php-cli:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_PHP_CLI_IMAGE:-ds60sqlpy-worker-php-cli:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>php-cli<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -524,7 +524,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">cuda-cpp-worker</span><span class="syntax-punctuation">:</span> &amp;gpu-worker</span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CUDA_CPP_IMAGE:-ds60sqlpy-worker-cuda-cpp:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CUDA_CPP_IMAGE:-ds60sqlpy-worker-cuda-cpp:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">platform</span><span class="syntax-punctuation">:</span> linux/amd64</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>cuda-cpp<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 4g</span>
@@ -548,7 +548,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">cuda-python-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *gpu-worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CUDA_PYTHON_IMAGE:-ds60sqlpy-worker-cuda-python:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_CUDA_PYTHON_IMAGE:-ds60sqlpy-worker-cuda-python:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>cuda-python<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -561,7 +561,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">pytorch-cuda-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *gpu-worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_PYTORCH_CUDA_IMAGE:-ds60sqlpy-worker-pytorch-cuda:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_PYTORCH_CUDA_IMAGE:-ds60sqlpy-worker-pytorch-cuda:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>pytorch-cuda<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
@@ -574,7 +574,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-tag">tensorflow-cuda-worker</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *gpu-worker</span>
-<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_TENSORFLOW_CUDA_IMAGE:-ds60sqlpy-worker-tensorflow-cuda:1.0.0}</span>
+<span class="source-line">    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ${DS60_WORKER_TENSORFLOW_CUDA_IMAGE:-ds60sqlpy-worker-tensorflow-cuda:1.0.1}</span>
 <span class="source-line">    <span class="syntax-tag">profiles</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>tensorflow-cuda<span class="syntax-punctuation">]</span></span>
 <span class="source-line">    <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>

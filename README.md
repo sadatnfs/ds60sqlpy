@@ -250,9 +250,10 @@ use the matching checkout or starter ZIP and start the full classroom from Hub:
 
 For a new Hub selection, omitting `--tag` resolves the app's `latest` alias to
 a concrete release, requires the matching checkout or starter ZIP, and saves
-that version for the project. The CI app tags are
-`YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0` and `:latest`;
-workers use versioned tags such as `:1.0.0-worker-python-core` in the same
+that version for the project. The accepted partial release uses App tag
+`YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0` with Core, JavaScript and TypeScript
+workers. After the full 1.0.1 release is promoted, its app tags are `:1.0.1`
+and `:latest`, with workers such as `:1.0.1-worker-python-core` in the same
 repository. Docker selects the engine's native architecture from the combined
 Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.
 
@@ -260,14 +261,15 @@ For a partial publication, select only its available workers. For example, an
 app/Core plus JavaScript and TypeScript publication is installed with:
 
 ```sh
-./classroom --profile javascript-node --profile typescript-node --from-hub YOUR_DOCKERHUB_USER
+./classroom --profile javascript-node --profile typescript-node \
+  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
 ```
 
 `--all` requires every ordinary worker at the selected app release and fails
 if a partial publication omitted one. Use `--tag VERSION` to select a default
 release explicitly. Repeat `--image-tag PROFILE=VERSION` to choose a particular
-Hub image, including `app`; for example, `--image-tag app=1.0.0
---image-tag javascript-node=1.0.0`. `VERSION` may also be `latest` for an
+Hub image, including `app`; for example, `--image-tag app=1.0.0` and
+`--image-tag javascript-node=1.0.0`. `VERSION` may also be `latest` for an
 individual profile. The launcher resolves it to a concrete version and checks
 the published worker's profile, platforms and source revision before saving it.
 Selected workers must share the app's qualified source revision. Current CI
@@ -284,7 +286,7 @@ completed release deliberately. Later bare `./classroom resume` never builds,
 pulls or follows a moving latest tag.
 
 For a completed full release, download without starting services with
-`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0`.
+`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1`.
 For a partial release, use only its published profiles.
 For an existing project, switching image source/layout or applying an update
 requires the same command without `pull` and with `--rebuild`. In Hub mode
@@ -313,7 +315,7 @@ for accepted markers, version rules and the selected-profile install command.
 After staging and validating the reviewed release changes on `main`:
 
 ```sh
-git commit -m "Release 1.0.0 [publish-docker]"
+git commit -m "Release 1.0.1 [publish-docker]"
 git push origin main
 ```
 
@@ -324,7 +326,7 @@ by latest aliases with app `latest` last. Small receipts record the evidence;
 large Docker archives are not transferred through Actions artifacts.
 
 The version comes from checked-in source. An incompatible existing version is
-refused; changes after publication should use a new patch release such as `1.0.1`.
+refused; changes after publication should use a new patch release such as `1.0.2`.
 The first upload can be large, and later runs reuse unchanged layers where
 available. Account pull limits, fair use and runner capacity still apply.
 A workflow configuration or staging upload does not prove final publication.
@@ -341,25 +343,25 @@ docker login
 Preview already built and tested images without uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1
 ```
 
 After reviewing the mapping, explicitly upload:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --push
 ```
 
 This requires the complete ordinary local set by default. It checks all
 selected images before tagging/pushing and does not build, log in, create
 another architecture or publish combined manifests. Prepare missing images
-with `./classroom build --all --local-build --tag 1.0.0`, then qualify them.
+with `./classroom build --all --local-build --tag 1.0.1`, then qualify them.
 
-Manual tags include architecture, such as `1.0.0-lab-arm64`. A matching-architecture
+Manual tags include architecture, such as `1.0.1-lab-arm64`. A matching-architecture
 learner selects that layout explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --architecture-tags
 ```
 
 An ARM64-only Mac publication does not supply AMD64 tags for a typical
