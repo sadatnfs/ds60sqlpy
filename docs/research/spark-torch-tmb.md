@@ -394,7 +394,7 @@ are possible alternatives. Arbitrary partition-local Laplace calls are not.
 
 The [Spark/TMB project](../../courses/advanced-spark-modeling/projects/spark-tmb/README.md)
 contains a reusable prepared-model package,
-[`spark_tmb`](../../courses/advanced-spark-modeling/projects/spark-tmb/spark_tmb/),
+[`spark_tmb`](../../courses/advanced-spark-modeling/projects/spark-tmb/spark_tmb/__init__.py),
 as well as fixed numerical cases. Trusted model source is registered and compiled
 during preparation. Runtime requests contain a model ID, validated numerical
 data and parameters. They do not accept arbitrary C++ source, R expressions,

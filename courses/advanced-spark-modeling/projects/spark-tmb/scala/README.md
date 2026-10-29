@@ -49,7 +49,7 @@ remote-cluster or GPU behavior.
 ## Use the DataFrame adapter
 
 The two original Scala files live in
-[src/main/scala/ds60/spark/tmb](src/main/scala/ds60/spark/tmb/). The example uses
+[src/main/scala/ds60/spark/tmb](src/main/scala/ds60/spark/tmb/TMBDataFrame.scala). The example uses
 this public adapter surface:
 
 ```scala

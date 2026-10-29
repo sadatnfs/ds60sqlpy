@@ -86,7 +86,7 @@ loss across partitions also breaks the simple additive contract.
 
 ## Customize a model deliberately
 
-The independent distribution `ds60-spark-likelihood` lives in [packages/spark-likelihood](../../../../packages/spark-likelihood/). Its import namespace is `ds60_spark_likelihood`; historical classroom imports are compatibility aliases. The project builds its pure wheel offline from the checked-in source, installs it before preparing Spark, and never imports a checkout copy.
+The independent distribution `ds60-spark-likelihood` lives in [packages/spark-likelihood](../../../../packages/spark-likelihood/README.md). Its import namespace is `ds60_spark_likelihood`; historical classroom imports are compatibility aliases. The project builds its pure wheel offline from the checked-in source, installs it before preparing Spark, and never imports a checkout copy.
 
 For whole-group likelihoods and real ML fit/transform, read the package's [DataFrame/ML guide](../../../../packages/spark-likelihood/docs/DATAFRAME-ML.md) and [custom model guide](../../../../packages/spark-likelihood/docs/custom-models.md). They include exact Gaussian group marginals and an original Gamma-Poisson custom model without R.
 Importing its contract module does not import Spark, Torch, NumPy or SciPy.
