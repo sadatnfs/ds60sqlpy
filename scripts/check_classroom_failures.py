@@ -34,6 +34,7 @@ from scripts.check_classroom_profiles import (  # noqa: E402
 )
 
 INVALID_SOURCE = {
+    "python-web": "def broken(:\n    pass\n",
     "data-engineering": "def broken(:\n    pass\n",
     "data-platforms-python": "def broken(:\n    pass\n",
     "dbt-duckdb": "select from\n",
@@ -60,6 +61,7 @@ INVALID_SOURCE = {
     "spark-local-scala": "object Main { def main(args: Array[String]): Unit = { val broken = } }\n",
 }
 DIAGNOSTICS = {
+    "python-web": ("main.py", "syntaxerror"),
     "data-engineering": ("main.py", "syntaxerror"),
     "data-platforms-python": ("main.py", "syntaxerror"),
     "dbt-duckdb": ("lesson_model", "error"),

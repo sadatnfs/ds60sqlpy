@@ -54,7 +54,7 @@ WEB_GRAMMARS = {
     ".jsonc": "json",
 }
 JAVASCRIPT_SUFFIXES = {".js", ".mjs", ".cjs", ".jsx", ".ts", ".mts", ".cts", ".tsx"}
-QUALITY_ROOTS = ("src/", "scripts/", "tests/", "bridge/", "python/professional/")
+QUALITY_ROOTS = ("src/", "scripts/", "tests/", "bridge/", "python/professional/", "packages/")
 
 
 def run(command: list[str], root: Path) -> bool:
@@ -66,8 +66,174 @@ def run(command: list[str], root: Path) -> bool:
     return result.returncode == 0
 
 
+def _cpp_tokens(source: bytes) -> list[tuple[bytes, int, int]]:
+    """Locate code tokens without interpreting comments or C++ string contents."""
+    if len(source) > 2_000_000:
+        raise ValueError("TMB syntax projection exceeds its source-size bound")
+    raw_string = re.compile(rb'(?:u8|u|U|L)?R"([^ ()\\\t\r\n]{0,16})\(')
+    identifier = re.compile(rb"[A-Za-z_][A-Za-z_0-9]*")
+    number = re.compile(rb"[0-9][A-Za-z_0-9'.]*")
+    tokens: list[tuple[bytes, int, int]] = []
+    cursor = 0
+    while cursor < len(source):
+        start = cursor
+        char = source[cursor : cursor + 1]
+        if char.isspace():
+            cursor += 1
+            continue
+        if source.startswith(b"//", cursor):
+            while True:
+                end = source.find(b"\n", cursor)
+                if end < 0:
+                    cursor = len(source)
+                    break
+                continued = source[cursor:end].rstrip(b"\r").endswith(b"\\")
+                cursor = end + 1
+                if not continued:
+                    break
+            continue
+        if source.startswith(b"/*", cursor):
+            end = source.find(b"*/", cursor + 2)
+            if end < 0:
+                raise ValueError("Unterminated comment in TMB source")
+            cursor = end + 2
+            continue
+        if char == b"#" and not source[source.rfind(b"\n", 0, cursor) + 1 : cursor].strip():
+            while True:
+                end = source.find(b"\n", cursor)
+                if end < 0:
+                    cursor = len(source)
+                    break
+                continued = source[cursor:end].rstrip(b"\r").endswith(b"\\")
+                cursor = end + 1
+                if not continued:
+                    break
+            tokens.append((source[start:cursor], start, cursor))
+            continue
+        raw = raw_string.match(source, cursor)
+        if raw:
+            closing = b")" + raw.group(1) + b'"'
+            end = source.find(closing, raw.end())
+            if end < 0:
+                raise ValueError("Unterminated raw string in TMB source")
+            cursor = end + len(closing)
+            tokens.append((b"@literal", start, cursor))
+            continue
+        if char in {b'"', b"'"}:
+            cursor += 1
+            while cursor < len(source):
+                current = source[cursor : cursor + 1]
+                if current == b"\\":
+                    cursor += 3 if source.startswith(b"\\\r\n", cursor) else 2
+                elif current == char:
+                    cursor += 1
+                    break
+                elif current in {b"\n", b"\r"}:
+                    raise ValueError("Unterminated quoted literal in TMB source")
+                else:
+                    cursor += 1
+            else:
+                raise ValueError("Unterminated quoted literal in TMB source")
+            tokens.append((b"@literal", start, cursor))
+            continue
+        match = identifier.match(source, cursor) or number.match(source, cursor)
+        cursor = match.end() if match else cursor + 1
+        tokens.append((source[start:cursor], start, cursor))
+        if len(tokens) > 100_000:
+            raise ValueError("TMB syntax projection exceeds its token bound")
+    return tokens
+
+
+def tmb_grammar_source(source: bytes) -> bytes:
+    """Project two declared TMB macro forms into body-preserving C++ syntax.
+
+    This is not macro expansion, type checking or automatic differentiation.
+    SIMULATE's body becomes an ordinary conditional. The four-argument atomic
+    macro's forward/reverse statements become separate function bodies. Unknown
+    arity or nonliteral metadata fails visibly. Compiler/runtime gates still own
+    the actual TMB and derivative semantics. No source file is rewritten.
+    """
+    if b"TMB.hpp" not in source or not any(
+        name in source for name in (b"SIMULATE", b"TMB_ATOMIC_VECTOR_FUNCTION")
+    ):
+        return source
+    tokens = _cpp_tokens(source)
+    if not any(
+        re.match(rb'#[ \t]*include[ \t]*(?:<TMB\.hpp>|"TMB\.hpp")', text) for text, _, _ in tokens
+    ):
+        return source
+    if any(
+        re.match(rb"#[ \t]*(?:define|undef)[ \t]+(?:SIMULATE|TMB_ATOMIC_VECTOR_FUNCTION)\b", text)
+        for text, _, _ in tokens
+    ):
+        raise ValueError("Source-local redefinition of projected TMB macros is unsupported")
+    edits: dict[int, tuple[int, bytes]] = {}
+
+    def replace(index: int, value: bytes) -> None:
+        _, start, end = tokens[index]
+        if start in edits:
+            raise ValueError("Overlapping TMB syntax projection")
+        edits[start] = (end, value)
+
+    for index, (text, _, _) in enumerate(tokens):
+        if text == b"SIMULATE":
+            if index + 1 >= len(tokens) or tokens[index + 1][0] != b"{":
+                raise ValueError("Only the declared SIMULATE { body } syntax is supported")
+            replace(index, b"if(true)")
+        elif text == b"TMB_ATOMIC_VECTOR_FUNCTION":
+            if index + 1 >= len(tokens) or tokens[index + 1][0] != b"(":
+                raise ValueError("TMB atomic syntax requires its four-argument invocation")
+            depth = 0
+            separators: list[int] = []
+            close = None
+            for position in range(index + 1, len(tokens)):
+                token = tokens[position][0]
+                if token == b"(":
+                    depth += 1
+                    if depth > 256:
+                        raise ValueError("TMB atomic parentheses exceed their nesting bound")
+                elif token == b")":
+                    depth -= 1
+                    if depth == 0:
+                        close = position
+                        break
+                elif token == b"," and depth == 1:
+                    separators.append(position)
+            if close is None or len(separators) != 3:
+                raise ValueError("TMB atomic syntax needs exactly four balanced arguments")
+            first, second, third = separators
+            names = tokens[index + 2 : first]
+            dimensions = tokens[first + 1 : second]
+            if (
+                len(names) != 1
+                or re.fullmatch(rb"[A-Za-z_][A-Za-z_0-9]{0,127}", names[0][0]) is None
+                or len(dimensions) != 1
+                or re.fullmatch(rb"[0-9]{1,6}", dimensions[0][0]) is None
+            ):
+                raise ValueError("TMB atomic syntax needs a named function and literal dimension")
+            replace(index, b"void")
+            replace(index + 1, b" ")
+            replace(first, b"()")
+            replace(first + 1, b" " * (dimensions[0][2] - dimensions[0][1]))
+            replace(second, b"{")
+            replace(third, b"} void ds60_reverse_" + names[0][0] + b"() {")
+            replace(close, b"}")
+    projected = bytearray()
+    cursor = 0
+    for start, (end, value) in sorted(edits.items()):
+        if start < cursor:
+            raise ValueError("Overlapping TMB syntax projection spans")
+        projected.extend(source[cursor:start])
+        projected.extend(value)
+        cursor = end
+    projected.extend(source[cursor:])
+    if projected.count(b"\n") != source.count(b"\n"):
+        raise ValueError("TMB syntax projection changed diagnostic line positions")
+    return bytes(projected)
+
+
 def grammar_source(path: str, source: bytes, grammar: str) -> tuple[str, bytes]:
-    """Project the standard C++ linkage guards of interoperable C headers.
+    """Project standard linkage guards and declared TMB macro syntax for parsing.
 
     Tree-sitter does not evaluate preprocessor branches and cannot join an
     opening extern-C brace to its separately guarded closing brace. Checking the
@@ -84,6 +250,8 @@ def grammar_source(path: str, source: bytes, grammar: str) -> tuple[str, bytes]:
         )
         if count:
             return "cpp", projected
+    if grammar == "cpp":
+        return grammar, tmb_grammar_source(source)
     return grammar, source
 
 
@@ -374,6 +542,7 @@ def main(argv: list[str] | None = None) -> int:
         "psql branches, included files, dynamic SQL or procedural bodies."
     )
     print(
+        "TMB macro projections retain both bodies but do not model AD semantics. "
         "Grammar checks do not prove type checking, linking, runtime behavior or "
         "lesson correctness. Markdown fences retain their authoring contracts."
     )

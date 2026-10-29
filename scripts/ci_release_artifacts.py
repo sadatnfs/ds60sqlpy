@@ -38,6 +38,10 @@ def logical_keys(mode: str, architecture: str | None = None) -> list[str]:
         if architecture not in RUNNERS:
             raise ValueError("Select a native seed architecture")
         return ["seed-" + str(architecture)]
+    if mode == "scientific":
+        if architecture is not None and architecture not in RUNNERS:
+            raise ValueError("Select a native scientific architecture")
+        return ["scientific-" + arch for arch in ([architecture] if architecture else RUNNERS)]
     if mode != "receipts":
         raise ValueError("Unknown release artifact selection")
     return ["seed-" + arch for arch in RUNNERS] + [
@@ -53,7 +57,13 @@ def select_artifacts(pages: Any, keys: list[str], current_attempt: int) -> list[
         raise ValueError("Invalid artifact pagination")
     selected = []
     for key in keys:
-        prefix = "release-gate" if key == "gate" else "release-receipt-" + key
+        prefix = (
+            "release-gate"
+            if key == "gate"
+            else "scientific-projects-" + key.removeprefix("scientific-")
+            if key.startswith("scientific-")
+            else "release-receipt-" + key
+        )
         pattern = re.compile(re.escape(prefix) + r"-attempt-([1-9][0-9]{0,5})\Z")
         candidates = []
         for page in pages:
@@ -104,7 +114,14 @@ def receipt_bytes(
 ) -> bytes:
     if len(archive) > MAX_ARCHIVE:
         raise ValueError("Release artifact exceeds its archive bound")
-    filename = "gate.json" if artifact.key == "gate" else "release-receipt.json"
+    scientific = artifact.key.startswith("scientific-")
+    filename = (
+        "gate.json"
+        if artifact.key == "gate"
+        else "scientific-receipt.json"
+        if scientific
+        else "release-receipt.json"
+    )
     with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
         entries = bundle.infolist()
         if len(entries) != 1:
@@ -123,7 +140,13 @@ def receipt_bytes(
     document = json.loads(raw, object_pairs_hook=unique_fields)
     if not isinstance(document, dict) or not isinstance(document.get("context"), dict):
         raise ValueError("Missing release receipt context")
-    expected_kind = "ds60-release-gate" if artifact.key == "gate" else "ds60-staged-images"
+    expected_kind = (
+        "ds60-release-gate"
+        if artifact.key == "gate"
+        else "ds60-scientific-projects"
+        if scientific
+        else "ds60-staged-images"
+    )
     if (
         document.get("kind") != expected_kind
         or type(document.get("schema_version")) is not int
@@ -138,7 +161,12 @@ def receipt_bytes(
     }.items():
         if document["context"].get(field) != expected:
             raise ValueError("Receipt is not from the selected run, revision and attempt")
-    if artifact.key != "gate":
+    if scientific:
+        if document.get("architecture") != artifact.key.removeprefix("scientific-"):
+            raise ValueError("Scientific receipt architecture differs from its artifact")
+        if document.get("passed") is not True or document.get("complete") is not True:
+            raise ValueError("Scientific receipt is not a successful complete qualification")
+    elif artifact.key != "gate":
         group, architecture = artifact.key.rsplit("-", 1)
         if document.get("architecture") != architecture:
             raise ValueError("Receipt architecture differs from its logical artifact")
@@ -169,7 +197,7 @@ def gh(args: list[str], *, maximum: int) -> bytes:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("gate", "seed", "receipts"))
+    parser.add_argument("mode", choices=("gate", "seed", "receipts", "scientific"))
     parser.add_argument("--architecture", choices=tuple(RUNNERS))
     parser.add_argument("--destination", required=True, type=Path)
     args = parser.parse_args()
@@ -220,11 +248,20 @@ def main() -> int:
             )
         )
     for artifact, raw in payloads:
-        directory = destination / artifact.key if args.mode == "receipts" else destination
+        directory = (
+            destination / artifact.key if args.mode in {"receipts", "scientific"} else destination
+        )
         directory.mkdir(parents=True, exist_ok=True)
         if directory.is_symlink():
             raise ValueError("Artifact destination must not be a link")
-        path = directory / ("gate.json" if artifact.key == "gate" else "release-receipt.json")
+        filename = (
+            "gate.json"
+            if artifact.key == "gate"
+            else "scientific-receipt.json"
+            if artifact.key.startswith("scientific-")
+            else "release-receipt.json"
+        )
+        path = directory / filename
         if path.exists() or path.is_symlink():
             raise ValueError("Use an empty artifact destination")
         path.write_bytes(raw)

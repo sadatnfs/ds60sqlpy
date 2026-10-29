@@ -209,6 +209,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Fresh Python process with the prepared Core dependencies</td>
 </tr>
 <tr>
+<td><code>python-web</code></td>
+<td><code>main.py</code></td>
+<td>Prepared Flask, FastAPI, Django and web dependencies in an isolated environment; finite in-process clients, not persistent HTTP servers</td>
+</tr>
+<tr>
 <td><code>jax-cpu</code></td>
 <td><code>main.py</code></td>
 <td>Pinned CPU JAX/JAXLIB, including real JIT and autodiff startup checks</td>
@@ -454,7 +459,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The overlay is an explicit session configuration, not a saved launcher profile. An expired or released Kubernetes session requires a new preparation and inspection followed by the overlay start. Normal <code>./classroom resume</code> does not recreate its cluster or credentials.</p>
 <p>The Kubernetes adapter admits reviewed Deployment/Service/ConfigMap or finite Job shapes, not arbitrary Kubernetes administration. It verifies owner and resource identities, bounded readiness, fixed in-cluster HTTP observations or finite-task output, then cleans only resources bound to that Run&#x27;s nonce and UIDs. Work gets its selected deadline plus an independent 15-second cleanup reserve. Unproved cleanup is a failure, not a clean cancellation. The detailed <a href="../docker/kubernetes/README.md.html#fixture-contract-2-and-bounded-ordinary-labs">fixture contract</a> defines what is and is not executed; other networking and operations chapters remain reading or separately prepared host labs.</p>
 <h3 id="qualification-evidence">Qualification evidence<a class="heading-anchor" href="#qualification-evidence" aria-label="Link to this section">#</a></h3>
-<p>Use <a href="validation.md.html">validation</a> and the current <a href="implementation/CHECKPOINT.md.html">implementation checkpoint</a> for revision-specific acceptance. Keep source tests, image builds, startup probes, actual lesson runs, browser observations, hardware tests and hosted CI as separate records. A Linux arm64 success does not establish Linux amd64, WSL host integration, emulation or NVIDIA execution. A saved historical receipt does not qualify changed source.</p></article>
+<p>Use <a href="validation.md.html">validation</a> and the current <a href="implementation/CHECKPOINT.md.html">implementation checkpoint</a> for revision-specific acceptance. Keep source tests, image builds, startup probes, actual lesson runs, browser observations, hardware tests and hosted CI as separate records. A Linux arm64 success does not establish Linux amd64, WSL host integration, emulation or NVIDIA execution. A saved historical receipt does not qualify changed source.</p>
+<h3 id="python-web-services">Python web services<a class="heading-anchor" href="#python-web-services" aria-label="Link to this section">#</a></h3>
+<p>The <a href="learning/python-web.md.html">Python web route</a> extends the original Python foundations. Its 69 finite examples use the separately prepared python-web profile; long-running servers belong to the <a href="../courses/python-web/projects/web-lab/README.md.html">owned web lab</a>. That lab has actual PostgreSQL, Flask/Gunicorn, FastAPI/Uvicorn, Django/Gunicorn and durable worker processes, with distinct ports and retained database state. A pad run cannot create a persistent multi-file web deployment.</p></article>
   </main>
 </body>
 </html>

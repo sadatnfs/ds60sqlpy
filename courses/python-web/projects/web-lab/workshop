@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+action=${1:-help}
+[[ $# -le 1 ]] || {
+  echo 'Use one fixed action.' >&2
+  exit 2
+}
+if [[ "$action" == help || "$action" == --help ]]; then
+  cat <<'HELP'
+Owned Python web service lab, Linux Docker on any supported host (Windows: WSL 2).
+  ./workshop prepare   Build from an already prepared python-web image; save settings
+  ./workshop start     Start existing images, apply reviewed migrations, serve three apps
+  ./workshop stop      Stop this project; retain all PostgreSQL data and saved settings
+  ./workshop resume    Restart the exact existing containers without builds or pulls
+  ./workshop replace   Recreate app/worker containers from the saved image; retain database
+  ./workshop check     Run real HTTP, WebSocket, SSE and PostgreSQL acceptance; save receipt
+  ./workshop verify   Read the check's saved notes/job without creating replacement records
+  ./workshop status   Show this project's containers
+  ./workshop logs     Follow the owned application/worker logs
+Initial settings: WORKSHOP_PROJECT=ds60-python-web
+WORKSHOP_FLASK_PORT=18761 WORKSHOP_FASTAPI_PORT=18762 WORKSHOP_DJANGO_PORT=18763
+WORKSHOP_BASE_IMAGE=ds60sqlpy-worker-python-web:1.1.0
+WORKSHOP_POSTGRES_IMAGE=mirror.gcr.io/library/postgres:17
+Images must already exist locally. No action publishes or deletes data/volumes.
+HELP
+  exit 0
+fi
+case "$action" in prepare | start | stop | resume | replace | check | verify | status | logs) ;; *)
+  echo 'Unknown action.' >&2
+  exit 2
+  ;;
+esac
+command -v docker >/dev/null || {
+  echo 'Install and start a Linux Docker engine.' >&2
+  exit 1
+}
+docker info >/dev/null
+[[ ! -L .workshop ]] || {
+  echo '.workshop must not be a symlink.' >&2
+  exit 1
+}
+if [[ ! -f .workshop/settings.env ]]; then
+  [[ "$action" == prepare ]] || {
+    echo 'Run ./workshop prepare first.' >&2
+    exit 1
+  }
+  umask 077
+  mkdir -p .workshop
+  project=${WORKSHOP_PROJECT:-ds60-python-web}
+  flask_port=${WORKSHOP_FLASK_PORT:-18761}
+  fastapi_port=${WORKSHOP_FASTAPI_PORT:-18762}
+  django_port=${WORKSHOP_DJANGO_PORT:-18763}
+  base=${WORKSHOP_BASE_IMAGE:-ds60sqlpy-worker-python-web:1.1.0}
+  postgres=${WORKSHOP_POSTGRES_IMAGE:-mirror.gcr.io/library/postgres:17}
+  image="$project-image:1.0"
+  printf '%s\n' "WORKSHOP_PROJECT=$project" "WORKSHOP_FLASK_PORT=$flask_port" "WORKSHOP_FASTAPI_PORT=$fastapi_port" "WORKSHOP_DJANGO_PORT=$django_port" "WORKSHOP_BASE_IMAGE=$base" "WORKSHOP_POSTGRES_IMAGE=$postgres" "WORKSHOP_IMAGE=$image" "WORKSHOP_UID=$(id -u)" "WORKSHOP_GID=$(id -g)" >.workshop/settings.env
+fi
+[[ ! -L .workshop/settings.env && ! -L .workshop/password && ! -L .workshop/signing-key && ! -L .workshop/acceptance.json && ! -L .workshop/acceptance.pending.json && ! -L .workshop/readback.json ]] || {
+  echo 'Owned state paths must not be symlinks.' >&2
+  exit 1
+}
+seen='|'
+while IFS='=' read -r key value; do
+  [[ "$seen" != *"|$key|"* ]] || {
+    echo 'Duplicate saved setting.' >&2
+    exit 1
+  }
+  seen="$seen$key|"
+  case "$key" in
+    WORKSHOP_PROJECT) project=$value ;; WORKSHOP_FLASK_PORT) flask_port=$value ;;
+    WORKSHOP_FASTAPI_PORT) fastapi_port=$value ;; WORKSHOP_DJANGO_PORT) django_port=$value ;;
+    WORKSHOP_BASE_IMAGE) base=$value ;; WORKSHOP_POSTGRES_IMAGE) postgres=$value ;;
+    WORKSHOP_IMAGE) image=$value ;; WORKSHOP_UID) owner_uid=$value ;; WORKSHOP_GID) owner_gid=$value ;;
+    *)
+      echo 'Unexpected saved setting.' >&2
+      exit 1
+      ;;
+  esac
+done <.workshop/settings.env
+[[ "${project:-}" =~ ^[a-z0-9][a-z0-9_-]{2,50}$ ]] || {
+  echo 'Invalid project name.' >&2
+  exit 1
+}
+for port in "${flask_port:-}" "${fastapi_port:-}" "${django_port:-}"; do
+  [[ "$port" =~ ^[1-9][0-9]{3,4}$ && "$port" -ge 1024 && "$port" -le 65535 ]] || {
+    echo 'Invalid port.' >&2
+    exit 1
+  }
+done
+[[ "$flask_port" != "$fastapi_port" && "$flask_port" != "$django_port" && "$fastapi_port" != "$django_port" ]] || {
+  echo 'Choose distinct framework ports.' >&2
+  exit 1
+}
+for reference in "${base:-}" "${postgres:-}" "${image:-}"; do
+  [[ "$reference" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/:@-]+$ ]] || {
+    echo 'Invalid image reference.' >&2
+    exit 1
+  }
+done
+[[ "${owner_uid:-}" =~ ^[0-9]+$ && "${owner_gid:-}" =~ ^[0-9]+$ ]] || {
+  echo 'Invalid saved user.' >&2
+  exit 1
+}
+export WORKSHOP_PROJECT="$project" WORKSHOP_FLASK_PORT="$flask_port" WORKSHOP_FASTAPI_PORT="$fastapi_port" WORKSHOP_DJANGO_PORT="$django_port" WORKSHOP_BASE_IMAGE="$base" WORKSHOP_POSTGRES_IMAGE="$postgres" WORKSHOP_IMAGE="$image" WORKSHOP_UID="$owner_uid" WORKSHOP_GID="$owner_gid"
+owned=$(docker ps --all --filter "label=com.docker.compose.project=$project" --format '{{.ID}}|{{.Label "ds60.workshop"}}')
+while IFS= read -r row; do
+  [[ -z "$row" || "$row" == *'|python-web-lab' ]] || {
+    echo 'Project belongs to unrelated containers.' >&2
+    exit 1
+  }
+done <<<"$owned"
+if docker volume inspect "${project}_postgres-data" >/dev/null 2>&1; then
+  [[ "$(docker volume inspect --format '{{index .Labels "ds60.workshop"}}' "${project}_postgres-data")" == python-web-lab ]] || {
+    echo 'Existing volume ownership differs.' >&2
+    exit 1
+  }
+fi
+compose=(docker compose --project-name "$project" --env-file .workshop/settings.env -f compose.yaml)
+urls() { printf 'Flask: http://127.0.0.1:%s\nFastAPI: http://127.0.0.1:%s\nDjango: http://127.0.0.1:%s\n' "$flask_port" "$fastapi_port" "$django_port"; }
+if [[ "$action" == prepare ]]; then
+  for reference in "$base" "$postgres"; do docker image inspect "$reference" >/dev/null || {
+    echo "Prepare this local image first: $reference" >&2
+    exit 1
+  }; done
+  if [[ ! -f .workshop/password ]]; then
+    printf 'admin\n' >.workshop/password
+    chmod 644 .workshop/password
+  fi
+  if [[ ! -f .workshop/signing-key ]]; then
+    docker run --rm --pull never --network none --read-only --user "$owner_uid:$owner_gid" --entrypoint python "$base" -c 'import secrets;print(secrets.token_hex(48))' >.workshop/signing-key
+    chmod 600 .workshop/signing-key
+  fi
+  docker build --pull=false --network=none --progress plain --build-arg "WEB_BASE_IMAGE=$base" --tag "$image" .
+  echo 'Prepared. Run ./workshop start.'
+elif [[ "$action" == start ]]; then
+  [[ -f .workshop/password && -s .workshop/signing-key ]] || {
+    echo 'Preparation incomplete.' >&2
+    exit 1
+  }
+  "${compose[@]}" up -d --no-build --pull never --wait postgres
+  "${compose[@]}" run --rm --no-deps migrate
+  "${compose[@]}" up -d --no-build --pull never --wait flask fastapi django worker
+  urls
+elif [[ "$action" == stop ]]; then
+  "${compose[@]}" stop
+elif [[ "$action" == resume ]]; then
+  before=$("${compose[@]}" ps --all --quiet | LC_ALL=C sort)
+  [[ $(printf '%s\n' "$before" | sed '/^$/d' | wc -l | tr -d ' ') == 5 ]] || {
+    echo 'Expected five existing containers. Use start to create missing services.' >&2
+    exit 1
+  }
+  "${compose[@]}" start postgres
+  deadline=$((SECONDS + 90))
+  until [[ $("${compose[@]}" ps --format '{{.Health}}' postgres) == healthy ]]; do
+    [[ "$SECONDS" -lt "$deadline" ]] || {
+      echo 'Database did not become healthy.' >&2
+      exit 1
+    }
+    sleep 1
+  done
+  "${compose[@]}" start flask fastapi django worker
+  for container in $before; do
+    deadline=$((SECONDS + 90))
+    while :; do
+      state=$(docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container")
+      case "$state" in
+        'running healthy' | 'running none') break ;;
+        'running starting' | 'created none' | 'restarting none') ;;
+        *)
+          echo "Owned container failed to resume: $state" >&2
+          exit 1
+          ;;
+      esac
+      [[ "$SECONDS" -lt "$deadline" ]] || {
+        echo 'Owned service readiness timed out.' >&2
+        exit 1
+      }
+      sleep 1
+    done
+  done
+  after=$("${compose[@]}" ps --all --quiet | LC_ALL=C sort)
+  [[ "$before" == "$after" ]] || {
+    echo 'Unexpected container identity change.' >&2
+    exit 1
+  }
+  urls
+elif [[ "$action" == replace ]]; then
+  "${compose[@]}" up -d --no-build --pull never --no-deps --force-recreate --wait flask fastapi django worker
+  urls
+elif [[ "$action" == check ]]; then
+  "${compose[@]}" exec -T -e "WORKSHOP_FLASK_PORT=$flask_port" -e "WORKSHOP_FASTAPI_PORT=$fastapi_port" -e "WORKSHOP_DJANGO_PORT=$django_port" fastapi python check_api.py >.workshop/acceptance.pending.json
+  mv .workshop/acceptance.pending.json .workshop/acceptance.json
+  echo 'Actual service acceptance saved to .workshop/acceptance.json.'
+elif [[ "$action" == verify ]]; then
+  [[ -f .workshop/acceptance.json ]] || {
+    echo 'Run check once to create retained evidence.' >&2
+    exit 1
+  }
+  "${compose[@]}" exec -T -e "WORKSHOP_FLASK_PORT=$flask_port" -e "WORKSHOP_FASTAPI_PORT=$fastapi_port" -e "WORKSHOP_DJANGO_PORT=$django_port" fastapi python check_api.py --verify-saved <.workshop/acceptance.json >.workshop/readback.json
+  echo 'Saved notes/job readback passed; receipt is .workshop/readback.json.'
+elif [[ "$action" == status ]]; then
+  "${compose[@]}" ps --all
+else
+  "${compose[@]}" logs --follow --tail 100 flask fastapi django worker
+fi

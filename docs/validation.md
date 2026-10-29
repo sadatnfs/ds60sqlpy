@@ -55,6 +55,13 @@ The first invocation prepares missing images; `--build` explicitly rebuilds them
 and `--list` reports coverage without formatting source. Classroom containers
 and learner volumes are not part of this operation.
 
+C++ grammar checks project the declared TMB `SIMULATE` block and four-argument
+`TMB_ATOMIC_VECTOR_FUNCTION` form with a literal output dimension. The projection
+preserves comments, quoted/raw strings, diagnostic lines, both atomic bodies and
+surrounding C++ for parsing. Unsupported forms fail visibly. It does not expand
+TMB headers, check types or model automatic-differentiation semantics; the actual
+native compiler and numerical probes remain separate required evidence.
+
 The R adapter parses without evaluating lesson code and checks that formatting
 preserves parsed expressions. Its fixed lexical lint rules do not substitute for
 runtime assertions. Check and lint modes use read-only source mounts. A focused
@@ -145,8 +152,7 @@ suite rejects unsafe distribution when those shared fixtures are enabled.
 Changing the scheduler can cause destructive fixture races even if individual
 tests pass. Use `-n 0` for focused serial diagnosis, and reduce worker count on
 machines with little memory. On a machine with spare CPU and memory, measure
-six workers before increasing further. The 4,913-case local release suite took
-about 8.5 minutes with four workers; a long individual reader test and shared
+six workers before increasing further. Long individual reader tests and shared
 fixtures still set a floor. More workers do not guarantee shorter runtimes.
 
 Record the passed, failed and skipped totals from the actual run. Explain skips
@@ -206,7 +212,7 @@ gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
 | Application builds: Portable Docker classroom starter | Push, pull request and manual dispatch, except targeted build-test pushes; Ubuntu | A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners |
 | Targeted image check | Push with one `[build-test-ALIAS]` in HEAD; native AMD64 and ARM64 | App/Core plus the alias's complete ordinary group build and qualify without Hub writes or a starter ZIP |
 | Targeted partial publication | Push to main with one `[publish-ALIAS]` in HEAD | Exact-revision source/starter gates, native App/Core and complete-group qualification, selected version/latest indexes and source/digest-bound promotion |
-| Full image publication | Push to main with `[publish-docker]` in HEAD | Native AMD64/ARM64 qualification of every ordinary profile and source/digest-bound promotion; staging images are distinct from completed version/latest tags |
+| Full image publication | Push to main with `[publish-docker]` in HEAD | Native AMD64/ARM64 qualification of the 26-image ordinary set, then the complete scientific-project gate before source/digest-bound promotion; staging is distinct from completed version/latest tags |
 | Hosted Hub pull acceptance | After successful full or partial promotion; native AMD64 and ARM64 runners | Published-index and exact-receipt checks, fresh Hub classroom pull/start, then stop/resume with stable stateful containers, volumes and saved learning; app-only port repair is verified separately |
 | Published-image read-only reverify | Manual dispatch on main for an already-promoted immutable partial 1.0.0 release | Old promotion artifact, source-diff allowlist, combined indexes and fresh native pull/resume are rechecked without a Hub write; its acceptance report is distinct from the original publishing run |
 | Application builds: Docker classroom | Push, pull request and manual dispatch, except targeted build-test or any marked publication push; isolated Linux groups cover all ordinary profiles on other events | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
@@ -664,6 +670,7 @@ compiler/error probes and classroom persistence gates:
 | --- | --- | --- |
 | `data-engineering` | Real ML training/HTTP, model activation and rollback | [ML service lifecycle checker](../courses/ml-engineering/projects/local-system/README.md#reproduce-the-release-checks) |
 | `data-engineering` | Real ingestion HTTP, exact replay/conflicts, immutable Parquet publication, controlled process failure, recovery and rollback | [Data-product checker](../courses/data-ml-engineering/projects/data-product/README.md) |
+| `python-web` | Finite framework references plus real HTTP, streaming/WebSockets, browser/session behavior and retained state across resume/replacement | [Owned Python web lab](../courses/python-web/projects/web-lab/README.md) |
 | `pytorch` | Actual tiny-model generation, queue/cancellation, SSE, Chromium, exact-container resume and retained request history after replacement | [Inference project checker](../courses/data-ml-engineering/projects/inference-service/README.md#maintainer-lifecycle-gate) |
 | `data-platforms` | Actual Flight RPC and compiled Rust/Python IPC, error cases and retained data | [Arrow Flight workshop](../courses/apache-data-platforms/projects/arrow-flight/README.md) through the common workshop qualifier |
 | `java` | Actual Kafka records, transactions, offsets, consumers and compaction-safe retained state | [Kafka workshop](../courses/apache-data-platforms/projects/streaming/README.md) through the common workshop qualifier |
@@ -728,3 +735,72 @@ its request guard rejects writes and execution. Keep the report from the first
 run. Changing a report, rerunning code or selecting another project does not
 prove persistence. The checker restores the prior effective pads after its
 initial probes and does not mark learner completion.
+
+
+## Standalone modeling and native scientific publication
+
+The primary framework is the independent
+[`ds60-spark-likelihood` package](../packages/spark-likelihood/README.md).
+Its source tests, ordinary classroom pads and combined workshop answer different
+questions. The canonical package has no classroom or R requirement; the
+[optional Spark/TMB reference](../courses/advanced-spark-modeling/projects/spark-tmb/README.md)
+retains its separate R/compiler/ABI contracts.
+
+The [Spark/Torch workshop](../courses/advanced-spark-modeling/projects/spark-torch/README.md)
+builds a non-editable pure wheel from the declared source and installs it before
+the explicitly requested, source-checked Spark launcher preparation. Its fixed
+`standalone-package` check compares the retained wheel, installed modules and
+declared source, verifies imports on two actual Spark executor partitions, then
+runs numerical, Spark and DataFrame/ML acceptance. It requires all 33 named ML
+checks, including real Pipeline save/load, custom factories, response-free
+prediction, complete groups, weights, cache ownership and precision refusals.
+The complete workshop also checks DDP/Lightning updates, record coverage and
+failure propagation after result serialization. No runtime check installs a
+package, reads a learner volume or contacts a registry.
+
+Use the workshop's documented build/check commands in an owned environment.
+Host tests that skip Torch/Spark do not substitute for these runs. A passing
+low-dimensional driver fit is not distributed neural-network training, and a
+CPU local[2] run is not remote-cluster or GPU qualification. The ordinary Spark
+and Torch pads still do not imply a shared dependency environment.
+
+Full publication now includes a dedicated scientific job after the ordinary
+worker jobs. The ordinary catalog contains 26 images, App plus 25 workers,
+including `python-web`; optional GPU images remain separate. The scientific job
+runs on native AMD64 and ARM64 runners, with at most two architecture jobs in
+parallel and sequential project preparation within each job. It imports exactly
+the qualified Spark, Torch, R and Java native digests from the same run and source.
+It then qualifies:
+
+| Surface | Required evidence |
+| --- | --- |
+| Primary Spark/Torch workshop | Installed-wheel/source/executor identity, independent value/gradient/Hessian oracles, partition/weight invariance, ML/Pipeline behavior and training/failure checks |
+| Optional Spark/TMB reference | Prepared-model source/library/registry/ABI binding, real R refusals, independent row/group objectives, rpy2, predictions, DataFrame/ML and Scala compiler/execution checks |
+| Standalone TMB public API | Exact installed API/runtime inventory and the declared profile, simulation, solver, reporting and lifecycle checks |
+| Standalone TMB C++ families | Five actual compiled templates, source/library identities, independent numerical checks and the declared finite-difference cases |
+
+The executable contract lives in
+[`docker/ci-scientific-projects.json`](../docker/ci-scientific-projects.json),
+[`ci_scientific_projects.py`](../scripts/ci_scientific_projects.py),
+[`scientific_receipts.py`](../scripts/scientific_receipts.py) and
+[`scientific_package_receipts.py`](../scripts/scientific_package_receipts.py).
+These project environments are not additional ordinary Hub images. Full promotion
+and recovery require complete scientific receipts bound to the same run, source,
+version, native bases and App/Core seeds. Earlier successful attempts may be reused
+only under those exact bindings. Targeted partial-image jobs retain their documented
+selected-group contract; they do not establish full scientific-release acceptance.
+
+The `python-web` ordinary group has its own service gate in addition to finite
+pad references. The [web lab checker](../courses/python-web/projects/web-lab/README.md)
+uses owned PostgreSQL, actual framework servers and a browser, preserves its own
+project state and verifies stop/resume/replacement. An in-process Flask/FastAPI/
+Django test client proves neither network streaming nor durable service recovery.
+Prepare contributor Chromium explicitly; a learner needs only the ordinary
+Docker/browser installation documented by the project.
+
+Retain failed diagnostics separately from successful receipt candidates. Export
+source-bound evidence before removing only owned synthetic resources. Never prune
+learner volumes to obtain a green gate. Local ARM evidence, workflow source,
+staging upload, manifest promotion and fresh published-image acceptance are
+separate states. Only observed hosted job completion qualifies that release's
+native GitHub path.

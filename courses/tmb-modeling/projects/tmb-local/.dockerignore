@@ -1,0 +1,5 @@
+.tmb-work
+__pycache__
+*.pyc
+*.so
+*.o

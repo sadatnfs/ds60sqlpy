@@ -70,6 +70,7 @@ export default [
       "src/ds60sqlpy/assets/**/*.js",
       "courses/javascript-typescript/**/*.js",
       "courses/data-ml-engineering/projects/inference-service/app.js",
+      "courses/python-web/projects/web-lab/static/*.js",
     ],
     languageOptions: {
       sourceType: "script",

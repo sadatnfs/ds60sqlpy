@@ -14,6 +14,14 @@ from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
 
 RUNTIME_GUIDANCE: dict[str, str] = {
+    "python-web": (
+        "Run main.py with prepared FastAPI, Flask, Django and framework test clients. "
+        "Each run uses fresh bounded scratch files and temporary databases. "
+        "Finite test-client examples exercise real framework behavior inside the process; "
+        "they do not start a public HTTP server. Persistent applications, real browser "
+        "requests and server lifecycle work use the separately prepared owned projects. "
+        "No packages are installed during Run."
+    ),
     "dbt-duckdb": (
         "Edit model.sql as actual dbt SQL/Jinja. Each run creates a fresh project "
         "with the documented raw_orders/customers seeds, runs dbt seed/build and "

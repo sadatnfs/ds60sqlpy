@@ -38,6 +38,7 @@ class WorkerProfile:
 
 
 PROFILES = {
+    "python-web": WorkerProfile("python-web", "python", "main.py"),
     "dbt-duckdb": WorkerProfile("dbt-duckdb", "sql", "model.sql"),
     "data-engineering": WorkerProfile("data-engineering", "python", "main.py"),
     "data-platforms-python": WorkerProfile("data-platforms-python", "python", "main.py"),
@@ -896,6 +897,16 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
                     ),
                 ]
             ]
+        elif profile_id == "python-web":
+            probe = (
+                Path(__file__).resolve().parents[2] / "courses" / "python-web" / "runtime_probe.py"
+            )
+            if not probe.is_file():
+                return (
+                    False,
+                    "The immutable Python web runtime probe is missing; rebuild this profile.",
+                )
+            commands = [[sys.executable, str(probe)]]
         elif profile_id == "data-engineering":
             commands = [
                 [

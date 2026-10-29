@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-29",
+  "platform": "linux/arm64",
+  "image_id": "sha256:38671d098bbc1b0fb9e2ab46debb2134caa4088fc057fa57f6886c56b0fe7265",
+  "returncode": 0,
+  "network": "none",
+  "source_mount": "readonly",
+  "memory_limit_bytes": 3221225472,
+  "cpus": 2,
+  "owned_source_sha256": {
+    "run.py": "a9ea688115934cee9a3d0588812daf44b482cf4e5b085251ae0fb49504eab617",
+    "src/main/scala/ds60/spark/tmb/Example.scala": "d0743f7ceeab474e7582489741f1c32ed8262e576df5fd9e4c839444b5fc167c",
+    "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "d52d35d67cbab03d0273e850a05b3757f3e2b626dafacf750dfbef6fa3b6f1d7"
+  },
+  "compilation": {
+    "boundary_source_sha256": {
+      "R/evaluate_registered.R": "ae11e3bc38cac04dfedcfa4dc5e30c4ae690882c8482f9635eeb6cab272bf517",
+      "models/linear_regression.cpp": "4f8ed504ece7e5f234bfa6f59b6c9daa965955b9ae5be5b50f6e1a09c916ec40",
+      "models/normal_location.cpp": "aef7ce0ce0aa33f4e02ea7ca357c472415fe687589b8c77346aa836379af0fde",
+      "models/normal_mean.cpp": "d3882d4d6d4bd2b25b08bc8575020f520fd21adb749676b2a132168359961e6e",
+      "models/random_intercept.cpp": "a253b64e38d0e14393d9f4cb3b2985d119aa25310cfb42ac56720740df82d86b",
+      "registry.json": "03a5cb32c508267628c4dbc8a94c2c9f71f759c243214e1e681fa892d50e7c93",
+      "spark_tmb/__init__.py": "99bca4efc4df5215434f8932261509df239dac032cc3cbb0fda0c54584a12b10",
+      "spark_tmb/cli.py": "3ea3d55116d79b811718084d5ebdf6ebe78d0c0ed2d76fafe34088af93a17683",
+      "spark_tmb/processes.py": "4d342c40f680d339d5be55baf06fff63e52d0fbf7d2be9acc0fa531fbdf1f353",
+      "spark_tmb/registry.py": "63dc7a233331d9e4562aa285206accc77aa5f6711c5f3db0d1d7c85b6bb14e06",
+      "spark_tmb/runtime.py": "b9b4d0c090ef064f60acbb0daabd1c69bc7bfdcc7744b3678d98de81cd0ad757"
+    },
+    "cli_sha256": "3ea3d55116d79b811718084d5ebdf6ebe78d0c0ed2d76fafe34088af93a17683",
+    "compiled": true,
+    "executed": true,
+    "kind": "scala-tmb-compilation-and-execution",
+    "owned_source_sha256": {
+      "run.py": "a9ea688115934cee9a3d0588812daf44b482cf4e5b085251ae0fb49504eab617",
+      "src/main/scala/ds60/spark/tmb/Example.scala": "d0743f7ceeab474e7582489741f1c32ed8262e576df5fd9e4c839444b5fc167c",
+      "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "d52d35d67cbab03d0273e850a05b3757f3e2b626dafacf750dfbef6fa3b6f1d7"
+    },
+    "scope": "native single-host CPU; no remote cluster or performance claim",
+    "sources": {
+      "src/main/scala/ds60/spark/tmb/Example.scala": "d0743f7ceeab474e7582489741f1c32ed8262e576df5fd9e4c839444b5fc167c",
+      "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "d52d35d67cbab03d0273e850a05b3757f3e2b626dafacf750dfbef6fa3b6f1d7"
+    }
+  },
+  "result": {
+    "schema_version": 1,
+    "kind": "scala-dataframe-prepared-tmb",
+    "spark": "4.0.1",
+    "java": "21.0.12.1",
+    "remote_cluster": false,
+    "gpu": false,
+    "raw_observations_collected": false,
+    "partition_batch_cases": [
+      {
+        "partitions": 1,
+        "batch_size": 4,
+        "actual_batches": 3,
+        "rows": 12,
+        "loss": 20.391459850155528,
+        "oracle_error": 0.0,
+        "partition_rows": [
+          12
+        ]
+      },
+      {
+        "partitions": 3,
+        "batch_size": 2,
+        "actual_batches": 6,
+        "rows": 12,
+        "loss": 20.391459850155528,
+        "oracle_error": 0.0,
+        "partition_rows": [
+          4,
+          4,
+          4
+        ]
+      },
+      {
+        "partitions": 5,
+        "batch_size": 64,
+        "actual_batches": 5,
+        "rows": 12,
+        "loss": 20.391459850155528,
+        "oracle_error": 0.0,
+        "partition_rows": [
+          3,
+          3,
+          2,
+          2,
+          2
+        ]
+      }
+    ],
+    "fit": {
+      "mu": 2.0000000855886224,
+      "log_sigma": 0.11157174399118923,
+      "gradient_inf_norm": 8.216508273761747e-07,
+      "iterations": 11,
+      "objective_evaluations": 12,
+      "converged": true
+    },
+    "model_source_sha256": "d3882d4d6d4bd2b25b08bc8575020f520fd21adb749676b2a132168359961e6e",
+    "model_library_sha256": "5d2365478559d9c012a095ee8cf39259222f29c60039324e707e4033defc48b4",
+    "registry_sha256": "03a5cb32c508267628c4dbc8a94c2c9f71f759c243214e1e681fa892d50e7c93",
+    "abi": {
+      "Matrix": "1.7.6",
+      "R": "4.6.1",
+      "TMB": "1.9.25",
+      "architecture": "aarch64-unknown-linux-gnu"
+    },
+    "caller_cache_preserved": true,
+    "empty_partitions_checked": true,
+    "pure_optimizer_oracle": true,
+    "passed": true,
+    "rejected_cases": [
+      "evaluation budget",
+      "invalid parameters",
+      "boolean CLI envelope version",
+      "extra CLI envelope field",
+      "closed objective",
+      "closed objective",
+      "closed objective",
+      "complete groups cannot be row-batched",
+      "unknown prepared model",
+      "missing projection",
+      "silent text conversion",
+      "duplicate observation identity",
+      "stale registry descriptor",
+      "null numeric data"
+    ]
+  },
+  "log_sha256": "766d1c5c9cbed7c33e717e28af932c3771c74becbd3bfdae383d82d8feed4511",
+  "scope": "actual Scala compilation, Spark and prepared R/TMB with readonly current source; installed-wheel and sealed-image acceptance are a separate subsequent gate",
+  "package_source_mode": "readonly canonical package source, no installed-wheel claim"
+}

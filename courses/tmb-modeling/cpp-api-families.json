@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "tmb_version": "1.9.25",
+  "scope": "Public/documented model-authoring families; not every private Eigen or AD-engine symbol.",
+  "source_header_sha256": {
+    "TMB.hpp": "a6f93072bfc73c531e061ad10774f292b07be6b6abbfc85b192c40bc5950fdf9",
+    "convenience.hpp": "c497fdff4000a7218f7f577054fd7b391d980d2eeab6669137883fb71b46b981",
+    "tmbutils/density.hpp": "e032aeba89503a4f1fd99fbdcd45398bb732f32333ab38998cb0de40d5e1ec53",
+    "atomic_macro.hpp": "ca083dd2dcfc270556a8b0b74c7ba453a3ce8d4f9307b4ef5dffa514e6cb7c24",
+    "tmbad_atomic_macro.hpp": "2684c2334b9db50de540e1168242298d9591e5e66ae88cae2e4e8bf26d7bbe22"
+  },
+  "families": [
+    {
+      "id": "typed-data",
+      "symbols": [
+        "DATA_SCALAR",
+        "DATA_VECTOR",
+        "DATA_MATRIX",
+        "DATA_ARRAY",
+        "DATA_INTEGER",
+        "DATA_IVECTOR",
+        "DATA_FACTOR",
+        "DATA_SPARSE_MATRIX"
+      ],
+      "chapters": ["tmb-002", "tmb-041"],
+      "contract": "R-side shape, finite-value, index and sparse-representation contracts precede native access.",
+      "evidence": "Original nine-model project covers vectors/matrices/integer indices; array/sparse family probes are separate."
+    },
+    {
+      "id": "typed-parameters",
+      "symbols": [
+        "PARAMETER",
+        "PARAMETER_VECTOR",
+        "PARAMETER_MATRIX",
+        "PARAMETER_ARRAY",
+        "Type",
+        "vector<Type>",
+        "matrix<Type>",
+        "array<Type>"
+      ],
+      "chapters": ["tmb-002", "tmb-026", "tmb-041"],
+      "contract": "Flat parameter order and free dimension depend on declarations and map/random/profile construction.",
+      "evidence": "Scalar/vector parameters executed in original likelihoods; array parameters executed in the separable family probe."
+    },
+    {
+      "id": "reports-and-simulation",
+      "symbols": ["REPORT", "ADREPORT", "SIMULATE"],
+      "chapters": ["tmb-009", "tmb-018", "tmb-019", "tmb-031", "tmb-045"],
+      "contract": "Keep deterministic estimands, diagnostic readback and generative simulation distinct.",
+      "evidence": "Original normal SIMULATE and multiple report/sdreport paths executed."
+    },
+    {
+      "id": "univariate-probability",
+      "symbols": ["dnorm", "dpois", "dbinom", "dgamma", "dnbinom2", "pnorm", "lgamma"],
+      "chapters": ["tmb-003", "tmb-011", "tmb-042"],
+      "contract": "Check the actual family parameterization, support and log-density flag; not every helper has the same conventions.",
+      "evidence": "Normal/Poisson/censor original models executed; other listed families require their own native tests."
+    },
+    {
+      "id": "stable-probability",
+      "symbols": ["logspace_add", "logspace_sub", "logit", "invlogit"],
+      "chapters": ["tmb-004", "tmb-042", "tmb-046"],
+      "contract": "Stable arithmetic does not change invalid domains or remove identifiability problems.",
+      "evidence": "Original stable-mixture template passed independent value and full logit/mean/log-scale gradient oracles at logits -1000, -3, 0, 2 and 1000 with two finite-difference step sizes."
+    },
+    {
+      "id": "multivariate-and-sparse",
+      "symbols": ["density::MVNORM", "density::GMRF", "density::UNSTRUCTURED_CORR"],
+      "chapters": ["tmb-015", "tmb-036", "tmb-043"],
+      "contract": "Distinguish covariance from precision, normalization from penalty and proper from intrinsic fields.",
+      "evidence": "MVNORM and GMRF compiled value/gradient equivalence passed against a dense oracle. UNSTRUCTURED_CORR remains explained but not claimed executed."
+    },
+    {
+      "id": "density-composition",
+      "symbols": ["density::AR1", "density::SCALE", "density::VECSCALE", "density::SEPARABLE"],
+      "chapters": ["tmb-015", "tmb-044"],
+      "contract": "Scale Jacobians and array-axis ordering are part of the statistical target.",
+      "evidence": "AR1/SCALE passed in the original model; SCALE/VECSCALE have independent value/gradient oracles. SEPARABLE state, row/column correlation and log-scale gradients matched an independent dense Kronecker oracle at two step sizes."
+    },
+    {
+      "id": "ad-safe-control",
+      "symbols": [
+        "CppAD::CondExpGt",
+        "CppAD::CondExpLt",
+        "CppAD::CondExpEq",
+        "parameter transforms",
+        "data-controlled branches"
+      ],
+      "chapters": ["tmb-004", "tmb-027", "tmb-046"],
+      "contract": "Avoid invalid arithmetic in candidate expressions and distinguish branch changes from mathematical nonsmoothness.",
+      "evidence": "Censor data branch executed; CondExpGt parameter-crossing probe compiled and matched positive/negative value and gradient references."
+    },
+    {
+      "id": "atomic-extensions",
+      "symbols": [
+        "TMB_ATOMIC_VECTOR_FUNCTION",
+        "forward values",
+        "reverse adjoints",
+        "higher derivatives"
+      ],
+      "chapters": ["tmb-006", "tmb-027", "tmb-047"],
+      "contract": "A correct first derivative does not establish higher-order latent-model support.",
+      "evidence": "Original quartic atomic compiled under CppAD and matched analytic values, gradients and Hessians at three points. This does not qualify every custom atomic or framework."
+    },
+    {
+      "id": "parallel-and-lifecycle",
+      "symbols": [
+        "parallel_accumulator<Type>",
+        "CppAD",
+        "TMBad",
+        "OpenMP",
+        "native ABI",
+        "sparse factorization"
+      ],
+      "chapters": [
+        "tmb-005",
+        "tmb-020",
+        "tmb-027",
+        "tmb-035",
+        "tmb-037",
+        "tmb-038",
+        "tmb-039",
+        "tmb-048"
+      ],
+      "contract": "Separate arithmetic, compilation, process ownership, threading and experimental framework evidence.",
+      "evidence": "Original CppAD/OpenMP model passed; TMBad/autopar and specialized debugging/factorization remain separate."
+    }
+  ]
+}

@@ -79,7 +79,7 @@ verify_image() {
 }
 if [[ $action == prepare ]]; then
   if [[ $route == binary ]]; then
-    base=${DS60_JAVA_IMAGE:-ds60sqlpy-worker-java21:1.0.1}
+    base=${DS60_JAVA_IMAGE:-ds60sqlpy-worker-java21:1.1.0}
     [[ $base =~ ^ds60sqlpy-worker-java21:[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
       echo 'Use an existing versioned local Java21 classroom image.' >&2
       exit 2

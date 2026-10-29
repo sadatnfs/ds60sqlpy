@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
+  >
+  <link rel="stylesheet" href="../../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
+  <title>Brad Bell Source Index · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    .katex{font:normal 1.21em KaTeX_Main,math,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.19.1"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.katex-newline{display:block}.katex .katex-base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .katex-base,.katex .katex-strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .katex-vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .katex-thinbox{display:inline-flex;flex-direction:row;max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline,.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-rule,.katex .katex-underline .underline-line,.katex .mfrac .frac-line{min-height:1px}.katex .mspace{display:inline-block}.katex .katex-smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.katex-inner,.katex .llap>.katex-inner,.katex .rlap>.katex-inner{position:absolute}.katex .clap>.katex-fix,.katex .llap>.katex-fix,.katex .rlap>.katex-fix{display:inline-block}.katex .llap>.katex-inner{right:0}.katex .clap>.katex-inner,.katex .rlap>.katex-inner{left:0}.katex .clap>.katex-inner>span{margin-left:-50%;margin-right:50%}.katex .katex-rule{border:0 solid;display:inline-block;position:relative}.katex .katex-hline,.katex .katex-overline .overline-line,.katex .katex-underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .katex-hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.katex-root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .katex-sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .katex-sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .katex-sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .katex-sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .katex-sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .katex-sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .katex-sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .katex-sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .katex-sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .katex-sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .katex-sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .katex-sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .katex-sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .katex-sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .katex-sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .katex-sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .katex-sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .katex-sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .katex-sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .katex-sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .katex-sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .katex-sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .katex-sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .katex-sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .katex-sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .katex-sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .katex-sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .katex-sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .katex-sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .katex-sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .katex-sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .katex-sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .katex-sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .katex-sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .katex-sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .katex-sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .katex-sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .katex-sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .katex-sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .katex-sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .katex-sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .katex-sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .katex-sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .katex-sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .katex-sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .katex-sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .katex-sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .katex-sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .katex-sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .katex-sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .katex-sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .katex-sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .katex-sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .katex-sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .katex-sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .katex-sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .katex-sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .katex-sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .katex-sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .katex-sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .katex-sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .katex-sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .katex-sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .katex-sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .katex-sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .katex-sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .katex-sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .katex-sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .katex-sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .katex-sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .katex-sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .katex-sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .katex-sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .katex-sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .katex-sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .katex-sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .katex-sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .katex-sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .katex-sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .katex-sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .katex-sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .katex-sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .katex-sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .katex-sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .katex-sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .katex-sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .katex-sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .katex-sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .katex-sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .katex-sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .katex-sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .katex-sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .katex-sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .katex-sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .katex-sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .katex-sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .katex-sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .katex-sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .katex-sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .katex-sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .katex-sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .katex-sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .katex-sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .katex-sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .katex-sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .katex-sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .katex-sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .katex-sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .katex-sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .katex-sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .katex-sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .katex-sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .katex-sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .katex-sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .katex-sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .katex-sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .katex-sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .katex-sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .katex-sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .katex-sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .katex-sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .katex-accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .katex-accent .accent-body{position:relative}.katex .katex-accent .accent-body:not(.accent-full){width:0}.katex .katex-overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .katex-stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .katex-stretchy:after,.katex .katex-stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .katex-sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .reflectbox{display:inline-block;transform:scaleX(-1)}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.katex-tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.katex-tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+
+
+.guide, .artifact-content, article.document {
+  font-family: "Latin Modern", "STIX Two Text", Georgia, serif;
+  font-size: var(--reading-size, 1.15rem); line-height: 1.7;
+  font-kerning: normal; text-wrap: pretty;
+}
+.guide p, .artifact-content p, article.document p { max-width: 72ch; }
+.guide h1, .guide h2, .guide h3, .guide h4,
+.artifact-content h2, .artifact-content h3, article.document h2, article.document h3 {
+  font-family: inherit; font-weight: 700; line-height: 1.25; text-wrap: balance;
+}
+.katex { font-size: 1.05em; text-align: initial; }
+.katex math { font-size: inherit; }
+.katex-display { margin: 0; }
+.katex .base { white-space: nowrap; }
+.tex-compiled { scrollbar-width: thin; }
+.guide, .artifact-content, article.document { counter-reset: equation; }
+.equation { margin: 1.4rem 0; counter-increment: equation; }
+.equation-label { text-align: right; font: .8rem/1.4 system-ui, sans-serif; opacity: .75; }
+.equation-label::after { content: " " counter(equation); }
+.equation-source { font: .8rem/1.4 system-ui, sans-serif; margin-top: .4rem; }
+.equation-source pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: .65rem; }
+.equation-source summary { cursor: pointer; }
+@media print {
+  .guide, .artifact-content, article.document { font-size: 11pt; line-height: 1.45; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  pre, table, .math-display { break-inside: avoid; }
+}
+
+/* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Brad Bell Source Index</h1>
+      <p class="source-path">Generated from <code>docs/research/brad-bell-source-index.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-json"><code><span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;schema_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;scope&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;26 publicly listed owned/forked repositories, selected upstreams and the recent public contribution index; not a complete lifetime attribution claim&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;repositories&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/ad-tensor&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a5b359a7da6b156f45478d2c5df780f39772fe92&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/ad-tensor/a5b359a7da6b156f45478d2c5df780f39772fe92/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;fe87c989d3de37a2651129eac38a50118deb67700b3f2fcd9ebf88a87c017772&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/at-cascade-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;65e6433729344e37f32b02f48ec81963dbce993a&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/at-cascade-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/at-cascade-feedstock/65e6433729344e37f32b02f48ec81963dbce993a/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;98b5cf3b56d3bdca98b2f3ba78f714e64fdeb6663568924d24ff154253b9433f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/at_cascade&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;0df64979213cfbe59fd82cb3ab5d7a7e0532db58&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/at_cascade/0df64979213cfbe59fd82cb3ab5d7a7e0532db58/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;1a728819ede25ef940e464b943951c3e3d2325e92677289cff7da0084e1d5aca&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/cmpad&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;e375e0606f9b6f6769ea4ce0a57a00463a090539&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/cmpad/e375e0606f9b6f6769ea4ce0a57a00463a090539/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;aa0c21c2672c36403d4883c366a52fc1919ddb3076798076ce2c3e2f46565c12&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/conda-forge-pinning-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;01bf470ec049bb32086a2e269d4be9bfdc677efe&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/conda-forge-pinning-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/conda-forge-pinning-feedstock/01bf470ec049bb32086a2e269d4be9bfdc677efe/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4d0e4aa46f54002c9e0f088416cb38ef7a6f38f5b191db544b2d8c02bd7ce181&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/cppad-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;86e99c40dfbe2f08b63a082a34ccd86b3c4679b4&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/cppad-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/cppad-feedstock/86e99c40dfbe2f08b63a082a34ccd86b3c4679b4/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;1f0ce5a3670f84415919fadaaa75319d2af9db1388a162658d823fae0ccf494b&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/cppad-mixed-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;81cb8036855755c63676f7877a72c491845e8f08&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/cppad-mixed-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/cppad-mixed-feedstock/81cb8036855755c63676f7877a72c491845e8f08/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cbf9fcdb9a667a8908c92e24132c96b79a9c194697697c106b37773e83fb48dc&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/CppADCodeGen&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;16abba1ae7777861c15a7e20058c481960c12f90&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;joaoleal/CppADCodeGen&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/CppADCodeGen/16abba1ae7777861c15a7e20058c481960c12f90/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;d4949d441842a1bf3ea7a88317662c2e8b96b713536dc71840440b6006449fad&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/cppad_mixed&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b0c86bbb2b1a04346e9950cd68e744935164d627&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/cppad_mixed/b0c86bbb2b1a04346e9950cd68e744935164d627/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;aeec96c323bcd9100822a9c23244be351cb696f4fb32ece7db3f614892d1e553&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/cppad_py&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;76331e8690ae5f3af88a9e3f25971b0f476e4518&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/cppad_py/76331e8690ae5f3af88a9e3f25971b0f476e4518/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;0eecade9d18888f466f2584731fbb6078d0a3b7fcb3a2ea07132386bdfa285e8&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/cppad_swig&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4cd2da806d19f3952e56550e07169139a8b50947&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/cppad_swig/4cd2da806d19f3952e56550e07169139a8b50947/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a208c9ea76a7ce01d7ad5dd5af2342ed3c603f6d9a153781c1c78944f32ecea2&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/dismod-at-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b6af31785ac278316bc05e9031df437b2dd804bc&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/dismod-at-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/dismod-at-feedstock/b6af31785ac278316bc05e9031df437b2dd804bc/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;8646604c6fd80b4a7500d8ddfaed490ee9a275aac50b10af23f2ec038dd0a13a&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/dismod_at&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a6bef7b543a7ed0c3998199f30a8382ab7026726&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/dismod_at/a6bef7b543a7ed0c3998199f30a8382ab7026726/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4e92858430bfdac86291f3a4e9657309dc9ef43e433b589fff32e7b8a648b247&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/implicit_ad&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;8f71d9292fc6368e6f712ac67b7276042b26bd88&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/implicit_ad/8f71d9292fc6368e6f712ac67b7276042b26bd88/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a4fc45e7890c52742708c543e4c2c6899cd8cbeab5136da0e618558f24878b75&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;MIT&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;MIT License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/mit/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/mat2cpp&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cc5c4683c6429e07ceac061e0ea72b51da2c3caf&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/mat2cpp/cc5c4683c6429e07ceac061e0ea72b51da2c3caf/README&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;855b179a5cf4fe47cfdd308178426076c7bb723c0a9f33379c22654f9d2f71fb&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/match_csv&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;fdf5981fc489ea3e401c588684691cce54238566&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/match_csv/fdf5981fc489ea3e401c588684691cce54238566/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;7dde35bf681549f463b2ee4dbadf15e54b8ebdb0cc5506efcaaefc762c9868aa&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/omhelp&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;62eccea226a88a6a99da450247523463ef85bf4a&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/omhelp/62eccea226a88a6a99da450247523463ef85bf4a/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2b5e3de1ca21a8eec3d9dbc57f93d34b5993fa3c0b47b72975786287f7a11d6f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/python-reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;9a3b94e792c9122c94751183fdcc4cffb3d7ac11&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;jprzywoski/python-reference&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/python-reference/9a3b94e792c9122c94751183fdcc4cffb3d7ac11/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;38716d718613206bc17beb422e6a6482f72d92e89b19bd2c407543d3c37f1295&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;MIT&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;MIT License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/mit/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/rustad&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;d98938e24a3196b49cb05a7abb8893941f8c9b09&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/rustad/d98938e24a3196b49cb05a7abb8893941f8c9b09/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;e6cc3c11a267f0ab89f9e44d943ea0faebd103a59fa4fd3af1584440648f4ba7&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/sparse_ad&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;592134d12108aefaa8308ca55cd665908119ed8d&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/sparse_ad/592134d12108aefaa8308ca55cd665908119ed8d/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a1a2c8c128ca397084bd668a0dca35412084cbc35e24ed33bc84b3207d75113d&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/staged-recipes&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;42121433b63276bc2947c3503f258175885d0c4e&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/staged-recipes&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/staged-recipes/42121433b63276bc2947c3503f258175885d0c4e/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;8ff319d8d6a2c52e0f409bbcd4f91b6f8a875d5334666e3696282200fd45f075&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/test_sphinx&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;22ec3b7ee8c87bd25a7ad947b9071e864a952c15&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/Trilinos&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2f8614ce01b61271bad2ccbc96e8d226124ebae6&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;trilinos/Trilinos&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/Trilinos/2f8614ce01b61271bad2ccbc96e8d226124ebae6/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;72b613de023101a53fff0d7f115923d6a6202a35468e90a421f36c4ea16f222f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/tst_github&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a6bfec12436728d7dbf10e14fc783584f3c3d1e0&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/tst_github/a6bfec12436728d7dbf10e14fc783584f3c3d1e0/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;30416c869f20d473a398c96c1506a547e7c2eb9340ae3ec0e7068243ee799809&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/xrst&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;23aafdfed1be235cc8321edc725b5f26623404e0&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/xrst/23aafdfed1be235cc8321edc725b5f26623404e0/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;c2f4d0493f1531ec151827371481945e935629aa739f4118237713600d5bd7d9&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bradbell/xrst-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;8e90ca20382b144cae0bd0c10506db9b411bf5b7&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/xrst-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/bradbell/xrst-feedstock/8e90ca20382b144cae0bd0c10506db9b411bf5b7/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;f374e071627717cc27bd2d33abdfe21b3e6b3f0515a1e8a1c8ced1a0d145bcff&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;coin-or/CppAD&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;302e241ae7b6b146c676590981b5919af71e1ccf&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/coin-or/CppAD/302e241ae7b6b146c676590981b5919af71e1ccf/readme.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;9f32245ed2b7742b74aeaeb78c2eab2b5bb9f987c89dcd08d1e4ad124b002dfb&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;kaskr/adcomp&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ee2aebea75ccb96ccfb242732165a113cd3ec6d9&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/kaskr/adcomp/ee2aebea75ccb96ccfb242732165a113cd3ec6d9/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;79b9a8c21ebb9491daf6f1ac9057cac89b048d8b19c0b7ccf0f2cf3c22ac4c59&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;joaoleal/CppADCodeGen&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bd3c44f78ed3a032c1791f8ba9b866e5ac48e406&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/joaoleal/CppADCodeGen/bd3c44f78ed3a032c1791f8ba9b866e5ac48e406/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;e8ff1fbe8202e2e724df35c26b67ed4d387b5e23fccb31d6e56f024a1bf4e496&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;NOASSERTION&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Other&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/other/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/staged-recipes&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;d0a48f1083d67c1f2a157dad22bfcbe9595cb408&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/conda-forge/staged-recipes/d0a48f1083d67c1f2a157dad22bfcbe9595cb408/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;08c28302a3cb80f44b5029dd78ab57ed83fe8d13705dc5343987dfa6e0b39115&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/conda-forge-pinning-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;7c11f837d5cd7a0fbd13254f36e0ba4183e8b61e&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/conda-forge/conda-forge-pinning-feedstock/7c11f837d5cd7a0fbd13254f36e0ba4183e8b61e/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b14bbc71b47baf584ccac5f5f89ab22578b43149206e2221b6ac893a00919ba8&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;LaurentMazare/tch-rs&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4227b89b72059b0651ff83a38637693574e0a2d6&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/LaurentMazare/tch-rs/4227b89b72059b0651ff83a38637693574e0a2d6/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;257a900a71b1783b270f6eb7563426dbfb82be1cc41ab4931b2b4d56c0fe998c&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apache-2.0&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apache License 2.0&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/apache-2.0/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/xrst-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;778ed049eeaf741fd79c9e3805fe45fadb89c01a&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/conda-forge/xrst-feedstock/778ed049eeaf741fd79c9e3805fe45fadb89c01a/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;f374e071627717cc27bd2d33abdfe21b3e6b3f0515a1e8a1c8ced1a0d145bcff&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/cppad-mixed-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;8f7a367023d9f6926e8225b5f551151d758ecef3&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/conda-forge/cppad-mixed-feedstock/8f7a367023d9f6926e8225b5f551151d758ecef3/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b4398a69bb9a6d96ff5c7feda2a459532a9fa38b10906d4b18ce5a75e71c3a0a&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/dismod-at-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ad60c2b5f05c269825b68f6e3859c35b54d8d67b&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/conda-forge/dismod-at-feedstock/ad60c2b5f05c269825b68f6e3859c35b54d8d67b/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;8646604c6fd80b4a7500d8ddfaed490ee9a275aac50b10af23f2ec038dd0a13a&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conda-forge/at-cascade-feedstock&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;revision&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b380da6843654b7c8f6de75601c65c17f30ec176&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;fork&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;parent&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;recent_contribution_index&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://raw.githubusercontent.com/conda-forge/at-cascade-feedstock/b380da6843654b7c8f6de75601c65c17f30ec176/README.md&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;readme_sha256&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;98b5cf3b56d3bdca98b2f3ba78f714e64fdeb6663568924d24ff154253b9433f&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;license_metadata&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;spdxId&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD-3-Clause&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;BSD 3-Clause \&quot;New\&quot; or \&quot;Revised\&quot; License&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;http://choosealicense.com/licenses/bsd-3-clause/&quot;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">],</span></span>
+<span class="source-line">  <span class="syntax-tag">&quot;selected_account_attributed_commits&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;coin-or/CppAD&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;query_scope&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;author=bradbell, at most3 returned commits&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;commits&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;302e241ae7b6b146c676590981b5919af71e1ccf&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/coin-or/CppAD/commit/302e241ae7b6b146c676590981b5919af71e1ccf&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;900ade02fdef161817de397f984c76671d01946d&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/coin-or/CppAD/commit/900ade02fdef161817de397f984c76671d01946d&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cf97dae55024a85687c599a1885d04d8acce60ab&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/coin-or/CppAD/commit/cf97dae55024a85687c599a1885d04d8acce60ab&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;kaskr/adcomp&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;query_scope&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;author=bradbell, at most3 returned commits&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;commits&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;647a82653e00a54ba7a53cae1fab80a72b0eb4b8&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/kaskr/adcomp/commit/647a82653e00a54ba7a53cae1fab80a72b0eb4b8&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;joaoleal/CppADCodeGen&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;query_scope&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;author=bradbell, at most3 returned commits&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;commits&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;975343cfc5d1237549393981a9e05069a2ad00cc&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/joaoleal/CppADCodeGen/commit/975343cfc5d1237549393981a9e05069a2ad00cc&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;1ff6f59fcc9072f4eb2b941f9ad3d827e300ea53&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/joaoleal/CppADCodeGen/commit/1ff6f59fcc9072f4eb2b941f9ad3d827e300ea53&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">},</span></span>
+<span class="source-line">        <span class="syntax-punctuation">{</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;sha&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b495a0ec22eac601c7ba23c1cf1134ccac6d51ad&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">          <span class="syntax-tag">&quot;url&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https://github.com/joaoleal/CppADCodeGen/commit/b495a0ec22eac601c7ba23c1cf1134ccac6d51ad&quot;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">},</span></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;repository&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Trilinos/Trilinos&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;query_scope&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;author=bradbell, at most3 returned commits&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;commits&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">  <span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span></code></pre></article>
+  </main>
+</body>
+</html>

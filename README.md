@@ -24,11 +24,11 @@ Install and start a local Docker-compatible engine with **Linux containers**,
 **Docker Compose 2.28.0 or newer**, and a Bash terminal. Install Git if you want
 to clone the repository; a ZIP download works without Git.
 
-| Operating system | What to prepare | Where to run the commands below |
-| --- | --- | --- |
-| Windows | WSL 2 with Ubuntu, plus Docker Desktop or Rancher Desktop. Enable Linux containers and integration for your Ubuntu distribution. Rancher Desktop uses the Moby engine. | The Ubuntu/WSL terminal |
-| macOS | Docker Desktop or Rancher Desktop using Moby. Start the application and wait for its engine to be ready. Bash is included with macOS. | Terminal |
-| Linux | Docker Engine, its Compose plugin, Bash and permission for your normal user to access the local engine. | A terminal in your Linux session |
+| Operating system | What to prepare                                                                                                                                                        | Where to run the commands below  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Windows          | WSL 2 with Ubuntu, plus Docker Desktop or Rancher Desktop. Enable Linux containers and integration for your Ubuntu distribution. Rancher Desktop uses the Moby engine. | The Ubuntu/WSL terminal          |
+| macOS            | Docker Desktop or Rancher Desktop using Moby. Start the application and wait for its engine to be ready. Bash is included with macOS.                                  | Terminal                         |
+| Linux            | Docker Engine, its Compose plugin, Bash and permission for your normal user to access the local engine.                                                                | A terminal in your Linux session |
 
 Follow the [beginner setup guide](docs/one-command-classroom.md) for installation
 links, WSL integration and resource guidance. The course's Python, PostgreSQL,
@@ -162,43 +162,47 @@ lesson keeps its guide, coding workspace or reading notes, and progress in the
 same classroom. Use **All learning paths** to change direction without opening a
 second application.
 
-| Subject | Start here | Main direction |
-| --- | --- | --- |
-| Python and data science | [Python](python/ds-60day/README.md) | First programs, NumPy, pandas, algorithms, analysis and delivery |
-| PostgreSQL | [SQL](sql/postgres-60day/README.md) | First queries, relational reasoning, analytics, performance and operations |
-| Python + PostgreSQL engineering | [Bridge](bridge/README.md) | Safe database access, transactions, testing and pipelines |
-| Statistics and machine learning | [Tutorial book](courses/statistics-ml/README.md) | Theory, modeling choices, worked Python examples and interview explanations |
-| Applied scientific methods | [Applied Science](courses/applied-science/README.md) | Causal identification, forecasting, survival, ranking, optimization and evidence synthesis |
-| Bayesian computation | [PyMC, ArviZ and Stan](courses/bayesian-computing/README.md) | Generative models, actual posterior fitting, diagnostics, predictive checks and decisions |
-| Polars | [Polars data engineering](courses/polars/README.md) | Expressions, lazy plans, Arrow, temporal joins and validated feature publication |
-| dbt | [dbt and DuckDB](courses/dbt/README.md) | Real models, tests, snapshots, incremental data, contracts and controlled publication |
-| ML engineering | [ML engineering](courses/ml-engineering/README.md) | Features, experiment tracking, model decisions, serving, monitoring and rollback |
-| Data and ML Engineering | [Engineering tutorial book](courses/data-ml-engineering/README.md) | 72 chapters connecting data contracts, storage, streaming, features, model delivery and the complete LLM request-to-SSE lifecycle |
-| Apache and open-data platforms | [Platform tutorials and workshops](courses/apache-data-platforms/README.md) | 88 units covering Arrow, DataFusion, Ballista, Airflow, Kafka, Iceberg, Flink, Cassandra, Pinot, Hive, Atlas and Delta Sharing |
-| LLM evaluation | [Evaluation and alignment](courses/llm-evaluation/README.md) | Sampling, annotation, uncertainty, retrieval, preference models, DPO, PPO and GRPO |
-| Julia | [Julia scientific computing](courses/julia/README.md) | Language, dispatch, data analysis, numerical methods, differentiation and concurrency |
-| R | [R programming and statistics](courses/r/README.md) | Language foundations, data workflows, S3/S4/R6/S7, statistical modeling and plotting |
-| JAX | [JAX numerical computing](courses/jax/README.md) | Arrays, automatic differentiation, JIT, transformations, optimization and scientific models |
-| DAX | [Offline DAX](courses/dax/README.md) | Semantic models, filter context, measures, time intelligence and worked reference tables |
-| Data visualization | [Plotly in Python and JavaScript](courses/data-visualization/README.md) | Shared data semantics, uncertainty, interactive controls, accessibility and export |
-| C | [C17](courses/c/README.md) | Memory, pointers, representation, compilation and reliable systems programs |
-| C++ | [C++20](courses/cpp/README.md) | Language foundations, ownership, compilation and larger programs |
-| Go | [Go](courses/go/README.md) | General-purpose programs, concurrency, services and Kubernetes-oriented engineering |
-| C# | [C# and .NET](courses/csharp/README.md) | Types, collections, LINQ, async programming and application design |
-| Rust | [Rust and Arrow](courses/rust/README.md) | Ownership, traits, concurrency, systems design and columnar data |
-| Swift | [Swift](courses/swift/README.md) | Language, concurrency and app architecture, with explicit Apple-platform project boundaries |
-| Docker | [Docker](courses/docker/README.md) | Images, Dockerfiles, Compose, networking, data, security and recovery |
-| Java | [Java](courses/java/README.md) | Objects, types, collections, concurrency and practical engineering |
-| JavaScript and TypeScript | [JavaScript/TypeScript and D3](courses/javascript-typescript/README.md) | Browser and Node concepts, types, async code and a 24-lesson D3 visualization specialization |
-| Kubernetes | [Kubernetes](courses/kubernetes/README.md) | Workloads and a deep 24-lesson networking/operations extension, with bounded owned-cluster practice |
-| Scala and Apache Spark | [Scala/Spark](courses/scala-spark/README.md) | Scala, distributed data processing and companion PySpark implementations |
-| TensorFlow | [TensorFlow/Keras](courses/deep-learning-tensorflow/README.md) | Tensors, optimization, architectures and model workflows |
-| PyTorch | [PyTorch](courses/deep-learning-pytorch/README.md) | Autograd, training state, architectures and reproducibility |
-| Natural language processing | [NLP](courses/nlp/README.md) | Text representation, classical baselines, neural methods and evaluation |
-| LLM mechanisms | [LLM theory](courses/llm-theory/README.md) | Tokens, Transformers, attention, generation and adaptation mechanics |
-| Applied LLM systems | [Applied LLMs](courses/llm-applied/README.md) | RAG, evaluation, fine-tuning, tools and subject assistants |
-| GPU computing and CUDA | [CUDA, Python and GPU Spark](courses/cuda/README.md) | GPU architecture, C++ kernels, Python, PyTorch/TensorFlow and RAPIDS/Spark, with portable CPU study paths |
-| Web development | [HTML, CSS and PHP](courses/web-development/README.md) | Semantic pages, responsive layouts, accessibility, browser interactions and server-side applications |
+| Subject                         | Start here                                                                  | Main direction                                                                                                                       |
+| ------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Python and data science         | [Python](python/ds-60day/README.md)                                         | First programs, NumPy, pandas, algorithms, analysis and delivery                                                                     |
+| PostgreSQL                      | [SQL](sql/postgres-60day/README.md)                                         | First queries, relational reasoning, analytics, performance and operations                                                           |
+| Python + PostgreSQL engineering | [Bridge](bridge/README.md)                                                  | Safe database access, transactions, testing and pipelines                                                                            |
+| Statistics and machine learning | [Tutorial book](courses/statistics-ml/README.md)                            | Theory, modeling choices, worked Python examples and interview explanations                                                          |
+| Applied scientific methods      | [Applied Science](courses/applied-science/README.md)                        | Causal identification, forecasting, survival, ranking, optimization and evidence synthesis                                           |
+| Bayesian computation            | [PyMC, ArviZ and Stan](courses/bayesian-computing/README.md)                | Generative models, actual posterior fitting, diagnostics, predictive checks and decisions                                            |
+| Polars                          | [Polars data engineering](courses/polars/README.md)                         | Expressions, lazy plans, Arrow, temporal joins and validated feature publication                                                     |
+| dbt                             | [dbt and DuckDB](courses/dbt/README.md)                                     | Real models, tests, snapshots, incremental data, contracts and controlled publication                                                |
+| ML engineering                  | [ML engineering](courses/ml-engineering/README.md)                          | Features, experiment tracking, model decisions, serving, monitoring and rollback                                                     |
+| Data and ML Engineering         | [Engineering tutorial book](courses/data-ml-engineering/README.md)          | 72 chapters connecting data contracts, storage, streaming, features, model delivery and the complete LLM request-to-SSE lifecycle    |
+| Apache and open-data platforms  | [Platform tutorials and workshops](courses/apache-data-platforms/README.md) | 88 units covering Arrow, DataFusion, Ballista, Airflow, Kafka, Iceberg, Flink, Cassandra, Pinot, Hive, Atlas and Delta Sharing       |
+| LLM evaluation                  | [Evaluation and alignment](courses/llm-evaluation/README.md)                | Sampling, annotation, uncertainty, retrieval, preference models, DPO, PPO and GRPO                                                   |
+| Julia                           | [Julia scientific computing](courses/julia/README.md)                       | Language, dispatch, data analysis, numerical methods, differentiation and concurrency                                                |
+| R                               | [R programming and statistics](courses/r/README.md)                         | Language foundations, data workflows, S3/S4/R6/S7, statistical modeling and plotting                                                 |
+| JAX                             | [JAX numerical computing](courses/jax/README.md)                            | Arrays, automatic differentiation, JIT, transformations, optimization and scientific models                                          |
+| DAX                             | [Offline DAX](courses/dax/README.md)                                        | Semantic models, filter context, measures, time intelligence and worked reference tables                                             |
+| Data visualization              | [Plotly in Python and JavaScript](courses/data-visualization/README.md)     | Shared data semantics, uncertainty, interactive controls, accessibility and export                                                   |
+| C                               | [C17](courses/c/README.md)                                                  | Memory, pointers, representation, compilation and reliable systems programs                                                          |
+| C++                             | [C++20](courses/cpp/README.md)                                              | Language foundations, ownership, compilation and larger programs                                                                     |
+| Go                              | [Go](courses/go/README.md)                                                  | General-purpose programs, concurrency, services and Kubernetes-oriented engineering                                                  |
+| C#                              | [C# and .NET](courses/csharp/README.md)                                     | Types, collections, LINQ, async programming and application design                                                                   |
+| Rust                            | [Rust and Arrow](courses/rust/README.md)                                    | Ownership, traits, concurrency, systems design and columnar data                                                                     |
+| Swift                           | [Swift](courses/swift/README.md)                                            | Language, concurrency and app architecture, with explicit Apple-platform project boundaries                                          |
+| Docker                          | [Docker](courses/docker/README.md)                                          | Images, Dockerfiles, Compose, networking, data, security and recovery                                                                |
+| Java                            | [Java](courses/java/README.md)                                              | Objects, types, collections, concurrency and practical engineering                                                                   |
+| JavaScript and TypeScript       | [JavaScript/TypeScript and D3](courses/javascript-typescript/README.md)     | Browser and Node concepts, types, async code and a 24-lesson D3 visualization specialization                                         |
+| Kubernetes                      | [Kubernetes](courses/kubernetes/README.md)                                  | Workloads and a deep 24-lesson networking/operations extension, with bounded owned-cluster practice                                  |
+| Scala and Apache Spark          | [Scala/Spark](courses/scala-spark/README.md)                                | Scala, distributed data processing and companion PySpark implementations                                                             |
+| Advanced Spark modeling         | [Advanced Spark](courses/advanced-spark-modeling/README.md)                 | Custom likelihoods, bounded distributed fitting, Scala extensions, Catalyst and Spark/PyTorch integration                            |
+| Custom likelihoods              | [PyTorch modeling](courses/custom-likelihood-pytorch/README.md)             | Likelihood construction, automatic differentiation, optimization, uncertainty and numerical diagnostics                              |
+| TMB modeling                    | [R and C++ with TMB](courses/tmb-modeling/README.md)                        | Compiled models, random effects, Laplace approximation, public APIs and C++ authoring families                                       |
+| TensorFlow                      | [TensorFlow/Keras](courses/deep-learning-tensorflow/README.md)              | Tensors, optimization, architectures and model workflows                                                                             |
+| PyTorch                         | [PyTorch](courses/deep-learning-pytorch/README.md)                          | Autograd, training state, architectures and reproducibility                                                                          |
+| Natural language processing     | [NLP](courses/nlp/README.md)                                                | Text representation, classical baselines, neural methods and evaluation                                                              |
+| LLM mechanisms                  | [LLM theory](courses/llm-theory/README.md)                                  | Tokens, Transformers, attention, generation and adaptation mechanics                                                                 |
+| Applied LLM systems             | [Applied LLMs](courses/llm-applied/README.md)                               | RAG, evaluation, fine-tuning, tools and subject assistants                                                                           |
+| GPU computing and CUDA          | [CUDA, Python and GPU Spark](courses/cuda/README.md)                        | GPU architecture, C++ kernels, Python, PyTorch/TensorFlow and RAPIDS/Spark, with portable CPU study paths                            |
+| Web development                 | [HTML, CSS and PHP](courses/web-development/README.md)                      | Semantic pages, responsive layouts, accessibility, browser interactions and server-side applications                                 |
+| Python web development          | [HTTP, Flask, FastAPI and Django](courses/python-web/README.md)             | Shared HTTP foundations, independent framework branches, APIs, databases, authentication, streaming and real Docker service projects |
 
 The engineering book includes separately owned [data-product](courses/data-ml-engineering/projects/data-product/README.md)
 and [inference-service](courses/data-ml-engineering/projects/inference-service/README.md)
@@ -252,8 +256,8 @@ For a new Hub selection, omitting `--tag` resolves the app's `latest` alias to
 a concrete release, requires the matching checkout or starter ZIP, and saves
 that version for the project. The accepted partial release uses App tag
 `YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0` with Core, JavaScript and TypeScript
-workers. After the full 1.0.1 release is promoted, its app tags are `:1.0.1`
-and `:latest`, with workers such as `:1.0.1-worker-python-core` in the same
+workers. After the full 1.1.0 release is promoted, its app tags are `:1.1.0`
+and `:latest`, with workers such as `:1.1.0-worker-python-core` in the same
 repository. Docker selects the engine's native architecture from the combined
 Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.
 
@@ -286,7 +290,7 @@ completed release deliberately. Later bare `./classroom resume` never builds,
 pulls or follows a moving latest tag.
 
 For a completed full release, download without starting services with
-`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1`.
+`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0`.
 For a partial release, use only its published profiles.
 For an existing project, switching image source/layout or applying an update
 requires the same command without `pull` and with `--rebuild`. In Hub mode
@@ -315,7 +319,7 @@ for accepted markers, version rules and the selected-profile install command.
 After staging and validating the reviewed release changes on `main`:
 
 ```sh
-git commit -m "Release 1.0.1 [publish-docker]"
+git commit -m "Release 1.1.0 [publish-docker]"
 git push origin main
 ```
 
@@ -343,25 +347,25 @@ docker login
 Preview already built and tested images without uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0
 ```
 
 After reviewing the mapping, explicitly upload:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --push
 ```
 
 This requires the complete ordinary local set by default. It checks all
 selected images before tagging/pushing and does not build, log in, create
 another architecture or publish combined manifests. Prepare missing images
-with `./classroom build --all --local-build --tag 1.0.1`, then qualify them.
+with `./classroom build --all --local-build --tag 1.1.0`, then qualify them.
 
-Manual tags include architecture, such as `1.0.1-lab-arm64`. A matching-architecture
+Manual tags include architecture, such as `1.1.0-lab-arm64`. A matching-architecture
 learner selects that layout explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --architecture-tags
 ```
 
 An ARM64-only Mac publication does not supply AMD64 tags for a typical

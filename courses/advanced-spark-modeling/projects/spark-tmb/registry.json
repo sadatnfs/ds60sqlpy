@@ -1,0 +1,131 @@
+{
+  "schema_version": 2,
+  "abi": {
+    "R": "4.6.1",
+    "TMB": "1.9.25",
+    "Matrix": "1.7.6"
+  },
+  "models": {
+    "normal_mean": {
+      "source": "models/normal_mean.cpp",
+      "factorization": "independent_rows",
+      "response": "y",
+      "data": {
+        "y": "real_vector"
+      },
+      "fixed_parameters": ["mu", "log_sigma"],
+      "random": null
+    },
+    "random_intercept": {
+      "source": "models/random_intercept.cpp",
+      "factorization": "complete_groups",
+      "response": "y",
+      "data": {
+        "y": "real_vector",
+        "group": "integer_vector"
+      },
+      "fixed_parameters": ["beta", "log_sigma", "log_tau"],
+      "random": {
+        "name": "u",
+        "group_field": "group"
+      }
+    },
+    "normal_location": {
+      "source": "models/normal_location.cpp",
+      "factorization": "independent_rows",
+      "response": "y",
+      "data": {
+        "y": "real_vector"
+      },
+      "fixed_parameters": ["mu", "log_sigma"],
+      "random": null,
+      "training_constants": {
+        "prediction_mode": {
+          "kind": "integer_scalar",
+          "value": 0
+        },
+        "n_prediction": {
+          "kind": "integer_scalar",
+          "value": 0
+        }
+      },
+      "prediction": {
+        "target": "conditional_mean",
+        "inputs": {},
+        "from_training": {},
+        "report": "prediction",
+        "constants": {
+          "prediction_mode": {
+            "kind": "integer_scalar",
+            "value": 1
+          },
+          "y": {
+            "kind": "real_vector",
+            "value": []
+          }
+        },
+        "row_count_field": "n_prediction"
+      }
+    },
+    "linear_regression": {
+      "source": "models/linear_regression.cpp",
+      "factorization": "independent_rows",
+      "response": "y",
+      "data": {
+        "y": "real_vector",
+        "x": "real_vector"
+      },
+      "fixed_parameters": ["beta_0", "beta_1", "log_sigma"],
+      "random": null,
+      "parameter_layout": [
+        {
+          "name": "beta",
+          "kind": "real_vector",
+          "size": 2,
+          "coordinates": ["beta_0", "beta_1"]
+        },
+        {
+          "name": "log_sigma",
+          "kind": "scalar",
+          "size": 1,
+          "coordinates": ["log_sigma"]
+        }
+      ],
+      "training_constants": {
+        "prediction_mode": {
+          "kind": "integer_scalar",
+          "value": 0
+        },
+        "x_prediction": {
+          "kind": "real_vector",
+          "value": []
+        }
+      },
+      "prediction": {
+        "target": "conditional_mean",
+        "inputs": {
+          "x_prediction": "real_vector"
+        },
+        "from_training": {
+          "x_prediction": "x"
+        },
+        "report": "prediction",
+        "constants": {
+          "prediction_mode": {
+            "kind": "integer_scalar",
+            "value": 1
+          },
+          "x": {
+            "kind": "real_vector",
+            "value": []
+          },
+          "y": {
+            "kind": "real_vector",
+            "value": []
+          }
+        },
+        "row_count_field": null
+      }
+    }
+  }
+}

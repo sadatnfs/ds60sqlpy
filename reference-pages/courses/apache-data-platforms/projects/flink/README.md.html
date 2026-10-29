@@ -200,8 +200,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The reviewed <code>scala-jvm</code> classroom image supplies Java 17 and Python. From the repository root, prepare it locally or reuse a matching published Hub release:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom build --profile scala-jvm</code></pre>
 <p>For a published combined manifest, replace <code>yourname</code> with its publisher:</p>
-<pre class="highlighted-code"><code class="language-bash">docker pull yourname/ds60sqlpy:1.0.1-worker-scala-jvm
-docker tag yourname/ds60sqlpy:1.0.1-worker-scala-jvm ds60sqlpy-worker-scala-jvm:1.0.1</code></pre>
+<pre class="highlighted-code"><code class="language-bash">docker pull yourname/ds60sqlpy:1.1.0-worker-scala-jvm
+docker tag yourname/ds60sqlpy:1.1.0-worker-scala-jvm ds60sqlpy-worker-scala-jvm:1.1.0</code></pre>
 <p>Docker selects the native architecture. The project verifies the actual local image before preparation; it never silently emulates AMD64 on ARM. The combined worker tag includes <code>worker-</code>. These commands pull/tag a base and never push it.</p>
 <p>Copy the complete project into a fresh learner-owned directory:</p>
 <pre class="highlighted-code"><code class="language-bash">mkdir -p work

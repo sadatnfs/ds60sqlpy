@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head
+    ><meta charset="utf-8" /><meta
+      name="viewport"
+      content="width=device-width,initial-scale=1" /><title>Python web engineering lab</title
+    ><link rel="stylesheet" href="/static/site.css" /><script src="/static/app.js" defer></script
+  ></head>
+  <body
+    ><main
+      ><header
+        ><p class="eyebrow">LOCAL SERVICE WORKSHOP</p><h1 id="framework">Python web engineering</h1
+        ><p>Inspect authentication, persistent notes and request outcomes in a real server.</p
+        ><nav
+          ><a href="/healthz">Readiness response</a
+          ><a id="docs" href="/docs" hidden>Local API explorer</a
+          ><a id="admin" href="/admin/" hidden>Django admin</a></nav
+        ></header
+      >
+      <section aria-labelledby="session-title"
+        ><h2 id="session-title">Session</h2
+        ><p
+          >Local synthetic accounts: <code>alice</code> or <code>bob</code>, password
+          <code>classroom-demo</code>. These accounts are confined to this loopback workshop.</p
+        ><form id="login-form"
+          ><label
+            >Username<input name="username" autocomplete="username" value="alice" required /></label
+          ><label
+            >Password<input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              value="classroom-demo"
+              required /></label
+          ><button>Sign in</button><button id="logout" type="button">Sign out</button></form
+        ><p id="identity" role="status">Checking the saved session.</p></section
+      >
+      <section aria-labelledby="notes-title"
+        ><h2 id="notes-title">Owned notes</h2
+        ><p
+          >Each framework has separate notes. Signing in as the other account changes the visible
+          collection.</p
+        ><form id="note-form"
+          ><label>Note title<input name="title" maxlength="120" required /></label
+          ><button>Create note</button><button id="refresh" type="button">Refresh</button></form
+        ><ul id="notes"></ul
+      ></section>
+      <section id="jobs" hidden aria-labelledby="jobs-title"
+        ><h2 id="jobs-title">Durable job and event stream</h2
+        ><p
+          >Create a held calculation, observe its queued/running events, then release it.
+          Disconnecting the stream does not delete the job. Reloading reconnects to its saved
+          identity.</p
+        ><div class="actions"
+          ><button id="create-job">Create held job: 2 + 3 + 5</button
+          ><button id="release-job" disabled>Release job</button
+          ><button id="disconnect" disabled>Disconnect stream</button
+          ><button id="reconnect" disabled>Reconnect stream</button
+          ><button id="socket">Check WebSocket echo</button></div
+        ><p id="job-state" role="status">No job selected.</p><ol id="events"></ol
+      ></section>
+      <section aria-labelledby="output-title"
+        ><h2 id="output-title">Last HTTP or protocol observation</h2
+        ><pre id="output" tabindex="0" aria-live="polite">Ready.</pre></section
+      ><footer
+        >Original local HTML, CSS and JavaScript. No external fonts, scripts or analytics. HTTP is
+        loopback-only; this is not a public deployment.</footer
+      ></main
+    ></body
+  ></html
+>

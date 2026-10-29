@@ -239,11 +239,118 @@ jobs:
           python scripts/ci_classroom.py cleanup --group "$CI_GROUP" --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
 
-  promote:
-    name: Promote the complete tested two-platform release
+  scientific-projects:
+    name: Qualify scientific projects (${{ matrix.architecture }})
     needs: [gate, seed, workers]
     if: >-
       always() && needs.gate.result == 'success' &&
+      (needs.gate.outputs.mode == 'promote-existing' ||
+      (needs.gate.outputs.mode == 'build' && needs.seed.result == 'success' && needs.workers.result == 'success'))
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      ARCHITECTURE: ${{ matrix.architecture }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Download this run's complete qualified ordinary receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ci_release_artifacts.py gate --destination work/release
+          python scripts/ci_release_artifacts.py receipts --destination work/ordinary-receipts
+      - name: Import exactly four qualified native bases by digest
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-scientific-import"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_scientific_projects.py import-bases --gate work/release/gate.json \
+            --receipts-dir work/ordinary-receipts --architecture "$ARCHITECTURE" --directory work/scientific
+      - name: Prepare Spark and Torch from qualified digests
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-scientific-torch-build"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_scientific_projects.py build --project spark-torch --gate work/release/gate.json \
+            --architecture "$ARCHITECTURE" --directory work/scientific
+      - name: Execute sealed Spark and Torch checks offline without registry credentials
+        run: >-
+          python scripts/ci_scientific_projects.py qualify --project spark-torch --gate work/release/gate.json
+          --architecture "$ARCHITECTURE" --directory work/scientific
+      - name: Prepare native R TMB and Spark from qualified digests
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-scientific-tmb-build"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_scientific_projects.py build --project spark-tmb --gate work/release/gate.json \
+            --architecture "$ARCHITECTURE" --directory work/scientific
+      - name: Execute sealed Spark TMB public API and C++ checks offline
+        run: >-
+          python scripts/ci_scientific_projects.py qualify --project spark-tmb --gate work/release/gate.json
+          --architecture "$ARCHITECTURE" --directory work/scientific
+      - name: Validate and seal this native scientific receipt
+        run: >-
+          python scripts/ci_scientific_projects.py complete --gate work/release/gate.json
+          --architecture "$ARCHITECTURE" --directory work/scientific
+      - name: Retain only the complete successful native scientific receipt
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: scientific-projects-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/scientific/scientific-receipt.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Retain bounded scientific diagnostics separately
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: scientific-diagnostics-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/scientific/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Remove only this scientific job's ephemeral labeled images
+        if: always()
+        run: >-
+          python scripts/ci_scientific_projects.py cleanup --gate work/release/gate.json
+          --architecture "$ARCHITECTURE" --directory work/scientific
+
+  promote:
+    name: Promote the complete tested two-platform release
+    needs: [gate, seed, workers, scientific-projects]
+    if: >-
+      always() && needs.gate.result == 'success' && needs.scientific-projects.result == 'success' &&
       (needs.gate.outputs.mode == 'promote-existing' ||
       (needs.gate.outputs.mode == 'build' && needs.seed.result == 'success' && needs.workers.result == 'success'))
     runs-on: ubuntu-24.04
@@ -259,13 +366,10 @@ jobs:
       - name: Download the latest qualified receipt per group from this run
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_MODE: ${{ needs.gate.outputs.mode }}
         run: |
           python scripts/ci_release_artifacts.py gate --destination work/release
-          mkdir -p work/receipts
-          if [ "$RELEASE_MODE" = build ]; then
-            python scripts/ci_release_artifacts.py receipts --destination work/receipts
-          fi
+          python scripts/ci_release_artifacts.py receipts --destination work/receipts
+          python scripts/ci_release_artifacts.py scientific --destination work/scientific-receipts
       - name: Recheck exact-revision qualification before canonical writes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -276,7 +380,8 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: >-
           python scripts/docker_release.py promote --gate work/release/gate.json
-          --receipts-dir work/receipts --output work/release/release.json
+          --receipts-dir work/receipts --project-receipts-dir work/scientific-receipts
+          --output work/release/release.json
       - name: Retain the published digest inventory
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:

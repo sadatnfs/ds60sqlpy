@@ -1,0 +1,386 @@
+{
+  "schema_version": 1,
+  "track_id": "advanced-spark-modeling",
+  "lessons": [
+    {
+      "id": "asm-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-001.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-002.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-003.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-004.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-004.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-005.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-006.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-007.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-008.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-009.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-010.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-011.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-012.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-013",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-013.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-013.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-014",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-014.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-014.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-015",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-015.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-015.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-016",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-016.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-016.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-017",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-017.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-017.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-018",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-018.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-018.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-019",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-019.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-019.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-020",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-020.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-020.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-021",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-021.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-021.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-022",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-022.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-022.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-023",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-023.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-023.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-024",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-024.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-024.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-025",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-025.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-025.scala",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-026",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-026.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-026.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-027",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-027.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-027.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-028",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-028.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-028.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-029",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-029.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-029.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-030.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-030.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-031",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-031.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-031.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-032",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-032.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-032.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-033",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-033.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-033.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-034",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-034.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-034.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-035",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-035.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-035.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-036",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-036.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-036.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-037",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-037.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-037.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "asm-038",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/advanced-spark-modeling/guides/asm-038.md",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-038.md",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

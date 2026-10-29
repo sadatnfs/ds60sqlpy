@@ -315,7 +315,7 @@ def test_portable_client_private_files_use_existing_payload_exclusion(
 @pytest.mark.parametrize(
     "project,wrong_image",
     [
-        ("pinot", "ds60sqlpy-worker-data-platforms-python:1.0.1"),
+        ("pinot", "ds60sqlpy-worker-data-platforms-python:1.1.0"),
         ("hive", "ds60-apache-hive-postgres:17.6"),
     ],
 )

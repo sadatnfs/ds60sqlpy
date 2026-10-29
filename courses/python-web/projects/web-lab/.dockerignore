@@ -1,0 +1,11 @@
+.workshop
+__pycache__
+**/__pycache__
+*.pyc
+collected-static
+.DS_Store
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.venv
+node_modules

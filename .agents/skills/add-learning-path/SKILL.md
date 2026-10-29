@@ -107,6 +107,25 @@ separate compatible formatting tool image. Bayesian examples target their pinned
 PyMC/ArviZ data-object API. Do not combine incompatible framework environments
 merely because their lessons all use Python.
 
+For custom distributed likelihoods, extend the canonical independent
+[package](../../../packages/spark-likelihood/README.md) and its explicit registry,
+not the old application compatibility imports. Declare row versus complete-unit
+factorization, support, parameter/feature order, weights and prediction semantics.
+Compare independent mathematical oracles at changed inputs, invalid support and
+extreme numerical regimes before distribution. Named callable/source/configuration
+identities and Python minor compatibility must survive wheel installation and
+executor import. Test a non-editable wheel without classroom or R imports.
+Keep low-dimensional driver optimization separate from TorchDistributor/Lightning
+training. The optional R/TMB reference requires prepared native artifacts and its
+own API/ABI/compiler receipts; it does not make R a package requirement.
+
+Python web lessons use the ordinary `python-web` worker for finite offline
+framework/test-client programs. Multi-process HTTP, WebSockets, SSE and durable
+job/session behavior belong to the owned web-lab project. A successful in-process
+test client is not browser/network or container-resume acceptance. Preserve both
+surfaces when adding framework lessons, and keep dependencies in that profile's
+native architecture locks rather than the root Python environment.
+
 Additional statistics tutorials use the validated tutorials/index.json contract;
 the original outline and chapter identities remain stable. Offline DAX uses
 editable drafts and source/model-bound hand-derived references, with Run rejected
@@ -161,7 +180,14 @@ Only add a publication marker with authorization.
 Staging uploads precede complete selected qualification; combined version/latest
 promotion must wait for every required selected check. A partial release carries
 App, Core and one complete group, while `[publish-docker]` requires all ordinary
-profiles. Existing version conflicts require a checked-in patch bump, not an
+profiles. The full publication set currently has 26 images, App plus 25 ordinary
+workers, and additionally requires the native scientific-project gate after the
+ordinary worker jobs. That gate consumes this run's immutable qualified bases,
+checks the installed standalone wheel, numerical/Spark/ML/training behavior,
+and preserves the optional R-reference, Scala, standalone TMB API and C++ checks.
+Its per-architecture builds run sequentially. Complete source-bound receipts are
+required for both first promotion and recovery; local passes are not hosted success.
+Existing version conflicts require a checked-in patch bump, not an
 overwritten tag. Combined tags use app `VERSION` and workers
 `VERSION-<suffix>`. New Hub projects resolve App latest to a concrete saved
 version; saved resumes never follow it. `--image-tag PROFILE=VERSION|latest|default`
@@ -223,7 +249,8 @@ When extending required project gates, update the exact required-check sets in
 `scripts/ci_classroom.py` and publication evidence validation together. Native CI
 currently requires data-product/ML-service checks for data engineering,
 inference/browser checks for PyTorch, Flight/Rust IPC for data platforms and
-Kafka semantics/lifecycle for Java. A new lesson reusing an existing profile
+Kafka semantics/lifecycle for Java and owned HTTP/streaming/browser/persistence
+checks for Python web. A new lesson reusing an existing profile
 does not by itself need another persistent service.
 
 Use `publish_table`/`publish_report` or the prepared plotting helpers for results.

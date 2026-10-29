@@ -1,0 +1,726 @@
+{
+  "schema_version": 1,
+  "track_id": "python-web",
+  "lessons": [
+    {
+      "id": "pyweb-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-001.md",
+      "source_path": "courses/python-web/examples/pyweb-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-002.md",
+      "source_path": "courses/python-web/examples/pyweb-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-003.md",
+      "source_path": "courses/python-web/examples/pyweb-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-004.md",
+      "source_path": "courses/python-web/examples/pyweb-004.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-005.md",
+      "source_path": "courses/python-web/examples/pyweb-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-006.md",
+      "source_path": "courses/python-web/examples/pyweb-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-007.md",
+      "source_path": "courses/python-web/examples/pyweb-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-008.md",
+      "source_path": "courses/python-web/examples/pyweb-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-009.md",
+      "source_path": "courses/python-web/examples/pyweb-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-010.md",
+      "source_path": "courses/python-web/examples/pyweb-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-011.md",
+      "source_path": "courses/python-web/examples/pyweb-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-012.md",
+      "source_path": "courses/python-web/examples/pyweb-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-013.md",
+      "source_path": "courses/python-web/examples/pyweb-013.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-014.md",
+      "source_path": "courses/python-web/examples/pyweb-014.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-015.md",
+      "source_path": "courses/python-web/examples/pyweb-015.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-016.md",
+      "source_path": "courses/python-web/examples/pyweb-016.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-017.md",
+      "source_path": "courses/python-web/examples/pyweb-017.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-018.md",
+      "source_path": "courses/python-web/examples/pyweb-018.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-019.md",
+      "source_path": "courses/python-web/examples/pyweb-019.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-020.md",
+      "source_path": "courses/python-web/examples/pyweb-020.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-021.md",
+      "source_path": "courses/python-web/examples/pyweb-021.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-022.md",
+      "source_path": "courses/python-web/examples/pyweb-022.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-023.md",
+      "source_path": "courses/python-web/examples/pyweb-023.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-024.md",
+      "source_path": "courses/python-web/examples/pyweb-024.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-025.md",
+      "source_path": "courses/python-web/examples/pyweb-025.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-026.md",
+      "source_path": "courses/python-web/examples/pyweb-026.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-027",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-027.md",
+      "source_path": "courses/python-web/examples/pyweb-027.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-028",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-028.md",
+      "source_path": "courses/python-web/examples/pyweb-028.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-029",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-029.md",
+      "source_path": "courses/python-web/examples/pyweb-029.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-030",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-030.md",
+      "source_path": "courses/python-web/examples/pyweb-030.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-031",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-031.md",
+      "source_path": "courses/python-web/examples/pyweb-031.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-032",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-032.md",
+      "source_path": "courses/python-web/examples/pyweb-032.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-033",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-033.md",
+      "source_path": "courses/python-web/examples/pyweb-033.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-034",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-034.md",
+      "source_path": "courses/python-web/examples/pyweb-034.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-035",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-035.md",
+      "source_path": "courses/python-web/examples/pyweb-035.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-036",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-036.md",
+      "source_path": "courses/python-web/examples/pyweb-036.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-037",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-037.md",
+      "source_path": "courses/python-web/examples/pyweb-037.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-038",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-038.md",
+      "source_path": "courses/python-web/examples/pyweb-038.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-039",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-039.md",
+      "source_path": "courses/python-web/examples/pyweb-039.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-040",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-040.md",
+      "source_path": "courses/python-web/examples/pyweb-040.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-041",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-041.md",
+      "source_path": "courses/python-web/examples/pyweb-041.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-042",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-042.md",
+      "source_path": "courses/python-web/examples/pyweb-042.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-043",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-043.md",
+      "source_path": "courses/python-web/examples/pyweb-043.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-044",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-044.md",
+      "source_path": "courses/python-web/examples/pyweb-044.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-045",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-045.md",
+      "source_path": "courses/python-web/examples/pyweb-045.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-046",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-046.md",
+      "source_path": "courses/python-web/examples/pyweb-046.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-047",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-047.md",
+      "source_path": "courses/python-web/examples/pyweb-047.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-048",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-048.md",
+      "source_path": "courses/python-web/examples/pyweb-048.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-049",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-049.md",
+      "source_path": "courses/python-web/examples/pyweb-049.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-050",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-050.md",
+      "source_path": "courses/python-web/examples/pyweb-050.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-051",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-051.md",
+      "source_path": "courses/python-web/examples/pyweb-051.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-052",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-052.md",
+      "source_path": "courses/python-web/examples/pyweb-052.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-053",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-053.md",
+      "source_path": "courses/python-web/examples/pyweb-053.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-054",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-054.md",
+      "source_path": "courses/python-web/examples/pyweb-054.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-055",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-055.md",
+      "source_path": "courses/python-web/examples/pyweb-055.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-056",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-056.md",
+      "source_path": "courses/python-web/examples/pyweb-056.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-057",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-057.md",
+      "source_path": "courses/python-web/examples/pyweb-057.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-058",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-058.md",
+      "source_path": "courses/python-web/examples/pyweb-058.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-059",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-059.md",
+      "source_path": "courses/python-web/examples/pyweb-059.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-060",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-060.md",
+      "source_path": "courses/python-web/examples/pyweb-060.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-061",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-061.md",
+      "source_path": "courses/python-web/examples/pyweb-061.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-062",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-062.md",
+      "source_path": "courses/python-web/examples/pyweb-062.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-063",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-063.md",
+      "source_path": "courses/python-web/examples/pyweb-063.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-064",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-064.md",
+      "source_path": "courses/python-web/examples/pyweb-064.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-065",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-065.md",
+      "source_path": "courses/python-web/examples/pyweb-065.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-066",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-066.md",
+      "source_path": "courses/python-web/examples/pyweb-066.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-067",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-067.md",
+      "source_path": "courses/python-web/examples/pyweb-067.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-068",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/python-web/guides/pyweb-068.md",
+      "source_path": "courses/python-web/examples/pyweb-068.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-069",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-069.md",
+      "source_path": "courses/python-web/examples/pyweb-069.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-070",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/python-web/guides/pyweb-070.md",
+      "source_path": "courses/python-web/examples/pyweb-070.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-071",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-web",
+      "guide_path": "courses/python-web/guides/pyweb-071.md",
+      "source_path": "courses/python-web/examples/pyweb-071.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "pyweb-072",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/python-web/guides/pyweb-072.md",
+      "source_path": "courses/python-web/examples/pyweb-072.md",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

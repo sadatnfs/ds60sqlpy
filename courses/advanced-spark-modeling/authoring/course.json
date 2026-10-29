@@ -1,0 +1,5 @@
+{
+  "title": "Advanced Spark modeling: likelihoods, autodiff and engine internals",
+  "summary": "A 38-chapter worked route through distributed custom likelihoods, Scala extension mechanisms, Spark/Torch execution and the boundaries of Spark/TMB modeling.",
+  "introduction": "Start after the Scala/Spark foundation route. Mathematical bridges explain the exact objective before a distributed implementation. Public Spark examples use tiny deterministic CPU data; combined Torch/TMB and Catalyst projects have explicit preparation and evidence requirements. Reading a guide or running a reference does not establish mastery or cluster-scale performance."
+}

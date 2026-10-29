@@ -1,0 +1,6 @@
+evidence <- data.frame(layer = c("formula", "source", "compiled model", "native numerical checks", "rpy2", "Spark integration"), status = c("derived", "authored", "separate receipt", "separate receipt", "separate receipt", "separate receipt"))
+print(evidence)
+required <- c("value", "gradient", "optimizer", "uncertainty", "invalid input")
+recorded <- c("value", "gradient", "optimizer")
+print(list(recorded = recorded, still_required = setdiff(required, recorded)))
+stopifnot(identical(setdiff(required, recorded), c("uncertainty", "invalid input")))

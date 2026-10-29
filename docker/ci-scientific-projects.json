@@ -1,0 +1,540 @@
+{
+  "schema_version": 1,
+  "kind": "ds60-scientific-project-policy",
+  "ordinary_profile_count": 26,
+  "base_profiles": {
+    "spark-local-python": "scala-spark",
+    "llm-torch-cpu": "pytorch",
+    "r-statistics": "r",
+    "java21": "java"
+  },
+  "architectures": {
+    "amd64": "ubuntu-24.04",
+    "arm64": "ubuntu-24.04-arm"
+  },
+  "resources": {
+    "cpus": 2,
+    "memory": "4g",
+    "pids": 512,
+    "scratch_bytes": 2147483648,
+    "maximum_log_bytes": 33554432
+  },
+  "projects": {
+    "spark-torch": {
+      "maps": {
+        "courses/advanced-spark-modeling/projects/spark-torch": "/opt/spark-torch",
+        "packages/spark-likelihood": "/opt/ds60-package-source"
+      },
+      "runner_cases": [
+        "additive-logistic",
+        "nonlinear-gaussian",
+        "independent-groups",
+        "arrow-batches",
+        "torch-distributor",
+        "lightning-ddp",
+        "sharding-audit",
+        "standalone-package"
+      ],
+      "checks": [
+        {
+          "id": "cleanup",
+          "selector": {
+            "kind": "linux-supervisor-descendant-cleanup"
+          },
+          "required": {
+            "passed": true,
+            "parent_exit_and_timeout": true,
+            "package_capture_parent_exit_and_timeout": true
+          }
+        },
+        {
+          "id": "torch-math",
+          "selector": {
+            "kind": "torch-cpu-partition-math"
+          },
+          "required": {
+            "passed": true,
+            "partition_batch_cases": 12
+          }
+        },
+        {
+          "id": "spark-math",
+          "selector": {
+            "kind": "spark-local-torch-additive-mle"
+          },
+          "required": {
+            "passed": true,
+            "caller_cache_preserved": true,
+            "master": "local[2]"
+          }
+        },
+        {
+          "id": "failed-exit",
+          "selector": {
+            "kind": "spark-distributor-failed-exit-propagation"
+          },
+          "required": {
+            "passed": true,
+            "worker_exit_code": 7,
+            "serialized_result_did_not_override_failure": true
+          }
+        },
+        {
+          "id": "logistic",
+          "selector": {
+            "kind": "weighted-logistic-global-mle"
+          },
+          "required": {
+            "passed": true,
+            "rows": 3
+          }
+        },
+        {
+          "id": "nonlinear",
+          "selector": {
+            "kind": "nonlinear-gaussian-global-mle"
+          },
+          "required": {
+            "passed": true,
+            "rows": 40,
+            "global_optimum_proven": false
+          }
+        },
+        {
+          "id": "groups",
+          "selector": {
+            "kind": "independent-group-mles"
+          },
+          "required": {
+            "passed": true,
+            "input_rows": 15,
+            "shared_parameters": false
+          }
+        },
+        {
+          "id": "arrow",
+          "selector": {
+            "kind": "arrow-pandas-torch-batches"
+          },
+          "required": {
+            "passed": true,
+            "rows": 17,
+            "batch_size_invariant": true
+          }
+        },
+        {
+          "id": "one-rank",
+          "selector": {
+            "kind": "spark-torch-distributor-ddp",
+            "world_size": 1
+          },
+          "required": {
+            "passed": true,
+            "global_observations": 6,
+            "launcher_local_mode": true
+          }
+        },
+        {
+          "id": "two-rank",
+          "selector": {
+            "kind": "spark-torch-distributor-ddp",
+            "world_size": 2
+          },
+          "required": {
+            "passed": true,
+            "global_observations": 6,
+            "launcher_local_mode": true
+          }
+        },
+        {
+          "id": "lightning",
+          "selector": {
+            "kind": "spark-torch-distributor-lightning"
+          },
+          "required": {
+            "passed": true,
+            "world_size": 2,
+            "global_step": 1
+          }
+        },
+        {
+          "id": "sampler",
+          "selector": {
+            "kind": "sampler-padding-audit"
+          },
+          "required": {
+            "passed": true,
+            "dataset_rows": 5,
+            "training_executed": false
+          }
+        },
+        {
+          "id": "standalone-package",
+          "selector": {
+            "case": "standalone-package"
+          },
+          "required": {
+            "passed": true,
+            "isolated_wheel_install": true,
+            "r_dependency_required": false
+          }
+        }
+      ],
+      "fixtures": {
+        "kind": "literal-and-zero-initialized",
+        "ddp_rows": 6,
+        "ddp_rank_shards": [
+          [0, 1, 2, 3],
+          [4, 5]
+        ],
+        "arrow_rows": 17,
+        "arrow_batch_limits": [1, 3],
+        "sampler_rows": 5,
+        "model_initialization": "zeros"
+      },
+      "runtime": {
+        "spark": "4.0.1",
+        "torch": "2.9.1+cpu",
+        "lightning": "2.6.1",
+        "java_major": "17",
+        "scipy": "1.15.3",
+        "ds60-spark-likelihood": "0.1.0"
+      },
+      "role": "primary-no-r-platform",
+      "package": {
+        "distribution": "ds60-spark-likelihood",
+        "version": "0.1.0",
+        "ml_checks": [
+          "ml-option-inexact-integer-refusal",
+          "ml-option-exact-integer-float-acceptance",
+          "shared-normal-mle",
+          "no-raw-driver-collect",
+          "caller-cache-preserved",
+          "row-identity-schema",
+          "response-free-row-prediction",
+          "model-json-roundtrip",
+          "estimator-json-roundtrip",
+          "owned-overwrite",
+          "stale-fingerprint-refusal",
+          "linear-mle-oracle",
+          "pipeline-roundtrip",
+          "driver-only-custom-factory",
+          "custom-label-free-prediction",
+          "undeclared-prediction-refusal",
+          "independent-group-fits-separate",
+          "joint-gaussian-value-gradient-oracle",
+          "balanced-joint-mle-oracle",
+          "unit-row-count-distinction",
+          "new-group-mean-label",
+          "joint-json-roundtrip",
+          "conditional-group-prediction-refusal",
+          "complete-order-tie-refusal",
+          "unit-weight-constant-refusal",
+          "row-unit-weight-separation",
+          "unit-weighted-mean-denominator",
+          "derived-cache-cleanup",
+          "custom-complete-unit-feature-mapping",
+          "custom-unit-scipy-value-gradient-oracle",
+          "custom-unit-serial-fit-oracle",
+          "custom-unit-response-free-count-prediction",
+          "custom-unit-json-roundtrip"
+        ],
+        "observations": {
+          "numerical": [
+            "package-wheel-isolation",
+            "package-row-numerical",
+            "package-unit-numerical",
+            "package-prediction-optimizer",
+            "package-custom-gamma-poisson"
+          ],
+          "spark": [
+            "package-wheel-isolation",
+            "package-spark-rows",
+            "package-spark-units",
+            "package-spark-custom-unit"
+          ],
+          "ml": ["package-wheel-isolation", "package-dataframe-ml"]
+        }
+      }
+    },
+    "spark-tmb": {
+      "maps": {
+        "courses/advanced-spark-modeling/projects/spark-tmb": "/opt/spark-tmb",
+        "courses/tmb-modeling/projects/tmb-local": "/opt/tmb-project",
+        "packages/spark-likelihood": "/opt/ds60-package-source"
+      },
+      "runner_cases": [
+        "partition-normal",
+        "group-laplace",
+        "global-normal-fit",
+        "rpy2-frame",
+        "failure-contracts",
+        "registered-models",
+        "prediction-models",
+        "dataframe-ml",
+        "scala-dataframe"
+      ],
+      "checks": [
+        {
+          "id": "reference-package",
+          "selector": {
+            "case": "reference-package"
+          },
+          "required": {
+            "passed": true,
+            "role": "optional-r-tmb-reference",
+            "distribution": "ds60-spark-likelihood",
+            "version": "0.1.0",
+            "classroom_imported": false,
+            "torch_imported": false,
+            "isolated_python": true
+          }
+        },
+        {
+          "id": "process-cleanup",
+          "selector": {
+            "case": "process-cleanup"
+          },
+          "required": {}
+        },
+        {
+          "id": "runtime-contracts",
+          "selector": {
+            "case": "runtime-contracts"
+          },
+          "required": {}
+        },
+        {
+          "id": "partition-normal",
+          "selector": {
+            "case": "partition-normal"
+          },
+          "required": {
+            "spark_version": "4.0.1"
+          }
+        },
+        {
+          "id": "group-laplace",
+          "selector": {
+            "case": "group-laplace"
+          },
+          "required": {
+            "spark_version": "4.0.1"
+          }
+        },
+        {
+          "id": "global-normal-fit",
+          "selector": {
+            "case": "global-normal-fit"
+          },
+          "required": {
+            "spark_version": "4.0.1"
+          }
+        },
+        {
+          "id": "rpy2-frame",
+          "selector": {
+            "case": "rpy2-frame"
+          },
+          "required": {
+            "status": "passed",
+            "rows": 6
+          }
+        },
+        {
+          "id": "failure-contracts",
+          "selector": {
+            "case": "failure-contracts"
+          },
+          "required": {
+            "execution": "Python boundary validation"
+          }
+        },
+        {
+          "id": "registered-models",
+          "selector": {
+            "case": "registered-models"
+          },
+          "required": {
+            "spark": "4.0.1",
+            "shared_rows": 12
+          }
+        },
+        {
+          "id": "prediction-models",
+          "selector": {
+            "case": "prediction-models"
+          },
+          "required": {
+            "response_free": true,
+            "target": "conditional_mean",
+            "predictor_free_rows": 3
+          }
+        },
+        {
+          "id": "dataframe-ml",
+          "selector": {
+            "case": "dataframe-ml"
+          },
+          "required": {
+            "passed": true,
+            "spark_version": "4.0.1",
+            "global_row_order_promised": false,
+            "remote_cluster_executed": false
+          }
+        },
+        {
+          "id": "scala-dataframe",
+          "selector": {
+            "kind": "scala-dataframe-prepared-tmb"
+          },
+          "required": {
+            "passed": true,
+            "spark": "4.0.1",
+            "raw_observations_collected": false,
+            "caller_cache_preserved": true,
+            "empty_partitions_checked": true
+          }
+        },
+        {
+          "id": "scala-compiler",
+          "selector": {
+            "kind": "scala-tmb-compilation-and-execution"
+          },
+          "required": {
+            "compiled": true,
+            "executed": true
+          }
+        }
+      ],
+      "fixtures": {
+        "kind": "literal-original-models",
+        "normal_parameterization": ["mu", "log_sigma"],
+        "complete_groups_required_for_laplace": true,
+        "scala_rows": 12
+      },
+      "runtime": {
+        "spark": "4.0.1",
+        "R": "4.6.1",
+        "TMB": "1.9.25",
+        "Matrix": "1.7.6",
+        "java_major": "21",
+        "ds60-spark-likelihood": "0.1.0"
+      },
+      "role": "optional-r-tmb-reference",
+      "dataframe_checks": [
+        "shared-normal-mle",
+        "no-driver-raw-collect",
+        "caller-cache-preserved",
+        "response-free-normal-prediction",
+        "row-identity-and-schema",
+        "model-json-roundtrip",
+        "estimator-json-roundtrip",
+        "owned-model-overwrite",
+        "stale-artifact-refusal",
+        "vector-parameter-regression-mle",
+        "response-free-regression-prediction",
+        "pipeline-roundtrip",
+        "prediction-schema-refusal",
+        "complete-group-laplace-oracle",
+        "derived-cache-cleanup",
+        "explicit-order-required",
+        "duplicate-order-refusal",
+        "undeclared-prediction-refusal"
+      ]
+    },
+    "tmb-public-api": {
+      "maps": {
+        "courses/tmb-modeling/projects/tmb-local": "/opt/tmb-project"
+      },
+      "runner_cases": [],
+      "checks": [
+        {
+          "id": "public-api",
+          "selector": {
+            "case": "tmb-public-api"
+          },
+          "required": {
+            "schema_version": 1,
+            "passed": true
+          }
+        }
+      ],
+      "completed_checks": [
+        "prepared-export-inventory",
+        "fixed-parameter-map",
+        "report-methods",
+        "normal-profile-root-oracle",
+        "profile-plot",
+        "normal-simulation-finite",
+        "score-consistency-api",
+        "sparse-newton-oracle",
+        "newton-options-read",
+        "sr-descriptor",
+        "template-interface-generation",
+        "installed-example-listing",
+        "benchmark-plot",
+        "version-config-thread-read",
+        "native-object-release"
+      ],
+      "fixtures": {
+        "seed": 4141,
+        "score_replicates": 100,
+        "benchmark_repetitions": 10000,
+        "profile_root_absolute_tolerance": 0.001,
+        "profile_interval_absolute_tolerance": 0.03
+      },
+      "runtime": {
+        "R": "4.6.1",
+        "TMB": "1.9.25",
+        "Matrix": "1.7.6"
+      },
+      "role": "standalone-tmb-curriculum"
+    },
+    "tmb-cpp-api": {
+      "maps": {
+        "courses/tmb-modeling/projects/tmb-cpp-api": "/opt/tmb-cpp-api"
+      },
+      "runner_cases": [],
+      "checks": [
+        {
+          "id": "cpp-api",
+          "selector": {
+            "case": "tmb-cpp-api"
+          },
+          "required": {
+            "schema_version": 1,
+            "passed": true
+          }
+        }
+      ],
+      "completed_checks": [
+        "dense-precision-scale-values",
+        "dense-precision-scale-gradients",
+        "separable-kronecker-value",
+        "separable-state-gradient",
+        "separable-all-parameter-finite-differences",
+        "mixture-values",
+        "mixture-all-parameter-finite-differences",
+        "conditional-crossing-values",
+        "conditional-crossing-gradients",
+        "atomic-values",
+        "atomic-gradients",
+        "atomic-hessians"
+      ],
+      "fixtures": {
+        "finite_difference_steps": [0.0001, 1e-5],
+        "mixture_logits": [-1000, -3, 0, 2, 1000],
+        "atomic_points": [-0.7, 0.4, 1.3],
+        "conditional_points": [-2, -0.1, 0.1, 2],
+        "density_modes": [0, 1, 2, 3]
+      },
+      "runtime": {
+        "R": "4.6.1",
+        "TMB": "1.9.25",
+        "Matrix": "1.7.6"
+      },
+      "role": "standalone-tmb-curriculum"
+    }
+  }
+}

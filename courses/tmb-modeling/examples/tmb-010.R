@@ -1,0 +1,8 @@
+t <- seq(0, 8, length.out = 40)
+y <- 3 * exp(-.6 * t) + 1 + rep(c(-.03, .01, .02, -.01, .01), 8)
+fn <- function(p) -sum(dnorm(y, exp(p[1]) * exp(-exp(p[2]) * t) + p[3], exp(p[4]), log = TRUE))
+fit <- nlminb(c(log(2.5), log(.5), .9, log(.1)), fn)
+print(c(amplitude = exp(fit$par[1]), rate = exp(fit$par[2]), offset = fit$par[3], half_life = log(2) / exp(fit$par[2])))
+stopifnot(fit$convergence == 0, abs(exp(fit$par[2]) - .6) < .03)
+short_and_long <- c(0, .1, 10)
+print(data.frame(time = short_and_long, curve_a = 3 * exp(-.6 * short_and_long) + 1, curve_b = 6 * exp(-.3 * short_and_long) - 2))

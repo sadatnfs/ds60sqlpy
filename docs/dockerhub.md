@@ -21,8 +21,8 @@ GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
 | Publication route | App tag | Example worker tag |
 | --- | --- | --- |
-| Full CI release after promotion | `1.0.1`, with `latest` then pointing to that completed release | `1.0.1-worker-python-core` |
-| Manual architecture set | `1.0.1-lab-arm64` or `1.0.1-lab-amd64` | `1.0.1-worker-python-core-arm64` or `1.0.1-worker-python-core-amd64` |
+| Full CI release after promotion | `1.1.0`, with `latest` then pointing to that completed release | `1.1.0-worker-python-core` |
+| Manual architecture set | `1.1.0-lab-arm64` or `1.1.0-lab-amd64` | `1.1.0-worker-python-core-arm64` or `1.1.0-worker-python-core-amd64` |
 
 Each combined release tag points to an image index containing Linux
 `amd64` and `arm64` variants. Docker selects the variant matching the engine. This is the default `--from-hub` layout.
@@ -40,13 +40,13 @@ Use Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows.
 Build the complete ordinary set with visible logs and start the classroom:
 
 ```sh
-./classroom --all --local-build --tag 1.0.1 --rebuild
+./classroom --all --local-build --tag 1.1.0 --rebuild
 ```
 
 To build without starting services:
 
 ```sh
-./classroom build --all --local-build --tag 1.0.1
+./classroom build --all --local-build --tag 1.1.0
 ```
 
 Already built and tested the matching image set? No rebuild is required merely
@@ -94,7 +94,7 @@ account. The local publisher never logs in or reads a password.
 Preview the complete local image set without tagging or uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0
 ```
 
 Omitting a selection, or adding `--all`, includes the app and every ordinary
@@ -107,7 +107,7 @@ It neither builds missing images nor proves that existing images passed tests.
 After reviewing the mapping and your local qualification, upload deliberately:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --push
 ```
 
 Keep the tested image set unchanged between review and upload. A missing image
@@ -117,7 +117,7 @@ complete set first, or explicitly select a smaller distribution.
 For a starter-only set, preview both necessary images:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --profile app --profile python-core
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --profile app --profile python-core
 ```
 
 Append `--push` only when ready to upload that same selection. Repeated
@@ -130,7 +130,7 @@ namespace/version option.
 This route creates architecture tags only. A learner on that architecture uses:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --architecture-tags
 ```
 
 Use `--starter` instead of `--all` for the explicitly published starter set.
@@ -144,13 +144,13 @@ and Compose files. After a full `[publish-docker]` publication, pull and start t
 combined release:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0
 ```
 
 For a new project, omitting `--tag` resolves the app's `latest` alias and
 saves its concrete version. The accepted partial 1.0.0 release contains App,
 Core, JavaScript and TypeScript. Select only those workers and pin that release,
-including after `latest` moves to the completed full 1.0.1 release:
+including after `latest` moves to the completed full 1.1.0 release:
 
 ```sh
 ./classroom --profile javascript-node --profile typescript-node \
@@ -222,7 +222,7 @@ sets a new default and resets previous worker pins unless you repeat them.
 For a new project using a completed full release, separate downloading from startup:
 
 ```sh
-./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1
+./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0
 ./classroom resume
 ```
 
@@ -242,7 +242,7 @@ tags, or an intentional Hub version update, keep the project name and apply
 the intended full release explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1 --rebuild
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --rebuild
 ```
 
 Use the matching new source version when upgrading. To deliberately follow
@@ -253,7 +253,7 @@ A new download alone does not replace running containers.
 To return to local development:
 
 ```sh
-./classroom --local-build --tag 1.0.1 --rebuild
+./classroom --local-build --tag 1.1.0 --rebuild
 ```
 
 Keep the same custom `--project NAME` on every command. Images contain runtime
@@ -296,11 +296,11 @@ After local checks, stage the reviewed release changes on `main` and create
 the opt-in commit, for example:
 
 ```sh
-git commit -m "Release 1.0.1 [publish-docker]"
+git commit -m "Release 1.1.0 [publish-docker]"
 git push origin main
 ```
 
-The source version is `1.0.1` for this release. The workflow reads the checked-in
+The source version is `1.1.0` for this release. The workflow reads the checked-in
 version rather than inventing a registry-only version. Do not combine a
 publication commit with a CI-skip marker.
 

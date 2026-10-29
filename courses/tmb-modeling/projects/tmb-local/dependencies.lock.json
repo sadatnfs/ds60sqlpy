@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "r_version": "4.6.1",
+  "matrix_version": "1.7.6",
+  "rcpp_version": "1.1.2",
+  "framework": "CppAD",
+  "packages": [
+    {
+      "name": "RcppEigen",
+      "version": "0.3.4.0.2",
+      "url": "https://cran.r-project.org/src/contrib/RcppEigen_0.3.4.0.2.tar.gz",
+      "sha256": "ecad7ba2129fd48b7ebb825558d38492ed1f3a8934959e27fcd6688175e542bb",
+      "bytes": 1761745,
+      "license": "GPL (>= 2) | file LICENSE"
+    },
+    {
+      "name": "TMB",
+      "version": "1.9.25",
+      "url": "https://cran.r-project.org/src/contrib/TMB_1.9.25.tar.gz",
+      "sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+      "bytes": 781382,
+      "license": "GPL-2"
+    }
+  ]
+}

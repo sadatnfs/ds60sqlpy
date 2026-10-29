@@ -381,7 +381,7 @@ def run_checks(docker: str, project: str, image: str, report_path: Path) -> dict
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", required=True)
-    parser.add_argument("--image", default="ds60sqlpy-worker-data-engineering:1.0.1")
+    parser.add_argument("--image", default="ds60sqlpy-worker-data-engineering:1.1.0")
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--confirm-disposable", action="store_true")
     args = parser.parse_args()

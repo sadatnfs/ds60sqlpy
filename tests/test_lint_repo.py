@@ -239,3 +239,120 @@ def test_swift_uses_real_parser_for_result_builders_without_writing(
     monkeypatch.setattr(subprocess, "run", record)
     assert linting.lint_group("swift", [path.name], tmp_path)
     assert path.read_bytes() == original
+
+
+TMB_ATOMIC_FIXTURE = (
+    b"#include <TMB.hpp>\n"
+    b"TMB_ATOMIC_VECTOR_FUNCTION(original, 1,\n"
+    b"  ty[0] = helper(tx[0], Type(2));\n"
+    b"  , px[0] = Type(4) * tx[0] * py[0];)\n"
+    b"int after() { return 3; }\n"
+)
+
+
+def test_tmb_projection_preserves_comments_literals_body_and_lines() -> None:
+    protected = (
+        b"// SIMULATE { and TMB_ATOMIC_VECTOR_FUNCTION(a,2,b,c)\n"
+        b"/* SIMULATE { */\n"
+        b'const char* message = "SIMULATE { a,b( )";\n'
+        b'const char* raw = u8R"tag(TMB_ATOMIC_VECTOR_FUNCTION(\n'
+        b'bad,1,unparsed,body) SIMULATE {)tag";\n'
+    )
+    source = (
+        b"#include <TMB.hpp>\n"
+        + protected
+        + (b"void model() { SIMULATE /* keep this comment */ { value = 42; } }\n")
+    )
+    projected = linting.tmb_grammar_source(source)
+    assert protected in projected
+    assert b"if(true) /* keep this comment */ { value = 42; }" in projected
+    assert projected.count(b"\n") == source.count(b"\n")
+    atomic = linting.tmb_grammar_source(TMB_ATOMIC_FIXTURE)
+    assert b"ty[0] = helper(tx[0], Type(2));" in atomic
+    assert b"px[0] = Type(4) * tx[0] * py[0];" in atomic
+    assert b"int after() { return 3; }" in atomic
+    assert atomic.count(b"\n") == TMB_ATOMIC_FIXTURE.count(b"\n")
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        b"// #include <TMB.hpp>\n",
+        b'const char* fake = "#include <TMB.hpp>";\n',
+        b'const char* fake = R"tag(\n#include <TMB.hpp>\n)tag";\n',
+    ],
+)
+def test_fake_tmb_include_does_not_activate_projection(prefix: bytes) -> None:
+    source = prefix + b"void f(){ SIMULATE { value = 1; } }\n"
+    assert linting.tmb_grammar_source(source) == source
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        b"TMB_ATOMIC_VECTOR_FUNCTION(name, 1, body;)",
+        b"TMB_ATOMIC_VECTOR_FUNCTION(name, 1, one;, two;, third;)",
+        b"TMB_ATOMIC_VECTOR_FUNCTION(name, count(), one;, two;)",
+        b'TMB_ATOMIC_VECTOR_FUNCTION("bad name", 1, one;, two;)',
+        b"TMB_ATOMIC_VECTOR_FUNCTION(name, 1, one;, two;",
+        b"SIMULATE(value);",
+        b"#define SIMULATE broken\nvoid f(){SIMULATE {}}",
+        b"#undef TMB_ATOMIC_VECTOR_FUNCTION\n",
+    ],
+)
+def test_unsupported_tmb_macro_forms_fail_visibly(body: bytes) -> None:
+    with pytest.raises(ValueError):
+        linting.tmb_grammar_source(b"#include <TMB.hpp>\n" + body)
+
+
+def test_tmb_atomic_projection_keeps_string_commas_and_digit_separators() -> None:
+    source = TMB_ATOMIC_FIXTURE.replace(
+        b"ty[0] = helper(tx[0], Type(2));",
+        b"""const char* text = "a,b,( )\\\"";
+           const char* raw = R"raw(, ) SIMULATE { } )raw";
+           auto count = 1'000;
+           ty[0] = helper(tx[0], Type(2));""",
+    )
+    projected = linting.tmb_grammar_source(source)
+    assert b'const char* raw = R"raw(, ) SIMULATE { } )raw";' in projected
+    assert b"auto count = 1'000;" in projected
+    assert source.count(b"\n") == projected.count(b"\n")
+
+
+def test_real_tmb_models_parse_with_prepared_grammar() -> None:
+    pytest.importorskip("tree_sitter_language_pack")
+    root = Path(__file__).resolve().parents[1]
+    for relative in (
+        "courses/tmb-modeling/projects/tmb-local/models/normal_mean.cpp",
+        "courses/advanced-spark-modeling/projects/spark-tmb/models/normal_mean.cpp",
+        "courses/tmb-modeling/projects/tmb-cpp-api/models/atomic_quartic.cpp",
+    ):
+        source = (root / relative).read_bytes()
+        assert linting.grammar_errors(relative, source, "cpp") == []
+        assert (root / relative).read_bytes() == source
+
+
+@pytest.mark.parametrize(
+    "source,line",
+    [
+        (TMB_ATOMIC_FIXTURE.replace(b"helper(tx[0], Type(2))", b""), 3),
+        (TMB_ATOMIC_FIXTURE.replace(b"Type(4) * tx[0] * py[0]", b""), 4),
+        (TMB_ATOMIC_FIXTURE.replace(b"return 3;", b"return ( ;"), 5),
+        (b"#include <TMB.hpp>\nvoid model() {\nSIMULATE { value = ; }\n}\n", 3),
+    ],
+)
+def test_tmb_projection_does_not_hide_body_or_surrounding_errors(source: bytes, line: int) -> None:
+    pytest.importorskip("tree_sitter_language_pack")
+    errors = linting.grammar_errors("model.cpp", source, "cpp")
+    assert errors and any(f"model.cpp:{line}:" in error for error in errors)
+
+
+def test_tmb_projection_retains_valid_nested_control_flow() -> None:
+    pytest.importorskip("tree_sitter_language_pack")
+    source = TMB_ATOMIC_FIXTURE.replace(
+        b"ty[0] = helper(tx[0], Type(2));",
+        b"if (tx[0] > 0) { ty[0] = helper(tx[0], Type(2)); } else { ty[0] = 0; }",
+    )
+    assert linting.grammar_errors("model.cpp", source, "cpp") == []
+    broken = source.replace(b"if (tx[0] > 0)", b"if (tx[0] > )")
+    assert linting.grammar_errors("model.cpp", broken, "cpp")

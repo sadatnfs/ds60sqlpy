@@ -5,6 +5,8 @@ import fs from "node:fs";
 import vm from "node:vm";
 const filename = process.argv[2] || "src/ds60sqlpy/assets/classroom.js";
 const script = fs.readFileSync(filename, "utf8");
+const cssFilename = process.argv[3] || "src/ds60sqlpy/assets/classroom.css";
+const stylesheet = fs.readFileSync(cssFilename, "utf8");
 class Element {
   constructor(tag = "div") {
     this.tagName = tag.toUpperCase();
@@ -1483,6 +1485,10 @@ await test("all registered subject accents meet text contrast in both appearance
   assert.deepEqual(
     new Set(Object.keys(palette)),
     new Set([
+      "python-web",
+      "advanced-spark-modeling",
+      "custom-likelihood-pytorch",
+      "tmb-modeling",
       "apache-data-platforms",
       "data-ml-engineering",
       "python",
@@ -1537,6 +1543,103 @@ await test("all registered subject accents meet text contrast in both appearance
     assert.ok(contrast(light, tint) >= 4.5, id + " light tinted text");
     assert.ok(contrast(dark, "#20232b") >= 4.5, id + " dark text");
     assert.ok(contrast(dark, darkTint) >= 4.5, id + " dark tinted text");
+  }
+});
+
+await test("new subject primary buttons retain readable accent fills while hovered", async () => {
+  const e = environment();
+  const palette = e.run("themes");
+  // A bounded cascade check for the four relevant button rules. The separate
+  // browser acceptance verifies actual computed styles and visual state.
+  const specificity = new Map([
+    ["button", 1],
+    ["button.primary", 11],
+    ["button:hover:not(:disabled)", 21],
+    ["button.primary:hover:not(:disabled)", 31],
+  ]);
+  const rules = [...stylesheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match, order) => ({
+    selectors: match[1]
+      .trim()
+      .split(",")
+      .map((selector) => selector.trim()),
+    declarations: [...match[2].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((item) => [
+      item[1],
+      item[2].trim(),
+    ]),
+    order,
+  }));
+  const variablesFor = (dark) => {
+    const variables = {};
+    for (const rule of rules) {
+      if (
+        rule.selectors.includes(":root") ||
+        (dark && rule.selectors.includes('body[data-mode="dark"]'))
+      ) {
+        Object.assign(
+          variables,
+          Object.fromEntries(rule.declarations.filter(([name]) => name.startsWith("--"))),
+        );
+      }
+    }
+    return variables;
+  };
+  const declarationsFor = (hovered) => {
+    const winners = new Map();
+    for (const rule of rules) {
+      for (const selector of rule.selectors) {
+        if (!specificity.has(selector) || (!hovered && selector.includes(":hover"))) continue;
+        const priority = specificity.get(selector) * 10000 + rule.order;
+        for (const [name, value] of rule.declarations) {
+          if (!winners.has(name) || priority >= winners.get(name).priority) {
+            winners.set(name, { priority, value });
+          }
+        }
+      }
+    }
+    return Object.fromEntries([...winners].map(([name, item]) => [name, item.value]));
+  };
+  const luminance = (hex, brightness) => {
+    let digits = hex.slice(1);
+    if (digits.length === 3) digits = [...digits].map((digit) => digit + digit).join("");
+    assert.match(digits, /^[0-9a-f]{6}$/i);
+    const channels = digits
+      .match(/../g)
+      .map((value) => (parseInt(value, 16) / 255) * brightness)
+      .map((value) => (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4));
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  };
+  for (const subject of [
+    "advanced-spark-modeling",
+    "custom-likelihood-pytorch",
+    "tmb-modeling",
+    "python-web",
+  ]) {
+    for (const dark of [false, true]) {
+      const variables = variablesFor(dark);
+      variables["--accent"] = palette[subject][dark ? 2 : 0];
+      variables["--tint"] = palette[subject][dark ? 3 : 1];
+      const resolve = (value) => value.replace(/var\((--[\w-]+)\)/g, (_, key) => variables[key]);
+      for (const hovered of [false, true]) {
+        const declarations = declarationsFor(hovered);
+        const foreground = resolve(declarations.color);
+        const background = resolve(declarations.background);
+        const brightness = Number(
+          (declarations.filter || "").match(/brightness\(([0-9.]+)\)/)?.[1] || 1,
+        );
+        const values = [luminance(foreground, brightness), luminance(background, brightness)].sort(
+          (a, b) => b - a,
+        );
+        assert.ok(
+          (values[0] + 0.05) / (values[1] + 0.05) >= 4.5,
+          `${subject} ${dark ? "dark" : "light"} ${hovered ? "hover" : "normal"} primary contrast`,
+        );
+        assert.equal(
+          background,
+          variables["--accent"],
+          "Primary hover must not inherit the generic tinted fill",
+        );
+      }
+    }
   }
 });
 

@@ -1,0 +1,5 @@
+{
+  "title": "Custom likelihoods in PyTorch",
+  "summary": "Twenty worked tutorials from observation models and automatic differentiation to nonlinear panel maximum likelihood, uncertainty and distributed-gradient contracts.",
+  "introduction": "Start with basic Python, tensors and elementary probability. The first five chapters develop likelihood notation and numerical oracles before progressing to custom distributions, dependence, inference and forecasting. Each chapter contains two contrasting worked cases, full float64 CPU source and answered modeling discussions. All data are original tiny offline fixtures.\n\nUse the classroom path selector and the separately prepared `llm-torch-cpu` runtime. Save edited code, notes and reading progress through the ordinary classroom controls. A successful run reproduces a numerical investigation; it is not an exam result or evidence of scientific mastery. Chapter 19 executes serial DDP scaling arithmetic and the actual sampler, not distributed training. The capstone estimates shared mean parameters with supplied covariance, and its plug-in prediction uncertainties are explicitly approximate."
+}

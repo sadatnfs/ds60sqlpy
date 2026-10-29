@@ -52,6 +52,8 @@ def required_checks(group: str) -> frozenset[str]:
         names.add("owned data product HTTP, publication and recovery")
     if group == "pytorch":
         names.add("owned inference lifecycle, SSE and persistent history")
+    if group == "python-web":
+        names.add("owned Python web HTTP, streaming, browser and persistence")
     if group == "data-platforms":
         names.add("owned Arrow Flight, Rust IPC and persistent data")
     if group == "java":
@@ -337,7 +339,7 @@ class ClassroomCI:
                 persistence=True,
             )
         scientific = [profile for profile in self.profiles if profile in SCIENTIFIC]
-        if scientific or self.group == "pytorch":
+        if scientific or self.group in {"pytorch", "python-web"}:
             self.run([sys.executable, "-m", "venv", "work/browser-env"])
             browser = str(ROOT / "work/browser-env/bin/python")
             self.run(
@@ -393,6 +395,23 @@ class ClassroomCI:
                     ]
                 )
                 self.completed.append("owned inference lifecycle, SSE and persistent history")
+            if self.group == "python-web":
+                self.run(
+                    [
+                        sys.executable,
+                        "courses/python-web/projects/web-lab/check_project.py",
+                        "--workspace",
+                        "work/python-web-ci-workspace",
+                        "--image",
+                        "ds60sqlpy-worker-python-web:" + self.version,
+                        "--browser-python",
+                        browser,
+                        "--report",
+                        "work/python-web-project-receipts.json",
+                        "--confirm-disposable",
+                    ]
+                )
+                self.completed.append("owned Python web HTTP, streaming, browser and persistence")
         if self.group in {"data-platforms", "java"}:
             workshop = "arrow-flight" if self.group == "data-platforms" else "streaming"
             variable = (

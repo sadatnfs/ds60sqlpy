@@ -373,6 +373,7 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
     endpoints = json.loads(lab["environment"]["DS60_MODULE_ENDPOINTS"])
     expected = {
         "python-core": "python-core-worker",
+        "python-web": "python-web-worker",
         "cpp20": "cpp-worker",
         "c17": "c-worker",
         "go": "go-worker",

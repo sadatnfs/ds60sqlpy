@@ -147,6 +147,9 @@ def language_for(path: str) -> str | None:
         "scripts/lint-repo",
         "scripts/publish-images",
         "courses/data-ml-engineering/projects/inference-service/workshop",
+        "courses/advanced-spark-modeling/projects/spark-torch/workshop",
+        "courses/advanced-spark-modeling/projects/spark-tmb/workshop",
+        "courses/python-web/projects/web-lab/workshop",
     }:
         return "shell"
     return SUFFIXES.get(Path(path).suffix.lower())

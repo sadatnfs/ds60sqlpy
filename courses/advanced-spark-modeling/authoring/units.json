@@ -1,0 +1,825 @@
+[
+  {
+    "id": "asm-001",
+    "title": "What Spark distributes",
+    "level": "beginner",
+    "minutes": 75,
+    "prerequisites": ["spark-021", "clp-001"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["driver", "executor", "partition", "action"],
+    "outcome": "Trace one objective evaluation across the driver and partitions and show that repartitioning does not redefine the model.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-002",
+    "title": "The additive likelihood theorem",
+    "level": "beginner",
+    "minutes": 75,
+    "prerequisites": ["asm-001", "clp-002"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["conditional", "independence", "likelihood", "gradient"],
+    "outcome": "Derive and check a partition-additive objective and identify a shared latent variable that invalidates a naive split.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-003",
+    "title": "Independent group fits and one shared model",
+    "level": "beginner",
+    "minutes": 75,
+    "prerequisites": ["asm-002", "spark-016"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["grouped", "MLE", "pooling", "sufficient", "statistics"],
+    "outcome": "Fit separate Gaussian means and distinguish them from the pooled maximum-likelihood estimate when group sizes differ.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-004",
+    "title": "Whole-group memory, shuffle and skew",
+    "level": "beginner",
+    "minutes": 75,
+    "prerequisites": ["asm-003", "spark-022"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["skew", "group", "materialization", "shuffle", "memory"],
+    "outcome": "Measure group sizes before an independent fit and replace unsafe group materialization with bounded sufficient statistics.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-005",
+    "title": "Stable global logistic likelihood in Spark SQL",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-002", "clp-007"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["softplus", "logistic", "likelihood", "weights"],
+    "outcome": "Evaluate a stable normalized logistic objective with Spark SQL and compare extreme-score and imbalance cases to a serial oracle.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-006",
+    "title": "Loss, count and gradient summaries",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-005", "clp-003"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["gradient", "Hessian", "feature", "order", "aggregation"],
+    "outcome": "Compute correctly ordered logistic loss and gradient summaries and detect invalid feature or label contracts.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-007",
+    "title": "A driver optimizer over distributed passes",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-006", "clp-015"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Newton", "line", "search", "action", "broadcast"],
+    "outcome": "Fit a small shared logistic model through repeated Spark actions and explain why a stale expression cannot supply the next gradient.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-008",
+    "title": "Merge precision, unequal partitions and one penalty",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-007", "clp-013"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["floating", "point", "weighted", "mean", "regularization"],
+    "outcome": "Prove the difference between global sums and averages of partition means and apply a model penalty exactly once.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-009",
+    "title": "Retry-safe evaluation and external side effects",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-008", "spark-035"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["retry", "idempotence", "task", "attempts", "side", "effects"],
+    "outcome": "Separate Spark result aggregation from external writes and construct a retry-safe summary contract.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-010",
+    "title": "Nonlinear global maximum likelihood",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-007", "clp-006"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["nonlinear", "regression", "Gaussian", "MLE", "parameter", "transforms"],
+    "outcome": "Fit a shared exponential-decay model with explicit scale, analytic gradients and distributed objective evaluations.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-011",
+    "title": "When a likelihood is not separable",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-010", "clp-012"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["covariance", "coupling", "quadratic", "form", "determinant"],
+    "outcome": "Calculate the omitted covariance and normalization terms in an invalid independent partition approximation.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-012",
+    "title": "State-space boundaries and complete-series ownership",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-011", "r-049"],
+    "runtime": "spark-local-python",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["AR1", "boundary", "state", "stationary", "density"],
+    "outcome": "Preserve every lag edge and initial-state term when evaluating an AR1 likelihood across data partitions.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-013",
+    "title": "Typed Scala aggregation and merge laws",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-006", "spark-007"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["Aggregator", "encoder", "monoid", "weighted", "moments"],
+    "outcome": "Implement a typed weighted-statistics Aggregator and verify zero, merge and partition invariance with an empty-input policy.",
+    "sources": [
+      [
+        "Spark 4.0.1 typed aggregate API",
+        "https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html"
+      ],
+      [
+        "Spark 4.0.1 SQL null semantics",
+        "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-014",
+    "title": "Registering a SQL aggregate with explicit nulls",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-013", "spark-012"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["UDAF", "SQL", "null", "weights", "encoders"],
+    "outcome": "Register a typed aggregate for SQL and test its null, invalid-weight and zero-weight behavior against built-in sums.",
+    "sources": [
+      [
+        "Spark 4.0.1 typed aggregate API",
+        "https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html"
+      ],
+      [
+        "Spark 4.0.1 SQL null semantics",
+        "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-015",
+    "title": "Built-in expression or Scala UDF",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-014", "spark-026"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["UDF", "optimizer", "null", "semantics", "softplus"],
+    "outcome": "Implement equivalent stable likelihood contributions with SQL expressions and a typed Scala UDF and interpret their plans.",
+    "sources": [
+      [
+        "Spark 4.0.1 typed aggregate API",
+        "https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html"
+      ],
+      [
+        "Spark 4.0.1 SQL null semantics",
+        "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-016",
+    "title": "A custom Transformer and durable parameters",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-015", "spark-012"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["Transformer", "Param", "persistence", "schema"],
+    "outcome": "Build a schema-checked feature Transformer whose declared parameters survive a save and fresh load.",
+    "sources": [
+      ["Spark 4.0.1 ML pipeline contract", "https://spark.apache.org/docs/4.0.1/ml-pipeline.html"],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-017",
+    "title": "A custom Estimator and fitted Model lifecycle",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-016", "spark-027"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["Estimator", "Model", "training", "transform", "leakage"],
+    "outcome": "Implement a training-only mean Estimator and evaluate its immutable fitted Model on held-out data.",
+    "sources": [
+      ["Spark 4.0.1 ML pipeline contract", "https://spark.apache.org/docs/4.0.1/ml-pipeline.html"],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-018",
+    "title": "Arrow batches and pandas partition functions",
+    "level": "intermediate",
+    "minutes": 100,
+    "prerequisites": ["asm-005", "spark-026"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["Arrow", "pandas", "batch", "schema", "null"],
+    "outcome": "Use an explicitly prepared mapInPandas project and audit batch-size invariance without mistaking a batch for a group.",
+    "sources": [
+      [
+        "Spark 4.0.1 Arrow and pandas guide",
+        "https://spark.apache.org/docs/4.0.1/api/python/tutorial/sql/arrow_pandas.html"
+      ],
+      [
+        "Spark 4.0.1 SQL programming guide",
+        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-019",
+    "title": "Analyzed, optimized and physical plans",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-015", "spark-021"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["Catalyst", "plan", "AQE", "semantics"],
+    "outcome": "Capture all three planning layers and prove result equivalence before interpreting an optimizer or AQE change.",
+    "sources": [
+      [
+        "Spark 4.0.1 SQL performance tuning",
+        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-020",
+    "title": "Generated operator code and evaluation fallback",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-019", "spark-026"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["whole", "stage", "codegen", "UDF", "interpreted"],
+    "outcome": "Inspect code-generation boundaries and verify that codegen settings preserve the same null-aware numerical result.",
+    "sources": [
+      [
+        "Spark 4.0.1 SQL performance tuning",
+        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-021",
+    "title": "Injecting an exact-version Spark extension",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-020", "cpp-020"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["SparkSessionExtensions", "injection", "lifecycle"],
+    "outcome": "Compile an owned Spark4.0.1 extension and prove that it is installed when the session is constructed.",
+    "sources": [
+      [
+        "Spark 4.0.1 extension API",
+        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-022",
+    "title": "Writing a Catalyst likelihood expression",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-021", "spark-026"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["UnaryExpression", "eval", "doGenCode", "type", "check"],
+    "outcome": "Implement a stable softplus expression with matching interpreted and generated-code behavior, type and null checks.",
+    "sources": [
+      [
+        "Spark 4.0.1 extension API",
+        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-023",
+    "title": "An optimizer rule with a proof obligation",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-022", "spark-021"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["Rule", "logical", "plan", "rewrite", "idempotence"],
+    "outcome": "Prove and test one narrow idempotent integer rewrite while rejecting unsafe rewrites involving randomness or floating arithmetic.",
+    "sources": [
+      [
+        "Spark 4.0.1 extension API",
+        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-024",
+    "title": "Forward-mode dual numbers inside JVM rows",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-013", "clp-003"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["dual", "numbers", "forward", "AD", "chain", "rule"],
+    "outcome": "Propagate a scalar derivative through a tiny original dual-number algebra and aggregate it against an analytic gradient.",
+    "sources": [
+      [
+        "Spark 4.0.1 extension API",
+        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-025",
+    "title": "Why a query plan is not a global autodiff tape",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-024", "asm-023"],
+    "runtime": "spark-local-scala",
+    "language": "scala",
+    "suffix": ".scala",
+    "concepts": ["reverse", "AD", "join", "multiplicity", "shuffle", "adjoint"],
+    "outcome": "Use join multiplicity to show that a row derivative needs relational semantics and that Catalyst supplies no general global reverse-mode tape.",
+    "sources": [
+      [
+        "Spark 4.0.1 extension API",
+        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+      ],
+      [
+        "Spark 4.0.1 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+      ]
+    ]
+  },
+  {
+    "id": "asm-026",
+    "title": "Preparing a combined Spark and Torch environment",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-018", "torch-030"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["ABI", "Python", "JVM", "Torch", "Arrow", "environment"],
+    "outcome": "Verify a combined project environment and make process, package, data and memory boundaries explicit before training.",
+    "sources": [
+      [
+        "Spark 4.0.1 TorchDistributor implementation",
+        "https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py"
+      ],
+      [
+        "PyTorch 2.9 distributed data parallel",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-027",
+    "title": "TorchDistributor with one CPU process",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-026", "torch-011"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["TorchDistributor", "launcher", "rank", "process"],
+    "outcome": "Launch a fixed CPU function through the pinned public TorchDistributor.run interface and retain actual rank and result evidence.",
+    "sources": [
+      [
+        "Spark 4.0.1 TorchDistributor implementation",
+        "https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py"
+      ],
+      [
+        "PyTorch 2.9 distributed data parallel",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-028",
+    "title": "Two CPU ranks, exact shards and gradient scaling",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-027", "clp-019"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["DDP", "allreduce", "uneven", "inputs", "sampler"],
+    "outcome": "Derive the correct DDP reduction scale for uneven row counts and require an exact no-duplicate/no-drop data audit.",
+    "sources": [
+      [
+        "Spark 4.0.1 TorchDistributor implementation",
+        "https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py"
+      ],
+      [
+        "PyTorch 2.9 distributed data parallel",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-029",
+    "title": "Lightning under a Spark launcher",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-028", "torch-028"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["Lightning", "DDP", "accumulation", "checkpoint"],
+    "outcome": "Compare Lightning and plain Torch on the same objective, initialization, shard policy and optimizer-step definition.",
+    "sources": [
+      ["Lightning Trainer", "https://lightning.ai/docs/pytorch/stable/common/trainer.html"],
+      [
+        "PyTorch 2.9 distributed data parallel",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ],
+      [
+        "PyTorch 2.9 distributed sampler",
+        "https://docs.pytorch.org/docs/2.9/data.html#torch.utils.data.distributed.DistributedSampler"
+      ]
+    ]
+  },
+  {
+    "id": "asm-030",
+    "title": "Data delivery, epochs and restart boundaries",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-029", "spark-035"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["checkpoint", "sharding", "replay", "epoch"],
+    "outcome": "Design a bounded restart contract that preserves sample identity, optimizer state and epoch reshuffling without silent data replay.",
+    "sources": [
+      ["Lightning Trainer", "https://lightning.ai/docs/pytorch/stable/common/trainer.html"],
+      [
+        "PyTorch 2.9 distributed data parallel",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ],
+      [
+        "PyTorch 2.9 distributed sampler",
+        "https://docs.pytorch.org/docs/2.9/data.html#torch.utils.data.distributed.DistributedSampler"
+      ]
+    ]
+  },
+  {
+    "id": "asm-031",
+    "title": "Independent TMB fits on complete Spark groups",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-003", "tmb-016"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["TMB", "Spark", "groups", "R", "isolation"],
+    "outcome": "Dispatch independent TMB fits for whole groups with bounded process isolation and compare each result to a serial fit.",
+    "sources": [
+      ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
+      ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-032",
+    "title": "Distributing compiled models and their ABI",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-031", "tmb-005"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["native", "library", "ABI", "architecture", "artifact"],
+    "outcome": "Bind a compiled model to its C++ source, architecture and R/TMB ABI and reject stale or incompatible libraries before fitting.",
+    "sources": [
+      ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
+      ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-033",
+    "title": "Independent latent groups and Laplace sums",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-032", "tmb-013"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["Laplace", "block", "diagonal", "random", "effects"],
+    "outcome": "Derive when integrated group likelihoods can be summed and verify the block-diagonal Hessian condition.",
+    "sources": [
+      ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
+      ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-034",
+    "title": "Optimizing global TMB loss and gradient summaries",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-033", "tmb-007"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["TMB", "gradient", "driver", "optimizer", "tape"],
+    "outcome": "Evaluate every partition at the same parameter vector, merge pure TMB summaries and optimize the original shared objective.",
+    "sources": [
+      ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
+      ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-035",
+    "title": "A coupled random-effect counterexample",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-034", "tmb-015"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["latent", "coupling", "Hessian", "log", "determinant"],
+    "outcome": "Show quantitatively how an off-block latent dependence changes a Laplace approximation and forbids an independent-group decomposition.",
+    "sources": [
+      ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
+      ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-036",
+    "title": "Comparing MLE, Laplace and Bayesian targets",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-034", "bayes-009"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["MLE", "posterior", "Laplace", "uncertainty"],
+    "outcome": "Compare estimation targets and uncertainty for one shared model without treating optimizer output and posterior draws as equivalent.",
+    "sources": [
+      ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
+      [
+        "PyMC custom probability distributions",
+        "https://www.pymc.io/projects/docs/en/stable/guides/Probability_Distributions.html"
+      ],
+      [
+        "PyTorch 2.9 distributed data parallel",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-037",
+    "title": "Measure scheduling, transfer and arithmetic separately",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-034", "spark-022"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["profiling", "scheduling", "serialization", "break", "even"],
+    "outcome": "Build a reproducible cost decomposition and decide when distributed likelihood evaluation is justified by measured work.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL performance tuning",
+        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+      ]
+    ]
+  },
+  {
+    "id": "asm-038",
+    "title": "A custom-model-at-scale review dossier",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["asm-035", "asm-036", "asm-037"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "concepts": ["architecture", "validation", "scientific", "inference"],
+    "outcome": "Choose and defend independent fitting, additive global MLE, DDP or a coupled-model alternative for four concrete modeling cases.",
+    "sources": [
+      [
+        "Spark 4.0.1 programming guide",
+        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+      ],
+      [
+        "Spark 4.0.1 SQL performance tuning",
+        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+      ]
+    ]
+  }
+]

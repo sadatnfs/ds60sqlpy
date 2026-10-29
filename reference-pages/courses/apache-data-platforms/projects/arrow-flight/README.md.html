@@ -209,12 +209,12 @@ bash run.sh check</code></pre>
 <h3 id="reuse-already-published-hub-runtime-images">Reuse already published Hub runtime images<a class="heading-anchor" href="#reuse-already-published-hub-runtime-images" aria-label="Link to this section">#</a></h3>
 <p>If you prefer published combined release images, replace <code>yourname</code> with the Hub namespace and use the concrete release matching this checkout. These commands pull native platform variants and add the local aliases expected by the workshop; they do not rebuild or push anything.</p>
 <pre class="highlighted-code"><code class="language-bash">DS60_HUB_ACCOUNT<span class="syntax-operator">=</span>yourname
-docker pull <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.0.1-worker-data-platforms-python</span><span class="syntax-string">&quot;</span>
-docker tag <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.0.1-worker-data-platforms-python</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
-  ds60sqlpy-worker-data-platforms-python:1.0.1
-docker pull <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.0.1-worker-rust-stable</span><span class="syntax-string">&quot;</span>
-docker tag <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.0.1-worker-rust-stable</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
-  ds60sqlpy-worker-rust-stable:1.0.1</code></pre>
+docker pull <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.1.0-worker-data-platforms-python</span><span class="syntax-string">&quot;</span>
+docker tag <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.1.0-worker-data-platforms-python</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  ds60sqlpy-worker-data-platforms-python:1.1.0
+docker pull <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.1.0-worker-rust-stable</span><span class="syntax-string">&quot;</span>
+docker tag <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.1.0-worker-rust-stable</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  ds60sqlpy-worker-rust-stable:1.1.0</code></pre>
 <p>Rust is needed only for <code>ipc-check</code>. The standard Flight client/server path needs the data-platforms image. These combined tags must have been published first; a manual architecture-tag set uses the corresponding explicit native suffix instead. See <a href="../../../../docs/dockerhub.md.html">the Docker Hub guide</a> for both layouts. A native image mismatch fails before the workshop starts; no implicit emulation is selected.</p>
 <h3 id="network-namespaces-and-cross-language-ipc">Network namespaces and cross-language IPC<a class="heading-anchor" href="#network-namespaces-and-cross-language-ipc" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh network-check</code></pre>

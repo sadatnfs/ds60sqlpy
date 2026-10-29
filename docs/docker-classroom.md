@@ -216,7 +216,7 @@ silently following them.
 
 Edit `backup_dir` to the actual absolute backup path and set `restore_tag`
 to the installed image version matching the backup. The example uses the full
-1.0.1 release. The generated `restore_project` must be unused. Run the **entire** block from the course
+1.1.0 release. The generated `restore_project` must be unused. Run the **entire** block from the course
 folder in Bash; do not skip the destination checks and run only `pg_restore`.
 It uses existing local images and strict `resume`, so missing image preparation
 causes a failure instead of an unexpected build or download.
@@ -226,7 +226,7 @@ causes a failure instead of an unexpected build or download.
 set -eu
 backup_dir="$HOME/Documents/REPLACE_WITH_YOUR_BACKUP_FOLDER"
 restore_project="ds60-restored-$(date +%Y%m%d-%H%M%S)"
-restore_tag=1.0.1
+restore_tag=1.1.0
 [[ "$restore_project" =~ ^[a-z0-9][a-z0-9_-]*$ ]]
 docker info --format '{{.OSType}}'
 [ -d "$backup_dir" ]

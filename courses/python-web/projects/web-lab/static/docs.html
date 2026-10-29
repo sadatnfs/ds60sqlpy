@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Local OpenAPI explorer</title>
+    <link rel="stylesheet" href="/static/site.css" />
+    <script src="/static/docs.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">OFFLINE API CONTRACT</p>
+        <h1>Local OpenAPI explorer</h1>
+        <p
+          >This original viewer reads the server's local schema. It is deliberately smaller than
+          Swagger UI: inspect every operation and schema, and explicitly run the fixed
+          read/create-note examples. No external assets or remote validators are used.</p
+        >
+        <nav><a href="/">Workshop</a><a href="/openapi.json">Raw OpenAPI JSON</a></nav>
+      </header>
+      <section>
+        <h2>Try a local request</h2>
+        <p
+          >Sign in on the workshop page first for note operations. These controls use that
+          same-origin session and obtain its CSRF token.</p
+        >
+        <label for="operation">Operation</label>
+        <select id="operation">
+          <option value="health">GET /healthz</option>
+          <option value="list">GET /api/notes</option>
+          <option value="create">POST /api/notes</option>
+        </select>
+        <label for="body">JSON body</label>
+        <textarea id="body">{"title":"Created from the local API explorer"}</textarea>
+        <button id="run">Run selected request</button>
+        <pre id="result" aria-live="polite" tabindex="0">No request submitted.</pre>
+      </section>
+      <section><h2>Operations</h2><div id="operations"></div></section>
+      <section><h2>Component schemas</h2><div id="schemas"></div></section>
+    </main>
+  </body>
+</html>

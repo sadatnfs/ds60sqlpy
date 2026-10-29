@@ -53,6 +53,8 @@ given for the current task rather than asking repeatedly.
 | Integrated engineering book and projects | `courses/data-ml-engineering/authoring/` and its subject's `projects/data-product/`, `projects/inference-service/` guidance |
 | Apache and open-data platforms | `courses/apache-data-platforms/authoring/`, project launchers and the maintained qualification ledger |
 | Static/live reading | `lesson_reader.py`, `reader_math.py`, `reader_tex.py`, `reader_content.py`, `scripts/compile_lesson_tex.py`, `classroom_http.py` |
+| Reusable Spark likelihood framework | `packages/spark-likelihood/`; `src/ds60sqlpy/spark_likelihood/` contains compatibility aliases only |
+| Scientific project publication gates | `scripts/ci_scientific_projects.py`, `scripts/scientific_receipts.py`, `scripts/scientific_package_receipts.py`, `docker/ci-scientific-projects.json` |
 | Scientific runtime adapters | `dbt_runner.py`, `stan_runner.py`, `worker_figures.jl`, prepared worker locks |
 | Reviewed Python fixtures | `teaching_data.py`, `python/fixtures/manifest.json`, `python/authoring/build_teaching_fixtures.py` |
 | Offline drafts and figures | `module_drafts.py`, `plot_artifacts.py`, `plot_capture.py`, `worker_figures.py`, `worker_figures.R` |
@@ -205,6 +207,31 @@ qualification ledger and each project's guidance. Prepared Atlas/Delta Sharing
 clients are not accepted servers; native architecture and complete topology
 checks remain distinct. Ordinary workers never receive an engine socket.
 
+The reusable `ds60-spark-likelihood` distribution is independent of the classroom
+and R. Canonical source is `packages/spark-likelihood/src/ds60_spark_likelihood/`.
+Keep pure-core imports lightweight and prepare Spark/Torch/SciPy extras explicitly.
+The owned Spark/Torch workshop builds and installs the pure wheel before its
+source-checked Spark preparation step. Do not copy a second implementation into
+the application or execute models through a checkout that masks the installed wheel.
+
+Distinguish row losses, complete independent-group losses, separate per-group
+fits and distributed neural-network training. Whole-unit weights are not row
+weights; cross-group latent covariance is unsupported by an additive reducer.
+Predictions need a declared response-free target. Model descriptors bind source,
+configuration, callable state and normalized live code with Python minor version.
+Never load executable model code from a JSON artifact. Upstream Spark Pipeline
+metadata has its own trusted-class import boundary, and whole-pipeline overwrite
+is broader than the individual model's owned-directory replacement contract.
+The optional Spark/TMB reference retains R, precompiled C++ models, ABI/source
+receipts and process-local native state. It is not the primary package dependency.
+
+`python-web` is an ordinary `main.py` profile with separately locked Flask,
+FastAPI, Django and supporting packages. Pads run finite offline test-client or
+numerical/database examples; they do not expose long-running network servers.
+The owned `courses/python-web/projects/web-lab/` project supplies real HTTP,
+streaming/WebSockets, browsers, PostgreSQL, durable jobs and separate persisted
+state. Its service/lifecycle evidence is distinct from pad completion.
+
 The classroom runs trusted local learner code, not arbitrary hosted tenants.
 Preserve Host, origin, token, path, request/output-size, process and resource
 checks. Publish ports to loopback; use `http_server.py` to avoid reverse-DNS
@@ -275,18 +302,30 @@ logs, build arguments and reports.
 
 Grouped Docker CI requires the owned data-product gate in data engineering,
 the inference/SSE/browser gate in PyTorch, Flight/Rust IPC in data platforms and
-Kafka semantics/lifecycle in Java. Keep `scripts/ci_classroom.py` required check
+Kafka semantics/lifecycle in Java, and owned HTTP/streaming/browser/persistence
+checks in Python web. Keep `scripts/ci_classroom.py` required check
 sets and source-bound publication receipt validation aligned when changing them.
 
 Native AMD64/ARM64 seed and worker publication jobs upload commit-specific
 staging images and small evidence receipts. Build-test jobs do not stage or
 publish. Promote only after every required selected check succeeds: worker
 version tags before the app version, then selected latest aliases with app
-latest last. The full publisher requires every ordinary profile; the partial
+latest last. The full publication set currently contains 26 images: App plus 25 ordinary
+workers, including Python web. Derive the set from `docker/classroom-images.tsv`;
+optional GPU profiles remain outside it. The full publisher requires every ordinary profile; the partial
 publisher requires only App, Core and its complete selected group. Refuse
 conflicting existing source versions; a later full release after a partial
 release from another commit needs a consistent checked-in patch bump instead
 of registry-only renumbering or overwriting released tags.
+Full publication also requires the dedicated scientific project gate on native
+AMD64 and ARM64 after ordinary workers qualify. Each architecture prepares and
+checks Spark/Torch and the optional R/TMB reference serially from this run's
+qualified immutable bases, retaining the standalone TMB API/C++ and Scala probes.
+The primary gate requires exact installed-wheel/source identity, real executor
+imports, numerical oracles, DataFrame/Pipeline behavior and training/failure
+checks. Promotion and same-run recovery both require complete source-bound
+scientific receipts. Two architecture jobs may run concurrently; this does not
+authorize overlapping heavy builds on a constrained local engine.
 Successful earlier-attempt receipts may be reused only within the same run
 and revision, with exact app/Core seed bindings; cross-run or mismatched-seed
 reuse is rejected. Failed promotion retries retain original qualified digests.
@@ -307,8 +346,8 @@ original publisher's failed post-promotion result or create a new version.
 On dynamic host-port reassignment, the launcher may recreate only the app
 from the same image while worker IDs, PostgreSQL ID, saved volume set and
 learner content remain stable. Do not require the app container ID to survive
-that documented repair. A new full 1.0.1 release still needs fresh complete
-qualification and post-promotion acceptance.
+that documented repair. Every later full version requires fresh complete
+qualification and its own post-promotion acceptance.
 
 A checked-in patch bump must update the Python package and editable lock stanza,
 App label, launcher version, Compose image defaults, Core base, owned workshop

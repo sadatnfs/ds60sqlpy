@@ -1,0 +1,511 @@
+{
+  "schema_version": 1,
+  "scope": "26 publicly listed owned/forked repositories, selected upstreams and the recent public contribution index; not a complete lifetime attribution claim",
+  "repositories": [
+    {
+      "repository": "bradbell/ad-tensor",
+      "revision": "a5b359a7da6b156f45478d2c5df780f39772fe92",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/ad-tensor/a5b359a7da6b156f45478d2c5df780f39772fe92/readme.md",
+      "readme_sha256": "fe87c989d3de37a2651129eac38a50118deb67700b3f2fcd9ebf88a87c017772",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/at-cascade-feedstock",
+      "revision": "65e6433729344e37f32b02f48ec81963dbce993a",
+      "fork": true,
+      "parent": "conda-forge/at-cascade-feedstock",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/at-cascade-feedstock/65e6433729344e37f32b02f48ec81963dbce993a/README.md",
+      "readme_sha256": "98b5cf3b56d3bdca98b2f3ba78f714e64fdeb6663568924d24ff154253b9433f",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "bradbell/at_cascade",
+      "revision": "0df64979213cfbe59fd82cb3ab5d7a7e0532db58",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/at_cascade/0df64979213cfbe59fd82cb3ab5d7a7e0532db58/readme.md",
+      "readme_sha256": "1a728819ede25ef940e464b943951c3e3d2325e92677289cff7da0084e1d5aca",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/cmpad",
+      "revision": "e375e0606f9b6f6769ea4ce0a57a00463a090539",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/cmpad/e375e0606f9b6f6769ea4ce0a57a00463a090539/readme.md",
+      "readme_sha256": "aa0c21c2672c36403d4883c366a52fc1919ddb3076798076ce2c3e2f46565c12",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/conda-forge-pinning-feedstock",
+      "revision": "01bf470ec049bb32086a2e269d4be9bfdc677efe",
+      "fork": true,
+      "parent": "conda-forge/conda-forge-pinning-feedstock",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/conda-forge-pinning-feedstock/01bf470ec049bb32086a2e269d4be9bfdc677efe/README.md",
+      "readme_sha256": "4d0e4aa46f54002c9e0f088416cb38ef7a6f38f5b191db544b2d8c02bd7ce181",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "bradbell/cppad-feedstock",
+      "revision": "86e99c40dfbe2f08b63a082a34ccd86b3c4679b4",
+      "fork": true,
+      "parent": "conda-forge/cppad-feedstock",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/cppad-feedstock/86e99c40dfbe2f08b63a082a34ccd86b3c4679b4/README.md",
+      "readme_sha256": "1f0ce5a3670f84415919fadaaa75319d2af9db1388a162658d823fae0ccf494b",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "bradbell/cppad-mixed-feedstock",
+      "revision": "81cb8036855755c63676f7877a72c491845e8f08",
+      "fork": true,
+      "parent": "conda-forge/cppad-mixed-feedstock",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/cppad-mixed-feedstock/81cb8036855755c63676f7877a72c491845e8f08/README.md",
+      "readme_sha256": "cbf9fcdb9a667a8908c92e24132c96b79a9c194697697c106b37773e83fb48dc",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "bradbell/CppADCodeGen",
+      "revision": "16abba1ae7777861c15a7e20058c481960c12f90",
+      "fork": true,
+      "parent": "joaoleal/CppADCodeGen",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/CppADCodeGen/16abba1ae7777861c15a7e20058c481960c12f90/README.md",
+      "readme_sha256": "d4949d441842a1bf3ea7a88317662c2e8b96b713536dc71840440b6006449fad",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "bradbell/cppad_mixed",
+      "revision": "b0c86bbb2b1a04346e9950cd68e744935164d627",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/cppad_mixed/b0c86bbb2b1a04346e9950cd68e744935164d627/readme.md",
+      "readme_sha256": "aeec96c323bcd9100822a9c23244be351cb696f4fb32ece7db3f614892d1e553",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/cppad_py",
+      "revision": "76331e8690ae5f3af88a9e3f25971b0f476e4518",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/cppad_py/76331e8690ae5f3af88a9e3f25971b0f476e4518/readme.md",
+      "readme_sha256": "0eecade9d18888f466f2584731fbb6078d0a3b7fcb3a2ea07132386bdfa285e8",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/cppad_swig",
+      "revision": "4cd2da806d19f3952e56550e07169139a8b50947",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/cppad_swig/4cd2da806d19f3952e56550e07169139a8b50947/readme.md",
+      "readme_sha256": "a208c9ea76a7ce01d7ad5dd5af2342ed3c603f6d9a153781c1c78944f32ecea2",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/dismod-at-feedstock",
+      "revision": "b6af31785ac278316bc05e9031df437b2dd804bc",
+      "fork": true,
+      "parent": "conda-forge/dismod-at-feedstock",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/dismod-at-feedstock/b6af31785ac278316bc05e9031df437b2dd804bc/README.md",
+      "readme_sha256": "8646604c6fd80b4a7500d8ddfaed490ee9a275aac50b10af23f2ec038dd0a13a",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "bradbell/dismod_at",
+      "revision": "a6bef7b543a7ed0c3998199f30a8382ab7026726",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/dismod_at/a6bef7b543a7ed0c3998199f30a8382ab7026726/readme.md",
+      "readme_sha256": "4e92858430bfdac86291f3a4e9657309dc9ef43e433b589fff32e7b8a648b247",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/implicit_ad",
+      "revision": "8f71d9292fc6368e6f712ac67b7276042b26bd88",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/implicit_ad/8f71d9292fc6368e6f712ac67b7276042b26bd88/readme.md",
+      "readme_sha256": "a4fc45e7890c52742708c543e4c2c6899cd8cbeab5136da0e618558f24878b75",
+      "license_metadata": {
+        "spdxId": "MIT",
+        "name": "MIT License",
+        "url": "http://choosealicense.com/licenses/mit/"
+      }
+    },
+    {
+      "repository": "bradbell/mat2cpp",
+      "revision": "cc5c4683c6429e07ceac061e0ea72b51da2c3caf",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/mat2cpp/cc5c4683c6429e07ceac061e0ea72b51da2c3caf/README",
+      "readme_sha256": "855b179a5cf4fe47cfdd308178426076c7bb723c0a9f33379c22654f9d2f71fb",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "bradbell/match_csv",
+      "revision": "fdf5981fc489ea3e401c588684691cce54238566",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/match_csv/fdf5981fc489ea3e401c588684691cce54238566/readme.md",
+      "readme_sha256": "7dde35bf681549f463b2ee4dbadf15e54b8ebdb0cc5506efcaaefc762c9868aa",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/omhelp",
+      "revision": "62eccea226a88a6a99da450247523463ef85bf4a",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/omhelp/62eccea226a88a6a99da450247523463ef85bf4a/readme.md",
+      "readme_sha256": "2b5e3de1ca21a8eec3d9dbc57f93d34b5993fa3c0b47b72975786287f7a11d6f",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "bradbell/python-reference",
+      "revision": "9a3b94e792c9122c94751183fdcc4cffb3d7ac11",
+      "fork": true,
+      "parent": "jprzywoski/python-reference",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/python-reference/9a3b94e792c9122c94751183fdcc4cffb3d7ac11/README.md",
+      "readme_sha256": "38716d718613206bc17beb422e6a6482f72d92e89b19bd2c407543d3c37f1295",
+      "license_metadata": {
+        "spdxId": "MIT",
+        "name": "MIT License",
+        "url": "http://choosealicense.com/licenses/mit/"
+      }
+    },
+    {
+      "repository": "bradbell/rustad",
+      "revision": "d98938e24a3196b49cb05a7abb8893941f8c9b09",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/rustad/d98938e24a3196b49cb05a7abb8893941f8c9b09/readme.md",
+      "readme_sha256": "e6cc3c11a267f0ab89f9e44d943ea0faebd103a59fa4fd3af1584440648f4ba7",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/sparse_ad",
+      "revision": "592134d12108aefaa8308ca55cd665908119ed8d",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/sparse_ad/592134d12108aefaa8308ca55cd665908119ed8d/readme.md",
+      "readme_sha256": "a1a2c8c128ca397084bd668a0dca35412084cbc35e24ed33bc84b3207d75113d",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/staged-recipes",
+      "revision": "42121433b63276bc2947c3503f258175885d0c4e",
+      "fork": true,
+      "parent": "conda-forge/staged-recipes",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/staged-recipes/42121433b63276bc2947c3503f258175885d0c4e/README.md",
+      "readme_sha256": "8ff319d8d6a2c52e0f409bbcd4f91b6f8a875d5334666e3696282200fd45f075",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "bradbell/test_sphinx",
+      "revision": "22ec3b7ee8c87bd25a7ad947b9071e864a952c15",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": null,
+      "readme_sha256": null,
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/Trilinos",
+      "revision": "2f8614ce01b61271bad2ccbc96e8d226124ebae6",
+      "fork": true,
+      "parent": "trilinos/Trilinos",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/Trilinos/2f8614ce01b61271bad2ccbc96e8d226124ebae6/README.md",
+      "readme_sha256": "72b613de023101a53fff0d7f115923d6a6202a35468e90a421f36c4ea16f222f",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "bradbell/tst_github",
+      "revision": "a6bfec12436728d7dbf10e14fc783584f3c3d1e0",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/tst_github/a6bfec12436728d7dbf10e14fc783584f3c3d1e0/readme.md",
+      "readme_sha256": "30416c869f20d473a398c96c1506a547e7c2eb9340ae3ec0e7068243ee799809",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/xrst",
+      "revision": "23aafdfed1be235cc8321edc725b5f26623404e0",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/xrst/23aafdfed1be235cc8321edc725b5f26623404e0/readme.md",
+      "readme_sha256": "c2f4d0493f1531ec151827371481945e935629aa739f4118237713600d5bd7d9",
+      "license_metadata": null
+    },
+    {
+      "repository": "bradbell/xrst-feedstock",
+      "revision": "8e90ca20382b144cae0bd0c10506db9b411bf5b7",
+      "fork": true,
+      "parent": "conda-forge/xrst-feedstock",
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/bradbell/xrst-feedstock/8e90ca20382b144cae0bd0c10506db9b411bf5b7/README.md",
+      "readme_sha256": "f374e071627717cc27bd2d33abdfe21b3e6b3f0515a1e8a1c8ced1a0d145bcff",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "coin-or/CppAD",
+      "revision": "302e241ae7b6b146c676590981b5919af71e1ccf",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/coin-or/CppAD/302e241ae7b6b146c676590981b5919af71e1ccf/readme.md",
+      "readme_sha256": "9f32245ed2b7742b74aeaeb78c2eab2b5bb9f987c89dcd08d1e4ad124b002dfb",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "kaskr/adcomp",
+      "revision": "ee2aebea75ccb96ccfb242732165a113cd3ec6d9",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/kaskr/adcomp/ee2aebea75ccb96ccfb242732165a113cd3ec6d9/README.md",
+      "readme_sha256": "79b9a8c21ebb9491daf6f1ac9057cac89b048d8b19c0b7ccf0f2cf3c22ac4c59",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "joaoleal/CppADCodeGen",
+      "revision": "bd3c44f78ed3a032c1791f8ba9b866e5ac48e406",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": false,
+      "readme_url": "https://raw.githubusercontent.com/joaoleal/CppADCodeGen/bd3c44f78ed3a032c1791f8ba9b866e5ac48e406/README.md",
+      "readme_sha256": "e8ff1fbe8202e2e724df35c26b67ed4d387b5e23fccb31d6e56f024a1bf4e496",
+      "license_metadata": {
+        "spdxId": "NOASSERTION",
+        "name": "Other",
+        "url": "http://choosealicense.com/licenses/other/"
+      }
+    },
+    {
+      "repository": "conda-forge/staged-recipes",
+      "revision": "d0a48f1083d67c1f2a157dad22bfcbe9595cb408",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/conda-forge/staged-recipes/d0a48f1083d67c1f2a157dad22bfcbe9595cb408/README.md",
+      "readme_sha256": "08c28302a3cb80f44b5029dd78ab57ed83fe8d13705dc5343987dfa6e0b39115",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "conda-forge/conda-forge-pinning-feedstock",
+      "revision": "7c11f837d5cd7a0fbd13254f36e0ba4183e8b61e",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/conda-forge/conda-forge-pinning-feedstock/7c11f837d5cd7a0fbd13254f36e0ba4183e8b61e/README.md",
+      "readme_sha256": "b14bbc71b47baf584ccac5f5f89ab22578b43149206e2221b6ac893a00919ba8",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "LaurentMazare/tch-rs",
+      "revision": "4227b89b72059b0651ff83a38637693574e0a2d6",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/LaurentMazare/tch-rs/4227b89b72059b0651ff83a38637693574e0a2d6/README.md",
+      "readme_sha256": "257a900a71b1783b270f6eb7563426dbfb82be1cc41ab4931b2b4d56c0fe998c",
+      "license_metadata": {
+        "spdxId": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "http://choosealicense.com/licenses/apache-2.0/"
+      }
+    },
+    {
+      "repository": "conda-forge/xrst-feedstock",
+      "revision": "778ed049eeaf741fd79c9e3805fe45fadb89c01a",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/conda-forge/xrst-feedstock/778ed049eeaf741fd79c9e3805fe45fadb89c01a/README.md",
+      "readme_sha256": "f374e071627717cc27bd2d33abdfe21b3e6b3f0515a1e8a1c8ced1a0d145bcff",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "conda-forge/cppad-mixed-feedstock",
+      "revision": "8f7a367023d9f6926e8225b5f551151d758ecef3",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/conda-forge/cppad-mixed-feedstock/8f7a367023d9f6926e8225b5f551151d758ecef3/README.md",
+      "readme_sha256": "b4398a69bb9a6d96ff5c7feda2a459532a9fa38b10906d4b18ce5a75e71c3a0a",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "conda-forge/dismod-at-feedstock",
+      "revision": "ad60c2b5f05c269825b68f6e3859c35b54d8d67b",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/conda-forge/dismod-at-feedstock/ad60c2b5f05c269825b68f6e3859c35b54d8d67b/README.md",
+      "readme_sha256": "8646604c6fd80b4a7500d8ddfaed490ee9a275aac50b10af23f2ec038dd0a13a",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    },
+    {
+      "repository": "conda-forge/at-cascade-feedstock",
+      "revision": "b380da6843654b7c8f6de75601c65c17f30ec176",
+      "fork": false,
+      "parent": null,
+      "recent_contribution_index": true,
+      "readme_url": "https://raw.githubusercontent.com/conda-forge/at-cascade-feedstock/b380da6843654b7c8f6de75601c65c17f30ec176/README.md",
+      "readme_sha256": "98b5cf3b56d3bdca98b2f3ba78f714e64fdeb6663568924d24ff154253b9433f",
+      "license_metadata": {
+        "spdxId": "BSD-3-Clause",
+        "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+        "url": "http://choosealicense.com/licenses/bsd-3-clause/"
+      }
+    }
+  ],
+  "selected_account_attributed_commits": [
+    {
+      "repository": "coin-or/CppAD",
+      "query_scope": "author=bradbell, at most3 returned commits",
+      "commits": [
+        {
+          "sha": "302e241ae7b6b146c676590981b5919af71e1ccf",
+          "url": "https://github.com/coin-or/CppAD/commit/302e241ae7b6b146c676590981b5919af71e1ccf"
+        },
+        {
+          "sha": "900ade02fdef161817de397f984c76671d01946d",
+          "url": "https://github.com/coin-or/CppAD/commit/900ade02fdef161817de397f984c76671d01946d"
+        },
+        {
+          "sha": "cf97dae55024a85687c599a1885d04d8acce60ab",
+          "url": "https://github.com/coin-or/CppAD/commit/cf97dae55024a85687c599a1885d04d8acce60ab"
+        }
+      ]
+    },
+    {
+      "repository": "kaskr/adcomp",
+      "query_scope": "author=bradbell, at most3 returned commits",
+      "commits": [
+        {
+          "sha": "647a82653e00a54ba7a53cae1fab80a72b0eb4b8",
+          "url": "https://github.com/kaskr/adcomp/commit/647a82653e00a54ba7a53cae1fab80a72b0eb4b8"
+        }
+      ]
+    },
+    {
+      "repository": "joaoleal/CppADCodeGen",
+      "query_scope": "author=bradbell, at most3 returned commits",
+      "commits": [
+        {
+          "sha": "975343cfc5d1237549393981a9e05069a2ad00cc",
+          "url": "https://github.com/joaoleal/CppADCodeGen/commit/975343cfc5d1237549393981a9e05069a2ad00cc"
+        },
+        {
+          "sha": "1ff6f59fcc9072f4eb2b941f9ad3d827e300ea53",
+          "url": "https://github.com/joaoleal/CppADCodeGen/commit/1ff6f59fcc9072f4eb2b941f9ad3d827e300ea53"
+        },
+        {
+          "sha": "b495a0ec22eac601c7ba23c1cf1134ccac6d51ad",
+          "url": "https://github.com/joaoleal/CppADCodeGen/commit/b495a0ec22eac601c7ba23c1cf1134ccac6d51ad"
+        }
+      ]
+    },
+    {
+      "repository": "Trilinos/Trilinos",
+      "query_scope": "author=bradbell, at most3 returned commits",
+      "commits": []
+    }
+  ]
+}

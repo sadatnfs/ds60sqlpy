@@ -53,8 +53,18 @@ def test_source_quality_runs_once_with_the_shared_docker_entrypoints() -> None:
 def test_pytest_console_entrypoint_can_import_repository_scripts() -> None:
     project = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
 
-    assert project["tool"]["pytest"]["ini_options"]["pythonpath"] == ["."]
+    assert project["tool"]["pytest"]["ini_options"]["pythonpath"] == [
+        ".",
+        "packages/spark-likelihood/src",
+    ]
+    assert (REPO_ROOT / "packages/spark-likelihood/src/ds60_spark_likelihood/__init__.py").is_file()
     assert (REPO_ROOT / "scripts" / "__init__.py").is_file()
+    assert (
+        "packages/spark-likelihood/tests" in project["tool"]["pytest"]["ini_options"]["testpaths"]
+    )
+    from scripts.lint_repo import QUALITY_ROOTS
+
+    assert "packages/" in QUALITY_ROOTS
 
 
 def test_sql_notebook_profile_is_self_contained_for_dataframe_conversion() -> None:
@@ -125,6 +135,7 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
         if path.name == "publish-images.yml":
             assert runners == [
                 "ubuntu-24.04",
+                "${{ matrix.runner }}",
                 "${{ matrix.runner }}",
                 "${{ matrix.runner }}",
                 "ubuntu-24.04",

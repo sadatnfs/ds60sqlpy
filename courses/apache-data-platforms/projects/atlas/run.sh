@@ -40,7 +40,7 @@ case "$engine" in
     exit 2
     ;;
 esac
-image=ds60sqlpy-worker-data-platforms-python:1.0.1
+image=ds60sqlpy-worker-data-platforms-python:1.1.0
 actual=$("$docker_cmd" image inspect --format '{{.Os}}|{{.Architecture}}' "$image")
 [[ $actual == "$engine" ]] || {
   echo 'Prepare the native data-platforms-python image. Automatic emulation is disabled.' >&2

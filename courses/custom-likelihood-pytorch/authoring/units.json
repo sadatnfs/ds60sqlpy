@@ -1,0 +1,418 @@
+[
+  {
+    "id": "clp-001",
+    "title": "Observation, parameter and likelihood",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["torch-004", "bayes-002"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["observation unit", "Bernoulli likelihood", "latent dependence"],
+    "outcome": "Derive a Bernoulli score and explain why repeated-subject observations do not factor marginally.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-002",
+    "title": "Reduction and weight contracts",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["clp-001"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["weighted likelihood", "global denominator", "partition invariance"],
+    "outcome": "Recover the declared weighted objective from unequal partition numerators and masses.",
+    "sources": [
+      [
+        "PyTorch automatic differentiation mechanics",
+        "https://docs.pytorch.org/docs/2.9/notes/autograd.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-003",
+    "title": "Analytic, finite-difference and AD gradients",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["clp-002", "torch-005"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["reverse automatic differentiation", "finite differences", "gradient oracle"],
+    "outcome": "Compare independent analytic, finite-difference and automatic derivatives for normal and decay models.",
+    "sources": [
+      [
+        "PyTorch automatic differentiation mechanics",
+        "https://docs.pytorch.org/docs/2.9/notes/autograd.html"
+      ],
+      [
+        "PyTorch gradcheck assumptions",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.autograd.gradcheck.gradcheck.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-004",
+    "title": "Constraints and density transformations",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["clp-003", "bayes-004"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["parameter coordinates", "density Jacobian", "positive scales"],
+    "outcome": "Distinguish parameter reparameterization from observation and prior density transformations.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ],
+      [
+        "PyTorch automatic differentiation mechanics",
+        "https://docs.pytorch.org/docs/2.9/notes/autograd.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-005",
+    "title": "Gaussian linear MLE from first principles",
+    "level": "beginner",
+    "minutes": 90,
+    "prerequisites": ["clp-004", "r-043"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Gaussian likelihood", "least squares", "variance estimation"],
+    "outcome": "Recover Gaussian coefficients and maximum-likelihood scale from an independent least-squares oracle.",
+    "sources": [
+      [
+        "PyTorch least-squares solver API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.linalg.lstsq.html"
+      ],
+      [
+        "PyTorch L-BFGS closure API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.optim.LBFGS.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-006",
+    "title": "Nonlinear decay and forecasting",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-005", "r-049"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["nonlinear mean", "extrapolation", "sensitivity geometry"],
+    "outcome": "Fit a transformed nonlinear curve and diagnose the information lost in a short observation window.",
+    "sources": [
+      [
+        "PyTorch automatic differentiation mechanics",
+        "https://docs.pytorch.org/docs/2.9/notes/autograd.html"
+      ],
+      [
+        "PyTorch L-BFGS closure API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.optim.LBFGS.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-007",
+    "title": "Binary logistic likelihood",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-005", "torch-013"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["stable logits", "Bernoulli score", "separation"],
+    "outcome": "Check stable logistic scores and recognize when separated data have no finite coefficient MLE.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-008",
+    "title": "Count models and exposure",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-007", "bayes-012"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["Poisson rate", "exposure offset", "boundary estimate"],
+    "outcome": "Fit an exposure-adjusted event rate and distinguish expected counts from rates.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-009",
+    "title": "Censoring contributes survival probability",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-004", "r-048"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["right censoring", "delayed entry", "survival likelihood"],
+    "outcome": "Construct event and survival contributions and account for delayed entry in time at risk.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-010",
+    "title": "Heteroskedastic observation models",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-005", "r-043"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["log scale regression", "normalization", "noise calibration"],
+    "outcome": "Jointly fit a mean and covariate scale while detecting a missing likelihood normalization term.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ],
+      [
+        "PyTorch L-BFGS closure API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.optim.LBFGS.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-011",
+    "title": "Mixture likelihoods and stable log sums",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-008", "bayes-022"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["logsumexp", "latent mixtures", "scale collapse"],
+    "outcome": "Evaluate a stable marginalized mixture and explain label invariance and likelihood degeneracy.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-012",
+    "title": "Correlated panel residuals",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-006", "r-049"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["AR1 covariance", "Cholesky likelihood", "complete panels"],
+    "outcome": "Evaluate complete-panel likelihoods and detect false covariance introduced across subject boundaries.",
+    "sources": [
+      [
+        "PyTorch Cholesky factorization API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.linalg.cholesky.html"
+      ],
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-013",
+    "title": "Penalty, prior and objective placement",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["clp-005", "bayes-003"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["penalized likelihood", "MAP", "global penalty"],
+    "outcome": "Distinguish MLE, ridge and MAP and preserve a single global penalty across partitions.",
+    "sources": [
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-014",
+    "title": "Identifiability and profile likelihood",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["clp-006", "r-039"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["rank deficiency", "profile likelihood", "weak identification"],
+    "outcome": "Diagnose redundant parameters and refit nuisance parameters when profiling a nonlinear rate.",
+    "sources": [
+      [
+        "PyTorch least-squares solver API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.linalg.lstsq.html"
+      ],
+      [
+        "PyTorch functional Hessian API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.autograd.functional.hessian.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-015",
+    "title": "Optimizers and closure semantics",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["clp-006", "torch-008"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["LBFGS closure", "Adam", "evaluation accounting"],
+    "outcome": "Implement deterministic optimizer closures and distinguish returned step loss from final objective.",
+    "sources": [
+      [
+        "PyTorch L-BFGS closure API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.optim.LBFGS.html"
+      ],
+      [
+        "PyTorch automatic differentiation mechanics",
+        "https://docs.pytorch.org/docs/2.9/notes/autograd.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-016",
+    "title": "Gradient and curvature audits",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["clp-015", "torch-026"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["gradcheck", "Hessian", "detached graph"],
+    "outcome": "Verify Hessians independently and detect deliberately broken gradient paths.",
+    "sources": [
+      [
+        "PyTorch gradcheck assumptions",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.autograd.gradcheck.gradcheck.html"
+      ],
+      [
+        "PyTorch functional Hessian API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.autograd.functional.hessian.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-017",
+    "title": "Prediction is a distinct estimand",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["clp-006", "bayes-011"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["delta method", "prediction intervals", "lognormal expectation"],
+    "outcome": "Separate mean, observation and new-group uncertainty and distinguish transformed means from medians.",
+    "sources": [
+      [
+        "PyTorch automatic differentiation mechanics",
+        "https://docs.pytorch.org/docs/2.9/notes/autograd.html"
+      ],
+      [
+        "PyTorch distribution probability APIs",
+        "https://docs.pytorch.org/docs/2.9/distributions.html"
+      ]
+    ]
+  },
+  {
+    "id": "clp-018",
+    "title": "Frequentist uncertainty and limits",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["clp-016", "r-042"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["sandwich covariance", "cluster bootstrap", "weak information"],
+    "outcome": "Compare model, iid and cluster variance calculations and enumerate a whole-cluster bootstrap.",
+    "sources": [
+      [
+        "White (1982), Maximum Likelihood Estimation of Misspecified Models",
+        "https://doi.org/10.2307/1912526"
+      ],
+      [
+        "Efron (1979), Bootstrap Methods: Another Look at the Jackknife",
+        "https://doi.org/10.1214/aos/1176344552"
+      ]
+    ]
+  },
+  {
+    "id": "clp-019",
+    "title": "Minibatch and DDP gradient scaling",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": ["clp-002", "torch-030"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["unequal rank mass", "DistributedSampler", "serial reduction oracle"],
+    "outcome": "Derive the global mean gradient under rank averaging and inspect sampler padding and dropping.",
+    "sources": [
+      [
+        "PyTorch DistributedDataParallel gradient contract",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
+      ],
+      [
+        "PyTorch DistributedSampler membership policy",
+        "https://docs.pytorch.org/docs/2.9/data.html#torch.utils.data.distributed.DistributedSampler"
+      ]
+    ]
+  },
+  {
+    "id": "clp-020",
+    "title": "Reproducible nonlinear panel dossier",
+    "level": "advanced",
+    "minutes": 150,
+    "prerequisites": ["clp-012", "clp-018", "clp-019"],
+    "runtime": "llm-torch-cpu",
+    "language": "python",
+    "suffix": ".py",
+    "concepts": ["shared nonlinear MLE", "conditional AR1 prediction", "reproducibility"],
+    "outcome": "Fit and audit a shared nonlinear panel model with explicit prediction and evidence limitations.",
+    "sources": [
+      [
+        "PyTorch Cholesky factorization API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.linalg.cholesky.html"
+      ],
+      [
+        "PyTorch L-BFGS closure API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.optim.LBFGS.html"
+      ],
+      [
+        "PyTorch functional Hessian API",
+        "https://docs.pytorch.org/docs/2.9/generated/torch.autograd.functional.hessian.html"
+      ]
+    ]
+  }
+]

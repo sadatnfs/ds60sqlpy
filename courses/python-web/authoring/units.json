@@ -1,0 +1,1266 @@
+[
+  {
+    "id": "pyweb-001",
+    "title": "From Python functions to HTTP responses",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["python-05", "python-09"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "From Python functions to HTTP responses"],
+    "outcome": "Trace a request through routing, a handler and a response using two real in-process client requests.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-002",
+    "title": "URLs, path parameters and query strings",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-001"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "URLs, path parameters and query strings"],
+    "outcome": "Distinguish resource paths, repeated query values, percent encoding and missing-route behavior.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-003",
+    "title": "HTTP methods, status codes and idempotence",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-002"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "HTTP methods, status codes and idempotence"],
+    "outcome": "Compare repeated replacement and deletion operations without confusing equal effects with equal status codes.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-004",
+    "title": "Headers, JSON, bytes and content negotiation",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-003"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "Headers, JSON, bytes and content negotiation"],
+    "outcome": "Validate media types and Unicode representations and diagnose malformed request bodies.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-005",
+    "title": "Input schemas and explicit validation errors",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-004", "python-12"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "Input schemas and explicit validation errors"],
+    "outcome": "Reject ambiguous coercions and unexpected fields with an explained structured error contract.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-006",
+    "title": "HTML templates and context-aware escaping",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-005", "web-002"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "HTML templates and context-aware escaping"],
+    "outcome": "Render untrusted text safely and separate escaping from validating a URL or trusted HTML fragment.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-007",
+    "title": "Forms, multipart data and upload limits",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-006", "python-08"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "Forms, multipart data and upload limits"],
+    "outcome": "Parse form and file requests, enforce size and content contracts and keep filenames out of trusted paths.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-008",
+    "title": "Cookies, signed sessions and trust",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-007"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "Cookies, signed sessions and trust"],
+    "outcome": "Inspect a real session cookie, reject tampering and explain why signing does not encrypt its contents.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-009",
+    "title": "WSGI, ASGI and the server boundary",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-008"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "WSGI, ASGI and the server boundary"],
+    "outcome": "Compare real synchronous and asynchronous application interfaces without inventing network-performance evidence.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-010",
+    "title": "Named routes, redirects and navigation",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-009"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "Named routes, redirects and navigation"],
+    "outcome": "Generate URLs from route identities and implement a bounded post-redirect-get flow without open redirects.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-011",
+    "title": "HTTP tests, fixtures and state isolation",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-010", "python-10"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "HTTP tests, fixtures and state isolation"],
+    "outcome": "Separate server state, client cookies and factory-scoped fixtures using repeatable request sequences.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-012",
+    "title": "Resource-oriented API design and REST constraints",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-011"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "http",
+    "concepts": ["http", "HTTP", "Resource-oriented API design and REST constraints"],
+    "outcome": "Design consistent resource identities and state transitions, explaining statelessness and representation tradeoffs.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-013",
+    "title": "Flask application factories and configuration",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-012"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask application factories and configuration"],
+    "outcome": "Construct isolated Flask applications with explicit test and deployment settings.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-014",
+    "title": "Flask blueprints and error boundaries",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-013"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask blueprints and error boundaries"],
+    "outcome": "Compose routes through blueprints and distinguish application-wide from blueprint error handling.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-015",
+    "title": "Flask request context, application context and cleanup",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-014"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask request context, application context and cleanup"],
+    "outcome": "Use request-local state and teardown correctly, including an exception path.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-016",
+    "title": "Flask and SQLAlchemy transaction ownership",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-015", "python-12", "sql-found-01"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask and SQLAlchemy transaction ownership"],
+    "outcome": "Scope a real database session to a request and verify successful commit and failed-operation rollback.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-017",
+    "title": "Flask relational queries and deterministic pagination",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-016"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask relational queries and deterministic pagination"],
+    "outcome": "Avoid accidental unordered pagination and inspect bounded relationship loading.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-018",
+    "title": "Flask forms and CSRF protection",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-017"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask forms and CSRF protection"],
+    "outcome": "Use actual Flask-WTF validation and CSRF behavior instead of treating a signed cookie as sufficient protection.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-019",
+    "title": "Flask login, logout and session behavior",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-018"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask login, logout and session behavior"],
+    "outcome": "Use Flask-Login with a real client cookie jar and distinguish authenticated and anonymous requests.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-020",
+    "title": "Flask authorization and object ownership",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-019"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask authorization and object ownership"],
+    "outcome": "Apply object-level ownership checks and prevent list endpoints from exposing another user's data.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-021",
+    "title": "Flask uploads, downloads and path boundaries",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-020"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask uploads, downloads and path boundaries"],
+    "outcome": "Validate uploaded content and safely select owned download files without trusting submitted filenames.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-022",
+    "title": "Flask conditional requests and cache policy",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-021"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask conditional requests and cache policy"],
+    "outcome": "Implement ETag comparisons and choose public, private and non-cacheable response policies deliberately.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-023",
+    "title": "Flask CLI and versioned schema changes",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-022"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask CLI and versioned schema changes"],
+    "outcome": "Exercise application CLI commands and a bounded migration lifecycle with actual database effects.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-024",
+    "title": "Flask outbound clients, timeouts and error translation",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-023", "python-svc-01"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask outbound clients, timeouts and error translation"],
+    "outcome": "Use a deterministic HTTP mock transport and translate upstream failures without claiming a live service test.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-025",
+    "title": "Flask async views and background-work limits",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-024"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask async views and background-work limits"],
+    "outcome": "Explain what async changes under WSGI and distinguish request-scoped work from durable jobs.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-026",
+    "title": "Flask application walkthrough",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-025"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "flask",
+    "concepts": ["flask", "HTTP", "Flask application walkthrough"],
+    "outcome": "Integrate routing, forms, persistence and authorization in a complete finite client investigation and an owned application project.",
+    "sources": [
+      ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
+      ["Flask testing", "https://flask.palletsprojects.com/en/stable/testing/"]
+    ]
+  },
+  {
+    "id": "pyweb-027",
+    "title": "FastAPI typed paths, queries and response contracts",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-012", "python-12"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI typed paths, queries and response contracts"],
+    "outcome": "Build typed routes with actual validation and response behavior, linking annotations to generated API metadata.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-028",
+    "title": "Pydantic models, strictness and serialization",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-027"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Pydantic models, strictness and serialization"],
+    "outcome": "Separate input models, output models and internal state while inspecting validation and serialization differences.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-029",
+    "title": "FastAPI dependency injection and overrides",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-028"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI dependency injection and overrides"],
+    "outcome": "Scope dependencies, compose authorization/data services and replace them deliberately in tests.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-030",
+    "title": "FastAPI lifespan and resource ownership",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-029"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI lifespan and resource ownership"],
+    "outcome": "Initialize and close shared resources through actual lifespan events, including failed-request cleanup.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-031",
+    "title": "Async Python, blocking work and cancellation",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-030", "python-lang-04"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Async Python, blocking work and cancellation"],
+    "outcome": "Measure cooperative concurrency with explicit synchronization rather than unqualified timing claims.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-032",
+    "title": "FastAPI asynchronous database sessions",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-031", "sql-found-01"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI asynchronous database sessions"],
+    "outcome": "Use real SQLAlchemy async sessions with bounded SQLite fixtures and correct event-loop ownership.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-033",
+    "title": "Transactions, optimistic concurrency and idempotency keys",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-032"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Transactions, optimistic concurrency and idempotency keys"],
+    "outcome": "Protect updates and repeated requests with explicit version and request-identity contracts.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-034",
+    "title": "FastAPI response filtering and sensitive fields",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-033"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI response filtering and sensitive fields"],
+    "outcome": "Verify that internal fields do not leak through serialization and explain when response validation fails.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-035",
+    "title": "FastAPI errors and problem-details documents",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-034"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI errors and problem-details documents"],
+    "outcome": "Implement predictable application errors and preserve safe distinction between validation and server failures.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-036",
+    "title": "Bearer tokens, JWT claims and authentication",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-035"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Bearer tokens, JWT claims and authentication"],
+    "outcome": "Validate signatures and intended issuer/audience/expiry with real token libraries and explicit failure cases.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-037",
+    "title": "Cookies, CSRF, CORS and browser origins",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-036"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Cookies, CSRF, CORS and browser origins"],
+    "outcome": "Distinguish authentication, cross-origin permissions and CSRF protections with actual middleware/client observations.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-038",
+    "title": "API scopes, roles and tenant boundaries",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-037"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "API scopes, roles and tenant boundaries"],
+    "outcome": "Enforce both action-level permission and object ownership rather than relying on token presence alone.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-039",
+    "title": "FastAPI file handling and streaming responses",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-038"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI file handling and streaming responses"],
+    "outcome": "Bound uploaded data and construct finite streamed responses while retaining content and cleanup contracts.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-040",
+    "title": "Background tasks, queues and durable work",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-039"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Background tasks, queues and durable work"],
+    "outcome": "Compare request-attached tasks with an explicit durable-job design and label eager-task evidence honestly.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-041",
+    "title": "WebSocket messages, validation and close behavior",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-040"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "WebSocket messages, validation and close behavior"],
+    "outcome": "Exercise a finite real ASGI WebSocket exchange and explain connection/authentication/resource boundaries.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-042",
+    "title": "Server-sent events and resumable event identities",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-041"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "Server-sent events and resumable event identities"],
+    "outcome": "Construct valid finite SSE records and distinguish their parsing from actual network flush and reconnection acceptance.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-043",
+    "title": "OpenAPI, compatibility and generated clients",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-042"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "OpenAPI, compatibility and generated clients"],
+    "outcome": "Inspect actual OpenAPI schemas and plan compatible changes, including offline documentation asset boundaries.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-044",
+    "title": "FastAPI application walkthrough",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-043"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "fastapi",
+    "concepts": ["fastapi", "HTTP", "FastAPI application walkthrough"],
+    "outcome": "Connect typed requests, persistence, authentication and job/status APIs in a complete client example and live workshop.",
+    "sources": [
+      ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
+      ["Starlette TestClient", "https://www.starlette.io/testclient/"]
+    ]
+  },
+  {
+    "id": "pyweb-045",
+    "title": "Django projects, settings, URLs and views",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-012"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django projects, settings, URLs and views"],
+    "outcome": "Trace a real Django client request and distinguish a compact fixture from the standard multi-file project layout.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-046",
+    "title": "Django middleware and request lifecycle",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-045"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django middleware and request lifecycle"],
+    "outcome": "Explain middleware ordering, short-circuit responses and security-header behavior through concrete requests.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-047",
+    "title": "Django templates, inheritance and static assets",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": ["pyweb-046"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django templates, inheritance and static assets"],
+    "outcome": "Render reusable templates with explicit context and explain why template output is not a browser asset test.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-048",
+    "title": "Django models, migrations and constraints",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-047", "python-12", "sql-found-01"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django models, migrations and constraints"],
+    "outcome": "Create and evolve a real small schema while separating application validation from database constraints.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-049",
+    "title": "Django QuerySets, aggregation and evaluation",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-048"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django QuerySets, aggregation and evaluation"],
+    "outcome": "Inspect lazy query evaluation, filtering and grouped calculations without unnecessary materialization.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-050",
+    "title": "Django relationships and query-count diagnosis",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-049"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django relationships and query-count diagnosis"],
+    "outcome": "Reproduce an N-plus-one query pattern and verify appropriate related-object loading with actual query counts.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-051",
+    "title": "Django forms, ModelForms and field ownership",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-050"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django forms, ModelForms and field ownership"],
+    "outcome": "Validate user input through actual forms and restrict which model fields a request may change.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-052",
+    "title": "Django class-based views and composition",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-051", "python-12"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django class-based views and composition"],
+    "outcome": "Trace dispatch and mixin responsibilities while preserving explicit authorization and predictable context.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-053",
+    "title": "Django authentication, passwords and sessions",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-052"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django authentication, passwords and sessions"],
+    "outcome": "Use the real authentication/session stack and inspect login, logout and invalid-credential behavior.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-054",
+    "title": "Django permissions, groups and object access",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-053"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django permissions, groups and object access"],
+    "outcome": "Separate model permissions from per-object ownership and verify queryset restrictions.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-055",
+    "title": "Django CSRF and session security",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-054"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django CSRF and session security"],
+    "outcome": "Run clients with CSRF enforcement and explain cookie/origin settings without confusing tests with TLS.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-056",
+    "title": "Django admin as a privileged application",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-055"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django admin as a privileged application"],
+    "outcome": "Configure and test a bounded admin surface while keeping staff access, permissions and public APIs distinct.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-057",
+    "title": "Django REST Framework serializers and viewsets",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-056"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django REST Framework serializers and viewsets"],
+    "outcome": "Build real serializers and routed APIs while comparing their contracts with the other frameworks.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-058",
+    "title": "DRF authentication, pagination and throttling",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-057"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "DRF authentication, pagination and throttling"],
+    "outcome": "Test authenticated APIs and bounded pagination while documenting the limits of process-local throttles.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-059",
+    "title": "Django async views, ORM calls and sync bridges",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-058", "python-lang-04"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django async views, ORM calls and sync bridges"],
+    "outcome": "Use AsyncClient and deliberate sync bridges while explaining transaction and connection boundaries.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-060",
+    "title": "Django caching, email and task interfaces",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": ["pyweb-059"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django caching, email and task interfaces"],
+    "outcome": "Inspect invalidation and in-memory email/task backends without labeling them production delivery.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-061",
+    "title": "Django deployment settings and management checks",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-060"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django deployment settings and management checks"],
+    "outcome": "Run relevant deployment/configuration checks and connect static files, secrets and database migrations to the owned project.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-062",
+    "title": "Django application walkthrough",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-061"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "django",
+    "concepts": ["django", "HTTP", "Django application walkthrough"],
+    "outcome": "Integrate domain models, views, permissions and REST endpoints with actual client cases and a separate live deployment.",
+    "sources": [
+      ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
+      ["Django 6.1 test tools", "https://docs.djangoproject.com/en/6.1/topics/testing/tools/"]
+    ]
+  },
+  {
+    "id": "pyweb-063",
+    "title": "Structured concurrency and service time budgets",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-009", "pyweb-012", "python-lang-04"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Structured concurrency and service time budgets"],
+    "outcome": "Bound related async operations, propagate failures and distinguish application deadlines from client timeouts.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-064",
+    "title": "Retries, idempotency and transactional outboxes",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-063"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Retries, idempotency and transactional outboxes"],
+    "outcome": "Implement a small atomic outbox/identity case and explain retry-safe effects under uncertain delivery.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-065",
+    "title": "Database performance, indexes and contention",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-064"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Database performance, indexes and contention"],
+    "outcome": "Inspect real bounded query plans and transaction conflicts, then map the limits of SQLite evidence to PostgreSQL.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-066",
+    "title": "Caching, rate limits and worker coordination",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-065"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Caching, rate limits and worker coordination"],
+    "outcome": "Compare cache/invalidation and per-process coordination with the explicit shared-state workshop contract.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-067",
+    "title": "Logs, metrics and tracing without sensitive payloads",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-066"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Logs, metrics and tracing without sensitive payloads"],
+    "outcome": "Record useful request diagnostics with bounded labels and an actual in-memory tracing exporter.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-068",
+    "title": "Network streaming, backpressure and disconnects",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-067"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Network streaming, backpressure and disconnects"],
+    "outcome": "Reproduce actual workshop HTTP/WS/SSE behavior and separate wire timing from in-process test-client buffering.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-069",
+    "title": "Web threat modeling, proxies and TLS boundaries",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-068"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Web threat modeling, proxies and TLS boundaries"],
+    "outcome": "Evaluate concrete input, origin, forwarding and secret-handling threats in the owned application design.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-070",
+    "title": "Container deployment, migrations and recovery",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-069", "docker-005", "docker-004"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Container deployment, migrations and recovery"],
+    "outcome": "Build, start, stop and resume the owned web application with persistent data and source-bound acceptance.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-071",
+    "title": "Integration, failure and load testing",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-070"],
+    "runtime": "python-web",
+    "language": "python",
+    "suffix": ".py",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "Integration, failure and load testing"],
+    "outcome": "Combine real framework tests with explicit service-level failure/load probes and interpret their scope.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  },
+  {
+    "id": "pyweb-072",
+    "title": "End-to-end Python web engineering review",
+    "level": "advanced",
+    "minutes": 120,
+    "prerequisites": ["pyweb-068", "pyweb-070", "pyweb-071"],
+    "runtime": "reading",
+    "language": "markdown",
+    "suffix": ".md",
+    "framework": "engineering",
+    "concepts": ["engineering", "HTTP", "End-to-end Python web engineering review"],
+    "outcome": "Choose and defend a framework architecture, reproduce a complete request/job flow and diagnose an intentional failure without losing state.",
+    "sources": [
+      ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
+      [
+        "Django deployment checklist",
+        "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"
+      ],
+      ["FastAPI deployment concepts", "https://fastapi.tiangolo.com/deployment/concepts/"]
+    ]
+  }
+]

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "mode": "tutorial",
+  "areas": [
+    {
+      "area": "HTTP and browser foundations",
+      "units": [
+        "pyweb-001",
+        "pyweb-002",
+        "pyweb-003",
+        "pyweb-004",
+        "pyweb-005",
+        "pyweb-006",
+        "pyweb-007",
+        "pyweb-008",
+        "pyweb-009",
+        "pyweb-010",
+        "pyweb-011",
+        "pyweb-012"
+      ],
+      "evidence": "Complete original worked cases and framework-specific acceptance are required before admission.",
+      "limits": "In-process clients validate application/protocol semantics, not TCP/browser behavior."
+    },
+    {
+      "area": "Flask applications",
+      "units": [
+        "pyweb-013",
+        "pyweb-014",
+        "pyweb-015",
+        "pyweb-016",
+        "pyweb-017",
+        "pyweb-018",
+        "pyweb-019",
+        "pyweb-020",
+        "pyweb-021",
+        "pyweb-022",
+        "pyweb-023",
+        "pyweb-024",
+        "pyweb-025",
+        "pyweb-026"
+      ],
+      "evidence": "Complete original worked cases and framework-specific acceptance are required before admission.",
+      "limits": "Real HTTP deployment, worker processes and persistent databases have separate project acceptance."
+    },
+    {
+      "area": "FastAPI and asynchronous APIs",
+      "units": [
+        "pyweb-027",
+        "pyweb-028",
+        "pyweb-029",
+        "pyweb-030",
+        "pyweb-031",
+        "pyweb-032",
+        "pyweb-033",
+        "pyweb-034",
+        "pyweb-035",
+        "pyweb-036",
+        "pyweb-037",
+        "pyweb-038",
+        "pyweb-039",
+        "pyweb-040",
+        "pyweb-041",
+        "pyweb-042",
+        "pyweb-043",
+        "pyweb-044"
+      ],
+      "evidence": "Complete original worked cases and framework-specific acceptance are required before admission.",
+      "limits": "Finite ASGI tests are distinct from network streaming, disconnect and durable-worker behavior."
+    },
+    {
+      "area": "Django and REST Framework",
+      "units": [
+        "pyweb-045",
+        "pyweb-046",
+        "pyweb-047",
+        "pyweb-048",
+        "pyweb-049",
+        "pyweb-050",
+        "pyweb-051",
+        "pyweb-052",
+        "pyweb-053",
+        "pyweb-054",
+        "pyweb-055",
+        "pyweb-056",
+        "pyweb-057",
+        "pyweb-058",
+        "pyweb-059",
+        "pyweb-060",
+        "pyweb-061",
+        "pyweb-062"
+      ],
+      "evidence": "Complete original worked cases and framework-specific acceptance are required before admission.",
+      "limits": "Temporary test databases and compact settings do not replace the owned multi-file deployment."
+    },
+    {
+      "area": "Cross-framework engineering",
+      "units": [
+        "pyweb-063",
+        "pyweb-064",
+        "pyweb-065",
+        "pyweb-066",
+        "pyweb-067",
+        "pyweb-068",
+        "pyweb-069",
+        "pyweb-070",
+        "pyweb-071",
+        "pyweb-072"
+      ],
+      "evidence": "Complete original worked cases and framework-specific acceptance are required before admission.",
+      "limits": "Local correctness and failure cases do not establish production scale, external identity-provider or TLS acceptance."
+    }
+  ]
+}

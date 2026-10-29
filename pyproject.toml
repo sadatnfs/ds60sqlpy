@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ds60sqlpy"
-version = "1.0.1"
+version = "1.1.0"
 description = "Offline-capable classroom for programming, data science and machine learning"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -122,13 +122,14 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers --dist=loadgroup"
-pythonpath = ["."]
+pythonpath = [".", "packages/spark-likelihood/src"]
 testpaths = [
   "tests",
   "bridge/tests",
   "bridge/professional/tests",
   "python/professional/tests",
   "sql/professional/tests",
+  "packages/spark-likelihood/tests",
 ]
 
 [tool.ruff]
@@ -148,7 +149,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH"]
 python_version = "3.11"
 strict = true
 explicit_package_bases = true
-mypy_path = ["src"]
+mypy_path = ["src", "packages/spark-likelihood/src"]
 files = [
   "docker/init_module_runtime.py",
   "src",

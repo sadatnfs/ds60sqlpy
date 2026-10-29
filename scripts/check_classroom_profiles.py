@@ -20,6 +20,7 @@ from urllib.request import ProxyHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = {
+    "python-web": ("python-web", "pyweb-001"),
     "data-platforms-python": ("apache-data-platforms", "apache-009"),
     "data-engineering": ("polars", "polars-001"),
     "dbt-duckdb": ("dbt", "dbt-002@sql-model"),
@@ -48,6 +49,7 @@ CASES = {
 # These are outputs from the exact catalog references above, after their own
 # assertions. Generic run receipts do not claim independent typed worker checks.
 EXPECTED_OUTPUT = {
+    "python-web": ("pyweb-001: all reference checks passed",),
     "data-platforms-python": (
         "Narrowing rejected: 200 cannot fit in signed int8",
         "Retained slice: [None, 30] offset: 1",

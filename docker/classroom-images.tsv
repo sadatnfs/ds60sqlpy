@@ -28,3 +28,4 @@ data-platforms-python data-platforms-worker ds60sqlpy-worker-data-platforms-pyth
 stan-cpu stan-worker ds60sqlpy-worker-stan-cpu worker-stan-cpu DS60_WORKER_STAN_CPU_IMAGE ordinary
 julia julia-worker ds60sqlpy-worker-julia worker-julia DS60_WORKER_JULIA_IMAGE ordinary
 dbt-duckdb dbt-worker ds60sqlpy-worker-dbt-duckdb worker-dbt-duckdb DS60_WORKER_DBT_DUCKDB_IMAGE ordinary
+python-web python-web-worker ds60sqlpy-worker-python-web worker-python-web DS60_WORKER_PYTHON_WEB_IMAGE ordinary

@@ -1527,6 +1527,7 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--architecture", required=True, choices=ARCHITECTURES)
         else:
             command.add_argument("--receipts-dir", required=True, type=Path)
+            command.add_argument("--project-receipts-dir", type=Path)
             command.add_argument("--output", required=True, type=Path)
     try:
         args = parser.parse_args(argv)
@@ -1605,9 +1606,18 @@ def main(argv: list[str] | None = None) -> int:
                     registry,
                     target_group=target_group,
                 )
-                if mode == "build"
+                if mode == "build" or target_group is None
                 else None
             )
+            if target_group is None:
+                # Full recovery must retain the same scientific evidence as a new
+                # full promotion. Published tags alone never bypass this gate.
+                from scripts.scientific_receipts import validate_scientific_receipts
+
+                assert natives is not None
+                validate_scientific_receipts(
+                    args.project_receipts_dir, context, profiles, natives, ROOT, registry=registry
+                )
             promote_release(
                 context,
                 profiles,

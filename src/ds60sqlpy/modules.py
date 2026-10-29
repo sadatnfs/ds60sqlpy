@@ -19,6 +19,7 @@ from ds60sqlpy.module_plans import load_core_plans
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 LANGUAGES = {
+    "python-web": frozenset({"python"}),
     "dbt-duckdb": frozenset({"sql"}),
     "data-engineering": frozenset({"python"}),
     "data-platforms-python": frozenset({"python"}),

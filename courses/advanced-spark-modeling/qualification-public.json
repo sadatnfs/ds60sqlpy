@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-29",
+  "scope": "public Spark examples and exact-version Catalyst project",
+  "platform": "linux/arm64",
+  "spark": "4.0.1",
+  "scala_binary": "2.13",
+  "java": "17.0.21",
+  "runtime_image_id": "sha256:7eaaf5b6ff64e67e033cae8b3b3a516c86f973c1358ea37f8580fc7b0cfb5385",
+  "source_mount": "read-only",
+  "network": "none",
+  "cpu_limit": 2,
+  "memory_limit_bytes": 3221225472,
+  "ordinary_programs": [
+    {
+      "source": "authoring/programs/asm-001.py",
+      "sha256": "44c076d51f277c28c4775a1c75ed302508f840e92c78d6e2b84abdfcc2e97848",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-002.py",
+      "sha256": "adff4fb66e4480abb569626b618eb99bb0d78c18eb873f4de42f0d88b1d8b413",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-003.py",
+      "sha256": "ce2778b677e581bae7e05455f50391323b218746144acbb7770a9a43d55e005f",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-004.py",
+      "sha256": "e06f6cbea01658cc5e8a7414060841666e355f0303961eedeabfc9d79f091246",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-005.py",
+      "sha256": "51340efe8d621302d1d9d604f9d8789db548ff6c9ba89cc1386600762a1a8bf8",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-006.py",
+      "sha256": "8439e8cf5187cce22c1ddab745734b26fe5db50dcc98a532a2814fefa0f4533c",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-007.py",
+      "sha256": "3915439b7871c407a4576dcb8a103616d90d51d527a403f5f095cf9ed684bd69",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-008.py",
+      "sha256": "7edbf0708675520c3fcaf1faec913c5758a76154c497d56ca64c566005ddfeeb",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-009.py",
+      "sha256": "4cc76834da318d5446d39bfe53cc88a486bf8cc2a0809b90cb9fa98f7c8faded",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-010.py",
+      "sha256": "fa17f98369a548b94c81f0aaa58b4bfd4186b6d1c1bc6a73e0883e29eb3afae8",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-011.py",
+      "sha256": "40f075f75ac8b541e90a56f31605dd810d304e6e9da7ca4ba672789a0d379ddc",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-012.py",
+      "sha256": "35f373649d6a1906279222ee9db2dacc122fb8cd9570b9fe5ce3466841332715",
+      "executed": true,
+      "compiled": false
+    },
+    {
+      "source": "authoring/programs/asm-013.scala",
+      "sha256": "77fd7c7689add190a97ef4b186a31a71b5010e5bfdf2b82beeedf5b16852e533",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-014.scala",
+      "sha256": "9948657e9bcead746b37175792ed1968f6540a08553258b5927abd4bb855d8c2",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-015.scala",
+      "sha256": "92723e111810f96305a2d13145403c3e24ff7c506ed94e5b6e0438ff64c06985",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-016.scala",
+      "sha256": "638c436e01d8791e75f6153319ee357abbea0bc3e10cf36924b39e03489855b3",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-017.scala",
+      "sha256": "1b082e0ff47ed521a2165ae64093b0d850b7d506d6e7d7f71e9a0c6baa83070d",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-019.scala",
+      "sha256": "c78b8b5b380726bc0f5c51d27c3fff09ddc71316b563c3f0fa6264a808d15499",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-020.scala",
+      "sha256": "a3ccc2b02917191f5f66d432843eb52a578c1a76296301bdc71afa5c30d4b170",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-024.scala",
+      "sha256": "fc3833835e0d6a69fcf6147f7d98abd333cde6fa3d3573574ecc8281afaceeb8",
+      "executed": true,
+      "compiled": true
+    },
+    {
+      "source": "authoring/programs/asm-025.scala",
+      "sha256": "a32bb8c6d71876530ed30d9994ba7a921df50fe46086e2270585c16291211ae6",
+      "executed": true,
+      "compiled": true
+    }
+  ],
+  "catalyst": {
+    "scope": "single-host CPU Spark/Catalyst compilation and execution",
+    "spark": "4.0.1",
+    "sources": {
+      "src/main/scala/ds60/spark/Probe.scala": "3127552b6d9c3bb31d808776369ec89b6b43b0fe695a37b97d0a6e5b8dd8de51",
+      "src/main/scala/ds60/spark/TeachingExtensions.scala": "c5924609c1b7fe2883c0fee0087668267d1a805de44524a56277cedbbb1059d7"
+    }
+  },
+  "host_tests": {
+    "passed": 29,
+    "test_file": "tests/test_advanced_spark_modeling.py"
+  },
+  "rendering": {
+    "guides": 38,
+    "math_expressions": 205,
+    "code_blocks": 31,
+    "actual_repository_renderer": true,
+    "browser_observed": false
+  },
+  "limits": [
+    "Single-host local[2] CPU execution only.",
+    "No AMD64, GPU or remote cluster execution in this receipt.",
+    "Combined Spark/Torch and Spark/TMB projects have separate source and runtime receipts.",
+    "Fresh learner-container browser/persistence acceptance belongs to shared integration."
+  ]
+}

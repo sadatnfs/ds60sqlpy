@@ -22,32 +22,33 @@ The worker stages that source under the filename below. Source may create
 bounded temporary files during execution, but those files are not a project
 upload channel or durable storage.
 
-| Profile | Staged source | Actual operation |
-| --- | --- | --- |
-| `python-core` | `main.py` | Fresh Python process with the prepared Core dependencies |
-| `jax-cpu` | `main.py` | Pinned CPU JAX/JAXLIB, including real JIT and autodiff startup checks |
-| `bayesian-cpu` | `main.py` | Pinned PyMC/ArviZ with the tutorial's InferenceData contract and CPU sampling |
-| `data-engineering` | `main.py` | Fresh Python with prepared Polars, Arrow, DuckDB, dbt Core/adapter and ML engineering tools |
-| `data-platforms-python` | `main.py` | PyArrow, DataFusion SQL and PyIceberg with an embedded local SQLite catalog; temporary files are discarded after each run |
-| `dbt-duckdb` | `model.sql` | Real SQL/Jinja compilation and dbt seed/build in a fixed local DuckDB project; bounded result table and metadata |
-| `stan-cpu` | `main.stan` | CmdStan 2.40.0 translation/compilation and two seeded chains, each with 100 warmup and 100 retained draws |
-| `julia` | `main.jl` | Julia 1.13.3 fresh process, two threads, read-only prepared project/depot and scientific packages |
-| `r-statistics` | `main.R` | Rscript with base/recommended statistics, ggplot2, Plotly and S3/S4/R6/S7 support |
-| `cpp20` | `main.cpp` | C++20 compile and link, then execute; pthread support and compiler warnings enabled |
-| `c17` | `main.c` | C17 compile and link, then execute; pthread and math libraries available |
-| `go` | `main.go` | Fixed `go tool compile` and link using the image's prepared standard-library import configuration |
-| `csharp-dotnet` | `Program.cs` | Compile inside an immutable trusted .NET project with offline package sources, then run its DLL |
-| `rust-stable` | `main.rs` | Rust 2024 compilation with the prepared Arrow library, then execute |
-| `swift-linux` | `main.swift` | Swift 6 Linux compilation with `-parse-as-library`; use the guide's explicit entry point |
-| `java21` | `Main.java` | `javac --release 21`, public `Main`, then `java -ea`; prepared H2 JDBC library available |
-| `javascript-node` | `main.mjs` | Node ES module with strict unhandled-rejection behavior |
-| `typescript-node` | `main.mts` | Strict NodeNext type checking and compilation, then execute emitted `compiled/main.mjs` |
-| `tensorflow-cpu` | `main.py` | Fresh Python process with its separately locked TensorFlow dependencies and GPU visibility disabled |
-| `llm-torch-cpu` | `main.py` | Fresh Python process with its separately locked PyTorch CPU dependencies |
-| `scala-jvm` | `Main.scala` | Compile with the prepared Scala toolchain, then run `Main` |
-| `spark-local-scala` | `Main.scala` | Compile and submit to bounded local Spark with `local[2]` |
-| `spark-local-python` | `main.py` | Submit to the prepared local PySpark environment with `local[2]` |
-| `php-cli` | `main.php` | PHP syntax check followed by CLI execution, with assertions and PDO SQLite enabled |
+| Profile                 | Staged source | Actual operation                                                                                                                        |
+| ----------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `python-core`           | `main.py`     | Fresh Python process with the prepared Core dependencies                                                                                |
+| `python-web`            | `main.py`     | Prepared Flask, FastAPI, Django and web dependencies in an isolated environment; finite in-process clients, not persistent HTTP servers |
+| `jax-cpu`               | `main.py`     | Pinned CPU JAX/JAXLIB, including real JIT and autodiff startup checks                                                                   |
+| `bayesian-cpu`          | `main.py`     | Pinned PyMC/ArviZ with the tutorial's InferenceData contract and CPU sampling                                                           |
+| `data-engineering`      | `main.py`     | Fresh Python with prepared Polars, Arrow, DuckDB, dbt Core/adapter and ML engineering tools                                             |
+| `data-platforms-python` | `main.py`     | PyArrow, DataFusion SQL and PyIceberg with an embedded local SQLite catalog; temporary files are discarded after each run               |
+| `dbt-duckdb`            | `model.sql`   | Real SQL/Jinja compilation and dbt seed/build in a fixed local DuckDB project; bounded result table and metadata                        |
+| `stan-cpu`              | `main.stan`   | CmdStan 2.40.0 translation/compilation and two seeded chains, each with 100 warmup and 100 retained draws                               |
+| `julia`                 | `main.jl`     | Julia 1.13.3 fresh process, two threads, read-only prepared project/depot and scientific packages                                       |
+| `r-statistics`          | `main.R`      | Rscript with base/recommended statistics, ggplot2, Plotly and S3/S4/R6/S7 support                                                       |
+| `cpp20`                 | `main.cpp`    | C++20 compile and link, then execute; pthread support and compiler warnings enabled                                                     |
+| `c17`                   | `main.c`      | C17 compile and link, then execute; pthread and math libraries available                                                                |
+| `go`                    | `main.go`     | Fixed `go tool compile` and link using the image's prepared standard-library import configuration                                       |
+| `csharp-dotnet`         | `Program.cs`  | Compile inside an immutable trusted .NET project with offline package sources, then run its DLL                                         |
+| `rust-stable`           | `main.rs`     | Rust 2024 compilation with the prepared Arrow library, then execute                                                                     |
+| `swift-linux`           | `main.swift`  | Swift 6 Linux compilation with `-parse-as-library`; use the guide's explicit entry point                                                |
+| `java21`                | `Main.java`   | `javac --release 21`, public `Main`, then `java -ea`; prepared H2 JDBC library available                                                |
+| `javascript-node`       | `main.mjs`    | Node ES module with strict unhandled-rejection behavior                                                                                 |
+| `typescript-node`       | `main.mts`    | Strict NodeNext type checking and compilation, then execute emitted `compiled/main.mjs`                                                 |
+| `tensorflow-cpu`        | `main.py`     | Fresh Python process with its separately locked TensorFlow dependencies and GPU visibility disabled                                     |
+| `llm-torch-cpu`         | `main.py`     | Fresh Python process with its separately locked PyTorch CPU dependencies                                                                |
+| `scala-jvm`             | `Main.scala`  | Compile with the prepared Scala toolchain, then run `Main`                                                                              |
+| `spark-local-scala`     | `Main.scala`  | Compile and submit to bounded local Spark with `local[2]`                                                                               |
+| `spark-local-python`    | `main.py`     | Submit to the prepared local PySpark environment with `local[2]`                                                                        |
+| `php-cli`               | `main.php`    | PHP syntax check followed by CLI execution, with assertions and PDO SQLite enabled                                                      |
 
 The authoritative commands are in
 [`worker_operations.py`](../src/ds60sqlpy/worker_operations.py); image inputs and
@@ -173,13 +174,13 @@ compiler/runtime differences, device selection and actual qualification limits.
 
 These observations answer different questions:
 
-| Observation | What it establishes |
-| --- | --- |
-| An image exists | Build inputs were assembled; a runtime might still fail to start |
-| A worker is ready | Its fixed startup probe passed for this worker instance |
+| Observation                    | What it establishes                                                   |
+| ------------------------------ | --------------------------------------------------------------------- |
+| An image exists                | Build inputs were assembled; a runtime might still fail to start      |
+| A worker is ready              | Its fixed startup probe passed for this worker instance               |
 | A submitted program exits zero | That submitted source completed under the selected runtime and limits |
-| Registered checks pass | A named verifier observed its stated fixture invariants |
-| A saved result is readable | The earlier receipt survived; the current source has not been rerun |
+| Registered checks pass         | A named verifier observed its stated fixture invariants               |
+| A saved result is readable     | The earlier receipt survived; the current source has not been rerun   |
 
 Ordinary startup probes have a 45-second total deadline and compile or execute
 small real examples. Health returns the cached result and instance identity;
@@ -409,3 +410,13 @@ acceptance. Keep source tests, image builds, startup probes, actual lesson runs,
 browser observations, hardware tests and hosted CI as separate records. A Linux
 arm64 success does not establish Linux amd64, WSL host integration, emulation or
 NVIDIA execution. A saved historical receipt does not qualify changed source.
+
+## Python web services
+
+The [Python web route](learning/python-web.md) extends the original Python
+foundations. Its 69 finite examples use the separately prepared python-web
+profile; long-running servers belong to the
+[owned web lab](../courses/python-web/projects/web-lab/README.md). That lab
+has actual PostgreSQL, Flask/Gunicorn, FastAPI/Uvicorn, Django/Gunicorn and durable
+worker processes, with distinct ports and retained database state. A pad run
+cannot create a persistent multi-file web deployment.

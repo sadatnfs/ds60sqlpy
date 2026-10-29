@@ -26,8 +26,8 @@ requested_port=''
 requested_db_port=''
 gpu_device=''
 profiles=()
-all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics data-engineering data-platforms-python stan-cpu julia dbt-duckdb)
-all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker jax-worker bayesian-worker r-worker data-engineering-worker data-platforms-worker stan-worker julia-worker dbt-worker)
+all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics data-engineering data-platforms-python stan-cpu julia dbt-duckdb python-web)
+all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker jax-worker bayesian-worker r-worker data-engineering-worker data-platforms-worker stan-worker julia-worker dbt-worker python-web-worker)
 known_profiles=("${all_profiles[@]}" cuda-cpp cuda-python pytorch-cuda tensorflow-cuda)
 known_services=("${all_services[@]}" cuda-cpp-worker cuda-python-worker pytorch-cuda-worker tensorflow-cuda-worker)
 usage() {
@@ -63,7 +63,7 @@ Examples:
   ./classroom
   ./classroom --starter
   ./classroom --profile cpp20 --profile java21
-  ./classroom --starter --from-hub USER --image-tag python-core=1.0.1
+  ./classroom --starter --from-hub USER --image-tag python-core=1.1.0
   ./classroom resume
   ./classroom --rebuild
   ./classroom stop

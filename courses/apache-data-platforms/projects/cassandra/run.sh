@@ -106,7 +106,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 if [[ $action == prepare ]]; then
   image=ds60-apache-cassandra-binary:5.0.9
-  base=${DS60_CASSANDRA_BASE:-ds60sqlpy-worker-scala-jvm:1.0.1}
+  base=${DS60_CASSANDRA_BASE:-ds60sqlpy-worker-scala-jvm:1.1.0}
   [[ $base =~ ^ds60sqlpy-worker-scala-jvm:[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
     echo 'Use a prepared local versioned Scala/JVM image with Java 17.' >&2
     exit 2

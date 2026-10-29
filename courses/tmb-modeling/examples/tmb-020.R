@@ -1,0 +1,6 @@
+y <- c(1, 2, 4, 7, 9); chunks <- list(y[1:2], y[3:5])
+loss <- function(z) -sum(dnorm(z, 3, 2, log = TRUE))
+print(c(serial = loss(y), partition_sum = sum(vapply(chunks, loss, numeric(1)))))
+stopifnot(abs(loss(y) - sum(vapply(chunks, loss, numeric(1)))) < 1e-12)
+print(c(correct_mean = loss(y) / length(y), wrong_equal_chunk_mean = mean(vapply(chunks, function(z) loss(z) / length(z), numeric(1)))))
+print(data.frame(tasks = c(1, 4, 4), threads_per_task = c(2, 1, 8), requested_threads = c(2, 4, 32)))

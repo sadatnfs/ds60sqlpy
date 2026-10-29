@@ -185,7 +185,7 @@ def test_login_is_short_lived_and_never_places_a_token_in_command_arguments() ->
                 assert 'DOCKER_CONFIG="$RUNNER_TEMP/' in command
                 assert "docker logout" in command and "trap " in command
                 assert step["env"]["DOCKERHUB_TOKEN"] == "${{ secrets.DOCKERHUB_TOKEN }}"
-    assert count == 4
+    assert count == 7
     for filename in ("ci.yml", "app-build.yml", "kubernetes.yml"):
         assert "secrets.DOCKERHUB" not in (WORKFLOW.parent / filename).read_text()
 
@@ -201,14 +201,23 @@ def test_only_small_same_run_receipts_cross_jobs() -> None:
     for job in workflow()["jobs"].values():
         for step in job["steps"]:
             if step.get("uses", "").startswith("actions/upload-artifact@"):
-                assert all(path.endswith(".json") for path in step["with"]["path"].split())
+                if step["with"]["name"].startswith("scientific-diagnostics-"):
+                    assert step["with"]["name"] == (
+                        "scientific-diagnostics-${{ matrix.architecture }}-"
+                        "attempt-${{ github.run_attempt }}"
+                    )
+                    assert step["with"]["path"] == "work/scientific/"
+                    assert step["if"] == "always()"
+                else:
+                    assert all(path.endswith(".json") for path in step["with"]["path"].split())
                 assert int(step["with"]["retention-days"]) <= 30
 
 
 def test_final_promotion_requires_all_jobs_or_verified_existing_release_mode() -> None:
     job = workflow()["jobs"]["promote"]
-    assert job["needs"] == ["gate", "seed", "workers"]
+    assert job["needs"] == ["gate", "seed", "workers", "scientific-projects"]
     condition = job["if"]
+    assert "needs.scientific-projects.result == 'success'" in condition
     assert "needs.gate.result == 'success'" in condition
     assert "needs.gate.outputs.mode == 'promote-existing'" in condition
     assert (

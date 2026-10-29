@@ -160,6 +160,9 @@ def test_repository_policy_keeps_independently_maintained_source_eligible(path: 
         ("notebook.ipynb", "python"),
         ("classroom", "shell"),
         ("scripts/format-repo", "shell"),
+        ("courses/advanced-spark-modeling/projects/spark-torch/workshop", "shell"),
+        ("courses/advanced-spark-modeling/projects/spark-tmb/workshop", "shell"),
+        ("courses/python-web/projects/web-lab/workshop", "shell"),
         ("records.csv", None),
     ],
 )

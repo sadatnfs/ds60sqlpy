@@ -35,6 +35,13 @@ navigation. The tutorial-book exception still has no exam or solution gate.
 
 ## Mathematical notation and code presentation
 
+Use the maintained repository formatter for source files. Do not run a generic
+Markdown formatter over TeX prose unless it explicitly preserves the chosen math
+delimiters: Markdown emphasis rewriting can change subscripts, superscripts and
+stars while leaving an expression that still compiles. Review the equations after
+any prose transformation, including summation limits, indices and conditioning.
+Successful TeX compilation proves rendering syntax, not mathematical correctness.
+
 Author mathematical statements with explicit LaTeX delimiters: `\( ... \)`
 for inline notation and `\[ ... \]` on separate lines for a displayed
 formula. These delimiters avoid ambiguity with monetary dollar signs. The

@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "track_id": "custom-likelihood-pytorch",
+  "lessons": [
+    {
+      "id": "clp-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-001.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-001.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-002.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-002.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-003.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-003.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-004.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-004.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-005.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-005.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-006.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-006.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-007.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-007.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-008.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-008.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-009.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-009.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-010.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-010.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-011.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-011.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-012.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-012.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-013.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-013.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-014.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-014.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-015.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-015.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-016.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-016.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-017.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-017.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-018.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-018.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-019.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-019.py",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "clp-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/custom-likelihood-pytorch/guides/clp-020.md",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-020.py",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

@@ -209,22 +209,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr></thead><tbody>
 <tr>
 <td>Full CI release after promotion</td>
-<td><code>1.0.1</code>, with <code>latest</code> then pointing to that completed release</td>
-<td><code>1.0.1-worker-python-core</code></td>
+<td><code>1.1.0</code>, with <code>latest</code> then pointing to that completed release</td>
+<td><code>1.1.0-worker-python-core</code></td>
 </tr>
 <tr>
 <td>Manual architecture set</td>
-<td><code>1.0.1-lab-arm64</code> or <code>1.0.1-lab-amd64</code></td>
-<td><code>1.0.1-worker-python-core-arm64</code> or <code>1.0.1-worker-python-core-amd64</code></td>
+<td><code>1.1.0-lab-arm64</code> or <code>1.1.0-lab-amd64</code></td>
+<td><code>1.1.0-worker-python-core-arm64</code> or <code>1.1.0-worker-python-core-amd64</code></td>
 </tr>
 </tbody></table></div>
 <p>Each combined release tag points to an image index containing Linux <code>amd64</code> and <code>arm64</code> variants. Docker selects the variant matching the engine. This is the default <code>--from-hub</code> layout. Manual architecture tags require the consumer&#x27;s explicit <code>--architecture-tags</code> option. Publishing ARM64 images from a Mac does not create AMD64 images for a typical Windows/WSL machine, and the local publisher does not create a combined manifest. <a href="https://docs.docker.com/build/building/multi-platform/">Docker multi-platform images</a></p>
 <h3 id="1-build-and-try-the-release-on-your-machine">1. Build and try the release on your machine<a class="heading-anchor" href="#1-build-and-try-the-release-on-your-machine" aria-label="Link to this section">#</a></h3>
 <p>The CI route builds its own images on native runners. The commands in this section prepare a local installation or the manual publisher&#x27;s input images. Use Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows.</p>
 <p>Build the complete ordinary set with visible logs and start the classroom:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">1</span>.0.1 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">1</span>.1.0 --rebuild</code></pre>
 <p>To build without starting services:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">1</span>.0.1</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">1</span>.1.0</code></pre>
 <p>Already built and tested the matching image set? No rebuild is required merely to publish it manually. Check actual lessons, compiler diagnostics, figures, saved drafts and prior results, then verify stop/resume:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom stop
 ./classroom resume</code></pre>
@@ -236,21 +236,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Docker Hub normally uses a device-code/browser sign-in flow. An interactive username-and-token login is available through <code>docker login --username YOUR_LOGIN_USERNAME</code>. Keep credentials in Docker&#x27;s configured credential store and out of source files, commands, screenshots and lessons. Organization destinations need write access from the authenticated account. The local publisher never logs in or reads a password. <a href="https://docs.docker.com/reference/cli/docker/login/">Docker login</a>, <a href="https://docs.docker.com/security/access-tokens/">access tokens</a>.</p>
 <h3 id="3-review-the-complete-image-mapping-then-publish-manually">3. Review the complete image mapping, then publish manually<a class="heading-anchor" href="#3-review-the-complete-image-mapping-then-publish-manually" aria-label="Link to this section">#</a></h3>
 <p>Preview the complete local image set without tagging or uploading:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0</code></pre>
 <p>Omitting a selection, or adding <code>--all</code>, includes the app and every ordinary worker in <code>docker/classroom-images.tsv</code>. All selected images must exist and agree on one Linux architecture before any tag or push operation. The tag defaults to the checked-in source version; an explicit version must match it. Each invocation inspects the current local images and pins their immutable IDs. It neither builds missing images nor proves that existing images passed tests.</p>
 <p>After reviewing the mapping and your local qualification, upload deliberately:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1 --push</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0 --push</code></pre>
 <p>Keep the tested image set unchanged between review and upload. A missing image stops preflight before any selected image is tagged or pushed. Prepare the complete set first, or explicitly select a smaller distribution.</p>
 <p>For a starter-only set, preview both necessary images:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1 --profile app --profile python-core</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0 --profile app --profile python-core</code></pre>
 <p>Append <code>--push</code> only when ready to upload that same selection. Repeated <code>--profile</code> options select exact images, with no implicit app or Core. <code>--all</code> and <code>--profile</code> cannot be combined. A partial set cannot serve a full <code>--all</code> installation. The older <code>./scripts/publish-images</code> entrypoint and <code>--namespace</code>/<code>--version</code> aliases remain supported; supply one spelling per namespace/version option.</p>
 <p>This route creates architecture tags only. A learner on that architecture uses:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1 --architecture-tags</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0 --architecture-tags</code></pre>
 <p>Use <code>--starter</code> instead of <code>--all</code> for the explicitly published starter set. There is no manual <code>latest</code> shortcut. Treat released architecture tags as immutable and use a new checked-in version when image content changes.</p>
 <h3 id="4-start-from-published-images">4. Start from published images<a class="heading-anchor" href="#4-start-from-published-images" aria-label="Link to this section">#</a></h3>
 <p>Download the checkout or starter ZIP matching the release for its launcher and Compose files. After a full <code>[publish-docker]</code> publication, pull and start the combined release:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1</code></pre>
-<p>For a new project, omitting <code>--tag</code> resolves the app&#x27;s <code>latest</code> alias and saves its concrete version. The accepted partial 1.0.0 release contains App, Core, JavaScript and TypeScript. Select only those workers and pin that release, including after <code>latest</code> moves to the completed full 1.0.1 release:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0</code></pre>
+<p>For a new project, omitting <code>--tag</code> resolves the app&#x27;s <code>latest</code> alias and saves its concrete version. The accepted partial 1.0.0 release contains App, Core, JavaScript and TypeScript. Select only those workers and pin that release, including after <code>latest</code> moves to the completed full 1.1.0 release:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom --profile javascript-node --profile typescript-node <span class="syntax-string">\</span>
   --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
 <p>The launcher includes Python Core with any profile selection. <code>--all</code> requires every ordinary worker at the app version, which a partial release may not provide. A missing selected worker stops before containers start and keeps saved volumes.</p>
@@ -270,16 +270,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An individual <code>VERSION</code> may be <code>latest</code>. The launcher uses Docker Buildx to read that worker alias&#x27;s published OCI index, checks its profile, source revision and Linux AMD64/ARM64 platforms, and saves its actual version. If Buildx or valid index metadata is unavailable, choose a concrete version. Any different worker patch version must stay in the app&#x27;s major.minor line and have the same published source revision. Current CI binds one checked-in version to each source revision, so its releases do not qualify mixing worker images from different versions. A different revision stops before startup. Manual architecture tags do not support latest aliases or mixed-version selections. The project&#x27;s saved image settings remain compatible with older three-field and four-field selections. Use <code>--image-tag javascript-node=default --rebuild</code> to remove a saved worker pin and make it inherit the app&#x27;s version again. An explicit <code>--tag VERSION</code> sets a new default and resets previous worker pins unless you repeat them.</p>
 <h4 id="pull-only-setup-and-strict-resume">Pull-only setup and strict resume<a class="heading-anchor" href="#pull-only-setup-and-strict-resume" aria-label="Link to this section">#</a></h4>
 <p>For a new project using a completed full release, separate downloading from startup:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1
+<pre class="highlighted-code"><code class="language-bash">./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0
 ./classroom resume</code></pre>
 <p>The project records the namespace, layout, profiles and concrete release. <code>resume</code> and <code>--no-build</code> never pull, build or resolve latest. Ordinary startup can prepare missing images from the saved source. Pull-only preparation leaves existing containers unchanged.</p>
 <p>Existing saved Hub settings from older versions retain their architecture-tag layout. A new explicit <code>--from-hub</code> selection defaults to the combined layout; add <code>--architecture-tags</code> when selecting a manual/older architecture release.</p>
 <h4 id="apply-an-update-while-retaining-progress">Apply an update while retaining progress<a class="heading-anchor" href="#apply-an-update-while-retaining-progress" aria-label="Link to this section">#</a></h4>
 <p>For an existing local project, an architecture-layout project moving to CI tags, or an intentional Hub version update, keep the project name and apply the intended full release explicitly:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0 --rebuild</code></pre>
 <p>Use the matching new source version when upgrading. To deliberately follow <code>latest</code> again, update the checkout/ZIP and use <code>--tag latest --rebuild</code>. In Hub mode, <code>--rebuild</code> pulls and applies images; it never compiles locally. A new download alone does not replace running containers.</p>
 <p>To return to local development:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">1</span>.0.1 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">1</span>.1.0 --rebuild</code></pre>
 <p>Keep the same custom <code>--project NAME</code> on every command. Images contain runtime tools and course sources, not saved drafts, notes, receipts or database state. Named volumes retain that state. Moving machines requires the separate <a href="one-command-classroom.md.html#backup-and-transfer">backup and transfer procedure</a>.</p>
 <h3 id="5-github-actions-publication">5. GitHub Actions publication<a class="heading-anchor" href="#5-github-actions-publication" aria-label="Link to this section">#</a></h3>
 <p>The separate <a href="targeted-images.md.html">targeted image workflow</a> accepts a HEAD marker such as <code>[build-test-js]</code> to qualify the JavaScript and TypeScript group on both native platforms without publishing. <code>[publish-js]</code> on <code>main</code> publishes App, Core and that group after the required checks. Profile names are aliases for their complete qualification group. Its partial versioned release needs selected profiles in the install command above.</p>
@@ -300,9 +300,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>No additional repository variables, enable flag or protected-environment configuration is required. Never commit the secret values or print them in workflow logs. The workflow handles authentication on its runners.</p>
 <p>After local checks, stage the reviewed release changes on <code>main</code> and create the opt-in commit, for example:</p>
-<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release 1.0.1 [publish-docker]&quot;</span>
+<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release 1.1.0 [publish-docker]&quot;</span>
 git push origin main</code></pre>
-<p>The source version is <code>1.0.1</code> for this release. The workflow reads the checked-in version rather than inventing a registry-only version. Do not combine a publication commit with a CI-skip marker.</p>
+<p>The source version is <code>1.1.0</code> for this release. The workflow reads the checked-in version rather than inventing a registry-only version. Do not combine a publication commit with a CI-skip marker.</p>
 <h4 id="native-builds-staging-and-promotion">Native builds, staging and promotion<a class="heading-anchor" href="#native-builds-staging-and-promotion" aria-label="Link to this section">#</a></h4>
 <p>The gate waits for the exact revision&#x27;s source validation and Docker starter checks, and promotion rechecks that qualification before canonical tag writes. The ordinary Docker runtime matrix is skipped for this marked main push because the publication workflow performs the native runtime qualification itself.</p>
 <ol>

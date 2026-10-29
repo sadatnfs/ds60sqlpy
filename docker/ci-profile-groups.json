@@ -6,6 +6,10 @@
       "profiles": ["python-core"]
     },
     {
+      "id": "python-web",
+      "profiles": ["python-web"]
+    },
+    {
       "id": "cpp",
       "profiles": ["cpp20"]
     },

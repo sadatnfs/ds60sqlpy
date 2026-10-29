@@ -26,7 +26,7 @@ statistics book, Applied Science and Bayesian Computing. Do not apply a practice
 answer gate to those tracks.
 
 The library includes programming, SQL, systems, statistics, ML/NLP/LLMs,
-GPU/CUDA and HTML/CSS/PHP web development. Derive the inventory rather than
+GPU/CUDA, HTML/CSS/PHP and Python web development. Derive the inventory rather than
 assuming every subject is Python or every pad shares one runtime. Start a new
 SQL learner at `sql-start-01` through `sql-start-03` before `sql-01`; otherwise
 follow actual prerequisites rather than filename order.
@@ -172,6 +172,20 @@ different things. Opening a lesson must not install packages or fetch models.
   tokens, transport events and network chunks separately. Viewing a completed
   request is readback, not another generation. Follow each project's explicit
   start/resume/replace commands and preserve its private `.workshop/` directory.
+- Python web pads use the separately prepared `python-web` profile for finite
+  Flask/FastAPI/Django programs and offline test clients. A real browser-facing
+  application uses the owned web-lab with its own database, sessions, jobs and
+  lifecycle. Do not tell a learner that a pad starts a persistent server.
+- Advanced Spark custom likelihoods use the independently installable
+  `ds60_spark_likelihood` package in the prepared Spark/Torch workshop. R is not
+  required for that path. Explain independent rows, complete independent groups,
+  one shared fit, separate group fits and DDP as different statistical/execution
+  choices. Preserve complete groups, explicit weight meaning and prediction target.
+  A fitted new-group mean is not a conditional latent-effect prediction.
+- The optional Spark/TMB reference uses R and precompiled trusted C++ models.
+  Source/library/ABI checks and local objective pointers matter; never serialize
+  an R pointer through Spark or promise arbitrary code compilation during fitting.
+  The separate TMB book teaches its public R API and native modeling process.
 - PHP CLI supports its prepared SQLite examples. Real HTTP cookies/sessions use
   the separately owned web fixture; a request model is not a real web exchange.
 - CUDA reading, CPU models, device compilation, GPU execution and profiling are

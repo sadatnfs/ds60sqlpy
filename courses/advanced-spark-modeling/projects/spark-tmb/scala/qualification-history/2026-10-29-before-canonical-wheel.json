@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-29",
+  "platform": "linux/arm64",
+  "image_id": "sha256:73f68961fbf3e6f1f524a92eafb140a6463af3072e3387b23f653bf41730a5e8",
+  "returncode": 0,
+  "network": "none",
+  "source_mount": "readonly",
+  "memory_limit_bytes": 3221225472,
+  "cpus": 2,
+  "owned_source_sha256": {
+    "run.py": "a9ea688115934cee9a3d0588812daf44b482cf4e5b085251ae0fb49504eab617",
+    "src/main/scala/ds60/spark/tmb/Example.scala": "35509251ada24e4e983714f987c6bca356d97198c0f13f6cecde4dd3d1c43ef8",
+    "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "04f93f733bd3d90b631156d5a2a86598968ead9781ba2d4b87c1c10a8221981a"
+  },
+  "compilation": {
+    "boundary_source_sha256": {
+      "R/evaluate_registered.R": "21969a39087c9fdcc4d613bdf2afa241dc8b46381d1b8d2181103e779d6955b3",
+      "models/normal_mean.cpp": "d3882d4d6d4bd2b25b08bc8575020f520fd21adb749676b2a132168359961e6e",
+      "models/random_intercept.cpp": "a253b64e38d0e14393d9f4cb3b2985d119aa25310cfb42ac56720740df82d86b",
+      "registry.json": "5d3b635261581a99e464621d719a34c31ddffeb545bd489a3b05c0c3c9c79c49",
+      "spark_tmb/__init__.py": "4db4780024e0a9cc56bff7b53539aee707dc7cf160da1d053a997c88bf240c3c",
+      "spark_tmb/cli.py": "d270689e0b9c9b3fa610df8ae90cc9398159a521b80b706c5a45524b66ecaa83",
+      "spark_tmb/processes.py": "4d342c40f680d339d5be55baf06fff63e52d0fbf7d2be9acc0fa531fbdf1f353",
+      "spark_tmb/registry.py": "e712dfa2e4dd0fdd154aeca79205818f7499e68fdb9da208f036f96ff718bf27",
+      "spark_tmb/runtime.py": "9a2f1be43ca1662996292c9a3e1c4a16017ddd66185ce7de068c08c5d4579000"
+    },
+    "cli_sha256": "d270689e0b9c9b3fa610df8ae90cc9398159a521b80b706c5a45524b66ecaa83",
+    "compiled": true,
+    "executed": true,
+    "kind": "scala-tmb-compilation-and-execution",
+    "owned_source_sha256": {
+      "run.py": "a9ea688115934cee9a3d0588812daf44b482cf4e5b085251ae0fb49504eab617",
+      "src/main/scala/ds60/spark/tmb/Example.scala": "35509251ada24e4e983714f987c6bca356d97198c0f13f6cecde4dd3d1c43ef8",
+      "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "04f93f733bd3d90b631156d5a2a86598968ead9781ba2d4b87c1c10a8221981a"
+    },
+    "scope": "native single-host CPU; no remote cluster or performance claim",
+    "sources": {
+      "src/main/scala/ds60/spark/tmb/Example.scala": "35509251ada24e4e983714f987c6bca356d97198c0f13f6cecde4dd3d1c43ef8",
+      "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "04f93f733bd3d90b631156d5a2a86598968ead9781ba2d4b87c1c10a8221981a"
+    }
+  },
+  "result": {
+    "schema_version": 1,
+    "kind": "scala-dataframe-prepared-tmb",
+    "spark": "4.0.1",
+    "java": "21.0.12.1",
+    "remote_cluster": false,
+    "gpu": false,
+    "raw_observations_collected": false,
+    "partition_batch_cases": [
+      {
+        "partitions": 1,
+        "batch_size": 4,
+        "actual_batches": 3,
+        "rows": 12,
+        "loss": 20.391459850155528,
+        "oracle_error": 0.0,
+        "partition_rows": [
+          12
+        ]
+      },
+      {
+        "partitions": 3,
+        "batch_size": 2,
+        "actual_batches": 6,
+        "rows": 12,
+        "loss": 20.391459850155528,
+        "oracle_error": 0.0,
+        "partition_rows": [
+          4,
+          4,
+          4
+        ]
+      },
+      {
+        "partitions": 5,
+        "batch_size": 64,
+        "actual_batches": 5,
+        "rows": 12,
+        "loss": 20.391459850155528,
+        "oracle_error": 0.0,
+        "partition_rows": [
+          3,
+          3,
+          2,
+          2,
+          2
+        ]
+      }
+    ],
+    "fit": {
+      "mu": 2.0000000855886224,
+      "log_sigma": 0.11157174399118923,
+      "gradient_inf_norm": 8.216508273761747e-07,
+      "iterations": 11,
+      "objective_evaluations": 12,
+      "converged": true
+    },
+    "model_source_sha256": "d3882d4d6d4bd2b25b08bc8575020f520fd21adb749676b2a132168359961e6e",
+    "model_library_sha256": "5d2365478559d9c012a095ee8cf39259222f29c60039324e707e4033defc48b4",
+    "registry_sha256": "5d3b635261581a99e464621d719a34c31ddffeb545bd489a3b05c0c3c9c79c49",
+    "abi": {
+      "Matrix": "1.7.6",
+      "R": "4.6.1",
+      "TMB": "1.9.25",
+      "architecture": "aarch64-unknown-linux-gnu"
+    },
+    "caller_cache_preserved": true,
+    "empty_partitions_checked": true,
+    "pure_optimizer_oracle": true,
+    "passed": true,
+    "rejected_cases": [
+      "evaluation budget",
+      "invalid parameters",
+      "closed objective",
+      "closed objective",
+      "closed objective",
+      "complete groups cannot be row-batched",
+      "unknown prepared model",
+      "missing projection",
+      "silent text conversion",
+      "duplicate observation identity",
+      "null numeric data"
+    ]
+  },
+  "limits": [
+    "Single-host Spark local[2] with fresh Python and R processes per batch.",
+    "Compiled models were prepared in the parent image; this run compiles only the original Scala adapter.",
+    "No raw DataFrame observations collected; local known synthetic values form an independent oracle.",
+    "No remote cluster, GPU, native AMD64, large-data performance or forced parent-crash qualification.",
+    "Parent sealed-image rebuild and workshop registration are separate integration gates."
+  ]
+}

@@ -1,0 +1,5 @@
+schema <- list(response = list(name = "y", length = 4L), design = list(columns = c("intercept", "time"), rows = 4L), parameters = list(beta = 2L, log_sigma = 1L))
+stopifnot(schema$response$length == schema$design$rows, schema$parameters$beta == length(schema$design$columns))
+print(schema)
+other_columns <- c("intercept", "temperature")
+print(c(same_shape = length(other_columns) == length(schema$design$columns), same_meaning = identical(other_columns, schema$design$columns)))

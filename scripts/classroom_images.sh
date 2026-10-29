@@ -2,7 +2,7 @@
 # Sourced by the launcher. Values are data, never evaluated as shell code.
 image_source=local
 image_namespace=''
-release_version=1.0.1
+release_version=1.1.0
 image_tag="$release_version"
 image_source_explicit=0
 image_tag_explicit=0
@@ -39,7 +39,7 @@ known_image_profile() {
 
 request_image_tag() {
   local selection="$1" profile version known
-  [[ "$selection" == *=* ]] || fail 'Use --image-tag PROFILE=VERSION, for example python-core=1.0.1.'
+  [[ "$selection" == *=* ]] || fail 'Use --image-tag PROFILE=VERSION, for example python-core=1.1.0.'
   profile="${selection%%=*}"
   version="${selection#*=}"
   known_image_profile "$profile" || fail "Unknown or unpublished image profile in --image-tag: $profile."

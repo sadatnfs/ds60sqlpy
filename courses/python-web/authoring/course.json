@@ -1,0 +1,6 @@
+{
+  "title": "Python web development: HTTP, Flask, FastAPI and Django",
+  "summary": "72 self-paced chapters from HTTP and browser foundations through three Python frameworks, persistence, authentication, asynchronous services, testing and deployment.",
+  "introduction": "Begin after Python functions and modules. Follow the shared foundations, then choose Flask, FastAPI or Django as an independently navigable branch. Finite coding-pad examples use real framework test clients. Long-running HTTP, database, WebSocket and SSE applications have separate owned Docker projects and acceptance. A client test, a browser observation and a deployed-service receipt are different evidence. The complete [web service lab](projects/web-lab/README.md) supplies separate Flask, FastAPI and Django servers, PostgreSQL state, local API documentation and a durable streaming job. Its explicit prepare/start/stop/resume/check/verify commands keep saved data outside application images.",
+  "admitted": true
+}

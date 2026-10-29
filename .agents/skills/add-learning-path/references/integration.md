@@ -76,6 +76,21 @@ Inspect current definitions before declaring support:
 - `scripts/format_repo.py`, `scripts/lint_repo.py`, `docker/formatting/`: prepared style and static validation.
 - `classroom.py` and `assets/classroom.js`: derived directory and accessible themes.
 
+For a new ordinary profile, keep the launcher's ordered `all_profiles` and
+`all_services` arrays identical to the ordinary image-catalog order. Register
+both the successful reference in `check_classroom_profiles.CASES` and its real
+invalid-source/diagnostic pair in `check_classroom_failures`. The Kubernetes
+Compose overlay replaces the JSON endpoint map, so it must retain the new
+ordinary endpoint as well as adding the owned cluster endpoint. Run the existing
+launcher-array, failure-registry and overlay-parity tests before native builds.
+
+An extensionless project launcher needs explicit shell routing in
+`scripts/format_repo.py`. An independently installable package needs normal CI
+test collection and lint coverage as well as installed-wheel runtime checks;
+pytest's in-process source path does not automatically reach a subprocess.
+Use namespaced helper modules rather than generic top-level names such as
+`bridge`, which can collide when the complete test suite imports other subjects.
+
 Python filenames are under `src/ds60sqlpy/`. A new subject reusing an existing
 profile needs no new worker. Check profile-specific package locks, not the
 host's installed modules. C++ stages `main.cpp`; Java stages `Main.java` with
@@ -296,3 +311,25 @@ strings. Validate declarations through `scripts/declared_outputs.py` during the
 reference corpus, then inspect actual browser/history output and retained
 receipts after replacement. A capture warning cannot replace the real execution
 status. Preserve scientific numerical oracles separately from shape/count checks.
+
+
+## Independent modeling and Python web boundaries
+
+The canonical modeling distribution is `packages/spark-likelihood/`, imported as
+`ds60_spark_likelihood`. Its optional Spark/Torch/SciPy extras are prepared before
+execution. Existing `ds60sqlpy.spark_likelihood` modules are compatibility aliases,
+not a second implementation. The Spark/Torch workshop installs a pure wheel;
+qualification compares declared source, retained wheel bytes, installed modules
+and two actual executor imports. Row callbacks return per-observation losses;
+complete-unit callbacks return one bounded joint loss. Keep their weighting and
+prediction semantics distinct. Cross-unit coupling needs another algorithm.
+
+The optional Spark/TMB project retains R and native model receipts. Full publication
+also requires its qualified reference cases, Scala bridge, standalone TMB public
+API checks and C++ probes. It is not part of the R-free package dependency tree.
+
+`python-web` adds finite `main.py` framework examples with architecture-specific
+locks. Persistent HTTP, browser actions, streaming and retained job/database state
+are tested in `courses/python-web/projects/web-lab/`. The native group requires
+that owned service gate in addition to every admitted pad reference. No ordinary
+worker receives an engine socket or installs packages when Run is pressed.

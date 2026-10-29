@@ -1,0 +1,7 @@
+a <- c(-1, 1); b <- c(8, 9, 10, 11, 12, 10, 10, 10)
+print(c(equal_panel_average = mean(c(mean(a), mean(b))), pooled_mean = mean(c(a, b))))
+stopifnot(abs(mean(c(a, b)) - weighted.mean(c(mean(a), mean(b)), c(length(a), length(b)))) < 1e-12)
+block <- matrix(0, 4, 4); block[1:2, 1:2] <- matrix(c(1, .5, .5, 1), 2); block[3:4, 3:4] <- matrix(c(1, .5, .5, 1), 2)
+shared <- block + .2 * matrix(1, 4, 4)
+print(list(independent = block, shared_intercept = shared))
+stopifnot(block[1, 3] == 0, shared[1, 3] > .1)

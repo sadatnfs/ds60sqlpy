@@ -4,6 +4,10 @@ const $ = (id) => document.getElementById(id);
 const phases = ["read", "predict", "attempt", "compare", "explain"];
 const finished = new Set(["succeeded", "failed", "cancelled", "timed_out", "blocked"]);
 const themes = {
+  "python-web": ["#745018", "#fff0d6", "#f2ca86", "#43341f", "PyW"],
+  "advanced-spark-modeling": ["#3d4a8f", "#eceffc", "#b7c5ff", "#2b324d", "Sp+"],
+  "custom-likelihood-pytorch": ["#8c3056", "#fbeaf2", "#f5b4ce", "#452d3b", "MLE"],
+  "tmb-modeling": ["#17636b", "#e3f5f4", "#93d8db", "#223e42", "TMB"],
   "apache-data-platforms": ["#7e3e26", "#fff0e6", "#f4ba99", "#443127", "Data"],
   "data-ml-engineering": ["#26576d", "#e4f3fa", "#9fcfe5", "#233b47", "Eng"],
   polars: ["#275ea1", "#e8f2ff", "#a5cfff", "#24364d", "Pl"],

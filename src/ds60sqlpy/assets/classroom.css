@@ -93,6 +93,7 @@ button.primary {
   color: var(--on-accent);
 }
 button.primary:hover:not(:disabled) {
+  background: var(--accent);
   filter: brightness(0.92);
 }
 button.quiet {

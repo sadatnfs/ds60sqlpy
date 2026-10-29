@@ -210,9 +210,9 @@ bash run.sh check</code></pre>
 <h3 id="use-a-published-hub-java-17-base">Use a published Hub Java 17 base<a class="heading-anchor" href="#use-a-published-hub-java-17-base" aria-label="Link to this section">#</a></h3>
 <p>Once the matching combined release is published, the base can be pulled and given the existing local alias instead of rebuilding the Scala/JVM runtime. Replace <code>yourname</code> with the publishing namespace:</p>
 <pre class="highlighted-code"><code class="language-bash">DS60_HUB_ACCOUNT<span class="syntax-operator">=</span>yourname
-docker pull <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.0.1-worker-scala-jvm</span><span class="syntax-string">&quot;</span>
-docker tag <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.0.1-worker-scala-jvm</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
-  ds60sqlpy-worker-scala-jvm:1.0.1</code></pre>
+docker pull <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.1.0-worker-scala-jvm</span><span class="syntax-string">&quot;</span>
+docker tag <span class="syntax-string">&quot;</span>$DS60_HUB_ACCOUNT<span class="syntax-string">/ds60sqlpy:1.1.0-worker-scala-jvm</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  ds60sqlpy-worker-scala-jvm:1.1.0</code></pre>
 <p>Back in the copied workshop directory, use <code>bash run.sh prepare</code> to build the small Cassandra layer from its pinned official archive and native client locks. No image upload or host SDK installation is involved. Use concrete release tags, not a moving latest alias, for this base. Manual publisher tags additionally include their explicit native architecture.</p>
 <h3 id="exact-observations">Exact observations<a class="heading-anchor" href="#exact-observations" aria-label="Link to this section">#</a></h3>
 <p>The bounded client verifies a three-order retained fixture, a customer partition&#x27;s clustering order, rejection of an unsupported unindexed filter, RF 1 reads at ONE and QUORUM, and real unavailability for a TWO-replica read. A one-node topology cannot demonstrate multi-node consistency, replication or availability.</p>

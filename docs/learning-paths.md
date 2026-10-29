@@ -6,22 +6,21 @@
 > Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
 > saved work and compatibility bookmarks.
 
-
 The course has no sixty-day deadline. Its historical day IDs are stable navigation points. A named module may be a beginner practice lab, an intermediate foundation, or a multi-session advanced project. Progress comes from producing and explaining evidence, not from opening sixty files.
 
 ## Find a starting point
 
 Use the [first-success guide](setup/first-success.md) before diagnosing a lesson. You should be able to run a small Python pad, find its output, rerun it from a fresh process, and explain the difference between the source file and the result. For SQL, you should be able to connect to the disposable database and identify its name without revealing a credential.
 
-| Your current evidence | Starting route |
-| --- | --- |
-| You have not written a program | Python foundations, including the four confidence labs inserted around Days 1, 3, 8, and 10 |
-| You have not queried a database | The three `sql-start` labs, then the historical SQL core |
-| You know syntax but cannot diagnose failures | Trace state and debug-from-evidence practice before the next project |
-| You can clean a file and explain rejected rows | Data analysis, then exact-value and calendar-boundary work |
-| You can build and explain a model baseline | Machine learning with group/time evaluation and resampling |
-| You write joins but cannot prove their totals | SQL bag reconciliation, fanout, and data-contract testing |
-| You build applications and need safer changes | Application engineering, then the integrated data-product incident review |
+| Your current evidence                          | Starting route                                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| You have not written a program                 | Python foundations, including the four confidence labs inserted around Days 1, 3, 8, and 10 |
+| You have not queried a database                | The three `sql-start` labs, then the historical SQL core                                    |
+| You know syntax but cannot diagnose failures   | Trace state and debug-from-evidence practice before the next project                        |
+| You can clean a file and explain rejected rows | Data analysis, then exact-value and calendar-boundary work                                  |
+| You can build and explain a model baseline     | Machine learning with group/time evaluation and resampling                                  |
+| You write joins but cannot prove their totals  | SQL bag reconciliation, fanout, and data-contract testing                                   |
+| You build applications and need safer changes  | Application engineering, then the integrated data-product incident review                   |
 
 Do a short placement exercise before skipping foundations. From a blank file, trace three assignments and predict the output; parse a numeric string while distinguishing blank from zero; write a function with an empty-input policy; and explain an actual exception from its traceback. For SQL, state a table's grain, distinguish `NULL` from zero, produce a stable ordering with a tie-breaker, and show a join fixture where duplicate child rows change a total. If you cannot show evidence for one of these, review its beginner guide before choosing an advanced route.
 
@@ -77,6 +76,14 @@ without mandatory exercises, exams or prediction gates. Read and revisit them at
 a chosen schedule; reading markers record review status. Other language and systems
 subjects have their own beginner entry points and explicit project/runtime boundaries.
 Use the common subject chooser and the [documentation map](README.md) to explore them.
+
+## Python web applications
+
+After Python functions and modules, follow the [Python web route](learning/python-web.md).
+It has common HTTP foundations, then independent Flask, FastAPI and Django
+branches, followed by service engineering. Use the ordinary python-web worker
+for finite examples and the owned service lab for persistent applications.
+The route preserves existing Python IDs and imposes no day-count limit.
 
 ## Scientist and ML engineer specializations
 

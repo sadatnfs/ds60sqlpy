@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "track_id": "custom-likelihood-pytorch",
+  "mode": "tutorial",
+  "chapters": 20,
+  "source_ownership": "authoring/chapters and authoring/programs",
+  "runtime": "llm-torch-cpu",
+  "numerical_contract": "float64 CPU, tiny deterministic original fixtures, no network or data download",
+  "topics": [
+    {
+      "id": "clp-001",
+      "concepts": ["observation unit", "Bernoulli likelihood", "latent dependence"],
+      "outcome": "Derive a Bernoulli score and explain why repeated-subject observations do not factor marginally."
+    },
+    {
+      "id": "clp-002",
+      "concepts": ["weighted likelihood", "global denominator", "partition invariance"],
+      "outcome": "Recover the declared weighted objective from unequal partition numerators and masses."
+    },
+    {
+      "id": "clp-003",
+      "concepts": ["reverse automatic differentiation", "finite differences", "gradient oracle"],
+      "outcome": "Compare independent analytic, finite-difference and automatic derivatives for normal and decay models."
+    },
+    {
+      "id": "clp-004",
+      "concepts": ["parameter coordinates", "density Jacobian", "positive scales"],
+      "outcome": "Distinguish parameter reparameterization from observation and prior density transformations."
+    },
+    {
+      "id": "clp-005",
+      "concepts": ["Gaussian likelihood", "least squares", "variance estimation"],
+      "outcome": "Recover Gaussian coefficients and maximum-likelihood scale from an independent least-squares oracle."
+    },
+    {
+      "id": "clp-006",
+      "concepts": ["nonlinear mean", "extrapolation", "sensitivity geometry"],
+      "outcome": "Fit a transformed nonlinear curve and diagnose the information lost in a short observation window."
+    },
+    {
+      "id": "clp-007",
+      "concepts": ["stable logits", "Bernoulli score", "separation"],
+      "outcome": "Check stable logistic scores and recognize when separated data have no finite coefficient MLE."
+    },
+    {
+      "id": "clp-008",
+      "concepts": ["Poisson rate", "exposure offset", "boundary estimate"],
+      "outcome": "Fit an exposure-adjusted event rate and distinguish expected counts from rates."
+    },
+    {
+      "id": "clp-009",
+      "concepts": ["right censoring", "delayed entry", "survival likelihood"],
+      "outcome": "Construct event and survival contributions and account for delayed entry in time at risk."
+    },
+    {
+      "id": "clp-010",
+      "concepts": ["log scale regression", "normalization", "noise calibration"],
+      "outcome": "Jointly fit a mean and covariate scale while detecting a missing likelihood normalization term."
+    },
+    {
+      "id": "clp-011",
+      "concepts": ["logsumexp", "latent mixtures", "scale collapse"],
+      "outcome": "Evaluate a stable marginalized mixture and explain label invariance and likelihood degeneracy."
+    },
+    {
+      "id": "clp-012",
+      "concepts": ["AR1 covariance", "Cholesky likelihood", "complete panels"],
+      "outcome": "Evaluate complete-panel likelihoods and detect false covariance introduced across subject boundaries."
+    },
+    {
+      "id": "clp-013",
+      "concepts": ["penalized likelihood", "MAP", "global penalty"],
+      "outcome": "Distinguish MLE, ridge and MAP and preserve a single global penalty across partitions."
+    },
+    {
+      "id": "clp-014",
+      "concepts": ["rank deficiency", "profile likelihood", "weak identification"],
+      "outcome": "Diagnose redundant parameters and refit nuisance parameters when profiling a nonlinear rate."
+    },
+    {
+      "id": "clp-015",
+      "concepts": ["LBFGS closure", "Adam", "evaluation accounting"],
+      "outcome": "Implement deterministic optimizer closures and distinguish returned step loss from final objective."
+    },
+    {
+      "id": "clp-016",
+      "concepts": ["gradcheck", "Hessian", "detached graph"],
+      "outcome": "Verify Hessians independently and detect deliberately broken gradient paths."
+    },
+    {
+      "id": "clp-017",
+      "concepts": ["delta method", "prediction intervals", "lognormal expectation"],
+      "outcome": "Separate mean, observation and new-group uncertainty and distinguish transformed means from medians."
+    },
+    {
+      "id": "clp-018",
+      "concepts": ["sandwich covariance", "cluster bootstrap", "weak information"],
+      "outcome": "Compare model, iid and cluster variance calculations and enumerate a whole-cluster bootstrap."
+    },
+    {
+      "id": "clp-019",
+      "concepts": ["unequal rank mass", "DistributedSampler", "serial reduction oracle"],
+      "outcome": "Derive the global mean gradient under rank averaging and inspect sampler padding and dropping."
+    },
+    {
+      "id": "clp-020",
+      "concepts": ["shared nonlinear MLE", "conditional AR1 prediction", "reproducibility"],
+      "outcome": "Fit and audit a shared nonlinear panel model with explicit prediction and evidence limitations."
+    }
+  ],
+  "boundaries": [
+    "No Spark job or distributed process group is launched by this track.",
+    "Supplied covariance in prediction examples is not estimated uncertainty.",
+    "Synthetic oracle recovery and source tests do not establish interval coverage or production forecasting performance.",
+    "Mixture degeneracy, separation, weak identification and boundary estimates are explicitly treated as failures or limits."
+  ]
+}

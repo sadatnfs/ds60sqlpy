@@ -8,6 +8,7 @@ COURSE_PATHS = (
     "pyproject.toml",
     "curriculum",
     "courses",
+    "packages",
     "examples",
     "python",
     "sql",

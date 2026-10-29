@@ -1,0 +1,486 @@
+{
+  "schema_version": 1,
+  "track_id": "tmb-modeling",
+  "lessons": [
+    {
+      "id": "tmb-001",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-001.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-001.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-002",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-002.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-002.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-003",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-003.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-003.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-004",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-004.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-004.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-005",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-005.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-005.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-006",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-006.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-006.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-007",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-007.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-007.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-008",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-008.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-008.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-009",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-009.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-009.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-010",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-010.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-010.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-011",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-011.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-011.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-012",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-012.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-012.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-013",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-013.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-013.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-014",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-014.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-014.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-015",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-015.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-015.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-016",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-016.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-016.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-017",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-017.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-017.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-018",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-018.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-018.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-019",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-019.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-019.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-020",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-020.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-020.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-021",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-021.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-021.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-022",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-022.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-022.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-023",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-023.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-023.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-024",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-024.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-024.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-025",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-025.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-025.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-026",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-026.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-026.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-027",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-027.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-027.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-028",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-028.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-028.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-029",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-029.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-029.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-030",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-030.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-030.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-031",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-031.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-031.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-032",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-032.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-032.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-033",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-033.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-033.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-034",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-034.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-034.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-035",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-035.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-035.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-036",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-036.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-036.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-037",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-037.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-037.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-038",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-038.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-038.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-039",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-039.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-039.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-040",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-040.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-040.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-041",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-041.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-041.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-042",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-042.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-042.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-043",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-043.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-043.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-044",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-044.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-044.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-045",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-045.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-045.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-046",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-046.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-046.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-047",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-047.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-047.R",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "tmb-048",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/tmb-modeling/guides/tmb-048.md",
+      "source_path": "courses/tmb-modeling/examples/tmb-048.R",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

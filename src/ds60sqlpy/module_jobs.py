@@ -22,6 +22,7 @@ from ds60sqlpy.plot_artifacts import read_saved_artifacts, validate_artifacts
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 SERVICES = {
+    "python-web": "python-web-worker",
     "dbt-duckdb": "dbt-worker",
     "data-engineering": "data-engineering-worker",
     "data-platforms-python": "data-platforms-worker",

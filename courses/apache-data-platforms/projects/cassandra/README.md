@@ -49,9 +49,9 @@ the existing local alias instead of rebuilding the Scala/JVM runtime. Replace
 
 ```bash
 DS60_HUB_ACCOUNT=yourname
-docker pull "$DS60_HUB_ACCOUNT/ds60sqlpy:1.0.1-worker-scala-jvm"
-docker tag "$DS60_HUB_ACCOUNT/ds60sqlpy:1.0.1-worker-scala-jvm" \
-  ds60sqlpy-worker-scala-jvm:1.0.1
+docker pull "$DS60_HUB_ACCOUNT/ds60sqlpy:1.1.0-worker-scala-jvm"
+docker tag "$DS60_HUB_ACCOUNT/ds60sqlpy:1.1.0-worker-scala-jvm" \
+  ds60sqlpy-worker-scala-jvm:1.1.0
 ```
 
 Back in the copied workshop directory, use `bash run.sh prepare` to build the small Cassandra layer from its pinned

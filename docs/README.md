@@ -53,6 +53,14 @@ Generated [practice coverage](practice-coverage.md) and [depth reports](lesson-d
 are maintained outputs. The [founding subject plans](expansion/README.md) remain active
 metadata; the former prototype application has been removed.
 
+## Python applications and APIs
+
+The [Python web route](learning/python-web.md) connects the original Python
+foundations to HTTP, Flask, FastAPI and Django. Choose one framework branch after
+the shared foundations, then use the owned service lab for actual browser,
+PostgreSQL, WebSocket and SSE behavior. Short coding-pad programs terminate;
+persistent servers have their own explicit Docker lifecycle.
+
 ## Connected textbook routes
 
 The [LLM textbook route](learning/llm-textbook.md) connects mechanisms and applied
@@ -60,7 +68,6 @@ systems. [Inside a Transformer](learning/inside-a-transformer.md) gives a numeri
 explanation. [Professional routes](professional-paths.md) deepen Python, SQL and
 cross-language engineering. All subject entrances are in the front README and
 classroom chooser.
-
 
 ## Numerical, statistical and visualization extensions
 
@@ -102,3 +109,15 @@ Separate owned projects cover [dbt configuration](../courses/dbt/projects/retail
 and [Stan with JSON data](../courses/bayesian-computing/projects/normal-mean/README.md).
 Their instructions explain preparation, saved outputs and cleanup independently
 of ordinary classroom pads.
+
+
+## Advanced modeling research
+
+The [Spark, PyTorch and TMB report](research/spark-torch-tmb.md) maps the modeling
+questions to the new chapters, implementation and runtime evidence. The
+[Brad Bell and native AD review](research/brad-bell-autodiff.md) covers the pinned
+repository survey and explains the direct C++ experiment's scope. Explore the
+[independent Spark likelihood package](../packages/spark-likelihood/README.md)
+and the [standalone native AD example](../examples/native-ad-core/README.md)
+through those reports. The native experiment is a serial C++ demonstration;
+it does not implement a Spark/TMBad connector.

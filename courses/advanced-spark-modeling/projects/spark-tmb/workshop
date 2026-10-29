@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+repo=$(cd "$here/../../../.." && pwd)
+image=${DS60_SPARK_TMB_IMAGE:-ds60-spark-tmb:4.0.1-tmb1.9.25}
+command=${1:-help}
+case "$command" in
+  build)
+    [[ $# == 1 ]] || {
+      echo "Usage: ./workshop build" >&2
+      exit 64
+    }
+    docker build --pull=false --progress=plain \
+      --build-arg "TMB_IMAGE=${DS60_TMB_BASE:-ds60-tmb-local:dev-1.9.25}" \
+      --build-arg "SPARK_IMAGE=${DS60_SPARK_BASE:-ds60sqlpy-worker-spark-local-python:1.1.0}" \
+      --build-arg "JAVA_IMAGE=${DS60_JAVA_BASE:-ds60sqlpy-worker-java21:1.1.0}" \
+      -f "$here/Dockerfile" -t "$image" "$repo"
+    ;;
+  run | check)
+    if [[ "$command" == run ]]; then
+      [[ $# == 2 ]] || {
+        echo "Usage: ./workshop run CASE" >&2
+        exit 64
+      }
+      case "$2" in
+        partition-normal | group-laplace | global-normal-fit | rpy2-frame | failure-contracts | registered-models | prediction-models | dataframe-ml | scala-dataframe) ;;
+        *)
+          echo "Unknown case. Use ./workshop help." >&2
+          exit 64
+          ;;
+      esac
+    else
+      [[ $# == 1 ]] || {
+        echo "Usage: ./workshop check" >&2
+        exit 64
+      }
+    fi
+    docker image inspect "$image" >/dev/null 2>&1 || {
+      echo "Prepare this optional project first with ./workshop build." >&2
+      exit 1
+    }
+    state="$repo/.workshop/spark-tmb"
+    mkdir -p "$state"
+    log=$(mktemp "$state/run.XXXXXXXX")
+    printf 'Saving this run log to %s\n' "$log"
+    docker run --rm --init --pull never --network none \
+      --hostname ds60-spark-tmb --add-host ds60-spark-tmb:127.0.0.1 \
+      --env RPY2_CFFI_MODE=ABI \
+      --memory 4g --cpus 2 --pids-limit 512 --cap-drop ALL \
+      --security-opt no-new-privileges --read-only \
+      --tmpfs /tmp:rw,nosuid,size=1g --user 65534:65534 \
+      --env 'JAVA_TOOL_OPTIONS=-Duser.home=/tmp -Divy.home=/tmp/.ivy2 -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1' \
+      "$image" "$@" 2>&1 | tee "$log"
+    ;;
+  help)
+    cat <<'HELP'
+Optional native Spark 4.0.1, Java 21 and R/TMB 1.9.25 project
+  ./workshop build       Prepare packages and compile fixed original C++ models
+  ./workshop check       Run all bounded cases offline
+  ./workshop run CASE    Run one named case
+
+Cases: partition-normal, group-laplace, global-normal-fit, rpy2-frame,
+       failure-contracts, registered-models, prediction-models, dataframe-ml, scala-dataframe
+
+Runtime never compiles C++, downloads packages, contacts a registry or mounts
+learner volumes or a Docker socket. Logs persist in .workshop/spark-tmb.
+Spark local[2] is actual local task execution, not remote-cluster qualification.
+HELP
+    ;;
+  *)
+    echo "Unknown command. Use ./workshop help." >&2
+    exit 64
+    ;;
+esac

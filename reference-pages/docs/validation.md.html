@@ -207,6 +207,7 @@ uv run --no-sync python scripts/course.py doctor</code></pre>
 <p>Core setup does not install every heavy learning dependency. A test that needs an optional compiler, framework, SQL service or model asset must either run in its prepared environment or report that boundary explicitly.</p>
 <h3 id="repository-formatting">Repository formatting<a class="heading-anchor" href="#repository-formatting" aria-label="Link to this section">#</a></h3>
 <p>Run <code>./scripts/format-repo</code> to apply maintained code style, or <code>./scripts/format-repo --check</code> to report drift without editing tracked source. Make exposes the same commands as <code>make format</code> and <code>make format-check</code>. <code>./scripts/lint-repo</code> (or <code>make lint</code>) adds read-only static source checks using the same toolchain. <code>make check</code> requires both formatting and lint checks. These commands use pinned Docker toolchains on Linux, macOS and Windows through WSL 2. R uses its compatible styler/lintr image and Julia uses its prepared JuliaFormatter/parse tool image. Other languages use the main image, including stanc for Stan and SQLfmt for dbt SQL/Jinja. A full pass runs the separate adapters before refreshing shared generated views after successful source formatting. Image fingerprints follow tool inputs rather than lesson edits. The first invocation prepares missing images; <code>--build</code> explicitly rebuilds them, and <code>--list</code> reports coverage without formatting source. Classroom containers and learner volumes are not part of this operation.</p>
+<p>C++ grammar checks project the declared TMB <code>SIMULATE</code> block and four-argument <code>TMB_ATOMIC_VECTOR_FUNCTION</code> form with a literal output dimension. The projection preserves comments, quoted/raw strings, diagnostic lines, both atomic bodies and surrounding C++ for parsing. Unsupported forms fail visibly. It does not expand TMB headers, check types or model automatic-differentiation semantics; the actual native compiler and numerical probes remain separate required evidence.</p>
 <p>The R adapter parses without evaluating lesson code and checks that formatting preserves parsed expressions. Its fixed lexical lint rules do not substitute for runtime assertions. Check and lint modes use read-only source mounts. A focused language pass omits shared regeneration, so finish with the unfiltered checks.</p>
 <p>Use a repeated <code>--language</code> selection for focused iteration and the unfiltered check before submission. Follow <a href="../CONTRIBUTING.md.html#format-the-repository">the contributor formatting workflow</a> for generated-source ownership and optional pre-commit installation. Formatting checks and execution checks are separate evidence: still compile/run changed examples and inspect lesson rendering when either may be affected.</p>
 <h3 id="fast-checks-during-development">Fast checks during development<a class="heading-anchor" href="#fast-checks-during-development" aria-label="Link to this section">#</a></h3>
@@ -242,7 +243,7 @@ git diff --check</code></pre>
 make test TEST_WORKERS=2
 make test TEST_WORKERS=6
 make test-serial</code></pre>
-<p>Keep <code>--dist loadgroup</code>. Tests that use the same disposable PostgreSQL fixtures belong to the <code>shared-postgres</code> group and run serially within that group. The suite rejects unsafe distribution when those shared fixtures are enabled. Changing the scheduler can cause destructive fixture races even if individual tests pass. Use <code>-n 0</code> for focused serial diagnosis, and reduce worker count on machines with little memory. On a machine with spare CPU and memory, measure six workers before increasing further. The 4,913-case local release suite took about 8.5 minutes with four workers; a long individual reader test and shared fixtures still set a floor. More workers do not guarantee shorter runtimes.</p>
+<p>Keep <code>--dist loadgroup</code>. Tests that use the same disposable PostgreSQL fixtures belong to the <code>shared-postgres</code> group and run serially within that group. The suite rejects unsafe distribution when those shared fixtures are enabled. Changing the scheduler can cause destructive fixture races even if individual tests pass. Use <code>-n 0</code> for focused serial diagnosis, and reduce worker count on machines with little memory. On a machine with spare CPU and memory, measure six workers before increasing further. Long individual reader tests and shared fixtures still set a floor. More workers do not guarantee shorter runtimes.</p>
 <p>Record the passed, failed and skipped totals from the actual run. Explain skips by surface, such as an optional framework, a live database or historical optional services or platform-specific filesystem cases. Do not describe a skipped platform as validated.</p>
 <h3 id="what-hosted-workflows-check">What hosted workflows check<a class="heading-anchor" href="#what-hosted-workflows-check" aria-label="Link to this section">#</a></h3>
 <p>The workflow files are the executable source of truth. Routine validation uses read-only repository permissions, pinned action revisions and local image builds. The separate <a href="dockerhub.md.html">full image publication workflow</a> opts in only on a push to <code>main</code> with <code>[publish-docker]</code> in the HEAD message. The <a href="targeted-images.md.html">targeted workflow</a> accepts a single <code>[build-test-ALIAS]</code> on a branch for native App/Core plus one complete group without Hub credentials, staging or publication. A single <code>[publish-ALIAS]</code> on <code>main</code> publishes App, Core and that complete group as a partial versioned release. Both publication modes use the two repository secrets, require the exact revision&#x27;s source/starter checks, qualify native AMD64 and ARM64 groups, upload commit-specific staging images and small receipts, and promote combined version/latest tags only after their required checks. Neither needs an extra enable variable or protected environment. Staging uploads are not a completed release; conflicting source versions are refused rather than overwritten. After promotion, separate native AMD64 and ARM64 jobs inspect the promotion receipt and published indexes, pull a fresh Hub classroom and verify stop/resume retention. For a full release the fresh runtime exercise uses App and Python Core; for a partial release it includes the selected group. Promotion can write canonical tags before this later acceptance fails, so inspect its distinct result before calling the release usable. A changing dynamic browser host port permits only an app-container repair from the same image; PostgreSQL, workers, named volumes, learner content and the saved image pin must remain stable.</p>
@@ -296,7 +297,7 @@ make test-serial</code></pre>
 <tr>
 <td>Full image publication</td>
 <td>Push to main with <code>[publish-docker]</code> in HEAD</td>
-<td>Native AMD64/ARM64 qualification of every ordinary profile and source/digest-bound promotion; staging images are distinct from completed version/latest tags</td>
+<td>Native AMD64/ARM64 qualification of the 26-image ordinary set, then the complete scientific-project gate before source/digest-bound promotion; staging is distinct from completed version/latest tags</td>
 </tr>
 <tr>
 <td>Hosted Hub pull acceptance</td>
@@ -447,6 +448,11 @@ python courses/web-development/authoring/check_live_preview.py --url CLASSROOM_U
 <td><a href="../courses/data-ml-engineering/projects/data-product/README.md.html">Data-product checker</a></td>
 </tr>
 <tr>
+<td><code>python-web</code></td>
+<td>Finite framework references plus real HTTP, streaming/WebSockets, browser/session behavior and retained state across resume/replacement</td>
+<td><a href="../courses/python-web/projects/web-lab/README.md.html">Owned Python web lab</a></td>
+</tr>
+<tr>
 <td><code>pytorch</code></td>
 <td>Actual tiny-model generation, queue/cancellation, SSE, Chromium, exact-container resume and retained request history after replacement</td>
 <td><a href="../courses/data-ml-engineering/projects/inference-service/README.md.html#maintainer-lifecycle-gate">Inference project checker</a></td>
@@ -474,7 +480,36 @@ python courses/web-development/authoring/check_live_preview.py --url CLASSROOM_U
 <p>Use <code>--profiles python-core dbt-duckdb</code> to qualify only those prepared runtime probes. A subset still checks the complete directory but does not establish execution for omitted profiles. After replacing this same disposable project&#x27;s containers while retaining its named volumes, use its current URL and the same profile selection:</p>
 <pre class="highlighted-code"><code class="language-bash">python scripts/check_scientist_browser.py --url <span class="syntax-string">&quot;</span>$CLASSROOM_URL<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
   --confirm-disposable --report work/scientist-browser.json --check-persistence</code></pre>
-<p>The second command uses the original receipt IDs and fresh browser documents; its request guard rejects writes and execution. Keep the report from the first run. Changing a report, rerunning code or selecting another project does not prove persistence. The checker restores the prior effective pads after its initial probes and does not mark learner completion.</p></article>
+<p>The second command uses the original receipt IDs and fresh browser documents; its request guard rejects writes and execution. Keep the report from the first run. Changing a report, rerunning code or selecting another project does not prove persistence. The checker restores the prior effective pads after its initial probes and does not mark learner completion.</p>
+<h3 id="standalone-modeling-and-native-scientific-publication">Standalone modeling and native scientific publication<a class="heading-anchor" href="#standalone-modeling-and-native-scientific-publication" aria-label="Link to this section">#</a></h3>
+<p>The primary framework is the independent <a href="../packages/spark-likelihood/README.md.html"><code>ds60-spark-likelihood</code> package</a>. Its source tests, ordinary classroom pads and combined workshop answer different questions. The canonical package has no classroom or R requirement; the <a href="../courses/advanced-spark-modeling/projects/spark-tmb/README.md.html">optional Spark/TMB reference</a> retains its separate R/compiler/ABI contracts.</p>
+<p>The <a href="../courses/advanced-spark-modeling/projects/spark-torch/README.md.html">Spark/Torch workshop</a> builds a non-editable pure wheel from the declared source and installs it before the explicitly requested, source-checked Spark launcher preparation. Its fixed <code>standalone-package</code> check compares the retained wheel, installed modules and declared source, verifies imports on two actual Spark executor partitions, then runs numerical, Spark and DataFrame/ML acceptance. It requires all 33 named ML checks, including real Pipeline save/load, custom factories, response-free prediction, complete groups, weights, cache ownership and precision refusals. The complete workshop also checks DDP/Lightning updates, record coverage and failure propagation after result serialization. No runtime check installs a package, reads a learner volume or contacts a registry.</p>
+<p>Use the workshop&#x27;s documented build/check commands in an owned environment. Host tests that skip Torch/Spark do not substitute for these runs. A passing low-dimensional driver fit is not distributed neural-network training, and a CPU local[2] run is not remote-cluster or GPU qualification. The ordinary Spark and Torch pads still do not imply a shared dependency environment.</p>
+<p>Full publication now includes a dedicated scientific job after the ordinary worker jobs. The ordinary catalog contains 26 images, App plus 25 workers, including <code>python-web</code>; optional GPU images remain separate. The scientific job runs on native AMD64 and ARM64 runners, with at most two architecture jobs in parallel and sequential project preparation within each job. It imports exactly the qualified Spark, Torch, R and Java native digests from the same run and source. It then qualifies:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Surface</th>
+<th>Required evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Primary Spark/Torch workshop</td>
+<td>Installed-wheel/source/executor identity, independent value/gradient/Hessian oracles, partition/weight invariance, ML/Pipeline behavior and training/failure checks</td>
+</tr>
+<tr>
+<td>Optional Spark/TMB reference</td>
+<td>Prepared-model source/library/registry/ABI binding, real R refusals, independent row/group objectives, rpy2, predictions, DataFrame/ML and Scala compiler/execution checks</td>
+</tr>
+<tr>
+<td>Standalone TMB public API</td>
+<td>Exact installed API/runtime inventory and the declared profile, simulation, solver, reporting and lifecycle checks</td>
+</tr>
+<tr>
+<td>Standalone TMB C++ families</td>
+<td>Five actual compiled templates, source/library identities, independent numerical checks and the declared finite-difference cases</td>
+</tr>
+</tbody></table></div>
+<p>The executable contract lives in <a href="../docker/ci-scientific-projects.json.html"><code>docker/ci-scientific-projects.json</code></a>, <a href="../scripts/ci_scientific_projects.py.html"><code>ci_scientific_projects.py</code></a>, <a href="../scripts/scientific_receipts.py.html"><code>scientific_receipts.py</code></a> and <a href="../scripts/scientific_package_receipts.py.html"><code>scientific_package_receipts.py</code></a>. These project environments are not additional ordinary Hub images. Full promotion and recovery require complete scientific receipts bound to the same run, source, version, native bases and App/Core seeds. Earlier successful attempts may be reused only under those exact bindings. Targeted partial-image jobs retain their documented selected-group contract; they do not establish full scientific-release acceptance.</p>
+<p>The <code>python-web</code> ordinary group has its own service gate in addition to finite pad references. The <a href="../courses/python-web/projects/web-lab/README.md.html">web lab checker</a> uses owned PostgreSQL, actual framework servers and a browser, preserves its own project state and verifies stop/resume/replacement. An in-process Flask/FastAPI/ Django test client proves neither network streaming nor durable service recovery. Prepare contributor Chromium explicitly; a learner needs only the ordinary Docker/browser installation documented by the project.</p>
+<p>Retain failed diagnostics separately from successful receipt candidates. Export source-bound evidence before removing only owned synthetic resources. Never prune learner volumes to obtain a green gate. Local ARM evidence, workflow source, staging upload, manifest promotion and fresh published-image acceptance are separate states. Only observed hosted job completion qualifies that release&#x27;s native GitHub path.</p></article>
   </main>
 </body>
 </html>

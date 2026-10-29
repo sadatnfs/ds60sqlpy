@@ -86,3 +86,41 @@ projects retain their saved selection; use `--all` or explicit profiles to add
 new runtimes deliberately. `resume` never prepares them. See the
 [scientist roadmap](scientist-roadmap.md) and [source contracts](modules-runtime.md)
 for lesson placement, single-source boundaries and separate project workflows.
+
+
+## Python web and independent scientific projects
+
+`python-web` is an ordinary runtime profile, distinct from Python Core and root
+project extras. It provides separately pinned Flask, FastAPI, Django, Django REST
+Framework, SQLAlchemy, HTTP clients and related packages for finite `main.py`
+programs. Native AMD64/ARM64 locks live under `docker/workers/`. In-process test
+clients exercise application behavior without opening a persistent service.
+The [owned web lab](../courses/python-web/projects/web-lab/README.md) adds actual
+HTTP servers, PostgreSQL, jobs, streaming and browser/session state. Prepare its
+small project image explicitly, and preserve its private workshop state through
+stop/resume or replacement. A finite pad result does not qualify that lifecycle.
+
+The [independent Spark likelihood package](../packages/spark-likelihood/README.md)
+is distribution `ds60-spark-likelihood`, imported as `ds60_spark_likelihood`.
+Its pure core has no mandatory third-party or classroom dependency. Spark,
+CPU Torch, SciPy and distributed-training integrations are explicit extras.
+The [Spark/Torch workshop](../courses/advanced-spark-modeling/projects/spark-torch/README.md)
+prepares their compatible versions together, builds the pure wheel and installs
+it before explicitly preparing the pinned Spark launcher. Fitting never downloads
+packages or changes the user's Spark installation. The ordinary Spark and Torch
+pads remain separate environments.
+
+The package supports bounded row-additive and complete-independent-unit
+likelihoods, declared predictions, DataFrame mapping and ML/Pipeline persistence.
+It does not provide arbitrary cross-group covariance, a generic Laplace solver
+or an unbounded neural-network driver optimizer. R is not required. The
+[optional Spark/TMB reference](../courses/advanced-spark-modeling/projects/spark-tmb/README.md)
+has its own R/TMB/C++ preparation, compiled-artifact identities and process boundary.
+It consumes only the pure core contracts and is qualified separately.
+
+Full ordinary publication currently covers 26 catalog images, App plus 25 workers.
+Optional GPU profiles and scientific project images are separate contracts.
+The full native scientific gate builds its project environments from that run's
+qualified ordinary bases; it does not add them to a learner's default workers or
+publish their local project tags automatically. See [validation](validation.md)
+for the separate source, wheel, runtime, browser and hosted-release evidence.

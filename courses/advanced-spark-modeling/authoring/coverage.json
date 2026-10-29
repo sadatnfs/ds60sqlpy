@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "mode": "tutorial",
+  "areas": [
+    {
+      "area": "objective decomposition and numerical contracts",
+      "units": [
+        "asm-001",
+        "asm-002",
+        "asm-003",
+        "asm-004",
+        "asm-005",
+        "asm-006",
+        "asm-007",
+        "asm-008",
+        "asm-009",
+        "asm-010",
+        "asm-011",
+        "asm-012"
+      ],
+      "new_evidence": "Real PySpark fixed-parameter evaluations, serial oracles, unequal partitions, bounded Newton and finite-grid nonlinear fits.",
+      "limits": "Tiny local CPU fixtures; retry delivery is modeled explicitly, not real failure injection."
+    },
+    {
+      "area": "public Scala aggregates and pipeline persistence",
+      "units": ["asm-013", "asm-014", "asm-015", "asm-016", "asm-017"],
+      "new_evidence": "Actual Scala compilation and Spark execution, null/weight policies and fitted model save/load comparisons.",
+      "limits": "Temporary in-container model paths are not durable learner exports."
+    },
+    {
+      "area": "Arrow, plans and exact-version engine extensions",
+      "units": ["asm-018", "asm-019", "asm-020", "asm-021", "asm-022", "asm-023"],
+      "new_evidence": "Declared Arrow project boundary, actual plan/codegen probes and compiled Spark4.0.1 Catalyst expression/rule project.",
+      "limits": "Combined Arrow runtime requires its own project receipt; Catalyst APIs are unstable across versions."
+    },
+    {
+      "area": "automatic differentiation and global summaries",
+      "units": ["asm-024", "asm-025", "asm-026"],
+      "new_evidence": "Original forward-mode JVM implementation and explicit analytic versus numeric gradient boundaries.",
+      "limits": "Bounded operations do not implement a general global Spark differentiation tape."
+    },
+    {
+      "area": "TorchDistributor, Lightning and delivery",
+      "units": ["asm-027", "asm-028", "asm-029", "asm-030"],
+      "new_evidence": "Fixed optional combined project cases, rank scaling derivation, coverage and topology contracts.",
+      "limits": "Project preparation and actual case receipts are required; no GPU or remote-cluster claim."
+    },
+    {
+      "area": "Spark and compiled TMB",
+      "units": ["asm-031", "asm-032", "asm-033", "asm-034", "asm-035"],
+      "new_evidence": "Independent/group-separable derivations, explicit compiled ABI boundary, global optimizer design and coupled-Hessian counterexample.",
+      "limits": "Combined project runtime evidence is separate from chapter arithmetic and source completeness."
+    },
+    {
+      "area": "inference target, measurement and synthesis",
+      "units": ["asm-036", "asm-037", "asm-038"],
+      "new_evidence": "Analytic posterior comparison, measurement protocol and two complete system design reviews.",
+      "limits": "No production-scale speedup or universal statistical calibration is claimed."
+    }
+  ]
+}

@@ -403,6 +403,21 @@ bash --version</code></pre>
 <td>Scala, distributed data processing and companion PySpark implementations</td>
 </tr>
 <tr>
+<td>Advanced Spark modeling</td>
+<td><a href="courses/advanced-spark-modeling/README.md.html">Advanced Spark</a></td>
+<td>Custom likelihoods, bounded distributed fitting, Scala extensions, Catalyst and Spark/PyTorch integration</td>
+</tr>
+<tr>
+<td>Custom likelihoods</td>
+<td><a href="courses/custom-likelihood-pytorch/README.md.html">PyTorch modeling</a></td>
+<td>Likelihood construction, automatic differentiation, optimization, uncertainty and numerical diagnostics</td>
+</tr>
+<tr>
+<td>TMB modeling</td>
+<td><a href="courses/tmb-modeling/README.md.html">R and C++ with TMB</a></td>
+<td>Compiled models, random effects, Laplace approximation, public APIs and C++ authoring families</td>
+</tr>
+<tr>
 <td>TensorFlow</td>
 <td><a href="courses/deep-learning-tensorflow/README.md.html">TensorFlow/Keras</a></td>
 <td>Tensors, optimization, architectures and model workflows</td>
@@ -437,6 +452,11 @@ bash --version</code></pre>
 <td><a href="courses/web-development/README.md.html">HTML, CSS and PHP</a></td>
 <td>Semantic pages, responsive layouts, accessibility, browser interactions and server-side applications</td>
 </tr>
+<tr>
+<td>Python web development</td>
+<td><a href="courses/python-web/README.md.html">HTTP, Flask, FastAPI and Django</a></td>
+<td>Shared HTTP foundations, independent framework branches, APIs, databases, authentication, streaming and real Docker service projects</td>
+</tr>
 </tbody></table></div>
 <p>The engineering book includes separately owned <a href="courses/data-ml-engineering/projects/data-product/README.md.html">data-product</a> and <a href="courses/data-ml-engineering/projects/inference-service/README.md.html">inference-service</a> workshops with their own persistent state. Apache library examples run in the ordinary <code>data-platforms-python</code> worker; distributed services use explicit project preparation. The <a href="courses/apache-data-platforms/authoring/ENVIRONMENTS.md.html">platform qualification ledger</a> records actual runtime scope and separately prepared Atlas/Delta Sharing routes. Opening a chapter does not start those services or install their dependencies.</p>
 <p>The <a href="docs/scientist-roadmap.md.html">scientist roadmap</a> connects the statistics, experimentation, data engineering and ML routes, showing what each adds and where external systems or hardware are still required.</p>
@@ -448,18 +468,18 @@ bash --version</code></pre>
 <h4 id="optional-docker-hub-distribution">Optional Docker Hub distribution<a class="heading-anchor" href="#optional-docker-hub-distribution" aria-label="Link to this section">#</a></h4>
 <p>Ordinary startup uploads nothing. Once a full <code>[publish-docker]</code> CI release is complete, use the matching checkout or starter ZIP and start the full classroom from Hub:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER</code></pre>
-<p>For a new Hub selection, omitting <code>--tag</code> resolves the app&#x27;s <code>latest</code> alias to a concrete release, requires the matching checkout or starter ZIP, and saves that version for the project. The accepted partial release uses App tag <code>YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0</code> with Core, JavaScript and TypeScript workers. After the full 1.0.1 release is promoted, its app tags are <code>:1.0.1</code> and <code>:latest</code>, with workers such as <code>:1.0.1-worker-python-core</code> in the same repository. Docker selects the engine&#x27;s native architecture from the combined Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.</p>
+<p>For a new Hub selection, omitting <code>--tag</code> resolves the app&#x27;s <code>latest</code> alias to a concrete release, requires the matching checkout or starter ZIP, and saves that version for the project. The accepted partial release uses App tag <code>YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0</code> with Core, JavaScript and TypeScript workers. After the full 1.1.0 release is promoted, its app tags are <code>:1.1.0</code> and <code>:latest</code>, with workers such as <code>:1.1.0-worker-python-core</code> in the same repository. Docker selects the engine&#x27;s native architecture from the combined Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.</p>
 <p>For a partial publication, select only its available workers. For example, an app/Core plus JavaScript and TypeScript publication is installed with:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom --profile javascript-node --profile typescript-node <span class="syntax-string">\</span>
   --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
 <p><code>--all</code> requires every ordinary worker at the selected app release and fails if a partial publication omitted one. Use <code>--tag VERSION</code> to select a default release explicitly. Repeat <code>--image-tag PROFILE=VERSION</code> to choose a particular Hub image, including <code>app</code>; for example, <code>--image-tag app=1.0.0</code> and <code>--image-tag javascript-node=1.0.0</code>. <code>VERSION</code> may also be <code>latest</code> for an individual profile. The launcher resolves it to a concrete version and checks the published worker&#x27;s profile, platforms and source revision before saving it. Selected workers must share the app&#x27;s qualified source revision. Current CI binds one checked-in version to each revision, so its releases do not support mixing worker images from different versions. The launcher also requires any different patch versions to stay in the app&#x27;s major.minor line. Missing or incompatible images stop startup with the project volumes retained. Use <code>--image-tag javascript-node=default --rebuild</code> to clear a saved worker pin and return that worker to the app&#x27;s version.</p>
 <p>A same-namespace saved Hub project keeps its pinned release when you repeat <code>--from-hub USER</code> without <code>--tag</code>. Use <code>--tag latest --rebuild</code> to choose a newer completed release deliberately. Later bare <code>./classroom resume</code> never builds, pulls or follows a moving latest tag.</p>
-<p>For a completed full release, download without starting services with <code>./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.0.1</code>. For a partial release, use only its published profiles. For an existing project, switching image source/layout or applying an update requires the same command without <code>pull</code> and with <code>--rebuild</code>. In Hub mode that pulls and applies images without compiling. Keep the same custom <code>--project NAME</code> to retain its volumes. Images do not carry saved progress; moving machines needs a separate learning/database backup.</p>
+<p>For a completed full release, download without starting services with <code>./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0</code>. For a partial release, use only its published profiles. For an existing project, switching image source/layout or applying an update requires the same command without <code>pull</code> and with <code>--rebuild</code>. In Hub mode that pulls and applies images without compiling. Keep the same custom <code>--project NAME</code> to retain its volumes. Images do not carry saved progress; moving machines needs a separate learning/database backup.</p>
 <h5 id="publish-through-github-actions">Publish through GitHub Actions<a class="heading-anchor" href="#publish-through-github-actions" aria-label="Link to this section">#</a></h5>
 <p>The full publication workflow builds and pushes only for a push to <code>main</code> whose HEAD commit message contains <code>[publish-docker]</code>. The targeted workflow accepts <code>[build-test-ALIAS]</code> on a branch for native qualification without uploading, and <code>[publish-ALIAS]</code> on <code>main</code> for a partial versioned release. Use exactly one Docker marker in the HEAD message. Configure the two repository Actions secrets <code>DOCKERHUB_USERNAME</code> and <code>DOCKERHUB_TOKEN</code> for publication. No extra enable variables or protected-environment setup is required.</p>
 <p>For a smaller native check, <code>[build-test-js]</code> builds and qualifies the JavaScript and TypeScript group without publishing. <code>[publish-js]</code> publishes App, Core and that group from a marked <code>main</code> commit after its gates pass. Profile names such as <code>javascript-node</code> are aliases for their complete qualification group. See <a href="docs/targeted-images.md.html">targeted image checks and partial publication</a> for accepted markers, version rules and the selected-profile install command.</p>
 <p>After staging and validating the reviewed release changes on <code>main</code>:</p>
-<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release 1.0.1 [publish-docker]&quot;</span>
+<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release 1.1.0 [publish-docker]&quot;</span>
 git push origin main</code></pre>
 <p>Native AMD64 and ARM64 jobs build and qualify the app, Core and worker groups. Commit-specific staging uploads precede final promotion. Only the complete successful checks allow versioned worker tags, then the app version, followed by latest aliases with app <code>latest</code> last. Small receipts record the evidence; large Docker archives are not transferred through Actions artifacts.</p>
 <p>The version comes from checked-in source. An incompatible existing version is refused; changes after publication should use a new patch release such as <code>1.0.2</code>. The first upload can be large, and later runs reuse unchanged layers where available. Account pull limits, fair use and runner capacity still apply. A workflow configuration or staging upload does not prove final publication.</p>
@@ -467,12 +487,12 @@ git push origin main</code></pre>
 <p>The local publisher remains a separate, single-architecture route. If this machine needs authentication, the operator runs:</p>
 <pre class="highlighted-code"><code class="language-bash">docker login</code></pre>
 <p>Preview already built and tested images without uploading:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0</code></pre>
 <p>After reviewing the mapping, explicitly upload:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1 --push</code></pre>
-<p>This requires the complete ordinary local set by default. It checks all selected images before tagging/pushing and does not build, log in, create another architecture or publish combined manifests. Prepare missing images with <code>./classroom build --all --local-build --tag 1.0.1</code>, then qualify them.</p>
-<p>Manual tags include architecture, such as <code>1.0.1-lab-arm64</code>. A matching-architecture learner selects that layout explicitly:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.1 --architecture-tags</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0 --push</code></pre>
+<p>This requires the complete ordinary local set by default. It checks all selected images before tagging/pushing and does not build, log in, create another architecture or publish combined manifests. Prepare missing images with <code>./classroom build --all --local-build --tag 1.1.0</code>, then qualify them.</p>
+<p>Manual tags include architecture, such as <code>1.1.0-lab-arm64</code>. A matching-architecture learner selects that layout explicitly:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.1.0 --architecture-tags</code></pre>
 <p>An ARM64-only Mac publication does not supply AMD64 tags for a typical Windows/WSL machine. See <a href="docs/dockerhub.md.html">Docker Hub distribution</a> for complete account, tag, lifecycle, compatibility and publication instructions.</p>
 <h4 id="reading-and-execution">Reading and execution<a class="heading-anchor" href="#reading-and-execution" aria-label="Link to this section">#</a></h4>
 <p>Mathematical explanations render as typeset equations, including fractions, subscripts, vectors and matrices. Fenced code examples carry language-aware syntax highlighting. Both work from bundled local rendering resources without an external CDN. Code remains selectable so you can copy an example into its appropriate workspace.</p>

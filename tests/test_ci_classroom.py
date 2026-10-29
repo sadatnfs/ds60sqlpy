@@ -293,3 +293,25 @@ def test_native_platform_groups_require_real_service_lifecycle_gates(
         assert "streaming" in command and "--prepare" in command
         assert "DS60_JAVA_IMAGE=ds60sqlpy-worker-java21:1.0.0" in command
     assert "work/apache-service-receipts.json" in command
+
+
+def test_python_web_requires_real_services_browser_and_retained_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    work, commands = prepared("python-web", tmp_path, monkeypatch)
+    work.qualify()
+    script = "courses/python-web/projects/web-lab/check_project.py"
+    checks = script_calls(commands, script)
+    assert len(checks) == 1
+    command = checks[0]
+    assert command[command.index("--image") + 1] == "ds60sqlpy-worker-python-web:1.0.0"
+    assert command[command.index("--browser-python") + 1] == str(
+        tmp_path / "work/browser-env/bin/python"
+    )
+    assert "--confirm-disposable" in command
+    assert "owned Python web HTTP, streaming, browser and persistence" in work.completed
+    assert set(work.completed) == ci_classroom.required_checks("python-web")
+    corpus = script_calls(commands, "scripts/check_module_references.py")
+    assert len(corpus) == 1 and corpus[0][corpus[0].index("--profiles") + 1] == "python-web"
+    assert not script_calls(commands, "scripts/check_scientist_browser.py")
+    assert "requirements/ci-browser.arm64.lock" in next(item for item in commands if "pip" in item)

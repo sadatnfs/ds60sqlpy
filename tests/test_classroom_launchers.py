@@ -405,10 +405,15 @@ def test_saved_zero_ports_remain_dynamic_on_restart_and_existing_ports_are_adopt
     assert not any("build" in c["args"] or "pull" in c["args"] for c in launcher.calls())
 
 
-def test_profile_selection_deduplicates_and_includes_core(launcher: Any) -> None:
-    result = launcher.run("--profile", "java21", "--profile", "java21", "--no-browser", "--rebuild")
+@pytest.mark.parametrize(
+    "profile,service", [("java21", "java-worker"), ("python-web", "python-web-worker")]
+)
+def test_profile_selection_deduplicates_and_includes_core(
+    launcher: Any, profile: str, service: str
+) -> None:
+    result = launcher.run("--profile", profile, "--profile", profile, "--no-browser", "--rebuild")
     assert result.returncode == 0, result.stderr
-    assert built_services(launcher.calls()) == ["lab", "python-core-worker", "java-worker"]
+    assert built_services(launcher.calls()) == ["lab", "python-core-worker", service]
 
 
 @pytest.mark.parametrize(

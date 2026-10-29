@@ -1,0 +1,7 @@
+y <- c(1, 2, 4, 7)
+objective <- function(s) -sum(dnorm(y, mean(y), exp(s), log = TRUE))
+fit <- optimize(objective, interval = c(-3, 3))
+print(c(log_sd = fit$minimum, sd = exp(fit$minimum)))
+z <- c(0, 2, 8)
+print(data.frame(z = z, phi = tanh(z), derivative = 1 - tanh(z)^2))
+stopifnot(all(exp(c(-10, 0, 10)) > 0), 1 - tanh(8)^2 < 1e-5)

@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+repo=$(cd "$here/../../../.." && pwd)
+image=${DS60_SPARK_TORCH_IMAGE:-ds60-spark-torch:4.0.1-torch2.9.1}
+command=${1:-help}
+case "$command" in
+  build)
+    [[ $# == 1 ]] || {
+      echo "Usage: ./workshop build" >&2
+      exit 64
+    }
+    docker build --pull=false --progress=plain \
+      --build-arg "TORCH_IMAGE=${DS60_TORCH_BASE:-ds60sqlpy-worker-llm-torch-cpu:1.1.0}" \
+      --build-arg "SPARK_IMAGE=${DS60_SPARK_BASE:-ds60sqlpy-worker-spark-local-python:1.1.0}" \
+      -f "$here/Dockerfile" -t "$image" "$repo"
+    ;;
+  run | check)
+    if [[ "$command" == run ]]; then
+      [[ $# == 2 ]] || {
+        echo "Usage: ./workshop run CASE" >&2
+        exit 64
+      }
+      case "$2" in
+        additive-logistic | nonlinear-gaussian | independent-groups | arrow-batches | torch-distributor | lightning-ddp | sharding-audit | standalone-package) ;;
+        *)
+          echo "Unknown case. Use ./workshop help." >&2
+          exit 64
+          ;;
+      esac
+    else
+      [[ $# == 1 ]] || {
+        echo "Usage: ./workshop check" >&2
+        exit 64
+      }
+    fi
+    docker image inspect "$image" >/dev/null 2>&1 || {
+      echo "Prepare this optional project first with ./workshop build." >&2
+      exit 1
+    }
+    state="$repo/.workshop/spark-torch"
+    mkdir -p "$state"
+    log=$(mktemp "$state/run.XXXXXXXX")
+    printf 'Saving this run log to %s\n' "$log"
+    docker run --rm --init --pull never --network none \
+      --hostname ds60-spark-torch --add-host ds60-spark-torch:127.0.0.1 \
+      --env GLOO_SOCKET_IFNAME=lo \
+      --memory 4g --cpus 2 --pids-limit 512 --cap-drop ALL \
+      --security-opt no-new-privileges --read-only \
+      --tmpfs /tmp:rw,nosuid,size=1g --user 65534:65534 \
+      --env 'JAVA_TOOL_OPTIONS=-Duser.home=/tmp -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1' \
+      "$image" "$@" 2>&1 | tee "$log"
+    ;;
+  help)
+    cat <<'HELP'
+Optional Spark 4.0.1 and Torch 2.9.1 CPU project
+  ./workshop build       Prepare packages and source into a separate image
+  ./workshop check       Run all bounded numerical and process checks offline
+  ./workshop run CASE    Run one complete worked case
+
+Cases: additive-logistic, nonlinear-gaussian, independent-groups, arrow-batches,
+       torch-distributor, lightning-ddp, sharding-audit, standalone-package
+
+Runs do not install packages, contact registries, mount a Docker socket or touch
+classroom volumes. Logs persist in .workshop/spark-torch at the repository root.
+Two ranks on this one host do not establish remote-cluster or GPU qualification.
+HELP
+    ;;
+  *)
+    echo "Unknown command. Use ./workshop help." >&2
+    exit 64
+    ;;
+esac

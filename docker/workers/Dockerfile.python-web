@@ -1,0 +1,14 @@
+ARG DS60_PYTHON_IMAGE=python:3.12.12-slim-bookworm
+FROM ${DS60_PYTHON_IMAGE}
+RUN install -d -m 0700 /run/ds60 && python -m venv /opt/web
+ENV PATH="/opt/web/bin:$PATH"
+WORKDIR /opt/worker
+ARG TARGETARCH
+COPY docker/workers/requirements-python-web.${TARGETARCH}.lock /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/requirements.txt \
+    && python -m pip check && rm /tmp/requirements.txt
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
+COPY courses/python-web/runtime_probe.py courses/python-web/runtime_extended_probe.py /opt/worker/courses/python-web/
+ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 DS60_WORKER_PROFILE=python-web
+ENTRYPOINT ["python", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]
