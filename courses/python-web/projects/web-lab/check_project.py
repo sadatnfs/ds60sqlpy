@@ -515,6 +515,14 @@ def qualify(args: argparse.Namespace) -> dict[str, Any]:
         before = inspect_containers(project, workspace)
         if set(before) != {"postgres", "flask", "fastapi", "django", "worker"}:
             raise AssertionError("Expected exactly five owned persistent containers")
+        worker_health = run(
+            ["docker", "inspect", "--format", "{{.State.Health.Status}}", before["worker"]["id"]],
+            cwd=workspace,
+            log=evidence / "worker-health.log",
+        )
+        if worker_health.stdout.strip() != "healthy":
+            raise AssertionError("Worker has not completed a live database job poll")
+        record["checks"].append("live-worker-poll-healthcheck")
         run(
             ["./workshop", "check"], cwd=workspace, env=environment, log=evidence / "http-check.log"
         )

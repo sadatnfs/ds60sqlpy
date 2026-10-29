@@ -88,6 +88,13 @@ Release. Release allows the worker to calculate the bounded sum and commit the
 result and finished event together. The job remains stored if the browser or its
 SSE connection disconnects.
 
+The worker reports healthy only after its live process completes a database job
+poll. A private atomic heartbeat expires after 15 seconds without another
+successful poll. Startup waits for this check as well as database TCP readiness
+and each framework's HTTP readiness. A process that merely exists, or an old
+heartbeat left by a killed worker, is insufficient. A failed database transaction
+exits the worker instead of renewing its heartbeat.
+
 The browser stores only the selected job identity in its origin's localStorage.
 Session/CSRF tokens are not put there. Reloading as the same authorized user can
 reconnect to the stored job. Event IDs allow the HTTP client to resume after an

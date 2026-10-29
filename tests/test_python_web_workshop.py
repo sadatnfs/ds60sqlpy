@@ -36,6 +36,8 @@ def test_compose_keeps_state_owned_and_ports_loopback() -> None:
         "-d",
         "web_lab",
     ]
+    assert services["worker"]["healthcheck"]["test"] == ["CMD", "python", "worker_health.py"]
+    assert services["worker"]["healthcheck"].get("disable") is not True
     for name, service in services.items():
         assert service["labels"]["ds60.workshop"] == "python-web-lab"
         assert service["pull_policy"] == "never"

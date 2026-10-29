@@ -85,7 +85,11 @@ services:
   worker:
     <<: *web
     command: [python, serve.py, worker]
-    healthcheck: { disable: true }
+    healthcheck:
+      test: [CMD, python, worker_health.py]
+      interval: 3s
+      timeout: 3s
+      retries: 5
     environment:
       <<: *environment
       WEB_ORIGIN: "http://127.0.0.1:${WORKSHOP_FASTAPI_PORT}"
