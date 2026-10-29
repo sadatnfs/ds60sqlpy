@@ -165,6 +165,16 @@ the original workflow. It does establish a fresh session to read the retained
 records. Container identity, service acceptance, browser observations and
 post-replacement readback are distinct evidence and should be recorded separately.
 
+PostgreSQL readiness checks its TCP listener at `127.0.0.1`. The official image
+uses a temporary Unix-socket-only server during first initialization, so a socket
+probe alone can report healthy before another container can connect for migrations.
+The TCP check waits for the final application-facing server.
+
+Failed project checks embed bounded, redacted tails from allowlisted phase and
+service logs in the top-level report before and after cleanup. This retains useful
+startup evidence in CI without uploading the private `.workshop/` directory,
+password file, signing key, session cookies or authorization headers.
+
 Use `./workshop status` and `./workshop logs` to inspect this project. If startup
 fails, retain the error and inspect readiness/database state. Do not switch to a
 new project name to conceal a defect. A clean configuration or prepared image is

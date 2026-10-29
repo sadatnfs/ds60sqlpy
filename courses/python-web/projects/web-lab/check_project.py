@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import json
 import os
+import re
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import time
@@ -28,6 +31,178 @@ IGNORED_SOURCE_NAMES = {
     ".venv",
     "node_modules",
 }
+
+
+DIAGNOSTIC_TAIL_BYTES = 4096
+DIAGNOSTIC_TOTAL_BYTES = 16384
+DIAGNOSTIC_LOG_NAMES = (
+    "start.log",
+    "services.log",
+    "cleanup.log",
+    "prepare.log",
+    "http-check.log",
+    "pending-create.log",
+    "worker-stop.log",
+    "pending-release.log",
+    "worker-resume.log",
+    "pending-reconciled.log",
+    "stop.log",
+    "resume.log",
+    "resume-readback.log",
+    "replace.log",
+    "replace-readback.log",
+    "browser.log",
+    "shipped-source.log",
+)
+CREDENTIAL_LINE = re.compile(
+    r"(?i)\b[\w-]*(?:password|passwd|passphrase|signing[_-]?key|secret|token|csrf|"
+    r"cookie|authorization|signature|credential)[\w-]*[\\\"' \t]*[:=]"
+)
+
+
+def regular_file_bytes(path: Path, maximum: int, *, tail: bool = False) -> tuple[bytes, int]:
+    """Read only a bounded ordinary file, refusing links and special files."""
+    if path.is_symlink():
+        raise ValueError("Diagnostic files must not be links")
+    descriptor = os.open(
+        path,
+        os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0),
+    )
+    with os.fdopen(descriptor, "rb") as stream:
+        metadata = os.fstat(stream.fileno())
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("Diagnostics require ordinary files")
+        size = metadata.st_size
+        if tail:
+            stream.seek(max(0, size - maximum))
+            data = stream.read(maximum)
+            if size > maximum:
+                # A truncated header/assignment must not leave an unlabelled secret suffix.
+                data = data.partition(b"\n")[2]
+            return data, size
+        data = stream.read(maximum + 1)
+        if len(data) > maximum:
+            raise ValueError("Private redaction input exceeds its fixed bound")
+        return data, size
+
+
+def diagnostic_secrets(workspace: Path) -> list[str]:
+    private = workspace / ".workshop"
+    if workspace.is_symlink() or private.is_symlink():
+        raise ValueError("Private redaction inputs must not follow links")
+    values = []
+    for name in ("password", "signing-key"):
+        path = private / name
+        if not path.exists() and not path.is_symlink():
+            raise ValueError("Private redaction inputs are incomplete")
+        data, _ = regular_file_bytes(path, 4096)
+        value = data.decode("utf-8").strip()
+        if not value:
+            raise ValueError("Private redaction inputs are empty")
+        values.append(value)
+    return sorted(set(values), key=len, reverse=True)
+
+
+def redact_diagnostic_text(text: str, secrets: list[str]) -> str:
+    text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
+    for value in secrets:
+        text = text.replace(value, "[REDACTED]")
+    lines = []
+    for line in text.splitlines():
+        if CREDENTIAL_LINE.search(line) or re.search(r"\bfill\([\"']", line):
+            lines.append("[REDACTED credential-bearing log line]")
+            continue
+        line = re.sub(r"(?i)\b(Bearer|Basic)\s+[A-Za-z0-9+/_=.:-]+", r"\1 [REDACTED]", line)
+        line = re.sub(r"(?i)([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^@\s/]+@", r"\1[REDACTED]@", line)
+        # Signed download query strings are unnecessary for startup diagnosis.
+        line = re.sub(r"https?://[^\s<>\"']*\?[^\s<>\"']+", "[REDACTED query URL]", line)
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def collect_failure_diagnostics(evidence: Path, workspace: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "scope": "bounded-redacted-owned-project-logs",
+        "per_log_tail_bytes": DIAGNOSTIC_TAIL_BYTES,
+        "maximum_total_text_bytes": DIAGNOSTIC_TOTAL_BYTES,
+        "logs": [],
+        "omitted_logs": [],
+    }
+    if (
+        evidence.absolute() != (workspace / ".workshop/evidence").absolute()
+        or evidence.is_symlink()
+    ):
+        result["warning"] = "Withheld diagnostics from an unexpected evidence path"
+        return result
+    try:
+        secrets = diagnostic_secrets(workspace)
+    except (OSError, ValueError, UnicodeError):
+        result["warning"] = "Withheld log text because private redaction inputs were unavailable"
+        return result
+    remaining = DIAGNOSTIC_TOTAL_BYTES
+    for name in DIAGNOSTIC_LOG_NAMES:
+        path = evidence / name
+        if not path.exists() and not path.is_symlink():
+            continue
+        if remaining == 0:
+            result["omitted_logs"].append(name)
+            continue
+        try:
+            data, size = regular_file_bytes(path, DIAGNOSTIC_TAIL_BYTES, tail=True)
+            text = redact_diagnostic_text(data.decode("utf-8", errors="replace"), secrets)
+            encoded = text.encode("utf-8")
+            budget = min(remaining, DIAGNOSTIC_TAIL_BYTES)
+            truncated = size > DIAGNOSTIC_TAIL_BYTES or len(encoded) > budget
+            # Ignore an incomplete UTF-8 character at the already-redacted budget boundary.
+            text = encoded[:budget].decode("utf-8", errors="ignore")
+            remaining -= len(text.encode("utf-8"))
+            result["logs"].append(
+                {"name": name, "text": text, "bytes_on_disk": size, "truncated": truncated}
+            )
+        except (OSError, ValueError):
+            result["omitted_logs"].append(name)
+    return result
+
+
+def retain_failure_diagnostics(record: dict[str, Any], evidence: Path, workspace: Path) -> None:
+    if record.get("accepted") is True:
+        return
+    previous = record.get("failure_diagnostics", {})
+    latest = collect_failure_diagnostics(evidence, workspace)
+    # Preserve already-redacted startup evidence even if cleanup removed its log file.
+    remembered = {
+        item["name"]: item
+        for item in previous.get("logs", [])
+        if isinstance(item, dict) and item.get("name") in DIAGNOSTIC_LOG_NAMES
+    }
+    remembered.update({item["name"]: item for item in latest["logs"]})
+    remaining = DIAGNOSTIC_TOTAL_BYTES
+    latest["logs"] = []
+    for name in DIAGNOSTIC_LOG_NAMES:
+        if name not in remembered or remaining == 0:
+            continue
+        item = dict(remembered[name])
+        encoded = item["text"].encode("utf-8")
+        budget = min(remaining, DIAGNOSTIC_TAIL_BYTES)
+        item["text"] = encoded[:budget].decode("utf-8", errors="ignore")
+        item["truncated"] = item["truncated"] or len(encoded) > budget
+        remaining -= len(item["text"].encode("utf-8"))
+        latest["logs"].append(item)
+    record["failure_diagnostics"] = latest
+    try:
+        secrets = diagnostic_secrets(workspace)
+    except (OSError, ValueError, UnicodeError):
+        secrets = []
+        safe = False
+    else:
+        safe = True
+    for field in ("failure", "cleanup_failure", "service_log_failure"):
+        if isinstance(record.get(field), dict) and isinstance(record[field].get("message"), str):
+            record[field]["message"] = (
+                redact_diagnostic_text(record[field]["message"], secrets)[:2048]
+                if safe
+                else "Diagnostic message withheld because redaction inputs were unavailable"
+            )
 
 
 def clean_environment() -> dict[str, str]:
@@ -76,16 +251,30 @@ def run(
     timeout: int = 240,
     check: bool = True,
 ) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(
-        command,
-        cwd=cwd,
-        env=clean_environment() if env is None else env,
-        input=input_text,
-        text=True,
-        capture_output=True,
-        timeout=timeout,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            env=clean_environment() if env is None else env,
+            input=input_text,
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as error:
+        if log is not None:
+            partial = []
+            for value in (error.stdout, error.stderr):
+                partial.append(
+                    value.decode("utf-8", errors="replace")
+                    if isinstance(value, bytes)
+                    else value or ""
+                )
+            # A diagnostic write must not replace the operation's original timeout.
+            with contextlib.suppress(OSError):
+                log.write_text("".join(partial))
+        raise
     if log is not None:
         log.write_text(result.stdout + result.stderr)
     if check and result.returncode:
@@ -253,6 +442,31 @@ def qualify(args: argparse.Namespace) -> dict[str, Any]:
     }
     started = time.monotonic()
     failure: BaseException | None = None
+    final_report_retained = False
+
+    def save_report(phase: str, *, provisional: bool = False) -> bool:
+        nonlocal failure
+        payload = (
+            {**record, "accepted": False, "finalization": "owned-cleanup-pending"}
+            if provisional
+            else record
+        )
+        try:
+            write_report(report, payload)
+        except OSError as error:
+            record.setdefault("diagnostic_warnings", []).append(
+                {"phase": phase, "type": type(error).__name__}
+            )
+            record["accepted"] = False
+            if failure is None:
+                failure = error
+                record["failure"] = {
+                    "type": type(error).__name__,
+                    "message": "Could not retain the " + phase + " evidence report",
+                }
+            return False
+        return True
+
     try:
         run(
             ["./workshop", "prepare"],
@@ -390,13 +604,24 @@ def qualify(args: argparse.Namespace) -> dict[str, Any]:
         record["seconds"] = time.monotonic() - started
         # Save all observations before removing only this newly owned synthetic topology.
         if (workspace / ".workshop/settings.env").is_file():
-            run(
-                compose + ["logs", "--no-color", "--tail", "200"],
-                cwd=workspace,
-                log=evidence / "services.log",
-                check=False,
-            )
-        write_report(report, record)
+            try:
+                run(
+                    compose + ["logs", "--no-color", "--tail", "200"],
+                    cwd=workspace,
+                    log=evidence / "services.log",
+                    timeout=30,
+                    check=False,
+                )
+            except Exception as error:
+                record["service_log_failure"] = {
+                    "type": type(error).__name__,
+                    "message": str(error),
+                }
+                record.setdefault("diagnostic_warnings", []).append(
+                    {"phase": "service-logs", "type": type(error).__name__}
+                )
+        retain_failure_diagnostics(record, evidence, workspace)
+        save_report("initial", provisional=True)
         try:
             inspect_containers(project, workspace)  # Refuse cleanup if ownership no longer matches.
             if (workspace / ".workshop/settings.env").is_file():
@@ -432,11 +657,30 @@ def qualify(args: argparse.Namespace) -> dict[str, Any]:
             record["accepted"] = False
             failure = AssertionError("Expected preserved synthetic database volume")
         record["evidence_directory"] = str(evidence)
-        write_report(report, record)
+        # Keep bounded startup/service and cleanup evidence in the top-level artifact itself.
+        retain_failure_diagnostics(record, evidence, workspace)
+        final_report_retained = save_report("final")
+        if not final_report_retained:
+            # This small warning is safe even when the filesystem cannot retain a report.
+            with contextlib.suppress(OSError):
+                print(
+                    json.dumps(
+                        {
+                            "kind": "python-web-report-unavailable",
+                            "diagnostic_warnings": record.get("diagnostic_warnings", []),
+                            "accepted": False,
+                        },
+                        sort_keys=True,
+                    ),
+                    file=sys.stderr,
+                )
     if failure is not None:
-        raise RuntimeError(
-            f"Web project qualification failed; retained report: {report}"
-        ) from failure
+        detail = (
+            f"retained report: {report}"
+            if final_report_retained
+            else f"final report unavailable; private evidence directory: {evidence}"
+        )
+        raise RuntimeError("Web project qualification failed; " + detail) from failure
     return record
 
 

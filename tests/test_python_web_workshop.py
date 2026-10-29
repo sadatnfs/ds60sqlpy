@@ -24,6 +24,18 @@ def test_compose_keeps_state_owned_and_ports_loopback() -> None:
     services = config["services"]
     assert set(services) == {"postgres", "migrate", "flask", "fastapi", "django", "worker"}
     assert "ports" not in services["postgres"]
+    # The official image's temporary initialization server exposes only a Unix socket.
+    # Migrations in another container require the final server's TCP listener.
+    assert services["postgres"]["healthcheck"]["test"] == [
+        "CMD",
+        "pg_isready",
+        "-h",
+        "127.0.0.1",
+        "-U",
+        "web_lab",
+        "-d",
+        "web_lab",
+    ]
     for name, service in services.items():
         assert service["labels"]["ds60.workshop"] == "python-web-lab"
         assert service["pull_policy"] == "never"

@@ -27,3 +27,11 @@ actual native ARM64 evidence. Hosted native AMD64 and publication acceptance
 remain separate gates. Keep the fixed source-bound project checker and its
 negative ownership/environment/architecture tests; do not replace its network
 or saved-record checks with mocks.
+
+For PostgreSQL service readiness, probe TCP on 127.0.0.1 explicitly. The image's
+initialization server can accept Unix-socket probes before the final TCP server
+starts. Keep startup, runtime and browser acceptance separate. Failed project
+receipts must contain bounded, redacted phase diagnostics without copying private
+.workshop state. Missing redaction inputs must withhold new text, and diagnostic
+or report-storage failures must not mask the original failure or prevent guarded
+cleanup of owned containers. Retain data volumes and earlier safe evidence.
