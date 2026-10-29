@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import pytest
@@ -15,7 +15,7 @@ from scripts.ci_profiles import RUNNERS, groups, project_group_slug
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_workflow_keeps_build_test_free_of_hub_secrets_and_uploads() -> None:
+def test_workflow_keeps_build_test_free_of_hub_secrets_and_image_uploads() -> None:
     yaml = pytest.importorskip("yaml")
     workflow = yaml.load(
         (ROOT / ".github/workflows/targeted-images.yml").read_text(),
@@ -36,10 +36,65 @@ def test_workflow_keeps_build_test_free_of_hub_secrets_and_uploads() -> None:
     assert "needs.intent.outputs.mode == 'publish'" in jobs["promote"]["if"]
     for job_name in ("seed", "workers"):
         for step in jobs[job_name]["steps"]:
-            if "secrets.DOCKERHUB" in json.dumps(step) or step.get("uses", "").startswith(
-                "actions/upload-artifact@"
-            ):
+            if "secrets.DOCKERHUB" in json.dumps(step):
                 assert step.get("if") == "needs.intent.outputs.mode == 'publish'"
+            if step.get("uses", "").startswith("actions/upload-artifact@"):
+                artifact = step["with"]
+                if artifact["name"].startswith("release-receipt-"):
+                    assert step.get("if") == "needs.intent.outputs.mode == 'publish'"
+                else:
+                    assert step.get("if") == "always()"
+                    assert artifact["name"].startswith(("seed-checks-", "worker-checks-"))
+                    assert artifact["if-no-files-found"] == "ignore"
+                    assert artifact["retention-days"] == "7"
+                    assert set(artifact["path"].splitlines()) == {
+                        "work/*receipts.json",
+                        "work/runtime-failures.json",
+                        "work/module-reference-results.json",
+                        "work/scientist-browser.json",
+                        "work/ci-qualification.json",
+                        "work/tested-images.json",
+                    }
+        reports = [
+            step
+            for step in jobs[job_name]["steps"]
+            if step.get("uses", "").startswith("actions/upload-artifact@")
+            and step.get("if") == "always()"
+        ]
+        assert len(reports) == 1
+        cleanup = next(
+            i
+            for i, step in enumerate(jobs[job_name]["steps"])
+            if step.get("name", "").startswith("Remove only")
+        )
+        assert jobs[job_name]["steps"].index(reports[0]) < cleanup
+        qualifier = next(
+            i
+            for i, step in enumerate(jobs[job_name]["steps"])
+            if step.get("name", "").startswith(
+                ("Qualify Core references", "Qualify every selected")
+            )
+        )
+        assert qualifier < jobs[job_name]["steps"].index(reports[0])
+        assert reports[0]["uses"] == (
+            "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+        )
+        expected_name = (
+            "seed-checks-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}"
+            if job_name == "seed"
+            else (
+                "worker-checks-${{ matrix.group }}-${{ matrix.architecture }}-"
+                "attempt-${{ github.run_attempt }}"
+            )
+        )
+        assert reports[0]["with"]["name"] == expected_name
+        patterns = reports[0]["with"]["path"].splitlines()
+        assert any(
+            PurePosixPath("work/python-web-project-receipts.json").match(p) for p in patterns
+        )
+        for private in ("password", "signing-key", "evidence/start.log", "evidence/private.json"):
+            path = PurePosixPath("work/python-web-ci-workspace/.workshop") / private
+            assert not any(path.match(p) for p in patterns)
     app_build = yaml.load(
         (ROOT / ".github/workflows/app-build.yml").read_text(), Loader=yaml.BaseLoader
     )["jobs"]

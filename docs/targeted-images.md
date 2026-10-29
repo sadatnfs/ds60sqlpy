@@ -54,6 +54,13 @@ the old source.
 
 ## Qualification and retries
 
+Both build-test and publication runs retain small qualification JSON reports as
+GitHub Actions artifacts, including bounded redacted diagnostics from failed
+owned service projects. These report uploads do not upload images or write
+Docker Hub tags. Look for the native `seed-checks` or `worker-checks` artifact
+for the failing group and architecture. Private `.workshop` directories,
+credential files and raw service logs are not uploaded by this step.
+
 Publication waits for the exact marked revision's source checks and portable
 starter job, then rechecks them before canonical writes. Native App/Core and
 selected worker receipts bind their source revision, workflow run and attempt,
