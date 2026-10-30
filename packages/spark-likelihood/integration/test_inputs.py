@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import base64
 import copy
+import csv
+import hashlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
@@ -42,6 +46,60 @@ class InputContracts(unittest.TestCase):
 
     def admit(self):
         return inputs.wheel_identity(self.wheel, self.source, "example_package", "0.1.0")
+
+    def integrated_wheel(self, *, changed_sibling=False, bad_record=False, extra=False):
+        root = self.root / "integrated"
+        primary = root / "ds60_spark_likelihood"
+        sibling = root / "ds60_torch_training"
+        primary.mkdir(parents=True, exist_ok=True)
+        sibling.mkdir(parents=True, exist_ok=True)
+        (primary / "__init__.py").write_bytes(b"PACKAGE = 'likelihood'\n")
+        (sibling / "__init__.py").write_bytes(b"PACKAGE = 'torch'\n")
+        (sibling / "runner.py").write_bytes(b"VALUE = 'source-bound'\n")
+        wheel = self.root / "ds60_spark_likelihood-0.2.0-py3-none-any.whl"
+        members = {
+            "ds60_spark_likelihood/__init__.py": (primary / "__init__.py").read_bytes(),
+            "ds60_torch_training/__init__.py": (sibling / "__init__.py").read_bytes(),
+            "ds60_torch_training/runner.py": (
+                b"VALUE = 'changed'\n" if changed_sibling else (sibling / "runner.py").read_bytes()
+            ),
+            "ds60_spark_likelihood-0.2.0.dist-info/METADATA": (
+                b"Name: ds60-spark-likelihood\nVersion: 0.2.0\n"
+            ),
+        }
+        if extra:
+            members["ds60_torch_training/unreviewed.py"] = b"VALUE = 'not prepared'\n"
+        lines = io.StringIO()
+        writer = csv.writer(lines, lineterminator="\n")
+        for name, raw in members.items():
+            encoded = base64.urlsafe_b64encode(hashlib.sha256(raw).digest()).rstrip(b"=").decode()
+            if bad_record and name == "ds60_torch_training/runner.py":
+                encoded = "0" * 43
+            writer.writerow((name, "sha256=" + encoded, len(raw)))
+        record = "ds60_spark_likelihood-0.2.0.dist-info/RECORD"
+        writer.writerow((record, "", ""))
+        members[record] = lines.getvalue().encode()
+        with zipfile.ZipFile(wheel, "w") as archive:
+            for name, raw in members.items():
+                archive.writestr(name, raw)
+        return wheel, primary
+
+    def test_integrated_sibling_sources_and_record_are_bound(self):
+        wheel, primary = self.integrated_wheel()
+        identity = inputs.wheel_identity(wheel, primary, "ds60_spark_likelihood", "0.2.0")
+        self.assertEqual(set(identity["torch_source_sha256"]), {"__init__.py", "runner.py"})
+        self.assertEqual(identity["wheel_sha256"], inputs.digest(wheel))
+
+    def test_integrated_sibling_mutation_record_and_extra_member_are_rejected(self):
+        for settings, message in (
+            ({"changed_sibling": True}, "exactly match"),
+            ({"bad_record": True}, "RECORD"),
+            ({"extra": True}, "exactly match"),
+        ):
+            with self.subTest(settings=settings):
+                wheel, primary = self.integrated_wheel(**settings)
+                with self.assertRaisesRegex(ValueError, message):
+                    inputs.wheel_identity(wheel, primary, "ds60_spark_likelihood", "0.2.0")
 
     def test_valid_exact_wheel_source_is_identified(self):
         self.write_wheel()

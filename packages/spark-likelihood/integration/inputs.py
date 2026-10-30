@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import base64
+import csv
 import hashlib
+import io
 import json
 import re
 import stat
@@ -38,7 +41,25 @@ def wheel_identity(wheel, source, import_name, version):
     }
     if any(path.is_symlink() for path in source.rglob("*.py")):
         raise ValueError("Copied Python sources must not be symlinks")
+    sibling_name = "ds60_torch_training" if import_name == "ds60_spark_likelihood" else None
+    sibling_source = source.parent / sibling_name if sibling_name is not None else None
+    sibling_expected = (
+        {
+            str(path.relative_to(sibling_source)): digest(path)
+            for path in sorted(sibling_source.rglob("*.py"))
+            if "__pycache__" not in path.parts
+        }
+        if sibling_source is not None and sibling_source.is_dir()
+        else {}
+    )
+    if sibling_source is not None and (
+        not sibling_expected or any(path.is_symlink() for path in sibling_source.rglob("*.py"))
+    ):
+        raise ValueError("Integrated Torch sources are missing or contain symlinks")
     metadata_prefix = import_name + "-" + version + ".dist-info/"
+    allowed = (import_name + "/", metadata_prefix)
+    if sibling_expected:
+        allowed += (sibling_name + "/",)
     try:
         with zipfile.ZipFile(wheel) as archive:
             seen = set()
@@ -52,7 +73,7 @@ def wheel_identity(wheel, source, import_name, version):
                     or ".." in path.parts
                     or "\\" in member.filename
                     or stat.S_ISLNK(member.external_attr >> 16)
-                    or not member.filename.startswith((import_name + "/", metadata_prefix))
+                    or not member.filename.startswith(allowed)
                     or total > 32 * 1024 * 1024
                 ):
                     raise ValueError("Unexpected or duplicate wheel member")
@@ -68,11 +89,40 @@ def wheel_identity(wheel, source, import_name, version):
                 for name in archive.namelist()
                 if name.startswith(import_name + "/") and name.endswith(".py")
             }
+            sibling_observed = {
+                name.removeprefix(sibling_name + "/"): hashlib.sha256(
+                    archive.read(name)
+                ).hexdigest()
+                for name in archive.namelist()
+                if sibling_expected and name.startswith(sibling_name + "/") and name.endswith(".py")
+            }
+            if sibling_expected:
+                rows = csv.reader(io.StringIO(archive.read(metadata_prefix + "RECORD").decode()))
+                records = {}
+                for row in rows:
+                    if len(row) != 3 or row[0] in records:
+                        raise ValueError("Malformed or duplicate integrated wheel RECORD")
+                    records[row[0]] = row[1:]
+                for namespace, names in ((import_name, observed), (sibling_name, sibling_observed)):
+                    for relative in names:
+                        member = namespace + "/" + relative
+                        raw = archive.read(member)
+                        encoded = (
+                            "sha256="
+                            + base64.urlsafe_b64encode(hashlib.sha256(raw).digest())
+                            .rstrip(b"=")
+                            .decode()
+                        )
+                        if records.get(member) != [encoded, str(len(raw))]:
+                            raise ValueError("Integrated wheel RECORD source identity differs")
     except (zipfile.BadZipFile, KeyError, AttributeError) as error:
         raise ValueError("Malformed package wheel or distribution metadata") from error
-    if not expected or expected != observed:
+    if not expected or expected != observed or sibling_expected != sibling_observed:
         raise ValueError("Prepared wheel does not exactly match this copied package source")
-    return {"python_source_sha256": observed, "wheel_sha256": digest(wheel), "version": version}
+    result = {"python_source_sha256": observed, "wheel_sha256": digest(wheel), "version": version}
+    if sibling_expected:
+        result["torch_source_sha256"] = sibling_observed
+    return result
 
 
 def native_identity(directory, package, architecture, version):

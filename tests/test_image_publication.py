@@ -38,17 +38,17 @@ def test_only_marked_main_head_pushes_can_reach_the_secret_gate() -> None:
     assert "vars." not in WORKFLOW.read_text() and "environment:" not in WORKFLOW.read_text()
 
 
-def test_gate_waits_for_source_checks_before_receipts_or_native_jobs() -> None:
+def test_promotion_waits_for_source_checks_while_builds_can_start_early() -> None:
     jobs = workflow()["jobs"]
     steps = jobs["gate"]["steps"]
-    wait = next(i for i, step in enumerate(steps) if "ci_release_status.py" in step.get("run", ""))
+    assert not any("ci_release_status.py" in step.get("run", "") for step in steps)
+    intent = next(i for i, step in enumerate(steps) if step.get("id") == "intent")
     upload = next(
         i
         for i, step in enumerate(steps)
         if step.get("uses", "").startswith("actions/upload-artifact@")
     )
-    assert wait < upload
-    assert "DOCKERHUB" not in json.dumps(steps[wait].get("env", {}))
+    assert intent < upload
     promotion_steps = jobs["promote"]["steps"]
     recheck = next(
         i for i, step in enumerate(promotion_steps) if "ci_release_status.py" in step.get("run", "")
@@ -68,7 +68,7 @@ def test_native_seed_and_workers_cover_both_platforms_and_all_ordinary_profiles(
         {"architecture": "arm64", "runner": "ubuntu-24.04-arm"},
     ]
     assert jobs["workers"]["needs"] == ["gate", "seed"]
-    assert jobs["workers"]["strategy"]["max-parallel"] == "8"
+    assert jobs["workers"]["strategy"]["max-parallel"] == "16"
     worker_rows = matrix(native=True, workers_only=True)["include"]
     ordinary = {
         line.split()[0]

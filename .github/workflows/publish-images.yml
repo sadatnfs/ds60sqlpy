@@ -36,10 +36,6 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: python scripts/docker_release.py gate --output work/release/gate.json --github-output "$GITHUB_OUTPUT"
-      - name: Wait for exact-revision source and Docker starter success
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python scripts/ci_release_status.py --report work/source-qualification.json
       - name: Derive the complete native worker matrix
         id: matrix
         run: echo "matrix=$(python scripts/ci_profiles.py --native --workers-only)" >> "$GITHUB_OUTPUT"
@@ -147,7 +143,7 @@ jobs:
     timeout-minutes: 150
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 16
       matrix: ${{ fromJSON(needs.gate.outputs.matrix) }}
     env:
       RELEASE_VERSION: ${{ needs.gate.outputs.version }}
