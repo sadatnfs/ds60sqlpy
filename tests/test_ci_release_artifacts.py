@@ -254,6 +254,7 @@ def test_timeout_retries_respect_one_total_deadline(monkeypatch: pytest.MonkeyPa
     [
         b"gh: HTTP 401: bad credentials private-token",
         b"gh: HTTP 403: permission denied private-token",
+        b"gh: HTTP 403: permission denied; rate limit not involved",
         b"gh: HTTP 404: missing private-token",
         b"gh: unknown failure private-token",
     ],
@@ -299,3 +300,22 @@ def test_mutating_api_flags_are_not_retried_or_invoked(monkeypatch: pytest.Monke
     monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: pytest.fail("Mutating call ran"))
     with pytest.raises(ValueError, match="read-only"):
         gate.gh(["api", "-X", "POST", "repos/example/repo"], maximum=100)
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ["api", "--input", "payload.json", "repos/example/repo/actions/runs/1/artifacts"],
+        ["api", "--field=x=y", "repos/example/repo/actions/runs/1/artifacts"],
+        ["api", "-Ffoo=bar", "repos/example/repo/actions/runs/1/artifacts"],
+        ["api", "-XPOST", "repos/example/repo/actions/runs/1/artifacts"],
+        ["api", "--method=GET", "repos/example/repo/actions/runs/1/artifacts"],
+        ["api", "graphql"],
+    ],
+)
+def test_only_closed_release_read_shapes_are_invoked(
+    monkeypatch: pytest.MonkeyPatch, arguments: list[str]
+) -> None:
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: pytest.fail("Unexpected API call"))
+    with pytest.raises(ValueError, match="read-only"):
+        gate.gh(arguments, maximum=100)

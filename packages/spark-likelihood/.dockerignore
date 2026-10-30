@@ -18,6 +18,8 @@
 !tooling/**
 !integration/
 !integration/**
+!training-integration/
+!training-integration/**
 **/__pycache__
 **/*.pyc
 **/.DS_Store

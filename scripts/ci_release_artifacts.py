@@ -202,8 +202,24 @@ def _read_failure(stderr: bytes) -> tuple[str, bool]:
         return "http_429", True
     if status is not None and 500 <= status <= 599:
         return "http_5xx", True
-    if status == 403 and any(phrase in lower for phrase in (b"rate limit", b"abuse detection")):
-        return "http_403_rate_limit", True
+    if status == 403:
+        denied = any(
+            phrase in lower
+            for phrase in (
+                b"permission denied",
+                b"bad credentials",
+                b"resource not accessible",
+                b"requires authentication",
+            )
+        )
+        rate_message = re.search(
+            rb"(?:^|\n)gh: (?:http 403: )?(?:api rate limit exceeded|"
+            rb"you have exceeded a secondary rate limit|secondary rate limit exceeded|"
+            rb"you have triggered an abuse detection mechanism)",
+            lower,
+        )
+        if not denied and rate_message:
+            return "http_403_rate_limit", True
     if status is not None:
         return "http_" + str(status), False
     if any(
@@ -222,14 +238,14 @@ def _read_failure(stderr: bytes) -> tuple[str, bool]:
 
 
 def gh(args: list[str], *, maximum: int) -> bytes:
+    endpoints = [arg for arg in args[1:] if arg not in {"--paginate", "--slurp"}]
     if (
         not args
         or args[0] != "api"
-        or any(
-            arg in {"-X", "--method", "-F", "--field", "-f", "--raw-field"}
-            or arg.startswith("--method=")
-            for arg in args
-        )
+        or len(endpoints) != 1
+        or not endpoints[0].startswith("repos/")
+        or "/actions/" not in endpoints[0]
+        or any(character.isspace() for character in endpoints[0])
     ):
         raise ValueError("Only read-only artifact API calls are admitted")
     deadline = time.monotonic() + READ_DEADLINE_SECONDS
