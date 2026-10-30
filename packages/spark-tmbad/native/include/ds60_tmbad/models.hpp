@@ -12,7 +12,8 @@ inline std::pair<double, double> unbounded() {
 inline Target
 target(std::string name, std::vector<std::string> fields, bool history,
        std::string conditioning, std::string uncertainty,
-       std::vector<std::string> columns = {"mean", "variance", "sd"}) {
+       std::vector<std::string> columns = std::vector<std::string>{
+           "mean", "variance", "sd"}) {
   return {std::move(name), std::move(fields),       std::move(columns),
           history,         std::move(conditioning), std::move(uncertainty)};
 }

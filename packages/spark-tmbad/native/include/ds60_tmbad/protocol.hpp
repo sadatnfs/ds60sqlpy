@@ -213,8 +213,9 @@ inline bool safe_identifier(const Json &value, std::size_t maximum = 128) {
          std::all_of(s.begin(), s.end(),
                      [](unsigned char c) { return c >= 32 && c <= 126; });
 }
-inline void keys(const Json &request, std::set<std::string> required,
-                 const std::set<std::string> &optional = {}) {
+inline void
+keys(const Json &request, std::set<std::string> required,
+     const std::set<std::string> &optional = std::set<std::string>{}) {
   require(request.is_object(), "Request must be an object");
   for (const auto &item : request.items())
     require(required.erase(item.key()) != 0 || optional.count(item.key()),
