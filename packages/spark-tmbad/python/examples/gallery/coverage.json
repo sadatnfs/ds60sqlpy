@@ -1,0 +1,429 @@
+{
+  "schema_version": 1,
+  "kind": "spark-tmbad-example-coverage",
+  "package_version": "0.1.0",
+  "status_semantics": {
+    "authored": "Source exists; no execution claim",
+    "not_run": "No retained current-artifact Spark execution receipt",
+    "pending_final_receipt": "Exploratory numerical checks exist separately; current source qualification not yet retained"
+  },
+  "models": [
+    {
+      "model_id": "ar1",
+      "python_entrypoint": "python/examples/gallery/ar1.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "conditional_history",
+        "stationary_new_series"
+      ],
+      "native_reference": "python/examples/validate_native_oracles.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "bernoulli_logistic",
+      "python_entrypoint": "python/examples/gallery/bernoulli_logistic.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "gamma_regression",
+      "python_entrypoint": "python/examples/gallery/gamma_regression.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "gaussian_ar1_random_intercept",
+      "python_entrypoint": "python/examples/gallery/gaussian_ar1_random_intercept.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "conditional_history",
+        "stationary_new_series"
+      ],
+      "forecast_targets": [
+        "conditional_history",
+        "stationary_new_series"
+      ],
+      "native_reference": "python/examples/validate_native_oracles.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "gaussian_random_intercept",
+      "python_entrypoint": "python/examples/gallery/gaussian_random_intercept.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "forecast_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "native_reference": "python/examples/validate_native_oracles.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "gaussian_random_intercept_laplace",
+      "python_entrypoint": "python/examples/gallery/gaussian_random_intercept_laplace.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "forecast_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "native_reference": "python/examples/validate_native_oracles.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "linear_gaussian",
+      "python_entrypoint": "python/examples/gallery/linear_gaussian.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "negative_binomial2",
+      "python_entrypoint": "python/examples/gallery/negative_binomial2.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "normal",
+      "python_entrypoint": "python/examples/gallery/normal.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "poisson_exposure",
+      "python_entrypoint": "python/examples/gallery/poisson_exposure.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "poisson_random_intercept",
+      "python_entrypoint": "python/examples/gallery/poisson_random_intercept.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "forecast_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "native_reference": "python/examples/validate_native_oracles.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "poisson_random_slope",
+      "python_entrypoint": "python/examples/gallery/poisson_random_slope.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "forecast_targets": [
+        "existing_group",
+        "new_group"
+      ],
+      "native_reference": "python/examples/validate_native_oracles.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "quadratic_gaussian",
+      "python_entrypoint": "python/examples/gallery/quadratic_gaussian.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    },
+    {
+      "model_id": "saturating_growth",
+      "python_entrypoint": "python/examples/gallery/saturating_growth.py",
+      "scala_entrypoint": "jvm/src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala",
+      "fixture": "python/examples/gallery/fixtures.json",
+      "example_status": "authored",
+      "fit": "fit_shared",
+      "prediction_targets": [
+        "response"
+      ],
+      "forecast_targets": [
+        "response"
+      ],
+      "native_reference": "python/examples/validate_row_references.py",
+      "native_status": "pending_final_receipt",
+      "spark_python_status": "passed",
+      "spark_scala_status": "not_run",
+      "evidence": [
+        {
+          "kind": "actual_python_spark_gallery",
+          "path": "qualification/arm64-python-gallery.json",
+          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        }
+      ]
+    }
+  ],
+  "selected_artifact_identity": {
+    "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+    "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+    "platform": {
+      "os": "linux",
+      "arch": "arm64"
+    },
+    "engine": {
+      "name": "TMBad",
+      "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+      "version": "1.9.25"
+    },
+    "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c"
+  }
+}

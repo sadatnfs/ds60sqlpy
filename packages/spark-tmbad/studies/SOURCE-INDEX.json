@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "retrieved_utc": "2026-10-29T22:38:25.546023+00:00",
+  "scope": "Primary-source analysis; upstream implementation is not vendored into this original study code.",
+  "repositories": [
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "commit_api": "https://api.github.com/repos/sadatnfs/AFModel/commits/master",
+      "license_expression": "MIT + file LICENSE",
+      "license_evidence": "AFModel/DESCRIPTION and AFModel/LICENSE.md"
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "commit_api": "https://api.github.com/repos/glmmTMB/glmmTMB/commits/master",
+      "license_expression": "AGPL-3",
+      "license_evidence": "glmmTMB/DESCRIPTION, pinned development version 1.1.15.9000"
+    }
+  ],
+  "files": [
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/DESCRIPTION",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/DESCRIPTION",
+      "sha256": "c8e80e08d1fec79270a45d50d12f01ed6c5c8f1fa4f4d908173d1bd709ea1b44",
+      "bytes": 926
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/LICENSE.md",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/LICENSE.md",
+      "sha256": "8e63d278aebdd0211fa75d695467e709e8c066c87d4266575b5e0bc085241393",
+      "bytes": 1070
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/src/AFModel.cpp",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/src/AFModel.cpp",
+      "sha256": "7270ff4663f39297799f3878b9a8144d74856649f8bc946c7213588f3975dc1b",
+      "bytes": 19624
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/R/run_model.R",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/R/run_model.R",
+      "sha256": "f51d7e63ad35254fc257ce4bf6c37fa7a6c68f9f0d370f69e742b6327dd37ef8",
+      "bytes": 3097
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/R/make_data_param.R",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/R/make_data_param.R",
+      "sha256": "4466fbd774da014f9551627980e70a73dbb1ba584ac34c6181484ab7126c562e",
+      "bytes": 8713
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/R/make_forecast.R",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/R/make_forecast.R",
+      "sha256": "f630d4aa62b2e856b510b83bf2387dd7fe836758894a5ffcadb81e28223da1e4",
+      "bytes": 5481
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/R/prior_coefs_mean.R",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/R/prior_coefs_mean.R",
+      "sha256": "9620678ce69117eddd1f6abbc5fa91a4cd36ef1c7fdbb430171af0694a224f7e",
+      "bytes": 1615
+    },
+    {
+      "repository": "sadatnfs/AFModel",
+      "revision": "5362baf5aa909d9792e0aeef2b9d17c8670841b9",
+      "path": "AFModel/R/simulate_rw_forecast.R",
+      "source_url": "https://github.com/sadatnfs/AFModel/blob/5362baf5aa909d9792e0aeef2b9d17c8670841b9/AFModel/R/simulate_rw_forecast.R",
+      "sha256": "f75a6b62ef6d27e73e3063a4cd6b02b64be6e61162d54bd5e99f8a2f8999a547",
+      "bytes": 2663
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/DESCRIPTION",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/DESCRIPTION",
+      "sha256": "fadd1ec435630112ff6bcc22356286db908bcf3738d716912089f04361c50cc8",
+      "bytes": 3530
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/src/glmmTMB.cpp",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/src/glmmTMB.cpp",
+      "sha256": "e5aaa9229f69e01630945d63e99d6e37dcb34c35b73e6264d12ae49a18745233",
+      "bytes": 49811
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/R/enum.R",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/R/enum.R",
+      "sha256": "9e6d3944f0c1bbff330369759cd6bdc84db8d807242cb979d0d3d5839cd08e3e",
+      "bytes": 1323
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/R/family.R",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/R/family.R",
+      "sha256": "260c51e4794bfcb4379b3dd9328f08114bb81d08b681007d1fcf95eb38b321f0",
+      "bytes": 28805
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/vignettes/covstruct.rmd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/vignettes/covstruct.rmd",
+      "sha256": "da9ecd0ab6d6ee918514b216317b1c353e8d90228992d0c57ca7e13962e63093",
+      "bytes": 41139
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/vignettes/priors.rmd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/vignettes/priors.rmd",
+      "sha256": "89e5b713b22cf35fb71c9059c42bcd6ccddb604f398b40417b9eb84cd9720857",
+      "bytes": 14077
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/man/predict.glmmTMB.Rd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/man/predict.glmmTMB.Rd",
+      "sha256": "2b4187d8349ccfbfc013ce4ff7b81dcf245d91773c2781f6bcef4d0d85200c11",
+      "bytes": 5913
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/man/simulate.glmmTMB.Rd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/man/simulate.glmmTMB.Rd",
+      "sha256": "8705489c473096c55a37e48c242c6f2f1c1ce24ffece7f357bf15a6fc9a12c55",
+      "bytes": 971
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/NAMESPACE",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/NAMESPACE",
+      "sha256": "f7d429c668c2a5499e5571b170faba9f956ef56d98b1ca73296a5987810b5637",
+      "bytes": 4683
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/R/priors.R",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/R/priors.R",
+      "sha256": "ffb1f5222d7901828cf2065df022685ac8592cf19253800760897b71e15fd062",
+      "bytes": 12985
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/man/glmmTMB.Rd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/man/glmmTMB.Rd",
+      "sha256": "6d6cd3a7e461c7bbb878cf90e4630de22fbd64ef63cec96c9dfb4c9998eaf70c",
+      "bytes": 11756
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/vignettes/sim.rmd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/vignettes/sim.rmd",
+      "sha256": "edd9158f8ce43fda42c6165ef5e6a78395292dba03d102f0b4f60eda4c96d222",
+      "bytes": 10484
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/vignettes/mcmc.rmd",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/vignettes/mcmc.rmd",
+      "sha256": "36a8331c4a55695de7c8a71b2d9f5e07830d187be9534dc34b99ff4f111bb65d",
+      "bytes": 9911
+    },
+    {
+      "repository": "glmmTMB/glmmTMB",
+      "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+      "path": "glmmTMB/R/predict.R",
+      "source_url": "https://github.com/glmmTMB/glmmTMB/blob/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/R/predict.R",
+      "sha256": "12c667c7b7f9bd36d349265589262f22796e3d59c7009df24e69087f52be55f3",
+      "bytes": 26096
+    }
+  ]
+}
