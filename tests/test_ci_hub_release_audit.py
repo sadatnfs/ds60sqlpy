@@ -13,10 +13,11 @@ from typing import Any
 
 import pytest
 
+from scripts import ci_hub_acceptance as hub
 from scripts import ci_hub_release_audit as audit
 from scripts import ci_hub_reverify as recovery
 from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError, sha256
-from scripts.docker_release import Context, catalog, index_body, latest_tag, version_tag
+from scripts.docker_release import Context, catalog, index_body, latest_tag, version_tag, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLISHED = "a" * 40
@@ -96,6 +97,7 @@ def test_full_receipt_covers_every_profile_and_matches_exported_version(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     receipt, _ = full_receipt()
+    monkeypatch.setattr(audit, "source_version", lambda root: context().version)
     profiles, versions, aliases = audit.receipt_indexes(receipt, context(), ROOT)
     assert len(profiles) == len(versions) == len(aliases) == 26
     receipt["version_tags"].pop(0)
@@ -172,7 +174,7 @@ def test_export_preserves_executable_source_and_refuses_tampering(
         Path(args[3].removeprefix("--output=")).write_bytes(data)
         return subprocess.CompletedProcess(args, 0, b"", b"")
 
-    monkeypatch.setattr(audit.subprocess, "run", run)
+    monkeypatch.setattr(subprocess, "run", run)
     exported = audit.export_source(request(), directory, tmp_path)
     assert exported["files"] == 2
     assert (directory / "source/classroom").stat().st_mode & 0o111
@@ -234,13 +236,14 @@ def test_selected_native_images_bind_canonical_indexes_and_exact_config_ids(
     monkeypatch: pytest.MonkeyPatch, architecture: str, letter: str
 ) -> None:
     receipt, bodies = full_receipt()
+    monkeypatch.setattr(audit, "source_version", lambda root: context().version)
     references = []
 
     def output(args: list[str], **kwargs: Any) -> bytes:
         references.append(args[-1])
         return bodies[args[-1]]
 
-    monkeypatch.setattr(audit.hub, "run_output", output)
+    monkeypatch.setattr(hub, "run_output", output)
     selected = ["app", "python-core", "r-statistics"]
     result = audit.selected_image_ids(context(), receipt, selected, architecture, True, ROOT)
     assert result == dict.fromkeys(selected, "sha256:" + letter * 64)
@@ -286,10 +289,10 @@ def test_module_audit_checks_actual_selective_pull_and_service_identities(
     preflight = {"published_tree": "c" * 40, "source_export": {"manifest_sha256": manifest_hash}}
     monkeypatch.setattr(audit, "prepared_identity", lambda *args: (preflight, receipt, context()))
     monkeypatch.setattr(audit, "verify_export", lambda *args: None)
-    monkeypatch.setattr(audit.hub, "native_engine", lambda *args: None)
+    monkeypatch.setattr(hub, "native_engine", lambda *args: None)
     expected = dict.fromkeys(["app", "python-core", "r-statistics"], "sha256:" + "1" * 64)
     monkeypatch.setattr(audit, "selected_image_ids", lambda *args: expected)
-    monkeypatch.setattr(audit.hub, "read_selection", lambda *args: None)
+    monkeypatch.setattr(hub, "read_selection", lambda *args: None)
     monkeypatch.setenv("DOCKERHUB_USERNAME", "example")
     phase = {"prepared": False, "started": False}
     references = [
@@ -317,7 +320,7 @@ def test_module_audit_checks_actual_selective_pull_and_service_identities(
     if defect == "extra-service":
         services.append("java-worker")
     monkeypatch.setattr(
-        audit.hub,
+        hub,
         "docker_items",
         lambda kind, *args: services if kind == "container" and phase["started"] else [],
     )
@@ -330,7 +333,7 @@ def test_module_audit_checks_actual_selective_pull_and_service_identities(
             return (args[-1] + " sha256:" + "1" * 64).encode()
         raise AssertionError(args)
 
-    monkeypatch.setattr(audit.hub, "run_output", output)
+    monkeypatch.setattr(hub, "run_output", output)
 
     def lifecycle(*args: Any, **kwargs: Any) -> dict[str, Any]:
         assert args[1:5] == ("partial", "r", False, "amd64")
@@ -351,7 +354,7 @@ def test_module_audit_checks_actual_selective_pull_and_service_identities(
             "resumed_observation": kwargs["started_check"](project, ["r-statistics"]),
         }
 
-    monkeypatch.setattr(audit.hub, "launch_and_resume", lifecycle)
+    monkeypatch.setattr(hub, "launch_and_resume", lifecycle)
     if defect is None:
         result = audit.accept(request(), directory, "r", "amd64", True, tmp_path)
         assert result["status"] == "accepted"
@@ -421,7 +424,7 @@ def test_preflight_source_guard_rejects_swapped_receipt_or_tree(
         "published_tree": "c" * 40,
         "receipt_sha256": sha256(raw),
     }
-    audit.write_json(tmp_path / "preflight.json", report)
+    write_json(tmp_path / "preflight.json", report)
     monkeypatch.setattr(audit, "verify_checkout", lambda *args: "c" * 40)
     assert audit.prepared_identity(request(), tmp_path, ROOT)[2] == context()
     monkeypatch.setattr(audit, "verify_checkout", lambda *args: "d" * 40)

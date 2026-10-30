@@ -531,6 +531,14 @@
     {
       "pattern": "courses/advanced-spark-modeling/projects/spark-tmb/scala/qualification-history/*.json",
       "reason": "Immutable historical native Scala/Spark/TMB qualification receipts. Preserve exact source/image/result evidence bytes; current qualification must not rewrite history."
+    },
+    {
+      "pattern": "packages/spark-tmbad/qualification/*.json",
+      "reason": "Immutable source-bound native, Python, Scala and executor qualification receipts. Preserve recorded bytes and hashes; new behavior requires new execution evidence."
+    },
+    {
+      "pattern": "packages/spark-tmbad/jvm/qualification.json",
+      "reason": "Immutable JVM compilation and runtime qualification receipt; preserve its source and artifact hash bindings."
     }
   ],
   "preserve": [
@@ -781,6 +789,22 @@
     {
       "path": "examples/native-ad-core/qualification.json",
       "reason": "Actual source-bound native automatic-differentiation qualification receipt. Preserve recorded evidence bytes; do not reformat or rewrite runtime results."
+    },
+    {
+      "path": "packages/spark-tmbad/python/examples/gallery/coverage.json",
+      "reason": "Maintained native gallery evidence index containing exact retained receipt and fixture hashes. Update through reviewed qualification, not a presentation-only rewrite."
+    },
+    {
+      "path": "packages/spark-tmbad/python/examples/gallery/fixtures.json",
+      "reason": "Deterministic native gallery fixture bytes bound by the retained Python and Scala execution receipts; preserve its canonical input identity."
+    },
+    {
+      "path": "packages/spark-tmbad/python/examples/row_reference_fixtures.json",
+      "reason": "Independently generated numerical reference constants with retained generator and package identities. Rebuild only through the explicit reference generator and oracle checks."
+    },
+    {
+      "path": "packages/spark-tmbad/studies/fixtures/smoke.json",
+      "reason": "Canonical compact shared study fixture with deterministic generator identity and retained fixture SHA256. Regenerate through studies/generate_fixtures.py, not a layout formatter."
     }
   ]
 }

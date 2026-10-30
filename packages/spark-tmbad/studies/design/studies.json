@@ -9,10 +9,7 @@
       "title": "Gaussian MLE, weights and partition invariance",
       "case": "normal_mle",
       "status": "paired runner source prepared; actual backend study gates not run",
-      "existing_lesson_links": [
-        "clp-002",
-        "asm-008"
-      ],
+      "existing_lesson_links": ["clp-002", "asm-008"],
       "worked_contrast": "Change partition sizes and distinguish replication weights from inverse-variance or sampling weights.",
       "source": "run_spark.py"
     },
@@ -21,10 +18,7 @@
       "title": "All-coordinate L2 and its actual prior",
       "case": "linear_all_coordinate_map",
       "status": "paired runner source prepared; actual backend study gates not run",
-      "existing_lesson_links": [
-        "clp-013",
-        "asm-008"
-      ],
+      "existing_lesson_links": ["clp-013", "asm-008"],
       "worked_contrast": "Compare zero versus nonzero L2 while recording that the intercept and log-scale are penalized too.",
       "source": "run_spark.py"
     },
@@ -33,10 +27,7 @@
       "title": "Conventional ridge with selected coefficients",
       "case": "ridge_selected",
       "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
-      "existing_lesson_links": [
-        "clp-013",
-        "bayes-003"
-      ],
+      "existing_lesson_links": ["clp-013", "bayes-003"],
       "worked_contrast": "Vary collinearity and prior precision, keep the intercept unpenalized explicitly, and compare an analytic Gaussian oracle.",
       "source": "run_reference.py"
     },
@@ -45,10 +36,7 @@
       "title": "Exact lasso, soft thresholding and KKT conditions",
       "case": "lasso_orthogonal",
       "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
-      "existing_lesson_links": [
-        "clp-013",
-        "asm-010"
-      ],
+      "existing_lesson_links": ["clp-013", "asm-010"],
       "worked_contrast": "Contrast coefficient sparsity with ridge and verify active and zero-coordinate KKT conditions; do not substitute smooth absolute values.",
       "source": "run_reference.py"
     },
@@ -57,10 +45,7 @@
       "title": "Correlated designs and elastic-net paths",
       "case": "elastic_net",
       "status": "planned",
-      "existing_lesson_links": [
-        "clp-014",
-        "bayes-013"
-      ],
+      "existing_lesson_links": ["clp-014", "bayes-013"],
       "worked_contrast": "Separate selection instability from prediction error using training-only scaling and nested tuning."
     },
     {
@@ -68,10 +53,7 @@
       "title": "Nonlinear growth and extrapolation",
       "case": "nonlinear_growth",
       "status": "paired runner source prepared; actual backend study gates not run",
-      "existing_lesson_links": [
-        "clp-006",
-        "tmb-010"
-      ],
+      "existing_lesson_links": ["clp-006", "tmb-010"],
       "worked_contrast": "Use matched curve families in different coordinates, then shorten the observed time range to expose weak identification.",
       "source": "run_spark.py"
     },
@@ -80,10 +62,7 @@
       "title": "Multiple starts and nonlinear identifiability",
       "case": "nonlinear_starts",
       "status": "planned",
-      "existing_lesson_links": [
-        "clp-014",
-        "tmb-008"
-      ],
+      "existing_lesson_links": ["clp-014", "tmb-008"],
       "worked_contrast": "Record every starting point and failure; choose the smallest training objective before viewing held-out outcomes."
     },
     {
@@ -91,10 +70,7 @@
       "title": "Pooling and complete-group Gaussian likelihoods",
       "case": "random_intercept",
       "status": "paired runner source prepared; actual backend study gates not run",
-      "existing_lesson_links": [
-        "asm-003",
-        "asm-033"
-      ],
+      "existing_lesson_links": ["asm-003", "asm-033"],
       "worked_contrast": "Change group imbalance and distinguish shared hyperparameters, independent fits and plug-in shrinkage.",
       "source": "run_spark.py"
     },
@@ -103,10 +79,7 @@
       "title": "Independent fits and boundary variance estimates",
       "case": "independent_boundaries",
       "status": "planned",
-      "existing_lesson_links": [
-        "asm-003",
-        "tmb-016"
-      ],
+      "existing_lesson_links": ["asm-003", "tmb-016"],
       "worked_contrast": "Study small-group failures and variance components at a boundary without calling one-group estimates identified."
     },
     {
@@ -114,10 +87,7 @@
       "title": "MLE, MAP and exact posterior targets",
       "case": "conjugate_targets",
       "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
-      "existing_lesson_links": [
-        "bayes-003",
-        "asm-036"
-      ],
+      "existing_lesson_links": ["bayes-003", "asm-036"],
       "worked_contrast": "Use Gaussian and Gamma-Poisson cases so posterior mean, mode and uncertainty cannot be conflated.",
       "source": "run_reference.py"
     },
@@ -126,10 +96,7 @@
       "title": "Coordinates, priors and Jacobians",
       "case": "prior_coordinates",
       "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
-      "existing_lesson_links": [
-        "clp-004",
-        "tmb-004"
-      ],
+      "existing_lesson_links": ["clp-004", "tmb-004"],
       "worked_contrast": "Compare positive-parameter and log-parameter MAP targets and verify density normalization under a change of measure.",
       "source": "run_reference.py"
     },
@@ -138,10 +105,7 @@
       "title": "Conditional versus unseen-group forecasts",
       "case": "group_forecasts",
       "status": "native API available; study planned",
-      "existing_lesson_links": [
-        "tmb-018",
-        "asm-036"
-      ],
+      "existing_lesson_links": ["tmb-018", "asm-036"],
       "worked_contrast": "Keep time and group holdouts separate and compare latent posterior uncertainty with new-group prior uncertainty."
     },
     {
@@ -149,10 +113,7 @@
       "title": "AR1 innovations, stationary variance and cadence",
       "case": "ar1_forecasts",
       "status": "native API available; study planned",
-      "existing_lesson_links": [
-        "tmb-015",
-        "clp-012"
-      ],
+      "existing_lesson_links": ["tmb-015", "clp-012"],
       "worked_contrast": "Compare innovation and stationary scales, negative autocorrelation, gaps and multi-step variance."
     },
     {
@@ -160,10 +121,7 @@
       "title": "Random-intercept AR1 forecasting dossier",
       "case": "panel_forecasts",
       "status": "native API available; study planned",
-      "existing_lesson_links": [
-        "tmb-024",
-        "clp-020"
-      ],
+      "existing_lesson_links": ["tmb-024", "clp-020"],
       "worked_contrast": "Use rolling origins and independent group holdouts, then evaluate pointwise and whole-path coverage."
     },
     {
@@ -171,10 +129,7 @@
       "title": "AFModel-inspired covariates and recursive trends",
       "case": "af_panel_trend",
       "status": "new prepared model required",
-      "existing_lesson_links": [
-        "tmb-021",
-        "tmb-024"
-      ],
+      "existing_lesson_links": ["tmb-021", "tmb-024"],
       "worked_contrast": "Specify original covariate scenarios and lag recursion with train-only transforms; do not reproduce operational helpers."
     },
     {
@@ -182,10 +137,7 @@
       "title": "First differences, inverse transforms and uncertainty",
       "case": "forecast_transforms",
       "status": "reference planned",
-      "existing_lesson_links": [
-        "tmb-024",
-        "bayes-015"
-      ],
+      "existing_lesson_links": ["tmb-024", "bayes-015"],
       "worked_contrast": "Back-transform complete forecast draws and compare mean of transformed draws with transformed mean."
     },
     {
@@ -193,10 +145,7 @@
       "title": "Process, latent and parameter uncertainty",
       "case": "uncertainty_layers",
       "status": "public evaluator and resampling interfaces pending",
-      "existing_lesson_links": [
-        "clp-018",
-        "bayes-016"
-      ],
+      "existing_lesson_links": ["clp-018", "bayes-016"],
       "worked_contrast": "Use repeated datasets to compare plug-in intervals, parameter bootstrap and actual posterior prediction."
     },
     {
@@ -204,10 +153,7 @@
       "title": "Separation and logistic regularization",
       "case": "logistic_map",
       "status": "existing package APIs available; study planned",
-      "existing_lesson_links": [
-        "clp-007",
-        "bayes-021"
-      ],
+      "existing_lesson_links": ["clp-007", "bayes-021"],
       "worked_contrast": "Create balanced and separated designs, track finite bounds, and distinguish regularization from posterior sampling."
     },
     {
@@ -215,10 +161,7 @@
       "title": "Poisson, NB1, NB2 and NB12 dispersion",
       "case": "count_dispersion",
       "status": "NB2 native subset; other models planned",
-      "existing_lesson_links": [
-        "clp-008",
-        "tmb-011"
-      ],
+      "existing_lesson_links": ["clp-008", "tmb-011"],
       "worked_contrast": "Vary mean and exposure so linear, quadratic and mixed variance laws can be distinguished."
     },
     {
@@ -226,10 +169,7 @@
       "title": "Zero inflation versus hurdle models",
       "case": "zeros_hurdles",
       "status": "new models required",
-      "existing_lesson_links": [
-        "clp-011",
-        "tmb-011"
-      ],
+      "existing_lesson_links": ["clp-011", "tmb-011"],
       "worked_contrast": "Simulate structural zeros separately from sampling zeros and evaluate normalized probabilities and distinct mean targets."
     },
     {
@@ -237,10 +177,7 @@
       "title": "Truncation, censoring and sample selection",
       "case": "selection",
       "status": "new models required",
-      "existing_lesson_links": [
-        "clp-009",
-        "tmb-011"
-      ],
+      "existing_lesson_links": ["clp-009", "tmb-011"],
       "worked_contrast": "Use the correct normalization or survival contribution rather than deleting observations or treating bounds as values."
     },
     {
@@ -248,10 +185,7 @@
       "title": "Binomial overdispersion and COM-binomial",
       "case": "bounded_counts",
       "status": "new models required",
-      "existing_lesson_links": [
-        "clp-007",
-        "tmb-011"
-      ],
+      "existing_lesson_links": ["clp-007", "tmb-011"],
       "worked_contrast": "Separate trial size, probability and latent heterogeneity; compare overdispersion with underdispersion."
     },
     {
@@ -259,10 +193,7 @@
       "title": "Beta, ordered-beta and ordinal boundaries",
       "case": "bounded_outcomes",
       "status": "new models required",
-      "existing_lesson_links": [
-        "clp-004",
-        "bayes-011"
-      ],
+      "existing_lesson_links": ["clp-004", "bayes-011"],
       "worked_contrast": "Distinguish continuous interior proportions, endpoint masses and ordered discrete categories."
     },
     {
@@ -270,10 +201,7 @@
       "title": "Gamma, lognormal, Student-t and skewness",
       "case": "continuous_families",
       "status": "Gamma native subset; other models planned",
-      "existing_lesson_links": [
-        "bayes-011",
-        "clp-010"
-      ],
+      "existing_lesson_links": ["bayes-011", "clp-010"],
       "worked_contrast": "Match mean and variance deliberately, then change tail behavior and compare robust predictive scores."
     },
     {
@@ -281,10 +209,7 @@
       "title": "Tweedie compound Poisson outcomes",
       "case": "tweedie",
       "status": "new model and normalizer qualification required",
-      "existing_lesson_links": [
-        "tmb-011",
-        "bayes-011"
-      ],
+      "existing_lesson_links": ["tmb-011", "bayes-011"],
       "worked_contrast": "Distinguish a point mass at zero from positive continuous values and validate limiting regimes."
     },
     {
@@ -292,10 +217,7 @@
       "title": "COM-Poisson, generalized Poisson and Bell",
       "case": "count_normalizers",
       "status": "new models and special functions required",
-      "existing_lesson_links": [
-        "tmb-011",
-        "clp-003"
-      ],
+      "existing_lesson_links": ["tmb-011", "clp-003"],
       "worked_contrast": "Quantify normalizer and derivative error before comparing dispersion fits."
     },
     {
@@ -303,10 +225,7 @@
       "title": "Conditional mean, zero and dispersion submodels",
       "case": "three_predictors",
       "status": "new typed model schemas required",
-      "existing_lesson_links": [
-        "tmb-016",
-        "asm-002"
-      ],
+      "existing_lesson_links": ["tmb-016", "asm-002"],
       "worked_contrast": "Keep independent design matrices, offsets and parameter blocks explicit."
     },
     {
@@ -314,10 +233,7 @@
       "title": "Correlated random intercepts and slopes",
       "case": "correlated_slopes",
       "status": "current native diagonal-prior subset only",
-      "existing_lesson_links": [
-        "tmb-016",
-        "asm-033"
-      ],
+      "existing_lesson_links": ["tmb-016", "asm-033"],
       "worked_contrast": "Vary prior correlation and distinguish it from posterior covariance induced by observations."
     },
     {
@@ -325,10 +241,7 @@
       "title": "Diagonal, compound-symmetric and Toeplitz covariance",
       "case": "covariance_basics",
       "status": "reference and new exact models planned",
-      "existing_lesson_links": [
-        "tmb-015",
-        "clp-012"
-      ],
+      "existing_lesson_links": ["tmb-015", "clp-012"],
       "worked_contrast": "Check positive definiteness, redundant residual variance and the allowed negative-correlation range."
     },
     {
@@ -336,10 +249,7 @@
       "title": "Unequal-time OU and heteroskedastic AR1",
       "case": "irregular_time",
       "status": "new exact models required",
-      "existing_lesson_links": [
-        "tmb-015",
-        "clp-012"
-      ],
+      "existing_lesson_links": ["tmb-015", "clp-012"],
       "worked_contrast": "Use real time gaps and separate heterogeneous marginal scales from innovation scales."
     },
     {
@@ -347,10 +257,7 @@
       "title": "Spatial exponential, Gaussian and Matern kernels",
       "case": "spatial_blocks",
       "status": "bounded independent-block research only",
-      "existing_lesson_links": [
-        "bayes-016",
-        "asm-011"
-      ],
+      "existing_lesson_links": ["bayes-016", "asm-011"],
       "worked_contrast": "Declare block independence honestly; a globally connected field cannot be split into unrelated Spark groups."
     },
     {
@@ -358,10 +265,7 @@
       "title": "Reduced rank, proportional and shared covariance",
       "case": "covariance_rank",
       "status": "new model and identification design required",
-      "existing_lesson_links": [
-        "tmb-008",
-        "bayes-013"
-      ],
+      "existing_lesson_links": ["tmb-008", "bayes-013"],
       "worked_contrast": "Diagnose rotations, rank boundaries and known covariance scales before reporting uncertainties."
     },
     {
@@ -369,10 +273,7 @@
       "title": "ML, REML and variance-component comparisons",
       "case": "reml",
       "status": "not implemented in either package",
-      "existing_lesson_links": [
-        "tmb-008",
-        "tmb-029"
-      ],
+      "existing_lesson_links": ["tmb-008", "tmb-029"],
       "worked_contrast": "Compare inferential targets and boundary behavior; never relabel marginal ML as REML."
     },
     {
@@ -380,10 +281,7 @@
       "title": "Sandwich inference and cluster bootstrap",
       "case": "robust_uncertainty",
       "status": "public evaluator/Hessian and resampling design pending",
-      "existing_lesson_links": [
-        "clp-018",
-        "asm-036"
-      ],
+      "existing_lesson_links": ["clp-018", "asm-036"],
       "worked_contrast": "Use the scientific independence unit and compare observed information with misspecification-robust uncertainty."
     },
     {
@@ -391,10 +289,7 @@
       "title": "SBC, posterior diagnostics and Monte Carlo error",
       "case": "posterior_calibration",
       "status": "analytic reference plus separately prepared sampler planned",
-      "existing_lesson_links": [
-        "bayes-008",
-        "bayes-015"
-      ],
+      "existing_lesson_links": ["bayes-008", "bayes-015"],
       "worked_contrast": "Draw parameters from the prior for SBC; distinguish fixed-truth coverage and effective posterior sample size."
     },
     {
@@ -402,10 +297,7 @@
       "title": "Failure accounting and reproducible study operations",
       "case": "study_operations",
       "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
-      "existing_lesson_links": [
-        "tmb-014",
-        "asm-004"
-      ],
+      "existing_lesson_links": ["tmb-014", "asm-004"],
       "worked_contrast": "Retain failed replicates, environment/source identities and MCSE; never turn a short smoke test into a coverage or scaling claim.",
       "source": "run_reference.py"
     },
@@ -414,11 +306,7 @@
       "title": "Global Gaussian coupling through bounded sufficient statistics",
       "case": "global_gaussian_low_rank",
       "status": "streaming statistics and exact Gaussian reference tested; actual Spark/core integration pending",
-      "existing_lesson_links": [
-        "asm-011",
-        "tmb-015",
-        "bayes-016"
-      ],
+      "existing_lesson_links": ["asm-011", "tmb-015", "bayes-016"],
       "worked_contrast": "Compare one genuinely shared low-rank Gaussian latent vector with incorrect independent partition effects, using Gram statistics, determinant/Schur identities and independent dense oracles.",
       "source": "run_global_reference.py"
     }

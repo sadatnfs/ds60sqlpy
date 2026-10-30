@@ -12,6 +12,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +34,7 @@ WARNING = (
 
 
 class BuildLoggingTests(unittest.TestCase):
-    def summarize(self, payload: bytes, name: str = "sass") -> tuple[str, bytes, dict]:
+    def summarize(self, payload: bytes, name: str = "sass") -> tuple[str, bytes, dict[str, Any]]:
         output = io.StringIO()
         raw = io.BytesIO()
         summary = installer.DiagnosticSummary(name, output)
