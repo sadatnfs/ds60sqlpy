@@ -228,6 +228,28 @@ jobs:
         run: >-
           python scripts/ci_classroom.py prepare --group "$CI_GROUP" --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
+      - name: Export complete R package build diagnostics from the local image
+        if: success() && matrix.group == 'r'
+        shell: bash
+        run: |
+          set -euo pipefail
+          repository="$(awk '$1 == "r-statistics" { print $3 }' docker/classroom-images.tsv)"
+          image_id="$(docker image inspect "$repository:$RELEASE_VERSION" --format '{{.Id}}')"
+          exporter="ds60-r-logs-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$ARCHITECTURE"
+          trap 'docker rm "$exporter" >/dev/null' EXIT
+          docker create --pull=never --name "$exporter" --entrypoint /bin/true "$image_id" >/dev/null
+          mkdir -p work/r-build-logs
+          docker cp "$exporter:/usr/local/share/ds60-build-logs/r/." work/r-build-logs/
+          printf '%s\n' "$image_id" > work/r-build-logs/image-id.txt
+          printf '%s\n' "$GITHUB_SHA" > work/r-build-logs/source-revision.txt
+      - name: Retain complete R source-build logs and hashes
+        if: always() && matrix.group == 'r'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: r-build-logs-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/r-build-logs/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Record immutable selected worker IDs before qualification
         if: needs.intent.outputs.mode == 'publish'
         run: >-

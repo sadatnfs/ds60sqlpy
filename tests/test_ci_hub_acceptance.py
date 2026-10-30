@@ -733,3 +733,59 @@ def test_diagnostics_redact_token_before_bounded_export(
     assert "secret-token-value" not in target.read_text()
     assert "Authorization: [redacted]" not in target.read_text()
     assert all(len(section) <= 24_100 for section in document["sections"])
+
+
+@pytest.mark.parametrize("failure", [None, "prepared", "started"])
+def test_pull_only_audit_hooks_run_before_start_and_keep_cleanup_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str | None
+) -> None:
+    root, calls = fake_resumable_hub(monkeypatch, tmp_path, app_recreated=False, port_changed=False)
+
+    def prepared(project: str, workers: list[str]) -> dict[str, Any]:
+        calls.append("prepared-audit")
+        assert workers == ["python-core"]
+        if failure == "prepared":
+            raise ReleaseError("selective pull mismatch")
+        return {"selected_images": True}
+
+    def started(project: str, workers: list[str]) -> dict[str, Any]:
+        calls.append("started-audit")
+        if failure == "started":
+            raise ReleaseError("unexpected service")
+        return {"selected_services": True}
+
+    def execute() -> dict[str, Any]:
+        return hub.launch_and_resume(
+            context(),
+            "full",
+            None,
+            True,
+            "amd64",
+            root / "work/diag.json",
+            root,
+            project="ds60-hub-amd64-12345-2",
+            pull_first=True,
+            prepared_check=prepared,
+            started_check=started,
+        )
+
+    if failure is None:
+        result = execute()
+        assert result["prepared_observation"] == {"selected_images": True}
+        assert result["started_observation"] == result["resumed_observation"]
+        assert calls.count("started-audit") == 2
+        commands = [call for call in calls if call.startswith("command:")]
+        assert commands == [
+            "command:bash classroom pull",
+            "command:bash classroom resume",
+            "command:bash classroom stop",
+            "command:bash classroom resume",
+        ]
+        assert calls.index("prepared-audit") < calls.index("command:bash classroom resume")
+    else:
+        with pytest.raises(ReleaseError):
+            execute()
+        assert "diagnostics" in calls
+        if failure == "prepared":
+            assert "command:bash classroom resume" not in calls
+    assert calls[-1] == "cleanup"

@@ -1,0 +1,136 @@
+name: Audit published full classroom release
+
+on:
+  workflow_dispatch:
+    inputs:
+      published_run_id:
+        description: Completed full publisher run with a successful promotion
+        required: true
+        type: string
+      published_sha:
+        description: Exact marked main commit used by that full publisher
+        required: true
+        type: string
+      published_attempt:
+        description: Attempt that uploaded the full published promotion receipt
+        required: true
+        type: string
+      check_latest:
+        description: Require current latest aliases to match this release
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+
+# Serialize this read-only audit with publication so pointers stay stable.
+concurrency:
+  group: classroom-dockerhub-publication
+  cancel-in-progress: false
+
+env:
+  PUBLISHED_RUN_ID: ${{ inputs.published_run_id }}
+  PUBLISHED_SHA: ${{ inputs.published_sha }}
+  PUBLISHED_ATTEMPT: ${{ inputs.published_attempt }}
+
+jobs:
+  preflight:
+    name: Bind published full source and promotion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    outputs:
+      matrix: ${{ steps.bound.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Verify current source checks and exact full promotion before deriving groups
+        id: bound
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ci_hub_release_audit.py preflight \
+            --published-run-id "$PUBLISHED_RUN_ID" \
+            --published-sha "$PUBLISHED_SHA" \
+            --published-attempt "$PUBLISHED_ATTEMPT" \
+            --directory work/full-hub-audit --github-output "$GITHUB_OUTPUT"
+      - name: Retain the bounded source and promotion binding
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: full-hub-audit-preflight-attempt-${{ github.run_attempt }}
+          path: |
+            work/full-hub-audit/preflight.json
+            work/full-hub-audit/release.json
+          if-no-files-found: error
+          retention-days: 30
+
+  native-module-pull:
+    name: Pull selected modules (${{ matrix.group }}, ${{ matrix.architecture }})
+    needs: preflight
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.preflight.outputs.matrix) }}
+    env:
+      ARCHITECTURE: ${{ matrix.architecture }}
+      MODULE_GROUP: ${{ matrix.group }}
+      CHECK_LATEST: ${{ inputs.check_latest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Export the original published tree with byte and mode checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "$GITHUB_RUN_ID" \
+            --name "full-hub-audit-preflight-attempt-$GITHUB_RUN_ATTEMPT" \
+            --dir work/full-hub-audit
+          python scripts/ci_hub_release_audit.py prepare \
+            --published-run-id "$PUBLISHED_RUN_ID" \
+            --published-sha "$PUBLISHED_SHA" \
+            --published-attempt "$PUBLISHED_ATTEMPT" \
+            --directory work/full-hub-audit
+      - name: Pull exact canonical profiles and check selective setup and saved-state resume
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-full-hub-audit"
+          mkdir -p "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          latest_args=()
+          if [ "$CHECK_LATEST" != true ]; then latest_args+=(--skip-latest); fi
+          python scripts/ci_hub_release_audit.py accept \
+            --published-run-id "$PUBLISHED_RUN_ID" \
+            --published-sha "$PUBLISHED_SHA" \
+            --published-attempt "$PUBLISHED_ATTEMPT" \
+            --directory work/full-hub-audit --group "$MODULE_GROUP" \
+            --architecture "$ARCHITECTURE" "${latest_args[@]}"
+      - name: Retain exact native pull and resume evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: full-hub-audit-${{ matrix.group }}-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: |
+            work/full-hub-audit/acceptance.json
+            work/full-hub-audit/source/work/hub-audit-diagnostics.json
+          if-no-files-found: ignore
+          retention-days: 30

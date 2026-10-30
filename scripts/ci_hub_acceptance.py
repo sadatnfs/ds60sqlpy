@@ -19,6 +19,7 @@ import sys
 import urllib.error
 import urllib.request
 import zipfile
+from collections.abc import Callable
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
@@ -746,6 +747,9 @@ def launch_and_resume(
     root: Path = ROOT,
     *,
     project: str | None = None,
+    pull_first: bool = False,
+    prepared_check: Callable[[str, list[str]], dict[str, Any]] | None = None,
+    started_check: Callable[[str, list[str]], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     project = project_name(architecture) if project is None else project
     match = PROJECT.fullmatch(project)
@@ -772,7 +776,20 @@ def launch_and_resume(
     command.extend(["--project", project, "--port", "0", "--database-port", "0", "--no-browser"])
     primary_error: Exception | None = None
     try:
-        run_visible(command, timeout=2700, root=root)
+        observations: dict[str, Any] = {}
+        if pull_first:
+            run_visible([*command[:2], "pull", *command[2:]], timeout=2700, root=root)
+            if prepared_check is not None:
+                observations["prepared_observation"] = prepared_check(project, workers)
+            run_visible(
+                ["bash", "classroom", "resume", "--project", project, "--no-browser"],
+                timeout=900,
+                root=root,
+            )
+        else:
+            run_visible(command, timeout=2700, root=root)
+        if started_check is not None:
+            observations["started_observation"] = started_check(project, workers)
         initial_url, initial_port = classroom_url(project, root)
         browser_readback(initial_url)
         read_selection(project, context, latest_profile, root)
@@ -806,6 +823,8 @@ def launch_and_resume(
             timeout=600,
             root=root,
         )
+        if started_check is not None:
+            observations["resumed_observation"] = started_check(project, workers)
         resumed_url, resumed_port = classroom_url(project, root)
         after = {service: compose_ids(project, service, root) for service in before}
         volumes_after = set(docker_items("volume", project, root))
@@ -839,6 +858,7 @@ def launch_and_resume(
         if violations:
             raise ReleaseError("Hosted stop/resume failed: " + "; ".join(violations))
         return {
+            **observations,
             "profiles_started": workers,
             "saved_version": context.version,
             "latest_resolved": not skip_latest,
