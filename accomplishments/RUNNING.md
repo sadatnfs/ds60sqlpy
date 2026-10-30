@@ -4,6 +4,8 @@ This log is edited by a maintainer. The source-derived `INDEX.md` and
 `inventory.json` are rebuilt separately. Each entry names the evidence tier
 and its remaining gate so a source change is not confused with publication or
 learner acceptance.
+The [qualification summary](qualification-2026-10-30.json) records the exact
+source revisions, hosted runs, artifact hashes and limits for this completion.
 
 ## 2026-10-30
 
@@ -53,9 +55,12 @@ learner acceptance.
 - **Optional R/TMB/glmmTMB 24-case reference passed both native platforms.**
   At source `53b33b02d99ac615b992127228cbb9a463b7ceef`, hosted run
   `41122123106` passed 24/24 registered cases on AMD64 and ARM64, including
-  the previously failed nonlinear-growth case. The AMD64 fit used a genuine
-  status-0 L-BFGS-B restart from a guarded Newton seed; the score, Hessian and
-  restoration checks remained in force. Evidence tier: exact-source hosted
+  the previously failed nonlinear-growth case. AMD64 first had an unsuccessful
+  nlminb attempt, then accepted a genuine status-0 L-BFGS-B refinement with
+  the original score, positive-definite Hessian and restored-objective checks.
+  ARM64 accepted its first nlminb attempt. Neither actual case used a Newton
+  seed; both image builds separately passed the guarded Newton-seed positive
+  and refusal controls. Evidence tier: exact-source hosted
   native qualification. The earlier AMD64 failure and local ARM64 v2 receipts
   remain historical. See `packages/spark-tmbad/reference/README.md`.
 - **Independent Spark/PyTorch executor training is integrated as package
@@ -74,6 +79,59 @@ learner acceptance.
   The final publication plan is consolidated as 1.3.0 and still requires its
   own exact-source gates, promotion and fresh pull/resume audit. See
   `docs/dockerhub.md` and `scripts/ci_release_artifacts.py`.
+
+- **Classroom 1.3.0 source completed independent hosted build gates while
+  publication remained pending.** At source
+  `0db974c6d021a0bce5b9260577c122ad29bca876`, Application builds run
+  `41139388006` completed its portable starter job, and standalone
+  Spark/PyTorch run `41139477838` completed native AMD64 and ARM64
+  builds, installed/offline checks, likelihood worker-loss recovery and
+  executor-training/checkpoint/DataFrame cases. Evidence tier: exact-source
+  hosted build/runtime checks. Course validation run `41139388074` passed
+  all seven required jobs; its optional advanced imports job was skipped.
+  Publisher run `41139387934` passed all 36 native ordinary worker build
+  and qualification steps, alongside both App/Core seed jobs. Combined
+  scientific checks, canonical promotion and fresh Hub acceptance still
+  require final readback; no canonical
+  promotion or fresh Docker Hub pull/resume is claimed here. An exact local
+  maintenance readback at 23:26 UTC found zero running containers, all 40
+  protected containers and 51 protected volumes present, and all 65 protected
+  images among 67 retained images. The Linux overlayfs engine and reviewed
+  disk expansion were recorded with a complete supported snapshot. The local
+  deliverables assembly made no Docker state changes.
+
+- **The repository now has a maintained lookup for future Codex work.**
+  `accomplishments/INDEX.md` and `inventory.json` index 2,277 registered
+  lessons, variants, packages, models, APIs, capabilities and study IDs.
+  `index.py build`, `check` and `search` keep the generated lookup tied to its
+  sources; this running log retains dated evidence separately. The index is
+  included in the portable starter and source package and linked from agent
+  and contributor guidance. Planned studies remain marked as planned.
+- **Spark deployment teaching now covers the full submission route.**
+  `courses/spark-deployment/` covers Compose and Kubernetes, batch submission,
+  Jupyter sessions, custom images, driver and executor networking, ports,
+  secure live UI access, History Server and event logs, storage, credentials,
+  RBAC, resources and troubleshooting. The owned Compose lab is separate from
+  cloud instructions. Authored Kubernetes guidance is not a cloud deployment
+  acceptance claim.
+- **Supported standalone and inline source formatting was completed.**
+  Guarded formatting preserves executable meaning, mathematical expressions
+  and retained runtime evidence. The generated accomplishment lookup precedes
+  shared guide, TeX and reader generation. The final ordered generation
+  produced 201 readers with 6,550 references and 3,519 TeX expressions.
+  Current-source hosted formatting acceptance remains separately recorded by
+  Course validation.
+- **Independent modeling and CPU training packages are distributable.**
+  `packages/spark-tmbad/` includes the 23-model native registry, Python and
+  Scala entrypoints, named Gaussian priors, exact proximal L1 penalties,
+  fixed-coordinate and prepared-point interfaces, prediction and forecasting.
+  `packages/spark-likelihood/` installs the original likelihood API and the
+  separate `ds60_torch_training` namespace in one 0.2.0 distribution, with
+  explicit single-executor and two-rank CPU execution, supported normal Torch
+  model/loss/optimizer usage, immutable DataFrame shards and explicit resume.
+  Both folders include their own build, dependency, example and documentation
+  routes. MAP estimates are not posterior samples; accepted bounded execution
+  does not establish arbitrary-program or unlimited-scale support.
 
 ## Maintenance rule
 
