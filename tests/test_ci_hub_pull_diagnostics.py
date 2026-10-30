@@ -7,6 +7,7 @@ import io
 import json
 import platform
 import urllib.error
+from email.message import Message
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
@@ -44,6 +45,8 @@ def hosted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         "GITHUB_EVENT_NAME": "workflow_dispatch",
         "GITHUB_REF": "refs/heads/main",
         "GITHUB_RUN_ID": "12345",
+        "GITHUB_SHA": "a" * 40,
+        "GITHUB_RUN_ATTEMPT": "1",
         "DOCKER_CONFIG": str(config),
         "RUNNER_TEMP": str(tmp_path),
         "DOCKERHUB_USERNAME": "example",
@@ -133,8 +136,15 @@ class Registry:
             )
         if self.head_status != 200:
             headers["Retry-After"] = "60"
+            message_headers = Message()
+            for key, value in headers.items():
+                message_headers[key] = value
             raise urllib.error.HTTPError(
-                request.full_url, self.head_status, SECRET, headers, io.BytesIO(SECRET.encode())
+                request.full_url,
+                self.head_status,
+                SECRET,
+                message_headers,
+                io.BytesIO(SECRET.encode()),
             )
         return Response(200, headers, b"", head=True)
 
@@ -269,3 +279,91 @@ def test_quota_header_allowlist_rejects_unexpected_strings_and_private_headers()
         "window_seconds": 21600,
         "retry_after_seconds": 60,
     }
+
+
+def test_shared_metadata_error_returns_only_static_category(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import subprocess
+
+    def rejected(args: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.CompletedProcess(
+            args, 1, stdout=b"", stderr=("HTTP429 pull rate limit " + SECRET + " " + IP).encode()
+        )
+
+    monkeypatch.setattr(subprocess, "run", rejected)
+    with pytest.raises(ReleaseError) as caught:
+        hub.run_output(
+            ["docker", "buildx", "imagetools", "inspect", "example/ds60sqlpy:1.1.0"], root=tmp_path
+        )
+    assert "hub-pull-rate-limit" in str(caught.value)
+    assert SECRET not in str(caught.value) and IP not in str(caught.value)
+
+
+def test_operational_cli_records_observations_without_claiming_acceptance(
+    hosted: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import subprocess
+
+    root = tmp_path / "source"
+    monkeypatch.setattr(diagnostic, "__file__", str(root / "scripts/diagnostic.py"))
+    monkeypatch.setattr(
+        diagnostic,
+        "inspect_hub",
+        lambda *args: {
+            "pulls_allowed": False,
+            "quota_interpretation": "unknown-not-unlimited",
+            "requests": {"image_pulls": 0, "manifest_gets": 0},
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda args, **kwargs: subprocess.CompletedProcess(
+            args, 0, stdout=b"false true 2\n", stderr=SECRET.encode()
+        ),
+    )
+    assert diagnostic.main(["--version", "1.1.0", "--report", "work/observation.json"]) == 0
+    report = json.loads((root / "work/observation.json").read_text())
+    assert report["scope"] == "registry-metadata-only-no-classroom-or-source-acceptance"
+    assert report["status"] == "blocked"
+    assert report["engine_transport"] == {
+        "http_proxy_configured": False,
+        "https_proxy_configured": True,
+        "registry_mirror_count": 2,
+    }
+    assert SECRET not in json.dumps(report)
+
+
+def test_metadata_workflow_is_separate_from_full_source_and_pull_acceptance() -> None:
+    root = Path(__file__).resolve().parents[1]
+    workflow = (root / ".github/workflows/inspect-registry-metadata.yml").read_text()
+    assert "workflow_dispatch:" in workflow and "  push:" not in workflow
+    assert "needs: diagnostic-tests" in workflow and "max-parallel: 1" in workflow
+    assert "--require-hashes" in workflow and "--only-binary=:all:" in workflow
+    assert "ci_hub_pull_diagnostics.py --version" in workflow
+    assert "docker pull" not in workflow and "docker push" not in workflow
+    assert "docker build" not in workflow and "ci_hub_release_audit.py accept" not in workflow
+    assert "contents: read" in workflow and "actions: read" in workflow
+    full = (root / "scripts/ci_hub_release_audit.py").read_text()
+    assert "source_ci = recovery.current_source_jobs(request)" in full
+
+
+def test_minimal_diagnostic_tools_match_the_existing_uv_lock() -> None:
+    import tomllib
+
+    root = Path(__file__).resolve().parents[1]
+    packages = {
+        row["name"]: row for row in tomllib.loads((root / "uv.lock").read_text())["package"]
+    }
+    requirements = (root / "requirements/registry-diagnostic-tests.lock").read_text().splitlines()
+    checked = set()
+    for line in requirements:
+        if not line or line.startswith("#"):
+            continue
+        requirement, digest = line.split(" --hash=")
+        name, version = requirement.split("==")
+        assert packages[name]["version"] == version
+        assert digest in {wheel["hash"] for wheel in packages[name]["wheels"]}
+        checked.add(name)
+    assert checked == {"pytest", "iniconfig", "packaging", "pluggy", "pygments"}

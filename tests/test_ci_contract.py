@@ -164,9 +164,18 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             assert "workflow_dispatch:" in workflow and "  push:" not in workflow
             assert "fetch-depth: 0" in workflow
             assert "fromJSON(needs.preflight.outputs.matrix)" in workflow
-            assert "max-parallel: 4" in workflow
+            assert "max-parallel: 1" in workflow
             assert "docker_release.py promote" not in workflow
             assert "docker_release.py stage" not in workflow
+        elif path.name == "inspect-registry-metadata.yml":
+            assert runners == ["ubuntu-24.04", "${{ matrix.runner }}"]
+            assert "workflow_dispatch:" in workflow and "  push:" not in workflow
+            assert "max-parallel: 1" in workflow
+            assert "contents: read" in workflow and "actions: read" in workflow
+            assert "ci_hub_pull_diagnostics.py" in workflow
+            assert "--require-hashes" in workflow
+            assert "docker pull" not in workflow and "docker push" not in workflow
+            assert "docker_release.py" not in workflow
         elif path.name == "verify-published-images.yml":
             assert runners == ["${{ matrix.runner }}"]
             assert "runner: ubuntu-24.04-arm" in workflow

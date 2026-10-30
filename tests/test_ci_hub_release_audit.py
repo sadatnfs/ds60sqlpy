@@ -16,6 +16,8 @@ import pytest
 from scripts import ci_hub_acceptance as hub
 from scripts import ci_hub_release_audit as audit
 from scripts import ci_hub_reverify as recovery
+from scripts import ci_profiles
+from scripts import ci_release_artifacts as artifacts
 from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError, sha256
 from scripts.docker_release import Context, catalog, index_body, latest_tag, version_tag, write_json
 
@@ -435,3 +437,297 @@ def test_preflight_source_guard_rejects_swapped_receipt_or_tree(
     (tmp_path / "release.json").write_bytes(raw + b"\n")
     with pytest.raises(ReleaseError, match="preflight differs"):
         audit.prepared_identity(request(), tmp_path, ROOT)
+
+
+def prior_acceptance(group: str = "cpp", architecture: str = "amd64") -> dict[str, Any]:
+    current = context()
+    profiles = catalog(ROOT)
+    workers = ci_profiles.selected(group, ROOT)
+    selected = list(dict.fromkeys(["app", "python-core", *workers]))
+    services = sorted(
+        {
+            "lab",
+            "postgres",
+            "classroom-init",
+            *[audit.service_for_profile(key, ROOT) for key in selected if key != "app"],
+        }
+    )
+    references = {
+        current.repository + ":" + version_tag(profiles[key], current.version) for key in selected
+    }
+    references.update(
+        current.repository + ":" + latest_tag(profiles[key]) for key in ("app", workers[0])
+    )
+    return {
+        "schema_version": 1,
+        "kind": "ds60-full-hub-module-audit",
+        "status": "accepted",
+        "group": group,
+        "architecture": architecture,
+        "version": current.version,
+        "saved_version": current.version,
+        "published_revision": current.revision,
+        "published_run_id": current.run_id,
+        "published_tree": "d" * 40,
+        "verification": {"revision": "c" * 40, "run_id": "9000", "run_attempt": "1"},
+        "profiles_pulled": selected,
+        "profiles_started": workers,
+        "persistent_volumes": 3,
+        "latest_aliases_checked": True,
+        "latest_resolved": True,
+        "stop_resume_same_stateful_containers": True,
+        "app_image_unchanged": True,
+        "learning_marker_retained": True,
+        "browser_readback_ok": True,
+        "prepared_observation": {
+            "no_runtime_resources": True,
+            "release_references": sorted(references),
+            "images": [
+                {
+                    "profile": key,
+                    "reference": current.repository
+                    + ":"
+                    + version_tag(profiles[key], current.version),
+                    "image_id": "sha256:" + "1" * 64,
+                }
+                for key in selected
+            ],
+        },
+        "started_observation": {"services": services, "profile_images_match_promotion": True},
+        "resumed_observation": {"services": services, "profile_images_match_promotion": True},
+    }
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [None, "status", "source", "verifier", "image", "service", "marker", "reference", "profiles"],
+)
+def test_prior_acceptance_retains_exact_published_and_lifecycle_identity(
+    mutation: str | None,
+) -> None:
+    value = prior_acceptance()
+    if mutation == "status":
+        value["status"] = "failed"
+    elif mutation == "source":
+        value["published_revision"] = "e" * 40
+    elif mutation == "verifier":
+        value["verification"]["revision"] = "e" * 40
+    elif mutation == "image":
+        value["prepared_observation"]["images"][0]["image_id"] = "unbound"
+    elif mutation == "service":
+        value["started_observation"]["services"] = ["lab"]
+    elif mutation == "marker":
+        value["learning_marker_retained"] = False
+    elif mutation == "reference":
+        value["prepared_observation"]["release_references"].append(
+            "example/ds60sqlpy:ci-unqualified"
+        )
+    elif mutation == "profiles":
+        value["profiles_pulled"] = ["app", "python-core"]
+
+    def validate() -> None:
+        audit.validate_prior_acceptance(
+            value,
+            context=context(),
+            source=ROOT,
+            verifier_sha="c" * 40,
+            run_id="9000",
+            attempt="1",
+            group="cpp",
+            architecture="amd64",
+        )
+
+    if mutation is None:
+        validate()
+    else:
+        with pytest.raises(ReleaseError):
+            validate()
+
+
+def test_recovery_defaults_to_one_unresolved_canary_and_never_repeats_passed_cases() -> None:
+    matrix = ci_profiles.matrix(native=True, root=ROOT)
+    reused = [{"case": "python-core/amd64"}, {"case": "python-core/arm64"}]
+    report = audit.execution_selection(
+        matrix, reused, resume=True, requested_cases=[], diagnostic_only=False
+    )
+    assert report["selected_cases"] == ["python-web/amd64"]
+    assert len(report["unresolved_cases"]) == len(matrix["include"]) - 2
+    assert not set(report["selected_cases"]) & set(report["accepted_cases"])
+    explicit = audit.execution_selection(
+        matrix,
+        reused,
+        resume=True,
+        requested_cases=["python-web/arm64", "r/amd64"],
+        diagnostic_only=False,
+    )
+    assert explicit["selected_cases"] == ["python-web/arm64", "r/amd64"]
+    with pytest.raises(ReleaseError, match="never accepted"):
+        audit.execution_selection(
+            matrix,
+            reused,
+            resume=True,
+            requested_cases=["python-core/amd64"],
+            diagnostic_only=False,
+        )
+    diagnostic = audit.execution_selection(
+        matrix, reused, resume=True, requested_cases=[], diagnostic_only=True
+    )
+    assert len(diagnostic["selected_cases"]) == 2
+    assert {row["architecture"] for row in diagnostic["execution_matrix"]["include"]} == {
+        "amd64",
+        "arm64",
+    }
+
+
+@pytest.mark.parametrize("text", ["0", "123,123", "../123", "1;command", "1, 2"])
+def test_recovery_inputs_are_bounded_data_not_commands(text: str) -> None:
+    with pytest.raises(ReleaseError):
+        audit.recovery_inputs(text)
+
+
+def test_explicit_recovery_case_limit_is_bounded() -> None:
+    assert audit.recovery_inputs("r/amd64,scala-spark/arm64", cases=True) == [
+        "r/amd64",
+        "scala-spark/arm64",
+    ]
+    with pytest.raises(ReleaseError):
+        audit.recovery_inputs(",".join(f"group-{i}/amd64" for i in range(7)), cases=True)
+
+
+def zip_report(files: dict[str, bytes]) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as bundle:
+        for name, raw in files.items():
+            bundle.writestr(name, raw)
+    return buffer.getvalue()
+
+
+def test_recovery_preserves_raw_passed_receipt_and_does_not_fetch_failed_case(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    value = prior_acceptance()
+    raw = json.dumps(value, indent=3).encode() + b"\n"
+    preflight = {
+        "kind": "ds60-full-hub-audit-preflight",
+        "status": "passed",
+        "verification": {"revision": "c" * 40, "run_id": "9000", "run_attempt": "1"},
+        "published": asdict(context()),
+        "resume_runs": [],
+    }
+    blobs = {
+        "77": zip_report({"preflight.json": json.dumps(preflight).encode()}),
+        "78": zip_report({"acceptance.json": raw}),
+    }
+    artifacts_list = [
+        {
+            "id": int(identifier),
+            "name": name,
+            "expired": False,
+            "size_in_bytes": len(blobs[identifier]),
+            "digest": sha256(blobs[identifier]),
+        }
+        for identifier, name in (
+            ("77", "full-hub-audit-preflight-attempt-1"),
+            ("78", "full-hub-audit-cpp-amd64-attempt-1"),
+        )
+    ]
+    artifacts_list.append({"id": 79, "name": "full-hub-audit-r-arm64-attempt-1"})
+    jobs = [
+        {
+            "id": 100,
+            "name": "Bind published full source and promotion",
+            "run_attempt": 1,
+            "conclusion": "success",
+        },
+        {
+            "id": 101,
+            "name": "Pull selected modules (cpp, amd64)",
+            "run_attempt": 1,
+            "conclusion": "success",
+        },
+        {
+            "id": 102,
+            "name": "Pull selected modules (r, arm64)",
+            "run_attempt": 1,
+            "conclusion": "failure",
+        },
+    ]
+    for job in jobs:
+        job.update(status="completed", head_sha="c" * 40, run_id=9000)
+    run = {
+        "id": 9000,
+        "run_attempt": 1,
+        "event": "workflow_dispatch",
+        "head_branch": "main",
+        "head_sha": "c" * 40,
+        "path": ".github/workflows/audit-published-release.yml",
+        "status": "completed",
+        "conclusion": "failure",
+    }
+    monkeypatch.setattr(recovery, "gh_json", lambda *args, **kwargs: run)
+    monkeypatch.setattr(
+        recovery,
+        "gh_pages",
+        lambda path: [{"artifacts": artifacts_list}] if "/artifacts?" in path else [{"jobs": jobs}],
+    )
+    monkeypatch.setattr(
+        recovery, "git", lambda args, **kwargs: b"" if args[0] == "merge-base" else b"d" * 40
+    )
+    fetched = []
+
+    def gh(args: list[str], **kwargs: Any) -> bytes:
+        identifier = args[-1].split("/")[-2]
+        fetched.append(identifier)
+        assert identifier != "79"
+        return blobs[identifier]
+
+    monkeypatch.setattr(artifacts, "gh", gh)
+    receipts, runs = audit.collect_prior_acceptances(
+        request(), context(), ROOT, tmp_path, ["9000"], root=ROOT
+    )
+    assert runs == ["9000"] and len(receipts) == 1
+    assert receipts[0]["case"] == "cpp/amd64" and receipts[0]["receipt_sha256"] == sha256(raw)
+    assert (tmp_path / receipts[0]["receipt_path"]).read_bytes() == raw
+    assert fetched == ["77", "78"]
+    tampered = dict(artifacts_list[1], digest="sha256:" + "0" * 64)
+    with pytest.raises(ReleaseError, match="GitHub digest"):
+        audit.prior_artifact(tampered, "example/classroom")
+
+
+def test_accept_command_checks_registry_before_any_classroom_pull(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(recovery, "dispatch_request", lambda *args: request())
+    monkeypatch.setattr(audit, "ROOT", tmp_path)
+    calls = []
+
+    def blocked(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        assert kwargs["require_pulls"] is True
+        calls.append("diagnostic")
+        raise ReleaseError("quota exhausted")
+
+    monkeypatch.setattr(audit, "diagnose", blocked)
+    monkeypatch.setattr(
+        audit, "accept", lambda *args: pytest.fail("Blocked quota reached classroom pull")
+    )
+    assert (
+        audit.main(
+            [
+                "accept",
+                "--published-sha",
+                PUBLISHED,
+                "--published-run-id",
+                "10000",
+                "--published-attempt",
+                "1",
+                "--directory",
+                "work/audit",
+                "--group",
+                "r",
+                "--architecture",
+                "arm64",
+            ]
+        )
+        == 2
+    )
+    assert calls == ["diagnostic"]

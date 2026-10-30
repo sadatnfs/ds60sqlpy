@@ -1,0 +1,88 @@
+name: Inspect classroom registry metadata only
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Canonical app version to observe; no images are pulled
+        required: true
+        default: "1.1.0"
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: classroom-dockerhub-publication
+  cancel-in-progress: false
+
+jobs:
+  diagnostic-tests:
+    name: Focused registry diagnostic tests only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Install only the hash-locked diagnostic test tools
+        run: >-
+          python -m pip install --disable-pip-version-check --no-deps --require-hashes
+          --only-binary=:all: -r requirements/registry-diagnostic-tests.lock
+      - name: Verify metadata privacy and read-only request boundaries
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: >-
+          python -m pytest -q -o addopts='' tests/test_ci_hub_pull_diagnostics.py
+
+  metadata:
+    name: Observe registry metadata (${{ matrix.architecture }})
+    needs: diagnostic-tests
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Observe auth propagation, canonical tag status and quota without pulling
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/ds60-registry-metadata"
+          mkdir -p "$DOCKER_CONFIG"
+          chmod 700 "$DOCKER_CONFIG"
+          trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+          printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          python scripts/ci_hub_pull_diagnostics.py --version "$RELEASE_VERSION" \
+            --report work/registry-metadata/observation.json
+      - name: Retain sanitized observations only
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: registry-metadata-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/registry-metadata/observation.json
+          if-no-files-found: ignore
+          retention-days: 30

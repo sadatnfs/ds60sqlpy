@@ -7,20 +7,34 @@ bodies are never returned or logged. HEAD observations do not download images.
 
 from __future__ import annotations
 
+import argparse
 import base64
 import hmac
+import json
 import os
 import platform
 import re
 import ssl
 import stat
+import subprocess
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-from scripts.docker_registry import ACCEPT, NAMESPACE, NoRedirect, ReleaseError, json_object
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.docker_registry import (  # noqa: E402
+    ACCEPT,
+    NAMESPACE,
+    NoRedirect,
+    ReleaseError,
+    json_object,
+)
 
 MAX_CONFIG = 64 * 1024
 HUB_KEYS = frozenset(
@@ -60,6 +74,7 @@ def hosted_guard() -> None:
         or os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch"
         or os.environ.get("GITHUB_REF") != "refs/heads/main"
         or re.fullmatch(r"[1-9][0-9]{0,19}", os.environ.get("GITHUB_RUN_ID", "")) is None
+        or re.fullmatch(r"[a-f0-9]{40}", os.environ.get("GITHUB_SHA", "")) is None
         or platform.system() != "Linux"
     ):
         raise ReleaseError("Registry diagnostics run only in an explicit hosted main dispatch")
@@ -141,11 +156,11 @@ def config_observation(
     entries = [value for key, value in auths.items() if key in HUB_KEYS and isinstance(value, dict)]
     result["hub_entry_present"] = bool(entries)
     expected = base64.b64encode((username + ":" + secret).encode("utf-8")).decode("ascii")
-    values = [
-        entry.get("auth")
-        for entry in entries
-        if isinstance(entry.get("auth"), str) and entry.get("auth")
-    ]
+    values: list[str] = []
+    for entry in entries:
+        value = entry.get("auth")
+        if isinstance(value, str) and value:
+            values.append(value)
     if values:
         result["inline_auth_matches_environment"] = all(
             value.isascii() and hmac.compare_digest(value, expected) for value in values
@@ -266,6 +281,7 @@ def inspect_hub(
     if (
         NAMESPACE.fullmatch(namespace) is None
         or username != namespace
+        or len(version) > 32
         or re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version) is None
         or not secret
         or len(secret) > 4096
@@ -331,3 +347,100 @@ def inspect_hub(
             "no IP headers are retained.",
         ],
     }
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Operational observation only, separate from the full classroom audit gate."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--version", required=True)
+    parser.add_argument("--report", type=Path, required=True)
+    args = parser.parse_args(argv)
+    report: dict[str, Any] = {
+        "schema_version": 1,
+        "kind": "ds60-hub-head-diagnostic",
+        "scope": "registry-metadata-only-no-classroom-or-source-acceptance",
+        "status": "checking",
+    }
+    root = Path(__file__).resolve().parents[1]
+    target = args.report if args.report.is_absolute() else root / args.report
+    try:
+        hosted_guard()
+        if not target.resolve().is_relative_to(root / "work") or any(
+            parent.is_symlink() for parent in (target, *target.parents)
+        ):
+            raise ReleaseError(
+                "Keep operational registry diagnostics beneath the owned work directory"
+            )
+        child = {
+            key: value
+            for key, value in os.environ.items()
+            if key
+            not in {
+                "DOCKERHUB_USERNAME",
+                "DOCKERHUB_TOKEN",
+                "GH_TOKEN",
+                "GITHUB_TOKEN",
+                "DOCKER_DEFAULT_PLATFORM",
+            }
+        }
+        report.update(inspect_hub(os.environ.get("DOCKERHUB_USERNAME", ""), args.version, child))
+        report["verification"] = {
+            "revision": os.environ.get("GITHUB_SHA", ""),
+            "run_id": os.environ["GITHUB_RUN_ID"],
+            "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+        }
+        report["observed_version"] = args.version
+        report["host_architecture"] = platform.machine().lower()
+        report["process_transport"] = {
+            "http_proxy_configured": bool(
+                os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy")
+            ),
+            "https_proxy_configured": bool(
+                os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+            ),
+        }
+        command = [
+            "docker",
+            "info",
+            "--format",
+            "{{if .HTTPProxy}}true{{else}}false{{end}} "
+            "{{if .HTTPSProxy}}true{{else}}false{{end}} "
+            "{{len .RegistryConfig.Mirrors}}",
+        ]
+        observed = subprocess.run(command, env=child, capture_output=True, check=False, timeout=30)
+        fields = observed.stdout.decode("ascii", "replace").strip().split()
+        if (
+            observed.returncode == 0
+            and len(fields) == 3
+            and fields[0] in {"true", "false"}
+            and fields[1] in {"true", "false"}
+            and re.fullmatch(r"[0-9]{1,4}", fields[2])
+        ):
+            report["engine_transport"] = {
+                "http_proxy_configured": fields[0] == "true",
+                "https_proxy_configured": fields[1] == "true",
+                "registry_mirror_count": int(fields[2]),
+            }
+        else:
+            report["engine_transport"] = {
+                "observable": False,
+                "error_category": command_failure_category(observed.stderr),
+            }
+        report["status"] = "observed" if report["pulls_allowed"] else "blocked"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n")
+        print(
+            "Registry metadata observation retained; no image pulls or registry writes performed."
+        )
+        return 0
+    except (OSError, ValueError, ReleaseError, subprocess.SubprocessError):
+        # Do not serialize arbitrary exception text from authentication/config parsing.
+        print(
+            "Operational registry observation failed its hosted, path or metadata checks.",
+            file=sys.stderr,
+        )
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -460,6 +460,7 @@ def validate_prior_acceptance(
     if (
         not isinstance(observed, list)
         or len(observed) != len(references)
+        or any(not isinstance(item, str) for item in observed)
         or set(observed) != references
     ):
         raise ReleaseError("Prior acceptance contains an unexpected selected pull reference")
@@ -491,7 +492,7 @@ def collect_prior_acceptances(
     root: Path,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Retain raw passed receipts and their original run identities without replay."""
-    pending = [(run_id, frozenset()) for run_id in requested_runs]
+    pending: list[tuple[str, frozenset[str]]] = [(run_id, frozenset()) for run_id in requested_runs]
     visited: set[str] = set()
     accepted: dict[str, dict[str, Any]] = {}
     while pending:
@@ -518,6 +519,8 @@ def collect_prior_acceptances(
             not in {path, path + "@main", path + "@refs/heads/main", path + "@" + revision}
             or run.get("status") != "completed"
             or run.get("conclusion") not in {"success", "failure"}
+            or type(run.get("run_attempt")) is not int
+            or run["run_attempt"] < 1
         ):
             raise ReleaseError("Recovery requires a completed main audit from this repository")
         recovery.git(["merge-base", "--is-ancestor", revision, "HEAD"], root=root)
@@ -550,6 +553,9 @@ def collect_prior_acceptances(
                 if job.get("name") == "Bind published full source and promotion"
                 and str(job.get("run_attempt")) == attempt
                 and job.get("conclusion") == "success"
+                and job.get("status") == "completed"
+                and job.get("head_sha") == revision
+                and job.get("run_id") == int(run_id)
             ]
             if len(successful) != 1:
                 continue
@@ -587,6 +593,9 @@ def collect_prior_acceptances(
                 if job.get("name") == name
                 and str(job.get("run_attempt")) == attempt
                 and job.get("conclusion") == "success"
+                and job.get("status") == "completed"
+                and job.get("head_sha") == revision
+                and job.get("run_id") == int(run_id)
             ]
             if not matching:
                 continue
@@ -666,6 +675,10 @@ def execution_selection(
         selected = []
         for architecture in ARCHITECTURES:
             candidates = [key for key in unresolved if by_case[key]["architecture"] == architecture]
+            if not candidates:
+                candidates = [
+                    key for key in by_case if by_case[key]["architecture"] == architecture
+                ]
             if candidates:
                 selected.append(candidates[0])
     return {
@@ -675,7 +688,9 @@ def execution_selection(
         "selected_cases": selected,
         "execution_matrix": {"include": [by_case[key] for key in selected]},
         "diagnostic_only": diagnostic_only,
-        "scope_complete_before_run": not unresolved,
+        "retained_coverage_complete": not unresolved,
+        "retained_receipts_are_historical": True,
+        "current_registry_availability_confirmed": False,
     }
 
 
@@ -711,7 +726,9 @@ def diagnose(
                     "docker",
                     "info",
                     "--format",
-                    "{{if .HTTPProxy}}true{{else}}false{{end}} {{if .HTTPSProxy}}true{{else}}false{{end}} {{len .RegistryConfig.Mirrors}}",
+                    "{{if .HTTPProxy}}true{{else}}false{{end}} "
+                    "{{if .HTTPSProxy}}true{{else}}false{{end}} "
+                    "{{len .RegistryConfig.Mirrors}}",
                 ],
                 root=root,
             )
