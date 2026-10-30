@@ -3,8 +3,10 @@ ARG R_BASE_IMAGE=r-base:4.6.1@sha256:ad9b3bbca751f3ead77704fed4c20246127647b3d56
 FROM ${R_BASE_IMAGE}
 USER root
 ARG PREPARED_OS_PACKAGES=0
+# The pinned r-base installs R and its libraries from unstable; use that suite
+# for matching development packages instead of the inherited testing preference.
 RUN if [ "$PREPARED_OS_PACKAGES" = 0 ]; then \
-      apt-get update && apt-get install -y --no-install-recommends \
+      apt-get update && apt-get install -y -t unstable --no-install-recommends \
         python3 g++ gfortran make cmake pkg-config libnlopt-dev libicu-dev \
         libcurl4-openssl-dev libssl-dev libxml2-dev libblas-dev liblapack-dev ca-certificates \
       && rm -rf /var/lib/apt/lists/*; \

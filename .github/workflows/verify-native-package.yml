@@ -87,8 +87,8 @@ jobs:
           flags=(--rm --pull=never --network=none --read-only --cpus=2 --memory=4g --pids-limit=1024
             --cap-drop=ALL --security-opt=no-new-privileges --hostname localhost
             --env SPARK_LOCAL_IP=127.0.0.1 --env JAVA_TOOL_OPTIONS='-Duser.home=/tmp -XX:ActiveProcessorCount=2'
-            --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777
-            --tmpfs /work:rw,exec,nosuid,nodev,size=536870912,mode=1777
+            --tmpfs '/tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777'
+            --tmpfs '/work:rw,exec,nosuid,nodev,size=536870912,mode=1777'
             --mount "type=bind,src=$REPORTS,dst=/out")
           docker run "${flags[@]}" --entrypoint python3 "$IMAGE" \
             /src/python/examples/validate_native_oracles.py --manifest /opt/spark-tmbad/artifact.json --case all \
@@ -115,8 +115,8 @@ jobs:
           flags=(--rm --pull=never --network=none --read-only --cpus=2 --memory=4g --pids-limit=1024
             --cap-drop=ALL --security-opt=no-new-privileges --hostname localhost
             --env SPARK_LOCAL_IP=127.0.0.1 --env JAVA_TOOL_OPTIONS='-Duser.home=/tmp -XX:ActiveProcessorCount=2'
-            --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777
-            --tmpfs /work:rw,exec,nosuid,nodev,size=536870912,mode=1777
+            --tmpfs '/tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777'
+            --tmpfs '/work:rw,exec,nosuid,nodev,size=536870912,mode=1777'
             --mount "type=bind,src=$REPORTS,dst=/out")
           docker run "${flags[@]}" --entrypoint python3 "$IMAGE" /src/jvm/build_checks.py \
             --production-jar /opt/spark-tmbad/spark-tmbad.jar --output /out/checks.jar \
