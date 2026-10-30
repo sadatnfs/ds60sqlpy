@@ -1,8 +1,14 @@
 from pathlib import Path
 import json
+import sys
 import textwrap
 
 ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 SPECS = {}
 
 
@@ -200,6 +206,8 @@ Task: {e["prompt"]}
 
 Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
 """
+        document = canonical_markdown(document, root=ROOT, path=guide)
+        answer = canonical_markdown(answer, root=ROOT, path=explanation)
         (ROOT / guide).write_text(document)
         (ROOT / explanation).write_text(answer)
         if reading:

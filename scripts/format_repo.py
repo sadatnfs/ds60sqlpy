@@ -637,7 +637,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     if missing:
         parser.error("Missing tools: " + ", ".join(missing) + ". Use ./scripts/format-repo.")
-    from scripts import format_inline_code
+    from scripts import format_inline_code, inline_format_contracts
+
+    active = {language for language in chosen if groups.get(language)}
+    checked = inline_format_contracts.verify(ROOT, active)
+    if checked:
+        print(f"Verified {checked} parser-only inline guard contracts.", flush=True)
 
     # Fences in durable authoring strings are updated before Python/JSON source
     # style, so the same pass leaves both containers and embedded code canonical.

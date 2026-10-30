@@ -88,7 +88,7 @@ object ParameterDocument {
     val columns = target.columns.map(options.prefix + _).toSet
     val metadata = new MetadataBuilder().putString("parameter_set_id", origin.id)
       .putString("purpose", origin.purpose).putString("parameter_digest", origin.parameterDigest).build()
-    frame.select(frame.schema.fieldNames.map { name =>
+    frame.select(frame.schema.fieldNames.toVector.map { name =>
       if (columns(name)) Data.literal(name).as(name, metadata) else Data.literal(name)
     }: _*)
   }

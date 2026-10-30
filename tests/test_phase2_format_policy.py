@@ -25,6 +25,15 @@ ROOT = Path(__file__).resolve().parents[1]
         "courses/advanced-spark-modeling/projects/spark-tmb/scala/qualification.json",
         "courses/advanced-spark-modeling/projects/spark-tmb/scala/qualification-history/earlier.json",
         "examples/native-ad-core/qualification.json",
+        "packages/spark-tmbad/reference/qualification/case-gaussian-ridge.json",
+        "packages/spark-tmbad/python/examples/new_model_references/rows-v3.json",
+        "packages/spark-tmbad/python/tests/fixtures/jvm-target-v2/schema2-bfgs-sum.json",
+        "packages/spark-tmbad/jvm/oracles/convex-targets.json",
+        "courses/advanced-spark-modeling/guides/asm-001.md",
+        "courses/apache-data-platforms/guides/adp-001.md",
+        "courses/custom-likelihood-pytorch/guides/clp-001.md",
+        "courses/python-web/guides/pyweb-001.md",
+        "courses/spark-deployment/guides/spd-001.md",
     ],
 )
 def test_generated_metadata_and_exact_receipts_remain_preserved(path: str) -> None:

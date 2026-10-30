@@ -1,0 +1,75 @@
+{
+  "kind": "derived-ledger-of-unchanged-failed-method-records",
+  "scope": "No reruns, retuning or classification changes",
+  "failures": [
+    {
+      "study": "sim-022",
+      "replicate": 0,
+      "scenario": "binomial_truth",
+      "method": "beta_binomial",
+      "status": "failed",
+      "optimizer_status": "line_search_failed",
+      "projected_gradient_inf": 1.759224406983062e-06,
+      "parameters": [
+        -0.3372863462320759,
+        0.679661934234835,
+        6.0
+      ],
+      "failure_category": "optimizer_not_certified_by_declared_stationarity",
+      "canonical_shard_sha256": "b283a0f6ab09828f8c9d9e4d895cb19c8078f9c8dffd21caa65415ac79371ccb",
+      "no_fitted_predictions_or_metrics": true
+    },
+    {
+      "study": "sim-020",
+      "replicate": 2,
+      "scenario": "poisson_truth",
+      "method": "zero_inflated",
+      "status": "failed",
+      "optimizer_status": "function_stalled_without_stationarity",
+      "projected_gradient_inf": 2.2303114710631178e-06,
+      "parameters": [
+        0.07786783810453407,
+        0.49376870087451796,
+        -5.599565517953986,
+        3.0
+      ],
+      "failure_category": "optimizer_not_certified_by_declared_stationarity",
+      "canonical_shard_sha256": "c8f7bfc8b4cdd94c0942de8ff46b11579c220a557f7016c96f77f4794b383582",
+      "no_fitted_predictions_or_metrics": true
+    },
+    {
+      "study": "sim-022",
+      "replicate": 3,
+      "scenario": "binomial_truth",
+      "method": "beta_binomial",
+      "status": "failed",
+      "optimizer_status": "line_search_failed",
+      "projected_gradient_inf": 1.8584231418206087e-06,
+      "parameters": [
+        -0.3490400496436897,
+        0.9684174563913932,
+        6.0
+      ],
+      "failure_category": "optimizer_not_certified_by_declared_stationarity",
+      "canonical_shard_sha256": "85b9d6ad3d1a03d23cba9a3d90d22f47e1f20d5c872489a0def49fdb021dfdc0",
+      "no_fitted_predictions_or_metrics": true
+    },
+    {
+      "study": "sim-024",
+      "replicate": 7,
+      "scenario": "symmetric_contamination",
+      "method": "gaussian",
+      "status": "failed",
+      "optimizer_status": "function_stalled_without_stationarity",
+      "projected_gradient_inf": 1.2355165441846339e-06,
+      "parameters": [
+        0.0842102189639148,
+        0.3229487175578295,
+        1.0656429331918669
+      ],
+      "failure_category": "optimizer_not_certified_by_declared_stationarity",
+      "canonical_shard_sha256": "f6daad990b6c12807a3437f4cad44b676aafd90f02d7228a64aaa099216a64d7",
+      "no_fitted_predictions_or_metrics": true
+    }
+  ]
+}

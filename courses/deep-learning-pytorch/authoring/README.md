@@ -1,6 +1,6 @@
 # PyTorch course authoring sources
 
-The original topic specifications and renderer generate all 36 bundles while preserving reviewed track IDs, prerequisites and paired TensorFlow IDs. Run `python courses/deep-learning-pytorch/authoring/build.py` from the repository root. Authoring uses the Python standard library and does not import PyTorch or execute training.
+The original topic specifications and renderer generate all 36 bundles while preserving reviewed track IDs, prerequisites and paired TensorFlow IDs. Run `python courses/deep-learning-pytorch/authoring/build.py` from the repository root. Authoring uses Python and the pinned Ruff formatter from the repository quality environment. It does not import PyTorch or execute training.
 
 `specs.py` owns the literal fixtures, helpers, exercise programs, basic concepts and framework comparisons. `depth_reviews.py` owns the foundation review, shared prose corrections and review-matrix builder. `depth_reviews_advanced.py` supplies the independently reviewed advanced chapters through the same callback. `render.py` publishes guides, learner worksheets, executable references and explained solutions. Edit these durable sources before regenerating; direct edits to generated artifacts will be detected by the regeneration test.
 
@@ -41,3 +41,25 @@ link and grouped-test gates. Run only this directory's documented generator;
 Check the generated diff and execute changed references in their declared
 runtime. A generation pass, parser result or historical receipt is not new
 runtime evidence. Preserve learner data and immutable evidence files.
+
+## Canonical displayed code
+
+The owner renderer passes Markdown through the shared guarded fence formatter
+before writing it. Python fences use the pinned Ruff tool already present in
+the Core quality environment, with independent AST, literal and comment guards.
+Missing tools fail explicitly; generation never installs a dependency or runs
+framework examples. Formatting configuration comes from the renderer's stable
+source root even when a regeneration test uses a temporary output directory.
+
+For a formatting-only publication pass, run this directory's normal `build.py`
+with `--markdown-only`. That mode writes guides and explanatory solutions while
+preserving standalone learner/reference programs, plans, manifests and review
+ledgers. Normal full generation retains its existing scope. After generation,
+apply the maintained prose normalizer and the shared reader/TeX pipeline.
+
+Historical execution and frozen-artifact receipts remain unchanged. Changed
+Python fence layout needs the separate self-verifying
+`curriculum/inline-format-parity.json` binding from a retained pre-format source
+snapshot. Its verifier preserves non-code spans, fence identities, Python AST
+values/type comments and ordered comments before exposing historical bytes for
+old hash assertions. This is static formatting parity, not new execution.

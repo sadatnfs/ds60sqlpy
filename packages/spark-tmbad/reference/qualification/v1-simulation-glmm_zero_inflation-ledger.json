@@ -1,0 +1,2066 @@
+[
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 1729
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000290365155574792,
+        "objective": 1407.61185851805,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.544992414251249,
+              0.607414927631283,
+              -1.06552777796207,
+              0.303969023873577,
+              1.00853105960004,
+              0.251419190049191
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1407.61185851805,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.00010535582263449,
+              0.000290365155574792,
+              0.000135761228122533,
+              -2.84207676557457e-05,
+              -0.000200098615402128,
+              7.16028234517968e-05
+            ],
+            "score_inf": 0.000290365155574792,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.544992414251249,
+            0.607414927631283
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.06552777796207,
+            0.303969023873577
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.00853105960004,
+            0.251419190049191
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.939485857576739,
+        1.72459529998017,
+        3.16580491843195
+      ],
+      "zero_probability": [
+        0.228374537620041,
+        0.28627532298405,
+        0.228374537620041
+      ],
+      "response_mean": [
+        0.724931209252083,
+        1.23088622346157,
+        2.4428156839898
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.607414927631283,
+        "truth": 0.6
+      },
+      "fixture_sha256": "2126e5905bfeff16cf93413235f295b2cebcb0b8866177c44ae12e826df41c8e"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.799,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "172bdbdf86714b767dceb9da2f168bcfee75f17f91274be381653905710c0d5d",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 0,
+    "seed": 1729
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 9648
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 2.0479194538181e-05,
+        "objective": 1445.34927659372,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.570312522098765,
+              0.506202855587928,
+              -1.13908822445257,
+              0.737585260068679,
+              1.20163798225144,
+              0.222201236726994
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1445.34927659372,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -2.0479194538181e-05,
+              3.64163912017937e-06,
+              -2.90912703349022e-06,
+              -1.49686319161901e-06,
+              3.08381164038085e-06,
+              -1.82142656640627e-06
+            ],
+            "score_inf": 2.0479194538181e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.570312522098765,
+            0.506202855587928
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.13908822445257,
+            0.737585260068679
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.20163798225144,
+            0.222201236726994
+          ]
+        }
+      },
+      "conditional_mean": [
+        1.06620931980615,
+        1.7688197603262,
+        2.93443631227053
+      ],
+      "zero_probability": [
+        0.181253062775101,
+        0.316415166724064,
+        0.181253062775101
+      ],
+      "response_mean": [
+        0.872955615031929,
+        1.20913836095776,
+        2.40256074315302
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.506202855587928,
+        "truth": 0.6
+      },
+      "fixture_sha256": "eef1dc174311fbd426002e277a3f93ed893f6b1943e239196dd3931ded536c3b"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.793,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "75ea03bfd1bcd948c6343a97db0f5d6b30c03ad48befa2e93e9fa52db1d31cd7",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 1,
+    "seed": 9648
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 17567
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000416462648897165,
+        "objective": 1409.36161007287,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.513628028962101,
+              0.581781870583073,
+              -1.13770531693801,
+              0.271691245409534,
+              1.05503388041591,
+              0.00869543199789268
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1409.36161007287,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              0.000416462648897165,
+              -0.000369969492503482,
+              -8.41232562862615e-05,
+              -2.34707879442908e-05,
+              -4.37407175820081e-05,
+              4.37986195286899e-06
+            ],
+            "score_inf": 0.000416462648897165,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.513628028962101,
+            0.581781870583073
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.13770531693801,
+            0.271691245409534
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.05503388041591,
+            0.00869543199789268
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.934116756486667,
+        1.67134389267371,
+        2.99040819916775
+      ],
+      "zero_probability": [
+        0.21864999579004,
+        0.268575940443429,
+        0.21864999579004
+      ],
+      "response_mean": [
+        0.729872131613451,
+        1.22246113489449,
+        2.33655545900922
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.581781870583073,
+        "truth": 0.6
+      },
+      "fixture_sha256": "c1c5116595f2fde14c4b2376589f30b8590f0b9e650f129cc4f14949938e569c"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.794,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "8539297fa50c876ebe1391bdc1af467046df31470eab5c3c71f56f6dba38bff8",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 2,
+    "seed": 17567
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 25486
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 4.61841581444477e-05,
+        "objective": 1393.58640109286,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.508176786097249,
+              0.596467937707888,
+              -1.09522595915223,
+              0.524571030764781,
+              1.29791822475115,
+              0.359004344946817
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1393.58640109286,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              2.22330538535154e-07,
+              -4.61841581444477e-05,
+              -4.2430383757619e-06,
+              -5.24985550498513e-06,
+              -2.4600216739501e-06,
+              1.12239346099219e-06
+            ],
+            "score_inf": 4.61841581444477e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.508176786097249,
+            0.596467937707888
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.09522595915223,
+            0.524571030764781
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.29791822475115,
+            0.359004344946817
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.915494290279527,
+        1.66225777901047,
+        3.01815200074832
+      ],
+      "zero_probability": [
+        0.204645050562686,
+        0.303023688018781,
+        0.204645050562686
+      ],
+      "response_mean": [
+        0.728142914955423,
+        1.15855429637681,
+        2.40050213194931
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.596467937707888,
+        "truth": 0.6
+      },
+      "fixture_sha256": "482ef339e0dc79b480a0f27d5f985db76e964712e723ef6d1aacc8e1222147b7"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.814,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "07860d062f220ce0a61ab48827812c3ad53c7550169df37612c812c7fa74039f",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 3,
+    "seed": 25486
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 33405
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 2.25830625528632e-05,
+        "objective": 1426.94577767782,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.477270572636052,
+              0.545649905362543,
+              -1.34848440221898,
+              0.470829922430519,
+              0.886171734611932,
+              0.0201986881283179
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1426.94577767782,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -5.7702320834796e-06,
+              -2.25830625528632e-05,
+              7.4988055303038e-06,
+              -7.37588877086637e-07,
+              -1.2210018478398e-05,
+              -2.24281429897499e-06
+            ],
+            "score_inf": 2.25830625528632e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.477270572636052,
+            0.545649905362543
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.34848440221898,
+            0.470829922430519
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            0.886171734611932,
+            0.0201986881283179
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.93390614521294,
+        1.61166945871865,
+        2.78130565633469
+      ],
+      "zero_probability": [
+        0.170243945772114,
+        0.247299092836369,
+        0.170243945772114
+      ],
+      "response_mean": [
+        0.774914278071064,
+        1.21310506362545,
+        2.30780520700197
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.545649905362543,
+        "truth": 0.6
+      },
+      "fixture_sha256": "aaf9fa1414d4b7ff76659c5088c9105394b6c5e083dfad921b1f87c53f44e076"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.886,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "7931494e7b8eada2d6bb0f74cf0065333d8b6b6906545b475fd8e9a668f10d47",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 4,
+    "seed": 33405
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 41324
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000104768615448281,
+        "objective": 1412.69099698899,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.481313403856844,
+              0.519044218935955,
+              -1.44068684223883,
+              1.00192780848861,
+              1.0555944625283,
+              0.565743907486402
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1412.69099698899,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.000104768615448281,
+              -5.8257864173851e-05,
+              6.09840989511667e-05,
+              1.01836331083405e-05,
+              1.82571999149117e-05,
+              5.71111578376304e-07
+            ],
+            "score_inf": 0.000104768615448281,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.481313403856844,
+            0.519044218935955
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.44068684223883,
+            1.00192780848861
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.0555944625283,
+            0.565743907486402
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.962972123580503,
+        1.61819835504429,
+        2.71925412184493
+      ],
+      "zero_probability": [
+        0.125466616766612,
+        0.280956311214819,
+        0.125466616766612
+      ],
+      "response_mean": [
+        0.842151269194298,
+        1.16355531439716,
+        2.37807850704838
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.519044218935955,
+        "truth": 0.6
+      },
+      "fixture_sha256": "e06daee51b3f19750c5684d61e69e389756bdd65d347deab26c635f0c5e36627"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.801,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "8233abccd6227da0bc418d922806b1c57f2d5c464cc8dcb2aebd07a72c665ef5",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 5,
+    "seed": 41324
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 49243
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000126079495274979,
+        "objective": 1372.92723185783,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.47711799689297,
+              0.623606812121126,
+              -1.11572878816032,
+              0.791762351702706,
+              1.20091388417564,
+              0.11651317698607
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1372.92723185783,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              0.000122084437976455,
+              -0.000126079495274979,
+              -4.41097313199634e-05,
+              2.93298377940232e-05,
+              2.37688022642901e-05,
+              -3.50678786842362e-05
+            ],
+            "score_inf": 0.000126079495274979,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.47711799689297,
+            0.623606812121126
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.11572878816032,
+            0.791762351702706
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.20091388417564,
+            0.11651317698607
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.86373539296404,
+        1.61142357581175,
+        3.00634425986759
+      ],
+      "zero_probability": [
+        0.18070031912224,
+        0.327426540623341,
+        0.18070031912224
+      ],
+      "response_mean": [
+        0.707658131818265,
+        1.08380072890481,
+        2.4630968927182
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.623606812121126,
+        "truth": 0.6
+      },
+      "fixture_sha256": "519beb7c0d5975a90deaa18a508bfc2209cf0f88b59c0063922d7796bdbf413a"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.797,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "81ccdf2c4c8918f5d9e04675aa16aa0a5cd9d16921f8fea0867c64ad0de7cfa6",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 6,
+    "seed": 49243
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 57162
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 1.7746691524331e-05,
+        "objective": 1419.56195905718,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.534876108972703,
+              0.604613520141319,
+              -1.10739443430969,
+              0.544073986881341,
+              1.47060661278617,
+              0.292128593944557
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1419.56195905718,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -1.576372755141e-05,
+              1.7746691524331e-05,
+              2.03892257388816e-06,
+              2.01803722887917e-06,
+              1.10207978581967e-06,
+              8.45814446537307e-08
+            ],
+            "score_inf": 1.7746691524331e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.534876108972703,
+            0.604613520141319
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.10739443430969,
+            0.544073986881341
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.47060661278617,
+            0.292128593944557
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.932638688257947,
+        1.70723671784068,
+        3.12517296080397
+      ],
+      "zero_probability": [
+        0.201100330468751,
+        0.302513460590904,
+        0.201100330468751
+      ],
+      "response_mean": [
+        0.745084739841331,
+        1.19077463027884,
+        2.49669964561429
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.604613520141319,
+        "truth": 0.6
+      },
+      "fixture_sha256": "615079106b3df4a717ed131b5d3dccae00a9dff631f855be0df25cbb1909d9f6"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.909,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "f6941c1b39925cd62cecab99d7a85de1e84fd9f9830a256b0f85f3e2c368a683",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 7,
+    "seed": 57162
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 65081
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 1.83348179211285e-05,
+        "objective": 1481.05746046599,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.595530246071506,
+              0.540610569287633,
+              -1.27498079915626,
+              0.244172058446623,
+              1.18130223168888,
+              -0.0168975082986683
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1481.05746046599,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -1.83348179211285e-05,
+              -2.39071563364395e-06,
+              4.86985904046833e-06,
+              -4.67627764066947e-07,
+              -5.03893719613902e-06,
+              2.17339654252913e-06
+            ],
+            "score_inf": 1.83348179211285e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.595530246071506,
+            0.540610569287633
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.27498079915626,
+            0.244172058446623
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.18130223168888,
+            -0.0168975082986683
+          ]
+        }
+      },
+      "conditional_mean": [
+        1.05645575334357,
+        1.813992552418,
+        3.11472484277138
+      ],
+      "zero_probability": [
+        0.198281974066034,
+        0.2399607387745,
+        0.198281974066034
+      ],
+      "response_mean": [
+        0.846979621057186,
+        1.37870555940833,
+        2.49713105227415
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.540610569287633,
+        "truth": 0.6
+      },
+      "fixture_sha256": "4cb53968f9805dfffde7e6a7a28ee047e83c26704d5c99eee633c78dfae93441"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.874,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "850e8f9b9559cddb9f0e3ff3170addb334f4648e889a1bad986d3a15224a2c36",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 8,
+    "seed": 65081
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 73000
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 4.67560410126541e-05,
+        "objective": 1391.44831595403,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.48410513747614,
+              0.612950398254435,
+              -1.21535883003706,
+              0.596509516792262,
+              1.24509918976902,
+              0.300870239303323
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1391.44831595403,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -2.29554122477271e-05,
+              -4.67560410126541e-05,
+              -1.83674478364537e-05,
+              -2.22682072887892e-05,
+              -1.86713619668155e-05,
+              9.26315357621665e-06
+            ],
+            "score_inf": 4.67560410126541e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.48410513747614,
+            0.612950398254435
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.21535883003706,
+            0.596509516792262
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.24509918976902,
+            0.300870239303323
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.879109987816629,
+        1.62272224560526,
+        2.99533337452131
+      ],
+      "zero_probability": [
+        0.180403876857417,
+        0.285548326940402,
+        0.180403876857417
+      ],
+      "response_mean": [
+        0.720515137830432,
+        1.15935662328371,
+        2.45496362127726
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.612950398254435,
+        "truth": 0.6
+      },
+      "fixture_sha256": "dca2f0354b894e66cdfe4aa7ac2ccd9e5fcce211e4147190fde6a915943c3fe7"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.808,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "05ef88958b8d734b0427e1d4b8a3b8887030860c882254d78f8007eef351458e",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 9,
+    "seed": 73000
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 80919
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 8.85689892121122e-05,
+        "objective": 1407.75577406036,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.492746813181344,
+              0.614450135651474,
+              -1.14156151239027,
+              0.419706579546865,
+              1.1154943812635,
+              0.129594581127691
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1407.75577406036,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              8.85689892121122e-05,
+              -4.98145654557565e-05,
+              -2.67732533956178e-05,
+              2.7727276616929e-06,
+              3.79856893473196e-06,
+              -6.35385734193417e-06
+            ],
+            "score_inf": 8.85689892121122e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.492746813181344,
+            0.614450135651474
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.14156151239027,
+            0.419706579546865
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.1154943812635,
+            0.129594581127691
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.885411011092314,
+        1.63680605120533,
+        3.02586484208863
+      ],
+      "zero_probability": [
+        0.205639165213566,
+        0.2825782817176,
+        0.205639165213566
+      ],
+      "response_mean": [
+        0.703335829900391,
+        1.17428020975076,
+        2.40362852191245
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.614450135651474,
+        "truth": 0.6
+      },
+      "fixture_sha256": "e5f2cabd3d276989258e0e193985c2f7cfbf53213900890efdebd64ae8400c2c"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.877,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "8dfaa1eccc1d5d25beeed3ee468b003f97947a6561143e6629efc7ae08ae81de",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 10,
+    "seed": 80919
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 88838
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000114798685200623,
+        "objective": 1426.11923707706,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.534750891496017,
+              0.688207770488754,
+              -1.25229435347182,
+              0.205850440172837,
+              0.961254860373192,
+              0.255941011057111
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1426.11923707706,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -4.96489205293882e-05,
+              -0.000114798685200623,
+              1.30240792373115e-06,
+              2.53519391577584e-05,
+              1.17491502388267e-06,
+              -1.26663168817098e-05
+            ],
+            "score_inf": 0.000114798685200623,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.534750891496017,
+            0.688207770488754
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.25229435347182,
+            0.205850440172837
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            0.961254860373192,
+            0.255941011057111
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.857737749917135,
+        1.70702295535045,
+        3.39722411701581
+      ],
+      "zero_probability": [
+        0.205018345394207,
+        0.240604332278904,
+        0.205018345394207
+      ],
+      "response_mean": [
+        0.681885775646974,
+        1.29630583699359,
+        2.70073084961194
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.688207770488754,
+        "truth": 0.6
+      },
+      "fixture_sha256": "67006d33003a43895e1d7591f421003dbff21c586fc1a785d0678ada114e136d"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.802,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "500f2fb77701f3f040ce5149a5830fb446eeae0a993bfdfe76c7b17c0a04c242",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 11,
+    "seed": 88838
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 96757
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.0002035396254359,
+        "objective": 1416.39849401664,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.419904116971213,
+              0.687055706509697,
+              -1.37749198569172,
+              0.278726942953247,
+              1.02206134421972,
+              -0.12949511477802
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1416.39849401664,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              0.0002035396254359,
+              5.17581150903698e-05,
+              2.10970394789456e-05,
+              -1.96777210845767e-05,
+              -7.88650488933729e-05,
+              3.45012231419417e-05
+            ],
+            "score_inf": 0.0002035396254359,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.419904116971213,
+            0.687055706509697
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.37749198569172,
+            0.278726942953247
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.02206134421972,
+            -0.12949511477802
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.765557012234745,
+        1.52181563233088,
+        3.02514741788622
+      ],
+      "zero_probability": [
+        0.179925036139647,
+        0.224761912909873,
+        0.179925036139647
+      ],
+      "response_mean": [
+        0.627814139141449,
+        1.17976943971204,
+        2.48084765939529
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.687055706509697,
+        "truth": 0.6
+      },
+      "fixture_sha256": "5cc55759f4300db1095d0218e3eb9ad2f80790ab52a5980cfca80d9860475462"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.791,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "6a986776e241620f222022f6726dd37496104c214b48d9fc59a90430af5ffdbf",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 12,
+    "seed": 96757
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 104676
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000226408729316785,
+        "objective": 1421.86701895477,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.601678269457972,
+              0.548380875167669,
+              -0.936324395703254,
+              0.433685401089133,
+              0.998563334602646,
+              0.590871637491028
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1421.86701895477,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.000226408729316785,
+              3.10987895062543e-05,
+              3.89231770725473e-06,
+              -5.09101223400421e-06,
+              2.09242538802279e-05,
+              -9.86248468271e-06
+            ],
+            "score_inf": 0.000226408729316785,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.601678269457972,
+            0.548380875167669
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -0.936324395703254,
+            0.433685401089133
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            0.998563334602646,
+            0.590871637491028
+          ]
+        }
+      },
+      "conditional_mean": [
+        1.05474327310862,
+        1.82517937423744,
+        3.15837970535104
+      ],
+      "zero_probability": [
+        0.239911075532093,
+        0.327507127401079,
+        0.239911075532093
+      ],
+      "response_mean": [
+        0.801698680046888,
+        1.22742012038924,
+        2.40064943330154
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.548380875167669,
+        "truth": 0.6
+      },
+      "fixture_sha256": "5557c115b4d00db77952bb10d2f72cac006d5877d44e693d8e1cbf384c49b1b9"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.798,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "7b65f5fbef740f2ba154404f7592bc9f5234b8886580e415b14a689f56594ade",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 13,
+    "seed": 104676
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 112595
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000248939440289707,
+        "objective": 1479.15392437059,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.591778818263497,
+              0.595402518933808,
+              -1.17449278695032,
+              0.366554459868181,
+              1.06705247682601,
+              -0.000402103540703451
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1479.15392437059,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -3.65728136464405e-06,
+              -0.000248939440289707,
+              6.84938245427702e-05,
+              3.01186364097816e-05,
+              -1.23095495039305e-05,
+              -8.43773600656128e-06
+            ],
+            "score_inf": 0.000248939440289707,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.591778818263497,
+            0.595402518933808
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.17449278695032,
+            0.366554459868181
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.06705247682601,
+            -0.000402103540703451
+          ]
+        }
+      },
+      "conditional_mean": [
+        0.996382857009549,
+        1.80720023871639,
+        3.27782907929465
+      ],
+      "zero_probability": [
+        0.204602972013211,
+        0.270672049250227,
+        0.204602972013211
+      ],
+      "response_mean": [
+        0.792519963202381,
+        1.31804164669752,
+        2.60717550791963
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.595402518933808,
+        "truth": 0.6
+      },
+      "fixture_sha256": "31caddf804915f5262e576cdc233d237ccc8fb1410d579a856bb339659ab7baa"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.81,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "1779466604465337a98765d430f0cfe3f00a385156d299ee372d436a24ac85b1",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 14,
+    "seed": 112595
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_zero_inflation",
+      "options": {},
+      "seed": 120514
+    },
+    "result": {
+      "case": "glmm_zero_inflation",
+      "backend": "actual pinned upstream glmmTMB",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 3.23373552579831e-05,
+        "objective": 1417.43878034684,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.58785207232488,
+              0.567798137580226,
+              -1.00816015615736,
+              0.065191671532939,
+              1.29498516907173,
+              0.170617748455096
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betazi",
+              "betazi",
+              "betadisp",
+              "betadisp"
+            ],
+            "objective": 1417.43878034684,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -3.23373552579831e-05,
+              1.96713700251956e-05,
+              -6.21740660733394e-06,
+              -4.32629156676967e-06,
+              1.59086658776952e-07,
+              4.51009002002539e-06
+            ],
+            "score_inf": 3.23373552579831e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "parameters": {
+        "cond": {
+          "parameter_names": [
+            "(Intercept)",
+            "x"
+          ],
+          "values": [
+            0.58785207232488,
+            0.567798137580226
+          ]
+        },
+        "zi": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            -1.00816015615736,
+            0.065191671532939
+          ]
+        },
+        "disp": {
+          "parameter_names": [
+            "(Intercept)",
+            "z"
+          ],
+          "values": [
+            1.29498516907173,
+            0.170617748455096
+          ]
+        }
+      },
+      "conditional_mean": [
+        1.02025636580941,
+        1.80011773721137,
+        3.17608787008373
+      ],
+      "zero_probability": [
+        0.26100415110565,
+        0.273772805527367,
+        0.26100415110565
+      ],
+      "response_mean": [
+        0.753965219141193,
+        1.30729445401544,
+        2.34711575171558
+      ],
+      "future_has_response": false,
+      "interpretation": "structural zeros plus ordinary NB2 component zeros",
+      "metrics": {
+        "primary_estimate": 0.567798137580226,
+        "truth": 0.6
+      },
+      "fixture_sha256": "13827d2e47b0505636d062dbd8938c4d1a83a5c0641b6addd3a6adb6c69e8705"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.893,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "15c3e41ccded1e0a5a473d33cab19a6f96ae2a472e7fc76015150ee2d3615a01",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 15,
+    "seed": 120514
+  }
+]

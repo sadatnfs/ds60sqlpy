@@ -15,37 +15,41 @@
         "LinkingTo": ""
       },
       "sha256": "2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1892159,
+      "description_sha256": "69cd947096ea4f2665acc8dda044fc4790947be8a9ca10a965b4edb03580f471"
     },
     {
       "name": "lattice",
-      "version": "0.22-7",
-      "url": "https://cran.r-project.org/src/contrib/Archive/lattice/lattice_0.22-7.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/lattice/lattice_0.22-7.tar.gz",
+      "version": "0.23-1",
+      "url": "https://cran.r-project.org/src/contrib/lattice_0.23-1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/lattice/lattice_0.23-1.tar.gz",
       "license": "GPL (>= 2)",
       "dependencies": {
         "Depends": "R (>= 4.0.0)",
         "Imports": "grid, grDevices, graphics, stats, utils",
         "LinkingTo": ""
       },
-      "sha256": "400fa62b95e90410d52a36cee2ddeb025dd49695e55fe3db709fe60886bff9f7",
-      "bytes": 598622,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "34e9b2fc023582c4246959b543c331233c62118efd922bcc1ba72b4888adc590",
+      "bytes": 682686,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "675137f4fcf0c511f60ea8ab252f21d9786797f3c3cef6a2ecfafdff60acbc5c"
     },
     {
       "name": "Matrix",
-      "version": "1.7-4",
-      "url": "https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-4.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-4.tar.gz",
+      "version": "1.7-6",
+      "url": "https://cran.r-project.org/src/contrib/Matrix_1.7-6.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-6.tar.gz",
       "license": "GPL (>= 2) | file LICENCE",
       "dependencies": {
         "Depends": "R (>= 4.4), methods",
         "Imports": "grDevices, graphics, grid, lattice, stats, utils",
         "LinkingTo": ""
       },
-      "sha256": "7b131ecb6a21ff09a33691dac7bf8a7bc2eab9fd1dd09ef14856d74346eb4779",
-      "bytes": 2485182,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "694239dbe47e659d6d39a49af95157f46bd94977c283df00c4e8a016601cf143",
+      "bytes": 2527103,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "5e10d218654a2e8372d8ba2e8667b2ee451a301daa14609d155f8d5f57c0489b"
     },
     {
       "name": "RcppEigen",
@@ -59,7 +63,9 @@
         "LinkingTo": "Rcpp"
       },
       "sha256": "ecad7ba2129fd48b7ebb825558d38492ed1f3a8934959e27fcd6688175e542bb",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1761745,
+      "description_sha256": "5a06d9fbb67cd4d68c8cabf8d7aa53df1dded39cfc567ec33a47136b715e74b6"
     },
     {
       "name": "TMB",
@@ -73,22 +79,25 @@
         "LinkingTo": "Matrix, RcppEigen"
       },
       "sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 781382,
+      "description_sha256": "1fe96276af671c6c28653bce899792b525ba0aa585aab560de1cd94979cfa7b8"
     },
     {
       "name": "MASS",
-      "version": "7.3-65",
-      "url": "https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-65.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-65.tar.gz",
+      "version": "7.3-66",
+      "url": "https://cran.r-project.org/src/contrib/MASS_7.3-66.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-66.tar.gz",
       "license": "GPL-2 | GPL-3",
       "dependencies": {
         "Depends": "R (>= 4.4.0), grDevices, graphics, stats, utils",
         "Imports": "methods",
         "LinkingTo": ""
       },
-      "sha256": "b07ef1e3c364ce56269b4a8a7759cc9f87c876554f91293437bb578cfe38172f",
-      "bytes": 510322,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "59c619c70bfca653f1c74aef880e69405daefd0134e716a1862ecc5334b4e155",
+      "bytes": 510345,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "b36c4f881c10d3c4dcba6448577b948861d0be5c77e0c2c01ad9520de0497033"
     },
     {
       "name": "RTMB",
@@ -103,7 +112,8 @@
       },
       "sha256": "a87b21eb5b30071c702b6b45866dfd2ee2aee51d78da0cbf4fdab5d7c1454635",
       "bytes": 684988,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "172c8e641827faabbf1e772ba625319725e8f4e6d4f8bdcc0592760ca633fb39"
     },
     {
       "name": "rbibutils",
@@ -118,7 +128,8 @@
       },
       "sha256": "da313d920a0f35ffdf30a54929ba8904b2b5a0d7f11a519db8674148129c8f32",
       "bytes": 1191704,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "4c1172257eb2d0c6b1789c923be73306c30298f621851fc7ba8b14020e5a2524"
     },
     {
       "name": "Rdpack",
@@ -133,22 +144,24 @@
       },
       "sha256": "b4e19d22bd5a2ec79cdb08ba209e79c66ea16dbc2fd2e7db8bca46412651cbdb",
       "bytes": 378731,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "8f40451f51d1fc4a682c4c4b3a39acb5e141119f81247e61a7b433aadec99d69"
     },
     {
       "name": "boot",
-      "version": "1.3-31",
-      "url": "https://cran.r-project.org/src/contrib/Archive/boot/boot_1.3-31.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/boot/boot_1.3-31.tar.gz",
+      "version": "1.3-32",
+      "url": "https://cran.r-project.org/src/contrib/boot_1.3-32.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/boot/boot_1.3-32.tar.gz",
       "license": "Unlimited",
       "dependencies": {
         "Depends": "R (>= 3.0.0), graphics, stats",
         "Imports": "",
         "LinkingTo": ""
       },
-      "sha256": "d8542e8cd1b503ca412e774908f386c0522a991296d57560ebded0f3d201c8d2",
-      "bytes": 238458,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "3a05aced6fea42a5c310c5c6ab7a2019f69f757f5e77c4961183977747136c97",
+      "bytes": 238282,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "0b681644c18745c0965e1bbb06f513f4662151a24db5f442f52edb1beb59d009"
     },
     {
       "name": "minqa",
@@ -163,22 +176,24 @@
       },
       "sha256": "5941e4b9b01978fc6d9fe24e6ca60cca66883fe9fa6ff3cbfa32aa1ac9db5467",
       "bytes": 54644,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "06878264442b41c81b83e0c88385f90d209f04c85a6bba4aff4a176823069d10"
     },
     {
       "name": "nlme",
-      "version": "3.1-168",
-      "url": "https://cran.r-project.org/src/contrib/Archive/nlme/nlme_3.1-168.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nlme/nlme_3.1-168.tar.gz",
+      "version": "3.1-171",
+      "url": "https://cran.r-project.org/src/contrib/nlme_3.1-171.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nlme/nlme_3.1-171.tar.gz",
       "license": "GPL (>= 2)",
       "dependencies": {
         "Depends": "R (>= 3.6.0)",
         "Imports": "graphics, stats, utils, lattice",
         "LinkingTo": ""
       },
-      "sha256": "23b78468344cb6775dee5e0d9c8133032d64f08ebaba20776508a0443a897362",
-      "bytes": 860576,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "481dc8277dd0e0f2717ffb36edfb08141621470de173894fb1153464383ba0d3",
+      "bytes": 854224,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "6a6b71cd2f86e1f360ed09afdadd6bb53437aeab7d103122d76887e6ba5dfcfb"
     },
     {
       "name": "nloptr",
@@ -193,7 +208,8 @@
       },
       "sha256": "76ba40750b475c8b1ad6a86c9e05f0c1746af16d965235ff9293953920aed7f4",
       "bytes": 2253853,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "b47ea1db6439aba53bf30398c3be050bcf64462c77321f13000fdb20f1491cfb"
     },
     {
       "name": "reformulas",
@@ -208,7 +224,8 @@
       },
       "sha256": "6a76d85eb4e19325aef87510180175f8cd7b5904a7075c89aff073765529e2f7",
       "bytes": 85205,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "06e9032f6bd820d3c06a5034276bbea42f859f71a3d51347ab1d42584349e1bc"
     },
     {
       "name": "lme4",
@@ -223,7 +240,8 @@
       },
       "sha256": "361d6eba45826b6ff4972eac57d400c4c7198506430418217af693adedd54b4b",
       "bytes": 4530297,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "74b344f8860968c68f39d30b5e4ba696525de84a07932bda3a75554014168445"
     },
     {
       "name": "numDeriv",
@@ -238,22 +256,24 @@
       },
       "sha256": "d8c4d19ff9aeb31b0c628bd4a16378e51c1c9a3813b525469a31fe89af00b345",
       "bytes": 76053,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "966ed1c55a437d089426f8e5a5bc71ca9d8b95002292a6ea23f3e0a110932ba4"
     },
     {
       "name": "mgcv",
-      "version": "1.9-3",
-      "url": "https://cran.r-project.org/src/contrib/Archive/mgcv/mgcv_1.9-3.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/mgcv/mgcv_1.9-3.tar.gz",
+      "version": "1.9-4",
+      "url": "https://cran.r-project.org/src/contrib/mgcv_1.9-4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/mgcv/mgcv_1.9-4.tar.gz",
       "license": "GPL (>= 2)",
       "dependencies": {
-        "Depends": "R (>= 3.6.0), nlme (>= 3.1-64)",
+        "Depends": "R (>= 4.4.0), nlme (>= 3.1-64)",
         "Imports": "methods, stats, graphics, Matrix, splines, utils",
         "LinkingTo": ""
       },
-      "sha256": "43f0ccdba176890a1d7bbe9a0a0859222e1fbcc97064c6e6ad7a3f545fd82f1d",
-      "bytes": 1127049,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "a98159698afb269e06a46cac1f945bf2b3427a2dd587c6f2efd67ede90089372",
+      "bytes": 1163324,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "9b81ed0c8aa6ab0fef555dcf4a618d90ef27c107ae08f9c92a3a7cf3a636ff9d"
     },
     {
       "name": "backports",
@@ -268,7 +288,8 @@
       },
       "sha256": "b8eeeabe3c27e1486f43e0b18dae57f0e870dd7c6979d3668df76bf0d4735bad",
       "bytes": 30108,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "50587b8ffc5745598b924cf1eeafb022c4ed99a336fc35359fa63feec3ea0125"
     },
     {
       "name": "cli",
@@ -282,7 +303,9 @@
         "LinkingTo": ""
       },
       "sha256": "b2b58d6dd82f5798b335e39c00591686a01fd3e94399ef898e146173e36f18f9",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 644134,
+      "description_sha256": "9d08623e469d026772ea58d382f1208aedb7a072190b5d7089371a0ce7d0e196"
     },
     {
       "name": "generics",
@@ -296,7 +319,9 @@
         "LinkingTo": ""
       },
       "sha256": "bbe95a097792d38fc3b7e677738af1b95b66ea5e5017e33b8beac6a6088d0801",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 47224,
+      "description_sha256": "07328169afefd300bf6ba091b8127801dbe555d4dac3bace45009449d3fc1500"
     },
     {
       "name": "glue",
@@ -310,7 +335,9 @@
         "LinkingTo": ""
       },
       "sha256": "1c55905d3efc3d5c199ceb0bd12218e97f0d4c64df6038ff41ecef415478a122",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 129786,
+      "description_sha256": "f76de9524f1387e2d0827d7deb4f7d7f56f44cb638bbbe2ba17929cf495c46d9"
     },
     {
       "name": "rlang",
@@ -324,7 +351,9 @@
         "LinkingTo": ""
       },
       "sha256": "80aa537d49e72265f443a15e8936128af583caa5e572086518b503cbf064279c",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 784080,
+      "description_sha256": "ea47314bf6ec7db5c775f7bdb658a08e4de819356781675d521be39406f29727"
     },
     {
       "name": "lifecycle",
@@ -338,7 +367,9 @@
         "LinkingTo": ""
       },
       "sha256": "61841e3e6edba056a88355a3f1d6698ab8d5d9cb3c05f2af0ec5a44ab516f8ee",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 107137,
+      "description_sha256": "fe1205b666b2d69de83126d92b1b1a75dbf00bd2e3210ed75287dfddc513c9d4"
     },
     {
       "name": "magrittr",
@@ -352,7 +383,9 @@
         "LinkingTo": ""
       },
       "sha256": "3f5b5b1d4e6d12807a95c50b6c88cb1d8af2c5eb5213f08bfe58f278eca2ed23",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 281813,
+      "description_sha256": "8f8f692840b8139ee04b6ad4ff7d6227188aa22e1006cf5270d64c1f305a2c91"
     },
     {
       "name": "utf8",
@@ -366,7 +399,9 @@
         "LinkingTo": ""
       },
       "sha256": "4589f8b72291329e70b7f3a8c20f2feb4e7764eebad2e6976bc9a3eee7686ce9",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 243856,
+      "description_sha256": "01d3a5946d86b14da50e7826fa9af7320d0a578bf050aa07515cefcf4e49df6d"
     },
     {
       "name": "vctrs",
@@ -380,7 +415,9 @@
         "LinkingTo": ""
       },
       "sha256": "b45078413e06ac624dddb7221a3a43908b405c8abec09822cb86638d30b0435b",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1083213,
+      "description_sha256": "872d226b68a29866d6708994c60f867e87ff8321e781a730ad6c2396a89a7c84"
     },
     {
       "name": "pillar",
@@ -394,7 +431,9 @@
         "LinkingTo": ""
       },
       "sha256": "056ce154238c9b5b8d5dcbcb52e1bc51d33870ce08c8a9ca9496478bd59f4653",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 409508,
+      "description_sha256": "5a91fd0f37d6923a345f49e422918abe380be5fec4bdf2593ec913244d41cb89"
     },
     {
       "name": "R6",
@@ -408,7 +447,9 @@
         "LinkingTo": ""
       },
       "sha256": "59c6eba8b1b912eb7e104f65053235604be853425ee67c152ac4e86a1f2073b4",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 64507,
+      "description_sha256": "de69af2c48276c45bba796554e78d045f3777e420356b84402b59bbd80c6ee1b"
     },
     {
       "name": "pkgconfig",
@@ -422,7 +463,9 @@
         "LinkingTo": ""
       },
       "sha256": "330fef440ffeb842a7dcfffc8303743f1feae83e8d6131078b5a44ff11bc3850",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 6080,
+      "description_sha256": "dd247639e04cc2963a88267d742188a084199d623de3a1a0ce282a421ceddaa1"
     },
     {
       "name": "tibble",
@@ -436,7 +479,9 @@
         "LinkingTo": ""
       },
       "sha256": "fb309f8a1939021b237c7e85ff7ad6e8ff5acd57a6230d220a452094b492b28f",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 557135,
+      "description_sha256": "41735a8b24a800038c99a21a2be82883310f2af5816abaac729b40f792912ecc"
     },
     {
       "name": "withr",
@@ -450,7 +495,9 @@
         "LinkingTo": ""
       },
       "sha256": "d86c6454164fc85678bfc85e2a6cce42f7461d45fa9a87de71f376e7956c991e",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 103968,
+      "description_sha256": "17509380fda6058c1ff25bf5edb1ff2ae319aec8f62fa52debf176609e16121c"
     },
     {
       "name": "tidyselect",
@@ -464,7 +511,9 @@
         "LinkingTo": ""
       },
       "sha256": "169e97ba0bbfbcdf4a80534322751f87a04370310c40e27f04aac6525d45903c",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 103591,
+      "description_sha256": "b8215c80e98080103cd9c0f4e89d1adee643682c9de301b56adbc95dbc4e302b"
     },
     {
       "name": "dplyr",
@@ -478,7 +527,9 @@
         "LinkingTo": ""
       },
       "sha256": "18d66fe2f24cda8b619c177326d39dd015229ab99695fa67d3fa31e4569390e0",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 923509,
+      "description_sha256": "6176081518c6d00f6b0b822c4a6079962d00185740ea87ca7431680c6a91456d"
     },
     {
       "name": "purrr",
@@ -492,7 +543,9 @@
         "LinkingTo": "cli"
       },
       "sha256": "ac3bc0fc0e789510042522e6c4294336c71447be8f6921b5ef78b9a9fb86617d",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 278508,
+      "description_sha256": "e87516c2efbd252c9ef981ab75982045dea7c1ac62141dbf54b37a7173b3241e"
     },
     {
       "name": "stringi",
@@ -506,7 +559,9 @@
         "LinkingTo": ""
       },
       "sha256": "427fcebd281d7ea850becce75e0807576dd394a723a814b2d487419b93275a33",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 11907881,
+      "description_sha256": "1fc7fd812df36c4ee5326670547ce1559f118d1857f9b8bd127202a17104e7f7"
     },
     {
       "name": "stringr",
@@ -520,7 +575,9 @@
         "LinkingTo": ""
       },
       "sha256": "24f2fc5df980a7eb888659e22b9744d2316c558624015c7a7cd8c3ce3e370064",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 195833,
+      "description_sha256": "633d1c31efac320d04a23bf084e4f03575b57ca71a910406743378de0a2dbb22"
     },
     {
       "name": "cpp11",
@@ -534,7 +591,9 @@
         "LinkingTo": ""
       },
       "sha256": "72486beb0605c1229bf3d422cd536224af8dc09bd389a3116f62f4c7705c62f4",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 304823,
+      "description_sha256": "eb9e722424454e5edf32c99f78ff46c6771309af1e61eb04f163b5d1e85a5bde"
     },
     {
       "name": "tidyr",
@@ -548,7 +607,9 @@
         "LinkingTo": "cpp11 (>= 0.4.0)"
       },
       "sha256": "04c0e6daf0af682af73763a42c027d7171761cdbdbf9ff7a77a0e421343d665a",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 809031,
+      "description_sha256": "44f7d8c32eedc03e772f995ca186beb869777e15d85298b76192007876b03325"
     },
     {
       "name": "broom",
@@ -563,7 +624,8 @@
       },
       "sha256": "f946601f57b4d90e7d2ea88c55c1516dacb8220cb12a980ba1e0fa1832320f61",
       "bytes": 466689,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "79fb9fe52825061698b9d9667e21b523a46564a86a9ebaa1a39c9f4733e22c36"
     },
     {
       "name": "gtable",
@@ -577,7 +639,9 @@
         "LinkingTo": ""
       },
       "sha256": "d305a5fa11278b649d2d8edc5288bf28009be888a42be58ff8714018e49de0ef",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 148148,
+      "description_sha256": "bc4af97ffbe46eda0826458db575476ef640c862f95ef66e85dae03982aeb8ac"
     },
     {
       "name": "isoband",
@@ -591,7 +655,9 @@
         "LinkingTo": "cpp11"
       },
       "sha256": "fe8d3d58ca75bbee32f389152ac0058818f3f76f09c9867949531de7abc424ac",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1593511,
+      "description_sha256": "b0ec65c6ac5f6e30c53326b905fdd564e08a13dc4fc616363404f93f39f99677"
     },
     {
       "name": "S7",
@@ -605,7 +671,9 @@
         "LinkingTo": ""
       },
       "sha256": "6f33245dde05b74265b1c4d379e034bc3a8923d41e7b52e6e75a75ce97d42af7",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 184632,
+      "description_sha256": "9582f0c545a1c75533eaa4c243c54183c4a201a858c4267f1cccad09dace201b"
     },
     {
       "name": "farver",
@@ -619,7 +687,9 @@
         "LinkingTo": ""
       },
       "sha256": "528823b95daab4566137711f1c842027a952bea1b2ae6ff098e2ca512b17fe25",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1275981,
+      "description_sha256": "b98293b80c387317858a020612ca8135e9d03f4c0e4a10a8e8676bacb4976da9"
     },
     {
       "name": "labeling",
@@ -633,7 +703,9 @@
         "LinkingTo": ""
       },
       "sha256": "c62f4fc2cc74377d7055903c5f1913b7295f7587456fe468592738a483e264f2",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 10167,
+      "description_sha256": "7ada0272cda3923c8de9669f6598d8395e081e9778f73a686b962ee7264d7343"
     },
     {
       "name": "RColorBrewer",
@@ -647,7 +719,9 @@
         "LinkingTo": ""
       },
       "sha256": "4f42f5423c45688b39f492c7892d93f37b4541831c8ffb140364d2bd89031ac0",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 11638,
+      "description_sha256": "25a41a5e9f5b2f922d801d278840350487edb68b5ba44329f613fdd2ae8e8101"
     },
     {
       "name": "viridisLite",
@@ -661,7 +735,9 @@
         "LinkingTo": ""
       },
       "sha256": "433be9bde66234dc76301fb4ffbbc9fc74bab5c14f4548d8ef2fc0065e121ef5",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1269031,
+      "description_sha256": "dda4f94cfd5a3f981bc667216000e7c777c9a257f4ff0b64f409dc3805080479"
     },
     {
       "name": "scales",
@@ -675,7 +751,9 @@
         "LinkingTo": ""
       },
       "sha256": "d55ef5f08c92652d7a95cfa27584024723ab17873f1b2577dd488cb7c883ceee",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 328671,
+      "description_sha256": "4e26da56f0d6d1393f220efd7a0931f8833e6fcfca5d43bc89f845dd3916c6eb"
     },
     {
       "name": "ggplot2",
@@ -689,7 +767,9 @@
         "LinkingTo": ""
       },
       "sha256": "690224bd61642b6222adb109470988e87f786e193cca77a15c0923cf9da73fa5",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 6327703,
+      "description_sha256": "7adbfcfb33c3d089ff25e704eb77326ae25d57048b3fa9531f547fc7a979cf47"
     },
     {
       "name": "cowplot",
@@ -704,7 +784,8 @@
       },
       "sha256": "431d582a4fb68f005f45e0d963c19daad826289374b429b05fe168ef6f231aa1",
       "bytes": 1638386,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "d0a3b3f7a4f7dc0547ba4db58e755f06fdcd4d06d1ff1a2984aa581724e48fbb"
     },
     {
       "name": "Deriv",
@@ -719,7 +800,8 @@
       },
       "sha256": "8950065ee01803e936e4fa48b525bcff702ecc21f6dd41ab3e98e37fd9efeb9c",
       "bytes": 47790,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "2ca412a0d54f82c679c05c61bc02fa7380c8955af095ded68d5a9ec305ebae88"
     },
     {
       "name": "colorspace",
@@ -734,7 +816,8 @@
       },
       "sha256": "3bb168c19772bc3f11d15933da008d96505376eab31cb5b3106392a322e9c62c",
       "bytes": 2149687,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "9c541e31e9ad1cf960d772f65dc5d57ed697e46ca96e44d38aab527a1da9e3ce"
     },
     {
       "name": "fracdiff",
@@ -749,7 +832,8 @@
       },
       "sha256": "c38ea9c377144a01e72c32f7fd30d6548f9795c1be909aab143b0efb26b42d9e",
       "bytes": 59652,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "d0e36e9ade9ff38d1c16a9e6e37fa4a89b6eb2e46d1dd8ae22bedaa14ed5f85b"
     },
     {
       "name": "zoo",
@@ -764,7 +848,8 @@
       },
       "sha256": "a2d998726a9b528efd20af449099e4b2df53887a0d10f48ac9ba63992b3a053a",
       "bytes": 691004,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "68cc7f7dc9094d5b2ccac1e6e57e05c8590a09c0f0e4ddcc5ed358c1ff008b4e"
     },
     {
       "name": "lmtest",
@@ -779,22 +864,24 @@
       },
       "sha256": "64400d4d6cc635316531042971f1783539686e9015c76f5741c07304fa14d997",
       "bytes": 230313,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "ca7710286fe0d85bc5714df7392a6948b53063282a395b4b0b16146c36738021"
     },
     {
       "name": "nnet",
-      "version": "7.3-20",
-      "url": "https://cran.r-project.org/src/contrib/Archive/nnet/nnet_7.3-20.tar.gz",
-      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nnet/nnet_7.3-20.tar.gz",
+      "version": "7.3-21",
+      "url": "https://cran.r-project.org/src/contrib/nnet_7.3-21.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nnet/nnet_7.3-21.tar.gz",
       "license": "GPL-2 | GPL-3",
       "dependencies": {
         "Depends": "R (>= 3.0.0), stats, utils",
         "Imports": "",
         "LinkingTo": ""
       },
-      "sha256": "8f33e17e0eb161cfbc1bfee4875baa23c66fcdba8215a64a63402b099db2b555",
-      "bytes": 31285,
-      "hash_origin": "downloaded R4.6-compatible archived source"
+      "sha256": "c3914e2b8fd2cc2df7afb60cfa106070fc43cd5b60f877f3790303fc6513895b",
+      "bytes": 31369,
+      "hash_origin": "downloaded R4.6-compatible archived source",
+      "description_sha256": "3cbb28c25e3d069ce370371527d40f833a74500b595cfa0f7fc890bb5bd60b7a"
     },
     {
       "name": "timeDate",
@@ -809,7 +896,8 @@
       },
       "sha256": "7f5b8e294f9fdf977cb721e711a6fcd664e379ee1b0ddb4c733374940e0e4646",
       "bytes": 367313,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "c33f179e45e846b40f1faec926e75be96f38bb8f32a89f4672c881c6bab1e76b"
     },
     {
       "name": "urca",
@@ -824,7 +912,8 @@
       },
       "sha256": "fe3d6ce5041f1e7caaf3137dfb6187640bcd2d208e19c59ee1202355ac0acb16",
       "bytes": 680691,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "a171b7bdbc598723903a171b60ddd24e8fe3439846707a73dd7d7b3744d62f2b"
     },
     {
       "name": "RcppArmadillo",
@@ -839,7 +928,8 @@
       },
       "sha256": "66fb2b707e237e1086b4f39111a172794f43a8bb815c1b589363d2219d61368d",
       "bytes": 1097105,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "5801d58293d095e1c53034beff8d0dda53f05bfdcde8cc8b24c43e10d42f3d15"
     },
     {
       "name": "forecast",
@@ -854,7 +944,8 @@
       },
       "sha256": "86dadffb846903b83fa6471d4e33d29e37435cc492641963a5b1daa925150653",
       "bytes": 590857,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "49951d4190353f379f5ac3bab9608dfd8b90eefae4af4989bc3ba9e2f402e39e"
     },
     {
       "name": "modelr",
@@ -869,7 +960,8 @@
       },
       "sha256": "94ebd506e9ccf3bf25318be6a182f8f89c3669a77b41864a0b9dbcc1d4337bd3",
       "bytes": 121480,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "0ccd2192f6c353222f8d23df8fea6397d0afc6d009b96f84df2d29a8e4cc16b6"
     },
     {
       "name": "doBy",
@@ -884,7 +976,8 @@
       },
       "sha256": "9d4b2c4dca86b9e54f5c3778f6af93485334cd4b4f6105ac69e5d55579af7b7f",
       "bytes": 4477331,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "83c8110ec90fa1cb024407690b191452fc78caa510aeedfbdfd5fc91c1f266be"
     },
     {
       "name": "pbkrtest",
@@ -899,7 +992,8 @@
       },
       "sha256": "d26c8ef0a6fd73bba184bde8e3434439d62539d93aef0a0b5b480a0f309bc51b",
       "bytes": 77353,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "1a74ee9075dbc5495ed8896621d4be401e46a0fff516951853686473c30f690a"
     },
     {
       "name": "sandwich",
@@ -914,7 +1008,8 @@
       },
       "sha256": "960006cf4fcbada936b43acd04ddd8c0d1255570f41dda046ce778873f546134",
       "bytes": 1423483,
-      "hash_origin": "downloaded pinned archive"
+      "hash_origin": "downloaded pinned archive",
+      "description_sha256": "ab9c31af99e0b6c68f2f26282ddeef8845ee57e03f5d9b6e7e46eee5ae9cc5a1"
     },
     {
       "name": "jsonlite",
@@ -928,7 +1023,9 @@
         "LinkingTo": ""
       },
       "sha256": "75eb910c82b350ec33f094779da0f87bff154c232e4ae39c9896a9b89f3ac82d",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 1055849,
+      "description_sha256": "427df14753b07bb9f6a5ea8799d39dcdcdf5a18026f32c88c5652356da0daa09"
     },
     {
       "name": "digest",
@@ -942,7 +1039,9 @@
         "LinkingTo": ""
       },
       "sha256": "8bf048b49b2d17077138fae758bda56bbd53278d9437f2fdeaedf979c90a13c9",
-      "hash_origin": "retained verified project dependency lock"
+      "hash_origin": "retained verified project dependency lock",
+      "bytes": 236629,
+      "description_sha256": "07dcde79e44828236433e7de97be2e49b8f4e689b262160fff1a76b300a71043"
     }
   ],
   "upstream": {

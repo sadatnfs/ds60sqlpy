@@ -108,17 +108,48 @@ protected literal spans. XML permits indentation between element-only children,
 while mixed content, leaf text and `xml:space="preserve"` remain exact. Formatter
 output must parse, preserve the admitted structure and values, and be idempotent.
 No example is executed, compiled to run, or permitted to download dependencies.
+Java statement and member excerpts use temporary parsed method/class contexts;
+the wrapper is removed and the original excerpt structure is checked again.
+Optional separators and arrow parameter parentheses are normalized only in
+reviewed grammar positions. JavaScript array holes, Rust tuple arity and typed
+parameters remain significant. Scala 2.13 wrapped chains may have a single
+expression indentation node. HTML void-tag delimiters may differ, while quoted
+attribute values, text, scripts and styles remain exact. Docker mount values,
+shell bodies and heredocs remain protected. C++ fences disable automatic
+namespace comments, and Python comment bytes, including cell markers, are restored.
+Rust macro token trees remain verbatim because an arbitrary macro can distinguish
+punctuation that ordinary Rust expressions treat as optional. Each such region
+is reported explicitly while surrounding Rust source can still be formatted.
+TypeScript union formatting preserves its ordered member list and parenthesized
+type groups, including an optional leading union separator.
 
 The same body-only contract applies to complete fences inside static Python and
 JSON authoring prose strings. An independent enclosing-file check allows only
-those approved prose constants to change. Notebook Markdown cells are supported;
+those approved prose constants to change. Known prose assignments/fields such as
+`guide`, `introduction`, `body`, `explanation` and `worked_examples` are admitted;
+expected outputs, executable source fields, replacement needles and unknown
+roles remain unchanged with a recorded reason. The reviewed NLP `author()`
+example argument has an explicit positional contract. Identical JSON string
+values in prose and expected output are tracked by their distinct field paths.
+Notebook Markdown cells are supported;
 code cells, outputs, execution counters and metadata values are preserved.
 Python authoring f-strings and concatenated literals are inventoried explicitly
 when their source cannot be rewritten safely without interpreting templates.
 
-Generated Markdown is checked but never rewritten directly. A differing fence
-reports `needs-regeneration`, with matching authored source candidates when
-available. Repair its durable program/prose input, run the subject's documented
+Generated Markdown is checked but never rewritten directly by the source
+formatter. Owner renderers can call
+`canonical_markdown(text, root=repo_root, path=relative_output)` from
+`scripts.format_inline_code` before their normal Markdown write. The hook admits
+only explicitly generator-owned paths in the formatting policy, formats in
+memory through the same guards, and reports preserved regions. It never writes
+a file, runs a generator, executes an example or installs dependencies.
+Run such generators in the documented prepared formatter environment. Required
+tools for supported fences must be available; missing tools fail explicitly
+rather than producing a silently noncanonical output. The owner's normal command
+and publication assertions remain authoritative.
+
+A differing checked-in generated fence reports `needs-regeneration`, with
+matching authored source candidates when available. Repair its durable program/prose input, run the subject's documented
 generator, then repeat the formatting and generation checks. Existing publication
 assertions remain in place. The statistics-book synchronizer retains its declared
 complete-example relationships and independent AST equivalence proof. Shared
@@ -126,11 +157,14 @@ HTML is regenerated only after successful source checks.
 
 Untyped/text/output blocks, interactive prompts, nested Markdown containers,
 unknown language labels, R Markdown/Quarto documents and fragments rejected by
-the declared parser are retained with explicit reasons and positions. DAX and
+the declared parser are retained with explicit reasons and positions. Unquoted
+`<your-...>` shell placeholders are inventoried as templates rather than commands. DAX and
 PowerShell labels currently have no standalone formatter adapter and are listed
 as unsupported. These entries are not reported as formatted or executed. A missing
-prepared tool, unexpected formatter failure, changed literal/structure or unstable
-second pass fails the check. `./scripts/format-repo --list` includes the complete
+prepared tool, unexpected formatter failure or changed literal/structure fails
+the check. Restoring exact authored literals can affect a later line-wrap choice,
+so at most three additional guarded passes may find a fixed point. Output must
+then be byte-idempotent; continued changes or oscillation fail the check. `./scripts/format-repo --list` includes the complete
 inventory; normal runs show preservation counts and all actionable drift/errors.
 
 For a machine-readable inventory inside a prepared tools environment:

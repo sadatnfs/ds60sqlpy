@@ -1,0 +1,436 @@
+{
+  "status": "passed",
+  "scope": "Actual native framed-process F/G/H, response-free moments and domain refusals only; no Spark or optimization",
+  "started_utc": "2026-10-30T09:12:23.089893+00:00",
+  "thresholds": {
+    "ordinary": {
+      "value": [
+        3e-08,
+        3e-07
+      ],
+      "gradient": [
+        3e-08,
+        3e-07
+      ],
+      "hessian": [
+        2e-05,
+        2e-05
+      ],
+      "moments": [
+        3e-08,
+        3e-07
+      ]
+    },
+    "tiny_positive": {
+      "value": [
+        3e-08,
+        1e-24
+      ],
+      "gradient": [
+        3e-08,
+        1e-24
+      ],
+      "hessian": [
+        2e-05,
+        1e-22
+      ],
+      "moments": [
+        3e-08,
+        1e-24
+      ]
+    },
+    "gamma_endpoint": {
+      "value": [
+        3e-08,
+        1e-12
+      ],
+      "gradient": [
+        3e-08,
+        1e-12
+      ],
+      "hessian": [
+        2e-05,
+        1e-12
+      ],
+      "moments": [
+        3e-08,
+        1e-12
+      ]
+    },
+    "series": {
+      "value": [
+        3e-08,
+        1e-24
+      ],
+      "gradient": [
+        3e-08,
+        1e-24
+      ],
+      "hessian": [
+        2e-05,
+        1e-22
+      ],
+      "moments": [
+        3e-08,
+        1e-24
+      ]
+    }
+  },
+  "threshold_policy": "Ordinary/tiny thresholds preserved from existing row oracle. New gamma endpoint absolute thresholds fixed before first execution to expose the retained 1.26e-9 cancellation regression.",
+  "inputs_sha256": {
+    "manifest": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f",
+    "rows": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+    "gaussian": "34a583886fdd2cb0670f80c194141bc397e3dccfad61d56b40d9f4e4d264b9cc",
+    "supplement": "8454d5c1592a8e91892092d8d35b3dd62622b0fb1bfa26ceaecad34a1672d4cd"
+  },
+  "runner_sha256": "f21de2def697dc009163d7b014d57f7216ed98fd2a7692a003ad9a9018f9ca41",
+  "cases": [
+    {
+      "family": "binomial_logistic",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "changed_parameters_and_zero_weight",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "zero_trials",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "extreme_probability_zero_successes",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "extreme_probability_all_successes",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "changed_parameters_and_zero_weight",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "zero_trials",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "extreme_probability_zero_successes",
+      "profile": "gamma_endpoint",
+      "status": "passed"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "extreme_probability_all_successes",
+      "profile": "gamma_endpoint",
+      "status": "passed"
+    },
+    {
+      "family": "beta_regression",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_regression",
+      "case": "changed_low_precision",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_regression",
+      "case": "near_response_boundaries",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "beta_regression",
+      "case": "extreme_mean_and_precision",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "changed_small_sigma",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "large_data_scale_moments",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "tiny_positive_response",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "student_t_regression",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "student_t_regression",
+      "case": "changed_near_two_df",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "student_t_regression",
+      "case": "finite_extreme_intercept",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "student_t_regression",
+      "case": "large_df_small_scale",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "changed_parameters",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "near_zero_singleton",
+      "profile": "tiny_positive",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "large_mean_variance",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "changed_parameters_and_zero_weight",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "near_zero_rate_and_nonzero_share",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "large_rate_tiny_nonzero_share",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "large_rate_tiny_zero_share",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "weighted_baseline",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "changed_parameters_and_zero_weight",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "near_zero_rate_and_nonzero_share",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "large_rate_tiny_nonzero_share",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "large_rate_tiny_zero_share",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_1e-12",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_1e-08",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_1e-05",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_9.999e-05",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_0.0001",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_0.00010001",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_0.01",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_1.0",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "series_binary64_10.0",
+      "profile": "series",
+      "status": "passed"
+    },
+    {
+      "family": "gaussian_correlated_random_slope",
+      "case": "positive_correlated_effects",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "gaussian_correlated_random_slope",
+      "case": "negative_correlated_effects",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "gaussian_correlated_random_slope",
+      "case": "rank_one_extreme_scale_x_0.5",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "gaussian_correlated_random_slope",
+      "case": "rank_one_extreme_scale_x_1.0",
+      "profile": "ordinary",
+      "status": "passed"
+    },
+    {
+      "family": "gaussian_correlated_random_slope",
+      "case": "rank_one_extreme_scale_x_5.0",
+      "profile": "ordinary",
+      "status": "passed"
+    }
+  ],
+  "failures": [],
+  "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+  "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+  "engine": {
+    "name": "TMBad",
+    "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+    "version": "1.9.25"
+  },
+  "model_digests": {
+    "normal": "f370a5a9f51a6fb8b4cfc923350527e592a86f64dd8b9a668c310296830bce66",
+    "linear_gaussian": "bd23bd964624f7406d1bcd93c3852c826c5a619c511968d679f656ffc2b793db",
+    "poisson_exposure": "b12df6eeba51de161f167234b3f51e84e5dc0dc92e1407eaf7088b1263bf013d",
+    "gaussian_random_intercept": "15283389cf3c0c6f57632460d1bc07861b8e05f3f549ab372a576b601efe7b1e",
+    "gaussian_random_intercept_laplace": "2aeedf5d0e051f4bff727c126cdcd3969cf5a3f8f66a176965e4b66c51c29400",
+    "ar1": "7c872155ceaaa0efeb07d0b6deadea783d9562776ac1c46f938bfce082abc894",
+    "gaussian_ar1_random_intercept": "09962e59b1a38ba97fbb7f14e59be137f6b4f325eb79bc52c7049d9e1d7c3195",
+    "poisson_random_intercept": "6db6384d4b48424c3777fa026194b9dd7dbfd054eaa4dfe2771049cf122a8971",
+    "poisson_random_slope": "4904fd57c836f62ca2a31c525aebb560884eda5de427c641d9f2f31d597137d0",
+    "bernoulli_logistic": "9b5545259f04cb32c0e3a7960c7bb439872b628dde42e4db691d9a9f9169fbe9",
+    "negative_binomial2": "561d6fb845ebb3e514eda8411dfcf68fc4efc69f1dc01ffecac29adff11261ad",
+    "gamma_regression": "b28e5f60d7b8477cb8dd1ac4b2e54d0146e3dd600da73f7040129a58413ee415",
+    "binomial_logistic": "cadf68192a54d39c7cbebeac2e42efdd5a0b576245858989102b881178179458",
+    "beta_binomial": "a0ad75f09b3b10d9f20f223ed6023e9b84fa718541693d2da09be03ce35ea811",
+    "beta_regression": "51cc9eba517abe32f4ad16fd8f1508d1b145a91fdcfb431dc23d35fabf10752a",
+    "lognormal_regression": "f8f26d1504d2c0ee94a6265f7674429da675cb1659dbe2e5bab4ba28a0de7a02",
+    "student_t_regression": "d67cb394578c2e023ec98a961542019c88605fb8b66be142c7c12f6dab1318ac",
+    "zero_truncated_poisson": "328af12de91785965a5e62485772e27fc9bd90029b336c3d6067cc2c0614c69d",
+    "zero_inflated_poisson": "16e11dec7694dbbd5a220ddbab8c3e147b1ead2c95ea4553ffd50839a0540b91",
+    "hurdle_poisson": "02b135cb48f65e040817aa8c911eca167470f4081a079124f01159981877a60c",
+    "gaussian_correlated_random_slope": "7b51231460272eaf52bf6918310e9b5083a8cebd9c7c2df42e1124e6c47cc16b",
+    "quadratic_gaussian": "4928b9ca74845411ddc51a8148025ad816a44db3f2f8836d4e28ec6f34961848",
+    "saturating_growth": "f5b4c0ebe4fab4937193083ff6ef41679f4a65df89d29bc45fa93d121ca6d82e"
+  },
+  "domain_refusal_cases": 10,
+  "case_counts": {
+    "binomial_logistic": 5,
+    "beta_binomial": 5,
+    "beta_regression": 4,
+    "lognormal_regression": 4,
+    "student_t_regression": 4,
+    "zero_truncated_poisson": 13,
+    "zero_inflated_poisson": 5,
+    "hurdle_poisson": 5,
+    "gaussian_correlated_random_slope": 5
+  },
+  "native_process_requests": 170,
+  "finished_utc": "2026-10-30T09:12:26.259019+00:00"
+}

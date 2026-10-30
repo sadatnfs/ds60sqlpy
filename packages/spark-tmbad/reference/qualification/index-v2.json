@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "scope": "native Linux ARM64 optional serial R/TMB/glmmTMB reference; prepared-base source refresh in bounded memory scratch",
+  "passed": true,
+  "cases": [
+    {
+      "case": "gaussian_random_slope",
+      "file": "v2-case-gaussian_random_slope.json",
+      "sha256": "c4e9ab1e4a96f959ce419d943be8b3c042abb01155b93dfa422693b761df511b",
+      "seed": 1729
+    },
+    {
+      "case": "gaussian_ridge",
+      "file": "v2-case-gaussian_ridge.json",
+      "sha256": "91ff8b1fd1c12b15c7a0b0343bb452b6439d4dee5a02a5de44d11e335014718d",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "file": "v2-case-glmm_ar_forecast.json",
+      "sha256": "f9ba5b0c01190415f886ca4e47a59ca846fccbad2a96859aa24063187a3b43db",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-ar1",
+      "file": "v2-case-glmm_covariance-ar1.json",
+      "sha256": "e447fd8a900cbd169d68d25f29f6b971b932d254d589a78b715ec485c35cc23d",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-cs",
+      "file": "v2-case-glmm_covariance-cs.json",
+      "sha256": "279efd56e7c5ffe22f868977c64ed25387f95405f94cb5fbd6adf7e2500cdea0",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-diag",
+      "file": "v2-case-glmm_covariance-diag.json",
+      "sha256": "ca607738d04913cf9bbd5da4354812f028512ebd1d1d1022f292d1e39adc54e2",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-ou",
+      "file": "v2-case-glmm_covariance-ou.json",
+      "sha256": "1b02b00b0308b295b5a8f192309f3eff9eeea88921847294c4a7110930db9bc2",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-toep",
+      "file": "v2-case-glmm_covariance-toep.json",
+      "sha256": "af4a76c59b63bbfe3fc80428648ba8db11b4171dd8ae2477ef1a8497bc1edfff",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-us",
+      "file": "v2-case-glmm_covariance-us.json",
+      "sha256": "760089733017f73ef8d316f0e52706d5e3c063ae93b25073decd572d31cd94eb",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-Gamma",
+      "file": "v2-case-glmm_family-Gamma.json",
+      "sha256": "0f1d51fc590366ae58d763beb718e96607b19e38c7d7717d10c53641daaddbf8",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-beta",
+      "file": "v2-case-glmm_family-beta.json",
+      "sha256": "849914c8bafd173d0bad1a142ece50bf8b32b228d2c9a44bdb9c03eed469874d",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-betabinomial",
+      "file": "v2-case-glmm_family-betabinomial.json",
+      "sha256": "1362cf4d1a5a0d298518f5d2dd5c4e7ab1f211725a0d5d1b38ce22fe136f464b",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-gaussian",
+      "file": "v2-case-glmm_family-gaussian.json",
+      "sha256": "c374672f7eb997dd8ac53b3cbe60cf2716034b91cb6da71f9f8e906bd21bde4f",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-lognormal",
+      "file": "v2-case-glmm_family-lognormal.json",
+      "sha256": "d9b971a9e0ddef2cc7f955e0eff71f567100b91f9c6355e9de15a14ab4e45f74",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-nbinom1",
+      "file": "v2-case-glmm_family-nbinom1.json",
+      "sha256": "a76ccda8ac1edee81791df33640f025e7fe47b42c3f8e4fd4db9d6203e193c5f",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-nbinom2",
+      "file": "v2-case-glmm_family-nbinom2.json",
+      "sha256": "a0d82bf252885f32161ad7343f28bbb462f25815a7fad7c2d351d4166b98169b",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-poisson",
+      "file": "v2-case-glmm_family-poisson.json",
+      "sha256": "b9dc7d45c544f75553a6fff7b01cfa7e5e50e92f4a011e78105caab5aaf9fd9b",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-student",
+      "file": "v2-case-glmm_family-student.json",
+      "sha256": "fcd76bbdf4ca4d566bb6789805657ded87cb4d3eef848829c3f47acc75be2fc1",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_hurdle",
+      "file": "v2-case-glmm_hurdle.json",
+      "sha256": "7215feab3faccf6aca924431259f322ad8ff4a46aa3848143d20ba7344b42d79",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_map",
+      "file": "v2-case-glmm_map.json",
+      "sha256": "0dbe6095bd7916b85cb92acaf89acbadfe58692d47d1795c0e1811ac2d6dae33",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_zero_inflation",
+      "file": "v2-case-glmm_zero_inflation.json",
+      "sha256": "70b6cf970fa2591716a72062c570320b02ee3dec96219ef42ff0a0517f6e6db6",
+      "seed": 1729
+    },
+    {
+      "case": "nonlinear_growth",
+      "file": "v2-case-nonlinear_growth.json",
+      "sha256": "31f73cbc60314d138a6f9ffce6cf7bf7d5e431183644fe9771077245d7be4277",
+      "seed": 1729
+    },
+    {
+      "case": "panel_ar1",
+      "file": "v2-case-panel_ar1.json",
+      "sha256": "de1615c40a7dd6217c8406e3ef1e974f7adcc6f5dcb84f2a7ab254c190a00148",
+      "seed": 1729
+    },
+    {
+      "case": "regularization_posterior",
+      "file": "v2-case-regularization_posterior.json",
+      "sha256": "ab44bdf242754c273436d23f39df2beee5e200089f1a092021a1a5d335d40537",
+      "seed": 1729
+    }
+  ],
+  "case_count": 24,
+  "simulations": [
+    {
+      "case": "glmm_ar_forecast",
+      "ledger.json": {
+        "file": "v2-simulation-glmm_ar_forecast-ledger.json",
+        "sha256": "e3257d731889f0a782153b1c11630a82112d204bc51d580a146f572666e75a18"
+      },
+      "summary.json": {
+        "file": "v2-simulation-glmm_ar_forecast-summary.json",
+        "sha256": "5e051bf48d88873e07c92303152c22f15e08724ece7c7e21ef53b485e8fafb8c"
+      }
+    },
+    {
+      "case": "nonlinear_growth",
+      "ledger.json": {
+        "file": "v2-simulation-nonlinear_growth-ledger.json",
+        "sha256": "5d343d1f26f420dd9dcc8a012e5a340e3a670b2241a7a513733df114b2dafdb8"
+      },
+      "summary.json": {
+        "file": "v2-simulation-nonlinear_growth-summary.json",
+        "sha256": "2c959a61be7909642257a314db2738720788f1c33ffbfafc7a49427a16fe3851"
+      }
+    },
+    {
+      "case": "panel_ar1",
+      "ledger.json": {
+        "file": "v2-simulation-panel_ar1-ledger.json",
+        "sha256": "454bf40249b3518de2ac0095e8564b30888b5e59a9423cb1f871ce1656307672"
+      },
+      "summary.json": {
+        "file": "v2-simulation-panel_ar1-summary.json",
+        "sha256": "a8ec4fd39864a669d42b95aa08c5415ecd00b6135af3b0a1df0f417255239538"
+      }
+    },
+    {
+      "case": "regularization_posterior",
+      "ledger.json": {
+        "file": "v2-simulation-regularization_posterior-ledger.json",
+        "sha256": "962f10f58dbf986bd3a590ebb6f1a51ccc18807d75998ecb4f67d8992c488676"
+      },
+      "summary.json": {
+        "file": "v2-simulation-regularization_posterior-summary.json",
+        "sha256": "6781262351d1be92c24327562903b64e0efd980d20c379d6730e681432322773"
+      }
+    }
+  ],
+  "preparation_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+  "preparation_manifest_file": "preparation-arm64-v2.json",
+  "source_identity": "source_sha256 in preparation manifest",
+  "historical_index": "index.json",
+  "note": "Forecast datasets retain unchanged training and fitted parameters; new heldout responses are evaluated after fitting. Fixed-data posterior-draw checks withhold independent-dataset MCSE.",
+  "not_qualified": [
+    "neutral default Docker base",
+    "AMD64",
+    "Spark execution of optional R reference",
+    "multi-host execution",
+    "generic posterior sampler",
+    "arbitrary upstream formulas"
+  ]
+}

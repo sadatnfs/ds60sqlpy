@@ -3,14 +3,22 @@
 from pathlib import Path
 import json
 import runpy
+import sys
 
 BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 SPECS = runpy.run_path(str(Path(__file__).with_name("chapters.py")))["CHAPTERS"]
 
 
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.suffix == ".md":
+        text = canonical_markdown(text, root=ROOT, path=path.relative_to(ROOT).as_posix())
     path.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
 
 

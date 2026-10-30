@@ -67,8 +67,11 @@ def validate_lock(lock):
     versions["R"] = lock["r_version"]
     completed = set(BASE_PACKAGES)
     for package in packages:
-        if not re.fullmatch(r"[a-f0-9]{64}", package["sha256"]):
-            raise ValueError("Every archive requires a SHA256")
+        if any(
+            not re.fullmatch(r"[a-f0-9]{64}", package.get(field, ""))
+            for field in ("sha256", "description_sha256")
+        ):
+            raise ValueError("Every archive and DESCRIPTION requires a SHA256")
         for field in ["Depends", "Imports", "LinkingTo"]:
             for name, operator, minimum in dependency_constraints(package["dependencies"][field]):
                 if name not in completed:
@@ -133,6 +136,45 @@ def acquire(entry, filename, archives, destination, allow_download):
         raise ValueError("Pinned source hash/size mismatch: " + filename)
     destination.write_bytes(data)
     return destination
+
+
+def verify_archive_metadata(archive_path, entry):
+    """The locked dependency graph must describe the actual pinned source."""
+    with tarfile.open(archive_path) as archive:
+        members = [
+            member
+            for member in archive.getmembers()
+            if member.name == entry["name"] + "/DESCRIPTION"
+        ]
+        if len(members) != 1 or not members[0].isfile() or not 0 < members[0].size <= 512_000:
+            raise ValueError("Pinned source must have one bounded package DESCRIPTION")
+        source = archive.extractfile(members[0])
+        if source is None:
+            raise ValueError("Package DESCRIPTION is unavailable")
+        raw = source.read(512_001)
+        if len(raw) != members[0].size:
+            raise ValueError("Package DESCRIPTION length differs")
+    fields = {}
+    key = None
+    for line in raw.decode("utf-8").splitlines():
+        if line[:1].isspace():
+            if key is None:
+                raise ValueError("Package DESCRIPTION has an orphan continuation")
+            fields[key] += " " + line.strip()
+        elif line:
+            key, separator, value = line.partition(":")
+            if not separator or key in fields:
+                raise ValueError("Package DESCRIPTION has invalid or repeated fields")
+            fields[key] = value.strip()
+    if fields.get("Package") != entry["name"] or fields.get("Version") != entry["version"]:
+        raise ValueError("Locked package identity differs from its source DESCRIPTION")
+    for field in ("Depends", "Imports", "LinkingTo"):
+        actual = list(dependency_constraints(fields.get(field, "")))
+        expected = list(dependency_constraints(entry["dependencies"][field]))
+        if actual != expected:
+            raise ValueError("Locked dependency metadata differs from its source DESCRIPTION")
+    if hashlib.sha256(raw).hexdigest() != entry["description_sha256"]:
+        raise ValueError("Package DESCRIPTION hash differs from its lock")
 
 
 def unpack_package(archive_path, prefix, output):
@@ -231,6 +273,7 @@ def main():
         archive = acquire(
             entry, name, args.archives, output / "sources" / name, args.allow_download
         )
+        verify_archive_metadata(archive, entry)
         logged(
             [
                 "R",
@@ -280,7 +323,16 @@ def main():
         for p in (ROOT / folder).rglob("*")
         if p.is_file() and "__pycache__" not in p.parts
     ]
-    sources += [ROOT / name for name in ["prepare.py", "dependencies.lock.json", "registry.json"]]
+    sources += [
+        ROOT / name
+        for name in [
+            "prepare.py",
+            "dependencies.lock.json",
+            "registry.json",
+            "refresh_runtime.py",
+            "tests/pure.R",
+        ]
+    ]
     package_files = {}
     for name in compiled["packages"]:
         package_root = output / "library" / name

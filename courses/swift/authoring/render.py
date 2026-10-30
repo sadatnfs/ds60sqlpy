@@ -3,8 +3,15 @@
 """Reproduce a subject's teaching artifacts from reviewed, original specifications."""
 
 import json
+import sys
 import textwrap
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
 BASE = Path(__file__).resolve().parents[1]
 SUBJECT = BASE.name
@@ -80,6 +87,10 @@ using System.Buffers;
 
 def write(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.suffix == ".md":
+        value = canonical_markdown(
+            value, root=ROOT, path=path.relative_to(ROOT).as_posix()
+        )
     path.write_text(value.rstrip() + "\n", encoding="utf-8", newline="\n")
 
 

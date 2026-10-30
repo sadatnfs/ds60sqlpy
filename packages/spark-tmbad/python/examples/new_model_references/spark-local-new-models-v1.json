@@ -1,0 +1,4246 @@
+{
+  "kind": "native-python-new-model-parameter-smoke",
+  "status": "passed",
+  "passed": true,
+  "stage": "complete",
+  "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f",
+  "validator_sha256": "6dcc03889fc07d68bb37d201b47935a06bfa6238ba4e8d097aa0ed84fec9141a",
+  "reference_sha256": {
+    "rows": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+    "gaussian": "34a583886fdd2cb0670f80c194141bc397e3dccfad61d56b40d9f4e4d264b9cc"
+  },
+  "tolerances": {
+    "relative": 3e-08,
+    "absolute": 3e-07
+  },
+  "cases": [
+    {
+      "model_id": "binomial_logistic",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "cadf68192a54d39c7cbebeac2e42efdd5a0b576245858989102b881178179458",
+        "model_id": "binomial_logistic",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope"
+        ],
+        "parameter_set_id": "binomial_logistic-weighted_baseline",
+        "parameters": [
+          0.2,
+          -0.3
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -5.939663245054381,
+          -16.647842448405882
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "6c4631923f5e16441e2969b47d3d67f0ff2947e2347450e6999fcaffa1f9c3f4",
+          "xor": "95b14ed5c191e984219fad150e42d8cf0056261dc38cbec1665824f97d0d51ee"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 12.255925002007885,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 12.255925002007885
+        },
+        "model_digest": "cadf68192a54d39c7cbebeac2e42efdd5a0b576245858989102b881178179458",
+        "model_id": "binomial_logistic",
+        "package_version": "0.2.0",
+        "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0",
+        "parameter_names": [
+          "intercept",
+          "slope"
+        ],
+        "parameters": [
+          0.2,
+          -0.3
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 16.647842448405882,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -5.939663245054381,
+          -16.647842448405882
+        ],
+        "smooth_gradient_sum": [
+          -5.939663245054381,
+          -16.647842448405882
+        ],
+        "summed_kkt_inf": 16.647842448405882,
+        "target_spec_digest": "791ef86854f96c16cf0e392437d6799dba185b8d887968f019687d3391165d35",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 5.124973964842104,
+                "declared_variance": 2.4984381508111646,
+                "declared_sd": 1.5806448528404995
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 214165.0169574414,
+                "declared_variance": 168298.36246906023,
+                "declared_sd": 410.2418341284324
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "binomial_logistic-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0"
+              },
+              "variance": {
+                "parameter_set_id": "binomial_logistic-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0"
+              },
+              "sd": {
+                "parameter_set_id": "binomial_logistic-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 5.124973964842104,
+                "declared_variance": 2.4984381508111646,
+                "declared_sd": 1.5806448528404995
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 214165.0169574414,
+                "declared_variance": 168298.36246906023,
+                "declared_sd": 410.2418341284324
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "binomial_logistic-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0"
+              },
+              "variance": {
+                "parameter_set_id": "binomial_logistic-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0"
+              },
+              "sd": {
+                "parameter_set_id": "binomial_logistic-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "9e7327c73e5dfc9659bffe2a724affacc48d216efa161595ca35fed85d900bd0"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "binomial_logistic",
+      "case": "changed_parameters_and_zero_weight",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "cadf68192a54d39c7cbebeac2e42efdd5a0b576245858989102b881178179458",
+        "model_id": "binomial_logistic",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope"
+        ],
+        "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+        "parameters": [
+          -0.7,
+          0.4
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -2.8022473449294205,
+          -5.598252155576019
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "a556fdc94d2df0a06e14b583131827ac9b182cfd4278b7012b676c5e7208cb80",
+          "xor": "6a28023532c90d5cd3ea2a88eac9d8535769db031a9b5907d418eb39be282a7e"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 4.901825617592396,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 4.901825617592396
+        },
+        "model_digest": "cadf68192a54d39c7cbebeac2e42efdd5a0b576245858989102b881178179458",
+        "model_id": "binomial_logistic",
+        "package_version": "0.2.0",
+        "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623",
+        "parameter_names": [
+          "intercept",
+          "slope"
+        ],
+        "parameters": [
+          -0.7,
+          0.4
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 5.598252155576019,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -2.8022473449294205,
+          -5.598252155576019
+        ],
+        "smooth_gradient_sum": [
+          -2.8022473449294205,
+          -5.598252155576019
+        ],
+        "summed_kkt_inf": 5.598252155576019,
+        "target_spec_digest": "791ef86854f96c16cf0e392437d6799dba185b8d887968f019687d3391165d35",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 3.7754066879814547,
+                "declared_variance": 2.3500371220159453,
+                "declared_sd": 1.5329830794943384
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 785834.9830425587,
+                "declared_variance": 168298.36246906023,
+                "declared_sd": 410.2418341284324
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623"
+              },
+              "variance": {
+                "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623"
+              },
+              "sd": {
+                "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 3.7754066879814547,
+                "declared_variance": 2.3500371220159453,
+                "declared_sd": 1.5329830794943384
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 785834.9830425587,
+                "declared_variance": 168298.36246906023,
+                "declared_sd": 410.2418341284324
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623"
+              },
+              "variance": {
+                "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623"
+              },
+              "sd": {
+                "parameter_set_id": "binomial_logistic-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "e4312fe7b547d2036d2f494c83078ab613732c0eacaf8a72711c015f670c8623"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "beta_binomial",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "a0ad75f09b3b10d9f20f223ed6023e9b84fa718541693d2da09be03ce35ea811",
+        "model_id": "beta_binomial",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameter_set_id": "beta_binomial-weighted_baseline",
+        "parameters": [
+          0.2,
+          -0.3,
+          2.0794415416798357
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -2.8925350162870567,
+          -9.253447907244846,
+          1.3935225749429425
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "6c4631923f5e16441e2969b47d3d67f0ff2947e2347450e6999fcaffa1f9c3f4",
+          "xor": "95b14ed5c191e984219fad150e42d8cf0056261dc38cbec1665824f97d0d51ee"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 9.305846282293025,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 9.305846282293025
+        },
+        "model_digest": "a0ad75f09b3b10d9f20f223ed6023e9b84fa718541693d2da09be03ce35ea811",
+        "model_id": "beta_binomial",
+        "package_version": "0.2.0",
+        "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameters": [
+          0.2,
+          -0.3,
+          2.0794415416798357
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 9.253447907244846,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -2.8925350162870567,
+          -9.253447907244846,
+          1.3935225749429425
+        ],
+        "smooth_gradient_sum": [
+          -2.8925350162870567,
+          -9.253447907244846,
+          1.3935225749429425
+        ],
+        "summed_kkt_inf": 9.253447907244846,
+        "target_spec_digest": "6799739bf2dc35f23b96e9bb67c35df2a580f229760062b44035151bdd480541",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 5.124973964842104,
+                "declared_variance": 4.99687630162233,
+                "declared_sd": 2.2353693881822596
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 214165.0169574414,
+                "declared_variance": 18699967650.662224,
+                "declared_sd": 136747.825030829
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_binomial-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7"
+              },
+              "variance": {
+                "parameter_set_id": "beta_binomial-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7"
+              },
+              "sd": {
+                "parameter_set_id": "beta_binomial-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 5.124973964842104,
+                "declared_variance": 4.99687630162233,
+                "declared_sd": 2.2353693881822596
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 214165.0169574414,
+                "declared_variance": 18699967650.662224,
+                "declared_sd": 136747.825030829
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_binomial-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7"
+              },
+              "variance": {
+                "parameter_set_id": "beta_binomial-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7"
+              },
+              "sd": {
+                "parameter_set_id": "beta_binomial-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "a47ece0faac24fa3bc19d14ef0a4b13088b6eb9ef0e16c41ad45b53464b749a7"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "beta_binomial",
+      "case": "changed_parameters_and_zero_weight",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "a0ad75f09b3b10d9f20f223ed6023e9b84fa718541693d2da09be03ce35ea811",
+        "model_id": "beta_binomial",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+        "parameters": [
+          -0.7,
+          0.4,
+          -1.6094379124341003
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -0.9660362574236522,
+          0.7709651930619105,
+          -2.536241324932177
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "a556fdc94d2df0a06e14b583131827ac9b182cfd4278b7012b676c5e7208cb80",
+          "xor": "6a28023532c90d5cd3ea2a88eac9d8535769db031a9b5907d418eb39be282a7e"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 9.359283090818069,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 9.359283090818069
+        },
+        "model_digest": "a0ad75f09b3b10d9f20f223ed6023e9b84fa718541693d2da09be03ce35ea811",
+        "model_id": "beta_binomial",
+        "package_version": "0.2.0",
+        "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameters": [
+          -0.7,
+          0.4,
+          -1.6094379124341003
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 2.536241324932177,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -0.9660362574236522,
+          0.7709651930619105,
+          -2.536241324932177
+        ],
+        "smooth_gradient_sum": [
+          -0.9660362574236522,
+          0.7709651930619105,
+          -2.536241324932177
+        ],
+        "summed_kkt_inf": 2.536241324932177,
+        "target_spec_digest": "6799739bf2dc35f23b96e9bb67c35df2a580f229760062b44035151bdd480541",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 3.7754066879814547,
+                "declared_variance": 19.975315537135536,
+                "declared_sd": 4.469375296071648
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 785834.9830425587,
+                "declared_variance": 140248663440.6106,
+                "declared_sd": 374497.88175717444
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f"
+              },
+              "variance": {
+                "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f"
+              },
+              "sd": {
+                "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 0.0,
+                "declared_sd": 0.0
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 3.7754066879814547,
+                "declared_variance": 19.975315537135536,
+                "declared_sd": 4.469375296071648
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 785834.9830425587,
+                "declared_variance": 140248663440.6106,
+                "declared_sd": 374497.88175717444
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f"
+              },
+              "variance": {
+                "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f"
+              },
+              "sd": {
+                "parameter_set_id": "beta_binomial-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8df9f39e2ad650c2be534fe29d61993cb29ba62f855031ca8c4eb652b60046f"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "beta_regression",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "51cc9eba517abe32f4ad16fd8f1508d1b145a91fdcfb431dc23d35fabf10752a",
+        "model_id": "beta_regression",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameter_set_id": "beta_regression-weighted_baseline",
+        "parameters": [
+          0.2,
+          -0.3,
+          1.6094379124341003
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -4.480689959694887,
+          -15.283652654567781,
+          7.782705790432528
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "cded8ba182f3c5d2b0545337d355f1a50028fb8951e07904dffcb5511964dc16",
+          "xor": "bcc274667e97b12c708baa88ace5d91470f6f089ac2e8f3f641bba86e69eab34"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 5.367292628457257,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 5.367292628457257
+        },
+        "model_digest": "51cc9eba517abe32f4ad16fd8f1508d1b145a91fdcfb431dc23d35fabf10752a",
+        "model_id": "beta_regression",
+        "package_version": "0.2.0",
+        "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameters": [
+          0.2,
+          -0.3,
+          1.6094379124341003
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 15.283652654567781,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -4.480689959694887,
+          -15.283652654567781,
+          7.782705790432528
+        ],
+        "smooth_gradient_sum": [
+          -4.480689959694887,
+          -15.283652654567781,
+          7.782705790432528
+        ],
+        "summed_kkt_inf": 15.283652654567781,
+        "target_spec_digest": "732fa9a488c45793ffdedc72e2e2357bc5f4ba3635ab457664f67080828bf669",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.6899744811276125,
+                "declared_variance": 0.03565161608671574,
+                "declared_sd": 0.18881635545342926
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.5124973964842103,
+                "declared_variance": 0.04164063584685275,
+                "declared_sd": 0.20406037304399097
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.33181222783183395,
+                "declared_variance": 0.03695214554885152,
+                "declared_sd": 0.1922294086471982
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61"
+              },
+              "variance": {
+                "parameter_set_id": "beta_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61"
+              },
+              "sd": {
+                "parameter_set_id": "beta_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.6899744811276125,
+                "declared_variance": 0.03565161608671574,
+                "declared_sd": 0.18881635545342926
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.5124973964842103,
+                "declared_variance": 0.04164063584685275,
+                "declared_sd": 0.20406037304399097
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.33181222783183395,
+                "declared_variance": 0.03695214554885152,
+                "declared_sd": 0.1922294086471982
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61"
+              },
+              "variance": {
+                "parameter_set_id": "beta_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61"
+              },
+              "sd": {
+                "parameter_set_id": "beta_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "4426bd6be6ac9f0e971f5a1f5b5cbba918c46d5a81b31213de7a781571e1ce61"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "beta_regression",
+      "case": "changed_low_precision",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "51cc9eba517abe32f4ad16fd8f1508d1b145a91fdcfb431dc23d35fabf10752a",
+        "model_id": "beta_regression",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameter_set_id": "beta_regression-changed_low_precision",
+        "parameters": [
+          -0.7,
+          0.4,
+          -1.3862943611198906
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -0.9194953639197144,
+          0.2718460091058403,
+          -2.4458081225561017
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "fb3585ecdab370c6bd4cc4cf9a0bd1aeb2ee378a445f460e7d0c5b863c5415f4",
+          "xor": "e8cdb801152c8f363acb233266682d2d31d3ce9bdbadd8fb82ebac79bfd7e302"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 3.5304874529454784,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 3.5304874529454784
+        },
+        "model_digest": "51cc9eba517abe32f4ad16fd8f1508d1b145a91fdcfb431dc23d35fabf10752a",
+        "model_id": "beta_regression",
+        "package_version": "0.2.0",
+        "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_precision"
+        ],
+        "parameters": [
+          -0.7,
+          0.4,
+          -1.3862943611198906
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 2.4458081225561017,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -0.9194953639197144,
+          0.2718460091058403,
+          -2.4458081225561017
+        ],
+        "smooth_gradient_sum": [
+          -0.9194953639197144,
+          0.2718460091058403,
+          -2.4458081225561017
+        ],
+        "summed_kkt_inf": 2.4458081225561017,
+        "target_spec_digest": "732fa9a488c45793ffdedc72e2e2357bc5f4ba3635ab457664f67080828bf669",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.18242552380635632,
+                "declared_variance": 0.11931716165626627,
+                "declared_sd": 0.3454231631727471
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.37754066879814546,
+                "declared_variance": 0.18800296976127562,
+                "declared_sd": 0.4335930923818732
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.6224593312018547,
+                "declared_variance": 0.18800296976127562,
+                "declared_sd": 0.4335930923818732
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_regression-changed_low_precision",
+                "purpose": "sensitivity",
+                "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec"
+              },
+              "variance": {
+                "parameter_set_id": "beta_regression-changed_low_precision",
+                "purpose": "sensitivity",
+                "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec"
+              },
+              "sd": {
+                "parameter_set_id": "beta_regression-changed_low_precision",
+                "purpose": "sensitivity",
+                "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.18242552380635632,
+                "declared_variance": 0.11931716165626627,
+                "declared_sd": 0.3454231631727471
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.37754066879814546,
+                "declared_variance": 0.18800296976127562,
+                "declared_sd": 0.4335930923818732
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.6224593312018547,
+                "declared_variance": 0.18800296976127562,
+                "declared_sd": 0.4335930923818732
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "beta_regression-changed_low_precision",
+                "purpose": "sensitivity",
+                "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec"
+              },
+              "variance": {
+                "parameter_set_id": "beta_regression-changed_low_precision",
+                "purpose": "sensitivity",
+                "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec"
+              },
+              "sd": {
+                "parameter_set_id": "beta_regression-changed_low_precision",
+                "purpose": "sensitivity",
+                "parameter_digest": "863f00da9fb7c65e9b2d9307d044b011866d6433097cd15b7bcb28d8df92c4ec"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "lognormal_regression",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "f8f26d1504d2c0ee94a6265f7674429da675cb1659dbe2e5bab4ba28a0de7a02",
+        "model_id": "lognormal_regression",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "log_location_intercept",
+          "log_location_slope",
+          "log_sigma"
+        ],
+        "parameter_set_id": "lognormal_regression-weighted_baseline",
+        "parameters": [
+          0.1,
+          0.2,
+          -0.5108256237659907
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -0.2707579558552795,
+          -6.892926831585488,
+          0.649701158276895
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "72ced56c2d9a1506cb7750b064438ef945c36ef6d2d1a406df361f51f0a7728",
+          "xor": "f5f6d2a8c18b620f97709ef518ccc920fda04f138b936c82f2141dca9937b52c"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 3.9010174680048406,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 3.9010174680048406
+        },
+        "model_digest": "f8f26d1504d2c0ee94a6265f7674429da675cb1659dbe2e5bab4ba28a0de7a02",
+        "model_id": "lognormal_regression",
+        "package_version": "0.2.0",
+        "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6",
+        "parameter_names": [
+          "log_location_intercept",
+          "log_location_slope",
+          "log_sigma"
+        ],
+        "parameters": [
+          0.1,
+          0.2,
+          -0.5108256237659907
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 6.892926831585488,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -0.2707579558552795,
+          -6.892926831585488,
+          0.649701158276895
+        ],
+        "smooth_gradient_sum": [
+          -0.2707579558552795,
+          -6.892926831585488,
+          0.649701158276895
+        ],
+        "summed_kkt_inf": 6.892926831585488,
+        "target_spec_digest": "abb75fe5b3f1d131ab9a7f0b7d740c4532fb35fb1084ef4cbba1d7a944629ee0",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.8869204367171575,
+                "declared_variance": 0.3408689905128222,
+                "declared_sd": 0.5838398671834788
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 1.4622845894342245,
+                "declared_variance": 0.9265779827961833,
+                "declared_sd": 0.9625892077081393
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 2.41089970641721,
+                "declared_variance": 2.518700093285104,
+                "declared_sd": 1.5870413016947933
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "lognormal_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6"
+              },
+              "variance": {
+                "parameter_set_id": "lognormal_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6"
+              },
+              "sd": {
+                "parameter_set_id": "lognormal_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.8869204367171575,
+                "declared_variance": 0.3408689905128222,
+                "declared_sd": 0.5838398671834788
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 1.4622845894342245,
+                "declared_variance": 0.9265779827961833,
+                "declared_sd": 0.9625892077081393
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 2.41089970641721,
+                "declared_variance": 2.518700093285104,
+                "declared_sd": 1.5870413016947933
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "lognormal_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6"
+              },
+              "variance": {
+                "parameter_set_id": "lognormal_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6"
+              },
+              "sd": {
+                "parameter_set_id": "lognormal_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "20c9ff12468d6386667d276c1017c1e6222b862456ebd9285207a16a3949b7c6"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "lognormal_regression",
+      "case": "changed_small_sigma",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "f8f26d1504d2c0ee94a6265f7674429da675cb1659dbe2e5bab4ba28a0de7a02",
+        "model_id": "lognormal_regression",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "log_location_intercept",
+          "log_location_slope",
+          "log_sigma"
+        ],
+        "parameter_set_id": "lognormal_regression-changed_small_sigma",
+        "parameters": [
+          -0.5,
+          0.1,
+          -2.0
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -90.76201352113355,
+          -150.08333655853397,
+          -114.96488543888503
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "6c4ab6759d795ddd458582d5f95502819099291fcf6e4e34b19772e64e50c9c9",
+          "xor": "92cc9f8a5a62a1db793e8cb987813c7cb36ecadbe851911742640cd9b9af7efd"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 56.001622583524025,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 56.001622583524025
+        },
+        "model_digest": "f8f26d1504d2c0ee94a6265f7674429da675cb1659dbe2e5bab4ba28a0de7a02",
+        "model_id": "lognormal_regression",
+        "package_version": "0.2.0",
+        "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af",
+        "parameter_names": [
+          "log_location_intercept",
+          "log_location_slope",
+          "log_sigma"
+        ],
+        "parameters": [
+          -0.5,
+          0.1,
+          -2.0
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 150.08333655853397,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -90.76201352113355,
+          -150.08333655853397,
+          -114.96488543888503
+        ],
+        "smooth_gradient_sum": [
+          -90.76201352113355,
+          -150.08333655853397,
+          -114.96488543888503
+        ],
+        "summed_kkt_inf": 150.08333655853397,
+        "target_spec_digest": "abb75fe5b3f1d131ab9a7f0b7d740c4532fb35fb1084ef4cbba1d7a944629ee0",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.5011538292795431,
+                "declared_variance": 0.004642452185471774,
+                "declared_sd": 0.06813554274731928
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.6434942544653226,
+                "declared_variance": 0.007654109666395611,
+                "declared_sd": 0.08748776866737207
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.8262629782260034,
+                "declared_variance": 0.012619493415257905,
+                "declared_sd": 0.11233651861820317
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "lognormal_regression-changed_small_sigma",
+                "purpose": "sensitivity",
+                "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af"
+              },
+              "variance": {
+                "parameter_set_id": "lognormal_regression-changed_small_sigma",
+                "purpose": "sensitivity",
+                "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af"
+              },
+              "sd": {
+                "parameter_set_id": "lognormal_regression-changed_small_sigma",
+                "purpose": "sensitivity",
+                "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.5011538292795431,
+                "declared_variance": 0.004642452185471774,
+                "declared_sd": 0.06813554274731928
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.6434942544653226,
+                "declared_variance": 0.007654109666395611,
+                "declared_sd": 0.08748776866737207
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.8262629782260034,
+                "declared_variance": 0.012619493415257905,
+                "declared_sd": 0.11233651861820317
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "lognormal_regression-changed_small_sigma",
+                "purpose": "sensitivity",
+                "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af"
+              },
+              "variance": {
+                "parameter_set_id": "lognormal_regression-changed_small_sigma",
+                "purpose": "sensitivity",
+                "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af"
+              },
+              "sd": {
+                "parameter_set_id": "lognormal_regression-changed_small_sigma",
+                "purpose": "sensitivity",
+                "parameter_digest": "e9ea5a3f4ab414a73d1ce071065ad44a32d1b3acb10d5f675a404562f07c57af"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "student_t_regression",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "d67cb394578c2e023ec98a961542019c88605fb8b66be142c7c12f6dab1318ac",
+        "model_id": "student_t_regression",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_scale",
+          "log_df_minus_two"
+        ],
+        "parameter_set_id": "student_t_regression-weighted_baseline",
+        "parameters": [
+          0.2,
+          -0.3,
+          -0.35667494393873245,
+          1.3862943611198906
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -1.4751581000372496,
+          -6.138851802403205,
+          -10.492051680192189,
+          5.191741791350703
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "118eb0696e1cbb023fb19d46e764c8fed299e4c92dbb24b78019a84d9f0f71c0",
+          "xor": "e06d519681c3a43781c864bcdaaa2f01e2a1dd398a059cc004f557b39ecf6cde"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 19.528573949268896,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 19.528573949268896
+        },
+        "model_digest": "d67cb394578c2e023ec98a961542019c88605fb8b66be142c7c12f6dab1318ac",
+        "model_id": "student_t_regression",
+        "package_version": "0.2.0",
+        "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_scale",
+          "log_df_minus_two"
+        ],
+        "parameters": [
+          0.2,
+          -0.3,
+          -0.35667494393873245,
+          1.3862943611198906
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 10.492051680192189,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -1.4751581000372496,
+          -6.138851802403205,
+          -10.492051680192189,
+          5.191741791350703
+        ],
+        "smooth_gradient_sum": [
+          -1.4751581000372496,
+          -6.138851802403205,
+          -10.492051680192189,
+          5.191741791350703
+        ],
+        "summed_kkt_inf": 10.492051680192189,
+        "target_spec_digest": "33fb66975d215e865078a1a2006198ff405a855c9fa0a680af5692ae53f28769",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.8,
+                "declared_variance": 0.7349999999999999,
+                "declared_sd": 0.8573214099741122
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.05000000000000002,
+                "declared_variance": 0.7349999999999999,
+                "declared_sd": 0.8573214099741122
+              },
+              {
+                "row_id": 102,
+                "declared_mean": -0.7,
+                "declared_variance": 0.7349999999999999,
+                "declared_sd": 0.8573214099741122
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "student_t_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0"
+              },
+              "variance": {
+                "parameter_set_id": "student_t_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0"
+              },
+              "sd": {
+                "parameter_set_id": "student_t_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.8,
+                "declared_variance": 0.7349999999999999,
+                "declared_sd": 0.8573214099741122
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 0.05000000000000002,
+                "declared_variance": 0.7349999999999999,
+                "declared_sd": 0.8573214099741122
+              },
+              {
+                "row_id": 102,
+                "declared_mean": -0.7,
+                "declared_variance": 0.7349999999999999,
+                "declared_sd": 0.8573214099741122
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "student_t_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0"
+              },
+              "variance": {
+                "parameter_set_id": "student_t_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0"
+              },
+              "sd": {
+                "parameter_set_id": "student_t_regression-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "aae80728cb877acabd519adeffa043d5171ad4457dfdb2129dfd543793f9c9d0"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "student_t_regression",
+      "case": "changed_near_two_df",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "d67cb394578c2e023ec98a961542019c88605fb8b66be142c7c12f6dab1318ac",
+        "model_id": "student_t_regression",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_scale",
+          "log_df_minus_two"
+        ],
+        "parameter_set_id": "student_t_regression-changed_near_two_df",
+        "parameters": [
+          1.0,
+          0.5,
+          -1.0,
+          -4.0
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          4.285535735960771,
+          -4.7214939906120375,
+          -2.6154319155361874,
+          0.0157463041604059
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "b24343f367c74f05f9323a7c9b073f28aef755e9550b36bae38bae8df7a8b11e",
+          "xor": "21ddef089804e8fa76b0b202657b40df41ec2e3add75b147146b1ff18b5cae5c"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 7.415997349461698,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 7.415997349461698
+        },
+        "model_digest": "d67cb394578c2e023ec98a961542019c88605fb8b66be142c7c12f6dab1318ac",
+        "model_id": "student_t_regression",
+        "package_version": "0.2.0",
+        "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7",
+        "parameter_names": [
+          "intercept",
+          "slope",
+          "log_scale",
+          "log_df_minus_two"
+        ],
+        "parameters": [
+          1.0,
+          0.5,
+          -1.0,
+          -4.0
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 4.7214939906120375,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          4.285535735960771,
+          -4.7214939906120375,
+          -2.6154319155361874,
+          0.0157463041604059
+        ],
+        "smooth_gradient_sum": [
+          4.285535735960771,
+          -4.7214939906120375,
+          -2.6154319155361874,
+          0.0157463041604059
+        ],
+        "summed_kkt_inf": 4.7214939906120375,
+        "target_spec_digest": "33fb66975d215e865078a1a2006198ff405a855c9fa0a680af5692ae53f28769",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 14.913447481097883,
+                "declared_sd": 3.8617932985981893
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 1.25,
+                "declared_variance": 14.913447481097883,
+                "declared_sd": 3.8617932985981893
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 2.5,
+                "declared_variance": 14.913447481097883,
+                "declared_sd": 3.8617932985981893
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "student_t_regression-changed_near_two_df",
+                "purpose": "sensitivity",
+                "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7"
+              },
+              "variance": {
+                "parameter_set_id": "student_t_regression-changed_near_two_df",
+                "purpose": "sensitivity",
+                "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7"
+              },
+              "sd": {
+                "parameter_set_id": "student_t_regression-changed_near_two_df",
+                "purpose": "sensitivity",
+                "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.0,
+                "declared_variance": 14.913447481097883,
+                "declared_sd": 3.8617932985981893
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 1.25,
+                "declared_variance": 14.913447481097883,
+                "declared_sd": 3.8617932985981893
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 2.5,
+                "declared_variance": 14.913447481097883,
+                "declared_sd": 3.8617932985981893
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "student_t_regression-changed_near_two_df",
+                "purpose": "sensitivity",
+                "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7"
+              },
+              "variance": {
+                "parameter_set_id": "student_t_regression-changed_near_two_df",
+                "purpose": "sensitivity",
+                "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7"
+              },
+              "sd": {
+                "parameter_set_id": "student_t_regression-changed_near_two_df",
+                "purpose": "sensitivity",
+                "parameter_digest": "97ffe086a389a614a5ffc4ad435cbd5e64ac2dfe7217a9b68a7f1390024933c7"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "zero_truncated_poisson",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "328af12de91785965a5e62485772e27fc9bd90029b336c3d6067cc2c0614c69d",
+        "model_id": "zero_truncated_poisson",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope"
+        ],
+        "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+        "parameters": [
+          0.3,
+          -0.2
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -3.80650670032053,
+          -8.839906055019709
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "357dd2db17f2187f0c1d4d8a9b743fa68f37d221197ceb7e1887e2ebd4da51a7",
+          "xor": "e4866d645412479110c2aa7d4583fc5cf6ab2e228c809332277bbd5c2a65bbd7"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 5.892595248353155,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 5.892595248353155
+        },
+        "model_digest": "328af12de91785965a5e62485772e27fc9bd90029b336c3d6067cc2c0614c69d",
+        "model_id": "zero_truncated_poisson",
+        "package_version": "0.2.0",
+        "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope"
+        ],
+        "parameters": [
+          0.3,
+          -0.2
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 8.839906055019709,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -3.80650670032053,
+          -8.839906055019709
+        ],
+        "smooth_gradient_sum": [
+          -3.80650670032053,
+          -8.839906055019709
+        ],
+        "summed_kkt_inf": 8.839906055019709,
+        "target_spec_digest": "3fb5721585007921771bce720b4b7b9d211054f2fffb487679672aafb1f80d66",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 1.2148562008754678,
+                "declared_variance": 0.22826460480994706,
+                "declared_sd": 0.4777704520059262
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.6753368693174084,
+                "declared_variance": 2.0532371673720893,
+                "declared_sd": 1.4329121282800594
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 1.415730480314292,
+                "declared_variance": 0.4602366228146633,
+                "declared_sd": 0.6784074165386632
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353"
+              },
+              "variance": {
+                "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353"
+              },
+              "sd": {
+                "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 1.2148562008754678,
+                "declared_variance": 0.22826460480994706,
+                "declared_sd": 0.4777704520059262
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.6753368693174084,
+                "declared_variance": 2.0532371673720893,
+                "declared_sd": 1.4329121282800594
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 1.415730480314292,
+                "declared_variance": 0.4602366228146633,
+                "declared_sd": 0.6784074165386632
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353"
+              },
+              "variance": {
+                "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353"
+              },
+              "sd": {
+                "parameter_set_id": "zero_truncated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "3f6ac942c26cbf48b869ae6f3b51c8f37c10f2d31ab6bd914194d2bcd4789353"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "zero_truncated_poisson",
+      "case": "changed_parameters",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "328af12de91785965a5e62485772e27fc9bd90029b336c3d6067cc2c0614c69d",
+        "model_id": "zero_truncated_poisson",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope"
+        ],
+        "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+        "parameters": [
+          1.2,
+          0.4
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          19.269308747127702,
+          33.676831856583085
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "7d314528e2b0ec438d856557699bfb573ee0b4876b2b5b591b197c70a3b495a6",
+          "xor": "baf2d0d9ffee13c6b2889b8a87db3128b21c4b8814d2e322c4561397645f4a54"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 13.645501705505922,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 13.645501705505922
+        },
+        "model_digest": "328af12de91785965a5e62485772e27fc9bd90029b336c3d6067cc2c0614c69d",
+        "model_id": "zero_truncated_poisson",
+        "package_version": "0.2.0",
+        "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope"
+        ],
+        "parameters": [
+          1.2,
+          0.4
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 33.676831856583085,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          19.269308747127702,
+          33.676831856583085
+        ],
+        "smooth_gradient_sum": [
+          19.269308747127702,
+          33.676831856583085
+        ],
+        "summed_kkt_inf": 33.676831856583085,
+        "target_spec_digest": "3fb5721585007921771bce720b4b7b9d211054f2fffb487679672aafb1f80d66",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 1.1565899560647173,
+                "declared_variance": 0.1639755218951679,
+                "declared_sd": 0.40493891131276566
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 8.11283701946119,
+                "declared_variance": 8.093065339791794,
+                "declared_sd": 2.8448313376704415
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 11.023356271530902,
+                "declared_variance": 11.021373270168178,
+                "declared_sd": 3.3198453684122367
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+                "purpose": "sensitivity",
+                "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226"
+              },
+              "variance": {
+                "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+                "purpose": "sensitivity",
+                "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226"
+              },
+              "sd": {
+                "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+                "purpose": "sensitivity",
+                "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 1.1565899560647173,
+                "declared_variance": 0.1639755218951679,
+                "declared_sd": 0.40493891131276566
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 8.11283701946119,
+                "declared_variance": 8.093065339791794,
+                "declared_sd": 2.8448313376704415
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 11.023356271530902,
+                "declared_variance": 11.021373270168178,
+                "declared_sd": 3.3198453684122367
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+                "purpose": "sensitivity",
+                "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226"
+              },
+              "variance": {
+                "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+                "purpose": "sensitivity",
+                "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226"
+              },
+              "sd": {
+                "parameter_set_id": "zero_truncated_poisson-changed_parameters",
+                "purpose": "sensitivity",
+                "parameter_digest": "7ef11c4676d63f0183f6df6cbee02986c1815e41512fcb43f4329df7fd84d226"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "zero_inflated_poisson",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "16e11dec7694dbbd5a220ddbab8c3e147b1ead2c95ea4553ffd50839a0540b91",
+        "model_id": "zero_inflated_poisson",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+        "parameters": [
+          0.3,
+          -0.2,
+          -0.4,
+          0.5
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -4.468284669634655,
+          -9.56971240193007,
+          1.2999201103272902,
+          2.7746738969712568
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "dc5871b622a81a581fa8a87073a9f95d23f40ffeba452fb3336636b0a2843313",
+          "xor": "efac8ec9e3d7d5a7e0b7570f6c1506525a0bf9fd76bfd14fcc9a572f842cc8cd"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 8.580343646421673,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 8.580343646421673
+        },
+        "model_digest": "16e11dec7694dbbd5a220ddbab8c3e147b1ead2c95ea4553ffd50839a0540b91",
+        "model_id": "zero_inflated_poisson",
+        "package_version": "0.2.0",
+        "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameters": [
+          0.3,
+          -0.2,
+          -0.4,
+          0.5
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 9.56971240193007,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -4.468284669634655,
+          -9.56971240193007,
+          1.2999201103272902,
+          2.7746738969712568
+        ],
+        "smooth_gradient_sum": [
+          -4.468284669634655,
+          -9.56971240193007,
+          1.2999201103272902,
+          2.7746738969712568
+        ],
+        "summed_kkt_inf": 9.56971240193007,
+        "target_spec_digest": "10dd67e7a061ac0d065ebe50fc66dda6c72dfc144ba416806effd136f95ff904",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.19131488946382205,
+                "declared_variance": 0.23176567786070493,
+                "declared_sd": 0.48142047927015413
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 1.959579228074204,
+                "declared_variance": 2.906499424980729,
+                "declared_sd": 1.7048458654613703
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.4435187271086077,
+                "declared_variance": 0.5753766200681871,
+                "declared_sd": 0.7585358396728444
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17"
+              },
+              "variance": {
+                "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17"
+              },
+              "sd": {
+                "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.19131488946382205,
+                "declared_variance": 0.23176567786070493,
+                "declared_sd": 0.48142047927015413
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 1.959579228074204,
+                "declared_variance": 2.906499424980729,
+                "declared_sd": 1.7048458654613703
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.4435187271086077,
+                "declared_variance": 0.5753766200681871,
+                "declared_sd": 0.7585358396728444
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17"
+              },
+              "variance": {
+                "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17"
+              },
+              "sd": {
+                "parameter_set_id": "zero_inflated_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "f615cd824d50d70198d29710f759f6a1e73a82ad8745ae145ab72dd9d58e0d17"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "zero_inflated_poisson",
+      "case": "changed_parameters_and_zero_weight",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "16e11dec7694dbbd5a220ddbab8c3e147b1ead2c95ea4553ffd50839a0540b91",
+        "model_id": "zero_inflated_poisson",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+        "parameters": [
+          1.2,
+          0.4,
+          0.7,
+          -0.2
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          17.429489717021557,
+          34.07201517335431,
+          0.23207874609671791,
+          1.4912488043382588
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "c1e12ef7791c16f661206331a7ed46a92996c6f69be969460230366d19ed02dc",
+          "xor": "321ed0e8b765e328d0df5e0ca8beb1796ee859456c921ef909cfc992c5e7e0a2"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 12.747433053959853,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 12.747433053959853
+        },
+        "model_digest": "16e11dec7694dbbd5a220ddbab8c3e147b1ead2c95ea4553ffd50839a0540b91",
+        "model_id": "zero_inflated_poisson",
+        "package_version": "0.2.0",
+        "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameters": [
+          1.2,
+          0.4,
+          0.7,
+          -0.2
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 34.07201517335431,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          17.429489717021557,
+          34.07201517335431,
+          0.23207874609671791,
+          1.4912488043382588
+        ],
+        "smooth_gradient_sum": [
+          17.429489717021557,
+          34.07201517335431,
+          0.23207874609671791,
+          1.4912488043382588
+        ],
+        "summed_kkt_inf": 34.07201517335431,
+        "target_spec_digest": "10dd67e7a061ac0d065ebe50fc66dda6c72dfc144ba416806effd136f95ff904",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.11264489881541526,
+                "declared_variance": 0.13356531400950777,
+                "declared_sd": 0.3654658862459091
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.025490423020943,
+                "declared_variance": 14.350416361828856,
+                "declared_sd": 3.788194340557102
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 3.6576247126439427,
+                "declared_variance": 30.598048515768006,
+                "declared_sd": 5.5315502814100865
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35"
+              },
+              "variance": {
+                "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35"
+              },
+              "sd": {
+                "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.11264489881541526,
+                "declared_variance": 0.13356531400950777,
+                "declared_sd": 0.3654658862459091
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.025490423020943,
+                "declared_variance": 14.350416361828856,
+                "declared_sd": 3.788194340557102
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 3.6576247126439427,
+                "declared_variance": 30.598048515768006,
+                "declared_sd": 5.5315502814100865
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35"
+              },
+              "variance": {
+                "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35"
+              },
+              "sd": {
+                "parameter_set_id": "zero_inflated_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "182098bdceec5a1d960b66b1e5458fca6c08230aa09e0922e3afefbf1cf22f35"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "hurdle_poisson",
+      "case": "weighted_baseline",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "02b135cb48f65e040817aa8c911eca167470f4081a079124f01159981877a60c",
+        "model_id": "hurdle_poisson",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameter_set_id": "hurdle_poisson-weighted_baseline",
+        "parameters": [
+          0.3,
+          -0.2,
+          -0.4,
+          0.5
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -4.2746866831505,
+          -8.37172607218974,
+          0.781019279770361,
+          3.293574727528186
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "dc5871b622a81a581fa8a87073a9f95d23f40ffeba452fb3336636b0a2843313",
+          "xor": "efac8ec9e3d7d5a7e0b7570f6c1506525a0bf9fd76bfd14fcc9a572f842cc8cd"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 9.024895541691588,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 9.024895541691588
+        },
+        "model_digest": "02b135cb48f65e040817aa8c911eca167470f4081a079124f01159981877a60c",
+        "model_id": "hurdle_poisson",
+        "package_version": "0.2.0",
+        "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameters": [
+          0.3,
+          -0.2,
+          -0.4,
+          0.5
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 8.37172607218974,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -4.2746866831505,
+          -8.37172607218974,
+          0.781019279770361,
+          3.293574727528186
+        ],
+        "smooth_gradient_sum": [
+          -4.2746866831505,
+          -8.37172607218974,
+          0.781019279770361,
+          3.293574727528186
+        ],
+        "summed_kkt_inf": 8.37172607218974,
+        "target_spec_digest": "bec22d85cabeeea7f3cab2544d7a4a501a4d6f7dc76d807d59b9154590eb8937",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.5
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.5770819796361127,
+                "declared_variance": 0.47647844820030677,
+                "declared_sd": 0.6902741833505776
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.146112133033181,
+                "declared_variance": 2.782849402696416,
+                "declared_sd": 1.6681874602982771
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.8475803686092414,
+                "declared_variance": 0.7570908679153164,
+                "declared_sd": 0.8701096872896638
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "hurdle_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec"
+              },
+              "variance": {
+                "parameter_set_id": "hurdle_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec"
+              },
+              "sd": {
+                "parameter_set_id": "hurdle_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.5770819796361127,
+                "declared_variance": 0.47647844820030677,
+                "declared_sd": 0.6902741833505776
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.146112133033181,
+                "declared_variance": 2.782849402696416,
+                "declared_sd": 1.6681874602982771
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 0.8475803686092414,
+                "declared_variance": 0.7570908679153164,
+                "declared_sd": 0.8701096872896638
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "hurdle_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec"
+              },
+              "variance": {
+                "parameter_set_id": "hurdle_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec"
+              },
+              "sd": {
+                "parameter_set_id": "hurdle_poisson-weighted_baseline",
+                "purpose": "sensitivity",
+                "parameter_digest": "de52c122a59fa400418c502008e7539a4f953a58bbd1d5431c0bfc7e6815acec"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "hurdle_poisson",
+      "case": "changed_parameters_and_zero_weight",
+      "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "02b135cb48f65e040817aa8c911eca167470f4081a079124f01159981877a60c",
+        "model_id": "hurdle_poisson",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+        "parameters": [
+          1.2,
+          0.4,
+          0.7,
+          -0.2
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "711b813b5069cbaee4abfc30b8132267ce3478ef70cc8919912d0243c27957cd"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          17.16716830202352,
+          34.33433660404704,
+          -0.0036584779383331822,
+          1.72698602837331
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "c1e12ef7791c16f661206331a7ed46a92996c6f69be969460230366d19ed02dc",
+          "xor": "321ed0e8b765e328d0df5e0ca8beb1796ee859456c921ef909cfc992c5e7e0a2"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 12.998261589930147,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 12.998261589930147
+        },
+        "model_digest": "02b135cb48f65e040817aa8c911eca167470f4081a079124f01159981877a60c",
+        "model_id": "hurdle_poisson",
+        "package_version": "0.2.0",
+        "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed",
+        "parameter_names": [
+          "count_intercept",
+          "count_slope",
+          "zero_intercept",
+          "zero_slope"
+        ],
+        "parameters": [
+          1.2,
+          0.4,
+          0.7,
+          -0.2
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 34.33433660404704,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          17.16716830202352,
+          34.33433660404704,
+          -0.0036584779383331822,
+          1.72698602837331
+        ],
+        "smooth_gradient_sum": [
+          17.16716830202352,
+          34.33433660404704,
+          -0.0036584779383331822,
+          1.72698602837331
+        ],
+        "summed_kkt_inf": 34.33433660404704,
+        "target_spec_digest": "bec22d85cabeeea7f3cab2544d7a4a501a4d6f7dc76d807d59b9154590eb8937",
+        "unit_count": 0,
+        "weight_kind": "observation",
+        "weight_sum": 3.0
+      },
+      "targets": [
+        {
+          "target": "response",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.43665974553789105,
+                "declared_variance": 0.3762719707365109,
+                "declared_sd": 0.6134101162652201
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.026099060564259,
+                "declared_variance": 14.353495343793305,
+                "declared_sd": 3.788600710525366
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 3.6576844026406876,
+                "declared_variance": 30.59832952834975,
+                "declared_sd": 5.531575682240075
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed"
+              },
+              "variance": {
+                "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed"
+              },
+              "sd": {
+                "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "declared_mean": 0.43665974553789105,
+                "declared_variance": 0.3762719707365109,
+                "declared_sd": 0.6134101162652201
+              },
+              {
+                "row_id": 101,
+                "declared_mean": 2.026099060564259,
+                "declared_variance": 14.353495343793305,
+                "declared_sd": 3.788600710525366
+              },
+              {
+                "row_id": 102,
+                "declared_mean": 3.6576844026406876,
+                "declared_variance": 30.59832952834975,
+                "declared_sd": 5.531575682240075
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed"
+              },
+              "variance": {
+                "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed"
+              },
+              "sd": {
+                "parameter_set_id": "hurdle_poisson-changed_parameters_and_zero_weight",
+                "purpose": "sensitivity",
+                "parameter_digest": "968b7af39739c1f15bc993821efd528f7b33d39652a3f4bf24c192e8dfecb3ed"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "gaussian_correlated_random_slope",
+      "case": "positive_correlated_effects",
+      "reference_sha256": "34a583886fdd2cb0670f80c194141bc397e3dccfad61d56b40d9f4e4d264b9cc",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [
+            "series"
+          ],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "7b51231460272eaf52bf6918310e9b5083a8cebd9c7c2df42e1124e6c47cc16b",
+        "model_id": "gaussian_correlated_random_slope",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "beta0",
+          "beta1",
+          "log_sigma",
+          "log_tau0",
+          "log_tau1",
+          "atanh_correlation"
+        ],
+        "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+        "parameters": [
+          0.4,
+          -0.2,
+          -0.6931471805599453,
+          -0.2231435513142097,
+          -1.0498221244986778,
+          0.6931471805599453
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "34a583886fdd2cb0670f80c194141bc397e3dccfad61d56b40d9f4e4d264b9cc"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -0.26881969730090916,
+          -0.25104460848066834,
+          -2.043624242567569,
+          0.8079594070667269,
+          0.7617527364431795,
+          -0.3977582579132903
+        ],
+        "data_ledger": {
+          "count": 4,
+          "sum": "18600908821a4f47c819c7aae39a007e6a765c7868b653c024e2faefd123949e",
+          "xor": "68bb64798cce9156ea2e78fe288a0b9e9785a600a80c5451c6675c38d6ef35bc"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 5.1378043909159015,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 5.1378043909159015
+        },
+        "model_digest": "7b51231460272eaf52bf6918310e9b5083a8cebd9c7c2df42e1124e6c47cc16b",
+        "model_id": "gaussian_correlated_random_slope",
+        "package_version": "0.2.0",
+        "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54",
+        "parameter_names": [
+          "beta0",
+          "beta1",
+          "log_sigma",
+          "log_tau0",
+          "log_tau1",
+          "atanh_correlation"
+        ],
+        "parameters": [
+          0.4,
+          -0.2,
+          -0.6931471805599453,
+          -0.2231435513142097,
+          -1.0498221244986778,
+          0.6931471805599453
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 2.043624242567569,
+        "reduction": "sum",
+        "row_count": 4,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -0.26881969730090916,
+          -0.25104460848066834,
+          -2.043624242567569,
+          0.8079594070667269,
+          0.7617527364431795,
+          -0.3977582579132903
+        ],
+        "smooth_gradient_sum": [
+          -0.26881969730090916,
+          -0.25104460848066834,
+          -2.043624242567569,
+          0.8079594070667269,
+          0.7617527364431795,
+          -0.3977582579132903
+        ],
+        "summed_kkt_inf": 2.043624242567569,
+        "target_spec_digest": "611aa715129ec091f05b1c1aa50c172d4a9f03165b9da1f813347c26543e4091",
+        "unit_count": 1,
+        "weight_kind": "unit",
+        "weight_sum": 1.0
+      },
+      "targets": [
+        {
+          "target": "existing_group",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": 0.7383054268118998,
+                "declared_variance": 0.3224770966324487,
+                "declared_sd": 0.5678706689312706
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": 0.6142201004973344,
+                "declared_variance": 0.3042470685824017,
+                "declared_sd": 0.5515859575645501
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": 0.2419641215536384,
+                "declared_variance": 0.4538746749514037,
+                "declared_sd": 0.6737022153380555
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": 0.7383054268118998,
+                "declared_variance": 0.3224770966324487,
+                "declared_sd": 0.5678706689312706
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": 0.6142201004973344,
+                "declared_variance": 0.3042470685824017,
+                "declared_sd": 0.5515859575645501
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": 0.2419641215536384,
+                "declared_variance": 0.4538746749514037,
+                "declared_sd": 0.6737022153380555
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              }
+            }
+          }
+        },
+        {
+          "target": "new_group",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": 0.6000000000000001,
+                "declared_variance": 0.6765000000000001,
+                "declared_sd": 0.8224962005991274
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": 0.4,
+                "declared_variance": 0.8900000000000001,
+                "declared_sd": 0.9433981132056605
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": -0.20000000000000007,
+                "declared_variance": 3.000499999999999,
+                "declared_sd": 1.7321951391226103
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": 0.6000000000000001,
+                "declared_variance": 0.6765000000000001,
+                "declared_sd": 0.8224962005991274
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": 0.4,
+                "declared_variance": 0.8900000000000001,
+                "declared_sd": 0.9433981132056605
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": -0.20000000000000007,
+                "declared_variance": 3.000499999999999,
+                "declared_sd": 1.7321951391226103
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-positive_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "3cc39d45a02a19af8f401a8d1c88d11df2ada4c69b964f96b0d268d759f9db54"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "gaussian_correlated_random_slope",
+      "case": "negative_correlated_effects",
+      "reference_sha256": "34a583886fdd2cb0670f80c194141bc397e3dccfad61d56b40d9f4e4d264b9cc",
+      "parameter_set": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "kind": "spark-tmbad-parameter-set",
+        "layout": {
+          "group_columns": [
+            "series"
+          ],
+          "id_columns": [
+            "row_id"
+          ],
+          "order_columns": []
+        },
+        "model_digest": "7b51231460272eaf52bf6918310e9b5083a8cebd9c7c2df42e1124e6c47cc16b",
+        "model_id": "gaussian_correlated_random_slope",
+        "package_version": "0.2.0",
+        "parameter_names": [
+          "beta0",
+          "beta1",
+          "log_sigma",
+          "log_tau0",
+          "log_tau1",
+          "atanh_correlation"
+        ],
+        "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+        "parameters": [
+          -1.0,
+          0.7,
+          0.1823215567939546,
+          -1.2039728043259361,
+          0.09531017980432493,
+          -1.2561528119880574
+        ],
+        "provenance": {
+          "kind": "sensitivity",
+          "reference_sha256": "34a583886fdd2cb0670f80c194141bc397e3dccfad61d56b40d9f4e4d264b9cc"
+        },
+        "purpose": "sensitivity",
+        "schema_version": 1
+      },
+      "fixed_evaluation": {
+        "artifact_identity": {
+          "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+          "platform": {
+            "arch": "arm64",
+            "os": "linux"
+          }
+        },
+        "data_gradient_sum": [
+          -0.7710871445947229,
+          -0.2652128271420451,
+          1.1130919037410394,
+          0.04166111481232393,
+          0.7814710044361969,
+          0.026824108751516224
+        ],
+        "data_ledger": {
+          "count": 3,
+          "sum": "52225d93d3db7b602a904b77df74aa40910a617fa05dd1ee54c0b6ec7b386804",
+          "xor": "ec1d9ac86a59e5bc9dbf3601c17bba4e8c95e30023a22c11fab5c0979daa9af8"
+        },
+        "fixed_parameters": {},
+        "kind": "spark-tmbad-evaluation",
+        "l1_subgradient_sum": [
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0
+          ]
+        ],
+        "loss_components": {
+          "data_sum": 4.6603181899642,
+          "denominator": 1.0,
+          "gaussian_log_normalizer_sum": 0.0,
+          "gaussian_quadratic_sum": 0.0,
+          "l1_sum": 0.0,
+          "legacy_l2_reduced": 0.0,
+          "total_reduced": 4.6603181899642
+        },
+        "model_digest": "7b51231460272eaf52bf6918310e9b5083a8cebd9c7c2df42e1124e6c47cc16b",
+        "model_id": "gaussian_correlated_random_slope",
+        "package_version": "0.2.0",
+        "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f",
+        "parameter_names": [
+          "beta0",
+          "beta1",
+          "log_sigma",
+          "log_tau0",
+          "log_tau1",
+          "atanh_correlation"
+        ],
+        "parameters": [
+          -1.0,
+          0.7,
+          0.1823215567939546,
+          -1.2039728043259361,
+          0.09531017980432493,
+          -1.2561528119880574
+        ],
+        "partition_count": 2,
+        "reduced_kkt_inf": 1.1130919037410394,
+        "reduction": "sum",
+        "row_count": 3,
+        "schema_version": 1,
+        "smooth_gradient_reduced": [
+          -0.7710871445947229,
+          -0.2652128271420451,
+          1.1130919037410394,
+          0.04166111481232393,
+          0.7814710044361969,
+          0.026824108751516224
+        ],
+        "smooth_gradient_sum": [
+          -0.7710871445947229,
+          -0.2652128271420451,
+          1.1130919037410394,
+          0.04166111481232393,
+          0.7814710044361969,
+          0.026824108751516224
+        ],
+        "summed_kkt_inf": 1.1130919037410394,
+        "target_spec_digest": "611aa715129ec091f05b1c1aa50c172d4a9f03165b9da1f813347c26543e4091",
+        "unit_count": 1,
+        "weight_kind": "unit",
+        "weight_sum": 1.0
+      },
+      "targets": [
+        {
+          "target": "existing_group",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": -3.4188470853489825,
+                "declared_variance": 4.026891738197111,
+                "declared_sd": 2.0067116729109618
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": -0.6026855666082912,
+                "declared_variance": 1.4806822129735324,
+                "declared_sd": 1.216832861560507
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": 2.2134759521324003,
+                "declared_variance": 4.928217735602123,
+                "declared_sd": 2.219958949080393
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": -3.4188470853489825,
+                "declared_variance": 4.026891738197111,
+                "declared_sd": 2.0067116729109618
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": -0.6026855666082912,
+                "declared_variance": 1.4806822129735324,
+                "declared_sd": 1.216832861560507
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": 2.2134759521324003,
+                "declared_variance": 4.928217735602123,
+                "declared_sd": 2.219958949080393
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              }
+            }
+          }
+        },
+        {
+          "target": "new_group",
+          "prediction": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": -3.0999999999999996,
+                "declared_variance": 14.103,
+                "declared_sd": 3.7553961175886625
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": -0.65,
+                "declared_variance": 1.552,
+                "declared_sd": 1.245792920191795
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": 1.7999999999999998,
+                "declared_variance": 18.646000000000004,
+                "declared_sd": 4.318101434658524
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              }
+            }
+          },
+          "forecast": {
+            "rows": [
+              {
+                "row_id": 100,
+                "series": "g0",
+                "declared_mean": -3.0999999999999996,
+                "declared_variance": 14.103,
+                "declared_sd": 3.7553961175886625
+              },
+              {
+                "row_id": 101,
+                "series": "g0",
+                "declared_mean": -0.65,
+                "declared_variance": 1.552,
+                "declared_sd": 1.245792920191795
+              },
+              {
+                "row_id": 102,
+                "series": "g0",
+                "declared_mean": 1.7999999999999998,
+                "declared_variance": 18.646000000000004,
+                "declared_sd": 4.318101434658524
+              }
+            ],
+            "metadata": {
+              "mean": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "variance": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              },
+              "sd": {
+                "parameter_set_id": "gaussian_correlated_random_slope-negative_correlated_effects",
+                "purpose": "sensitivity",
+                "parameter_digest": "c8560915d36f0d5414354c6b399743cf4b0c2bc1c95c684fd379254adb47ae1f"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "model_count": 9,
+  "parameter_data_cases": 18,
+  "expected_parameter_data_cases": 18,
+  "native_execution_attempted": true,
+  "native_executed": true,
+  "spark_executed": true,
+  "optimization_executed": false,
+  "hessian_compared": false,
+  "posterior_sampling_executed": false,
+  "joint_covariance_returned": false,
+  "scope": "Fixed values/scores and marginal moments at declared reference parameters; no independent-fit, optimizer, managed-cloud or multi-container acceptance",
+  "installed_package": {
+    "version": "0.2.0",
+    "module_path": "/work/site/ds60_spark_tmbad/__init__.py",
+    "module_sha256": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822"
+  },
+  "spark_version": "4.0.1",
+  "master": "local[2]",
+  "probe": {
+    "passed": true,
+    "scope": "one explicit native executor probe; not multi-node qualification",
+    "artifact_identity": {
+      "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+      "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+      "platform": {
+        "arch": "arm64",
+        "os": "linux"
+      },
+      "engine": {
+        "name": "TMBad",
+        "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+        "version": "1.9.25"
+      },
+      "jvm_sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c"
+    },
+    "execution": {
+      "executor_id": "driver",
+      "jvm_pid": 10,
+      "binary_sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357",
+      "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+      "model_digest": "7b51231460272eaf52bf6918310e9b5083a8cebd9c7c2df42e1124e6c47cc16b",
+      "passed": true
+    }
+  }
+}

@@ -91,6 +91,11 @@ The test then:
 
 The native workload fits a normal model and a real AR1 model, then verifies
 three conditional-history forecasts against finite innovation-moment formulas.
+It also checks a named nonzero Gaussian prior, exact L1 penalty and fixed scale
+before and after worker loss. Sum and weighted-mean objectives must yield the
+same independently derived optimum, satisfy summed KKT, preserve the data ledger,
+and produce matching persisted-model predictions. The prior is applied once to
+the shared parameter vector, regardless of the number of executor partitions.
 The Torch workload fits a Gaussian regression using distributed additive Torch
 likelihood evaluation and tests response-free point predictions at future
 covariates. Those are explicitly labeled future-covariate predictions, not an

@@ -1,0 +1,205 @@
+{
+  "scope": "Derived descriptive analysis of unchanged executed raw ledgers; no refits and no rewriting historical summaries. Source text is audit data, never executed from this receipt.",
+  "aggregation_source_sha256": "55fc844dd37eecd94ad3445074f016532f6fda4169cf5ccb9539cf49e07fe127",
+  "aggregation_source_text": "\"\"\"Serial reproducible reference studies with retained failures and Monte Carlo error.\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport math\nimport statistics\nimport time\nfrom pathlib import Path\n\nfrom client import run_case\n\n\ndef aggregate(records, requested, *, fixed_dataset=False):\n    passed = [record for record in records if record.get(\"status\") == \"passed\"]\n    errors = [\n        record[\"result\"][\"metrics\"][\"primary_estimate\"] - record[\"result\"][\"metrics\"][\"truth\"]\n        for record in passed\n    ]\n    if any(not math.isfinite(value) for value in errors):\n        raise ValueError(\"Nonfinite returned estimate cannot be admitted\")\n    result = {\n        \"requested_replications\": requested,\n        \"attempted_replications\": len(records),\n        \"successful_replications\": len(passed),\n        \"failed_replications\": len(records) - len(passed),\n        \"completion\": \"complete\" if len(records) == requested else \"incomplete\",\n        \"interpretation\": \"bias/MSE conditional on successful fits; failures are retained\",\n    }\n    fixture_hashes = [record.get(\"result\", {}).get(\"fixture_sha256\") for record in passed]\n    known_hashes = [value for value in fixture_hashes if value is not None]\n    repeated_fixture = len(known_hashes) != len(set(known_hashes))\n    dataset_mcse = not fixed_dataset and not repeated_fixture\n    result.update(\n        simulation_unit=\"posterior-draw checks on fixed data\" if fixed_dataset else \"dataset\",\n        distinct_observed_dataset_hashes=len(set(known_hashes)),\n        repeated_observed_dataset=bool(repeated_fixture),\n        dataset_monte_carlo_uncertainty=dataset_mcse,\n    )\n    if not dataset_mcse:\n        result[\"interpretation\"] = (\n            \"Descriptive bias/MSE across repeated fixed data; no independent-dataset MCSE. \"\n            \"Posterior-draw Monte Carlo errors, when available, remain in each case result.\"\n        )\n    if errors:\n        squares = [value * value for value in errors]\n        result.update(\n            bias=statistics.mean(errors),\n            mse=statistics.mean(squares),\n            bias_mcse=statistics.stdev(errors) / math.sqrt(len(errors))\n            if len(errors) > 1 and dataset_mcse\n            else None,\n            mse_mcse=statistics.stdev(squares) / math.sqrt(len(squares))\n            if len(squares) > 1 and dataset_mcse\n            else None,\n        )\n    predictive_errors = [record[\"result\"][\"metrics\"].get(\"mse\") for record in passed]\n    if predictive_errors and all(value is not None for value in predictive_errors):\n        if any(not math.isfinite(value) or value < 0 for value in predictive_errors):\n            raise ValueError(\"Invalid held-out predictive MSE\")\n        result[\"prediction_mse_conditional_on_success\"] = statistics.mean(predictive_errors)\n        result[\"prediction_mse_mcse_across_datasets\"] = (\n            statistics.stdev(predictive_errors) / math.sqrt(len(predictive_errors))\n            if len(predictive_errors) > 1 and dataset_mcse\n            else None\n        )\n    coverage = [record[\"result\"][\"metrics\"].get(\"pointwise_coverage\") for record in passed]\n    if coverage and all(value is not None for value in coverage):\n        result[\"conditional_pointwise_coverage\"] = statistics.mean(coverage)\n        result[\"procedural_pointwise_coverage\"] = sum(coverage) / len(records)\n        result[\"coverage_mcse_across_independent_datasets\"] = (\n            statistics.stdev(coverage) / math.sqrt(len(coverage))\n            if len(coverage) > 1 and dataset_mcse\n            else None\n        )\n    if records:\n        failures = len(records) - len(passed)\n        # Wilson interval also remains informative for zero observed failures.\n        n, z = len(records), 1.959963984540054\n        observed = failures / n\n        center = (observed + z * z / (2 * n)) / (1 + z * z / n)\n        radius = (\n            z * math.sqrt(observed * (1 - observed) / n + z * z / (4 * n * n)) / (1 + z * z / n)\n        )\n        result[\"failure_rate\"] = observed\n        result[\"failure_rate_wilson95\"] = (\n            [center - radius, center + radius] if dataset_mcse else None\n        )\n    result[\"coverage_claim\"] = (\n        \"A few smoke repetitions are execution evidence, not a calibration guarantee\"\n    )\n    return result\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument(\"--case\", required=True)\n    parser.add_argument(\"--option\", action=\"append\", default=[])\n    parser.add_argument(\"--seed\", type=int, default=1729)\n    parser.add_argument(\"--replications\", type=int, default=3)\n    parser.add_argument(\"--prepared\", type=Path, required=True)\n    parser.add_argument(\"--output\", type=Path, required=True)\n    parser.add_argument(\"--time-budget\", type=int, default=600)\n    args = parser.parse_args()\n    if not 1 <= args.replications <= 5000 or not 30 <= args.time_budget <= 86400:\n        raise ValueError(\"Declare1..5000replications and a bounded30..86400second budget\")\n    if args.output.exists() or args.output.is_symlink():\n        raise ValueError(\"Choose a fresh simulation directory\")\n    args.output.mkdir(parents=True)\n    options = {}\n    for item in args.option:\n        name, separator, value = item.partition(\"=\")\n        if not separator or name in options:\n            raise ValueError(\"Options must be unique NAME=VALUE pairs\")\n        options[name] = value\n    records = []\n    started = time.monotonic()\n    for replicate in range(args.replications):\n        remaining = args.time_budget - (time.monotonic() - started)\n        if remaining < 10:\n            break\n        seed = args.seed + replicate * 7919\n        try:\n            result = run_case(\n                args.case,\n                seed=seed,\n                options=options,\n                prepared=args.prepared,\n                output=args.output / f\"replicate-{replicate:05d}\",\n                timeout=max(10, min(300, int(remaining))),\n            )\n        except Exception as error:\n            result = {\n                \"status\": \"failed\",\n                \"error\": {\"type\": type(error).__name__, \"message\": str(error)[:1000]},\n            }\n        records.append({**result, \"replicate\": replicate, \"seed\": seed})\n        (args.output / \"ledger.json\").write_text(\n            json.dumps(records, indent=2, allow_nan=False) + \"\\n\"\n        )\n    # This registered case changes posterior draws across seeds but deliberately\n    # keeps the regression data fixed for its exact soft-threshold oracle.\n    summary = aggregate(\n        records, args.replications, fixed_dataset=args.case == \"regularization_posterior\"\n    )\n    summary[\"elapsed_seconds\"] = time.monotonic() - started\n    (args.output / \"summary.json\").write_text(json.dumps(summary, indent=2, allow_nan=False) + \"\\n\")\n    print(json.dumps(summary, indent=2))\n\n\nif __name__ == \"__main__\":\n    main()\n",
+  "records": [
+    {
+      "case": "gaussian_random_slope",
+      "raw_ledger_file": "v1-simulation-gaussian_random_slope-ledger.json",
+      "raw_ledger_sha256": "16a47cf267f47216081702fc25b6b42eb0f36e80ac279f2b7760566d5671f48d",
+      "historical_summary_sha256": "ba286de7647a1a6b373b1e14445a2b5f125e1f4bda4a67744d3e1aff8480a310",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 14,
+        "failed_replications": 2,
+        "completion": "complete",
+        "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+        "simulation_unit": "dataset",
+        "distinct_observed_dataset_hashes": 14,
+        "repeated_observed_dataset": false,
+        "dataset_monte_carlo_uncertainty": true,
+        "bias": 0.0025577109935022713,
+        "mse": 0.002362505321280378,
+        "bias_mcse": 0.013462093321488636,
+        "mse_mcse": 0.0007131669706477231,
+        "prediction_mse_conditional_on_success": 0.23898936431477294,
+        "prediction_mse_mcse_across_datasets": 0.05440190616223835,
+        "conditional_pointwise_coverage": 0.9523809523809524,
+        "procedural_pointwise_coverage": 0.8333333333333335,
+        "coverage_mcse_across_independent_datasets": 0.03235077240413128,
+        "failure_rate": 0.125,
+        "failure_rate_wilson95": [
+          0.03497748774324047,
+          0.36022827265758695
+        ],
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    },
+    {
+      "case": "gaussian_ridge",
+      "raw_ledger_file": "v1-simulation-gaussian_ridge-ledger.json",
+      "raw_ledger_sha256": "51ab2deb08995d5a4cac964c7e1b47359f162f449ab2c16e416a67d75887fdb9",
+      "historical_summary_sha256": "82dbeb44661267cbc0030d38785198578c795b089ece35d978456b848c2af265",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 16,
+        "failed_replications": 0,
+        "completion": "complete",
+        "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+        "simulation_unit": "dataset",
+        "distinct_observed_dataset_hashes": 16,
+        "repeated_observed_dataset": false,
+        "dataset_monte_carlo_uncertainty": true,
+        "bias": -0.027098062200259357,
+        "mse": 0.0021687591200529434,
+        "bias_mcse": 0.009779073388427687,
+        "mse_mcse": 0.0008238562299492936,
+        "failure_rate": 0.0,
+        "failure_rate_wilson95": [
+          0.0,
+          0.1936076805344365
+        ],
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "raw_ledger_file": "v1-simulation-glmm_ar_forecast-ledger.json",
+      "raw_ledger_sha256": "2153e1a4aa7a9afce5b0cebde7d87826611816cdfa3e8ff2f1113611ea69dd85",
+      "historical_summary_sha256": "be267c0d74db60d55322388886aa6c39deb0d3dbd28d938872f27dd7b5865bd9",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 16,
+        "failed_replications": 0,
+        "completion": "complete",
+        "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+        "simulation_unit": "dataset",
+        "distinct_observed_dataset_hashes": 16,
+        "repeated_observed_dataset": false,
+        "dataset_monte_carlo_uncertainty": true,
+        "bias": 0.018132936619266203,
+        "mse": 0.004884368955745424,
+        "bias_mcse": 0.01742711596967419,
+        "mse_mcse": 0.0014968727825827625,
+        "failure_rate": 0.0,
+        "failure_rate_wilson95": [
+          0.0,
+          0.1936076805344365
+        ],
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    },
+    {
+      "case": "glmm_zero_inflation",
+      "raw_ledger_file": "v1-simulation-glmm_zero_inflation-ledger.json",
+      "raw_ledger_sha256": "a0620333d88c9f3b2e1c1a9bec31031fdea7e85f7037ed064c17faffa54cb8b5",
+      "historical_summary_sha256": "93b9118d98f8aecc118840d25557548421d5b6872bb06d6d4face3da75698b45",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 16,
+        "failed_replications": 0,
+        "completion": "complete",
+        "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+        "simulation_unit": "dataset",
+        "distinct_observed_dataset_hashes": 16,
+        "repeated_observed_dataset": false,
+        "dataset_monte_carlo_uncertainty": true,
+        "bias": -0.010022615003449295,
+        "mse": 0.002641822495410918,
+        "bias_mcse": 0.01301632227603366,
+        "mse_mcse": 0.0008075182614310419,
+        "failure_rate": 0.0,
+        "failure_rate_wilson95": [
+          0.0,
+          0.1936076805344365
+        ],
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    },
+    {
+      "case": "nonlinear_growth",
+      "raw_ledger_file": "v1-simulation-nonlinear_growth-ledger.json",
+      "raw_ledger_sha256": "c90195df44d5c4d47370a75eb43d7d37aef3955463f3134bb116e8a3b511e93b",
+      "historical_summary_sha256": "8d2b6d3d61d6243839f1eaf00fa0b0dc5ab5a361e0a070d4010f0bdbed2c5549",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 16,
+        "failed_replications": 0,
+        "completion": "complete",
+        "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+        "simulation_unit": "dataset",
+        "distinct_observed_dataset_hashes": 16,
+        "repeated_observed_dataset": false,
+        "dataset_monte_carlo_uncertainty": true,
+        "bias": 0.00034392532977123996,
+        "mse": 0.00021935808843867593,
+        "bias_mcse": 0.003823086046692451,
+        "mse_mcse": 8.913171631126986e-05,
+        "failure_rate": 0.0,
+        "failure_rate_wilson95": [
+          0.0,
+          0.1936076805344365
+        ],
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    },
+    {
+      "case": "panel_ar1",
+      "raw_ledger_file": "v1-simulation-panel_ar1-ledger.json",
+      "raw_ledger_sha256": "710a2ad3761df6ccbba8771d2f6884e569c65f530d054f5ada5b4dd02394a86c",
+      "historical_summary_sha256": "845704fee3fc6fe07e23b1ac40d49798e9bc4cfcc960db9e2c63b1d1b830d1cf",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 16,
+        "failed_replications": 0,
+        "completion": "complete",
+        "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+        "simulation_unit": "dataset",
+        "distinct_observed_dataset_hashes": 16,
+        "repeated_observed_dataset": false,
+        "dataset_monte_carlo_uncertainty": true,
+        "bias": 0.008982475401990493,
+        "mse": 0.0006290748150621066,
+        "bias_mcse": 0.006046431182743213,
+        "mse_mcse": 0.00018551004959711388,
+        "failure_rate": 0.0,
+        "failure_rate_wilson95": [
+          0.0,
+          0.1936076805344365
+        ],
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    },
+    {
+      "case": "regularization_posterior",
+      "raw_ledger_file": "v1-simulation-regularization_posterior-ledger.json",
+      "raw_ledger_sha256": "4f87213d825485c427fe77d8f2e638aa2814c553e9a3c481cd315f533107d8dd",
+      "historical_summary_sha256": "32a424c93f1b222bfb9330669b9fc6e7569478b2e60a5ae77183c73e919dcf4b",
+      "derived_summary": {
+        "requested_replications": 16,
+        "attempted_replications": 16,
+        "successful_replications": 16,
+        "failed_replications": 0,
+        "completion": "complete",
+        "interpretation": "Descriptive bias/MSE across repeated fixed data; no independent-dataset MCSE. Posterior-draw Monte Carlo errors, when available, remain in each case result.",
+        "simulation_unit": "posterior-draw checks on fixed data",
+        "distinct_observed_dataset_hashes": 1,
+        "repeated_observed_dataset": true,
+        "dataset_monte_carlo_uncertainty": false,
+        "bias": -0.10000000000000009,
+        "mse": 0.010000000000000018,
+        "bias_mcse": null,
+        "mse_mcse": null,
+        "failure_rate": 0.0,
+        "failure_rate_wilson95": null,
+        "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee"
+      }
+    }
+  ]
+}

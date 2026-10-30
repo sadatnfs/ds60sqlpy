@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "panel_ar1",
+    "options": {},
+    "seed": 1729
+  },
+  "result": {
+    "case": "panel_ar1",
+    "target": "exact Gaussian marginal ML with panel intercept/slope and heteroskedastic observed AR1",
+    "parameters": {
+      "beta": [1.10012236147444, 0.375095979879577, 0.744055453570856],
+      "log_sigma": -1.05408309790239,
+      "log_tau": [-0.490959340550106, -1.73739627280569],
+      "phi_coordinate": 0.614975662627082,
+      "scale_trend": 0.215433660578222
+    },
+    "diagnostics": {
+      "converged": true,
+      "objective": 161.670552507996,
+      "raw_score_inf": 1.83663315397337e-05,
+      "projected_score_inf": 1.83663315397337e-05,
+      "iterations": null,
+      "pd_hessian": true,
+      "restored_objective": 161.670552507996,
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [1.10012625468352, 0.37509323260366, 0.744055558006632, -1.05408252976864, -0.490952219649168, -1.73739630575446, 0.614976349250008, 0.215433689321742],
+          "parameter_names": ["beta", "beta", "beta", "log_sigma", "log_tau", "log_tau", "phi_coordinate", "scale_trend"],
+          "objective": 161.670552509848,
+          "convergence": 1,
+          "message": "singular convergence (7)",
+          "iterations": 34,
+          "evaluations": [51, 35],
+          "gradient": [0.000145343657138586, -0.000306764281126526, 0.000452553103632819, 0.000115912690545105, 0.000296324942955944, 7.23322629274938e-06, 7.46572081088942e-05, 4.30345065602633e-05],
+          "projected_gradient": [0.000145343657138586, -0.000306764281126526, 0.000452553103632819, 0.000115912690545105, 0.000296324942955944, 7.23322629274938e-06, 7.46572081088942e-05, 4.30345065602633e-05],
+          "raw_score_inf": 0.000452553103632819,
+          "projected_score_inf": 0.000452553103632819
+        },
+        {
+          "method": "optim L-BFGS-B refinement",
+          "parameters": [1.10012236147444, 0.375095979879577, 0.744055453570856, -1.05408309790239, -0.490959340550106, -1.73739627280569, 0.614975662627082, 0.215433660578222],
+          "parameter_names": ["beta", "beta", "beta", "log_sigma", "log_tau", "log_tau", "phi_coordinate", "scale_trend"],
+          "objective": 161.670552507996,
+          "convergence": 0,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+          "iterations": null,
+          "evaluations": [10, 10],
+          "gradient": [-9.1620548907656e-06, -1.6178050468163e-06, -5.48529006921816e-06, -1.83663315397337e-05, 7.95231480886573e-06, -2.46249424042887e-06, 8.44929872810008e-06, 1.42470507694115e-06],
+          "projected_gradient": [-9.1620548907656e-06, -1.6178050468163e-06, -5.48529006921816e-06, -1.83663315397337e-05, 7.95231480886573e-06, -2.46249424042887e-06, 8.44929872810008e-06, 1.42470507694115e-06],
+          "raw_score_inf": 1.83663315397337e-05,
+          "projected_score_inf": 1.83663315397337e-05
+        }
+      ]
+    },
+    "gradient_check": {
+      "steps": [2e-05, 5e-06],
+      "maximum_absolute_errors": [6.63835066916363e-08, 6.1740541568156e-08]
+    },
+    "independent_initial_loss": 215.286794469809,
+    "forecast": {
+      "mean": [0.619912903623486, 0.73224388131752, 0.933926433722462],
+      "covariance": [
+        [0.16061618410532, 0.0995074949839996, 0.0658212183405127],
+        [0.0995074949839996, 0.227972044860206, 0.14366428676393],
+        [0.0658212183405127, 0.14366428676393, 0.262868038968056]
+      ],
+      "sd": [0.400769489988098, 0.477464181756292, 0.512706581748329],
+      "uncertainty": "observation/latent uncertainty at fitted population parameters"
+    },
+    "future_time": [16, 17, 18],
+    "future_covariate_scenario": [-0.81332939156758, -0.578198241744309, -0.279415498198926],
+    "future_has_response": false,
+    "fit_time_maximum": 15,
+    "forecast_time_minimum": 16,
+    "provenance": "Original synthetic panel inspired by AFModel's scientific topics; no operational code or data reused",
+    "metrics": {
+      "mse": 0.163397676793143,
+      "pointwise_coverage": 1,
+      "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+      "primary_estimate": 0.744055453570856,
+      "truth": 0.7
+    },
+    "fixture_sha256": "977afc5b0f5a3c87e4b7717e2a1840b3fbd3099c1183016226a23f8d7e3a4ee6"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.441
+}

@@ -1,0 +1,218 @@
+[
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "regularization_posterior",
+      "options": {},
+      "seed": 1729
+    },
+    "result": {
+      "case": "regularization_posterior",
+      "lasso": {
+        "beta": [
+          2,
+          0.7,
+          0
+        ],
+        "iterations": 1,
+        "kkt_inf": 9.76996261670138e-15,
+        "objective": 6.436,
+        "target": "exact L1 Gaussian point estimate; no posterior samples"
+      },
+      "exact_soft_threshold": [
+        2,
+        0.7,
+        0
+      ],
+      "posterior": {
+        "mean": [
+          1.99750312109863,
+          0.776190476190476,
+          0.0285714285714285
+        ],
+        "covariance": [
+          [
+            0.0124843945068664,
+            0,
+            0
+          ],
+          [
+            0,
+            0.0119047619047619,
+            0
+          ],
+          [
+            0,
+            0,
+            0.0119047619047619
+          ]
+        ],
+        "posterior_sd": [
+          0.111733587192332,
+          0.109108945117996,
+          0.109108945117996
+        ],
+        "prediction": {
+          "mean": [
+            0.473693597289103,
+            1.9689316925272,
+            3.57845550205101
+          ],
+          "sd": [
+            1.03537829030296,
+            1.01212111746156,
+            1.03537829030296
+          ]
+        },
+        "target": "exact conjugate coefficient posterior with known observation scale",
+        "uncertainty": "observation and population-coefficient posterior uncertainty"
+      },
+      "posterior_draw_count": 4096,
+      "posterior_draw_mean": [
+        1.99638016829662,
+        0.77895311159448,
+        0.0318327645009893
+      ],
+      "posterior_draw_mean_mcse": [
+        0.00174583729988018,
+        0.00170482726746869,
+        0.00170482726746869
+      ],
+      "posterior_sampler": "independent exact Gaussian draws, not MCMC",
+      "metrics": {
+        "primary_estimate": 0.7,
+        "truth": 0.8
+      },
+      "fixture_sha256": "d26d28b7daab3db453cf76828934ad40e929123176610aa154ba83a3f92f09b5"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.366,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "01b235ba2f447bae58cf6864886ab5415d53f83a09e91538dfd8b05a83cbaf4e",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 0,
+    "seed": 1729
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "regularization_posterior",
+      "options": {},
+      "seed": 9648
+    },
+    "result": {
+      "case": "regularization_posterior",
+      "lasso": {
+        "beta": [
+          2,
+          0.7,
+          0
+        ],
+        "iterations": 1,
+        "kkt_inf": 9.76996261670138e-15,
+        "objective": 6.436,
+        "target": "exact L1 Gaussian point estimate; no posterior samples"
+      },
+      "exact_soft_threshold": [
+        2,
+        0.7,
+        0
+      ],
+      "posterior": {
+        "mean": [
+          1.99750312109863,
+          0.776190476190476,
+          0.0285714285714285
+        ],
+        "covariance": [
+          [
+            0.0124843945068664,
+            0,
+            0
+          ],
+          [
+            0,
+            0.0119047619047619,
+            0
+          ],
+          [
+            0,
+            0,
+            0.0119047619047619
+          ]
+        ],
+        "posterior_sd": [
+          0.111733587192332,
+          0.109108945117996,
+          0.109108945117996
+        ],
+        "prediction": {
+          "mean": [
+            0.473693597289103,
+            1.9689316925272,
+            3.57845550205101
+          ],
+          "sd": [
+            1.03537829030296,
+            1.01212111746156,
+            1.03537829030296
+          ]
+        },
+        "target": "exact conjugate coefficient posterior with known observation scale",
+        "uncertainty": "observation and population-coefficient posterior uncertainty"
+      },
+      "posterior_draw_count": 4096,
+      "posterior_draw_mean": [
+        1.99786518125557,
+        0.774151160040071,
+        0.0273218912421969
+      ],
+      "posterior_draw_mean_mcse": [
+        0.00174583729988018,
+        0.00170482726746869,
+        0.00170482726746869
+      ],
+      "posterior_sampler": "independent exact Gaussian draws, not MCMC",
+      "metrics": {
+        "primary_estimate": 0.7,
+        "truth": 0.8
+      },
+      "fixture_sha256": "d26d28b7daab3db453cf76828934ad40e929123176610aa154ba83a3f92f09b5"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.363,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "898c91fde0236f3c930a385424bdd7210f673e00085c855aff9e2381bee6eace",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 1,
+    "seed": 9648
+  }
+]

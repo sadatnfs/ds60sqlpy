@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import io
 import json
@@ -44,6 +45,41 @@ class ReferenceContracts(unittest.TestCase):
         altered["packages"] = list(reversed(altered["packages"]))
         with self.assertRaisesRegex(ValueError, "topological"):
             prepare.validate_lock(altered)
+
+    def test_dependency_lock_must_match_actual_archive_description(self):
+        raw = b"Package: example\nVersion: 1.0\nDepends: R (>= 4.4),\n methods\n"
+        entry = {
+            "name": "example",
+            "version": "1.0",
+            "dependencies": {"Depends": "R (>= 4.4), methods", "Imports": "", "LinkingTo": ""},
+            "description_sha256": hashlib.sha256(raw).hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            archive = Path(temporary) / "example.tar.gz"
+            with tarfile.open(archive, "w:gz") as stream:
+                item = tarfile.TarInfo("example/DESCRIPTION")
+                item.size = len(raw)
+                stream.addfile(item, io.BytesIO(raw))
+            prepare.verify_archive_metadata(archive, entry)
+            altered = copy.deepcopy(entry)
+            altered["dependencies"]["Depends"] = "R (>= 4.7), methods"
+            with self.assertRaisesRegex(ValueError, "metadata differs"):
+                prepare.verify_archive_metadata(archive, altered)
+            altered = copy.deepcopy(entry)
+            altered["description_sha256"] = "0" * 64
+            with self.assertRaisesRegex(ValueError, "hash differs"):
+                prepare.verify_archive_metadata(archive, altered)
+
+    def test_repeated_description_fields_are_rejected(self):
+        raw = b"Package: example\nVersion: 1.0\nVersion: 2.0\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            archive = Path(temporary) / "example.tar.gz"
+            with tarfile.open(archive, "w:gz") as stream:
+                item = tarfile.TarInfo("example/DESCRIPTION")
+                item.size = len(raw)
+                stream.addfile(item, io.BytesIO(raw))
+            with self.assertRaisesRegex(ValueError, "repeated"):
+                prepare.verify_archive_metadata(archive, {"name": "example"})
 
     def test_registry_rejects_executable_text_unknown_options_and_noninteger_seeds(self):
         self.assertEqual(
@@ -114,6 +150,33 @@ class ReferenceContracts(unittest.TestCase):
         self.assertEqual(summary["mse"], 1)
         self.assertGreater(summary["failure_rate_wilson95"][1], 0)
         self.assertEqual(summary["procedural_pointwise_coverage"], 0.5)
+
+    def test_fixed_data_posterior_draw_replays_do_not_invent_dataset_mcse(self):
+        records = [
+            {"status": "passed", "result": {"fixture_sha256": "a" * 64,
+                "metrics": {"primary_estimate": 0.7, "truth": 0.8}}}
+            for _ in range(4)
+        ]
+        for fixed in [False, True]:
+            summary = aggregate(records, 4, fixed_dataset=fixed)
+            self.assertEqual(summary["distinct_observed_dataset_hashes"], 1)
+            self.assertTrue(summary["repeated_observed_dataset"])
+            self.assertFalse(summary["dataset_monte_carlo_uncertainty"])
+            self.assertIsNone(summary["bias_mcse"])
+            self.assertIsNone(summary["mse_mcse"])
+            self.assertIsNone(summary["failure_rate_wilson95"])
+            self.assertAlmostEqual(summary["bias"], -0.1)
+
+    def test_predictive_mse_is_separate_from_parameter_mse(self):
+        records = [
+            {"status": "passed", "result": {"metrics": {
+                "primary_estimate": 1, "truth": 1, "mse": value}}}
+            for value in [1, 9]
+        ]
+        summary = aggregate(records, 2)
+        self.assertEqual(summary["mse"], 0)
+        self.assertEqual(summary["prediction_mse_conditional_on_success"], 5)
+        self.assertEqual(summary["prediction_mse_mcse_across_datasets"], 4)
 
 
 if __name__ == "__main__":

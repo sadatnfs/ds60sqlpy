@@ -107,7 +107,7 @@ installed:
 
 ```sh
 python -m build --wheel --no-isolation python --outdir /work/python-dist
-python -m pip install --no-deps /work/python-dist/ds60_spark_tmbad-0.1.0-py3-none-any.whl
+python -m pip install --no-deps /work/python-dist/ds60_spark_tmbad-0.2.0-py3-none-any.whl
 ```
 
 The wheel has no numerical dependencies and contains no native binary or JAR.

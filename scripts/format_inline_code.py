@@ -18,6 +18,7 @@ import json
 import re
 import subprocess
 import sys
+import textwrap
 import time
 import tokenize
 import tomllib
@@ -25,6 +26,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +35,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts import format_repo  # noqa: E402
-from scripts.source_format_parity import _tree_value, semantic_sha256  # noqa: E402
+from scripts.source_format_parity import _inline_semantic_sha256, _tree_value  # noqa: E402
 
 MAX_DOCUMENT = 5_000_000
 MAX_SNIPPET = 256_000
@@ -137,6 +139,8 @@ PROTECTED_NODES = {
     "text",
     "raw_text",
     "attribute_value",
+    "quoted_attribute_value",
+    "mount_param",
 }
 
 
@@ -309,6 +313,129 @@ def xml_value(raw: bytes) -> Any:
     return namespaces, convert(root)
 
 
+# Only these grammar nodes admit a style-only terminal separator. Tuple commas
+# in Rust and array holes in JavaScript remain meaningful and are retained.
+TRAILING_COMMA_NODES = {
+    "javascript": {
+        "arguments",
+        "array",
+        "object",
+        "formal_parameters",
+        "named_imports",
+        "export_clause",
+        "array_pattern",
+        "object_pattern",
+    },
+    "typescript": {
+        "arguments",
+        "array",
+        "object",
+        "formal_parameters",
+        "named_imports",
+        "export_clause",
+        "array_pattern",
+        "object_pattern",
+        "type_arguments",
+        "type_parameters",
+        "tuple_type",
+        "object_type",
+    },
+    "tsx": {
+        "arguments",
+        "array",
+        "object",
+        "formal_parameters",
+        "named_imports",
+        "export_clause",
+        "array_pattern",
+        "object_pattern",
+        "type_arguments",
+        "type_parameters",
+        "tuple_type",
+        "object_type",
+    },
+    "rust": {
+        "arguments",
+        "parameters",
+        "field_declaration_list",
+        "field_initializer_list",
+        "enum_variant_list",
+        "type_arguments",
+        "type_parameters",
+        "match_arm",
+    },
+}
+
+
+def style_comma(node: Any, grammar: str) -> bool:
+    parent = node.parent
+    if (
+        node.type != ","
+        or parent is None
+        or parent.type not in TRAILING_COMMA_NODES.get(grammar, set())
+    ):
+        return False
+    children = [child for child in parent.children if "comment" not in child.type]
+    position = next(index for index, child in enumerate(children) if child.id == node.id)
+    # No preceding value means an array hole; a following value means a real separator.
+    if position == 0 or not children[position - 1].is_named:
+        return False
+    tail = children[position + 1 :]
+    return not tail or (len(tail) == 1 and tail[0].type in {")", "]", "}", ">"})
+
+
+HTML_VOID_TAGS = {
+    b"area",
+    b"base",
+    b"br",
+    b"col",
+    b"embed",
+    b"hr",
+    b"img",
+    b"input",
+    b"link",
+    b"meta",
+    b"param",
+    b"source",
+    b"track",
+    b"wbr",
+}
+
+
+def html_void_tag(node: Any) -> bool:
+    if node.type not in {"start_tag", "self_closing_tag"}:
+        return False
+    tags = [child for child in node.children if child.type == "tag_name"]
+    if len(tags) != 1 or tags[0].text.lower() not in HTML_VOID_TAGS:
+        return False
+    ancestor = node.parent
+    while ancestor is not None:
+        if ancestor.type == "element":
+            for child in ancestor.children:
+                if child.type in {"start_tag", "self_closing_tag"}:
+                    names = [
+                        part.text.lower() for part in child.children if part.type == "tag_name"
+                    ]
+                    if names in ([b"svg"], [b"math"]):
+                        return False
+                    break
+        ancestor = ancestor.parent
+    return True
+
+
+def rust_macro_regions(source: bytes) -> int:
+    parser = importlib.import_module("tree_sitter_language_pack").get_parser("rust")
+    pending = [parser.parse(source).root_node]
+    count = 0
+    while pending:
+        node = pending.pop()
+        if node.type == "token_tree":
+            count += 1
+        else:
+            pending.extend(node.children)
+    return count
+
+
 def tree_signature(
     raw: bytes, grammar: str, *, opaque: bool = False
 ) -> tuple[Any, list[tuple[int, int]]]:
@@ -326,16 +453,71 @@ def tree_signature(
             raise UnsupportedSnippet("syntax-tree-bound")
         kind = node.type
         value = raw[node.start_byte : node.end_byte]
-        if "string" in kind or "comment" in kind or kind in PROTECTED_NODES:
+        if (
+            "string" in kind
+            or "comment" in kind
+            or kind in PROTECTED_NODES
+            or (grammar == "rust" and kind == "token_tree")
+        ):
             protected.append((node.start_byte, node.end_byte))
             category = "string" if opaque and "string" in kind else kind
+            if (
+                opaque
+                and grammar == "html"
+                and kind in {"attribute_value", "quoted_attribute_value"}
+            ):
+                category = "html-attribute-value"
             return ("protected", category, b"" if opaque else value)
-        if not node.is_named and kind == ";":
+        if (not node.is_named and kind == ";") or style_comma(node, grammar):
             return None
+        if grammar == "dockerfile" and kind == "line_continuation":
+            return None
+        if (
+            grammar in {"javascript", "typescript", "tsx"}
+            and kind == "formal_parameters"
+            and node.parent.type == "arrow_function"
+            and len(node.named_children) == 1
+        ):
+            parameter = node.named_children[0]
+            if parameter.type == "identifier":
+                return convert(parameter, depth + 1)
+            if (
+                parameter.type == "required_parameter"
+                and len(parameter.named_children) == 1
+                and parameter.named_children[0].type == "identifier"
+            ):
+                return convert(parameter.named_children[0], depth + 1)
+        if grammar == "scala" and kind == "indented_block" and len(node.named_children) == 1:
+            expression = node.named_children[0]
+            if expression.type.endswith(("_expression", "_literal")) or expression.type in {
+                "string",
+                "identifier",
+            }:
+                return convert(expression, depth + 1)
         if kind == "parenthesized_expression" and len(node.named_children) == 1:
             return convert(node.named_children[0], depth + 1)
         children = [convert(child, depth + 1) for child in node.children]
         children = [child for child in children if child is not None]
+        if grammar in {"typescript", "tsx"} and kind == "union_type":
+            members = []
+            for child in children:
+                if child == ("|", b"|"):
+                    continue
+                members.extend(child[1] if child[0] == "union_type" else [child])
+            return members[0] if len(members) == 1 else ("union_type", tuple(members))
+        if grammar == "html":
+            expanded = []
+            for child in children:
+                expanded.extend(child[1] if child[0] == "html_void_with_tail" else [child])
+            children = expanded
+            if html_void_tag(node):
+                kind = "html_void_tag"
+                if children and children[-1] in {(">", b">"), ("/>", b"/>")}:
+                    children[-1] = (">", b">")
+            if kind == "element" and children and children[0][0] == "html_void_tag":
+                # The grammar may attach following text to a non-self-closed
+                # HTML void element. In HTML that text is its sibling.
+                return ("html_void_with_tail", (("element", (children[0],)), *children[1:]))
         if children:
             return (kind, tuple(children))
         if grammar == "dockerfile" and kind.isupper():
@@ -367,7 +549,7 @@ def signature(raw: bytes, language: str, suffix: str) -> Any:
                 for token in tokenize.tokenize(io.BytesIO(raw).readline)
                 if token.type == tokenize.COMMENT
             )
-            return semantic_sha256(raw), comments
+            return _inline_semantic_sha256(raw), comments
         if language == "web" and suffix == ".json":
             return typed_value(json.loads(raw, object_pairs_hook=lambda pairs: tuple(pairs)))
         if language == "web" and suffix == ".yaml":
@@ -406,6 +588,110 @@ def signature(raw: bytes, language: str, suffix: str) -> Any:
         raise
 
 
+def python_comments(raw: bytes) -> list[tuple[int, int]]:
+    source = raw.decode()
+    lines = source.splitlines(keepends=True)
+    offsets = [0]
+    for line in lines:
+        offsets.append(offsets[-1] + len(line))
+    return [
+        (offsets[token.start[0] - 1] + token.start[1], offsets[token.end[0] - 1] + token.end[1])
+        for token in tokenize.generate_tokens(io.StringIO(source).readline)
+        if token.type == tokenize.COMMENT
+    ]
+
+
+def restore_python_comments(source: bytes, candidate: bytes) -> bytes:
+    before, after = source.decode(), candidate.decode()
+    originals, replacements = python_comments(source), python_comments(candidate)
+    if len(originals) != len(replacements):
+        raise FormatFailure("Formatter changed Python comment count")
+    for (start, end), (old_start, old_end) in reversed(
+        list(zip(replacements, originals, strict=True))
+    ):
+        after = after[:start] + before[old_start:old_end] + after[end:]
+    return after.encode()
+
+
+def java_context(source: bytes) -> tuple[bytes, str]:
+    parser = importlib.import_module("tree_sitter_language_pack").get_parser("java")
+    tree = parser.parse(source)
+    if tree.root_node.has_error:
+        raise UnsupportedSnippet("fragment-or-unaccepted-java-syntax")
+    top_level = {
+        "package_declaration",
+        "import_declaration",
+        "class_declaration",
+        "interface_declaration",
+        "enum_declaration",
+        "record_declaration",
+        "annotation_type_declaration",
+        "line_comment",
+        "block_comment",
+    }
+    if all(node.type in top_level for node in tree.root_node.named_children):
+        return source, "unit"
+    # The permissive tree grammar admits some statement nodes in class bodies.
+    # Prefer the actual statement context; explicit members use the class context.
+    member_types = {
+        "method_declaration",
+        "constructor_declaration",
+        "field_declaration",
+        "static_initializer",
+    }
+    class_modifiers = {"public", "protected", "private", "static", "transient", "volatile"}
+    members = any(
+        node.type in member_types
+        or any(
+            child.type == "modifiers"
+            and any(item.type in class_modifiers for item in child.children)
+            for child in node.children
+        )
+        for node in tree.root_node.named_children
+    )
+    if members and any(
+        node.type not in top_level | member_types | {"local_variable_declaration", "block"}
+        for node in tree.root_node.named_children
+    ):
+        raise UnsupportedSnippet("java-mixed-member-and-statement-context")
+    wrappers = (
+        [(b"class DS60InlineSnippet {\n", b"\n}\n", "members")]
+        if members
+        else [(b"class DS60InlineSnippet { void ds60Example() {\n", b"\n} }\n", "statements")]
+    )
+    for prefix, suffix, mode in wrappers:
+        wrapped = prefix + source + suffix
+        if not parser.parse(wrapped).root_node.has_error:
+            return wrapped, mode
+    raise UnsupportedSnippet("java-excerpt-needs-unsupported-class-or-method-context")
+
+
+def java_unwrap(candidate: bytes, mode: str) -> bytes:
+    if mode == "unit":
+        return candidate
+    parser = importlib.import_module("tree_sitter_language_pack").get_parser("java")
+    tree = parser.parse(candidate)
+    if tree.root_node.has_error or len(tree.root_node.named_children) != 1:
+        raise FormatFailure("Formatter changed Java wrapper structure")
+    declaration = tree.root_node.named_children[0]
+    name = declaration.child_by_field_name("name")
+    if declaration.type != "class_declaration" or name is None or name.text != b"DS60InlineSnippet":
+        raise FormatFailure("Formatter changed Java wrapper identity")
+    body = declaration.child_by_field_name("body")
+    if body is None:
+        raise FormatFailure("Formatter removed Java wrapper body")
+    if mode == "statements":
+        if len(body.named_children) != 1 or body.named_children[0].type != "method_declaration":
+            raise FormatFailure("Formatter changed Java method wrapper")
+        method = body.named_children[0]
+        name = method.child_by_field_name("name")
+        body = method.child_by_field_name("body")
+        if name is None or name.text != b"ds60Example" or body is None:
+            raise FormatFailure("Formatter changed Java method identity")
+    content = candidate[body.start_byte + 1 : body.end_byte - 1].decode()
+    return (textwrap.dedent(content).strip("\r\n") + "\n").encode()
+
+
 def invoke(command: list[str], source: bytes, root: Path) -> bytes:
     try:
         result = subprocess.run(
@@ -426,6 +712,9 @@ def invoke(command: list[str], source: bytes, root: Path) -> bytes:
 def adapter_bytes(source: bytes, language: str, suffix: str, root: Path) -> bytes:
     """Reuse pinned commands and configuration, always through bounded stdin."""
     config = root / "docker/formatting"
+    java_mode = "unit"
+    if language == "java":
+        source, java_mode = java_context(source)
     if language == "python":
         command = [
             "ruff",
@@ -450,9 +739,14 @@ def adapter_bytes(source: bytes, language: str, suffix: str, root: Path) -> byte
         if language == "xml":
             command.extend(["--parser", "xml"])
     elif language in {"c", "cpp", "cuda", "csharp"}:
+        style = importlib.import_module("yaml").safe_load(
+            (config / "clang-format.yaml").read_text()
+        )
+        # Namespace comments are authored evidence, not a formatter-generated sentence.
+        style["FixNamespaceComments"] = False
         command = [
             "clang-format",
-            "--style=file:" + str(config / "clang-format.yaml"),
+            "--style=" + json.dumps(style),
             "--assume-filename=snippet" + suffix,
         ]
     elif language == "go":
@@ -498,6 +792,8 @@ def adapter_bytes(source: bytes, language: str, suffix: str, root: Path) -> byte
     else:
         raise FormatFailure("No pinned adapter for " + language)
     result = invoke(command, source, root)
+    if language == "java":
+        result = java_unwrap(result, java_mode)
     if language == "docker":
         result = result.rstrip(b"\r\n") + b"\n"
     return result
@@ -566,6 +862,8 @@ class Formatter:
             return self.adapter(source, language, suffix, self.root)
         before = signature(source, language, suffix)
         formatted = self.adapter(source, language, suffix, self.root)
+        if language == "python":
+            formatted = restore_python_comments(source, formatted)
         grammar = WEB_GRAMMARS.get(suffix) if language == "web" else TREE_GRAMMARS.get(language)
         if grammar:
             shape, originals = tree_signature(source, grammar, opaque=True)
@@ -596,8 +894,15 @@ class Formatter:
         self.check_time()
         # All native and generic syntax checks happen without executing source.
         formatted = self.once(source, language, suffix)
-        self.check_time()
-        if self.once(formatted, language, suffix) != formatted:
+        # Restored authored literals can affect a formatter's next line-wrap
+        # decision. Allow bounded convergence, checking meaning on every pass.
+        for _ in range(3):
+            self.check_time()
+            repeated = self.once(formatted, language, suffix)
+            if repeated == formatted:
+                break
+            formatted = repeated
+        else:
             raise FormatFailure("Pinned formatting did not reach an idempotent result")
         size = len(source) + len(formatted)
         if self.cache_bytes + size > MAX_CACHE_BYTES:
@@ -657,6 +962,19 @@ def format_document(
                 raise UnsupportedSnippet("empty-fence")
             if re.search(rb"(?m)^(?:>>> |\.\.\. |\$ |PS> |In \[[0-9]+\]:)", original):
                 raise UnsupportedSnippet("interactive-prompt-transcript")
+            if language == "rust":
+                count = rust_macro_regions(original)
+                if count:
+                    record["preserved_regions"] = {"opaque-rust-macro-token-trees": count}
+            if language == "shell":
+                placeholders = list(re.finditer(rb"<your[-_][A-Za-z0-9_-]+>", original))
+                if placeholders:
+                    _, protected_spans = tree_signature(original, "bash")
+                    if any(
+                        not any(start <= match.start() < end for start, end in protected_spans)
+                        for match in placeholders
+                    ):
+                        raise UnsupportedSnippet("unsubstituted-shell-template-placeholder")
             formatted = formatter.format(original, language, suffix)
             formatted_text = formatted.decode("utf-8")
             if not formatted_text.endswith("\n"):
@@ -676,6 +994,8 @@ def format_document(
             else:
                 record.update(status="formatted", reason="syntax-and-literals-preserved")
                 edits.append((block.body_start, block.body_end, restored))
+            if record.get("preserved_regions"):
+                record["reason"] += "; opaque-rust-macro-token-trees-preserved"
         except BudgetExhausted as error:
             record.update(status="not-checked", reason=str(error))
         except UnsupportedSnippet as error:
@@ -703,6 +1023,90 @@ def literal_source(value: str, original: str) -> str:
             encoded = value.replace("\\", "\\\\").replace(quote, "\\" + quote)
             return prefix + quote + encoded + quote
     return repr(value)
+
+
+PROSE_ROLES = {
+    "guide",
+    "chapter",
+    "introduction",
+    "overview",
+    "sections",
+    "examples",
+    "body",
+    "text",
+    "content",
+    "markdown",
+    "explanation",
+    "narrative",
+    "mechanism",
+    "anatomy",
+    "worked_examples",
+    "solution_explanation",
+}
+NON_PROSE_ROLES = {
+    "expected",
+    "output",
+    "outputs",
+    "reference",
+    "solution",
+    "starter",
+    "source",
+    "code",
+    "program",
+    "pattern",
+    "needle",
+    "replacement",
+    "regex",
+    "transcript",
+}
+
+
+def python_prose_role(node: ast.AST, parents: dict[int, ast.AST], path: str) -> bool:
+    """Admit known authoring data roles, never a replace needle or code literal."""
+    cursor = node
+    prose = False
+    while (parent := parents.get(id(cursor))) is not None:
+        if isinstance(parent, ast.List | ast.Tuple):
+            cursor = parent
+            continue
+        if isinstance(parent, ast.Dict):
+            for key, value in zip(parent.keys, parent.values, strict=True):
+                if value is cursor and isinstance(key, ast.Constant) and isinstance(key.value, str):
+                    if key.value in NON_PROSE_ROLES:
+                        return False
+                    prose = prose or key.value in PROSE_ROLES
+                    cursor = parent
+                    break
+            else:
+                return False
+            continue
+        if isinstance(parent, ast.Assign):
+            return bool(parent.targets) and all(
+                isinstance(target, ast.Name)
+                and target.id not in NON_PROSE_ROLES
+                and (prose or target.id in PROSE_ROLES)
+                for target in parent.targets
+            )
+        if isinstance(parent, ast.AnnAssign | ast.AugAssign):
+            return (
+                isinstance(parent.target, ast.Name)
+                and parent.target.id not in NON_PROSE_ROLES
+                and (prose or parent.target.id in PROSE_ROLES)
+            )
+        if isinstance(parent, ast.keyword):
+            return parent.arg in PROSE_ROLES
+        if isinstance(parent, ast.Call):
+            # This reviewed author() contract takes examples as positional arg3.
+            # The remaining executable fields and arbitrary calls are excluded.
+            return (
+                path.startswith("courses/nlp/authoring/advanced/")
+                and isinstance(parent.func, ast.Name)
+                and parent.func.id == "author"
+                and len(parent.args) > 3
+                and parent.args[3] is cursor
+            )
+        return False
+    return False
 
 
 def format_authoring_python(
@@ -753,14 +1157,19 @@ def format_authoring_python(
         start = offsets[node.lineno - 1] + node.col_offset
         end = offsets[node.end_lineno - 1] + node.end_col_offset
         original = source.encode()[start:end].decode()
+
         # Adjacent concatenated literals share one AST Constant but cannot be
         # replaced as an arbitrary token sequence without changing authorship.
+        def token_offset(position: tuple[int, int]) -> int:
+            line, column = position
+            return offsets[line - 1] + len(lines[line - 1].decode()[:column].encode())
+
         members = [
             token
             for token in tokens
             if token.type == tokenize.STRING
-            and node.lineno <= token.start[0] <= node.end_lineno
-            and original.find(token.string) >= 0
+            and start <= token_offset(token.start)
+            and token_offset(token.end) <= end
         ]
         if len(members) != 1:
             records.append(
@@ -773,7 +1182,14 @@ def format_authoring_python(
             )
             continue
         formatted, items = format_document(
-            node.value, formatter, selected, path=path, list_only=list_only
+            node.value,
+            formatter,
+            selected,
+            path=path,
+            list_only=list_only,
+            protected=None
+            if python_prose_role(node, parents, path)
+            else "non-prose-or-unknown-authoring-role",
         )
         for item in items:
             item["virtual_line"] = item["line"]
@@ -817,46 +1233,67 @@ def format_authoring_json(
     source: str, formatter: Formatter, selected: set[str], *, path: str, list_only: bool = False
 ) -> tuple[str, list[dict[str, Any]]]:
     original = container_json(source)
+    revised = copy.deepcopy(original)
+    # JSON keeps insertion order. Align every raw string token with its parsed
+    # key/value role so identical text in prose and expected output stays distinct.
+    tokens: list[tuple[str, tuple[str | int, ...], bool, bool]] = []
+
+    def walk(value: Any, trail: tuple[str | int, ...] = (), prose: bool = False) -> None:
+        if isinstance(value, dict):
+            for key, item in value.items():
+                tokens.append((key, trail, False, True))
+                role = key in PROSE_ROLES or (prose and key not in NON_PROSE_ROLES)
+                walk(item, (*trail, key), role)
+        elif isinstance(value, list):
+            for position, item in enumerate(value):
+                walk(item, (*trail, position), prose)
+        elif isinstance(value, str):
+            tokens.append((value, trail, prose, False))
+
+    walk(original)
     decoder = json.JSONDecoder()
     edits = []
     records = []
-    values: dict[str, str] = {}
-    index = 0
+    index, position = 0, 0
     while index < len(source):
         if source[index] != '"':
             index += 1
             continue
         value, end = decoder.raw_decode(source, index)
-        following = end
-        while following < len(source) and source[following].isspace():
-            following += 1
-        if source[following : following + 1] != ":" and fences(value)[0]:
+        if position >= len(tokens) or tokens[position][0] != value:
+            raise FormatFailure("JSON source tokens differ from parsed authoring roles")
+        _, trail, prose, is_key = tokens[position]
+        position += 1
+        if not is_key and fences(value)[0]:
             formatted, items = format_document(
-                value, formatter, selected, path=path, list_only=list_only
+                value,
+                formatter,
+                selected,
+                path=path,
+                list_only=list_only,
+                protected=None if prose else "non-prose-or-unknown-authoring-role",
             )
             for item in items:
                 item["virtual_line"] = item["line"]
                 item["line"] = source[:index].count("\n") + 1
                 item["container"] = "json-authoring-string"
+                item["json_path"] = list(trail)
             records.extend(items)
             if formatted != value:
-                values[value] = formatted
+                target = revised
+                for key in trail[:-1]:
+                    target = target[key]
+                target[trail[-1]] = formatted
                 edits.append((index, end, json.dumps(formatted, ensure_ascii=False)))
         index = end
+    if position != len(tokens):
+        raise FormatFailure("JSON source has incomplete role coverage")
     if any(item["status"] == "error" for item in records) or not edits:
         return source, records
     rewritten = source
     for start, end, value in reversed(edits):
         rewritten = rewritten[:start] + value + rewritten[end:]
-
-    def expected(value: Any) -> Any:
-        if isinstance(value, dict):
-            return {key: expected(item) for key, item in value.items()}
-        if isinstance(value, list):
-            return [expected(item) for item in value]
-        return values.get(value, value) if isinstance(value, str) else value
-
-    if typed_value(json.loads(rewritten)) != typed_value(expected(original)):
+    if typed_value(container_json(rewritten)) != typed_value(revised):
         raise FormatFailure("Authoring JSON changed outside approved prose strings")
     return rewritten, records
 
@@ -943,6 +1380,61 @@ def ownership(path: str, policy: dict[str, Any]) -> tuple[bool, str | None]:
     ):
         return True, None
     return False, reasons[0]
+
+
+@lru_cache(maxsize=2)
+def generation_formatter(root: Path) -> Formatter:
+    # One generator can emit hundreds of repeated examples. Keep the same
+    # bounded adapter cache without creating an unbounded cache per document.
+    return Formatter(root)
+
+
+def canonical_markdown(
+    text: str, *, root: Path, path: str, formatter: Formatter | None = None
+) -> str:
+    """Canonicalize an owner's in-memory Markdown before its normal file write.
+
+    This is a generation hook, not permission for a formatter to rewrite derived
+    files. It requires the pinned tools for every supported fence present, never
+    installs a tool, and never executes a snippet. Call it before write_text().
+    """
+    relative = Path(path)
+    if (
+        relative.is_absolute()
+        or ".." in relative.parts
+        or str(relative) != path
+        or "\\" in path
+        or relative.suffix != ".md"
+    ):
+        raise ValueError("Canonical generation requires a relative Markdown output path")
+    for part in [root / relative, *(root / relative).parents]:
+        if part.is_symlink():
+            raise ValueError("Canonical generation refuses symlink output components")
+        if part == root:
+            break
+    generated, protected = ownership(path, format_repo.load_policy(root))
+    if not generated or protected:
+        raise ValueError(
+            "Canonical generation requires an explicitly generator-owned output: " + path
+        )
+    tool = formatter if formatter is not None else generation_formatter(root)
+    revised, records = format_document(text, tool, set(format_repo.LANGUAGES), path=path)
+    errors = [row for row in records if row["status"] not in {"clean", "formatted", "preserved"}]
+    if errors:
+        first = errors[0]
+        raise FormatFailure(
+            f"Canonical generation failed for {path}:{first.get('line', 0)}: {first['reason']}. "
+            "Run the documented generator in the prepared formatter environment; "
+            "no fallback or dependency installation was attempted."
+        )
+    preserved = Counter(
+        (row.get("tag", "untyped"), row["reason"])
+        for row in records
+        if row["status"] == "preserved" or row.get("preserved_regions")
+    )
+    for (tag, reason), count in sorted(preserved.items()):
+        print(f"GENERATION-PRESERVE {path} [{tag}] {count}: {reason}", file=sys.stderr)
+    return revised
 
 
 def eligible_source(path: str) -> bool:

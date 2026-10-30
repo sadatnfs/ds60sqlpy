@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "glmm_family",
+    "options": {
+      "family_name": "nbinom1"
+    },
+    "seed": 1729
+  },
+  "result": {
+    "case": "glmm_family",
+    "family": "nbinom1",
+    "backend": "actual pinned upstream glmmTMB",
+    "target": "maximum likelihood with declared response/dispersion link",
+    "diagnostics": {
+      "converged": true,
+      "pd_hessian": true,
+      "score_inf": 8.00775791498509e-06,
+      "objective": 988.380792989025,
+      "warnings": [],
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [0.256733569802394, 0.619414581275777, 1.06483978119976, 0.447455842849802],
+          "parameter_names": ["beta", "beta", "betadisp", "betadisp"],
+          "objective": 988.380793028746,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "gradient": [-0.000663730291387887, -0.00389165302059604, -0.00111216566596595, -0.000453029685769268],
+          "score_inf": 0.00389165302059604,
+          "pd_hessian": true,
+          "warnings": []
+        },
+        {
+          "method": "upstream optim BFGS refit",
+          "parameters": [0.256734857191018, 0.619429325225182, 1.06485291641959, 0.44747049241721],
+          "parameter_names": ["beta", "beta", "betadisp", "betadisp"],
+          "objective": 988.380792989025,
+          "convergence": 0,
+          "message": null,
+          "gradient": [-8.00775791498509e-06, 2.43122900141704e-06, 5.58136055706093e-07, 2.64126915727747e-07],
+          "score_inf": 8.00775791498509e-06,
+          "pd_hessian": true,
+          "warnings": []
+        }
+      ]
+    },
+    "parameters": {
+      "cond": {
+        "parameter_names": [
+          "(Intercept)",
+          "x"
+        ],
+        "values": [
+          0.256734857191018,
+          0.619429325225182
+        ]
+      },
+      "zi": {
+        "parameter_names": [],
+        "values": []
+      },
+      "disp": {
+        "parameter_names": [
+          "(Intercept)",
+          "z"
+        ],
+        "values": [
+          1.06485291641959,
+          0.44747049241721
+        ]
+      }
+    },
+    "predictions": [0.695798989859259, 1.29270233058928, 2.40166964865668, 3.82185602994765],
+    "future_covariates": [
+      {
+        "x": -1,
+        "z": -0.5,
+        "exposure": 1,
+        "trials": 12
+      },
+      {
+        "x": 0,
+        "z": 0.5,
+        "exposure": 1,
+        "trials": 12
+      },
+      {
+        "x": 1,
+        "z": -0.5,
+        "exposure": 1,
+        "trials": 12
+      },
+      {
+        "x": 1.75,
+        "z": 0.5,
+        "exposure": 1,
+        "trials": 12
+      }
+    ],
+    "future_has_response": false,
+    "simulation_replicates": 2,
+    "simulation_summary": {
+      "sim_1": {
+        "shape": "scalar response vector",
+        "observations": 600,
+        "mean_response": 1.97333333333333
+      },
+      "sim_2": {
+        "shape": "scalar response vector",
+        "observations": 600,
+        "mean_response": 1.68
+      }
+    },
+    "simulation_conditioning": "upstream fitted-model simulate with new random draws, conditional on fitted parameters",
+    "metrics": {
+      "primary_estimate": 0.619429325225182,
+      "truth": 0.65
+    },
+    "fixture_sha256": "af134342e49f4d39809b7550c5116daadb2f20d055cdc452990a7cda4e2ceb5b"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.715
+}

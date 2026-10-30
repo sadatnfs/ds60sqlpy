@@ -12,7 +12,7 @@ from pathlib import Path
 from client import run_case
 
 
-def aggregate(records, requested):
+def aggregate(records, requested, *, fixed_dataset=False):
     passed = [record for record in records if record.get("status") == "passed"]
     errors = [
         record["result"]["metrics"]["primary_estimate"] - record["result"]["metrics"]["truth"]
@@ -28,24 +28,51 @@ def aggregate(records, requested):
         "completion": "complete" if len(records) == requested else "incomplete",
         "interpretation": "bias/MSE conditional on successful fits; failures are retained",
     }
+    fixture_hashes = [record.get("result", {}).get("fixture_sha256") for record in passed]
+    known_hashes = [value for value in fixture_hashes if value is not None]
+    repeated_fixture = len(known_hashes) != len(set(known_hashes))
+    dataset_mcse = not fixed_dataset and not repeated_fixture
+    result.update(
+        simulation_unit="posterior-draw checks on fixed data" if fixed_dataset else "dataset",
+        distinct_observed_dataset_hashes=len(set(known_hashes)),
+        repeated_observed_dataset=bool(repeated_fixture),
+        dataset_monte_carlo_uncertainty=dataset_mcse,
+    )
+    if not dataset_mcse:
+        result["interpretation"] = (
+            "Descriptive bias/MSE across repeated fixed data; no independent-dataset MCSE. "
+            "Posterior-draw Monte Carlo errors, when available, remain in each case result."
+        )
     if errors:
         squares = [value * value for value in errors]
         result.update(
             bias=statistics.mean(errors),
             mse=statistics.mean(squares),
             bias_mcse=statistics.stdev(errors) / math.sqrt(len(errors))
-            if len(errors) > 1
+            if len(errors) > 1 and dataset_mcse
             else None,
             mse_mcse=statistics.stdev(squares) / math.sqrt(len(squares))
-            if len(squares) > 1
+            if len(squares) > 1 and dataset_mcse
             else None,
+        )
+    predictive_errors = [record["result"]["metrics"].get("mse") for record in passed]
+    if predictive_errors and all(value is not None for value in predictive_errors):
+        if any(not math.isfinite(value) or value < 0 for value in predictive_errors):
+            raise ValueError("Invalid held-out predictive MSE")
+        result["prediction_mse_conditional_on_success"] = statistics.mean(predictive_errors)
+        result["prediction_mse_mcse_across_datasets"] = (
+            statistics.stdev(predictive_errors) / math.sqrt(len(predictive_errors))
+            if len(predictive_errors) > 1 and dataset_mcse
+            else None
         )
     coverage = [record["result"]["metrics"].get("pointwise_coverage") for record in passed]
     if coverage and all(value is not None for value in coverage):
         result["conditional_pointwise_coverage"] = statistics.mean(coverage)
         result["procedural_pointwise_coverage"] = sum(coverage) / len(records)
         result["coverage_mcse_across_independent_datasets"] = (
-            statistics.stdev(coverage) / math.sqrt(len(coverage)) if len(coverage) > 1 else None
+            statistics.stdev(coverage) / math.sqrt(len(coverage))
+            if len(coverage) > 1 and dataset_mcse
+            else None
         )
     if records:
         failures = len(records) - len(passed)
@@ -57,7 +84,9 @@ def aggregate(records, requested):
             z * math.sqrt(observed * (1 - observed) / n + z * z / (4 * n * n)) / (1 + z * z / n)
         )
         result["failure_rate"] = observed
-        result["failure_rate_wilson95"] = [center - radius, center + radius]
+        result["failure_rate_wilson95"] = (
+            [center - radius, center + radius] if dataset_mcse else None
+        )
     result["coverage_claim"] = (
         "A few smoke repetitions are execution evidence, not a calibration guarantee"
     )
@@ -110,7 +139,11 @@ def main():
         (args.output / "ledger.json").write_text(
             json.dumps(records, indent=2, allow_nan=False) + "\n"
         )
-    summary = aggregate(records, args.replications)
+    # This registered case changes posterior draws across seeds but deliberately
+    # keeps the regression data fixed for its exact soft-threshold oracle.
+    summary = aggregate(
+        records, args.replications, fixed_dataset=args.case == "regularization_posterior"
+    )
     summary["elapsed_seconds"] = time.monotonic() - started
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n")
     print(json.dumps(summary, indent=2))

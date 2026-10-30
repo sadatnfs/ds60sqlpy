@@ -1,0 +1,3063 @@
+[
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 1729
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.503146485862208,
+        0.932468318052465,
+        -0.807865430113495,
+        -1.69825753706548,
+        -1.92571436348215
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -51.2666357022856,
+        "raw_score_inf": 6.84035675249106e-05,
+        "projected_score_inf": 6.84035675249106e-05,
+        "iterations": 32,
+        "pd_hessian": true,
+        "restored_objective": -51.2666357022856,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.503146485862208,
+              0.932468318052465,
+              -0.807865430113495,
+              -1.69825753706548,
+              -1.92571436348215
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -51.2666357022856,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 32,
+            "evaluations": [
+              41,
+              33
+            ],
+            "gradient": [
+              -2.79494360810872e-05,
+              6.84035675249106e-05,
+              -1.26650233713832e-05,
+              -5.44054324896903e-06,
+              4.23419532004365e-06
+            ],
+            "projected_gradient": [
+              -2.79494360810872e-05,
+              6.84035675249106e-05,
+              -1.26650233713832e-05,
+              -5.44054324896903e-06,
+              4.23419532004365e-06
+            ],
+            "raw_score_inf": 6.84035675249106e-05,
+            "projected_score_inf": 6.84035675249106e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.03957767364968,
+        3.0563879569707,
+        3.06715168688035
+      ],
+      "new_group_latent_integrated_mean": [
+        3.02459916776117,
+        3.04131018052878,
+        3.05201034688006
+      ],
+      "new_group_observation_sd": [
+        0.412350448914096,
+        0.414546473263549,
+        0.415954084928079
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -1.55955256784216,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0611501911712983,
+            0.0611501911712983
+          ],
+          "scaled_absolute_errors": [
+            3.33358294116397e-14,
+            6.81255594740508e-11
+          ],
+          "relative_interval_change": 5.67364857819455e-16,
+          "centering_loss": -4.35397485842784,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -1.55900643622938,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1682.12628235409,
+          1682.1262729394
+        ],
+        "difference": 0.00054613161277528
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.127906533117835,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.445808661049475,
+        "truth": 0.45
+      },
+      "fixture_sha256": "fb902fdf2784d9c1c8473310c7ea680b8924977c21f6efa7ae2cd616715420f7"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.443,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "e8fe81673627af2b820aabe37d65048f33e9390bcd351c2d19ebec9e5714cc84",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 0,
+    "seed": 1729
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 9648
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.488582338861978,
+        0.907216067305711,
+        -0.757989914440138,
+        -1.70581567173416,
+        -1.69131572375414
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -48.4001245205125,
+        "raw_score_inf": 1.80807632030877e-05,
+        "projected_score_inf": 1.80807632030877e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -48.4001245205125,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.488582417085318,
+              0.907215889100666,
+              -0.757990019858106,
+              -1.70581585791422,
+              -1.69131575952082
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -48.4001245204807,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 28,
+            "evaluations": [
+              36,
+              29
+            ],
+            "gradient": [
+              -2.36017545418576e-05,
+              -0.000131005643368098,
+              -0.000116802928239679,
+              -0.000121854495110804,
+              -1.56718250257787e-05
+            ],
+            "projected_gradient": [
+              -2.36017545418576e-05,
+              -0.000131005643368098,
+              -0.000116802928239679,
+              -0.000121854495110804,
+              -1.56718250257787e-05
+            ],
+            "raw_score_inf": 0.000131005643368098,
+            "projected_score_inf": 0.000131005643368098
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.488582338861978,
+              0.907216067305711,
+              -0.757989914440138,
+              -1.70581567173416,
+              -1.69131572375414
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -48.4001245205125,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              26,
+              26
+            ],
+            "gradient": [
+              -2.61742604834581e-06,
+              -1.44972966822365e-05,
+              -1.80807632030877e-05,
+              -5.67857767962143e-06,
+              -1.17678173633534e-05
+            ],
+            "projected_gradient": [
+              -2.61742604834581e-06,
+              -1.44972966822365e-05,
+              -1.80807632030877e-05,
+              -5.67857767962143e-06,
+              -1.17678173633534e-05
+            ],
+            "raw_score_inf": 1.80807632030877e-05,
+            "projected_score_inf": 1.80807632030877e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.48996466435108,
+        3.50675907970565,
+        3.51727025484106
+      ],
+      "new_group_latent_integrated_mean": [
+        2.97128929096749,
+        2.98518142706866,
+        2.9938761432872
+      ],
+      "new_group_observation_sd": [
+        0.495876138506907,
+        0.498279505226515,
+        0.499784614157616
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -3.92356095923814,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0512170387926654,
+            0.0512170387926655
+          ],
+          "scaled_absolute_errors": [
+            1.16660658154325e-13,
+            2.34972807675378e-11
+          ],
+          "relative_interval_change": 2.70960370512514e-16,
+          "centering_loss": -6.89524397261751,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -3.92315250630644,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2397.20799513066,
+          2397.20798376197
+        ],
+        "difference": 0.000408452931699888
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.104938451059897,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.468607421965023,
+        "truth": 0.45
+      },
+      "fixture_sha256": "b4814f3b5f091191988468533b1e768c2182029ab94354687e6bed20c12e11ec"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.509,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "1854c1ab68b5dabba30a14d5c03141d175c79f3901c2022b3fa59cf8a5b90f67",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 1,
+    "seed": 9648
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 17567
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.515253233341838,
+        0.916645928740494,
+        -0.76309535831516,
+        -1.72430526957764,
+        -1.71582589871948
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -54.5695781734082,
+        "raw_score_inf": 5.4200596119186e-06,
+        "projected_score_inf": 5.4200596119186e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -54.5695781734082,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.515253082044408,
+              0.916645746002003,
+              -0.763095315979672,
+              -1.72430524402247,
+              -1.71582591574258
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -54.5695781733661,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 34,
+            "evaluations": [
+              49,
+              35
+            ],
+            "gradient": [
+              -0.000279749954287922,
+              -0.000177495297442931,
+              -0.000113346008067339,
+              1.62987010448729e-05,
+              -3.32146320630722e-06
+            ],
+            "projected_gradient": [
+              -0.000279749954287922,
+              -0.000177495297442931,
+              -0.000113346008067339,
+              1.62987010448729e-05,
+              -3.32146320630722e-06
+            ],
+            "raw_score_inf": 0.000279749954287922,
+            "projected_score_inf": 0.000279749954287922
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.515253233341838,
+              0.916645928740494,
+              -0.76309535831516,
+              -1.72430526957764,
+              -1.71582589871948
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -54.5695781734082,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              5,
+              5
+            ],
+            "gradient": [
+              -3.93640679163809e-07,
+              6.446912053093e-07,
+              1.38049763620529e-07,
+              1.19878116849881e-07,
+              -5.4200596119186e-06
+            ],
+            "projected_gradient": [
+              -3.93640679163809e-07,
+              6.446912053093e-07,
+              1.38049763620529e-07,
+              1.19878116849881e-07,
+              -5.4200596119186e-06
+            ],
+            "raw_score_inf": 5.4200596119186e-06,
+            "projected_score_inf": 5.4200596119186e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.2798382393685,
+        3.29558541496069,
+        3.30546469809391
+      ],
+      "new_group_latent_integrated_mean": [
+        3.01863455772737,
+        3.03289390775762,
+        3.04183977588615
+      ],
+      "new_group_observation_sd": [
+        0.487578281620751,
+        0.489985079081736,
+        0.491495951625281
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -5.35040585873189,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0545567433513558,
+            0.0545567433513558
+          ],
+          "scaled_absolute_errors": [
+            2.54076595037e-14,
+            2.96140056389309e-10
+          ],
+          "relative_interval_change": 7.63120392933219e-16,
+          "centering_loss": -8.2589198152683,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -5.34994997711008,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2112.9001199327,
+          2112.90011051801
+        ],
+        "difference": 0.000455881621817866
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.0236256759551305,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.466221069949367,
+        "truth": 0.45
+      },
+      "fixture_sha256": "dde7722bc6901d293ddf49fe699b752ceb07fb065321755b741a379c488f17cd"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.461,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "950c717369d4bc980293841496369a33bc527d6c3b371fa1008d26bd47dd805b",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 2,
+    "seed": 17567
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 25486
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.486937724874114,
+        0.900980458228225,
+        -0.775916758360504,
+        -1.73126008672829,
+        -1.66402622773844
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -55.9649873239535,
+        "raw_score_inf": 5.96121910945158e-06,
+        "projected_score_inf": 5.96121910945158e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -55.9649873239535,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.486937475015019,
+              0.900980671006506,
+              -0.775916192316036,
+              -1.7312606203161,
+              -1.6640242254116
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -55.964987323589,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 27,
+            "evaluations": [
+              35,
+              28
+            ],
+            "gradient": [
+              9.02514253127151e-05,
+              0.000161903030942767,
+              0.000524930820391845,
+              -0.000329207747606849,
+              9.5718682810067e-05
+            ],
+            "projected_gradient": [
+              9.02514253127151e-05,
+              0.000161903030942767,
+              0.000524930820391845,
+              -0.000329207747606849,
+              9.5718682810067e-05
+            ],
+            "raw_score_inf": 0.000524930820391845,
+            "projected_score_inf": 0.000524930820391845
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.486937724874114,
+              0.900980458228225,
+              -0.775916758360504,
+              -1.73126008672829,
+              -1.66402622773844
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -55.9649873239535,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              11,
+              11
+            ],
+            "gradient": [
+              5.96121910945158e-06,
+              -2.4416462025556e-06,
+              -1.50623160166674e-07,
+              9.51003035543074e-07,
+              -9.98651043249144e-07
+            ],
+            "projected_gradient": [
+              5.96121910945158e-06,
+              -2.4416462025556e-06,
+              -1.50623160166674e-07,
+              9.51003035543074e-07,
+              -9.98651043249144e-07
+            ],
+            "raw_score_inf": 5.96121910945158e-06,
+            "projected_score_inf": 5.96121910945158e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        2.46113302926575,
+        2.47288646918974,
+        2.4803041343315
+      ],
+      "new_group_latent_integrated_mean": [
+        2.9536886629667,
+        2.96837454986645,
+        2.97764289956123
+      ],
+      "new_group_observation_sd": [
+        0.503519099989864,
+        0.506147094881916,
+        0.507806619831902
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -4.21893253469459,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0754240570740086,
+            0.0754240570740084
+          ],
+          "scaled_absolute_errors": [
+            1.77332295873632e-12,
+            5.32806362896053e-14
+          ],
+          "relative_interval_change": 2.75995252964127e-15,
+          "centering_loss": -6.80356153021444,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -4.21809710557197,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1106.33266565685,
+          1106.33266139359
+        ],
+        "difference": 0.000835429122615139
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.107523257536093,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.460281620495172,
+        "truth": 0.45
+      },
+      "fixture_sha256": "dcc5f369ad3e9c7885ce6dd0582ab539849394a492f27fb3cb8589d9d448f15f"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.448,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "1c2872f763b807fe103fb1926026493438857d52550cc82d242ea350d845d99b",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 3,
+    "seed": 25486
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 33405
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.514905798020826,
+        0.886040866765919,
+        -0.825309042625158,
+        -1.73796550566772,
+        -1.65210923943001
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -58.4634032861363,
+        "raw_score_inf": 3.99990104611447e-05,
+        "projected_score_inf": 3.99990104611447e-05,
+        "iterations": 36,
+        "pd_hessian": true,
+        "restored_objective": -58.4634032861363,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.514905798020826,
+              0.886040866765919,
+              -0.825309042625158,
+              -1.73796550566772,
+              -1.65210923943001
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -58.4634032861363,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 36,
+            "evaluations": [
+              46,
+              37
+            ],
+            "gradient": [
+              -3.99990104611447e-05,
+              -1.81845343902864e-05,
+              2.93307354048977e-06,
+              2.93736955027379e-06,
+              1.10612916946751e-06
+            ],
+            "projected_gradient": [
+              -3.99990104611447e-05,
+              -1.81845343902864e-05,
+              2.93307354048977e-06,
+              2.93736955027379e-06,
+              1.10612916946751e-06
+            ],
+            "raw_score_inf": 3.99990104611447e-05,
+            "projected_score_inf": 3.99990104611447e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.80074148316635,
+        3.82379199750408,
+        3.83866560752506
+      ],
+      "new_group_latent_integrated_mean": [
+        2.9374598040715,
+        2.95445429838017,
+        2.96542019168507
+      ],
+      "new_group_observation_sd": [
+        0.500487542850192,
+        0.50356627060733,
+        0.505554247557104
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -2.29329957910342,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0460175207421078,
+            0.0460175207421078
+          ],
+          "scaled_absolute_errors": [
+            1.80165979141244e-12,
+            4.76286769550134e-14
+          ],
+          "relative_interval_change": 4.52364259873601e-16,
+          "centering_loss": -5.37203264841701,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -2.29295623324023,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2969.14674784432,
+          2969.14673754145
+        ],
+        "difference": 0.000343345863187849
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 1.22642467144822,
+        "pointwise_coverage": 0,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.438099580097616,
+        "truth": 0.45
+      },
+      "fixture_sha256": "0d486b6750bfff82ac581148466cd4147a3d432f3c7459e05bfe76bdd252da81"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.447,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "2f635fd933ab341a7e99bf9c9f0b23f1afe5a9ff06545db9bb1d3fde87162dc9",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 4,
+    "seed": 33405
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 41324
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.553818829847304,
+        0.852528576266064,
+        -0.812766803246166,
+        -1.72811558324741,
+        -1.3853535357875
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -49.7698749283814,
+        "raw_score_inf": 1.42496070836273e-05,
+        "projected_score_inf": 1.42496070836273e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -49.7698749283814,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.553818491514847,
+              0.852528182731055,
+              -0.812765747127285,
+              -1.72811529924458,
+              -1.38535662414565
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -49.7698749276886,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 25,
+            "evaluations": [
+              37,
+              25
+            ],
+            "gradient": [
+              0.000265195717958022,
+              -9.30101570730812e-05,
+              0.000947616458081058,
+              0.000168468427526117,
+              -0.00013020128598866
+            ],
+            "projected_gradient": [
+              0.000265195717958022,
+              -9.30101570730812e-05,
+              0.000947616458081058,
+              0.000168468427526117,
+              -0.00013020128598866
+            ],
+            "raw_score_inf": 0.000947616458081058,
+            "projected_score_inf": 0.000947616458081058
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.553818829847304,
+              0.852528576266064,
+              -0.812766803246166,
+              -1.72811558324741,
+              -1.3853535357875
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -49.7698749283814,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              9,
+              9
+            ],
+            "gradient": [
+              -1.30915329989989e-05,
+              1.42496070836273e-05,
+              7.24613082780934e-06,
+              -6.95723989299624e-06,
+              5.34179177541505e-06
+            ],
+            "projected_gradient": [
+              -1.30915329989989e-05,
+              1.42496070836273e-05,
+              7.24613082780934e-06,
+              -6.95723989299624e-06,
+              5.34179177541505e-06
+            ],
+            "raw_score_inf": 1.42496070836273e-05,
+            "projected_score_inf": 1.42496070836273e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        2.46596639327881,
+        2.47884477888447,
+        2.48710888389724
+      ],
+      "new_group_latent_integrated_mean": [
+        2.9293344935816,
+        2.94533368073374,
+        2.95560041499633
+      ],
+      "new_group_observation_sd": [
+        0.62944629468765,
+        0.633349112502233,
+        0.635854648696466
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -1.41004228876224,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.079190393087966,
+            0.079190393087966
+          ],
+          "scaled_absolute_errors": [
+            5.56841248333037e-13,
+            1.26650299050447e-13
+          ],
+          "relative_interval_change": 0,
+          "centering_loss": -3.94594257567573,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -1.40911549082117,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1003.78309690896,
+          1003.78309504379
+        ],
+        "difference": 0.000926797941065427
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.0329725397447247,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.443628932650716,
+        "truth": 0.45
+      },
+      "fixture_sha256": "6ab946c8fbbc1d2158fd27c6b8995911b4eee427556721fc809dbcabca3f1d40"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.444,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "61d3429d0f04d6d99628924bf1a964884be91c4867914065c5254a3ed40ba490",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 5,
+    "seed": 41324
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 49243
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.497274433081554,
+        0.971586416157661,
+        -0.775850820681301,
+        -1.73345104892443,
+        -1.33013987917195
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -47.0634980663826,
+        "raw_score_inf": 3.93628139880309e-06,
+        "projected_score_inf": 3.93628139880309e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -47.0634980663826,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.497274271403673,
+              0.97158595519813,
+              -0.775850875901636,
+              -1.73345101982017,
+              -1.33014183798049
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -47.0634980662146,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 21,
+            "evaluations": [
+              30,
+              21
+            ],
+            "gradient": [
+              -0.000341868329307715,
+              -0.000190665398648093,
+              -0.000270233388629748,
+              1.39682274643005e-05,
+              -8.85905085678818e-05
+            ],
+            "projected_gradient": [
+              -0.000341868329307715,
+              -0.000190665398648093,
+              -0.000270233388629748,
+              1.39682274643005e-05,
+              -8.85905085678818e-05
+            ],
+            "raw_score_inf": 0.000341868329307715,
+            "projected_score_inf": 0.000341868329307715
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.497274433081554,
+              0.971586416157661,
+              -0.775850820681301,
+              -1.73345104892443,
+              -1.33013987917195
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -47.0634980663826,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              9,
+              9
+            ],
+            "gradient": [
+              -5.45982153710156e-07,
+              -1.48043286429811e-06,
+              1.26340198214336e-06,
+              -3.93628139880309e-06,
+              8.16343658602281e-07
+            ],
+            "projected_gradient": [
+              -5.45982153710156e-07,
+              -1.48043286429811e-06,
+              1.26340198214336e-06,
+              -3.93628139880309e-06,
+              8.16343658602281e-07
+            ],
+            "raw_score_inf": 3.93628139880309e-06,
+            "projected_score_inf": 3.93628139880309e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.61061811146074,
+        3.62914932864703,
+        3.64084413397415
+      ],
+      "new_group_latent_integrated_mean": [
+        3.18997637248782,
+        3.20600384957094,
+        3.2161185777341
+      ],
+      "new_group_observation_sd": [
+        0.745915403352214,
+        0.750106854900159,
+        0.752752734065757
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -2.32626282170269,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0483349435071569,
+            0.0483349435071569
+          ],
+          "scaled_absolute_errors": [
+            3.85457884961498e-13,
+            5.45094672429995e-14
+          ],
+          "relative_interval_change": 1.29202685684154e-15,
+          "centering_loss": -5.35586333354608,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -2.32587264476642,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2691.51213840857,
+          2691.51212783925
+        ],
+        "difference": 0.000390176936264197
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.190478267155624,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.46031197139763,
+        "truth": 0.45
+      },
+      "fixture_sha256": "903f90e9b540ba0e93cc9a46ed8856f87ce87c0e37212d457325a8659a55edf1"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.438,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "c8b998f1bac71c4478b47403d17c789ad0207e828efd4f67d299998b6f2bfe95",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 6,
+    "seed": 49243
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 57162
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.479099540510363,
+        0.948055255582865,
+        -0.785120939564207,
+        -1.70679183770845,
+        -1.61929587622798
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -46.2171762131479,
+        "raw_score_inf": 9.35478390573508e-06,
+        "projected_score_inf": 9.35478390573508e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -46.2171762131479,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.479099524017834,
+              0.948055256637841,
+              -0.785120957853443,
+              -1.70679183188371,
+              -1.61929587978094
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -46.2171762131477,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 27,
+            "evaluations": [
+              35,
+              28
+            ],
+            "gradient": [
+              -3.50330898193363e-05,
+              2.24095798273538e-06,
+              -3.88496158389984e-05,
+              1.23728042734361e-05,
+              -7.54713658988881e-06
+            ],
+            "projected_gradient": [
+              -3.50330898193363e-05,
+              2.24095798273538e-06,
+              -3.88496158389984e-05,
+              1.23728042734361e-05,
+              -7.54713658988881e-06
+            ],
+            "raw_score_inf": 3.88496158389984e-05,
+            "projected_score_inf": 3.88496158389984e-05
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.479099540510363,
+              0.948055255582865,
+              -0.785120939564207,
+              -1.70679183770845,
+              -1.61929587622798
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -46.2171762131479,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              3,
+              3
+            ],
+            "gradient": [
+              6.39310889738454e-06,
+              9.35478390573508e-06,
+              -9.37300677961161e-07,
+              8.74262983784069e-06,
+              -7.74364459293908e-06
+            ],
+            "projected_gradient": [
+              6.39310889738454e-06,
+              9.35478390573508e-06,
+              -9.37300677961161e-07,
+              8.74262983784069e-06,
+              -7.74364459293908e-06
+            ],
+            "raw_score_inf": 9.35478390573508e-06,
+            "projected_score_inf": 9.35478390573508e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.21956520544154,
+        3.23639978447926,
+        3.24706908497271
+      ],
+      "new_group_latent_integrated_mean": [
+        3.06747457116698,
+        3.08337486307373,
+        3.09345203767409
+      ],
+      "new_group_observation_sd": [
+        0.548542688152448,
+        0.551544673890649,
+        0.553448280578225
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -1.52684871215937,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.05629645376565,
+            0.0562964537656499
+          ],
+          "scaled_absolute_errors": [
+            2.11402136300198e-14,
+            2.11689010241011e-10
+          ],
+          "relative_interval_change": 1.72558852568393e-15,
+          "centering_loss": -4.40397244615644,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -1.52634220169052,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1984.53033615209,
+          1984.53032957957
+        ],
+        "difference": 0.000506510468856636
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.209060811142333,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.456064542203234,
+        "truth": 0.45
+      },
+      "fixture_sha256": "e1a08f98aebab6e56893ca06ed2c7622521c4cbddef335e5b193288c74afdd10"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.441,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "79b02151bc531d726f11ff3c41c231a10ee388e7158580b0e4f7df0ace5b348e",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 7,
+    "seed": 57162
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 65081
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.499194567384266,
+        0.944513477024665,
+        -0.791839957889939,
+        -1.71284332597212,
+        -1.61788408770934
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -48.2035815258049,
+        "raw_score_inf": 8.98082151851165e-06,
+        "projected_score_inf": 8.98082151851165e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -48.2035815258049,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.499194687624081,
+              0.944513311204902,
+              -0.791839891714599,
+              -1.7128432593242,
+              -1.61788405091671
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -48.2035815257812,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 33,
+            "evaluations": [
+              44,
+              34
+            ],
+            "gradient": [
+              0.000203570670461062,
+              -5.32691591672574e-05,
+              0.000163755190007109,
+              4.08010663414393e-05,
+              7.99864886968926e-06
+            ],
+            "projected_gradient": [
+              0.000203570670461062,
+              -5.32691591672574e-05,
+              0.000163755190007109,
+              4.08010663414393e-05,
+              7.99864886968926e-06
+            ],
+            "raw_score_inf": 0.000203570670461062,
+            "projected_score_inf": 0.000203570670461062
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.499194567384266,
+              0.944513477024665,
+              -0.791839957889939,
+              -1.71284332597212,
+              -1.61788408770934
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -48.2035815258049,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              5,
+              5
+            ],
+            "gradient": [
+              3.30602940579183e-07,
+              8.78186376951362e-07,
+              -3.73922324214959e-07,
+              -7.72673808518975e-07,
+              8.98082151851165e-06
+            ],
+            "projected_gradient": [
+              3.30602940579183e-07,
+              8.78186376951362e-07,
+              -3.73922324214959e-07,
+              -7.72673808518975e-07,
+              8.98082151851165e-06
+            ],
+            "raw_score_inf": 8.98082151851165e-06,
+            "projected_score_inf": 8.98082151851165e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.30645634337935,
+        3.32409624221762,
+        3.33531012795131
+      ],
+      "new_group_latent_integrated_mean": [
+        3.07735567722815,
+        3.0935559837173,
+        3.10385470410599
+      ],
+      "new_group_observation_sd": [
+        0.546954215736959,
+        0.550018449828059,
+        0.551967490741074
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -2.04703219980168,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0547282648996397,
+            0.0547282648996396
+          ],
+          "scaled_absolute_errors": [
+            2.44642342922478e-14,
+            2.79934590346467e-10
+          ],
+          "relative_interval_change": 7.60728729474439e-16,
+          "centering_loss": -4.95240717704229,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -2.04654715108239,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2099.7994597316,
+          2099.7994482741
+        ],
+        "difference": 0.000485048719295111
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.0534587612969547,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.453010507732818,
+        "truth": 0.45
+      },
+      "fixture_sha256": "b448c313625b2d20d6b45c496d7f5f472bc0ae4a65fa5061589b3d8f0f399507"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.449,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "52eaf8e29bbd746afe97ab1fea2559a28c5adf28dabc5a716e37d52c23b332fb",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 8,
+    "seed": 65081
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 73000
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.517083051076485,
+        0.822223537213425,
+        -0.813758154584873,
+        -1.7435042703205,
+        -1.55904991706057
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -59.4151389294808,
+        "raw_score_inf": 1.95387043444434e-05,
+        "projected_score_inf": 1.95387043444434e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -59.4151389294808,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.517083172910516,
+              0.822223567704951,
+              -0.813759001673144,
+              -1.74350495470878,
+              -1.55905001054169
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -59.4151389289719,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 30,
+            "evaluations": [
+              41,
+              31
+            ],
+            "gradient": [
+              -0.000462698723207922,
+              -8.20423807894599e-05,
+              -0.000816424867821297,
+              -0.000420499597238444,
+              -2.76904634674419e-05
+            ],
+            "projected_gradient": [
+              -0.000462698723207922,
+              -8.20423807894599e-05,
+              -0.000816424867821297,
+              -0.000420499597238444,
+              -2.76904634674419e-05
+            ],
+            "raw_score_inf": 0.000816424867821297,
+            "projected_score_inf": 0.000816424867821297
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.517083051076485,
+              0.822223537213425,
+              -0.813758154584873,
+              -1.7435042703205,
+              -1.55904991706057
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -59.4151389294808,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              5,
+              5
+            ],
+            "gradient": [
+              3.33604721092229e-06,
+              -5.47525664984505e-06,
+              -4.16738293829155e-06,
+              6.77543265488467e-06,
+              -1.95387043444434e-05
+            ],
+            "projected_gradient": [
+              3.33604721092229e-06,
+              -5.47525664984505e-06,
+              -4.16738293829155e-06,
+              6.77543265488467e-06,
+              -1.95387043444434e-05
+            ],
+            "raw_score_inf": 1.95387043444434e-05,
+            "projected_score_inf": 1.95387043444434e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.53594358611556,
+        3.55634176784833,
+        3.56943710740261
+      ],
+      "new_group_latent_integrated_mean": [
+        2.80043998797465,
+        2.81586843497279,
+        2.82577327624162
+      ],
+      "new_group_observation_sd": [
+        0.516170155916333,
+        0.519258596684473,
+        0.521242573998698
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": 0.201370035516377,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0496932355250548,
+            0.049693235525055
+          ],
+          "scaled_absolute_errors": [
+            3.62818158516806e-13,
+            4.97280120480541e-14
+          ],
+          "relative_interval_change": 2.51342237933685e-15,
+          "centering_loss": -2.80051642576217,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": 0.201727329718969,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2546.2184689129,
+          2546.21845172665
+        ],
+        "difference": 0.000357294202592673
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.0872233828324556,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.443189358436687,
+        "truth": 0.45
+      },
+      "fixture_sha256": "ef60fc5d73e9c5024068169937a787de4ee080dc8329584975845ddd68d483e6"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.444,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "aafc3437d152ca2fcfac02048a9325c3f19af85ae6bceee5b6fd47305d2b10cd",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 9,
+    "seed": 73000
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 80919
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.463403934405476,
+        0.966439817609219,
+        -0.760953027799648,
+        -1.6075482642223,
+        -1.87099254697342
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -20.5299267535759,
+        "raw_score_inf": 5.49838065203034e-06,
+        "projected_score_inf": 5.49838065203034e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -20.5299267535759,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.463403896553906,
+              0.966439875209419,
+              -0.760952956861464,
+              -1.60754816565533,
+              -1.87099256483172
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -20.5299267535241,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 32,
+            "evaluations": [
+              39,
+              33
+            ],
+            "gradient": [
+              2.62578152199211e-05,
+              5.81396883276852e-05,
+              7.01846916530968e-05,
+              5.93189255492926e-05,
+              -5.27028565608378e-06
+            ],
+            "projected_gradient": [
+              2.62578152199211e-05,
+              5.81396883276852e-05,
+              7.01846916530968e-05,
+              5.93189255492926e-05,
+              -5.27028565608378e-06
+            ],
+            "raw_score_inf": 7.01846916530968e-05,
+            "projected_score_inf": 7.01846916530968e-05
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.463403934405476,
+              0.966439817609219,
+              -0.760953027799648,
+              -1.6075482642223,
+              -1.87099254697342
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -20.5299267535759,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              5,
+              5
+            ],
+            "gradient": [
+              -1.2414535941474e-06,
+              -5.01223951232532e-10,
+              1.91957102124718e-06,
+              -2.20995058036744e-06,
+              -5.49838065203034e-06
+            ],
+            "projected_gradient": [
+              -1.2414535941474e-06,
+              -5.01223951232532e-10,
+              1.91957102124718e-06,
+              -2.20995058036744e-06,
+              -5.49838065203034e-06
+            ],
+            "raw_score_inf": 5.49838065203034e-06,
+            "projected_score_inf": 5.49838065203034e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        4.40343288152698,
+        4.42570874947833,
+        4.43966996265942
+      ],
+      "new_group_latent_integrated_mean": [
+        3.0836282216387,
+        3.09844226767965,
+        3.10772684663765
+      ],
+      "new_group_observation_sd": [
+        0.452612704893347,
+        0.454671245728749,
+        0.455962567350492
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": 0.997128929072228,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0431196455446484,
+            0.0431196455446486
+          ],
+          "scaled_absolute_errors": [
+            2.87300962731624e-12,
+            1.88499572966393e-10
+          ],
+          "relative_interval_change": 3.54028109363493e-15,
+          "centering_loss": -2.14664764355055,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": 0.99742882562296,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          3381.3489598522,
+          3381.34894413145
+        ],
+        "difference": 0.000299896550731482
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.52416591485736,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.467220940218373,
+        "truth": 0.45
+      },
+      "fixture_sha256": "92b4cdd6787ba0e95188f215ea262ff565415b61358342013fabe494717471d1"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.448,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "df75cb137c7c1267e00e7102265a684a81e7d4814d8fe894f7e93c8d80979fa0",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 10,
+    "seed": 80919
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 88838
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.469797514904743,
+        0.924616727713281,
+        -0.762771775581793,
+        -1.76280612421859,
+        -1.52534837368528
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -61.9036985617684,
+        "raw_score_inf": 6.9845913295008e-06,
+        "projected_score_inf": 6.9845913295008e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -61.9036985617684,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.469797631109582,
+              0.924616944786948,
+              -0.762771759705893,
+              -1.76280627700142,
+              -1.52534840355026
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -61.9036985616616,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 29,
+            "evaluations": [
+              36,
+              30
+            ],
+            "gradient": [
+              0.00026710940832686,
+              0.000141757853704405,
+              0.000159544628479225,
+              -9.29502063461568e-05,
+              -1.06332319872171e-05
+            ],
+            "projected_gradient": [
+              0.00026710940832686,
+              0.000141757853704405,
+              0.000159544628479225,
+              -9.29502063461568e-05,
+              -1.06332319872171e-05
+            ],
+            "raw_score_inf": 0.00026710940832686,
+            "projected_score_inf": 0.00026710940832686
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.469797514904743,
+              0.924616727713281,
+              -0.762771775581793,
+              -1.76280612421859,
+              -1.52534837368528
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -61.9036985617684,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              5,
+              5
+            ],
+            "gradient": [
+              -1.89308215681194e-06,
+              2.73505111181294e-06,
+              1.83047765744959e-06,
+              2.6718540269699e-06,
+              -6.9845913295008e-06
+            ],
+            "projected_gradient": [
+              -1.89308215681194e-06,
+              2.73505111181294e-06,
+              1.83047765744959e-06,
+              2.6718540269699e-06,
+              -6.9845913295008e-06
+            ],
+            "raw_score_inf": 6.9845913295008e-06,
+            "projected_score_inf": 6.9845913295008e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        2.73243775064547,
+        2.74531134330321,
+        2.75338661226883
+      ],
+      "new_group_latent_integrated_mean": [
+        3.01225242816465,
+        3.02671806365851,
+        3.03579197957905
+      ],
+      "new_group_observation_sd": [
+        0.585411644069232,
+        0.588457093784053,
+        0.590368174050812
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -3.05368860957667,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0640795854864926,
+            0.0640795854864927
+          ],
+          "scaled_absolute_errors": [
+            3.67611242095621e-14,
+            3.42197862893948e-11
+          ],
+          "relative_interval_change": 1.73256898620104e-15,
+          "centering_loss": -5.80131805450732,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -3.05304553408289,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1532.14212241792,
+          1532.14211024988
+        ],
+        "difference": 0.000643075493774514
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.38673272655251,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.466371955448189,
+        "truth": 0.45
+      },
+      "fixture_sha256": "b356e8ee9f533ceee3397f4b71e46fb0b9de4d1a466fceae355e6669fbab5af7"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.446,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "50b4e4f0c861065c9a053198497d03bf8cd0ccda49571bb3d5eaaca26a095d19",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 11,
+    "seed": 88838
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 96757
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.487928382027554,
+        0.924002999237643,
+        -0.795663513401568,
+        -1.74017785105252,
+        -1.42006356209469
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -52.5611861831565,
+        "raw_score_inf": 9.62592390152395e-06,
+        "projected_score_inf": 9.62592390152395e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -52.5611861831565,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.487928620399838,
+              0.924003009016031,
+              -0.795663727248066,
+              -1.74017785080058,
+              -1.42006356234627
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -52.5611861831211,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 25,
+            "evaluations": [
+              37,
+              26
+            ],
+            "gradient": [
+              0.000211958160186043,
+              1.77135322090294e-05,
+              -8.81599989899229e-05,
+              6.98876876231713e-08,
+              -1.6374697371091e-06
+            ],
+            "projected_gradient": [
+              0.000211958160186043,
+              1.77135322090294e-05,
+              -8.81599989899229e-05,
+              6.98876876231713e-08,
+              -1.6374697371091e-06
+            ],
+            "raw_score_inf": 0.000211958160186043,
+            "projected_score_inf": 0.000211958160186043
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.487928382027554,
+              0.924002999237643,
+              -0.795663513401568,
+              -1.74017785105252,
+              -1.42006356209469
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -52.5611861831565,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              4,
+              4
+            ],
+            "gradient": [
+              -8.23311776088076e-07,
+              -9.62592390152395e-06,
+              -3.98042780780372e-06,
+              1.52839849415498e-07,
+              3.60913249496109e-06
+            ],
+            "projected_gradient": [
+              -8.23311776088076e-07,
+              -9.62592390152395e-06,
+              -3.98042780780372e-06,
+              1.52839849415498e-07,
+              3.60913249496109e-06
+            ],
+            "raw_score_inf": 9.62592390152395e-06,
+            "projected_score_inf": 9.62592390152395e-06
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        2.89378079329957,
+        2.9090932049358,
+        2.91884432360264
+      ],
+      "new_group_latent_integrated_mean": [
+        3.03728119738994,
+        3.05350693905718,
+        3.06383967672213
+      ],
+      "new_group_observation_sd": [
+        0.649443825185711,
+        0.653276383684115,
+        0.655717914476323
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -0.839305550248116,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0621956326144082,
+            0.0621956326144083
+          ],
+          "scaled_absolute_errors": [
+            3.29793852208478e-14,
+            5.60549474197399e-11
+          ],
+          "relative_interval_change": 1.11565613407713e-15,
+          "centering_loss": -3.61677604715276,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -0.838701172477177,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1626.2415258872,
+          1626.24152064694
+        ],
+        "difference": 0.00060437777093858
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.364764842091025,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.45128170410367,
+        "truth": 0.45
+      },
+      "fixture_sha256": "9d092b8a9d77a446222a777c475747d49f5c2ec662702d0fb1ad911470d64005"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.443,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "bb80f00aaffec44a8950ab4e9c0e0b2674ec107649de3d2950ae5aa183f09942",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 12,
+    "seed": 96757
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 104676
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.5240778241251,
+        0.899954089797274,
+        -0.825441163342611,
+        -1.7469907369968,
+        -1.4629594503453
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -56.474706010081,
+        "raw_score_inf": 1.61314683992941e-05,
+        "projected_score_inf": 1.61314683992941e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -56.474706010081,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.524077767209626,
+              0.899953911899991,
+              -0.82544121846068,
+              -1.74699076834464,
+              -1.46295826243046
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -56.4747060100298,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 28,
+            "evaluations": [
+              38,
+              29
+            ],
+            "gradient": [
+              -0.00021665682696792,
+              -8.08387371620256e-05,
+              -0.000144521063450753,
+              -1.86564461761712e-05,
+              5.71203152695404e-05
+            ],
+            "projected_gradient": [
+              -0.00021665682696792,
+              -8.08387371620256e-05,
+              -0.000144521063450753,
+              -1.86564461761712e-05,
+              5.71203152695404e-05
+            ],
+            "raw_score_inf": 0.00021665682696792,
+            "projected_score_inf": 0.00021665682696792
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.5240778241251,
+              0.899954089797274,
+              -0.825441163342611,
+              -1.7469907369968,
+              -1.4629594503453
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -56.474706010081,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              9,
+              9
+            ],
+            "gradient": [
+              -4.10557952434942e-06,
+              1.61314683992941e-05,
+              -2.60722011269365e-06,
+              9.8058335576412e-08,
+              6.93008467264611e-07
+            ],
+            "projected_gradient": [
+              -4.10557952434942e-06,
+              1.61314683992941e-05,
+              -2.60722011269365e-06,
+              9.8058335576412e-08,
+              6.93008467264611e-07
+            ],
+            "raw_score_inf": 1.61314683992941e-05,
+            "projected_score_inf": 1.61314683992941e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.1176969703822,
+        3.13589925734292,
+        3.14764517258855
+      ],
+      "new_group_latent_integrated_mean": [
+        3.00137725113724,
+        3.01876319429823,
+        3.02998232381065
+      ],
+      "new_group_observation_sd": [
+        0.60695848839999,
+        0.610868037199423,
+        0.6133920452108
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -1.52705452123752,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.057701980322082,
+            0.0577019803220821
+          ],
+          "scaled_absolute_errors": [
+            2.24169098709785e-14,
+            1.60399187061338e-10
+          ],
+          "relative_interval_change": 1.56330199149635e-15,
+          "centering_loss": -4.37951830628794,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -1.52656363771092,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          1888.96891160084,
+          1888.96889987689
+        ],
+        "difference": 0.000490883526602648
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.010232301907242,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.438041701890317,
+        "truth": 0.45
+      },
+      "fixture_sha256": "d7eaf7bf92350de1eddad3ed67a26dc167700dd6a79d7a2095f9536005808edf"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.452,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "74eb3e5f0983166c5132a507dff041df1e168d74112c3dc18b23a70b5d34be27",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 13,
+    "seed": 104676
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 112595
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.535840862271187,
+        0.92659028713559,
+        -0.830195010361447,
+        -1.74551236596531,
+        -1.70841474538209
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -61.2286079374525,
+        "raw_score_inf": 1.82835176580909e-05,
+        "projected_score_inf": 1.82835176580909e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": -61.2286079374525,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.535840852123608,
+              0.926590232930899,
+              -0.830194970452383,
+              -1.74551226756393,
+              -1.70841535927577
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -61.2286079373965,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 24,
+            "evaluations": [
+              32,
+              25
+            ],
+            "gradient": [
+              3.03411572133427e-05,
+              -2.26952439135175e-05,
+              3.75843483411131e-05,
+              5.09767810654427e-05,
+              -2.95177901807608e-05
+            ],
+            "projected_gradient": [
+              3.03411572133427e-05,
+              -2.26952439135175e-05,
+              3.75843483411131e-05,
+              5.09767810654427e-05,
+              -2.95177901807608e-05
+            ],
+            "raw_score_inf": 5.09767810654427e-05,
+            "projected_score_inf": 5.09767810654427e-05
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.535840862271187,
+              0.92659028713559,
+              -0.830195010361447,
+              -1.74551236596531,
+              -1.70841474538209
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -61.2286079374525,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              8,
+              8
+            ],
+            "gradient": [
+              1.82835176580909e-05,
+              1.24940270751495e-05,
+              5.47949992046881e-06,
+              -1.01039605289316e-05,
+              -1.28085728025307e-06
+            ],
+            "projected_gradient": [
+              1.82835176580909e-05,
+              1.24940270751495e-05,
+              5.47949992046881e-06,
+              -1.01039605289316e-05,
+              -1.28085728025307e-06
+            ],
+            "raw_score_inf": 1.82835176580909e-05,
+            "projected_score_inf": 1.82835176580909e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        3.29130719272803,
+        3.31094309430714,
+        3.32364047012288
+      ],
+      "new_group_latent_integrated_mean": [
+        3.05275145057031,
+        3.07068736510099,
+        3.08228545987029
+      ],
+      "new_group_observation_sd": [
+        0.491736054659106,
+        0.494800051173728,
+        0.49678279674684
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": -3.71562648262316,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0543442010441185,
+            0.0543442010441183
+          ],
+          "scaled_absolute_errors": [
+            2.65449689396407e-14,
+            2.96719482629506e-10
+          ],
+          "relative_interval_change": 3.57515660505658e-15,
+          "centering_loss": -6.62804385025092,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": -3.71514775034053,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          2129.55702796336,
+          2129.55702210138
+        ],
+        "difference": 0.000478732282624517
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.0243442328569208,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.435964260483331,
+        "truth": 0.45
+      },
+      "fixture_sha256": "c00393bf0f4337ddc0c0250af55486b371b18e513ea744c824a730349ec76020"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.442,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "84d3a97ffd6dd2494fea4c210cae118bae1c4d4950634ae39f4c3820fcae6fcd",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 14,
+    "seed": 112595
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "nonlinear_growth",
+      "options": {},
+      "seed": 120514
+    },
+    "result": {
+      "case": "nonlinear_growth",
+      "target": "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
+      "parameters": [
+        0.555019348838627,
+        0.933975810986826,
+        -0.888192760313932,
+        -1.66975981677566,
+        -1.52392487176804
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": -33.4284628802094,
+        "raw_score_inf": 1.80041444099999e-05,
+        "projected_score_inf": 1.80041444099999e-05,
+        "iterations": 27,
+        "pd_hessian": true,
+        "restored_objective": -33.4284628802094,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.555019348838627,
+              0.933975810986826,
+              -0.888192760313932,
+              -1.66975981677566,
+              -1.52392487176804
+            ],
+            "parameter_names": [
+              "theta",
+              "theta",
+              "theta",
+              "theta",
+              "theta"
+            ],
+            "objective": -33.4284628802094,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 27,
+            "evaluations": [
+              37,
+              28
+            ],
+            "gradient": [
+              3.64074368874867e-06,
+              -2.86323280107581e-06,
+              1.80041444099999e-05,
+              9.87721132982011e-06,
+              6.4282197205362e-06
+            ],
+            "projected_gradient": [
+              3.64074368874867e-06,
+              -2.86323280107581e-06,
+              1.80041444099999e-05,
+              9.87721132982011e-06,
+              6.4282197205362e-06
+            ],
+            "raw_score_inf": 1.80041444099999e-05,
+            "projected_score_inf": 1.80041444099999e-05
+          }
+        ]
+      },
+      "future_time": [
+        9,
+        10,
+        11
+      ],
+      "future_has_response": false,
+      "known_group_conditional_mode_mean": [
+        2.39562591752161,
+        2.41132154406744,
+        2.42172339258507
+      ],
+      "new_group_latent_integrated_mean": [
+        3.09647614513956,
+        3.11814821642073,
+        3.13251079072587
+      ],
+      "new_group_observation_sd": [
+        0.591096338099918,
+        0.59562733476468,
+        0.598632245075702
+      ],
+      "nonlinear_laplace_check": {
+        "quadrature": {
+          "negative_log_integral": 4.89063791206424,
+          "intervals": [
+            [
+              -5,
+              5
+            ],
+            [
+              -7.5,
+              7.5
+            ]
+          ],
+          "scaled_integrals": [
+            0.0879562842054517,
+            0.0879562842054517
+          ],
+          "scaled_absolute_errors": [
+            1.00660835642756e-10,
+            4.03321197817934e-14
+          ],
+          "relative_interval_change": 6.31122059472098e-16,
+          "centering_loss": 2.45972255373642,
+          "boundary": "finite-domain numerical reference; interval stability is checked, omitted tails are not rigorously bounded"
+        },
+        "laplace_loss": 4.89176473863846,
+        "curvature_steps": [
+          0.0001,
+          5e-05
+        ],
+        "curvature_estimates": [
+          814.000876880883,
+          814.000871152132
+        ],
+        "difference": 0.00112682657422702
+      },
+      "uncertainty": "new-group observation/latent moments; population-parameter uncertainty excluded",
+      "metrics": {
+        "mse": 0.0752037109944341,
+        "pointwise_coverage": 1,
+        "interval": "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles",
+        "primary_estimate": 0.411398577154722,
+        "truth": 0.45
+      },
+      "fixture_sha256": "ddc47477cd0b9f305a451270e1a4b31edf6bc45feac70c42be8264bb887ffaa3"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.442,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "474874f6e7e5c3d62fb28f20bcaf6009bde6c411cc276a0d840adc301cefcdd2",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 15,
+    "seed": 120514
+  }
+]

@@ -97,7 +97,7 @@ def main() -> None:
     manifest = {
         "schema_version": 1,
         "kind": "spark-tmbad-artifact",
-        "package_version": "0.1.0",
+        "package_version": "0.2.0",
         "protocol": 1,
         "build_id": descriptor["build_id"],
         "platform": {

@@ -14,15 +14,26 @@ from the stable ordered sequence, so append new lessons or introduce an explicit
 identity field before inserting within the sequence. Never renumber existing
 lessons as a cosmetic edit.
 
-Prepare Python and Go for contributor authoring, then run from the repository
+Prepare Python and the [pinned shared formatting toolchain](../../../docker/formatting/README.md)
+before authoring. Go generation requires `gofmt` from Go 1.27.3 and the
+shared toolchain's locked syntax parsers. Any other supported language
+fences also require their prepared formatter/parser. Run from the repository
 root:
 
 ```sh
 python courses/go/authoring/build.py
 ```
 
-The renderer uses `gofmt` to publish readable, deterministic Go source. Generation
-does not execute references, fetch dependencies or contact clusters. It rebuilds
+The renderer uses `gofmt` to publish readable, deterministic Go source. Each
+generated guide and explanatory-answer Markdown document also passes through
+`scripts.format_inline_code.canonical_markdown` in memory immediately before
+its normal write. The shared policy must explicitly admit that generated
+output path. Unsupported snippets, transcripts and protected regions retain
+their bytes with preservation diagnostics. Missing prepared tools/parsers or
+a genuine formatting failure stop generation; there is no silent fallback
+or automatic download.
+
+Generation does not execute references, fetch dependencies or contact clusters. It rebuilds
 `track.json`, `lessons.json`, all guides, starter pads, executable references and
 explanatory solutions. The prepared client-go project under `fixtures/` is directly
 authored and is not overwritten by the renderer.

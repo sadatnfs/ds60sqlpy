@@ -89,7 +89,7 @@ class RuntimeContractTests(unittest.TestCase):
 import ds60_spark_tmbad
 for forbidden in ('pyspark', 'numpy', 'scipy', 'torch', 'rpy2'):
     assert forbidden not in sys.modules, forbidden
-assert ds60_spark_tmbad.__version__ == '0.1.0'
+assert ds60_spark_tmbad.__version__ == '0.2.0'
 """
         env = dict(os.environ, PYTHONPATH=str(Path(__file__).parents[1] / "src"))
         subprocess.run([sys.executable, "-c", code], env=env, check=True)

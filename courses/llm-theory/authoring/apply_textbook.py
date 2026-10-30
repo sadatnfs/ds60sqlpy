@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import importlib.util
 import re
+import sys
 from pathlib import Path
 from types import ModuleType
 
@@ -22,7 +23,7 @@ def load_layer(name: str) -> ModuleType:
 
 
 def apply(
-    only: set[str] | None = None, *, require_complete: bool = False
+    only: set[str] | None = None, *, require_complete: bool = False, canonical_code: bool = False
 ) -> dict[str, dict[str, object]]:
     selected = only if only is not None else {f"llm-{number:03}" for number in range(1, 49)}
     layers = [load_layer("textbook_foundations"), load_layer("textbook_advanced")]
@@ -41,11 +42,22 @@ def apply(
             raise ValueError("Textbook pass changed executable code in " + identity)
         if layer.enrich_guide(identity, after) != after:
             raise ValueError("Textbook prose application is not idempotent for " + identity)
+        prose_after = after
+        if canonical_code:
+            source_root = BASE.parents[2]
+            if str(source_root) not in sys.path:
+                sys.path.insert(0, str(source_root))
+            from scripts.format_inline_code import canonical_markdown
+
+            after = canonical_markdown(
+                after, root=source_root, path=path.relative_to(source_root).as_posix()
+            )
         path.write_text(after, encoding="utf-8")
         result[identity] = {
             "before_sha256": hashlib.sha256(before.encode()).hexdigest(),
             "after_sha256": hashlib.sha256(after.encode()).hexdigest(),
-            "python_blocks_unchanged": len(code),
+            "python_blocks_unchanged": len(code) if after == prose_after else 0,
+            "python_blocks_formatting_only": len(code) if after != prose_after else 0,
         }
     return result
 
@@ -54,9 +66,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ids", nargs="+")
     parser.add_argument("--require-complete", action="store_true")
+    parser.add_argument("--canonical-code", action="store_true")
     args = parser.parse_args()
-    rows = apply(set(args.ids) if args.ids else None, require_complete=args.require_complete)
-    print(f"Applied textbook prose to {len(rows)} guides with unchanged Python blocks.")
+    rows = apply(
+        set(args.ids) if args.ids else None,
+        require_complete=args.require_complete,
+        canonical_code=args.canonical_code,
+    )
+    print(f"Applied textbook prose to {len(rows)} guides; canonical_code={args.canonical_code}.")
 
 
 if __name__ == "__main__":

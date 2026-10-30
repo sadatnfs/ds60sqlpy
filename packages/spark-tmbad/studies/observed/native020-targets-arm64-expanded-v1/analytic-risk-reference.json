@@ -1,0 +1,66 @@
+{
+  "scope": "Analytic repeated-sampling reference for independent Gaussian rows with fixed sigma1, n32 orthogonal[1,x], unpenalized intercept. These are not empirical estimates, calibrated intervals, posterior draws or native results.",
+  "methods": [
+    {
+      "true_slope": 0.15,
+      "method": "unpenalized",
+      "slope_expectation": 0.15,
+      "slope_bias": 0.0,
+      "slope_mse": 0.03125,
+      "slope_rmse": 0.1767766952966369,
+      "probability_slope_exactly_zero": 0.0,
+      "future_response_mse_at_abs_x1": 1.0625
+    },
+    {
+      "true_slope": 0.15,
+      "method": "selected_gaussian",
+      "slope_expectation": 0.16,
+      "slope_bias": 0.010000000000000009,
+      "slope_mse": 0.0201,
+      "slope_rmse": 0.14177446878757824,
+      "probability_slope_exactly_zero": 0.0,
+      "future_response_mse_at_abs_x1": 1.05135
+    },
+    {
+      "true_slope": 0.15,
+      "method": "selected_l1",
+      "slope_expectation": 0.07916958994602313,
+      "slope_bias": -0.07083041005397686,
+      "slope_mse": 0.01884284863340581,
+      "slope_rmse": 0.13726925596580544,
+      "probability_slope_exactly_zero": 0.38387107677789845,
+      "future_response_mse_at_abs_x1": 1.0500928486334058
+    },
+    {
+      "true_slope": 1.2,
+      "method": "unpenalized",
+      "slope_expectation": 1.2,
+      "slope_bias": 0.0,
+      "slope_mse": 0.03125,
+      "slope_rmse": 0.1767766952966369,
+      "probability_slope_exactly_zero": 0.0,
+      "future_response_mse_at_abs_x1": 1.0625
+    },
+    {
+      "true_slope": 1.2,
+      "method": "selected_gaussian",
+      "slope_expectation": 1.0,
+      "slope_bias": -0.19999999999999996,
+      "slope_mse": 0.06000000000000005,
+      "slope_rmse": 0.2449489742783179,
+      "probability_slope_exactly_zero": 0.0,
+      "future_response_mse_at_abs_x1": 1.09125
+    },
+    {
+      "true_slope": 1.2,
+      "method": "selected_l1",
+      "slope_expectation": 1.0750000000165143,
+      "slope_bias": -0.12499999998348565,
+      "slope_mse": 0.04687499995947175,
+      "slope_rmse": 0.21650635085251368,
+      "probability_slope_exactly_zero": 5.9670283145177e-10,
+      "future_response_mse_at_abs_x1": 1.0781249999594718
+    }
+  ],
+  "formula_note": "OLS slope is N(beta,1/n). Named Gaussian uses (n*OLS+precision*center)/(n+precision). L1 uses soft_threshold(OLS,lambda/n). Truncated normal first/second moments give exact L1 risk."
+}

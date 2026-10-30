@@ -160,7 +160,13 @@ object ProximalGradient {
                   val majorizationAccepted = proposed.value <= majorant +
                     allowance(proposed.value, majorant, current.value)
                   val compositeAccepted = composite <= total + allowance(composite, total)
-                  if (majorizationAccepted && compositeAccepted)
+                  // Summing many row losses can round the smooth majorant past
+                  // an already stationary trial. The same summed KKT certificate
+                  // used at loop entry can terminate there, but this exception
+                  // permits no objective increase, including an ULP allowance.
+                  val certifiedTerminal = composite <= total &&
+                    norm(plan.rawKkt(candidate, proposed.rawGradient)) <= settings.kktTolerance
+                  if ((majorizationAccepted && compositeAccepted) || certifiedTerminal)
                     accepted = Some((candidate, proposed, composite))
                 } catch {
                   case _: ReviewedDomainFailure => rejected += 1

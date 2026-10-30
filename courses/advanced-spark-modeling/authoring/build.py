@@ -6,10 +6,23 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import sys
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.normalize_math_prose import prose_parts  # noqa: E402
+
+
+def published_package_links(text: str) -> str:
+    """Relocate only prose links from authored sources to published guides."""
+    return "".join(
+        part.replace("](../../../../packages/", "](../../../packages/")
+        if protected and part.startswith(("[", "!["))
+        else part
+        for protected, part in prose_parts(text)
+    )
 
 
 def outputs() -> dict[Path, str]:
@@ -25,6 +38,9 @@ def outputs() -> dict[Path, str]:
         key = unit["id"]
         prose = (BASE / "authoring/chapters" / (key + ".md")).read_text("utf-8").strip()
         program = (BASE / "authoring/programs" / (key + unit["suffix"])).read_text("utf-8")
+        prose = published_package_links(prose)
+        if unit["runtime"] == "reading" and unit["language"] == "markdown":
+            program = published_package_links(program)
         if unit["language"] == "python":
             ast.parse(program, filename=key + ".py")
         if len(program.encode("utf-8")) > 48_000:

@@ -95,8 +95,8 @@ def validate_manifest(value: Mapping[str, Any]) -> dict[str, Any]:
         raise ContractError("Unsupported artifact schema_version")
     if manifest.get("kind") != "spark-tmbad-artifact":
         raise ContractError("Expected a spark-tmbad-artifact manifest")
-    if manifest.get("package_version") != "0.1.0":
-        raise ContractError("This frontend requires package_version 0.1.0")
+    if manifest.get("package_version") not in {"0.1.0", "0.2.0"}:
+        raise ContractError("This frontend supports package_version 0.1.0 or 0.2.0")
     if type(manifest.get("protocol")) is not int or manifest["protocol"] != 1:
         raise ContractError("This frontend requires native protocol 1")
     _sha(manifest.get("build_id"), "build_id")

@@ -31,12 +31,17 @@ def validate_model(value: Mapping[str, Any], runtime: PreparedRuntime) -> dict[s
         "spec",
         "fit",
     }
+    if type(model.get("schema_version")) is not int or model["schema_version"] not in (1, 2):
+        raise ContractError("Unsupported fitted-model schema_version")
+    if model["schema_version"] == 2:
+        fields.add("target")
     if set(model) != fields:
         raise ContractError(f"Fitted model must contain exactly these fields: {sorted(fields)}")
-    if type(model["schema_version"]) is not int or model["schema_version"] != 1:
-        raise ContractError("Unsupported fitted-model schema_version")
-    if model["kind"] != "spark-tmbad-model" or model["package_version"] != "0.1.0":
-        raise ContractError("Expected a spark-tmbad-model for package 0.1.0")
+    if (
+        model["kind"] != "spark-tmbad-model"
+        or model["package_version"] != runtime.manifest["package_version"]
+    ):
+        raise ContractError("Expected a spark-tmbad-model matching the selected runtime version")
     descriptor = runtime.descriptor(model["model_id"])
     if model["model_digest"] != descriptor["digest"]:
         raise ContractError("Fitted model source digest does not match the prepared model")
@@ -78,6 +83,10 @@ def validate_model(value: Mapping[str, Any], runtime: PreparedRuntime) -> dict[s
     if type(model["fit"].get("converged")) is not bool:
         raise ContractError("Fitted model diagnostics require a boolean converged flag")
     _validate_fit(model["fit"], len(theta), descriptor["fit_kind"])
+    if model["schema_version"] == 2:
+        from ._target_documents import validate_target
+
+        validate_target(model["target"], descriptor, theta, model["fit"])
     return model
 
 

@@ -1,6 +1,24 @@
 # Reproducible Rust authoring
 
-Run `python courses/rust/authoring/build.py` from the repository root. Only the Python standard library is needed for generation. The original specifications are foundations.py, composition.py and advanced.py. render.py writes the route, manifest, guides, unfinished learners and separate references/explanations as UTF-8 with LF.
+Prepare Python and the [pinned shared formatting toolchain](../../../docker/formatting/README.md),
+including `rustfmt` from Rust 1.99.1, edition 2024, and the shared toolchain's
+locked syntax parsers. Any other supported language fences require their
+prepared formatter/parser too. Then run from the repository root:
+
+```sh
+python courses/rust/authoring/build.py
+```
+
+The original specifications are foundations.py, composition.py and advanced.py.
+render.py writes the route, manifest, guides, unfinished learners and separate
+references/explanations as UTF-8 with LF. Its central writer passes Markdown
+through `scripts.format_inline_code.canonical_markdown` in memory before the
+normal write, retaining the existing final-newline rule. The shared policy
+must explicitly admit each generated Markdown output path. Unsupported
+snippets, transcripts and opaque Rust macro regions retain their bytes with
+preservation diagnostics. Missing prepared tools/parsers or a genuine
+formatting failure stop generation; there is no silent fallback or automatic
+download.
 
 Specification order defines stable rust-001 through rust-048 IDs. Do not reorder or renumber published lessons. Each stage contains sixteen chapters. Additive work needs a reviewed stable-ID strategy. The generator touches only this subject and never generates shared HTML.
 

@@ -3,8 +3,15 @@
 import json
 import re
 import subprocess
+import sys
 import textwrap
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
 BASE = Path(__file__).resolve().parents[1]
 SPECS = []
@@ -227,6 +234,8 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
         ]:
             p = BASE.parent.parent / paths[key]
             p.parent.mkdir(parents=True, exist_ok=True)
+            if key in {"guide", "answers"}:
+                content = canonical_markdown(content, root=ROOT, path=paths[key])
             p.write_text(content, encoding="utf-8", newline="\n")
         plan["lessons"].append(
             dict(

@@ -488,7 +488,7 @@ group so canonical pointers remain stable during readback. Existing immutable
 tags and the original publisher result remain unchanged.
 
 The published catalog currently produces 19 groups on each native architecture,
-with at most four audit jobs running together. Each isolated job pulls only
+with one audit job running at a time. Each isolated job pulls only
 App/Core plus its chosen group. It checks the combined indexes and native image
 identities, saved version and selected profiles, pull-only preparation without
 runtime resources, strict startup, exact service selection and stop/resume with
@@ -502,6 +502,49 @@ checks still run. Aggregate every required group/architecture receipt before
 claiming complete module pull coverage. Pull/setup acceptance does not rerun all
 scientific reference programs or establish another host's GPU/cluster readiness.
 Runner capacity, image downloads and account pull limits still apply.
+
+### Inspect registry metadata and resume an interrupted audit
+
+The separate
+[`inspect-registry-metadata.yml`](https://github.com/sadatnfs/ds60sqlpy/blob/main/.github/workflows/inspect-registry-metadata.yml)
+workflow runs focused, hash-locked diagnostic tests followed by native metadata
+observations. It uses authenticated and anonymous-control HEAD requests to
+observe quota, plus an authenticated canonical App HEAD. It does not pull images
+or write registry tags, and it does not claim classroom or whole-source
+acceptance. It retains config-binding booleans, numeric quota/status/retry fields
+and proxy/mirror presence without credentials, raw token claims, IP headers,
+config contents or response bodies.
+
+A maintainer can dispatch that observation with:
+
+```sh
+gh workflow run inspect-registry-metadata.yml \
+  --repo sadatnfs/ds60sqlpy --ref main -f version=1.1.0
+```
+
+A successful login alone does not prove how every later request was attributed.
+Authenticated requests can still meet shared-IP throttling. Missing quota headers
+mean unknown, not unlimited capacity; deleting images does not reset a pull-rate
+limit. Use the actual status and available quota observations to decide whether
+to wait or investigate auth/config propagation. A missing canonical-tag HEAD
+alone does not distinguish a missing tag from a missing/private repository.
+[Docker pull-limit diagnostics](https://docs.docker.com/docker-hub/usage/pulls/)
+and [429 troubleshooting](https://docs.docker.com/docker-hub/troubleshoot/).
+
+The full module audit keeps its seven-job source gate. After that gate and
+current registry state have been reconciled, `resume_runs` accepts completed
+prior full-audit run IDs and follows their bounded recovery ancestry. It validates
+and retains their raw accepted receipts, source/verifier/job identities and
+hashes. Recovery selects one unresolved canary by default. The optional `cases`
+input can select up to six unresolved `group/architecture` pairs, separated by
+commas; an already accepted case is refused. Selected cases run serially and
+known exhausted quota or rejected registry observations stop before image pulls.
+
+Prior receipts remain historical evidence. They do not establish current
+availability after tags or repositories have been removed or changed. Inspect
+current canonical identities before treating retained scope as live coverage.
+Do not overwrite immutable versions, replay every accepted group blindly, or
+reinterpret a metadata-only workflow result as a completed module audit.
 
 ### Transfer and account limits
 

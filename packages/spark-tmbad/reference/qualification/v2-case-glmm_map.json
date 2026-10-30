@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "glmm_map",
+    "options": {},
+    "seed": 1729
+  },
+  "result": {
+    "case": "glmm_map",
+    "backend": "actual pinned upstream glmmTMB",
+    "parameters": [-0.0445263235696672, 2.17012237714585],
+    "independent_map": [-0.0445263122449592, 2.17012237557672],
+    "priors": [
+      {
+        "prior": "normal(0,3)",
+        "class": "fixef",
+        "coef": "(Intercept)"
+      },
+      {
+        "prior": "normal(0.3,1)",
+        "class": "fixef",
+        "coef": "x"
+      }
+    ],
+    "diagnostics": {
+      "converged": true,
+      "pd_hessian": true,
+      "score_inf": 1.09893588978727e-07,
+      "objective": 72.3445681510124,
+      "warnings": [],
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [-0.0445263235696672, 2.17012237714585],
+          "parameter_names": ["beta", "beta"],
+          "objective": 72.3445681510124,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "gradient": [1.09893588978727e-07, -5.94753392715863e-09],
+          "score_inf": 1.09893588978727e-07,
+          "pd_hessian": true,
+          "warnings": []
+        }
+      ]
+    },
+    "target": "MAP in coefficient coordinates with proper nonzero-mean Gaussian prior; not posterior sampling",
+    "metrics": {
+      "primary_estimate": 2.17012237714585,
+      "truth": 2.2
+    },
+    "fixture_sha256": "4432a11f3ee5152965117035b0b3602b0be762e630e7861c367ff016295fd992"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.657
+}

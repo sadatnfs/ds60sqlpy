@@ -17,8 +17,10 @@ pinned source and license; original glue is MIT.
 
 The default targets R 4.6.1, TMB 1.9.25, RTMB 2.0 and glmmTMB development 1.1.15.9000
 at commit `1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c`. The lock contains the full
-65-package CRAN closure. Selected recommended packages are pinned to compatible
-archives, including Matrix 1.7-4, because newer source releases require R 4.7.
+65-package CRAN closure. Recommended-package pins match the previously qualified
+R 4.6.1 environment, including Matrix 1.7-6. Every dependency declaration is
+checked against the exact source archive's DESCRIPTION before installation;
+package-index metadata alone does not establish source compatibility.
 The library is installed into its own directory; existing R/classroom libraries
 are not replaced. Dependency and C++ preparation are serial.
 

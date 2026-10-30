@@ -2,13 +2,39 @@
 # Original calling code. The real glmmTMB library retains its AGPL-3 license.
 
 reference_glmm_fit <- function(...) {
+  settings <- list(...)
   observed_warnings <- character()
-  model <- withCallingHandlers(
-    glmmTMB::glmmTMB(...,
-      control = glmmTMB::glmmTMBControl(optCtrl = list(iter.max = 1500, eval.max = 3000))
-    ),
-    warning = function(condition) observed_warnings <<- c(observed_warnings, conditionMessage(condition))
-  )
+  fit_with <- function(control) {
+    withCallingHandlers(do.call(glmmTMB::glmmTMB, c(settings, list(control = control))),
+      warning = function(condition) observed_warnings <<- c(observed_warnings, conditionMessage(condition)))
+  }
+  inspect <- function(model, method) {
+    gradient <- as.numeric(model$obj$gr(model$fit$par))
+    list(method = method, parameters = unname(model$fit$par), parameter_names = names(model$fit$par),
+      objective = model$fit$objective, convergence = model$fit$convergence,
+      message = model$fit$message, gradient = gradient, score_inf = max(abs(gradient)),
+      pd_hessian = model$sdr$pdHess, warnings = observed_warnings)
+  }
+  accepted <- function(value) {
+    value$convergence == 0L && isTRUE(value$pd_hessian) && all(is.finite(value$parameters)) &&
+      is.finite(value$objective) && all(is.finite(value$gradient)) && value$score_inf < 2e-3
+  }
+  model <- fit_with(glmmTMB::glmmTMBControl(optCtrl = list(iter.max = 1500, eval.max = 3000)))
+  attempts <- list(inspect(model, "nlminb"))
+  if (!accepted(attempts[[1]])) {
+    # Rebuild the complete upstream fit using its public optimizer contract.
+    # Never replace only fit$par while leaving random effects or sdreport stale.
+    model <- fit_with(glmmTMB::glmmTMBControl(optimizer = optim,
+      optArgs = list(method = "BFGS"), optCtrl = list(maxit = 1500, reltol = 1e-12)))
+    attempts[[2]] <- inspect(model, "upstream optim BFGS refit")
+    if (!accepted(attempts[[2]])) {
+      stop(structure(list(message = "Upstream glmmTMB refit failed the original status, curvature or score checks",
+        call = NULL, diagnostics = list(optimizer_attempts = attempts)),
+        class = c("reference_fit_error", "error", "condition")))
+    }
+    reference_assert(attempts[[2]]$objective <= attempts[[1]]$objective +
+      1e-8 * (1 + abs(attempts[[1]]$objective)), "Upstream refit increased the objective")
+  }
   gradient <- as.numeric(model$obj$gr(model$fit$par))
   reference_assert(
     model$fit$convergence == 0L && isTRUE(model$sdr$pdHess),
@@ -20,7 +46,8 @@ reference_glmm_fit <- function(...) {
   )
   list(model = model, diagnostics = list(
     converged = TRUE, pd_hessian = model$sdr$pdHess,
-    score_inf = max(abs(gradient)), objective = model$fit$objective, warnings = observed_warnings
+    score_inf = max(abs(gradient)), objective = model$fit$objective, warnings = observed_warnings,
+    optimizer_attempts = attempts
   ))
 }
 
@@ -82,7 +109,7 @@ reference_glmm_family_case <- function(engine, seed, family_name) {
   list(
     case = "glmm_family", family = family_name, backend = "actual pinned upstream glmmTMB",
     target = "maximum likelihood with declared response/dispersion link", diagnostics = result$diagnostics,
-    parameters = glmmTMB::fixef(result$model), predictions = prediction, future_covariates = future,
+    parameters = reference_coefficients(glmmTMB::fixef(result$model)), predictions = prediction, future_covariates = future,
     future_has_response = FALSE, simulation_replicates = 2L,
     simulation_summary = simulation_summary,
     simulation_conditioning = "upstream fitted-model simulate with new random draws, conditional on fitted parameters",
@@ -122,7 +149,7 @@ reference_glmm_zero_case <- function(engine, seed, hurdle = FALSE) {
   list(
     case = if (hurdle) "glmm_hurdle" else "glmm_zero_inflation",
     backend = "actual pinned upstream glmmTMB", diagnostics = result$diagnostics,
-    parameters = glmmTMB::fixef(result$model), conditional_mean = conditional,
+    parameters = reference_coefficients(glmmTMB::fixef(result$model)), conditional_mean = conditional,
     zero_probability = zero_probability, response_mean = response, future_has_response = FALSE,
     interpretation = if (hurdle) {
       "positive-count truncated component plus separate zero hurdle"
@@ -248,6 +275,16 @@ reference_glmm_ar_forecast_case <- function(engine, seed) {
     latent + diag(estimated_sigma2, length(times)),
     estimated_tau2 * estimated_phi^abs(outer(future_times, times, "-")), future_covariance
   )
+  truth_future <- reference_conditional(
+    y[seq_along(times)], 0.8 + 0.4 * x[seq_along(times)], 0.8 + 0.4 * future_x,
+    covariance, tau^2 * phi^abs(outer(future_times, times, "-")),
+    tau^2 * phi^abs(outer(future_times, future_times, "-")) + diag(sigma^2, length(future_times))
+  )
+  set.seed(seed + 200000L)
+  future_y <- truth_future$mean + as.numeric(t(chol(truth_future$covariance)) %*% rnorm(length(future_times)))
+  metrics <- reference_prediction_metrics(future_y, prediction)
+  metrics$primary_estimate <- estimated_phi
+  metrics$truth <- phi
   list(
     case = "glmm_ar_forecast", backend = "upstream glmmTMB fit plus independent Gaussian conditioning",
     diagnostics = result$diagnostics, fixed_effects = beta, latent_phi = estimated_phi,
@@ -255,6 +292,8 @@ reference_glmm_ar_forecast_case <- function(engine, seed) {
     forecast = prediction, future_time = future_times, future_covariates = future_x,
     future_has_response = FALSE,
     interpretation = "latent AR1 plus separate measurement noise; differs from directly observed AR1",
-    metrics = list(primary_estimate = estimated_phi, truth = phi), fixture = list(training = data)
+    metrics = metrics, fixture = list(training = data, future_time = future_times,
+      future_x = future_x, heldout_future_y = future_y,
+      truth = list(beta = c(0.8, 0.4), tau = tau, phi = phi, sigma = sigma))
   )
 }

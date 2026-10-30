@@ -1,7 +1,13 @@
 from pathlib import Path
 import json, textwrap, re
+import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+SOURCE_ROOT = ROOT
+if str(SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT))
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 SPECS = {}
 
 
@@ -51,7 +57,7 @@ def polish(value):
     return value
 
 
-def write_all(only=None):
+def write_all(only=None, markdown_only=False):
     for track in ["llm-theory"]:
         base = ROOT / "courses" / track
         plan = json.loads((ROOT / "docs/expansion/plans/llm-theory.json").read_text())
@@ -220,8 +226,14 @@ The question is: {e["prompt"]}
             from depth_reviews_foundations_expert import enrich_guide, polish_document_prose
 
             document = enrich_guide(id, document)
-            (ROOT / guide).write_text(document)
-            (ROOT / explanation).write_text(polish_document_prose(explanation_doc))
+            (ROOT / guide).write_text(canonical_markdown(document, root=SOURCE_ROOT, path=guide))
+            (ROOT / explanation).write_text(
+                canonical_markdown(
+                    polish_document_prose(explanation_doc), root=SOURCE_ROOT, path=explanation
+                )
+            )
+            if markdown_only:
+                continue
             if reading:
                 (ROOT / learner).write_text(
                     f"# {id}: {p['title']}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n"
@@ -265,6 +277,8 @@ The question is: {e["prompt"]}
                         verification_id=None,
                     )
                 )
+        if markdown_only:
+            continue
         inventory["lessons"].sort(key=lambda x: x["id"])
         (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
         (ROOT / "docs/expansion/plans/llm-theory.json").write_text(

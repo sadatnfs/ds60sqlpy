@@ -189,7 +189,13 @@ object Optimizer {
             finished = true
           case Some((next, proposed)) =>
             val step = next.indices.map(i => next(i) - point(i)).toVector
-            val delta = next.indices.map(i => proposed.gradient(i) - current.gradient(i)).toVector
+            // Equality-fixed coordinates do not belong to the optimization
+            // tangent space. Their changing gradients must not contaminate the
+            // free-coordinate inverse-Hessian secant update.
+            val delta = next.indices.map { i =>
+              if (bounds.lower(i) == bounds.upper(i)) 0.0
+              else proposed.gradient(i) - current.gradient(i)
+            }.toVector
             val curvature = dot(step, delta)
             val threshold = 1e-12 * math.max(1.0, norm(step) * norm(delta))
             if (curvature > threshold) {
@@ -204,6 +210,12 @@ object Optimizer {
               if (updated.forall(_.forall(_.isFinite))) inverse = updated
               else { inverse = identity(point.size); reset = true }
             } else { inverse = identity(point.size); reset = true }
+            val relativeStep = next.indices.filter(i => bounds.lower(i) != bounds.upper(i)).map { i =>
+              math.abs(step(i)) / math.max(1.0, math.max(math.abs(point(i)), math.abs(next(i))))
+            }
+            val fixedCoordinates = bounds.lower.indices.exists(i => bounds.lower(i) == bounds.upper(i))
+            val smallStepInFreeSpace = if (fixedCoordinates) relativeStep.forall(_ <= settings.stepTolerance)
+              else norm(step) <= settings.stepTolerance * math.max(1.0, norm(next))
             val lossChange = math.abs(current.value - proposed.value)
             val lossScale =
               math.max(1.0, math.max(math.abs(current.value), math.abs(proposed.value)))
@@ -222,8 +234,7 @@ object Optimizer {
               reset
             )
             if (
-              norm(step) <= settings.stepTolerance * math.max(1.0, norm(point)) &&
-              norm(projected) > settings.gradientTolerance
+              smallStepInFreeSpace && norm(projected) > settings.gradientTolerance
             ) {
               status = "step_stalled_without_stationarity"
               finished = true

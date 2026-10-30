@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "glmm_family",
+    "options": {
+      "family_name": "poisson"
+    },
+    "seed": 1729
+  },
+  "result": {
+    "case": "glmm_family",
+    "family": "poisson",
+    "backend": "actual pinned upstream glmmTMB",
+    "target": "maximum likelihood with declared response/dispersion link",
+    "diagnostics": {
+      "converged": true,
+      "pd_hessian": true,
+      "score_inf": 0.000722290045371721,
+      "objective": 944.89333970624,
+      "warnings": [],
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [0.35806635800895, 0.613397520914812],
+          "parameter_names": ["beta", "beta"],
+          "objective": 944.89333970624,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "gradient": [0.000722290045371721, -0.000421255105237982],
+          "score_inf": 0.000722290045371721,
+          "pd_hessian": true,
+          "warnings": []
+        }
+      ]
+    },
+    "parameters": {
+      "cond": {
+        "parameter_names": [
+          "(Intercept)",
+          "x"
+        ],
+        "values": [
+          0.35806635800895,
+          0.613397520914812
+        ]
+      },
+      "zi": {
+        "parameter_names": [],
+        "values": []
+      },
+      "disp": {
+        "parameter_names": [],
+        "values": []
+      }
+    },
+    "predictions": [0.774659916849234, 1.43056054647986, 2.6418089185103, 4.18502224613152],
+    "future_covariates": [
+      {
+        "x": -1,
+        "z": -0.5,
+        "exposure": 1,
+        "trials": 12
+      },
+      {
+        "x": 0,
+        "z": 0.5,
+        "exposure": 1,
+        "trials": 12
+      },
+      {
+        "x": 1,
+        "z": -0.5,
+        "exposure": 1,
+        "trials": 12
+      },
+      {
+        "x": 1.75,
+        "z": 0.5,
+        "exposure": 1,
+        "trials": 12
+      }
+    ],
+    "future_has_response": false,
+    "simulation_replicates": 2,
+    "simulation_summary": {
+      "sim_1": {
+        "shape": "scalar response vector",
+        "observations": 600,
+        "mean_response": 1.895
+      },
+      "sim_2": {
+        "shape": "scalar response vector",
+        "observations": 600,
+        "mean_response": 1.94833333333333
+      }
+    },
+    "simulation_conditioning": "upstream fitted-model simulate with new random draws, conditional on fitted parameters",
+    "metrics": {
+      "primary_estimate": 0.613397520914812,
+      "truth": 0.65
+    },
+    "fixture_sha256": "1b6f566f3c75bc337b4f1e06bf22a4ff7e26775da1742c8f23daa84a923fc946"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.697
+}

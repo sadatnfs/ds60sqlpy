@@ -188,6 +188,34 @@ object ContractChecks {
       specifiedBounds = Some(Bounds(Vector(2.0), Vector(2.0)))
     )
     assert(fixed.converged && fixed.parameters == Vector(2.0) && fixed.activeBounds == Vector(0))
+    val masked = minimize(
+      point => {
+        val x = point(0); val nuisance = point(1)
+        Evaluation(3 * math.pow(x - 5.0 / 3.0, 2) + 20 * nuisance * x * x + 0.5 * nuisance * nuisance,
+          Vector(6 * (x - 5.0 / 3.0) + 40 * nuisance * x, 20 * x * x + nuisance))
+      },
+      Vector(0.0, 0.0),
+      Settings(gradientTolerance = 1e-9, functionTolerance = 0.0),
+      Some(Bounds(Vector(Double.NegativeInfinity, 0.0), Vector(Double.PositiveInfinity, 0.0)))
+    )
+    assert(masked.converged && masked.iterations <= 3 && math.abs(masked.parameters.head - 5.0 / 3.0) < 1e-10,
+      "Equality-fixed gradients contaminated the free-coordinate secant update")
+    val maskedScale = minimize(
+      point => Evaluation(1.5 * math.pow(point.head - 1.0, 2), Vector(3 * (point.head - 1.0), 0.0)),
+      Vector(0.0, 1e200), Settings(gradientTolerance = 1e-9, functionTolerance = 0.0),
+      Some(Bounds(Vector(Double.NegativeInfinity, 1e200), Vector(Double.PositiveInfinity, 1e200)))
+    )
+    assert(maskedScale.converged && math.abs(maskedScale.parameters.head - 1.0) < 1e-10,
+      "A large fixed coordinate caused false free-coordinate step stalling")
+    var latestEvaluated = Vector.empty[Double]
+    var latestAccepted = Vector.empty[Double]
+    val acceptedState = minimize(
+      point => { latestEvaluated = point; Evaluation(point.head * point.head, Vector(2 * point.head)) },
+      Vector(2.0), Settings(maxEvaluations = 2), None,
+      onAccepted = (point, _) => { latestAccepted = point }
+    )
+    assert(!acceptedState.converged && latestAccepted == acceptedState.parameters && latestEvaluated != latestAccepted,
+      "Rejected Armijo metadata replaced the accepted point")
     val narrow = minimize(
       quadratic(1.0),
       Vector(0.0),

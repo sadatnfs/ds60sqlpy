@@ -1,6 +1,12 @@
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 BLOCKS = {
     5: [
         r"""lemmas={('saw','VERB'):'see',('saw','NOUN'):'saw'}
@@ -285,6 +291,9 @@ for n in range(5, 25):
             + "\n\n"
         )
         text = text.replace("## Run and inspect", snippet + "## Run and inspect")
+        text = canonical_markdown(
+            text, root=ROOT, path=guide.relative_to(ROOT).as_posix()
+        )
         guide.write_text(text)
     answer = ROOT / "courses/nlp/solutions" / f"{key}_solutions.md"
     a = answer.read_text()
@@ -292,6 +301,9 @@ for n in range(5, 25):
         before = text.split("## Worked examples", 1)[0]
         final_section = before.rsplit("\n## ", 1)[1].split("\n", 1)[1].strip()
         a += "\n## Mechanism review and counterexample\n\n" + final_section + "\n"
+        a = canonical_markdown(
+            a, root=ROOT, path=answer.relative_to(ROOT).as_posix()
+        )
         answer.write_text(a)
 
 RELATED = {
@@ -309,4 +321,7 @@ for n, body in RELATED.items():
             "## Ask an AI tutor about this lesson",
             "## Related local tracks\n\n" + body + "\n\n## Ask an AI tutor about this lesson",
         )
+    text = canonical_markdown(
+        text, root=ROOT, path=path.relative_to(ROOT).as_posix()
+    )
     path.write_text(text)

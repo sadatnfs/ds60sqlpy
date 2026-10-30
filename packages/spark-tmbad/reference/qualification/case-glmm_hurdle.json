@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "glmm_hurdle",
+    "options": {},
+    "seed": 1729
+  },
+  "result": {
+    "case": "glmm_hurdle",
+    "backend": "actual pinned upstream glmmTMB",
+    "diagnostics": {
+      "converged": true,
+      "pd_hessian": true,
+      "score_inf": 0.000523773427607164,
+      "objective": 1598.22707143138,
+      "warnings": [],
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [0.514088539068554, 0.643262417405995, -1.23775397229193, 0.49753258458933, 0.805690642127904, 0.299531752607752],
+          "parameter_names": ["beta", "beta", "betazi", "betazi", "betadisp", "betadisp"],
+          "objective": 1598.22707143138,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "gradient": [-0.000129393672848199, 0.000523773427607164, 0.000500320970829193, 0.000184116185344863, 1.60450579270427e-05, -0.000126107665966301],
+          "score_inf": 0.000523773427607164,
+          "pd_hessian": true,
+          "warnings": []
+        }
+      ]
+    },
+    "parameters": {
+      "cond": {
+        "parameter_names": [
+          "(Intercept)",
+          "x"
+        ],
+        "values": [
+          0.514088539068554,
+          0.643262417405995
+        ]
+      },
+      "zi": {
+        "parameter_names": [
+          "(Intercept)",
+          "z"
+        ],
+        "values": [
+          -1.23775397229193,
+          0.49753258458933
+        ]
+      },
+      "disp": {
+        "parameter_names": [
+          "(Intercept)",
+          "z"
+        ],
+        "values": [
+          0.805690642127904,
+          0.299531752607752
+        ]
+      }
+    },
+    "conditional_mean": [1.70576767238828, 2.30622931452878, 3.75526570733482],
+    "zero_probability": [0.184444591209556, 0.271112076170379, 0.184444591209556],
+    "response_mean": [1.39114805135615, 1.68098269694189, 3.06262725906219],
+    "future_has_response": false,
+    "interpretation": "positive-count truncated component plus separate zero hurdle",
+    "metrics": {
+      "primary_estimate": 0.643262417405995,
+      "truth": 0.6
+    },
+    "fixture_sha256": "143b46fabef78adf4c76b31e522c844369fc5a52f46720507cf110745cfc3fff"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.737
+}

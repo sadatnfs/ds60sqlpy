@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "scope": "native Linux ARM64 optional serial R/TMB/glmmTMB reference; prepared-base route",
+  "passed": true,
+  "cases": [
+    {
+      "case": "gaussian_random_slope",
+      "file": "case-gaussian_random_slope.json",
+      "sha256": "cff806d3f7ec4b8554131283b04e4f2828ded665b9455e29ecc6173e84032fbb",
+      "seed": 1729
+    },
+    {
+      "case": "gaussian_ridge",
+      "file": "case-gaussian_ridge.json",
+      "sha256": "22c276edc3ab7ea4ef471a9a60b58ed41e2e6e4f193f0415a4ded8bbb5a43554",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "file": "case-glmm_ar_forecast.json",
+      "sha256": "ed3f1c50a49fceaa66e1d917dea8f8f6178550035d4ea771755ce333ebeb4c17",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-ar1",
+      "file": "case-glmm_covariance-ar1.json",
+      "sha256": "89b6f9b36e0afad59c1e572d338b3267d278f735637598bf9c492fbec867c9cc",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-cs",
+      "file": "case-glmm_covariance-cs.json",
+      "sha256": "06268aed5b19f5c05cb23de17bb654a36888d242559c6b64dc74d5f1338dd689",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-diag",
+      "file": "case-glmm_covariance-diag.json",
+      "sha256": "84879e4a4c5eec359f66481ffaeb641e96fa21187d6778a4f878e89990b0ebb5",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-ou",
+      "file": "case-glmm_covariance-ou.json",
+      "sha256": "7302716ea43f2955d4e0264dc6ed7c416028016b4cb6da89acc46618cc557085",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-toep",
+      "file": "case-glmm_covariance-toep.json",
+      "sha256": "7516953d5a3c60e3761a33311d1c8462879517a3b9a59992ea93b28af60ef5f7",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_covariance-us",
+      "file": "case-glmm_covariance-us.json",
+      "sha256": "9eff397ace2661523aa32b898a8ac61aa24cd72fceaaafe9ac90724586faef7a",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-Gamma",
+      "file": "case-glmm_family-Gamma.json",
+      "sha256": "20eea6d259b622fd0c82d1fc261929ec2a78b2da0ad91be1e957f6d3417b8e06",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-beta",
+      "file": "case-glmm_family-beta.json",
+      "sha256": "faeac5d67e4e71436d7632d55122d14e530a8bf86a1a6732aecd41194105aeb1",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-betabinomial",
+      "file": "case-glmm_family-betabinomial.json",
+      "sha256": "e9a3f48a260d90a763a1caccc7aa54e8e10b0896a5fd964fc6e158808aeedf82",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-gaussian",
+      "file": "case-glmm_family-gaussian.json",
+      "sha256": "7374e3772ae60cec14ce5010d97e374228e306ffc13dce6c494e27254ded3567",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-lognormal",
+      "file": "case-glmm_family-lognormal.json",
+      "sha256": "069a7429a99a532128d526702e9f8254c91144f799b2f42ddfecbc14bd1ae69e",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-nbinom1",
+      "file": "case-glmm_family-nbinom1.json",
+      "sha256": "8187179b6ea1c360b39bd2ddd24b69630ca2407aae0a2f54867c63a0b8c464a6",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-nbinom2",
+      "file": "case-glmm_family-nbinom2.json",
+      "sha256": "375a694b6fd0a50d90212ac874b4c35974e28d94e43cfae88c31108f44807913",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-poisson",
+      "file": "case-glmm_family-poisson.json",
+      "sha256": "247533b8606342097d53e28899853519d2c77e9323a47cd3535186e9ab5b2d28",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_family-student",
+      "file": "case-glmm_family-student.json",
+      "sha256": "2259035bf7b00225fb659882c0bcc60c4e40dc18aef2ac375b94c0793f1986b4",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_hurdle",
+      "file": "case-glmm_hurdle.json",
+      "sha256": "743cce196681a30ea7f8e04d9712ba7c5e2536a167d19e1055b3e7d738b48a5e",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_map",
+      "file": "case-glmm_map.json",
+      "sha256": "d349c16d6ae02524506e88a2a1ad6670cc87caa42e2edba8559fa9866124f336",
+      "seed": 1729
+    },
+    {
+      "case": "glmm_zero_inflation",
+      "file": "case-glmm_zero_inflation.json",
+      "sha256": "9567b3953229c73424d14321d4d1a8da3221ecd31be07f118243656ee10c4fff",
+      "seed": 1729
+    },
+    {
+      "case": "nonlinear_growth",
+      "file": "case-nonlinear_growth.json",
+      "sha256": "3b572a5cb2515d4eaf1caa4172953b0d4d51201afa532ef4341ca8baa16f6f63",
+      "seed": 1729
+    },
+    {
+      "case": "panel_ar1",
+      "file": "case-panel_ar1.json",
+      "sha256": "89173f686cef29799b7175e4d02740a7521ffbab8684645bbf7396c727a6d845",
+      "seed": 1729
+    },
+    {
+      "case": "regularization_posterior",
+      "file": "case-regularization_posterior.json",
+      "sha256": "96874cb6b58402ed74065a41bfaf0c40cb3ebcc018a1f99798422594ef2f7487",
+      "seed": 1729
+    }
+  ],
+  "case_count": 24,
+  "preparation_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+  "preparation_manifest_file": "preparation-arm64-v1.json",
+  "source_identity": "source_sha256 in preparation manifest",
+  "not_qualified": [
+    "neutral default Docker base",
+    "AMD64",
+    "Spark execution",
+    "multi-host execution",
+    "generic posterior sampler",
+    "arbitrary upstream formulas"
+  ]
+}

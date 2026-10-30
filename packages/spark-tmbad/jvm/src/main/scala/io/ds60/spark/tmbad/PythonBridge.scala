@@ -96,7 +96,14 @@ object PythonBridge {
   ): DataFrame = {
     require(future != null, "Prediction/forecast requires a target DataFrame")
     val artifact = PreparedArtifact.parse(artifactJson)
-    val loaded = ModelDocument.parse(modelJson, artifact)
+    val loaded = PredictionBinding.fitted(ModelDocument.parse(modelJson, artifact))
+    sharedBindingOutput(history, future, loaded, artifact, optionsJson, forecast, conditional)
+  }
+
+  private def sharedBindingOutput(
+      history: Option[DataFrame], future: DataFrame, loaded: PredictionBinding,
+      artifact: PreparedArtifact, optionsJson: String, forecast: Boolean, conditional: Boolean
+  ): DataFrame = {
     val options = PredictionOptions.parse(optionsJson, loaded, forecast, conditional)
     val distributed = ArtifactFiles.prepare(future.sparkSession.sparkContext, artifact, getClass)
     history.foreach(frame =>
@@ -105,9 +112,11 @@ object PythonBridge {
         "History and future must belong to the same SparkContext"
       )
     )
-    if (!forecast && !conditional && loaded.model.fitKind == "rows")
+    val output = if (!forecast && !conditional && loaded.model.fitKind == "rows")
       Prediction.rows(future, loaded, distributed, options)
     else Prediction.joined(history, future, loaded, None, distributed, options, forecast)
+    if (loaded.declared.nonEmpty) ParameterDocument.annotate(output, loaded, options, forecast)
+    else output
   }
 
   def predict(
@@ -162,6 +171,60 @@ object PythonBridge {
       conditional = false
     )
 
+  def evaluateShared(
+      frame: DataFrame, specJson: String, artifactJson: String,
+      parametersJson: String, optionsJson: String
+  ): String = {
+    require(frame != null, "Evaluation requires a Spark DataFrame")
+    val artifact = PreparedArtifact.parse(artifactJson)
+    val model = artifact.model(Json.text(Json.read(specJson), "model_id", 64))
+    val spec = FitSpecification.parse(specJson, model)
+    val supplied = Json.read(parametersJson)
+    Json.fields(supplied, Set("parameters"))
+    val parameters = Json.numbers(supplied.get("parameters"), 64, "evaluation parameters")
+    model.validateTheta(parameters)
+    val rawOptions = Json.read(optionsJson)
+    Json.fields(rawOptions, Set.empty, Set("reduction", "l2_strength", "regularization", "fixed_parameters",
+      "batch_rows", "task_timeout_seconds", "max_partitions"))
+    val preparedOptions = Json.obj()
+    rawOptions.fields().forEachRemaining(field => preparedOptions.set[JsonNode](field.getKey, field.getValue))
+    Json.putNumbers(preparedOptions, "initial_parameters", parameters)
+    val options = FitOptions.parse(Json.write(preparedOptions), model)
+    val settings = options.extension.getOrElse(FitTarget.resolve(preparedOptions, model, options))
+    settings.plan.domain.check(parameters)
+    val distributed = ArtifactFiles.prepare(frame.sparkSession.sparkContext, artifact, getClass)
+    val objective = SharedObjective.open(frame, spec, model, distributed, options)
+    try {
+      val raw = objective.evaluateRaw(parameters)
+      val evaluated = settings.evaluate(raw, parameters, NamedRegularization.Scaling(settings.reduction, raw.weight))
+      EvaluationDocument.create(model, artifact, parameters, options, settings, evaluated)
+    } finally objective.close()
+  }
+
+  private def parameterOutput(
+      history: Option[DataFrame], future: DataFrame, parameterSetJson: String,
+      artifactJson: String, optionsJson: String, forecast: Boolean, conditional: Boolean
+  ): DataFrame = {
+    require(future != null, "Declared-parameter prediction requires a target DataFrame")
+    val artifact = PreparedArtifact.parse(artifactJson)
+    val binding = ParameterDocument.parse(parameterSetJson, artifact)
+    sharedBindingOutput(history, future, binding, artifact, optionsJson, forecast, conditional)
+  }
+
+  def predictAtParameters(frame: DataFrame, parameterSetJson: String,
+                          artifactJson: String, optionsJson: String): DataFrame =
+    parameterOutput(None, frame, parameterSetJson, artifactJson, optionsJson, forecast = false, conditional = false)
+
+  def predictConditionalAtParameters(history: DataFrame, targets: DataFrame, parameterSetJson: String,
+                                     artifactJson: String, optionsJson: String): DataFrame = {
+    require(history != null, "Conditional declared-parameter prediction requires history")
+    parameterOutput(Some(history), targets, parameterSetJson, artifactJson, optionsJson, forecast = false, conditional = true)
+  }
+
+  def forecastAtParameters(history: DataFrame, future: DataFrame, parameterSetJson: String,
+                           artifactJson: String, optionsJson: String): DataFrame =
+    parameterOutput(Option(history), future, parameterSetJson, artifactJson, optionsJson, forecast = true, conditional = false)
+
   private def independentOutput(
       history: Option[DataFrame],
       future: DataFrame,
@@ -186,7 +249,7 @@ object PythonBridge {
       )
     )
     val artifact = PreparedArtifact.parse(artifactJson)
-    val template = Prediction.groupModelTemplate(models, artifact)
+    val template = PredictionBinding.fitted(Prediction.groupModelTemplate(models, artifact))
     val options =
       PredictionOptions.parse(optionsJson, template, forecast, conditional, grouped = true)
     val distributed = ArtifactFiles.prepare(future.sparkSession.sparkContext, artifact, getClass)

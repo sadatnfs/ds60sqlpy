@@ -1,7 +1,14 @@
+import json
+import sys
+import textwrap
 from pathlib import Path
-import json, textwrap
 
 ROOT = Path(__file__).resolve().parents[4]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 BASE = ROOT / "courses/nlp"
 PLAN = json.loads((BASE / "track.json").read_text())["lessons"]
 
@@ -88,6 +95,8 @@ def author(n, overview, sections, examples, exercises, learner, solution, interv
         assert "\u2014" not in text
         path = ROOT / relative
         path.parent.mkdir(parents=True, exist_ok=True)
+        if path.suffix == ".md":
+            text = canonical_markdown(text, root=ROOT, path=relative)
         path.write_text(text)
     manifest = BASE / "lessons.json"
     data = json.loads(manifest.read_text())

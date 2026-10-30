@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from ._json import ContractError, dumps, loads
+from ._targets import effective_fixed_check, option_object, option_target, resolved_solver
 from .runtime import PreparedRuntime
 from .spec import ModelSpec
 
@@ -29,19 +30,38 @@ def _same_session(frame: Any, session: Any) -> None:
         raise ContractError("All input DataFrames must belong to the same Spark context")
 
 
-def _bridge(session: Any) -> Any:
+def _bridge(session: Any, *, required_method: str | None = None) -> Any:
     if getattr(session, "_jvm", None) is None:
         raise ContractError("An active classic SparkSession is required")
     jvm = session._jvm
     name = "io.ds60.spark.tmbad.PythonBridge"
     try:
         loader = jvm.java.lang.Thread.currentThread().getContextClassLoader()
-        jvm.java.lang.Class.forName(name, True, loader)
+        prepared_class = jvm.java.lang.Class.forName(name, True, loader)
     except Exception as exc:
         raise RuntimeError(
             "The prepared Spark/TMBad JVM adapter is unavailable. Start Spark with "
             "the matching JAR in --jars or spark.jars before creating the session."
         ) from exc
+    if required_method is not None:
+        arity = {
+            "evaluateShared": 5,
+            "predictAtParameters": 4,
+            "predictConditionalAtParameters": 5,
+            "forecastAtParameters": 5,
+        }[required_method]
+        try:
+            supported = any(
+                method.getName() == required_method and method.getParameterCount() == arity
+                for method in prepared_class.getMethods()
+            )
+        except Exception as exc:
+            raise RuntimeError("Cannot inspect the loaded Spark/TMBad adapter capability") from exc
+        if not supported:
+            raise RuntimeError(
+                f"The loaded Spark/TMBad JAR does not support {required_method}. "
+                "Start a new Spark session with the matching 0.2.0 adapter before using this API."
+            )
     return jvm.io.ds60.spark.tmbad.PythonBridge
 
 
@@ -97,10 +117,39 @@ class SparkTMBad:
         """Fit one parameter vector using all independent units in a DataFrame."""
         spec = self._spec(spec)
         session = _session(frame)
+        descriptor = self.runtime.descriptor(spec.model_id)
+        selected = option_object(options, descriptor)
         result = _bridge(session).fitShared(
-            frame._jdf, spec.to_json(), self.runtime.to_json(), _options(options)
+            frame._jdf, spec.to_json(), self.runtime.to_json(), dumps(selected)
         )
-        return FittedModel(self.runtime, loads(result))
+        fitted = FittedModel(self.runtime, loads(result))
+        if fitted.model["spec"] != spec.to_dict():
+            raise ContractError(
+                "Returned fitted model differs from the requested input specification"
+            )
+        extended = any(
+            name in selected for name in ("regularization", "fixed_parameters", "solver")
+        )
+        if fitted.model["schema_version"] != (2 if extended else 1):
+            raise ContractError(
+                "Returned fitted model target schema differs from the requested options"
+            )
+        if extended:
+            target = fitted.model["target"]
+            expected_initial = list(selected["initial_parameters"])
+            fixed = selected.get("fixed_parameters", {})
+            for index, name in enumerate(descriptor["parameter_names"]):
+                if name in fixed:
+                    expected_initial[index] = fixed[name]
+            if (
+                target["target_spec_digest"] != option_target(descriptor, selected)[2]
+                or target["effective_initial_parameters"] != expected_initial
+                or target["solver"] != resolved_solver(selected)
+            ):
+                raise ContractError(
+                    "Returned fitted target differs from the requested target/solver"
+                )
+        return fitted
 
     def fit_groups(
         self,
@@ -114,10 +163,44 @@ class SparkTMBad:
         if not spec.to_dict()["group_columns"]:
             raise ContractError("fit_groups requires explicit group_columns")
         session = _session(frame)
+        selected = option_object(options, self.runtime.descriptor(spec.model_id))
         result = _bridge(session).fitGroups(
-            frame._jdf, spec.to_json(), self.runtime.to_json(), _options(options)
+            frame._jdf, spec.to_json(), self.runtime.to_json(), dumps(selected)
         )
         return GroupedModels(self.runtime, _wrap(result, session))
+
+    def evaluate_shared(
+        self,
+        frame: Any,
+        spec: ModelSpec | Mapping[str, Any],
+        parameters: Any,
+        *,
+        options: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Evaluate one explicit point and return bounded value/score/ledger diagnostics.
+
+        No optimizer is run and no convergence flag is fabricated. L1 subgradient
+        intervals are reported separately from the smooth gradient.
+        """
+        from ._evaluation import validate_evaluation
+        from ._targets import parameters as parameter_vector
+
+        selected_spec = self._spec(spec)
+        descriptor = self.runtime.descriptor(selected_spec.model_id)
+        point = parameter_vector(parameters, descriptor)
+        selected_options = option_object(options, descriptor, evaluation=True)
+        effective_fixed_check(point, descriptor, selected_options.get("fixed_parameters", {}))
+        session = _session(frame)
+        raw = _bridge(session, required_method="evaluateShared").evaluateShared(
+            frame._jdf,
+            selected_spec.to_json(),
+            self.runtime.to_json(),
+            dumps({"parameters": point}),
+            dumps(selected_options),
+        )
+        return validate_evaluation(
+            loads(raw), self.runtime, selected_spec.model_id, point, selected_options
+        )
 
     def from_group_models(self, models: Any) -> GroupedModels:
         """Wrap persisted grouped model rows; JVM validation occurs on execution."""

@@ -1,0 +1,4005 @@
+{
+  "schema_version": 1,
+  "part": "rows",
+  "observed_utc": "2026-10-30T05:09:46.563764+00:00",
+  "nominal_precision_digits": 70,
+  "rendered_reference_significant_digits": 40,
+  "input_convention": "JSON numbers denote exact binary64 input values; row records also retain hex encodings",
+  "versions": {
+    "python": "3.12.13",
+    "mpmath": "1.3.0",
+    "scipy": "1.18.0"
+  },
+  "source_sha256": {
+    "generate.py": "99d5ad50b35596df11fda50465ddb8a876c4b3ba730a6e171dd4ebf220b5c935",
+    "reference_models.py": "6e45b9e409c40c11d22efd81c6c64f03dcac1e66760af26eb17ef48bf32e9114",
+    "nonlinear_reference.py": "a8d252e40464bd8a497fa5053c6604457e68cb1d1b94f375c75183c5c1e81080",
+    "cases.py": "38830d1e277aeb48f08037f56907203e33786267d2e4b447b450a1ce70a180e2",
+    "row_models.hpp": "10d434b9907d3b0c56a9bbc5f45be7352784f6127e1a2c0d9103e4c8eebc1e95",
+    "mixed_models.hpp": "f2aa4ccf0fe62cfe05c6a1532c13e421198acb0c3d51b69d1b5e901296f030f4"
+  },
+  "wall_seconds": 3.8949741249998624,
+  "budget_seconds": 45,
+  "native_compiled": false,
+  "native_executed": false,
+  "spark_executed": false,
+  "model_registered": false,
+  "results": [
+    {
+      "family": "binomial_logistic",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.2,
+        -0.3
+      ],
+      "rows": [
+        [
+          -1,
+          4,
+          1
+        ],
+        [
+          0,
+          6,
+          3
+        ],
+        [
+          2,
+          8,
+          7
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2,
+          0
+        ],
+        [
+          0.5,
+          10
+        ],
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p+2",
+            "0x1.0000000000000p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.8000000000000p+2",
+            "0x1.8000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+3",
+            "0x1.c000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "0x1.4000000000000p+3"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "12.25592500200788599841361411443233559013",
+      "gradient": [
+        "-5.939663245054379885391595040747181418116",
+        "-16.64784244840588201429282800153633908104"
+      ],
+      "hessian": [
+        [
+          "5.526736498806424221365560609435013974006",
+          "6.748329014922554908021098035064253021705"
+        ],
+        [
+          "6.748329014922554908021098035064253021705",
+          "16.31670257626424368487382841038058937369"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        },
+        {
+          "mean": "5.124973964842103478222366730781281609129",
+          "variance": "2.49843815081116446837475880443508767618"
+        },
+        {
+          "mean": "214165.0169574413986088345489332316914608",
+          "variance": "168298.3624690602367878936593359137874606"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 12.255925002007885,
+        "absolute_error": "1.07093400566434741089225808024672664791e-15",
+        "passed": true
+      }
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "changed_parameters_and_zero_weight",
+      "parameters": [
+        -0.7,
+        0.4
+      ],
+      "rows": [
+        [
+          -1,
+          4,
+          1
+        ],
+        [
+          0,
+          6,
+          3
+        ],
+        [
+          2,
+          8,
+          7
+        ]
+      ],
+      "weights": [
+        2,
+        0,
+        1
+      ],
+      "future": [
+        [
+          -2,
+          0
+        ],
+        [
+          0.5,
+          10
+        ],
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.6666666666666p-1",
+          "0x1.999999999999ap-2"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p+2",
+            "0x1.0000000000000p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.8000000000000p+2",
+            "0x1.8000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+3",
+            "0x1.c000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+1",
+          "0x0.0p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "0x1.4000000000000p+3"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "4.901825617592396228574382677113700548454",
+      "gradient": [
+        "-2.802247344929420734410358743601275202267",
+        "-5.598252155576019067632003378864831507808"
+      ],
+      "hessian": [
+        [
+          "3.493967357923300441674691703424561523588",
+          "2.491057606706106759485021831313370234825"
+        ],
+        [
+          "2.491057606706106759485021831313370234825",
+          "9.478992322552707642834405238162493282"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        },
+        {
+          "mean": "3.775406687981454484064260421841935590728",
+          "variance": "2.350037122015944922643466384546654332044"
+        },
+        {
+          "mean": "785834.9830425586387609088550389628497383",
+          "variance": "168298.3624690602154247337149775956454107"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 4.9018256175923955,
+        "absolute_error": "6.832444185976852363741834196785349631426e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "zero_trials",
+      "parameters": [
+        0.2,
+        -0.3
+      ],
+      "rows": [
+        [
+          -5,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          -5,
+          0
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2"
+        ],
+        "rows": [
+          [
+            "-0x1.4000000000000p+2",
+            "0x0.0p+0",
+            "0x0.0p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.4000000000000p+2",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x0.0p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "0.0",
+      "gradient": [
+        "0.0",
+        "0.0"
+      ],
+      "hessian": [
+        [
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        },
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "extreme_probability_zero_successes",
+      "parameters": [
+        -10,
+        -2
+      ],
+      "rows": [
+        [
+          5,
+          1000000,
+          0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.4000000000000p+3",
+          "-0x1.0000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x0.0p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "0.002061153620314380703238982798877915235603",
+      "gradient": [
+        "0.002061153618190203581430862129474592690752",
+        "0.01030576809095101790715431064737296345376"
+      ],
+      "hessian": [
+        [
+          "0.002061153613941849343652294605392857098312",
+          "0.01030576806970924671826147302696428549156"
+        ],
+        [
+          "0.01030576806970924671826147302696428549156",
+          "0.0515288403485462335913073651348214274578"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.002061153618190203581430862129474592690752",
+          "variance": "0.002061153613941849343652294605392857098312"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "binomial_logistic",
+      "case": "extreme_probability_all_successes",
+      "parameters": [
+        10,
+        2
+      ],
+      "rows": [
+        [
+          5,
+          1000000,
+          1000000
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.4000000000000p+3",
+          "0x1.0000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.e848000000000p+19"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "0.002061153620314380703238982798877915235603",
+      "gradient": [
+        "-0.002061153618190203581430862129474592690752",
+        "-0.01030576809095101790715431064737296345376"
+      ],
+      "hessian": [
+        [
+          "0.002061153613941849343652294605392857098312",
+          "0.01030576806970924671826147302696428549156"
+        ],
+        [
+          "0.01030576806970924671826147302696428549156",
+          "0.0515288403485462335913073651348214274578"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "999999.9979388463818097964185691378705254",
+          "variance": "0.002061153613941849343652294605392857098312"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.2,
+        -0.3,
+        2.0794415416798357
+      ],
+      "rows": [
+        [
+          -1,
+          4,
+          1
+        ],
+        [
+          0,
+          6,
+          3
+        ],
+        [
+          2,
+          8,
+          7
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2,
+          0
+        ],
+        [
+          0.5,
+          10
+        ],
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2",
+          "0x1.0a2b23f3bab73p+1"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p+2",
+            "0x1.0000000000000p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.8000000000000p+2",
+            "0x1.8000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+3",
+            "0x1.c000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "0x1.4000000000000p+3"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "9.305846282293019891751460505511643105041",
+      "gradient": [
+        "-2.892535016287054645486321058440788252522",
+        "-9.253447907244839478198034367803929036652",
+        "1.393522574942929861410018805680666303187"
+      ],
+      "hessian": [
+        [
+          "2.587415877357816793849106699309081942305",
+          "2.28204334131364583957680231990298936782",
+          "-1.358745722121727465116783678371836503745"
+        ],
+        [
+          "2.28204334131364583957680231990298936782",
+          "6.432110905432657933497250056254089060477",
+          "-3.569086365909777095794340520703502985369"
+        ],
+        [
+          "-1.358745722121727465116783678371836503745",
+          "-3.569086365909777095794340520703502985369",
+          "0.1664526212437547640948409101472205312507"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        },
+        {
+          "mean": "5.124973964842103478222366730781281609129",
+          "variance": "4.996876301622329337818146106795136082934"
+        },
+        {
+          "mean": "214165.0169574413986088345489332316914608",
+          "variance": "18699967650.66222403181295841377892707026"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 9.305846282293016,
+        "absolute_error": "3.533484592167988450937759374328508081187e-15",
+        "passed": true
+      }
+    },
+    {
+      "family": "beta_binomial",
+      "case": "changed_parameters_and_zero_weight",
+      "parameters": [
+        -0.7,
+        0.4,
+        -1.6094379124341003
+      ],
+      "rows": [
+        [
+          -1,
+          4,
+          1
+        ],
+        [
+          0,
+          6,
+          3
+        ],
+        [
+          2,
+          8,
+          7
+        ]
+      ],
+      "weights": [
+        2,
+        0,
+        1
+      ],
+      "future": [
+        [
+          -2,
+          0
+        ],
+        [
+          0.5,
+          10
+        ],
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.6666666666666p-1",
+          "0x1.999999999999ap-2",
+          "-0x1.9c041f7ed8d33p+0"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p+2",
+            "0x1.0000000000000p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.8000000000000p+2",
+            "0x1.8000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+3",
+            "0x1.c000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+1",
+          "0x0.0p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "0x1.4000000000000p+3"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "9.35928309081806918293632833766214297527",
+      "gradient": [
+        "-0.9660362574236518296132301508101177683594",
+        "0.7709651930619100546788268259030799266062",
+        "-2.536241324932176627012245329804560480957"
+      ],
+      "hessian": [
+        [
+          "1.309939441901342199226713385359898153468",
+          "0.2130492187576418107453469503005513325608",
+          "-0.01922388486912206132946027885665535381177"
+        ],
+        [
+          "0.2130492187576418107453469503005513325608",
+          "2.832928102560326209198773721020347639497",
+          "-0.3057242996702065533928677105157345885106"
+        ],
+        [
+          "-0.01922388486912206132946027885665535381177",
+          "-0.3057242996702065533928677105157345885106",
+          "0.3961754886619286729658735405367371072009"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        },
+        {
+          "mean": "3.775406687981454484064260421841935590728",
+          "variance": "19.97531553713553156986275840124184601708"
+        },
+        {
+          "mean": "785834.9830425586387609088550389628497383",
+          "variance": "140248663440.6105888614515133170706731843"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 9.359283090818069,
+        "absolute_error": "9.884270611465371893161479579302989870779e-17",
+        "passed": true
+      }
+    },
+    {
+      "family": "beta_binomial",
+      "case": "zero_trials",
+      "parameters": [
+        0.2,
+        -0.3,
+        2.0794415416798357
+      ],
+      "rows": [
+        [
+          -5,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          -5,
+          0
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2",
+          "0x1.0a2b23f3bab73p+1"
+        ],
+        "rows": [
+          [
+            "-0x1.4000000000000p+2",
+            "0x0.0p+0",
+            "0x0.0p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.4000000000000p+2",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x0.0p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "0.0",
+      "gradient": [
+        "0.0",
+        "0.0",
+        "0.0"
+      ],
+      "hessian": [
+        [
+          "0.0",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        },
+        {
+          "mean": "0.0",
+          "variance": "0.0"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "extreme_probability_zero_successes",
+      "parameters": [
+        -10,
+        -2,
+        6
+      ],
+      "rows": [
+        [
+          5,
+          1000000,
+          0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.4000000000000p+3",
+          "-0x1.0000000000000p+1",
+          "0x1.8000000000000p+2"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x0.0p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "0.0000065001874528142970161952991713431856004",
+      "gradient": [
+        "0.000006500187440274083725913923553573846624159",
+        "0.0000325009372013704186295696177678692331208",
+        "0.000005667962634614443653363488949334317353294"
+      ],
+      "hessian": [
+        [
+          "0.000006500187415193657194690663591401782937605",
+          "0.00003250093707596828597345331795700891468803",
+          "0.000005667962623788164273205979823682739067201"
+        ],
+        [
+          "0.00003250093707596828597345331795700891468803",
+          "0.0001625046853798414298672665897850445734401",
+          "0.00002833981311894082136602989911841369533601"
+        ],
+        [
+          "0.000005667962623788164273205979823682739067201",
+          "0.00002833981311894082136602989911841369533601",
+          "0.000004837105288537705345494242623119395446658"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.002061153618190203581430862129474592690752",
+          "variance": "5.098512212371855172538289113931518186265"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "beta_binomial",
+      "case": "extreme_probability_all_successes",
+      "parameters": [
+        10,
+        2,
+        6
+      ],
+      "rows": [
+        [
+          5,
+          1000000,
+          1000000
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          1000000
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.4000000000000p+3",
+          "0x1.0000000000000p+1",
+          "0x1.8000000000000p+2"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.e848000000000p+19"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "0.0000065001874528142970161952991713431856004",
+      "gradient": [
+        "-0.000006500187440274083725913923553573846624159",
+        "-0.0000325009372013704186295696177678692331208",
+        "0.000005667962634614443653363488949334317353294"
+      ],
+      "hessian": [
+        [
+          "0.000006500187415193657194690663591401782937605",
+          "0.00003250093707596828597345331795700891468803",
+          "-0.000005667962623788164273205979823682739067201"
+        ],
+        [
+          "0.00003250093707596828597345331795700891468803",
+          "0.0001625046853798414298672665897850445734401",
+          "-0.00002833981311894082136602989911841369533601"
+        ],
+        [
+          "-0.000005667962623788164273205979823682739067201",
+          "-0.00002833981311894082136602989911841369533601",
+          "0.000004837105288537705345494242623119395446658"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "999999.9979388463818097964185691378705254",
+          "variance": "5.098512212371855172538289113931518186265"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "beta_regression",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.2,
+        -0.3,
+        1.6094379124341003
+      ],
+      "rows": [
+        [
+          -1,
+          0.2
+        ],
+        [
+          0,
+          0.7
+        ],
+        [
+          2,
+          0.9
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2
+        ],
+        [
+          0.5
+        ],
+        [
+          3
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2",
+          "0x1.9c041f7ed8d33p+0"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.6666666666666p-1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.ccccccccccccdp-1"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p-1"
+          ],
+          [
+            "0x1.8000000000000p+1"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "5.36729262845726996345060703379451535838",
+      "gradient": [
+        "-4.480689959694892406837562862897859359461",
+        "-15.28365265456778993867796846483477157227",
+        "7.782705790432534165109815632638419865057"
+      ],
+      "hessian": [
+        [
+          "3.422871554185317981084305393277404413846",
+          "2.538475566591710010607989475545822996307",
+          "-4.418101610221376772613516395191127843732"
+        ],
+        [
+          "2.538475566591710010607989475545822996307",
+          "7.786337240105810915175567764447892507965",
+          "-14.63108271730589973926070956014874106784"
+        ],
+        [
+          "-4.418101610221376772613516395191127843732",
+          "-14.63108271730589973926070956014874106784",
+          "9.886877104078167344175584463947011326656"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.6899744811276124402589993592743306654945",
+          "variance": "0.0356516160867157402185861220956522362241"
+        },
+        {
+          "mean": "0.5124973964842103478222366730781281609129",
+          "variance": "0.04164063584685274435981683280353006688031"
+        },
+        {
+          "mean": "0.3318122278318339033152411418025126235647",
+          "variance": "0.03695214554885151181049571236712153913594"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 5.367292628457269,
+        "absolute_error": "6.755723452129156818260464458996093303618e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "beta_regression",
+      "case": "changed_low_precision",
+      "parameters": [
+        -0.7,
+        0.4,
+        -1.3862943611198906
+      ],
+      "rows": [
+        [
+          -1,
+          0.2
+        ],
+        [
+          0,
+          0.7
+        ],
+        [
+          2,
+          0.9
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          -2
+        ],
+        [
+          0.5
+        ],
+        [
+          3
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.6666666666666p-1",
+          "0x1.999999999999ap-2",
+          "-0x1.62e42fefa39efp+0"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.6666666666666p-1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.ccccccccccccdp-1"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p-1"
+          ],
+          [
+            "0x1.8000000000000p+1"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "3.530487452945485313407513411676823812173",
+      "gradient": [
+        "-0.9194953639197143161481108459397586844104",
+        "0.2718460091058404221456885071682577840555",
+        "-2.445808122556102028423774085466767925656"
+      ],
+      "hessian": [
+        [
+          "1.35962409087169657804374843790625206071",
+          "0.6233764778558796644975724663964644735255",
+          "-0.1440039956183571260364896985028003226255"
+        ],
+        [
+          "0.6233764778558796644975724663964644735255",
+          "2.474621058781696826046016682373076257477",
+          "-0.3198775846601592361585305453111748199336"
+        ],
+        [
+          "-0.1440039956183571260364896985028003226255",
+          "-0.3198775846601592361585305453111748199336",
+          "0.4711254425726907270748118386668393259818"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.1824255238063563403927828213437517524538",
+          "variance": "0.1193171616562662840944183940426162824801"
+        },
+        {
+          "mean": "0.3775406687981454484064260421841935590728",
+          "variance": "0.1880029697612755920675265586896188116415"
+        },
+        {
+          "mean": "0.6224593312018545907295537816049120223237",
+          "variance": "0.1880029697612755843994210944488377965247"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 3.530487452945486,
+        "absolute_error": "6.243533365809513854807160574903091516493e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "beta_regression",
+      "case": "near_response_boundaries",
+      "parameters": [
+        0,
+        0,
+        6
+      ],
+      "rows": [
+        [
+          -5,
+          1e-12
+        ],
+        [
+          5,
+          0.999999999999
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          -5
+        ],
+        [
+          5
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x0.0p+0",
+          "0x0.0p+0",
+          "0x1.8000000000000p+2"
+        ],
+        "rows": [
+          [
+            "-0x1.4000000000000p+2",
+            "0x1.19799812dea11p-40"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.fffffffffdcd1p-1"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.4000000000000p+2"
+          ],
+          [
+            "0x1.4000000000000p+2"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "10529.84625900667683465213136981919944706",
+      "gradient": [
+        "-0.00223115939328359875074975338622384776853",
+        "-27867.88493522431250438288653446449154918",
+        "10586.88167318587144273953908310965935152"
+      ],
+      "hessian": [
+        [
+          "202.215222993031860118799912610732659174",
+          "0.0",
+          "-0.00223115939328359875074975338622384776853"
+        ],
+        [
+          "0.0",
+          "5055.38057482579650296999781526831647935",
+          "-27867.88493522431250438288653446449154918"
+        ],
+        [
+          "-0.00223115939328359875074975338622384776853",
+          "-27867.88493522431250438288653446449154918",
+          "10587.88415192281841007216492470933150184"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.5",
+          "variance": "0.0006181557891586935835149768430639406127733"
+        },
+        {
+          "mean": "0.5",
+          "variance": "0.0006181557891586935835149768430639406127733"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "beta_regression",
+      "case": "extreme_mean_and_precision",
+      "parameters": [
+        -10,
+        -2,
+        -4
+      ],
+      "rows": [
+        [
+          5,
+          1e-12
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5
+        ],
+        [
+          -5
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.4000000000000p+3",
+          "-0x1.0000000000000p+1",
+          "-0x1.0000000000000p+2"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.19799812dea11p-40"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2"
+          ],
+          [
+            "-0x1.4000000000000p+2"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "-3.631021110765236848023556157318502967353",
+      "gradient": [
+        "-0.9999999948357069417269279863480860965081",
+        "-4.999999974178534708634639931740430482541",
+        "-0.9999999989591035233604814755662003616182"
+      ],
+      "hessian": [
+        [
+          "0.000000005164293045485605208904673176713811880266",
+          "0.00000002582146522742802604452336588356905940133",
+          "0.000000001040878158859817480478748797446549867811"
+        ],
+        [
+          "0.00000002582146522742802604452336588356905940133",
+          "0.0000001291073261371401302226168294178452970067",
+          "0.000000005204390794299087402393743987232749339053"
+        ],
+        [
+          "0.000000001040878158859817480478748797446549867811",
+          "0.000000005204390794299087402393743987232749339053",
+          "0.000000001038710141697402325930795770494628199479"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.000000002061153618190203581430862129474592690752",
+          "variance": "0.000000002024081272277367435740982481741441480757"
+        },
+        {
+          "mean": "0.5",
+          "variance": "0.2455034475094771104933017155126153937819"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.1,
+        0.2,
+        -0.5108256237659907
+      ],
+      "rows": [
+        [
+          -1,
+          0.4
+        ],
+        [
+          0,
+          1.3
+        ],
+        [
+          2,
+          2.5
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2
+        ],
+        [
+          0.5
+        ],
+        [
+          3
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-4",
+          "0x1.999999999999ap-3",
+          "-0x1.058aefa811452p-1"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.999999999999ap-2"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.4cccccccccccdp+0"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.4000000000000p+1"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p-1"
+          ],
+          [
+            "0x1.8000000000000p+1"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "3.901017468004840054094704491059890962904",
+      "gradient": [
+        "-0.2707579558552794960239025282546410835345",
+        "-6.892926831585487069605373051852995992268",
+        "0.6497011582768953597041521724324442992881"
+      ],
+      "hessian": [
+        [
+          "9.722222222222222971432526803052549022433",
+          "8.333333333333333975513594402616470590656",
+          "0.5415159117105589920478050565092821670691"
+        ],
+        [
+          "8.333333333333333975513594402616470590656",
+          "25.00000000000000192654078320784941177197",
+          "13.78585366317097413921074610370599198454"
+        ],
+        [
+          "0.5415159117105589920478050565092821670691",
+          "13.78585366317097413921074610370599198454",
+          "5.700597683446209280591695655135111401424"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.8869204367171574884548164528279608321627",
+          "variance": "0.3408689905128222101712825881937658763972"
+        },
+        {
+          "mean": "1.462284589434224527502765339464294345476",
+          "variance": "0.9265779827961833523157868261283620810068"
+        },
+        {
+          "mean": "2.410899706417209911131342078374071869161",
+          "variance": "2.518700093285103182364401214018653529552"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 3.901017468004839,
+        "absolute_error": "1.214504384214730597115819742654183084092e-15",
+        "passed": true
+      }
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "changed_small_sigma",
+      "parameters": [
+        -0.5,
+        0.1,
+        -2
+      ],
+      "rows": [
+        [
+          -1,
+          0.4
+        ],
+        [
+          0,
+          1.3
+        ],
+        [
+          2,
+          2.5
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          -2
+        ],
+        [
+          0.5
+        ],
+        [
+          3
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.0000000000000p-1",
+          "0x1.999999999999ap-4",
+          "-0x1.0000000000000p+1"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.999999999999ap-2"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.4cccccccccccdp+0"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.4000000000000p+1"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p-1"
+          ],
+          [
+            "0x1.8000000000000p+1"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "56.00162258352402295787925221438221191386",
+      "gradient": [
+        "-90.76201352113354979194628557196573042419",
+        "-150.0833365585339708171216089802760471525",
+        "-114.9648854388850271816618146740435261434"
+      ],
+      "hessian": [
+        [
+          "163.7944500994327172343307836085826352084",
+          "54.59815003314423907811026120286087840279",
+          "181.5240270422670995838925711439314608484"
+        ],
+        [
+          "54.59815003314423907811026120286087840279",
+          "272.990750165721195390551306014304392014",
+          "300.1666731170679416342432179605520943051"
+        ],
+        [
+          "181.5240270422670995838925711439314608484",
+          "300.1666731170679416342432179605520943051",
+          "235.9297708777700543633236293480870522868"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.501153829279543081509074705868912913486",
+          "variance": "0.00464245218547177495715457469185950235454"
+        },
+        {
+          "mean": "0.6434942544653225727526788845472689819404",
+          "variance": "0.007654109666395612014406128228904130236743"
+        },
+        {
+          "mean": "0.826262978226003379078351341549897958252",
+          "variance": "0.01261949341525790772959013828804781477345"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 56.001622583524025,
+        "absolute_error": "1.931932446598609168777666556957299620099e-15",
+        "passed": true
+      }
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "large_data_scale_moments",
+      "parameters": [
+        12,
+        3,
+        2
+      ],
+      "rows": [
+        [
+          5,
+          1000000000000.0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1",
+          "0x1.0000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.d1a94a2000000p+39"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "30.55360617972542954418590109219731584117",
+      "gradient": [
+        "-0.01155755489051335706001650762449726844846",
+        "-0.05778777445256678530008253812248634224232",
+        "0.9927069388155828116206522008413445798115"
+      ],
+      "hessian": [
+        [
+          "0.01831563888873418029371802127324124221191",
+          "0.09157819444367090146859010636620621105956",
+          "0.02311510978102671412003301524899453689693"
+        ],
+        [
+          "0.09157819444367090146859010636620621105956",
+          "0.4578909722183545073429505318310310552978",
+          "0.1155755489051335706001650762449726844846"
+        ],
+        [
+          "0.02311510978102671412003301524899453689693",
+          "0.1155755489051335706001650762449726844846",
+          "0.0145861223688343767586955983173108403771"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "381758444250087574798595.4724977949429193",
+          "variance": "7.503304749099913854401183226725743429277e+70"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "lognormal_regression",
+      "case": "tiny_positive_response",
+      "parameters": [
+        -12,
+        -3,
+        -4
+      ],
+      "rows": [
+        [
+          5,
+          1e-300
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.8000000000000p+3",
+          "-0x1.8000000000000p+1",
+          "-0x1.0000000000000p+2"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.56e1fc2f8f359p-997"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "656701297.3479176538263274445719767671256",
+      "gradient": [
+        "1978686.96149101967508640240756420175928",
+        "9893434.807455098375432012037821008796401",
+        "-1313403981.409014037670719766259983201641"
+      ],
+      "hessian": [
+        [
+          "2980.957987041728274743592099452888673756",
+          "14904.78993520864137371796049726444336878",
+          "-3957373.92298203935017280481512840351856"
+        ],
+        [
+          "14904.78993520864137371796049726444336878",
+          "74523.9496760432068685898024863222168439",
+          "-19786869.6149101967508640240756420175928"
+        ],
+        [
+          "-3957373.92298203935017280481512840351856",
+          "-19786869.6149101967508640240756420175928",
+          "2626807964.818028075341439532519966403282"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.000000000001879844098817706899888051619098804468222",
+          "variance": "1.185661337310727443370775844314179099557e-27"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "student_t_regression",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.2,
+        -0.3,
+        -0.35667494393873245,
+        1.3862943611198906
+      ],
+      "rows": [
+        [
+          -1,
+          -0.2
+        ],
+        [
+          0,
+          0.7
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2
+        ],
+        [
+          0.5
+        ],
+        [
+          3
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2",
+          "-0x1.6d3c324e13f50p-2",
+          "0x1.62e42fefa39efp+0"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "-0x1.999999999999ap-3"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.6666666666666p-1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p-1"
+          ],
+          [
+            "0x1.8000000000000p+1"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "analytic location/scale/df derivatives with exact transformed-coordinate chain rule",
+      "value": "19.5285739492688812177849830706351456299",
+      "gradient": [
+        "-1.475158100037249068654944809745839437101",
+        "-6.138851802403204426865037557045044630734",
+        "-10.49205168019218934361642256929660216228",
+        "5.191741791350704095626450702158686352611"
+      ],
+      "hessian": [
+        [
+          "2.02668650780111953301645268870819839427",
+          "-2.17021903279860047994156635490207750352",
+          "-1.006377842016429954300113494253096937582",
+          "-1.178406766407714192532260997521262686644"
+        ],
+        [
+          "-2.17021903279860047994156635490207750352",
+          "0.03273977696839690108841932467742512973002",
+          "3.311797305174144192404197660822728590651",
+          "-2.403982880600925841412258859338596426368"
+        ],
+        [
+          "-1.006377842016429954300113494253096937582",
+          "3.311797305174144192404197660822728590651",
+          "4.549489986872519577752063429416816206013",
+          "-6.478961440676125344474137010663653189636"
+        ],
+        [
+          "-1.178406766407714192532260997521262686644",
+          "-2.403982880600925841412258859338596426368",
+          "-6.478961440676125344474137010663653189636",
+          "3.602570667317597976320317118870007972655"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.7999999999999999888977697537484345957637",
+          "variance": "0.7349999999999999110110165342500899943039"
+        },
+        {
+          "mean": "0.05000000000000001665334536937734810635448",
+          "variance": "0.7349999999999999110110165342500899943039"
+        },
+        {
+          "mean": "-0.6999999999999999555910790149937383830547",
+          "variance": "0.7349999999999999110110165342500899943039"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 19.528573949268882,
+        "absolute_error": "6.863327508679843488082696265190805415569e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "student_t_regression",
+      "case": "changed_near_two_df",
+      "parameters": [
+        1,
+        0.5,
+        -1,
+        -4
+      ],
+      "rows": [
+        [
+          -1,
+          -0.2
+        ],
+        [
+          0,
+          0.7
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          -2
+        ],
+        [
+          0.5
+        ],
+        [
+          3
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "-0x1.0000000000000p+0",
+          "-0x1.0000000000000p+2"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "-0x1.999999999999ap-3"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.6666666666666p-1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p-1"
+          ],
+          [
+            "0x1.8000000000000p+1"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "analytic location/scale/df derivatives with exact transformed-coordinate chain rule",
+      "value": "7.415997349461706473684667625490912332892",
+      "gradient": [
+        "4.285535735960770563426484600034324179352",
+        "-4.721493990612037881617874246534254098362",
+        "-2.615431915536187463599192451264928643646",
+        "0.0157463041604058863287159184858377382102"
+      ],
+      "hessian": [
+        [
+          "2.761630215182375880574556880244655468642",
+          "0.5112157685928329312847707841626982324977",
+          "-5.675324985862972632201611029591208721612",
+          "0.0002543622404281698602687354575249172725548"
+        ],
+        [
+          "0.5112157685928329312847707841626982324977",
+          "-2.349103351275926459543152324694614306447",
+          "2.096914933954572799056011925974106102745",
+          "-0.01913635449806066734765377904899162837616"
+        ],
+        [
+          "-5.675324985862972632201611029591208721612",
+          "2.096914933954572799056011925974106102745",
+          "2.685177589489995187995836922091703396455",
+          "-0.02189175986493886638932681636023344055575"
+        ],
+        [
+          "0.0002543622404281698602687354575249172725548",
+          "-0.01913635449806066734765377904899162837616",
+          "-0.02189175986493886638932681636023344055575",
+          "0.01577514261863140378130349139712392350834"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.0",
+          "variance": "14.91344748109791314635485441612250002977"
+        },
+        {
+          "mean": "1.25",
+          "variance": "14.91344748109791314635485441612250002977"
+        },
+        {
+          "mean": "2.5",
+          "variance": "14.91344748109791314635485441612250002977"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 7.415997349461707,
+        "absolute_error": "1.59948516912266275748849175205644548075e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "student_t_regression",
+      "case": "finite_extreme_intercept",
+      "parameters": [
+        1e+200,
+        0,
+        0,
+        0
+      ],
+      "rows": [
+        [
+          1,
+          0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.4e718d7d7625ap+664",
+          "0x0.0p+0",
+          "0x0.0p+0",
+          "0x0.0p+0"
+        ],
+        "rows": [
+          [
+            "0x1.0000000000000p+0",
+            "0x0.0p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "analytic location/scale/df derivatives with exact transformed-coordinate chain rule",
+      "value": "1840.871738667523837420958979972043904473",
+      "gradient": [
+        "4.000000000000000121067511149958557026438e-200",
+        "4.000000000000000121067511149958557026438e-200",
+        "-3.0",
+        "459.2745652739151366182165584094637633013"
+      ],
+      "hessian": [
+        [
+          "-4.000000000000000242135022299917117717211e-400",
+          "-4.000000000000000242135022299917117717211e-400",
+          "-2.400000000000000217921520069925409243392e-599",
+          "1.000000000000000030266877787489639256609e-200"
+        ],
+        [
+          "-4.000000000000000242135022299917117717211e-400",
+          "-4.000000000000000242135022299917117717211e-400",
+          "-2.400000000000000217921520069925409243392e-599",
+          "1.000000000000000030266877787489639256609e-200"
+        ],
+        [
+          "-2.400000000000000217921520069925409243392e-599",
+          "-2.400000000000000217921520069925409243392e-599",
+          "2.400000000000000145281013379950270630326e-399",
+          "-1.0"
+        ],
+        [
+          "1.000000000000000030266877787489639256609e-200",
+          "1.000000000000000030266877787489639256609e-200",
+          "-1.0",
+          "459.1803656406725831697860993261201092292"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "9.999999999999999697331222125103616594745e+199",
+          "variance": "3.0"
+        },
+        {
+          "mean": "9.999999999999999697331222125103616594745e+199",
+          "variance": "3.0"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "student_t_regression",
+      "case": "large_df_small_scale",
+      "parameters": [
+        0.2,
+        -0.3,
+        -10,
+        6
+      ],
+      "rows": [
+        [
+          5,
+          1000000000000.0
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          -5
+        ],
+        [
+          5
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.999999999999ap-3",
+          "-0x1.3333333333333p-2",
+          "-0x1.4000000000000p+3",
+          "0x1.8000000000000p+2"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.d1a94a2000000p+39"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.4000000000000p+2"
+          ],
+          [
+            "0x1.4000000000000p+2"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "analytic location/scale/df derivatives with exact transformed-coordinate chain rule",
+      "value": "14064.95873743811993093204807135470283968",
+      "gradient": [
+        "-0.0000000004064287934922067651768473117753923417265",
+        "-0.000000002032143967461033825884236558876961708633",
+        "-405.4287934927351226083871805430486469675",
+        "13767.94099300189398261343059462736045921"
+      ],
+      "hessian": [
+        [
+          "-4.064287934916784077453081298717177721451e-22",
+          "-2.032143967458392038726540649358588860726e-21",
+          "6.792652768368794845976864205416612034881e-40",
+          "-0.0000000004034287934922106651768473067048570513277"
+        ],
+        [
+          "-2.032143967458392038726540649358588860726e-21",
+          "-1.016071983729196019363270324679294430363e-20",
+          "3.39632638418439742298843210270830601744e-39",
+          "-0.000000002017143967461053325884236533524285256638"
+        ],
+        [
+          "6.792652768368794845976864205416612034881e-40",
+          "3.39632638418439742298843210270830601744e-39",
+          "6.792652768377625294575743638263900388244e-28",
+          "-403.4287934927351226083871805427131967065"
+        ],
+        [
+          "-0.0000000004034287934922106651768473067048570513277",
+          "-0.000000002017143967461053325884236533524285256638",
+          "-403.4287934927351226083871805427131967065",
+          "13567.71796344280919465113939069338563842"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "1.699999999999999955591079014993738383055",
+          "variance": "0.000000002071371800494684477405689180542779407909"
+        },
+        {
+          "mean": "-1.299999999999999933386618522490607574582",
+          "variance": "0.000000002071371800494684477405689180542779407909"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.3,
+        -0.2
+      ],
+      "rows": [
+        [
+          -1,
+          0.5,
+          1
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          3,
+          5
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2,
+          0.2
+        ],
+        [
+          0.5,
+          2
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.3333333333333p-2",
+          "-0x1.999999999999ap-3"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p-1",
+            "0x1.0000000000000p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.0000000000000p+0",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.8000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.8000000000000p+1",
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "5.892595248353155875679340626452340927651",
+      "gradient": [
+        "-3.806506700320529974927549160148746714193",
+        "-8.839906055019707637897354677785146874039"
+      ],
+      "hessian": [
+        [
+          "5.698177072155821500741186327481589202902",
+          "8.866240059625078006488766333193558133524"
+        ],
+        [
+          "8.866240059625078006488766333193558133524",
+          "19.30129203215411617881626366028881013729"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "1.214856200875467826115663701173484676344",
+          "variance": "0.2282646048099469099065547224490862179308"
+        },
+        {
+          "mean": "2.675336869317408446580438979523346906839",
+          "variance": "2.053237167372089169521959121348178755393"
+        },
+        {
+          "mean": "1.415730480314292192576546880650735783557",
+          "variance": "0.4602366228146634172185881476205729226235"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 5.892595248353156,
+        "absolute_error": "3.000182050710007473521474533819417328093e-17",
+        "passed": true
+      }
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "changed_parameters",
+      "parameters": [
+        1.2,
+        0.4
+      ],
+      "rows": [
+        [
+          -1,
+          0.5,
+          1
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          3,
+          5
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          -2,
+          0.2
+        ],
+        [
+          0.5,
+          2
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.3333333333333p+0",
+          "0x1.999999999999ap-2"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p-1",
+            "0x1.0000000000000p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x1.0000000000000p+0",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.8000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.8000000000000p+1",
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "13.64550170550592244244907984255227261118",
+      "gradient": [
+        "19.26930874712769585766522221181632847057",
+        "33.6768318565830679932330029585420612647"
+      ],
+      "hessian": [
+        [
+          "25.93748715355939443607093823506049683927",
+          "43.57973128518500396308318342049510971523"
+        ],
+        [
+          "43.57973128518500396308318342049510971523",
+          "89.42327783114262395733774235551527027129"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "1.156589956064717286026385410935485238562",
+          "variance": "0.1639755218951680098002606994641686652621"
+        },
+        {
+          "mean": "8.112837019461190230322278194165463257658",
+          "variance": "8.093065339791793772769334374667774200758"
+        },
+        {
+          "mean": "11.02335627153089898282078395905264112233",
+          "variance": "11.02137327016817468118397767909494816127"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 13.645501705505922,
+        "absolute_error": "8.788498211812821310096142600562912435905e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "near_zero_singleton",
+      "parameters": [
+        -12,
+        -3
+      ],
+      "rows": [
+        [
+          5,
+          1e-06,
+          1
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          1e-06
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.8000000000000p+3",
+          "-0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20",
+            "0x1.0000000000000p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "9.397644082695416050002141533606604070856e-19",
+      "gradient": [
+        "9.397644082695416051474070105356940200031e-19",
+        "4.698822041347708025737035052678470100016e-18"
+      ],
+      "hessian": [
+        [
+          "9.39764408269541605441792724885761245838e-19",
+          "4.69882204134770802720896362442880622919e-18"
+        ],
+        [
+          "4.69882204134770802720896362442880622919e-18",
+          "2.349411020673854013604481812214403114595e-17"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "1.000000000000000000939764408269541605147",
+          "variance": "9.39764408269541605441792724885761245838e-19"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "zero_truncated_poisson",
+      "case": "large_mean_variance",
+      "parameters": [
+        12,
+        3
+      ],
+      "rows": [
+        [
+          5,
+          1000000.0,
+          1000000
+        ]
+      ],
+      "weights": [
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          1000000.0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.e848000000000p+19"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "532048240573798624.5104411998613205688241",
+      "gradient": [
+        "532048240600798616.6837473043411774416593",
+        "2660241203003993083.418736521705887208296"
+      ],
+      "hessian": [
+        [
+          "532048240601798616.6837473043411774416593",
+          "2660241203008993083.418736521705887208296"
+        ],
+        [
+          "2660241203008993083.418736521705887208296",
+          "13301206015044965417.09368260852943604148"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "532048240601798616.6837473043411774416593",
+          "variance": "532048240601798616.6837473043411774416593"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.3,
+        -0.2,
+        -0.4,
+        0.5
+      ],
+      "rows": [
+        [
+          -1,
+          -1,
+          0.5,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
+          3,
+          5
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2,
+          1,
+          0.2
+        ],
+        [
+          0.5,
+          -2,
+          2
+        ],
+        [
+          3,
+          0,
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.3333333333333p-2",
+          "-0x1.999999999999ap-3",
+          "-0x1.999999999999ap-2",
+          "0x1.0000000000000p-1"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p-1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+1",
+            "0x1.8000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+0",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.8000000000000p+1",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "8.580343646421673396193245282593930088084",
+      "gradient": [
+        "-4.468284669634655129856950304329877696979",
+        "-9.569712401930071551156437034576049372831",
+        "1.299920110327290088475180118321600048668",
+        "2.774673896971256595647330480925280961048"
+      ],
+      "hessian": [
+        [
+          "6.362065486785259077422036047615536404006",
+          "10.59993744165001424156457661347853652618",
+          "-0.2057956630935490079598788417359375911106",
+          "0.2057956630935490079598788417359375911106"
+        ],
+        [
+          "10.59993744165001424156457661347853652618",
+          "21.97420960764452930741134767702097530205",
+          "0.2057956630935490079598788417359375911106",
+          "-0.2057956630935490079598788417359375911106"
+        ],
+        [
+          "-0.2057956630935490079598788417359375911106",
+          "0.2057956630935490079598788417359375911106",
+          "0.5335564025220843704202421531349146639729",
+          "0.959279413088624017853511072145097248707"
+        ],
+        [
+          "0.2057956630935490079598788417359375911106",
+          "-0.2057956630935490079598788417359375911106",
+          "0.959279413088624017853511072145097248707",
+          "1.786131472391263609317097596884416467817"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.1913148894638220623895429257818828538769",
+          "variance": "0.2317656778607049376301428321284233068664"
+        },
+        {
+          "mean": "1.959579228074204079911235070958909263085",
+          "variance": "2.906499424980729211683022308340655267194"
+        },
+        {
+          "mean": "0.4435187271086077490972643602961855930368",
+          "variance": "0.575376620068187243819883701262071886464"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 8.580343646421674,
+        "absolute_error": "1.067715612150531446613271053152387330491e-15",
+        "passed": true
+      }
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "changed_parameters_and_zero_weight",
+      "parameters": [
+        1.2,
+        0.4,
+        0.7,
+        -0.2
+      ],
+      "rows": [
+        [
+          -1,
+          -1,
+          0.5,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
+          3,
+          5
+        ]
+      ],
+      "weights": [
+        2,
+        0,
+        1
+      ],
+      "future": [
+        [
+          -2,
+          1,
+          0.2
+        ],
+        [
+          0.5,
+          -2,
+          2
+        ],
+        [
+          3,
+          0,
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.3333333333333p+0",
+          "0x1.999999999999ap-2",
+          "0x1.6666666666666p-1",
+          "-0x1.999999999999ap-3"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p-1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+1",
+            "0x1.8000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+1",
+          "0x0.0p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+0",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.8000000000000p+1",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "12.74743305395985256986554802447040848527",
+      "gradient": [
+        "17.42948971702155279931725250853819744025",
+        "34.07201517335429924575659463663687287837",
+        "0.2320787460967178917894600543569338343507",
+        "1.491248804338259020814169425336375301294"
+      ],
+      "hessian": [
+        [
+          "22.17199245220656483662772313760644230424",
+          "44.32951243816928720844612400756862801438",
+          "-0.2314019585246728796510035043519661518233",
+          "0.2314019585246728796510035043519661518233"
+        ],
+        [
+          "44.32951243816928720844612400756862801438",
+          "88.67349734258241688170157028278151262287",
+          "0.2314019585246728796510035043519661518233",
+          "-0.2314019585246728796510035043519661518233"
+        ],
+        [
+          "-0.2314019585246728796510035043519661518233",
+          "0.2314019585246728796510035043519661518233",
+          "0.4475077217380976766884305441790683177155",
+          "0.2858672133341399377829460224497488556796"
+        ],
+        [
+          "0.2314019585246728796510035043519661518233",
+          "-0.2314019585246728796510035043519661518233",
+          "0.2858672133341399377829460224497488556796",
+          "1.180882656810335291159807110807885491111"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.1126448988154152587287391797407144703956",
+          "variance": "0.1335653140095077871195156263440685506926"
+        },
+        {
+          "mean": "2.025490423020943214003580736071759933882",
+          "variance": "14.35041636182885283048775454224685828409"
+        },
+        {
+          "mean": "3.657624712643941449933009612247135137374",
+          "variance": "30.5980485157679878799630532474144556661"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 12.74743305395985,
+        "absolute_error": "1.746021412576599468515255927511482518663e-15",
+        "passed": true
+      }
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "near_zero_rate_and_nonzero_share",
+      "parameters": [
+        -12,
+        -3,
+        12,
+        3
+      ],
+      "rows": [
+        [
+          5,
+          5,
+          1e-06,
+          0
+        ],
+        [
+          5,
+          5,
+          1e-06,
+          1
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          5,
+          1e-06
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.8000000000000p+3",
+          "-0x1.8000000000000p+1",
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20",
+            "0x1.0000000000000p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "67.81551055796615368005590303574301559437",
+      "gradient": [
+        "-0.9999999999999999981204711834573841617218",
+        "-4.999999999999999990602355917286920808609",
+        "0.9999999999981204711834644493302812951767",
+        "4.999999999990602355917322246651406475884"
+      ],
+      "hessian": [
+        [
+          "1.879528816542615838278236759550651945383e-18",
+          "9.397644082713079191391183797753259726914e-18",
+          "-3.532628572187527508838478470929780947649e-30",
+          "-1.766314286093763754419239235464890473825e-29"
+        ],
+        [
+          "9.397644082713079191391183797753259726914e-18",
+          "4.698822041356539595695591898876629863457e-17",
+          "-1.766314286093763754419239235464890473825e-29",
+          "-8.831571430468818772096196177324452369123e-29"
+        ],
+        [
+          "-3.532628572187527508838478470929780947649e-30",
+          "-1.766314286093763754419239235464890473825e-29",
+          "0.000000000001879528816532018041146517295568568685653",
+          "0.000000000009397644082660090205732586477842843428265"
+        ],
+        [
+          "-1.766314286093763754419239235464890473825e-29",
+          "-8.831571430468818772096196177324452369123e-29",
+          "0.000000000009397644082660090205732586477842843428265",
+          "0.00000000004698822041330045102866293238921421714132"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "3.532628572194167192677711445631583019145e-30",
+          "variance": "3.532628572194167199317388645187357889673e-30"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "large_rate_tiny_nonzero_share",
+      "parameters": [
+        12,
+        3,
+        12,
+        3
+      ],
+      "rows": [
+        [
+          5,
+          5,
+          1000000.0,
+          0
+        ],
+        [
+          5,
+          5,
+          1000000.0,
+          1
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          5,
+          1000000.0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1",
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.0000000000000p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "532048240601798602.8682367463806623951844",
+      "gradient": [
+        "532048240601798615.6837473043411774416593",
+        "2660241203008993078.418736521705887208296",
+        "0.9999999999962409423669288986676278474979",
+        "4.999999999981204711834644493338139237489"
+      ],
+      "hessian": [
+        [
+          "532048240601798616.6837473043411774416593",
+          "2660241203008993083.418736521705887208296",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "2660241203008993083.418736521705887208296",
+          "13301206015044965417.09368260852943604148",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.000000000003759057633064036075227777446788641055787",
+          "0.00000000001879528816532018037613888723394320527894"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.00000000001879528816532018037613888723394320527894",
+          "0.00000000009397644082660090188069443616971602639469"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "999999.9999981204711834644493338139237489",
+          "variance": "532048240599798617683752.9429257475159621"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "zero_inflated_poisson",
+      "case": "large_rate_tiny_zero_share",
+      "parameters": [
+        12,
+        3,
+        -12,
+        -3
+      ],
+      "rows": [
+        [
+          5,
+          5,
+          1000000.0,
+          0
+        ],
+        [
+          5,
+          5,
+          1000000.0,
+          1000000
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          5,
+          1000000.0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1",
+          "-0x1.8000000000000p+3",
+          "-0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.e848000000000p+19"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "532048240573798651.5104411998650796264572",
+      "gradient": [
+        "532048240600798616.6837473043411774416593",
+        "2660241203003993083.418736521705887208296",
+        "-0.9999999999962409423669288986676278474979",
+        "-4.999999999981204711834644493338139237489"
+      ],
+      "hessian": [
+        [
+          "532048240601798616.6837473043411774416593",
+          "2660241203008993083.418736521705887208296",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "2660241203008993083.418736521705887208296",
+          "13301206015044965417.09368260852943604148",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.000000000003759057633064036075227777446788641055787",
+          "0.00000000001879528816532018037613888723394320527894"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.00000000001879528816532018037613888723394320527894",
+          "0.00000000009397644082660090188069443616971602639469"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "532048240600798616.6837491838699939772099",
+          "variance": "532048772648039217482369.6266768109147726"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "weighted_baseline",
+      "parameters": [
+        0.3,
+        -0.2,
+        -0.4,
+        0.5
+      ],
+      "rows": [
+        [
+          -1,
+          -1,
+          0.5,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
+          3,
+          5
+        ]
+      ],
+      "weights": [
+        1,
+        0.5,
+        2
+      ],
+      "future": [
+        [
+          -2,
+          1,
+          0.2
+        ],
+        [
+          0.5,
+          -2,
+          2
+        ],
+        [
+          3,
+          0,
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.3333333333333p-2",
+          "-0x1.999999999999ap-3",
+          "-0x1.999999999999ap-2",
+          "0x1.0000000000000p-1"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p-1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+1",
+            "0x1.8000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p-1",
+          "0x1.0000000000000p+1"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+0",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.8000000000000p+1",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "9.024895541691590157113034986104670016034",
+      "gradient": [
+        "-4.274686683150499230548466167361334035457",
+        "-8.371726072189738382276437670572559552776",
+        "0.7810192797703609247800688753292114783099",
+        "3.293574727528185759342441723917669531405"
+      ],
+      "hessian": [
+        [
+          "5.175239767854501445461609329514357912822",
+          "9.389177363926398061768343331160789423604",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "9.389177363926398061768343331160789423604",
+          "18.77835472785279612353668666232157884721",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.7831991611263426232199851208910029936619",
+          "0.709636654484365765053768104389008919018"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.709636654484365765053768104389008919018",
+          "2.035774230995521862116840564640504797506"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.577081979636112833283965173980584073175",
+          "variance": "0.4764784482003068250548840875446923825525"
+        },
+        {
+          "mean": "2.146112133033180968553606523552054284062",
+          "variance": "2.78284940269641616270841099446409590434"
+        },
+        {
+          "mean": "0.8475803686092413893774651615877730685743",
+          "variance": "0.7570908679153166169404367955713303593099"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 9.02489554169159,
+        "absolute_error": "1.759163995520755931542716707174146388659e-17",
+        "passed": true
+      }
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "changed_parameters_and_zero_weight",
+      "parameters": [
+        1.2,
+        0.4,
+        0.7,
+        -0.2
+      ],
+      "rows": [
+        [
+          -1,
+          -1,
+          0.5,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
+          3,
+          5
+        ]
+      ],
+      "weights": [
+        2,
+        0,
+        1
+      ],
+      "future": [
+        [
+          -2,
+          1,
+          0.2
+        ],
+        [
+          0.5,
+          -2,
+          2
+        ],
+        [
+          3,
+          0,
+          1
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.3333333333333p+0",
+          "0x1.999999999999ap-2",
+          "0x1.6666666666666p-1",
+          "-0x1.999999999999ap-3"
+        ],
+        "rows": [
+          [
+            "-0x1.0000000000000p+0",
+            "-0x1.0000000000000p+0",
+            "0x1.0000000000000p-1",
+            "0x0.0p+0"
+          ],
+          [
+            "0x0.0p+0",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.0000000000000p+1",
+            "0x1.0000000000000p+1",
+            "0x1.8000000000000p+1",
+            "0x1.4000000000000p+2"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+1",
+          "0x0.0p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+0",
+            "0x1.999999999999ap-3"
+          ],
+          [
+            "0x1.0000000000000p-1",
+            "-0x1.0000000000000p+1",
+            "0x1.0000000000000p+1"
+          ],
+          [
+            "0x1.8000000000000p+1",
+            "0x0.0p+0",
+            "0x1.0000000000000p+0"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "12.99826158993014600580858520623269742332",
+      "gradient": [
+        "17.16716830202351233643097967062619937325",
+        "34.33433660404702467286195934125239874649",
+        "-0.003658477938333115894997399903852452173566",
+        "1.726986028373310028498626879597161587818"
+      ],
+      "hessian": [
+        [
+          "22.16716818605460465340348762933506333109",
+          "44.33433637210920930680697525867012666217",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "44.33433637210920930680697525867012666217",
+          "88.66867274421841861361395051734025332434",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.6554589263752727691223370436564619252425",
+          "0.07791600869696484534903952297235524815254"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.07791600869696484534903952297235524815254",
+          "1.388833861447510383593713610285279098638"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.4366597455378910245031909871922844883066",
+          "variance": "0.3762719707365109423700115129285613966547"
+        },
+        {
+          "mean": "2.02609906056425850808098792337224574145",
+          "variance": "14.35349534379330195569650267427086827365"
+        },
+        {
+          "mean": "3.657684402640685765783889970850965305264",
+          "variance": "30.59832952834972970894979719751870224118"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty",
+      "scipy_density_crosscheck": {
+        "value": 12.998261589930145,
+        "absolute_error": "9.845097722711038894017743475156129256397e-16",
+        "passed": true
+      }
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "near_zero_rate_and_nonzero_share",
+      "parameters": [
+        -12,
+        -3,
+        12,
+        3
+      ],
+      "rows": [
+        [
+          5,
+          5,
+          1e-06,
+          0
+        ],
+        [
+          5,
+          5,
+          1e-06,
+          1
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          5,
+          1e-06
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "-0x1.8000000000000p+3",
+          "-0x1.8000000000000p+1",
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20",
+            "0x1.0000000000000p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.0c6f7a0b5ed8dp-20"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "27.00000000000375905857283904223048594946",
+      "gradient": [
+        "9.397644082695416051474070105356940200031e-19",
+        "4.698822041347708025737035052678470100016e-18",
+        "0.9999999999962409423669288986676278474979",
+        "4.999999999981204711834644493338139237489"
+      ],
+      "hessian": [
+        [
+          "9.39764408269541605441792724885761245838e-19",
+          "4.69882204134770802720896362442880622919e-18",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "4.69882204134770802720896362442880622919e-18",
+          "2.349411020673854013604481812214403114595e-17",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.000000000003759057633064036075227777446788641055787",
+          "0.00000000001879528816532018037613888723394320527894"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.00000000001879528816532018037613888723394320527894",
+          "0.00000000009397644082660090188069443616971602639469"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "0.000000000001879528816535550667952390537166740393566",
+          "variance": "0.000000000001879528816532018042912831581678931643584"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "large_rate_tiny_nonzero_share",
+      "parameters": [
+        12,
+        3,
+        12,
+        3
+      ],
+      "rows": [
+        [
+          5,
+          5,
+          1000000.0,
+          0
+        ],
+        [
+          5,
+          5,
+          1000000.0,
+          1
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          5,
+          1000000.0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1",
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.0000000000000p+0"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "532048240601798602.8682367463806623951844",
+      "gradient": [
+        "532048240601798615.6837473043411774416593",
+        "2660241203008993078.418736521705887208296",
+        "0.9999999999962409423669288986676278474979",
+        "4.999999999981204711834644493338139237489"
+      ],
+      "hessian": [
+        [
+          "532048240601798616.6837473043411774416593",
+          "2660241203008993083.418736521705887208296",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "2660241203008993083.418736521705887208296",
+          "13301206015044965417.09368260852943604148",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.000000000003759057633064036075227777446788641055787",
+          "0.00000000001879528816532018037613888723394320527894"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.00000000001879528816532018037613888723394320527894",
+          "0.00000000009397644082660090188069443616971602639469"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "999999.9999981204711834644493338139237489",
+          "variance": "532048240599798617683752.9429257475159621"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    },
+    {
+      "family": "hurdle_poisson",
+      "case": "large_rate_tiny_zero_share",
+      "parameters": [
+        12,
+        3,
+        -12,
+        -3
+      ],
+      "rows": [
+        [
+          5,
+          5,
+          1000000.0,
+          0
+        ],
+        [
+          5,
+          5,
+          1000000.0,
+          1000000
+        ]
+      ],
+      "weights": [
+        1.0,
+        1.0
+      ],
+      "future": [
+        [
+          5,
+          5,
+          1000000.0
+        ]
+      ],
+      "binary64_inputs": {
+        "parameters": [
+          "0x1.8000000000000p+3",
+          "0x1.8000000000000p+1",
+          "-0x1.8000000000000p+3",
+          "-0x1.8000000000000p+1"
+        ],
+        "rows": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x0.0p+0"
+          ],
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19",
+            "0x1.e848000000000p+19"
+          ]
+        ],
+        "weights": [
+          "0x1.0000000000000p+0",
+          "0x1.0000000000000p+0"
+        ],
+        "future": [
+          [
+            "0x1.4000000000000p+2",
+            "0x1.4000000000000p+2",
+            "0x1.e848000000000p+19"
+          ]
+        ]
+      },
+      "normalization": "weighted sum of fully normalized negative log pmf/density; no parameter-transform Jacobian or fixed-parameter prior",
+      "derivative_coordinates": "the declared untransformed parameter-vector entries, including log-scale/log-precision coordinates",
+      "derivative_method": "mpmath derivatives of dimensionless parameter perturbations",
+      "value": "532048240573798651.5104411998650796264572",
+      "gradient": [
+        "532048240600798616.6837473043411774416593",
+        "2660241203003993083.418736521705887208296",
+        "-0.9999999999962409423669288986676278474979",
+        "-4.999999999981204711834644493338139237489"
+      ],
+      "hessian": [
+        [
+          "532048240601798616.6837473043411774416593",
+          "2660241203008993083.418736521705887208296",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "2660241203008993083.418736521705887208296",
+          "13301206015044965417.09368260852943604148",
+          "0.0",
+          "0.0"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.000000000003759057633064036075227777446788641055787",
+          "0.00000000001879528816532018037613888723394320527894"
+        ],
+        [
+          "0.0",
+          "0.0",
+          "0.00000000001879528816532018037613888723394320527894",
+          "0.00000000009397644082660090188069443616971602639469"
+        ]
+      ],
+      "prediction_and_forecast_moments": [
+        {
+          "mean": "532048240600798616.6837491838699939772099",
+          "variance": "532048772648039217482369.6266768109147726"
+        }
+      ],
+      "forecast_scope": "response-free independent future covariates/trials/exposure; no conditional history or parameter uncertainty"
+    }
+  ]
+}

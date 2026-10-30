@@ -86,3 +86,28 @@ contracts only; they are not distributed runtime evidence.
 Original frontend code is MIT-licensed. The separately prepared TMBad dependency
 retains its upstream TMB GPL-2 terms and notices. This frontend does not
 relicense or bundle TMBad, Spark or their dependencies.
+
+
+## Named targets and declared parameters in 0.2
+
+The [extended-target guide](docs/EXTENDED-TARGETS.md) documents selected Gaussian
+priors and L1, exact fixed coordinates, bounded `evaluate_shared` results and the
+separate `PreparedParameters` type. A declared truth/sensitivity/posterior-draw
+point has source-bound provenance without fabricated fit or convergence fields.
+Its prediction metadata preserves point identity. Provenance validation alone
+does not certify a posterior sampler or scientific calibration.
+
+Legacy schema1 models remain readable against their exact supported 0.1.0 or
+0.2.0 runtime. New target fits use schema2, with explicit loss components and KKT
+semantics. New bridge methods require the matching prepared adapter; an old JAR
+fails clearly instead of being patched or attached to a running Spark session.
+The new runtime acceptance program is `examples/validate_extended.py`; source
+and pure-contract checks are separate from actually executing that program.
+
+
+## Added model checks
+
+The [new-model check guide](docs/NEW-MODEL-CHECKS.md) provides independent native
+value/gradient/Hessian references and an installed-wheel Spark check for the nine
+added 0.2 models. It separates observed native qualification from Python/Spark
+execution, parameter recovery and repeated-sample uncertainty studies.

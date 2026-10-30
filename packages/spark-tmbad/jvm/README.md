@@ -9,6 +9,10 @@ The adapter and native worker are a separately prepared package. They are not
 implicitly present in ordinary classroom Spark images. See the parent
 [protocol](../docs/PROTOCOL.md) and [build documentation](../README.md) before use.
 
+The [named-target and declared-parameter guide](NAMED-TARGETS.md) documents the
+new Gaussian/L1/fixed-coordinate, bounded evaluation and ParameterSet APIs. Its
+source-level/JVM checks are distinct from actual prepared native/Spark qualification.
+
 ## Preparation and loading
 
 Compile with a prepared Spark 4.0.1 distribution and JDK 17 or 21:

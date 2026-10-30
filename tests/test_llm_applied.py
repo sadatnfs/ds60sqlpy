@@ -17,7 +17,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from scripts.source_format_parity import source_digest_before_formatting
+from scripts.source_format_parity import markdown_before_formatting, source_digest_before_formatting
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/llm-applied"
@@ -289,8 +289,12 @@ def test_lora_first_step_has_an_independent_fresh_process_derivative_audit(tmp_p
     assert "rank one" in guide and "0.64" in guide
 
 
-def _worked_program(identifier: str) -> bytes:
-    guide = (BASE / "guides" / f"{identifier}.md").read_text()
+def _worked_program(identifier: str, *, historical_style: bool = False) -> bytes:
+    path = BASE / "guides" / f"{identifier}.md"
+    source = path.read_bytes()
+    if historical_style:
+        source = markdown_before_formatting(ROOT, path.relative_to(ROOT).as_posix(), source)
+    guide = source.decode("utf-8")
     section = guide.split("## Worked example / walkthrough\n", 1)[1]
     section = section.split("## Prediction before your attempt", 1)[0]
     blocks = re.findall(r"```python\n(.*?)\n```", section, re.DOTALL)
@@ -326,7 +330,7 @@ def test_applied_review_is_complete_and_preserves_the_qualified_program_baseline
             if current != reference["sha256"]:
                 changed_references.add(row["id"])
         if "worked_program_sha256" in row:
-            current = hashlib.sha256(_worked_program(row["id"])).hexdigest()
+            current = hashlib.sha256(_worked_program(row["id"], historical_style=True)).hexdigest()
             if current != row["worked_program_sha256"]:
                 changed_worked.add(row["id"])
     assert changed_references == {"llm-applied-010", "llm-applied-015", "llm-applied-022"}
@@ -341,7 +345,7 @@ def test_changed_applied_programs_have_matching_successful_worker_receipts() -> 
         if record["kind"] == "reference":
             source = (ROOT / record["source_path"]).read_bytes()
         else:
-            source = _worked_program(record["lesson_id"])
+            source = _worked_program(record["lesson_id"], historical_style=True)
             # The receipt identifies the full guide as it existed at execution.
             # Later textbook prose may change while the executed program stays exact.
             assert re.fullmatch(r"[0-9a-f]{64}", record["guide_sha256"])
@@ -392,6 +396,11 @@ def test_textbook_expansion_preserves_all_frozen_files_and_fences() -> None:
     bindings = {row["path"]: row for row in presentation["records"]}
     for record in proof["protected_files"]:
         source = (ROOT / record["path"]).read_bytes()
+        if record["path"].endswith(".md"):
+            expected = bindings.get(record["path"], {}).get("presentation_sha256", record["sha256"])
+            source = markdown_before_formatting(
+                ROOT, record["path"], source, expected_sha256=expected
+            )
         digest = hashlib.sha256(source).hexdigest()
         if record["path"] in bindings:
             # Whole-Markdown typography changed after the textbook freeze.
@@ -416,7 +425,9 @@ def test_textbook_expansion_preserves_all_frozen_files_and_fences() -> None:
             assert digest == record["sha256"], record["path"]
     total_fences = 0
     for record in proof["guide_fences"]:
-        guide = (ROOT / record["path"]).read_text()
+        guide = markdown_before_formatting(
+            ROOT, record["path"], (ROOT / record["path"]).read_bytes()
+        ).decode("utf-8")
         fences = re.findall(r"```[^\n]*\n.*?\n```", guide, re.DOTALL)
         assert [hashlib.sha256(fence.encode()).hexdigest() for fence in fences] == record[
             "fence_sha256"

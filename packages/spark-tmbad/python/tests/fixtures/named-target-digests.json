@@ -1,0 +1,225 @@
+{
+  "scope": "Independent rational-oracle digest vectors also checked by the standalone JVM; no native/Spark claim",
+  "model_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "cases": [
+    {
+      "id": "orthogonal_lasso",
+      "names": [
+        "intercept",
+        "slope",
+        "nuisance"
+      ],
+      "lower": [
+        null,
+        null,
+        null
+      ],
+      "upper": [
+        null,
+        null,
+        null
+      ],
+      "gaussian": {},
+      "l1": {
+        "slope": 2,
+        "nuisance": 2
+      },
+      "fixed": {},
+      "expected_target_digest": "7b504218e327eb57885aa9b47ed1764ca2724123dd2341cdd00a9cae45c78bc3"
+    },
+    {
+      "id": "correlated_prior_l1",
+      "names": [
+        "intercept",
+        "slope",
+        "nuisance"
+      ],
+      "lower": [
+        null,
+        null,
+        null
+      ],
+      "upper": [
+        null,
+        null,
+        null
+      ],
+      "gaussian": {
+        "slope": {
+          "mean": 0.6,
+          "precision": 2
+        }
+      },
+      "l1": {
+        "nuisance": 0.8
+      },
+      "fixed": {},
+      "expected_target_digest": "9bbedd9934d48e44c35523a70bea206ba46c142fca4cf99e1bf962920c4e6f15"
+    },
+    {
+      "id": "fixed_nuisance",
+      "names": [
+        "intercept",
+        "slope",
+        "nuisance"
+      ],
+      "lower": [
+        null,
+        null,
+        null
+      ],
+      "upper": [
+        null,
+        null,
+        null
+      ],
+      "gaussian": {
+        "slope": {
+          "mean": -0.2,
+          "precision": 1.5
+        }
+      },
+      "l1": {
+        "intercept": 0.4
+      },
+      "fixed": {
+        "nuisance": 0.8
+      },
+      "expected_target_digest": "735d59cc78df0ff84e3ea99e0405d7b67966c98d683ebbe361a1e3d2164f6b5c"
+    },
+    {
+      "id": "positive_box_excludes_zero",
+      "names": [
+        "coefficient"
+      ],
+      "lower": [
+        1
+      ],
+      "upper": [
+        4
+      ],
+      "gaussian": {},
+      "l1": {
+        "coefficient": 2
+      },
+      "fixed": {},
+      "expected_target_digest": "ef5f5ec7bced2ec155cfe46fc46a825a367654eeb05c8989231db9c3e377db24"
+    },
+    {
+      "id": "negative_upper_box",
+      "names": [
+        "coefficient"
+      ],
+      "lower": [
+        -4
+      ],
+      "upper": [
+        -1
+      ],
+      "gaussian": {},
+      "l1": {
+        "coefficient": 1
+      },
+      "fixed": {},
+      "expected_target_digest": "f62558f0670ce92da22362ae501458c4768cbeb7dcad825697dba8405355594f"
+    },
+    {
+      "id": "all_fixed",
+      "names": [
+        "intercept",
+        "slope"
+      ],
+      "lower": [
+        null,
+        null
+      ],
+      "upper": [
+        null,
+        null
+      ],
+      "gaussian": {
+        "intercept": {
+          "mean": -0.5,
+          "precision": 0.2
+        }
+      },
+      "l1": {
+        "slope": 0.7
+      },
+      "fixed": {
+        "intercept": 2,
+        "slope": 3
+      },
+      "expected_target_digest": "777feb3a82bec6464b06b70c16b088e5ccce62d755f741a2e589fa9294a46246"
+    },
+    {
+      "id": "nonzero_gaussian_center",
+      "names": [
+        "intercept",
+        "slope"
+      ],
+      "lower": [
+        null,
+        null
+      ],
+      "upper": [
+        null,
+        null
+      ],
+      "gaussian": {
+        "slope": {
+          "mean": 1.4,
+          "precision": 3
+        }
+      },
+      "l1": {},
+      "fixed": {},
+      "expected_target_digest": "e9856d6ce3893e327ab3b8b96e103ffd8c9a3c7f6f96e54583b0fc5a4c3ac0df"
+    },
+    {
+      "id": "unequal_weight_mass",
+      "names": [
+        "first",
+        "second"
+      ],
+      "lower": [
+        null,
+        null
+      ],
+      "upper": [
+        null,
+        null
+      ],
+      "gaussian": {
+        "first": {
+          "mean": -0.1,
+          "precision": 0.3
+        }
+      },
+      "l1": {
+        "first": 0.2,
+        "second": 0.7
+      },
+      "fixed": {},
+      "expected_target_digest": "9d19a1f31b45ff3713eb4ce8ebca977c3fe6860e781c2c0a0e99289a23438598"
+    },
+    {
+      "id": "exact_threshold_zero",
+      "names": [
+        "coefficient"
+      ],
+      "lower": [
+        null
+      ],
+      "upper": [
+        null
+      ],
+      "gaussian": {},
+      "l1": {
+        "coefficient": 1
+      },
+      "fixed": {},
+      "expected_target_digest": "0dcdc5f18c7d9c5e5e91e3e00beabdaa84e4a5b95215bb43b79ba750d70116b4"
+    }
+  ]
+}

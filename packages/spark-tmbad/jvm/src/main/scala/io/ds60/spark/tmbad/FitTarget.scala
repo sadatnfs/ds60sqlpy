@@ -245,7 +245,7 @@ object FitTarget {
       var scaling: Option[NamedRegularization.Scaling] = None
       var latest: Option[(Vector[Double], Evaluated)] = None
       var accepted: Option[Evaluated] = None
-      val result = Optimizer.minimize(theta => {
+      val solved = Optimizer.minimize(theta => {
         val data = raw(theta)
         if (scaling.isEmpty) scaling = Some(NamedRegularization.Scaling(settings.reduction, data.weight))
         val evaluated = settings.evaluate(data, theta, scaling.get)
@@ -259,6 +259,7 @@ object FitTarget {
             evaluation.gradient == value.smooth.gradient, "Accepted-point target metadata differs")
           accepted = Some(value)
         })
+      val result = if (settings.plan.domain.freeIndices.isEmpty) solved.copy(status = "all_parameters_fixed") else solved
       val evaluated = accepted.get
       (result, evaluated.data, settings.document(result, evaluated, Vector.empty))
     }
@@ -296,6 +297,8 @@ object FitTarget {
     val components = node.get("loss_components")
     Json.fields(components, Set("data_sum", "gaussian_quadratic_sum", "gaussian_log_normalizer_sum",
       "l1_sum", "legacy_l2_reduced", "denominator", "total_reduced"))
+    Vector("gaussian_quadratic_sum", "l1_sum", "legacy_l2_reduced").foreach(name =>
+      nonnegative(Json.fieldNumber(components, name), name))
     val prior = plan.smooth(NamedRegularization.RawEvaluation(0.0, Vector.fill(theta.size)(0.0), scaling.likelihoodWeight), theta, scaling)
     close(Json.fieldNumber(components, "denominator"), scaling.denominator, "normalization denominator")
     close(Json.fieldNumber(components, "gaussian_quadratic_sum"), prior.gaussianQuadratic, "Gaussian prior value")
@@ -342,12 +345,31 @@ object FitTarget {
     close(reduced, summed / scaling.denominator, "stationarity scaling")
     val tolerance = Json.fieldNumber(stationarity, "tolerance")
     val expectedTolerance = Json.fieldNumber(solver, if (method == "bfgs") "gradient_tolerance" else "kkt_tolerance")
-    close(tolerance, expectedTolerance, "stationarity tolerance")
+    require(tolerance > 0.0 && tolerance == expectedTolerance, "Stationarity tolerance differs from solver settings")
     require(Json.text(stationarity, "tolerance_units") == (if (method == "bfgs") "reduced_objective" else "summed_target"),
       "Wrong convergence tolerance units")
     if (method == "bfgs") close(Json.fieldNumber(fit, "projected_gradient_inf"), reduced, "box-gradient stationarity")
-    if (Json.boolean(fit, "converged"))
-      require((if (method == "bfgs") reduced else summed) <= tolerance, "Converged flag contradicts stationarity")
+    val successfulStatuses = if (method == "bfgs") Set("projected_gradient_tolerance", "all_parameters_fixed")
+      else Set("summed_target_kkt_tolerance", "all_parameters_fixed")
+    val failedStatuses = if (method == "bfgs") Set("maximum_iterations", "maximum_evaluations", "line_search_failed",
+      "step_stalled_without_stationarity", "function_stalled_without_stationarity")
+      else Set("maximum_iterations", "maximum_evaluations", "step_stalled_without_kkt", "proximal_backtracking_failed")
+    val status = Json.text(fit, "status")
+    if (Json.boolean(fit, "converged")) {
+      require(successfulStatuses(status) && (if (method == "bfgs") reduced else summed) <= tolerance,
+        "Converged flag contradicts solver status/stationarity")
+    } else require(failedStatuses(status), "Failed fit has an unsupported/successful status")
+    if (status == "all_parameters_fixed") require(plan.domain.freeIndices.isEmpty &&
+      Json.integer(fit, "iterations", 0, 1000) == 0 && Json.integer(fit, "objective_calls", 1, 10000) == 1,
+      "All-fixed result claims an optimization history")
+    if (plan.domain.freeIndices.isEmpty) require(status == "all_parameters_fixed" && Json.boolean(fit, "converged") &&
+      summed == 0.0 && reduced == 0.0 && Json.fieldNumber(fit, "projected_gradient_inf") == 0.0 &&
+      Json.elements(fit.get("trace"), 1000, "fixed fit history").isEmpty &&
+      Json.elements(node.get("proximal_trace"), 1000, "fixed proximal history").isEmpty,
+      "Zero-free-coordinate result must be one successful fixed evaluation without optimization history")
+    val active = Json.elements(fit.get("active_bounds"), theta.size, "active bounds").map(_.intValue())
+    require(active == theta.indices.filter(i => theta(i) == plan.domain.lower(i) || theta(i) == plan.domain.upper(i)).toVector,
+      "Saved active-bound mask differs from parameter values")
     val trace = Json.elements(node.get("proximal_trace"), 1000, "proximal trace")
     if (method == "bfgs") require(trace.isEmpty, "BFGS model contains a proximal trace")
     else {
@@ -360,7 +382,11 @@ object FitTarget {
         require(Json.integer(entry, "iteration", 1, 1000) == index + 1, "Proximal trace iteration order differs")
         Json.fieldNumber(entry, "loss")
         Vector("summed_kkt_inf", "reduced_kkt_inf", "relative_step_inf").foreach(name => nonnegative(Json.fieldNumber(entry, name), name))
-        require(Json.fieldNumber(entry, "step_size") > 0.0, "Invalid trace step")
+        val step = Json.fieldNumber(entry, "step_size")
+        require(step >= Json.fieldNumber(solver, "minimum_step") && step <= Json.fieldNumber(solver, "maximum_step"),
+          "Invalid trace step")
+        close(Json.fieldNumber(entry, "reduced_kkt_inf"), Json.fieldNumber(entry, "summed_kkt_inf") / scaling.denominator,
+          "Trace KKT scaling")
         Json.integer(entry, "backtracks", 0, maxBacktracks)
         val calls = Json.integer(entry, "objective_calls", 1, maxEvaluations)
         require(calls > previousCalls && calls <= Json.integer(fit, "objective_calls", 1, maxEvaluations), "Trace call counts differ")
@@ -369,6 +395,7 @@ object FitTarget {
       trace.lastOption.foreach { last =>
         close(Json.fieldNumber(last, "loss"), total, "final proximal loss")
         close(Json.fieldNumber(last, "summed_kkt_inf"), summed, "final proximal KKT")
+        close(Json.fieldNumber(last, "reduced_kkt_inf"), reduced, "final reduced KKT")
       }
     }
   }

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "glmm_ar_forecast",
+    "options": {},
+    "seed": 1729
+  },
+  "result": {
+    "case": "glmm_ar_forecast",
+    "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+    "diagnostics": {
+      "converged": true,
+      "pd_hessian": true,
+      "score_inf": 0.000230291575233062,
+      "objective": 527.495721446443,
+      "warnings": [],
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [0.80543610069194, 0.25973747543052, -1.27120830409374, -0.461382500274235, 0.742012712316911],
+          "parameter_names": ["beta", "beta", "betadisp", "theta", "theta"],
+          "objective": 527.495721446443,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "gradient": [-0.000230291575233062, -0.000180524023034361, 0.000131730614270663, 0.000112595114359539, -0.000128533532815882],
+          "score_inf": 0.000230291575233062,
+          "pd_hessian": true,
+          "warnings": []
+        }
+      ]
+    },
+    "fixed_effects": [0.80543610069194, 0.25973747543052],
+    "latent_phi": 0.595886924072961,
+    "latent_marginal_sd": 0.630411498704401,
+    "observation_sd": 0.280492496704501,
+    "forecast": {
+      "mean": [0.268218090758427, 0.361148506506474, 0.425012348539559],
+      "covariance": [
+        [0.356754288434144, 0.165703191689414, 0.0987403652048771],
+        [0.165703191689414, 0.433719159288464, 0.211565551844467],
+        [0.0987403652048771, 0.211565551844467, 0.461047940011985]
+      ],
+      "sd": [0.597289116286362, 0.658573579251752, 0.679005110446147],
+      "uncertainty": "observation/latent uncertainty at fitted population parameters"
+    },
+    "future_time": [12, 13, 14],
+    "future_covariates": [-0.756802495307928, -0.929014501270762, -0.998954917097928],
+    "future_has_response": false,
+    "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+    "metrics": {
+      "primary_estimate": 0.595886924072961,
+      "truth": 0.6
+    },
+    "fixture_sha256": "f0a6229a009aeed3d0e5f4968b33fc2f7a3faef62ee16434e2d668866e507d21"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.739
+}

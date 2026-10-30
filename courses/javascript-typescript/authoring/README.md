@@ -43,3 +43,32 @@ link and grouped-test gates. Run only this directory's documented generator;
 Check the generated diff and execute changed references in their declared
 runtime. A generation pass, parser result or historical receipt is not new
 runtime evidence. Preserve learner data and immutable evidence files.
+
+## Canonical Markdown publication
+
+Use the [prepared contributor formatting toolchain](../../../docker/formatting/README.md),
+including Prettier 3.6.2 and its locked JavaScript/TypeScript parsing dependencies,
+when running the existing build command. Both the original renderer and the D3
+extension pass completed guide/explanation Markdown through the shared
+`canonical_markdown` guard before their normal writes. The adapter checks
+generated-path ownership, syntax, protected literals and idempotence, while
+reporting unsupported or opaque regions. Missing prepared tools fail explicitly;
+there is no automatic installation or raw-output fallback.
+
+The original specification order, D3 admission, standalone program assembly and
+browser fixture generator are unchanged. This hook does not execute Node,
+TypeScript or browser examples. Browser fixtures remain under their own source
+contract and were not added to the Markdown hook.
+
+There is no separate `--check` mode for this builder. Hash the output artifacts,
+rerun in the same prepared environment and compare hashes. Continue through the
+normal standalone source formatting and publication checks. Within the prepared
+formatting environment, check admitted web-language fences with:
+
+```sh
+python scripts/format_inline_code.py --check --language web
+```
+
+Keep actual strict TypeScript compilation and browser/D3 interaction evidence
+separate from source formatting. Existing publication assertions and historical
+observations remain unchanged; generated HTML is still owned by shared readers.

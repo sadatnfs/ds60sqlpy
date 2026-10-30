@@ -21,6 +21,19 @@ def source(number: int) -> dict[str, Any]:
     return runpy.run_path(str(BASE / f"authoring/programs/asm-{number:03}.py"))
 
 
+def test_published_package_links_preserve_literal_code() -> None:
+    build = runpy.run_path(str(BASE / "authoring/build.py"))
+    before = (
+        "[Guide](../../../../packages/spark-tmbad/README.md)\n"
+        "`[literal](../../../../packages/example)`\n"
+        "```python\nvalue = '[literal](../../../../packages/example)'\n```\n"
+    )
+    after = build["published_package_links"](before)
+    assert after == before.replace(
+        "[Guide](../../../../packages/", "[Guide](../../../packages/", 1
+    )
+
+
 def test_all_chapters_have_complete_sources_and_fresh_outputs() -> None:
     track = json.loads((BASE / "track.json").read_text())
     manifest = json.loads((BASE / "lessons.json").read_text())

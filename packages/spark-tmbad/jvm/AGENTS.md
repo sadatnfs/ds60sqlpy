@@ -37,3 +37,15 @@ owned cleanup retry; do not evict artifacts used by active tasks. Compile test
 classes separately so they cannot replace the prepared production adapter JAR.
 Treat qualification.json as retained evidence for its exact source hashes. Update
 it only after actual qualification and preserve superseded evidence externally.
+
+Named target extensions preserve legacy post-reduction L2. New Gaussian/L1 terms
+share the summed-likelihood target and divide with the likelihood under weighted
+mean. Apply each prior once per fitted vector, record optimizer-coordinate measure,
+and keep MAP distinct from posterior inference. Exact L1 uses its proximal/KKT
+path. Equality-fixed coordinates do not enter BFGS secant updates.
+
+ParameterSet prediction has distinct data-only provenance and never fabricates a
+converged fit. Preserve fitted-model admission, declared targets, complete history
+and worker/ledger/source guards when sharing prediction code. Schema2 smooth-gradient
+fields may be nonzero at an L1 optimum; use its declared KKT metadata. Old
+qualification receipts stay immutable and do not qualify changed source.

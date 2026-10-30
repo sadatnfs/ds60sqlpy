@@ -1,7 +1,14 @@
+import json
+import sys
+import textwrap
 from pathlib import Path
-import json, textwrap
 
 ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 SPECS = {}
 
 
@@ -200,6 +207,11 @@ Run the complete reference with assertions enabled, then return to your own impl
             (solution, program(s, code_blocks)),
             (explanation, explanation_text),
         ]:
+            if path.endswith(".md"):
+                # Match the existing output encoding before guarding Java literals.
+                # Python surrogate units were already written as Java escapes.
+                serialized = text.encode("utf-8", errors="backslashreplace").decode("utf-8")
+                text = canonical_markdown(serialized, root=ROOT, path=path)
             target = ROOT / path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(text, encoding="utf-8", errors="backslashreplace")

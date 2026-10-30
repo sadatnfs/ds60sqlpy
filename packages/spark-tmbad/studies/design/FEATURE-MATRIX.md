@@ -11,25 +11,30 @@ were inspected alongside the C++ branches. Upstream code is not copied into
 this original MIT study implementation. The separate TMBad dependency keeps
 its own GPL-2 notices and corresponding source.
 
-Current native support means a specific prepared model in the 14-model registry,
+Current native 0.2 support means a specific prepared model in the 23-model registry,
 not arbitrary formulas, links or covariate-dependent dispersion. Current Torch
 support refers to its existing registered models and extension contracts. A new
 custom model still needs original source, explicit registration and actual
 qualification. No study below has run glmmTMB or AFModel merely by inspecting it.
+Actual local native checks qualify the nine added models' declared values,
+derivatives, moments and selected domain refusals; local Spark checks separately
+qualify the named-target APIs. Read [the additional model checks](../../python/docs/NEW-MODEL-CHECKS.md)
+and [target contract](../../python/docs/EXTENDED-TARGETS.md) for their exact scope.
+These receipts do not make the planned simulation studies completed benchmarks.
 
 ## Observation families
 
 | Pinned glmmTMB family or group | Existing native route | Existing Torch route | Original study and remaining work |
 | --- | --- | --- | --- |
 | Gaussian | Normal, one-predictor linear, quadratic, growth, selected Gaussian groups | Normal, general explicit design, nonlinear decay, Gaussian random intercept | sim-001/002/006/008; compare parameterization and normalization |
-| Binomial | Bernoulli only, with logistic link | Bernoulli logistic only | sim-018/022; general trial size requires a new model |
-| Beta-binomial | Absent | Custom model required | sim-022; distinguish trial-level correlation from beta precision |
+| Binomial | Bernoulli and binomial_logistic with explicit trial counts | Bernoulli logistic only | sim-018/022; native trial-size model available, study pending |
+| Beta-binomial | beta_binomial with constant concentration | Custom model required | sim-022; native model available, distinguish within-count variation from cross-row correlation |
 | COM-binomial | Absent | Custom model required | sim-022; normalization and mean parameterization need independent oracles |
-| Beta | Absent | Custom model required | sim-023; strictly interior support and precision model |
+| Beta | beta_regression with constant precision | Custom model required | sim-023; native interior-support subset available, study pending |
 | Ordered beta | Absent | Custom model required | sim-023; endpoint masses are not clipped continuous observations |
 | Gamma | Fixed-shape log-mean regression | Custom model required | sim-024; current native shape is constant across rows |
 | Poisson | Exposure regression and selected random effects | Exposure regression | sim-019; preserve exposure and log link |
-| Zero-truncated Poisson | Absent | Custom model required | sim-020/021; divide by the nonzero probability |
+| Zero-truncated Poisson | zero_truncated_poisson with exposure | Custom model required | sim-020/021; normalized positive-count model available, selection/censoring extensions remain separate |
 | Generalized Poisson | Absent | Custom model required | sim-026; support depends on parameterization |
 | COM-Poisson | Absent | Custom model required | sim-026; normalizer, mean parameterization and derivative accuracy |
 | Truncated generalized/COM-Poisson | Absent | Custom model required | sim-021/026; two normalization layers must be qualified |
@@ -37,9 +42,9 @@ qualification. No study below has run glmmTMB or AFModel merely by inspecting it
 | NB2 | Fixed-shape log-mean/exposure regression | Custom model required | sim-019; variance is mean plus a quadratic term |
 | NB12 | Absent | Custom model required | sim-019; distinguish its linear and quadratic dispersion terms |
 | Truncated NB1/NB2 | Absent | Custom model required | sim-021; fit to selected positive counts with correct normalization |
-| Student-t | Absent | Custom model required | sim-024; location, scale and degrees of freedom are distinct |
+| Student-t | student_t_regression with degrees of freedom greater than two | Custom model required | sim-024; native finite-variance model available, scale is not standard deviation |
 | Tweedie | Absent | Custom model required | sim-025; atom at zero plus continuous positive mass |
-| Lognormal | Absent | Custom model required | sim-024; data-scale moments differ from log-scale parameters |
+| Lognormal | lognormal_regression with constant log-scale noise | Custom model required | sim-024; native model includes the response Jacobian and data-scale moments |
 | Skew normal | Absent | Custom model required | sim-024; distribution shape and mean parameterization need care |
 | Bell | Absent | Custom model required | sim-026; special-function and normalizer qualification first |
 | Ordinal cumulative-link | Absent | Custom model required | sim-023; ordered thresholds and stable tail probabilities |
@@ -48,8 +53,8 @@ The pinned R exports include newer `combinomial`, `nbinom12`, `ordinal`, `bell`
 and `skewnormal` constructors. This does not establish that every possible link,
 simulation setting or prior combination works. The moving
 [family documentation](https://glmmtmb.github.io/glmmTMB/reference/nbinom2.html)
-is useful context but does not replace the pinned source and a future installed
-reference test. For example, the pinned Gamma branch explicitly uses shape and
+is useful context but does not replace pinned source and model-specific installed
+reference tests. The optional project below now covers selected cases. For example, the pinned Gamma branch explicitly uses shape and
 scale equal to mean/shape, so its variance is mean-squared/shape. Raw dispersion
 coefficients and `predict(type="disp")` must be interpreted through that version's
 actual transformation; comparing differently defined numbers is not parity.
@@ -66,7 +71,7 @@ current codes.
 | --- | --- | --- |
 | Heterogeneous diagonal `diag` | Native Poisson slope example has two independent latent scales only | sim-028/029; explicit vector scales and named latent layout |
 | Homogeneous diagonal `homdiag` | A scalar random-intercept prior is a narrow case | sim-029; do not claim a general covariance formula API |
-| Unstructured `us` | Not implemented as a generic prepared family | sim-028/029; Cholesky/partial-correlation parameterization and identification |
+| Unstructured `us` | Exact two-dimensional Gaussian correlated intercept/slope model; no generic covariance formula API | sim-028/029; native narrow subset available, broader dimensions and structures remain planned |
 | Compound symmetry `cs`, `homcs` | Gaussian random intercept implies only a nonnegative homogeneous correlation subset | sim-029; general CS also permits a dimension-dependent negative range |
 | AR1 `ar1` | Direct stationary Gaussian AR1 is available natively | sim-013; glmmTMB latent AR1 plus measurement noise is a different model |
 | Heterogeneous AR1 `hetar1` | Absent | sim-030; marginal scale schedule and innovation variance cannot be conflated |
@@ -99,15 +104,38 @@ a separately implemented sparse/Markov method is a different capability.
 | Feature | Current boundary | Study/action |
 | --- | --- | --- |
 | Separate mean, zero-inflation and dispersion designs | glmmTMB has separate design/offset/parameter blocks; neither package is a general formula compiler | sim-027; typed model schemas and explicit normalization |
-| Zero inflation and hurdle composition | Not part of the current prepared native menu | sim-020; distinguish structural-zero probability, nonzero component mean and overall response mean |
+| Zero inflation and hurdle composition | Native zero_inflated_poisson and hurdle_poisson with separate scalar x/z predictors and exposure | sim-020; distinguish structural-zero probability, positive component and full response moments; study pending |
 | Observation weights | Current packages multiply likelihood contributions and declare reduction | sim-001; do not silently reinterpret these as inverse-variance or survey weights |
-| Fixed-parameter priors | Current scalar L2 is a zero-centered Gaussian penalty on all optimized coordinates | sim-002/010/011; selected means/precisions and measure declarations need an interface |
+| Fixed-parameter priors | Native named diagonal Gaussian means/precisions, selected L1 and exact fixed coordinates; legacy scalar L2 unchanged | sim-002/003/004/010/011; native target API available, new studies and Torch parity remain separate |
 | Latent priors | Selected prepared joint models include normalized generative latent densities | sim-008/028; integrating these gives a marginal likelihood, not a posterior over population parameters |
 | Prior families | Pinned C++ dispatcher implements normal, Student-t, Cauchy, Gamma and LKJ paths | sim-010/011/035; a beta-prior enum exists but no beta case was found in that C++ prior dispatcher |
 | MAP versus MCMC | glmmTMB's prior vignette distinguishes MAP from a separately requested sampler | sim-010/035; current packages do not automatically sample fixed-parameter posteriors |
 | ML versus REML | Current package fitting is likelihood/MAP, not REML | sim-033; implement and qualify a different target explicitly |
 | Conditional simulation and residual diagnostics | Requires declared conditioning and a simulation operation | sim-017/035; generated data are not evidence that a fitted simulator is calibrated |
 | `REPORT`/`ADREPORT` and uncertainty | Native point/moment targets are explicit; full TMB reporting APIs are not reproduced | sim-017/034; parameter uncertainty needs its own calculation and evidence |
+
+## Separately qualified optional R reference
+
+The [optional serial R/TMB/glmmTMB project](../../reference/QUALIFICATION.md)
+now has actual native Linux ARM64 preparation and all 24 registered case passes,
+using prepared manifest SHA256
+`a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566`.
+Its [qualification index](../../reference/qualification/index.json) retains exact
+case receipts. This includes the original TMB templates and selected real upstream
+family, zero-component, covariance, prior and forecast calls. It is separate from
+the native 23-model registry and does not implement those upstream interfaces in
+Spark/TMBad or Torch. No broad cross-package numerical parity is claimed.
+
+A later bounded serial run attempted seven cases 16 times each: 112 executions,
+110 passed and two Gaussian random-slope failures retained. Those failures count
+in the denominator. The regularization_posterior case reused one fixed training
+dataset and changed posterior-draw randomness; its 16 executions are not 16
+independent dataset replications. The retained derived reanalysis therefore sets
+its dataset-level bias/MSE MCSE and dataset failure interval to null, while keeping
+within-case posterior-draw diagnostics separate. The original raw ledgers and
+historical summaries remain unchanged. The other dataset-study summaries retain
+their actual successful/failed counts and explicit Monte Carlo uncertainty.
+A small repetition count is execution evidence, not a coverage guarantee.
 
 ## AFModel-inspired lessons without operational dependencies
 

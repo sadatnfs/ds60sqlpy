@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "glmm_covariance",
+    "options": {
+      "structure": "ar1"
+    },
+    "seed": 1729
+  },
+  "result": {
+    "case": "glmm_covariance",
+    "structure": "ar1",
+    "backend": "actual pinned upstream glmmTMB",
+    "diagnostics": {
+      "converged": true,
+      "pd_hessian": true,
+      "score_inf": 4.74475557400367e-07,
+      "objective": 356.202774130259,
+      "warnings": [],
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [1.15222380204743, -0.547918158038512, 0.602208564373483],
+          "parameter_names": ["beta", "theta", "theta"],
+          "objective": 356.202774130259,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "gradient": [4.33267002498061e-07, -4.28234829791299e-07, -4.74475557400367e-07],
+          "score_inf": 4.74475557400367e-07,
+          "pd_hessian": true,
+          "warnings": []
+        }
+      ]
+    },
+    "estimated_covariance": [
+      [0.33425994305692, 0.172440105817373, 0.0889594781305978, 0.0458929708478003, 0.0236755522570071, 0.0122138916770767],
+      [0.172440105817373, 0.33425994305692, 0.172440105817373, 0.0889594781305978, 0.0458929708478003, 0.0236755522570071],
+      [0.0889594781305978, 0.172440105817373, 0.33425994305692, 0.172440105817373, 0.0889594781305978, 0.0458929708478003],
+      [0.0458929708478003, 0.0889594781305978, 0.172440105817373, 0.33425994305692, 0.172440105817373, 0.0889594781305978],
+      [0.0236755522570071, 0.0458929708478003, 0.0889594781305978, 0.172440105817373, 0.33425994305692, 0.172440105817373],
+      [0.0122138916770767, 0.0236755522570071, 0.0458929708478003, 0.0889594781305978, 0.172440105817373, 0.33425994305692]
+    ],
+    "generating_covariance": [
+      [0.36, 0.198, 0.1089, 0.059895, 0.03294225, 0.0181182375],
+      [0.198, 0.36, 0.198, 0.1089, 0.059895, 0.03294225],
+      [0.1089, 0.198, 0.36, 0.198, 0.1089, 0.059895],
+      [0.059895, 0.1089, 0.198, 0.36, 0.198, 0.1089],
+      [0.03294225, 0.059895, 0.1089, 0.198, 0.36, 0.198],
+      [0.0181182375, 0.03294225, 0.059895, 0.1089, 0.198, 0.36]
+    ],
+    "relative_covariance_error": 0.108787098953978,
+    "identifiability": "residual dispersion fixed near zero; do not add an unidentified duplicate diagonal component",
+    "metrics": {
+      "primary_estimate": 1.15222380204743,
+      "truth": 1.2
+    },
+    "fixture_sha256": "e02cb829199a16c2dff1d1b63ee60a4fcea47b4ae4b038cd9f942d9efc30f8d7"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.717
+}

@@ -1,0 +1,4091 @@
+{
+  "groups": [
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 16,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "independent_groups",
+          "initial": [
+            0,
+            0
+          ],
+          "mechanism": "independent_groups",
+          "model_id": "normal",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "group_parameters": {
+            "u0": [
+              0.5,
+              0
+            ],
+            "u1": [
+              0.5,
+              0
+            ],
+            "u2": [
+              0.5,
+              0
+            ],
+            "u3": [
+              0.5,
+              0
+            ]
+          },
+          "model_id": "normal",
+          "parameters": null
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.03430898693959687,
+              "mean": 0.8828125
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.03430898693959687,
+              "mean": 0.8828125
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08081929412447247,
+              "mean": 1.5489862472109495
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.18879120527618287,
+              "mean": 1.3579930820326045
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.06968185845521158,
+              "mean": 1.064476081527059
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.07834789631600109,
+              "mean": 0.6875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.07834789631600109,
+              "mean": 0.6875
+            }
+          }
+        }
+      },
+      "group_failure_fraction_per_dataset": {
+        "count": 8,
+        "mcse": 0.0,
+        "mean": 0.0
+      },
+      "group_fit_counts": {
+        "attempted": 32,
+        "failed": 0,
+        "successful": 32
+      },
+      "method": "independent_groups",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "equal_group_means",
+      "study": "sim-009",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 16,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "pooled_shared",
+          "initial": [
+            0,
+            0
+          ],
+          "model_id": "normal",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "group_parameters": {
+            "u0": [
+              0.5,
+              0
+            ],
+            "u1": [
+              0.5,
+              0
+            ],
+            "u2": [
+              0.5,
+              0
+            ],
+            "u3": [
+              0.5,
+              0
+            ]
+          },
+          "model_id": "normal",
+          "parameters": null
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.010228963604812142,
+              "mean": 0.953125
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.010228963604812142,
+              "mean": 0.953125
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.03706831881089729,
+              "mean": 1.4512546790542906
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.07527513042464513,
+              "mean": 1.0633374360465082
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.07635884444046619,
+              "mean": 1.0641015272901373
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.04091585441924857,
+              "mean": 0.8125
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.04091585441924857,
+              "mean": 0.8125
+            }
+          }
+        }
+      },
+      "method": "pooled_shared",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "equal_group_means",
+      "study": "sim-009",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 16,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "independent_groups",
+          "initial": [
+            0,
+            0
+          ],
+          "mechanism": "independent_groups",
+          "model_id": "normal",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "group_parameters": {
+            "u0": [
+              -1.75,
+              0
+            ],
+            "u1": [
+              -0.25,
+              0
+            ],
+            "u2": [
+              1.25,
+              0
+            ],
+            "u3": [
+              2.75,
+              0
+            ]
+          },
+          "model_id": "normal",
+          "parameters": null
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.03288151755057195,
+              "mean": 0.921875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.03288151755057195,
+              "mean": 0.921875
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08349447059815705,
+              "mean": 1.4357691815133802
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.22223472794882165,
+              "mean": 1.2017297675231862
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1259364539441721,
+              "mean": 0.9685529064998477
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0944911182523068,
+              "mean": 0.75
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0944911182523068,
+              "mean": 0.75
+            }
+          }
+        }
+      },
+      "group_failure_fraction_per_dataset": {
+        "count": 8,
+        "mcse": 0.0,
+        "mean": 0.0
+      },
+      "group_fit_counts": {
+        "attempted": 32,
+        "failed": 0,
+        "successful": 32
+      },
+      "method": "independent_groups",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "heterogeneous_group_means",
+      "study": "sim-009",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 16,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "pooled_shared",
+          "initial": [
+            0,
+            0
+          ],
+          "model_id": "normal",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "group_parameters": {
+            "u0": [
+              -1.75,
+              0
+            ],
+            "u1": [
+              -0.25,
+              0
+            ],
+            "u2": [
+              1.25,
+              0
+            ],
+            "u3": [
+              2.75,
+              0
+            ]
+          },
+          "model_id": "normal",
+          "parameters": null
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.016703827619526525,
+              "mean": 0.96875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.016703827619526525,
+              "mean": 0.96875
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0327862611950246,
+              "mean": 2.0689281191333646
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08438820561771818,
+              "mean": 0.9596144171755348
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.24746431810292244,
+              "mean": 3.6267296325905507
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0668153104781061,
+              "mean": 0.875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0668153104781061,
+              "mean": 0.875
+            }
+          }
+        }
+      },
+      "method": "pooled_shared",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "heterogeneous_group_means",
+      "study": "sim-009",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "hurdle",
+          "initial": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "model_id": "hurdle_poisson",
+          "regularization": null
+        },
+        "training_rows": 96,
+        "truth": {
+          "model_id": "poisson_exposure",
+          "parameters": [
+            0.2,
+            0.4
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.040456951782565656,
+              "mean": 1.6047918001977048
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.10515086687004678,
+              "mean": 1.1819215953460338
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.2060620796415503,
+              "mean": 1.6959686424170182
+            }
+          }
+        }
+      },
+      "method": "hurdle",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "poisson_truth",
+      "study": "sim-020",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "poisson",
+          "initial": [
+            0,
+            0
+          ],
+          "model_id": "poisson_exposure",
+          "regularization": null
+        },
+        "training_rows": 96,
+        "truth": {
+          "model_id": "poisson_exposure",
+          "parameters": [
+            0.2,
+            0.4
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.037611237878937935,
+              "mean": 1.5011456706347008
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08798033338629682,
+              "mean": 1.1655621373151799
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.15657552481837714,
+              "mean": 1.5744886648164766
+            }
+          }
+        }
+      },
+      "method": "poisson",
+      "parameter_error_names": [
+        "intercept",
+        "slope"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.028278932122929,
+            "mean": -0.0643848257672624
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.005888869602282744,
+            "mean": 0.009743291803173315
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.07032667155827338,
+            "mean": 0.18970356651239634
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.03017739590895933,
+            "mean": 0.07060832827477999
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "poisson_truth",
+      "study": "sim-020",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "zero_inflated",
+          "initial": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "model_id": "zero_inflated_poisson",
+          "regularization": null
+        },
+        "training_rows": 96,
+        "truth": {
+          "model_id": "poisson_exposure",
+          "parameters": [
+            0.2,
+            0.4
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.042993319086497186,
+              "mean": 1.5031831482151223
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.09912580695673984,
+              "mean": 1.1707374841546583
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.1747187144622399,
+              "mean": 1.5307965428793406
+            }
+          }
+        }
+      },
+      "method": "zero_inflated",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.125,
+        "mcse": 0.11692679333668567,
+        "successes": 1,
+        "wilson95_lower": 0.02241749145005667,
+        "wilson95_upper": 0.4708881822128535
+      },
+      "scenario": "poisson_truth",
+      "study": "sim-020",
+      "successful_replications": 7
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "hurdle",
+          "initial": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "model_id": "hurdle_poisson",
+          "regularization": null
+        },
+        "training_rows": 96,
+        "truth": {
+          "model_id": "zero_inflated_poisson",
+          "parameters": [
+            0.2,
+            0.4,
+            -0.4,
+            0.6
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0534865113198628,
+              "mean": 1.2405673262817334
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.16806309304927927,
+              "mean": 1.0036054073381333
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.3090188086762453,
+              "mean": 1.8670515338293487
+            }
+          }
+        }
+      },
+      "method": "hurdle",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "structural_zero_truth",
+      "study": "sim-020",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "poisson",
+          "initial": [
+            0,
+            0
+          ],
+          "model_id": "poisson_exposure",
+          "regularization": null
+        },
+        "training_rows": 96,
+        "truth": {
+          "model_id": "zero_inflated_poisson",
+          "parameters": [
+            0.2,
+            0.4,
+            -0.4,
+            0.6
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.07034353119121456,
+              "mean": 1.2705960327797374
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.26602969056338055,
+              "mean": 1.5544615511335973
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.25683208111444467,
+              "mean": 1.6774697626615354
+            }
+          }
+        }
+      },
+      "method": "poisson",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "structural_zero_truth",
+      "study": "sim-020",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "zero_inflated",
+          "initial": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "model_id": "zero_inflated_poisson",
+          "regularization": null
+        },
+        "training_rows": 96,
+        "truth": {
+          "model_id": "zero_inflated_poisson",
+          "parameters": [
+            0.2,
+            0.4,
+            -0.4,
+            0.6
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.05205112387611596,
+              "mean": 1.1806984288903317
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.15787201756812055,
+              "mean": 0.9341231956284132
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.24847028083829284,
+              "mean": 1.657601147864822
+            }
+          }
+        }
+      },
+      "method": "zero_inflated",
+      "parameter_error_names": [
+        "count_intercept",
+        "count_slope",
+        "zero_intercept",
+        "zero_slope"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.05208549883565837,
+            "mean": 0.01868578311326804
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.005949274396249558,
+            "mean": 0.01933945281327168
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.10533451209660079,
+            "mean": 0.017423250440772864
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.042320056378658474,
+            "mean": 0.07797108572632445
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.09836610825784353,
+            "mean": 0.05532561180787472
+          },
+          "coordinate": 2,
+          "mse": {
+            "count": 8,
+            "mcse": 0.03455792099941107,
+            "mean": 0.07079216209847222
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.19054464447902827,
+            "mean": -0.005002137361308771
+          },
+          "coordinate": 3,
+          "mse": {
+            "count": 8,
+            "mcse": 0.09503708442129621,
+            "mean": 0.25417585215565636
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "structural_zero_truth",
+      "study": "sim-020",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "beta_binomial",
+          "initial": [
+            0,
+            0,
+            1.6094379124341003
+          ],
+          "model_id": "beta_binomial",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "model_id": "beta_binomial",
+          "parameters": [
+            -0.4,
+            0.8,
+            1.0986122886681098
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.021154883034181365,
+              "mean": 2.312558828740812
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.12130534451290442,
+              "mean": 1.0446120138438826
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.6721331221647866,
+              "mean": 7.510378254951966
+            }
+          }
+        }
+      },
+      "method": "beta_binomial",
+      "parameter_error_names": [
+        "intercept",
+        "slope",
+        "log_precision"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.07402746086143393,
+            "mean": -0.0447294890766224
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.021235499809012407,
+            "mean": 0.04036118192419363
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.09289261627694828,
+            "mean": -0.03791652332592592
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.03741878136760508,
+            "mean": 0.06184092985255998
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.05205699218086147,
+            "mean": -0.014525764729505314
+          },
+          "coordinate": 2,
+          "mse": {
+            "count": 8,
+            "mcse": 0.008182717019296753,
+            "mean": 0.019180510885404848
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "beta_binomial_truth",
+      "study": "sim-022",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "binomial",
+          "initial": [
+            0,
+            0
+          ],
+          "model_id": "binomial_logistic",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "model_id": "beta_binomial",
+          "parameters": [
+            -0.4,
+            0.8,
+            1.0986122886681098
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1471581883352895,
+              "mean": 2.9378847058752466
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.36082666952639125,
+              "mean": 3.392538597415926
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.6772416842506938,
+              "mean": 7.539655302206753
+            }
+          }
+        }
+      },
+      "method": "binomial",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "beta_binomial_truth",
+      "study": "sim-022",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "beta_binomial",
+          "initial": [
+            0,
+            0,
+            1.6094379124341003
+          ],
+          "model_id": "beta_binomial",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "model_id": "binomial_logistic",
+          "parameters": [
+            -0.4,
+            0.8
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 6,
+              "mcse": 0.04941080978211303,
+              "mean": 1.8331822891434797
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 6,
+              "mcse": 0.09530802478971888,
+              "mean": 0.9149526838417671
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 6,
+              "mcse": 0.2977957282975716,
+              "mean": 2.37719029273518
+            }
+          }
+        }
+      },
+      "method": "beta_binomial",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.25,
+        "mcse": 0.15309310892394862,
+        "successes": 2,
+        "wilson95_lower": 0.071479212752109,
+        "wilson95_upper": 0.5907245696898311
+      },
+      "scenario": "binomial_truth",
+      "study": "sim-022",
+      "successful_replications": 6
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "binomial",
+          "initial": [
+            0,
+            0
+          ],
+          "model_id": "binomial_logistic",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "model_id": "binomial_logistic",
+          "parameters": [
+            -0.4,
+            0.8
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.04528847307948916,
+              "mean": 1.8347243715570727
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.10359366763993662,
+              "mean": 1.0429709029225638
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.21929399466187693,
+              "mean": 2.37685283311423
+            }
+          }
+        }
+      },
+      "method": "binomial",
+      "parameter_error_names": [
+        "intercept",
+        "slope"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.022413221246534776,
+            "mean": 0.051591608379544615
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.0017205826068722287,
+            "mean": 0.006178161461711123
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.04234022173492933,
+            "mean": -0.024521211084645445
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.003762468523070223,
+            "mean": 0.013150150428998615
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "binomial_truth",
+      "study": "sim-022",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "gaussian",
+          "initial": [
+            0,
+            0,
+            0
+          ],
+          "model_id": "linear_gaussian",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "conditional_mean_coefficients": [
+            0.5,
+            0.8
+          ],
+          "contamination_probability": 0,
+          "model_id": "linear_gaussian",
+          "parameters": [
+            0.5,
+            0.8,
+            0
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.022184600470052933,
+              "mean": 0.9427083333333334
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.022184600470052933,
+              "mean": 0.9427083333333334
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.09714600877900469,
+              "mean": 1.4378977163435616
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.19918175520890566,
+              "mean": 1.0950826176057467
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1885385744840142,
+              "mean": 1.0247154696784992
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.18298126367784995,
+              "mean": 0.375
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.18298126367784995,
+              "mean": 0.375
+            }
+          }
+        }
+      },
+      "method": "gaussian",
+      "parameter_error_names": [
+        "beta0",
+        "beta1",
+        "log_sigma"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.045065746280662115,
+            "mean": -0.06119899820677622
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.008937274798230324,
+            "mean": 0.017961767796344077
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.09851964368211,
+            "mean": 0.05112238955010755
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.037287779555655515,
+            "mean": 0.07055634005206238
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.030761739092244618,
+            "mean": -0.028582125663984423
+          },
+          "coordinate": 2,
+          "mse": {
+            "count": 8,
+            "mcse": 0.004081519011281325,
+            "mean": 0.007440930051327113
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "gaussian_truth",
+      "study": "sim-024",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {
+            "log_df_minus_two": 1.0986122886681098
+          },
+          "id": "student_t_df5",
+          "initial": [
+            0,
+            0,
+            0,
+            1.0986122886681098
+          ],
+          "model_id": "student_t_regression",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "conditional_mean_coefficients": [
+            0.5,
+            0.8
+          ],
+          "contamination_probability": 0,
+          "model_id": "linear_gaussian",
+          "parameters": [
+            0.5,
+            0.8,
+            0
+          ]
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.09179991482476166,
+              "mean": 1.433450550675465
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.15294973964786335,
+              "mean": 0.8850457464547675
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.18862303984334575,
+              "mean": 1.0282428325648378
+            }
+          }
+        }
+      },
+      "method": "student_t_df5",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "gaussian_truth",
+      "study": "sim-024",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "gaussian",
+          "initial": [
+            0,
+            0,
+            0
+          ],
+          "model_id": "linear_gaussian",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "conditional_mean_coefficients": [
+            0.5,
+            0.8
+          ],
+          "contamination_probability": 0.1,
+          "model_id": null,
+          "parameters": null
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.0240562612162344,
+              "mean": 0.9583333333333333
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.12158976593675784,
+              "mean": 0.8385416666666666
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.17064636409912892,
+              "mean": 2.074600444012647
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.2343164855137056,
+              "mean": 0.6856378294963811
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 2.1043436020642377,
+              "mean": 4.287999509986295
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 7,
+              "mcse": 0.20203050891044214,
+              "mean": 0.5714285714285714
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.1889822365046136,
+              "mean": 0.5
+            }
+          }
+        }
+      },
+      "method": "gaussian",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.125,
+        "mcse": 0.11692679333668567,
+        "successes": 1,
+        "wilson95_lower": 0.02241749145005667,
+        "wilson95_upper": 0.4708881822128535
+      },
+      "scenario": "symmetric_contamination",
+      "study": "sim-024",
+      "successful_replications": 7
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 24,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "future": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {
+            "log_df_minus_two": 1.0986122886681098
+          },
+          "id": "student_t_df5",
+          "initial": [
+            0,
+            0,
+            0,
+            1.0986122886681098
+          ],
+          "model_id": "student_t_regression",
+          "regularization": null
+        },
+        "training_rows": 64,
+        "truth": {
+          "conditional_mean_coefficients": [
+            0.5,
+            0.8
+          ],
+          "contamination_probability": 0.1,
+          "model_id": null,
+          "parameters": null
+        }
+      },
+      "future_metrics": {
+        "future": {
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.14993025137816268,
+              "mean": 1.7594277239243707
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.5209974686723532,
+              "mean": 1.4282287417883623
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 1.8418940636272205,
+              "mean": 3.8452364787151043
+            }
+          }
+        }
+      },
+      "method": "student_t_df5",
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "symmetric_contamination",
+      "study": "sim-024",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 20,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "known": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ],
+          "unseen": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "estimated_covariance",
+          "initial": [
+            0,
+            0,
+            -0.6931471805599453,
+            -0.5108256237659907,
+            -0.916290731874155,
+            0
+          ],
+          "model_id": "gaussian_correlated_random_slope",
+          "regularization": null
+        },
+        "training_rows": 48,
+        "truth": {
+          "model_id": "gaussian_correlated_random_slope",
+          "parameters": [
+            0.8,
+            0.4,
+            -1.0498221244986778,
+            -0.35667494393873245,
+            -1.2039728043259361,
+            -0.7752987062055835
+          ]
+        }
+      },
+      "future_metrics": {
+        "known": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0236227795630767,
+              "mean": 0.875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0236227795630767,
+              "mean": 0.875
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08201057347177822,
+              "mean": 0.8396792838275475
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1876510256181988,
+              "mean": 1.6004307140943417
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.026692435050555803,
+              "mean": 0.27515526076253843
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.043797805514170944,
+              "mean": 0.765625
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.043797805514170944,
+              "mean": 0.765625
+            }
+          }
+        },
+        "unseen": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.09374999999999999,
+              "mean": 0.84375
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.09374999999999999,
+              "mean": 0.84375
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.41968782059834714,
+              "mean": 1.3899398788534256
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.9447534588622104,
+              "mean": 1.8757542933405134
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1631599672600524,
+              "mean": 0.5817332896191802
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1336306209562122,
+              "mean": 0.75
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.1336306209562122,
+              "mean": 0.75
+            }
+          }
+        }
+      },
+      "method": "estimated_covariance",
+      "parameter_error_names": [
+        "beta0",
+        "beta1",
+        "log_sigma",
+        "log_tau0",
+        "log_tau1",
+        "atanh_correlation"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.06152519475927417,
+            "mean": -0.07430383914195876
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.01607302043836184,
+            "mean": 0.032018507642400405
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.03618677972208943,
+            "mean": -0.0385838193872686
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.0035416695720063853,
+            "mean": 0.010655092305094527
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.0334617286319304,
+            "mean": -0.01605220901451125
+          },
+          "coordinate": 2,
+          "mse": {
+            "count": 8,
+            "mcse": 0.0018768563721695672,
+            "mean": 0.008095484395504213
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.11698139763787493,
+            "mean": 0.013897567734682377
+          },
+          "coordinate": 3,
+          "mse": {
+            "count": 8,
+            "mcse": 0.03490735157694145,
+            "mean": 0.0959856741421144
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.17753334172425148,
+            "mean": -0.06507721470178784
+          },
+          "coordinate": 4,
+          "mse": {
+            "count": 8,
+            "mcse": 0.12588205683655307,
+            "mean": 0.22486165583980164
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.5628907731265064,
+            "mean": -0.9164733294250167
+          },
+          "coordinate": 5,
+          "mse": {
+            "count": 8,
+            "mcse": 1.6132045662436978,
+            "mean": 3.057845520844068
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "negative_correlation",
+      "study": "sim-028",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 20,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "known": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ],
+          "unseen": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {
+            "atanh_correlation": -0.7752987062055835,
+            "log_sigma": -1.0498221244986778,
+            "log_tau0": -0.35667494393873245,
+            "log_tau1": -1.2039728043259361
+          },
+          "id": "known_covariance",
+          "initial": [
+            0,
+            0,
+            -1.0498221244986778,
+            -0.35667494393873245,
+            -1.2039728043259361,
+            -0.7752987062055835
+          ],
+          "model_id": "gaussian_correlated_random_slope",
+          "regularization": null
+        },
+        "training_rows": 48,
+        "truth": {
+          "model_id": "gaussian_correlated_random_slope",
+          "parameters": [
+            0.8,
+            0.4,
+            -1.0498221244986778,
+            -0.35667494393873245,
+            -1.2039728043259361,
+            -0.7752987062055835
+          ]
+        }
+      },
+      "future_metrics": {
+        "known": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.021898902757085472,
+              "mean": 0.9296875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.021898902757085472,
+              "mean": 0.9296875
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.06854789368532922,
+              "mean": 0.7094057736797829
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.1370957873706584,
+              "mean": 1.1537475017945569
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.028852455331559893,
+              "mean": 0.2433175763753199
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.03340765523905305,
+              "mean": 0.875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.03340765523905305,
+              "mean": 0.875
+            }
+          }
+        },
+        "unseen": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0657630351011439,
+              "mean": 0.84375
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0657630351011439,
+              "mean": 0.84375
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.19640300556531937,
+              "mean": 1.1836354190173513
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.39280601113063873,
+              "mean": 1.4067824303638936
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.16315997088998158,
+              "mean": 0.5817332978357
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0944911182523068,
+              "mean": 0.75
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0944911182523068,
+              "mean": 0.75
+            }
+          }
+        }
+      },
+      "method": "known_covariance",
+      "parameter_error_names": [
+        "beta0",
+        "beta1"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.0615251946970843,
+            "mean": -0.07430384223025305
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.016073019938903806,
+            "mean": 0.03201850804777725
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.03618677974778221,
+            "mean": -0.03858382200315699
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.0035416697596907173,
+            "mean": 0.010655092519972808
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "negative_correlation",
+      "study": "sim-028",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 20,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "known": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ],
+          "unseen": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {},
+          "id": "estimated_covariance",
+          "initial": [
+            0,
+            0,
+            -0.6931471805599453,
+            -0.5108256237659907,
+            -0.916290731874155,
+            0
+          ],
+          "model_id": "gaussian_correlated_random_slope",
+          "regularization": null
+        },
+        "training_rows": 48,
+        "truth": {
+          "model_id": "gaussian_correlated_random_slope",
+          "parameters": [
+            0.8,
+            0.4,
+            -1.0498221244986778,
+            -0.35667494393873245,
+            -1.2039728043259361,
+            0.7752987062055835
+          ]
+        }
+      },
+      "future_metrics": {
+        "known": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.03628519689064477,
+              "mean": 0.8671875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.03628519689064477,
+              "mean": 0.8671875
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08222410766210517,
+              "mean": 0.7805122106964623
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.229388184413966,
+              "mean": 1.4985523591952008
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.02453063402388218,
+              "mean": 0.24536879590689392
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.06137378162887285,
+              "mean": 0.78125
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.06137378162887285,
+              "mean": 0.78125
+            }
+          }
+        },
+        "unseen": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0657630351011439,
+              "mean": 0.90625
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0657630351011439,
+              "mean": 0.90625
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.23553038156885972,
+              "mean": 1.544301881060859
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.4251966871071664,
+              "mean": 1.137351828509336
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.6623729586740836,
+              "mean": 1.4203497510574319
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.08183170883849714,
+              "mean": 0.875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.08183170883849714,
+              "mean": 0.875
+            }
+          }
+        }
+      },
+      "method": "estimated_covariance",
+      "parameter_error_names": [
+        "beta0",
+        "beta1",
+        "log_sigma",
+        "log_tau0",
+        "log_tau1",
+        "atanh_correlation"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.07678008139220568,
+            "mean": -0.07205278142740437
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.015374321257624909,
+            "mean": 0.04645786960158141
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.038674917556402566,
+            "mean": -0.0112775392094643
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.003936703520215861,
+            "mean": 0.010597427626582756
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.04600185019671566,
+            "mean": -0.045815173448052596
+          },
+          "coordinate": 2,
+          "mse": {
+            "count": 8,
+            "mcse": 0.00731092608315962,
+            "mean": 0.016912221668722624
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.07599411024329841,
+            "mean": 0.0214565807380939
+          },
+          "coordinate": 3,
+          "mse": {
+            "count": 8,
+            "mcse": 0.02053272494846113,
+            "mean": 0.0408861183986645
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.4293737677433277,
+            "mean": -0.7281211546589679
+          },
+          "coordinate": 4,
+          "mse": {
+            "count": 8,
+            "mcse": 1.1876668647913644,
+            "mean": 1.8206932428446163
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.5195357969334545,
+            "mean": 1.216230072100935
+          },
+          "coordinate": 5,
+          "mse": {
+            "count": 8,
+            "mcse": 1.5819737621093903,
+            "mean": 3.368637698349604
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "positive_correlation",
+      "study": "sim-028",
+      "successful_replications": 8
+    },
+    {
+      "attempted_replications": 8,
+      "configuration": {
+        "artifact": {
+          "binary": {
+            "path": "/opt/spark-tmbad/tmbad-worker",
+            "sha256": "3351a1619ec13d7eb19f2d80333146b3cbd156f4ae9e940a338b99fed4cac357"
+          },
+          "build_id": "5d3cfec94ba65f7c39711f109b09dc3ec6883bcb062e68cecb50345434a35383",
+          "engine": {
+            "name": "TMBad",
+            "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+            "version": "1.9.25"
+          },
+          "jvm": {
+            "java_min": 17,
+            "path": "/opt/spark-tmbad/spark-tmbad.jar",
+            "scala_binary_version": "2.13",
+            "sha256": "4bc78a3be973d8e3e62eea12df2bf1e2410299b7bf39144b2f75257958814b8c",
+            "spark_version": "4.0.1"
+          },
+          "manifest_sha256": "b6d73e248009a0f0dd23b804f70c6544cb938cc7623ab83bddc2929a0025a69f"
+        },
+        "environment": {
+          "java": "17.0.21",
+          "machine": "aarch64",
+          "master": "local[2]",
+          "python": "3.12.12",
+          "spark": "4.0.1"
+        },
+        "future_rows": 20,
+        "generator": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+        "metric_schema": {
+          "known": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ],
+          "unseen": [
+            "mse",
+            "mean_marginal_nll",
+            "mean_standardized_square",
+            "gaussian_pointwise_coverage",
+            "unadjusted_gaussian_bands_path_coverage"
+          ]
+        },
+        "package": {
+          "distribution": "ds60-spark-tmbad",
+          "module_sha256": {
+            "ds60_spark_tmbad/__init__.py": "004e6aa0a3ffb831246a7448418ed728d23de2e66059639d12eb728fa13b5822",
+            "ds60_spark_tmbad/_evaluation.py": "897ff0fae206c28733179b7cfd166858a4e0459587556259aa4296662e3fbce1",
+            "ds60_spark_tmbad/_json.py": "a98e6ad6f8dacb406cf7f9413ef804c15881bdb7671dddd9133f1b25f2c86eb3",
+            "ds60_spark_tmbad/_target_documents.py": "322ad1da2fb5ec21ea78386918a893ed11ddc08d2cf352f0e5a69e5f24cc3586",
+            "ds60_spark_tmbad/_targets.py": "7edd150f575f1ef3c5fd007eb80f1f50f22899f5b42e0f9d7722d83ea1188233",
+            "ds60_spark_tmbad/client.py": "2fccb68c9eac111518911c16fb06857ff83cb1ac6eb152abe9d1b549cfb055a7",
+            "ds60_spark_tmbad/parameters.py": "d582e4263dfd654bd6cc6c9ff1a70a475731e0cea9ccef06b09aa69e54672b05",
+            "ds60_spark_tmbad/persistence.py": "fc31b0cf7fd8cb2a808e32025f86ee7f3ba8d7ed0ee5c10077a8dca5b159f17a",
+            "ds60_spark_tmbad/runtime.py": "5196fa92e0cfe08b2ab8f2495b66c86cfc946e4208720c0350e755afe273554d",
+            "ds60_spark_tmbad/spec.py": "af2076d903a36811ee0760098736865b28c79f3058271babd128d3fb40a40682"
+          },
+          "version": "0.2.0"
+        },
+        "partitions": 2,
+        "source": {
+          "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+          "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+          "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+          "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+          "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd"
+        },
+        "target": {
+          "fixed": {
+            "atanh_correlation": 0.7752987062055835,
+            "log_sigma": -1.0498221244986778,
+            "log_tau0": -0.35667494393873245,
+            "log_tau1": -1.2039728043259361
+          },
+          "id": "known_covariance",
+          "initial": [
+            0,
+            0,
+            -1.0498221244986778,
+            -0.35667494393873245,
+            -1.2039728043259361,
+            0.7752987062055835
+          ],
+          "model_id": "gaussian_correlated_random_slope",
+          "regularization": null
+        },
+        "training_rows": 48,
+        "truth": {
+          "model_id": "gaussian_correlated_random_slope",
+          "parameters": [
+            0.8,
+            0.4,
+            -1.0498221244986778,
+            -0.35667494393873245,
+            -1.2039728043259361,
+            0.7752987062055835
+          ]
+        }
+      },
+      "future_metrics": {
+        "known": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.016440758775285974,
+              "mean": 0.9609375
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.016440758775285974,
+              "mean": 0.9609375
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.052987687573423356,
+              "mean": 0.7021371027309228
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.10597537514684671,
+              "mean": 1.0602872851128864
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.02328348582124004,
+              "mean": 0.24200305198404357
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.03288151755057195,
+              "mean": 0.921875
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.03288151755057195,
+              "mean": 0.921875
+            }
+          }
+        },
+        "unseen": {
+          "gaussian_pointwise_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0625,
+              "mean": 0.9375
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0625,
+              "mean": 0.9375
+            }
+          },
+          "mean_marginal_nll": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.24502534091272446,
+              "mean": 1.59760254801482
+            }
+          },
+          "mean_standardized_square": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.49005068182544903,
+              "mean": 1.047200228163419
+            }
+          },
+          "mse": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.6623729563390122,
+              "mean": 1.420349746054303
+            }
+          },
+          "unadjusted_gaussian_bands_path_coverage": {
+            "conditional_on_success": {
+              "count": 8,
+              "mcse": 0.0625,
+              "mean": 0.9375
+            },
+            "procedural_over_all_attempts": {
+              "count": 8,
+              "mcse": 0.0625,
+              "mean": 0.9375
+            }
+          }
+        }
+      },
+      "method": "known_covariance",
+      "parameter_error_names": [
+        "beta0",
+        "beta1"
+      ],
+      "parameter_recovery_conditional_on_success": [
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.07678008187401489,
+            "mean": -0.07205278577377631
+          },
+          "coordinate": 0,
+          "mse": {
+            "count": 8,
+            "mcse": 0.015374321407508839,
+            "mean": 0.04645787074582472
+          }
+        },
+        {
+          "bias": {
+            "count": 8,
+            "mcse": 0.03867491783731395,
+            "mean": -0.011277539121596798
+          },
+          "coordinate": 1,
+          "mse": {
+            "count": 8,
+            "mcse": 0.0039367035972490486,
+            "mean": 0.010597427776700039
+          }
+        }
+      ],
+      "reduction": "sum",
+      "replication_failure_fraction": {
+        "count": 8,
+        "estimate": 0.0,
+        "mcse": 0.0,
+        "successes": 0,
+        "wilson95_lower": 0.0,
+        "wilson95_upper": 0.32440756488388023
+      },
+      "scenario": "positive_correlation",
+      "study": "sim-028",
+      "successful_replications": 8
+    }
+  ],
+  "input_receipts": [
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        0
+      ],
+      "report_sha256": "82a7b2ddfe9db09d25daffd8f591ee6d0d08b191447bfab53a97c1b2ce50361a"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        0
+      ],
+      "report_sha256": "8a02a768fe542908e2ae183e12d74b00fc5293b29d5e5ad1587a9788bf05baab"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        0
+      ],
+      "report_sha256": "b283a0f6ab09828f8c9d9e4d895cb19c8078f9c8dffd21caa65415ac79371ccb"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        0
+      ],
+      "report_sha256": "6bb6fd7c8f17fed4d5f46d2ad6b83982342c93c323ae2cc8972be49b2d024adf"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        0
+      ],
+      "report_sha256": "342b3668cfd514a1e22e08ceac56c5efc842ca34274082215e1e7226a61d32cf"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        1
+      ],
+      "report_sha256": "f57d6c0f9ce2c2cdbe89b97cff4ff139186f8f699553337f4b6eb68d263db3e7"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        2
+      ],
+      "report_sha256": "1fc2c11df1e8f250365d1ef53bae9cc2aca03ff9a2d247d0798de137dee6620f"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        3
+      ],
+      "report_sha256": "c60ed345796a8392a84b15e3a514ea45c639210b2a96e52d0d1e7db87ba2615a"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        4
+      ],
+      "report_sha256": "dd1e91ce0bd4d425cd6f1b967c3db89cef05da182a249b5b99299502d51d2bbd"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        5
+      ],
+      "report_sha256": "beab644c4bca5e2b713e1bb4f75e3a44cfa264a79dc779a9f27b10a35259f377"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        6
+      ],
+      "report_sha256": "5b118346d91f72a29dc439bcc37ceffe3e850126bcb76ac56dee30a068fff800"
+    },
+    {
+      "identity": [
+        "sim-009",
+        381729,
+        7
+      ],
+      "report_sha256": "1442eda24619909c42015dba4f0e314a589a6e4a1e014189fcc28453dc36ebcb"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        1
+      ],
+      "report_sha256": "9e1717df40f12cc68eb3feeabc961370c8b0c649ea75c7641638e19a4ed1f784"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        2
+      ],
+      "report_sha256": "c8f7bfc8b4cdd94c0942de8ff46b11579c220a557f7016c96f77f4794b383582"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        3
+      ],
+      "report_sha256": "37aaae22f8b29109ae34aa85a2187b21bfe8c8ebeaf474fff4627a20f141fa16"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        4
+      ],
+      "report_sha256": "ec1f9629f246a8e0476ee64c06b389511df63009369261007e41779ae50a6e33"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        5
+      ],
+      "report_sha256": "bb3ba42084ce5ab10ab9adfcd43ea24ecb12ff779b39f09c9831b16acb3cb1e3"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        6
+      ],
+      "report_sha256": "65aaaa5619d5f933015276782cba0ba02a41e5743c25d1f333570df13cb8a0c4"
+    },
+    {
+      "identity": [
+        "sim-020",
+        381729,
+        7
+      ],
+      "report_sha256": "9dfade36abdff95e33623ea79688b4172043c5fcc7bdf7637c912b8158e11335"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        1
+      ],
+      "report_sha256": "6ecdf242296095da7d931198567c1a9f9d71e3a945594aeb8364b1fcea49a662"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        2
+      ],
+      "report_sha256": "2daba4629eafd6e024063d99b8af45be0533c0bb969dab1c2e2b0e470e3077e9"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        3
+      ],
+      "report_sha256": "85b9d6ad3d1a03d23cba9a3d90d22f47e1f20d5c872489a0def49fdb021dfdc0"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        4
+      ],
+      "report_sha256": "be036249fa7f4dfa6f781cc47c8739d1c2a44c6e37798a5a2dd9b58063ce8674"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        5
+      ],
+      "report_sha256": "35fd98b025d7ec01ea990a97e1951d84bb9121798946adc78d2f239a190d56a0"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        6
+      ],
+      "report_sha256": "3a53a7ac5a43910d6af7ad48f20f71362b47ce5573ccf40a996ceef29bcc5679"
+    },
+    {
+      "identity": [
+        "sim-022",
+        381729,
+        7
+      ],
+      "report_sha256": "06c4d03134d23dac38c4474101ca209b94aea5794c56971abb4e72d4ef831883"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        1
+      ],
+      "report_sha256": "3b1ecd34b59bfd99d683e8c70bb77e01c0a52ff5f4bd316f2747ccb4aaab5ad9"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        2
+      ],
+      "report_sha256": "9eeb45554889164f6560fb7ee37fd0e9ebe4f6236e1f4748c0c239142a290d2d"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        3
+      ],
+      "report_sha256": "e64140fcb7ca18423aa3d4879939011ba891a0ac3df71614e4c0436861c772cb"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        4
+      ],
+      "report_sha256": "0112978475ac31ae1b85293d72c599a367d10ccafa32fd59cd247ae0c2c5209e"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        5
+      ],
+      "report_sha256": "32941b076f27d0a11df6bbf40127dbb495ac6542a2f2b8aa985289f5af14c64e"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        6
+      ],
+      "report_sha256": "d1172e0e4e6f0a46a03f055fff9bff060667fe84bae3fc325888c305f999fb1a"
+    },
+    {
+      "identity": [
+        "sim-024",
+        381729,
+        7
+      ],
+      "report_sha256": "f6daad990b6c12807a3437f4cad44b676aafd90f02d7228a64aaa099216a64d7"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        1
+      ],
+      "report_sha256": "62dcfd49d57aa159a6ad52b4cb0bdbc6c029196e560fc1da9f37fbe8ef5c7d7d"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        2
+      ],
+      "report_sha256": "edbb9b9fc6bede652067b16600a3470f369a0846b8ce3e488d23cd79680ec4b4"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        3
+      ],
+      "report_sha256": "4ceb3f828098ea4feb6f07fb46f4078156875350cf43ee61be4869baadf35c73"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        4
+      ],
+      "report_sha256": "05ada060a8a3a726d669b83592970d9b5f5db4caf0b7927f9e5f8a93f5587b09"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        5
+      ],
+      "report_sha256": "89aa19cfffb78f9e1ce79e3da3f3b07053a276d32fd20d602a1b25dc2b8e3525"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        6
+      ],
+      "report_sha256": "377bf278b11f74981685937e9aef4c81fe51ccec026536f88badd7c8bf143708"
+    },
+    {
+      "identity": [
+        "sim-028",
+        381729,
+        7
+      ],
+      "report_sha256": "4d70b5f7d0f6eacab40cae372ca5daea83258dfe3ea5474e6fa24b07f234e5af"
+    }
+  ],
+  "kind": "native020-monte-carlo-summary",
+  "schema_version": 1,
+  "scope": "MCSE uses independent generated datasets, not rows or overlapping panel horizons. Failed fits remain in the attempted denominator. Small smoke repetition counts do not establish calibration, posterior inference or scale performance."
+}

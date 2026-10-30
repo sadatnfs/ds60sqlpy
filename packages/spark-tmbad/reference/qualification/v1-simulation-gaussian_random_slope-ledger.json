@@ -1,0 +1,2643 @@
+[
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 1729
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.21828475070674,
+        0.71130950913539,
+        -0.924704089668617,
+        -0.527199194576432,
+        -1.41368880749712,
+        0.13359908107595
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 268.387857691286,
+        "raw_score_inf": 8.03679220246946e-06,
+        "projected_score_inf": 8.03679220246946e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 268.387857691286,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.21828493721804,
+              0.711309836329627,
+              -0.924704897039013,
+              -0.527195258110345,
+              -1.41368010093629,
+              0.133594888156633
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 268.387857693791,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 21,
+            "evaluations": [
+              30,
+              22
+            ],
+            "gradient": [
+              9.755054737719e-06,
+              0.000144581729782874,
+              -0.000410915521799216,
+              0.000245292055921713,
+              0.000351742286111276,
+              -0.000139560211188452
+            ],
+            "projected_gradient": [
+              9.755054737719e-06,
+              0.000144581729782874,
+              -0.000410915521799216,
+              0.000245292055921713,
+              0.000351742286111276,
+              -0.000139560211188452
+            ],
+            "raw_score_inf": 0.000410915521799216,
+            "projected_score_inf": 0.000410915521799216
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.21828475070674,
+              0.71130950913539,
+              -0.924704089668617,
+              -0.527199194576432,
+              -1.41368880749712,
+              0.13359908107595
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 268.387857691286,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              9,
+              9
+            ],
+            "gradient": [
+              5.87901105225869e-07,
+              5.38034586568797e-06,
+              2.54209869306738e-06,
+              2.7406513682425e-06,
+              -4.3428093087557e-06,
+              -8.03679220246946e-06
+            ],
+            "projected_gradient": [
+              5.87901105225869e-07,
+              5.38034586568797e-06,
+              2.54209869306738e-06,
+              2.7406513682425e-06,
+              -4.3428093087557e-06,
+              -8.03679220246946e-06
+            ],
+            "raw_score_inf": 8.03679220246946e-06,
+            "projected_score_inf": 8.03679220246946e-06
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -2.89901436190121e-12,
+      "prediction": {
+        "mean": [
+          0.493729898403875,
+          1.53423163241406,
+          2.14119097725333
+        ],
+        "covariance": [
+          [
+            0.207662433886758,
+            -0.000275492329010002,
+            -0.0297966367535973
+          ],
+          [
+            -0.000275492329010002,
+            0.174372668555471,
+            0.0271445331441418
+          ],
+          [
+            -0.0297966367535973,
+            0.0271445331441418,
+            0.217690465643822
+          ]
+        ],
+        "sd": [
+          0.455699938431813,
+          0.417579535604261,
+          0.466573108573374
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.0620723657369632,
+        1.64507045618797,
+        2.64090376897752
+      ],
+      "new_group_sd": [
+        0.792962688746073,
+        0.741562311494744,
+        0.904807661902
+      ],
+      "metrics": {
+        "mse": 0.331253861270505,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.71130950913539,
+        "truth": 0.7
+      },
+      "fixture_sha256": "f8bdcb3dfd15097267ab4ac1161ab901365e8df5ce0408946e2a36125f9f057b"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.485,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "fba22a6501b8d1b20886d7479c38a3c839c4da265604610a01230098d6da2577",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 0,
+    "seed": 1729
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 9648
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.17133859591299,
+        0.734201800171936,
+        -0.875534019040964,
+        -0.544506990888858,
+        -1.2677461322737,
+        -0.0912447636035182
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 287.86108197226,
+        "raw_score_inf": 1.96253986930081e-05,
+        "projected_score_inf": 1.96253986930081e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 287.86108197226,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.17133733341973,
+              0.734199511952472,
+              -0.875529602418438,
+              -0.544509930892122,
+              -1.26773851388855,
+              -0.0912567298294396
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 287.861081983028,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 24,
+            "evaluations": [
+              36,
+              25
+            ],
+            "gradient": [
+              -0.00015798909260223,
+              -0.000800919193561618,
+              0.00288348279212691,
+              -0.000184179705381113,
+              0.000339005418248457,
+              -0.000306159698793563
+            ],
+            "projected_gradient": [
+              -0.00015798909260223,
+              -0.000800919193561618,
+              0.00288348279212691,
+              -0.000184179705381113,
+              0.000339005418248457,
+              -0.000306159698793563
+            ],
+            "raw_score_inf": 0.00288348279212691,
+            "projected_score_inf": 0.00288348279212691
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.17133859591299,
+              0.734201800171936,
+              -0.875534019040964,
+              -0.544506990888858,
+              -1.2677461322737,
+              -0.0912447636035182
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 287.86108197226,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              8,
+              8
+            ],
+            "gradient": [
+              -9.47208071551236e-06,
+              -1.14433060234113e-05,
+              -2.13263331981439e-06,
+              5.04530234086023e-06,
+              -1.96253986930081e-05,
+              -1.04549180803777e-05
+            ],
+            "projected_gradient": [
+              -9.47208071551236e-06,
+              -1.14433060234113e-05,
+              -2.13263331981439e-06,
+              5.04530234086023e-06,
+              -1.96253986930081e-05,
+              -1.04549180803777e-05
+            ],
+            "raw_score_inf": 1.96253986930081e-05,
+            "projected_score_inf": 1.96253986930081e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -4.03588273911737e-12,
+      "prediction": {
+        "mean": [
+          0.38132022835351,
+          2.58885643657847,
+          3.87658589137637
+        ],
+        "covariance": [
+          [
+            0.231618573528525,
+            -0.000603219648974529,
+            -0.0348060058884783
+          ],
+          [
+            -0.000603219648974529,
+            0.192192763569505,
+            0.0298087153278966
+          ],
+          [
+            -0.0348060058884783,
+            0.0298087153278966,
+            0.241089081375799
+          ]
+        ],
+        "sd": [
+          0.481267673471349,
+          0.438397951146564,
+          0.491008229437959
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.150224644396493,
+        1.61185967601615,
+        2.63974219625686
+      ],
+      "new_group_sd": [
+        0.905707545540367,
+        0.721683778062723,
+        0.87612579039793
+      ],
+      "metrics": {
+        "mse": 0.278049409803808,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.734201800171936,
+        "truth": 0.7
+      },
+      "fixture_sha256": "16f16283cda226e2e4d6818a17a82eba7313ec9b651d31b11ca6c7af2c2635b2"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.502,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "d65aebcd4be5481d479abfed5eaad4540068fcc03ef1e024eb1ac03b4657d605",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 1,
+    "seed": 9648
+  },
+  {
+    "status": "failed",
+    "error": {
+      "type": "RuntimeError",
+      "message": "Reference case failed; retained result/log are not acceptance"
+    },
+    "replicate": 2,
+    "seed": 17567
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 25486
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.16894724599408,
+        0.632460000776608,
+        -0.890910493855719,
+        -0.528986607947475,
+        -1.24276935692372,
+        -0.180046025481257
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 283.673931304283,
+        "raw_score_inf": 1.2241909131671e-05,
+        "projected_score_inf": 1.2241909131671e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 283.673931304283,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.16894349649101,
+              0.632464168711155,
+              -0.890909617271782,
+              -0.528990179128285,
+              -1.24277079294923,
+              -0.180046530973655
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 283.673931308025,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 25,
+            "evaluations": [
+              33,
+              25
+            ],
+            "gradient": [
+              -0.000215678291087871,
+              0.00127611957971216,
+              0.000541116773501734,
+              -0.000220977087427462,
+              -6.86141175538911e-05,
+              -3.0965532055232e-05
+            ],
+            "projected_gradient": [
+              -0.000215678291087871,
+              0.00127611957971216,
+              0.000541116773501734,
+              -0.000220977087427462,
+              -6.86141175538911e-05,
+              -3.0965532055232e-05
+            ],
+            "raw_score_inf": 0.00127611957971216,
+            "projected_score_inf": 0.00127611957971216
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.16894724599408,
+              0.632460000776608,
+              -0.890910493855719,
+              -0.528986607947475,
+              -1.24276935692372,
+              -0.180046025481257
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 283.673931304283,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              6,
+              6
+            ],
+            "gradient": [
+              9.43733335830462e-06,
+              -8.47768301085685e-07,
+              7.19059685324608e-07,
+              -8.47399553928163e-06,
+              -1.2241909131671e-05,
+              8.31696600120481e-08
+            ],
+            "projected_gradient": [
+              9.43733335830462e-06,
+              -8.47768301085685e-07,
+              7.19059685324608e-07,
+              -8.47399553928163e-06,
+              -1.2241909131671e-05,
+              8.31696600120481e-08
+            ],
+            "raw_score_inf": 1.2241909131671e-05,
+            "projected_score_inf": 1.2241909131671e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.97903932025656e-12,
+      "prediction": {
+        "mean": [
+          -0.110644026495065,
+          0.960366846721049,
+          1.58512318943045
+        ],
+        "covariance": [
+          [
+            0.225366641059621,
+            -0.000591120854221305,
+            -0.0342065343916443
+          ],
+          [
+            -0.000591120854221305,
+            0.186332135436436,
+            0.0288460819868363
+          ],
+          [
+            -0.0342065343916443,
+            0.0288460819868363,
+            0.233958113581115
+          ]
+        ],
+        "sd": [
+          0.474727965322901,
+          0.431662061613522,
+          0.483692168203202
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        0.0305192445961822,
+        1.54842324646004,
+        2.43386724754729
+      ],
+      "new_group_sd": [
+        0.945702973780399,
+        0.713530803629936,
+        0.85291449484451
+      ],
+      "metrics": {
+        "mse": 0.219641146183471,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.632460000776608,
+        "truth": 0.7
+      },
+      "fixture_sha256": "cb2774eb0afd433b6e82c886bb3f58fcd490f5542ddf97c62628eb28c7021974"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.479,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "7a6209d97b6413ea3bb4ecfac72d66b4c9cc38e843a5cc7d613339ef11fe5246",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 3,
+    "seed": 25486
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 33405
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.14219539574293,
+        0.687827707028746,
+        -0.905758484724096,
+        -0.472111928404771,
+        -1.13099524117316,
+        -0.582416395881654
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 279.855182327078,
+        "raw_score_inf": 9.53049591614066e-06,
+        "projected_score_inf": 9.53049591614066e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 279.855182327078,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.14219966528942,
+              0.687825703648999,
+              -0.905761542847026,
+              -0.472116913426403,
+              -1.13099428415156,
+              -0.582401946943859
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 279.855182334004,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 26,
+            "evaluations": [
+              36,
+              27
+            ],
+            "gradient": [
+              0.00025865662196959,
+              -0.000317575750658187,
+              -0.00187927584743261,
+              -0.000182087338544061,
+              0.000202358285753705,
+              0.000359887402510975
+            ],
+            "projected_gradient": [
+              0.00025865662196959,
+              -0.000317575750658187,
+              -0.00187927584743261,
+              -0.000182087338544061,
+              0.000202358285753705,
+              0.000359887402510975
+            ],
+            "raw_score_inf": 0.00187927584743261,
+            "projected_score_inf": 0.00187927584743261
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.14219539574293,
+              0.687827707028746,
+              -0.905758484724096,
+              -0.472111928404771,
+              -1.13099524117316,
+              -0.582416395881654
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 279.855182327078,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              10,
+              10
+            ],
+            "gradient": [
+              5.37401300564053e-08,
+              -9.53049591614066e-06,
+              7.50930612663875e-06,
+              -1.06992796296493e-06,
+              1.90447708041926e-06,
+              2.48389764503662e-06
+            ],
+            "projected_gradient": [
+              5.37401300564053e-08,
+              -9.53049591614066e-06,
+              7.50930612663875e-06,
+              -1.06992796296493e-06,
+              1.90447708041926e-06,
+              2.48389764503662e-06
+            ],
+            "raw_score_inf": 9.53049591614066e-06,
+            "projected_score_inf": 9.53049591614066e-06
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.35376171278767e-12,
+      "prediction": {
+        "mean": [
+          1.93829318717859,
+          2.40524998373758,
+          2.67764144839699
+        ],
+        "covariance": [
+          [
+            0.220022845119591,
+            -8.1812948729082e-05,
+            -0.0331559912573736
+          ],
+          [
+            -8.1812948729082e-05,
+            0.180312629561057,
+            0.026816448778484
+          ],
+          [
+            -0.0331559912573736,
+            0.026816448778484,
+            0.225206438814807
+          ]
+        ],
+        "sd": [
+          0.469065928329474,
+          0.424632346343348,
+          0.474559204751954
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.0958944769088104,
+        1.55489201996018,
+        2.51785080980043
+      ],
+      "new_group_sd": [
+        1.12684989595458,
+        0.680601866885009,
+        0.739431784998818
+      ],
+      "metrics": {
+        "mse": 0.153795155415615,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.687827707028746,
+        "truth": 0.7
+      },
+      "fixture_sha256": "fbf303406af5847fe8c4b2ffe239d38f65a32ec4e2b3ad2eae1c93dc2ff600be"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.508,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "62ce18c086bc4a58065fe02e4aa5646819a9a32f76e8e5c63bbd6963f4c757f0",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 4,
+    "seed": 33405
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 41324
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.07853184670893,
+        0.661590692829406,
+        -0.922195376536539,
+        -0.326676506515861,
+        -1.2809429062905,
+        -0.074497926365609
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 279.05967343542,
+        "raw_score_inf": 0.000193904073285414,
+        "projected_score_inf": 0.000193904073285414,
+        "iterations": 30,
+        "pd_hessian": true,
+        "restored_objective": 279.05967343542,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.07853184670893,
+              0.661590692829406,
+              -0.922195376536539,
+              -0.326676506515861,
+              -1.2809429062905,
+              -0.074497926365609
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 279.05967343542,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 30,
+            "evaluations": [
+              42,
+              31
+            ],
+            "gradient": [
+              0.000176891729559044,
+              -0.000193904073285414,
+              7.11534915098647e-05,
+              0.000152095005993911,
+              -4.29585689406713e-05,
+              1.47097402183487e-05
+            ],
+            "projected_gradient": [
+              0.000176891729559044,
+              -0.000193904073285414,
+              7.11534915098647e-05,
+              0.000152095005993911,
+              -4.29585689406713e-05,
+              1.47097402183487e-05
+            ],
+            "raw_score_inf": 0.000193904073285414,
+            "projected_score_inf": 0.000193904073285414
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -2.89901436190121e-12,
+      "prediction": {
+        "mean": [
+          -1.20822135824278,
+          1.4691154128078,
+          3.03089519592064
+        ],
+        "covariance": [
+          [
+            0.211536432117433,
+            -0.000528464588417904,
+            -0.0319953721123668
+          ],
+          [
+            -0.000528464588417904,
+            0.17538314940249,
+            0.0276390153445935
+          ],
+          [
+            -0.0319953721123668,
+            0.0276390153445935,
+            0.220547368025949
+          ]
+        ],
+        "sd": [
+          0.459930899285352,
+          0.418787714006142,
+          0.469624709769353
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.112331400384004,
+        1.47548626240657,
+        2.40171323236774
+      ],
+      "new_group_sd": [
+        0.990985532090532,
+        0.829649444414403,
+        0.963047082564481
+      ],
+      "metrics": {
+        "mse": 0.050288685244554,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.661590692829406,
+        "truth": 0.7
+      },
+      "fixture_sha256": "df73821c2932f0417b6ca32a679dda75d0ab3da470e5456901ee8806d20f0b85"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.482,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "ee23e934054d5195c98147ded02a51d2b196abf56737f5e3e121c36badb29b18",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 5,
+    "seed": 41324
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 49243
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.32877562916178,
+        0.738924954165068,
+        -0.909237219456375,
+        -0.21972733245048,
+        -1.39504880290211,
+        -0.401339014846411
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 281.777322470422,
+        "raw_score_inf": 4.36978012548649e-06,
+        "projected_score_inf": 4.36978012548649e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 281.777322470422,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.3287796710235,
+              0.738927034805734,
+              -0.909237203554807,
+              -0.219730174568457,
+              -1.39506831995259,
+              -0.401337518832514
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 281.777322480334,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 27,
+            "evaluations": [
+              38,
+              27
+            ],
+            "gradient": [
+              0.000330438871457403,
+              0.001198479145875,
+              -0.000200193546302946,
+              -9.04498805090597e-05,
+              -0.000813544599715277,
+              -8.58373101574695e-05
+            ],
+            "projected_gradient": [
+              0.000330438871457403,
+              0.001198479145875,
+              -0.000200193546302946,
+              -9.04498805090597e-05,
+              -0.000813544599715277,
+              -8.58373101574695e-05
+            ],
+            "raw_score_inf": 0.001198479145875,
+            "projected_score_inf": 0.001198479145875
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.32877562916178,
+              0.738924954165068,
+              -0.909237219456375,
+              -0.21972733245048,
+              -1.39504880290211,
+              -0.401339014846411
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 281.777322470422,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              12,
+              12
+            ],
+            "gradient": [
+              -4.36978012548649e-06,
+              -9.93777955787067e-07,
+              3.53219121583032e-06,
+              2.04009363006577e-06,
+              -1.533539182001e-06,
+              -5.99157373799391e-07
+            ],
+            "projected_gradient": [
+              -4.36978012548649e-06,
+              -9.93777955787067e-07,
+              3.53219121583032e-06,
+              2.04009363006577e-06,
+              -1.533539182001e-06,
+              -5.99157373799391e-07
+            ],
+            "raw_score_inf": 4.36978012548649e-06,
+            "projected_score_inf": 4.36978012548649e-06
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -2.89901436190121e-12,
+      "prediction": {
+        "mean": [
+          0.305821526448448,
+          2.53049915863904,
+          3.82822777741689
+        ],
+        "covariance": [
+          [
+            0.215072057523317,
+            0.000852312601606176,
+            -0.0294498854124334
+          ],
+          [
+            0.000852312601606176,
+            0.179321152095495,
+            0.0264955355218528
+          ],
+          [
+            -0.0294498854124334,
+            0.0264955355218528,
+            0.221403484154972
+          ]
+        ],
+        "sd": [
+          0.46375861989112,
+          0.423463283054736,
+          0.470535316586303
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.00128928833534364,
+        1.77213060166082,
+        2.80662553749192
+      ],
+      "new_group_sd": [
+        1.1307400533331,
+        0.858949763299989,
+        0.865488076850378
+      ],
+      "metrics": {
+        "mse": 0.21879593150089,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.738924954165068,
+        "truth": 0.7
+      },
+      "fixture_sha256": "87fee20a718daa96d14460176a6781e82a6a8ebc4b7d1ccc509feb614cd25fe9"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.487,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "0a3f90e9ff1adf6f3806162ee06e17c953c15762c8f87b00f5c1a140730cab9e",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 6,
+    "seed": 49243
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 57162
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.29643490263686,
+        0.65841729655779,
+        -0.903880447750798,
+        -0.561898835284084,
+        -1.23745166913895,
+        -0.178983495932283
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 278.576833828907,
+        "raw_score_inf": 4.85577592121229e-05,
+        "projected_score_inf": 4.85577592121229e-05,
+        "iterations": 26,
+        "pd_hessian": true,
+        "restored_objective": 278.576833828907,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.29643490263686,
+              0.65841729655779,
+              -0.903880447750798,
+              -0.561898835284084,
+              -1.23745166913895,
+              -0.178983495932283
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 278.576833828907,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 26,
+            "evaluations": [
+              33,
+              27
+            ],
+            "gradient": [
+              4.05562352056941e-06,
+              8.92474685842268e-06,
+              4.85577592121229e-05,
+              1.0245959003139e-05,
+              -8.03704780983027e-06,
+              1.60949219341747e-05
+            ],
+            "projected_gradient": [
+              4.05562352056941e-06,
+              8.92474685842268e-06,
+              4.85577592121229e-05,
+              1.0245959003139e-05,
+              -8.03704780983027e-06,
+              1.60949219341747e-05
+            ],
+            "raw_score_inf": 4.85577592121229e-05,
+            "projected_score_inf": 4.85577592121229e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.35376171278767e-12,
+      "prediction": {
+        "mean": [
+          1.25231602419617,
+          1.8548223446439,
+          2.20628436490507
+        ],
+        "covariance": [
+          [
+            0.219824635580264,
+            -0.000680546867106419,
+            -0.033629661420424
+          ],
+          [
+            -0.000680546867106419,
+            0.181567507460823,
+            0.0281789778742117
+          ],
+          [
+            -0.033629661420424,
+            0.0281789778742117,
+            0.228255003533004
+          ]
+        ],
+        "sd": [
+          0.468854599615131,
+          0.426107389587206,
+          0.477760403898235
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        0.111283768832839,
+        1.69148528057154,
+        2.61326949575244
+      ],
+      "new_group_sd": [
+        0.931253335930585,
+        0.695855013199633,
+        0.841770210228636
+      ],
+      "metrics": {
+        "mse": 0.297237082167691,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.65841729655779,
+        "truth": 0.7
+      },
+      "fixture_sha256": "49d6a25af11c558b347256ad3789c404d566daf185e0bcf82cd558e836eeaa75"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.484,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "eed09c95eb37205d6c8de35042510ddadbb646e97c545621a37dca2e87e7725c",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 7,
+    "seed": 57162
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 65081
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.20229724145298,
+        0.763866108404964,
+        -0.917953344414033,
+        -0.433871592072668,
+        -1.2967340538914,
+        -0.420389691810666
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 274.577023269961,
+        "raw_score_inf": 1.59499594556584e-05,
+        "projected_score_inf": 1.59499594556584e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 274.577023269961,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.20229812684994,
+              0.763867055335252,
+              -0.917953580833524,
+              -0.433873732140732,
+              -1.29673824809781,
+              -0.420392256010705
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 274.577023271001,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 25,
+            "evaluations": [
+              38,
+              26
+            ],
+            "gradient": [
+              0.000132594591002648,
+              0.000452063876568499,
+              -0.000199381268323987,
+              -0.000126301172753959,
+              -0.000207043109832969,
+              -0.000124119074509896
+            ],
+            "projected_gradient": [
+              0.000132594591002648,
+              0.000452063876568499,
+              -0.000199381268323987,
+              -0.000126301172753959,
+              -0.000207043109832969,
+              -0.000124119074509896
+            ],
+            "raw_score_inf": 0.000452063876568499,
+            "projected_score_inf": 0.000452063876568499
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.20229724145298,
+              0.763866108404964,
+              -0.917953344414033,
+              -0.433871592072668,
+              -1.2967340538914,
+              -0.420389691810666
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 274.577023269961,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              7,
+              7
+            ],
+            "gradient": [
+              -5.22902166162225e-06,
+              6.36589600105517e-06,
+              9.88745903479357e-06,
+              1.59499594556584e-05,
+              -3.82924408841761e-06,
+              -8.12624410254491e-06
+            ],
+            "projected_gradient": [
+              -5.22902166162225e-06,
+              6.36589600105517e-06,
+              9.88745903479357e-06,
+              1.59499594556584e-05,
+              -3.82924408841761e-06,
+              -8.12624410254491e-06
+            ],
+            "raw_score_inf": 1.59499594556584e-05,
+            "projected_score_inf": 1.59499594556584e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.46744855050929e-12,
+      "prediction": {
+        "mean": [
+          0.778747906548733,
+          1.82463324178955,
+          2.43473302068003
+        ],
+        "covariance": [
+          [
+            0.213056058511762,
+            0.000225478412961916,
+            -0.0309021988912256
+          ],
+          [
+            0.000225478412961916,
+            0.176158820436286,
+            0.0262942612857766
+          ],
+          [
+            -0.0309021988912256,
+            0.0262942612857766,
+            0.21912771063303
+          ]
+        ],
+        "sd": [
+          0.4615799589581,
+          0.419712783265277,
+          0.468110788844938
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.172661753675952,
+        1.66061690649596,
+        2.73002945826291
+      ],
+      "new_group_sd": [
+        1.03681089805314,
+        0.722370071034327,
+        0.77257213221399
+      ],
+      "metrics": {
+        "mse": 0.00615928082038856,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.763866108404964,
+        "truth": 0.7
+      },
+      "fixture_sha256": "71b75a4cbb354ea3acbc5e4b34f08cc86a102d3a9034a1ba7e8ea407d10ba2c5"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.487,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "75a76cf136b1dfc060ff02949a9d1efe2d03faffbfc87ab2798030108c61c3ca",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 8,
+    "seed": 65081
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 73000
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        0.994476221162923,
+        0.687776820019425,
+        -0.910856332076611,
+        -0.441856936330759,
+        -1.0377877750144,
+        -0.115077478664396
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 285.798026717649,
+        "raw_score_inf": 6.87534969205702e-06,
+        "projected_score_inf": 6.87534969205702e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 285.798026717649,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.994476200328017,
+              0.687775413403976,
+              -0.910856175584242,
+              -0.441855667478425,
+              -1.03778593928711,
+              -0.115078350111018
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 285.798026718029,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 24,
+            "evaluations": [
+              31,
+              25
+            ],
+            "gradient": [
+              -2.14018933248741e-05,
+              -0.000325033794832384,
+              0.000111170912232716,
+              7.20850004356229e-05,
+              9.04216037916037e-05,
+              -2.27184981345088e-05
+            ],
+            "projected_gradient": [
+              -2.14018933248741e-05,
+              -0.000325033794832384,
+              0.000111170912232716,
+              7.20850004356229e-05,
+              9.04216037916037e-05,
+              -2.27184981345088e-05
+            ],
+            "raw_score_inf": 0.000325033794832384,
+            "projected_score_inf": 0.000325033794832384
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              0.994476221162923,
+              0.687776820019425,
+              -0.910856332076611,
+              -0.441856936330759,
+              -1.0377877750144,
+              -0.115077478664396
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 285.798026717649,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              8,
+              8
+            ],
+            "gradient": [
+              -3.62713249204733e-08,
+              -1.14041845052884e-06,
+              -2.2805239104759e-06,
+              -1.54268801240384e-06,
+              -1.81330795678006e-06,
+              -6.87534969205702e-06
+            ],
+            "projected_gradient": [
+              -3.62713249204733e-08,
+              -1.14041845052884e-06,
+              -2.2805239104759e-06,
+              -1.54268801240384e-06,
+              -1.81330795678006e-06,
+              -6.87534969205702e-06
+            ],
+            "raw_score_inf": 6.87534969205702e-06,
+            "projected_score_inf": 6.87534969205702e-06
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -2.50111042987555e-12,
+      "prediction": {
+        "mean": [
+          1.63764951963149,
+          1.84684014154332,
+          1.96886800432523
+        ],
+        "covariance": [
+          [
+            0.219005606074946,
+            -0.00147160926634196,
+            -0.0357300307888804
+          ],
+          [
+            -0.00147160926634196,
+            0.179564806733846,
+            0.0290676025761889
+          ],
+          [
+            -0.0357300307888804,
+            0.0290676025761889,
+            0.228614714770368
+          ]
+        ],
+        "sd": [
+          0.467980347958059,
+          0.423750878151121,
+          0.478136711381136
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.243522054872042,
+        1.40714231317458,
+        2.37002986120177
+      ],
+      "new_group_sd": [
+        1.037057053107,
+        0.767372049399894,
+        0.986189484261508
+      ],
+      "metrics": {
+        "mse": 0.0369316519820296,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.687776820019425,
+        "truth": 0.7
+      },
+      "fixture_sha256": "65915ce8dc9f4af07cda2748132929c1e843958f83a008b9296ee6ac6072a1b1"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.542,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "7d409b25f5cecc4ef8c68ef0c45da7a81444322a2ed09ad487df6c00079aaefb",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 9,
+    "seed": 73000
+  },
+  {
+    "status": "failed",
+    "error": {
+      "type": "RuntimeError",
+      "message": "Reference case failed; retained result/log are not acceptance"
+    },
+    "replicate": 10,
+    "seed": 80919
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 88838
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.25221163506794,
+        0.600818724548221,
+        -0.926260611512847,
+        -0.379876358298854,
+        -1.50486710512077,
+        0.128404969341893
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 270.174918522525,
+        "raw_score_inf": 7.69611259452e-06,
+        "projected_score_inf": 7.69611259452e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 270.174918522525,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.2522187957594,
+              0.600816662602746,
+              -0.926257432016222,
+              -0.379874342358592,
+              -1.50486624071597,
+              0.128391549283469
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 270.174918531384,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 27,
+            "evaluations": [
+              38,
+              27
+            ],
+            "gradient": [
+              0.000524112086268053,
+              -0.0011882012090243,
+              0.0020780309628487,
+              0.000162322609779527,
+              8.25847075064211e-05,
+              -0.000335324761429871
+            ],
+            "projected_gradient": [
+              0.000524112086268053,
+              -0.0011882012090243,
+              0.0020780309628487,
+              0.000162322609779527,
+              8.25847075064211e-05,
+              -0.000335324761429871
+            ],
+            "raw_score_inf": 0.0020780309628487,
+            "projected_score_inf": 0.0020780309628487
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.25221163506794,
+              0.600818724548221,
+              -0.926260611512847,
+              -0.379876358298854,
+              -1.50486710512077,
+              0.128404969341893
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 270.174918522525,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              38,
+              38
+            ],
+            "gradient": [
+              -3.68060998924314e-07,
+              7.48351452195276e-07,
+              -2.71829608842073e-06,
+              -4.22307823027248e-06,
+              -7.69611259452e-06,
+              -2.45457141625113e-07
+            ],
+            "projected_gradient": [
+              -3.68060998924314e-07,
+              7.48351452195276e-07,
+              -2.71829608842073e-06,
+              -4.22307823027248e-06,
+              -7.69611259452e-06,
+              -2.45457141625113e-07
+            ],
+            "raw_score_inf": 7.69611259452e-06,
+            "projected_score_inf": 7.69611259452e-06
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.24007487506606e-12,
+      "prediction": {
+        "mean": [
+          -0.115866143407097,
+          1.3869473239403,
+          2.26358851322628
+        ],
+        "covariance": [
+          [
+            0.205750567272693,
+            0.000349287438878715,
+            -0.0279774049877521
+          ],
+          [
+            0.000349287438878715,
+            0.173770363844971,
+            0.0266007019315547
+          ],
+          [
+            -0.0279774049877521,
+            0.0266007019315547,
+            0.215279166641693
+          ]
+        ],
+        "sd": [
+          0.453597362506323,
+          0.41685772614283,
+          0.463981860250692
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        0.170737930881145,
+        1.61270286979688,
+        2.45384908416438
+      ],
+      "new_group_sd": [
+        0.845311734141496,
+        0.815871317813158,
+        0.948377030667052
+      ],
+      "metrics": {
+        "mse": 0.133985051156346,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.600818724548221,
+        "truth": 0.7
+      },
+      "fixture_sha256": "c5466bd30377ed7af94fe8a935f83ee679022c80c853481ecbb3ac601624988b"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.505,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "2e60d8f5ffead5dc34d4dbbd5e722a7e0a5871270f9fcc07ae0ac8cf4ec70c25",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 11,
+    "seed": 88838
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 96757
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.19206468743725,
+        0.759402625943785,
+        -0.924230780180536,
+        -0.361226565252904,
+        -1.07795842371406,
+        -0.636438117879341
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 277.899327226652,
+        "raw_score_inf": 0.000195013452772831,
+        "projected_score_inf": 0.000195013452772831,
+        "iterations": 30,
+        "pd_hessian": true,
+        "restored_objective": 277.899327226652,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.19206468743725,
+              0.759402625943785,
+              -0.924230780180536,
+              -0.361226565252904,
+              -1.07795842371406,
+              -0.636438117879341
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 277.899327226652,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 30,
+            "evaluations": [
+              40,
+              31
+            ],
+            "gradient": [
+              3.20004155702744e-05,
+              3.05500863972154e-05,
+              0.000195013452772831,
+              -4.72289730637948e-05,
+              4.93461450040403e-05,
+              1.09702197602623e-05
+            ],
+            "projected_gradient": [
+              3.20004155702744e-05,
+              3.05500863972154e-05,
+              0.000195013452772831,
+              -4.72289730637948e-05,
+              4.93461450040403e-05,
+              1.09702197602623e-05
+            ],
+            "raw_score_inf": 0.000195013452772831,
+            "projected_score_inf": 0.000195013452772831
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.12638803734444e-12,
+      "prediction": {
+        "mean": [
+          0.158718479016796,
+          1.52709338825445,
+          2.32531208530975
+        ],
+        "covariance": [
+          [
+            0.212587070681872,
+            -0.000191307237474514,
+            -0.0324491304730507
+          ],
+          [
+            -0.000191307237474514,
+            0.173969308318905,
+            0.0262208511367717
+          ],
+          [
+            -0.0324491304730507,
+            0.0262208511367717,
+            0.217924259448479
+          ]
+        ],
+        "sd": [
+          0.461071654606821,
+          0.417096281832989,
+          0.466823584931695
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.174860039261567,
+        1.64770626300352,
+        2.71086993932482
+      ],
+      "new_group_sd": [
+        1.22407716220635,
+        0.724346520980101,
+        0.756791708404671
+      ],
+      "metrics": {
+        "mse": 0.183541873914131,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.759402625943785,
+        "truth": 0.7
+      },
+      "fixture_sha256": "9e9ca8eeef4b81a4c8f2f2277477e1129f8acd9f183e2c17ca8a1a6778a58946"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.484,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "baa4ff17eecc444d1b2abb66e52fa05155acf34f8e881f540f18d05224493496",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 12,
+    "seed": 96757
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 104676
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.21085364306795,
+        0.707445016564658,
+        -0.8909958442779,
+        -0.357135177630286,
+        -1.14836945855456,
+        -0.348944298009066
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 290.365485101121,
+        "raw_score_inf": 1.75069357321804e-05,
+        "projected_score_inf": 1.75069357321804e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 290.365485101121,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.21086243572223,
+              0.707439719125575,
+              -0.890996361759794,
+              -0.357134826119322,
+              -1.14835939422888,
+              -0.348957294902748
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 290.365485110086,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 26,
+            "evaluations": [
+              37,
+              26
+            ],
+            "gradient": [
+              0.000384006926585253,
+              -0.00119612359417133,
+              -0.00029567498365696,
+              -0.000117064682414333,
+              0.000416429645591781,
+              -0.000303456556357151
+            ],
+            "projected_gradient": [
+              0.000384006926585253,
+              -0.00119612359417133,
+              -0.00029567498365696,
+              -0.000117064682414333,
+              0.000416429645591781,
+              -0.000303456556357151
+            ],
+            "raw_score_inf": 0.00119612359417133,
+            "projected_score_inf": 0.00119612359417133
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.21085364306795,
+              0.707445016564658,
+              -0.8909958442779,
+              -0.357135177630286,
+              -1.14836945855456,
+              -0.348944298009066
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 290.365485101121,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              10,
+              10
+            ],
+            "gradient": [
+              4.67189322324414e-06,
+              1.75069357321804e-05,
+              -4.6834943575455e-06,
+              2.73824180232609e-06,
+              3.3241350739373e-06,
+              3.65447269098346e-07
+            ],
+            "projected_gradient": [
+              4.67189322324414e-06,
+              1.75069357321804e-05,
+              -4.6834943575455e-06,
+              2.73824180232609e-06,
+              3.3241350739373e-06,
+              3.65447269098346e-07
+            ],
+            "raw_score_inf": 1.75069357321804e-05,
+            "projected_score_inf": 1.75069357321804e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -2.95585778076202e-12,
+      "prediction": {
+        "mean": [
+          0.0133998538998571,
+          1.75055610718181,
+          2.76389725492961
+        ],
+        "covariance": [
+          [
+            0.226588247518037,
+            -0.000556543442100821,
+            -0.0348811508352906
+          ],
+          [
+            -0.000556543442100821,
+            0.186364248405388,
+            0.0289222494586727
+          ],
+          [
+            -0.0348811508352906,
+            0.0289222494586727,
+            0.234443506487678
+          ]
+        ],
+        "sd": [
+          0.476012864866105,
+          0.431699256896961,
+          0.484193666302729
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.0625473867484365,
+        1.63532065300674,
+        2.62574367619726
+      ],
+      "new_group_sd": [
+        1.11880290254089,
+        0.77765033947871,
+        0.873186344726672
+      ],
+      "metrics": {
+        "mse": 0.200380756254811,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.707445016564658,
+        "truth": 0.7
+      },
+      "fixture_sha256": "3eddf33a7de48492eec23b78454c2159c3ff4c129e8f8a6a83c8dd3a3a337e35"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.508,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "e2d4efc25f865aef3e83d8366e136132211f53492a6951d00bf20d4ba7e9adff",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 13,
+    "seed": 104676
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 112595
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.36230474442287,
+        0.761506520989341,
+        -0.941366488228908,
+        -0.490780870658785,
+        -1.26529111396845,
+        -0.277979579620696
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 267.210585193863,
+        "raw_score_inf": 1.46083590278573e-05,
+        "projected_score_inf": 1.46083590278573e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 267.210585193863,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.36230473998682,
+              0.761506571164788,
+              -0.94136602588706,
+              -0.490780857498685,
+              -1.26529108236883,
+              -0.277979571567854
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 267.210585193916,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 26,
+            "evaluations": [
+              33,
+              27
+            ],
+            "gradient": [
+              -2.82356646283349e-06,
+              3.19369412098545e-05,
+              0.000294283069687873,
+              8.37647419010497e-06,
+              2.01133290727213e-05,
+              5.12567749611022e-06
+            ],
+            "projected_gradient": [
+              -2.82356646283349e-06,
+              3.19369412098545e-05,
+              0.000294283069687873,
+              8.37647419010497e-06,
+              2.01133290727213e-05,
+              5.12567749611022e-06
+            ],
+            "raw_score_inf": 0.000294283069687873,
+            "projected_score_inf": 0.000294283069687873
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.36230474442287,
+              0.761506520989341,
+              -0.941366488228908,
+              -0.490780870658785,
+              -1.26529111396845,
+              -0.277979579620696
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 267.210585193863,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              3,
+              3
+            ],
+            "gradient": [
+              -4.63186872468453e-06,
+              1.3939982793342e-05,
+              -2.77333014389007e-06,
+              6.59178951085744e-06,
+              1.46083590278573e-05,
+              3.39567205203315e-06
+            ],
+            "projected_gradient": [
+              -4.63186872468453e-06,
+              1.3939982793342e-05,
+              -2.77333014389007e-06,
+              6.59178951085744e-06,
+              1.46083590278573e-05,
+              3.39567205203315e-06
+            ],
+            "raw_score_inf": 1.46083590278573e-05,
+            "projected_score_inf": 1.46083590278573e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -2.44426701101474e-12,
+      "prediction": {
+        "mean": [
+          -0.166033552391231,
+          1.90240971391761,
+          3.10900161926443
+        ],
+        "covariance": [
+          [
+            0.204147908786776,
+            -0.000409371337773495,
+            -0.0309664889504713
+          ],
+          [
+            -0.000409371337773495,
+            0.168430644792547,
+            0.025979041810592
+          ],
+          [
+            -0.0309664889504713,
+            0.025979041810592,
+            0.211370918019232
+          ]
+        ],
+        "sd": [
+          0.451827299736056,
+          0.410403027270203,
+          0.459750930416929
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.00840699335794449,
+        1.81920865701647,
+        2.88531778640155
+      ],
+      "new_group_sd": [
+        0.976408134485164,
+        0.706670618723462,
+        0.811230845931679
+      ],
+      "metrics": {
+        "mse": 0.413208146504741,
+        "pointwise_coverage": 0.666666666666667,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.761506520989341,
+        "truth": 0.7
+      },
+      "fixture_sha256": "f596aa2173399b285a4f35cd31b75d976d2e97c47a909e01f852551de2d47e44"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.536,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "be1947162d1bc400a68d0d4c1d4a712a5dceb1326438cc8defd111a6d9752e96",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 14,
+    "seed": 112595
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_random_slope",
+      "options": {},
+      "seed": 120514
+    },
+    "result": {
+      "case": "gaussian_random_slope",
+      "target": "marginal ML; Gaussian Laplace equals exact integration",
+      "parameters": [
+        1.10573662276405,
+        0.730260176773693,
+        -0.886283318078078,
+        -0.190882487808759,
+        -1.33263613491786,
+        -0.28168516330276
+      ],
+      "diagnostics": {
+        "converged": true,
+        "objective": 292.740734149242,
+        "raw_score_inf": 1.51756837585876e-05,
+        "projected_score_inf": 1.51756837585876e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 292.740734149242,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.1057366243437,
+              0.730260232734487,
+              -0.886283432974068,
+              -0.190882518215291,
+              -1.33263613245224,
+              -0.281685161806526
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 292.74073414926,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 25,
+            "evaluations": [
+              37,
+              26
+            ],
+            "gradient": [
+              8.96122133951624e-07,
+              3.17460938728176e-05,
+              -6.51795406609764e-05,
+              -1.7249372720794e-05,
+              1.39872066585457e-06,
+              8.48801180657582e-07
+            ],
+            "projected_gradient": [
+              8.96122133951624e-07,
+              3.17460938728176e-05,
+              -6.51795406609764e-05,
+              -1.7249372720794e-05,
+              1.39872066585457e-06,
+              8.48801180657582e-07
+            ],
+            "raw_score_inf": 6.51795406609764e-05,
+            "projected_score_inf": 6.51795406609764e-05
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.10573662276405,
+              0.730260176773693,
+              -0.886283318078078,
+              -0.190882487808759,
+              -1.33263613491786,
+              -0.28168516330276
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "log_sd",
+              "log_sd",
+              "log_sd",
+              "correlation_coordinate"
+            ],
+            "objective": 292.740734149242,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              3,
+              3
+            ],
+            "gradient": [
+              -1.09262542581092e-06,
+              9.42431531092277e-06,
+              8.66226997599029e-06,
+              -1.51756837585876e-05,
+              2.39306956780702e-06,
+              1.34810070473955e-06
+            ],
+            "projected_gradient": [
+              -1.09262542581092e-06,
+              9.42431531092277e-06,
+              8.66226997599029e-06,
+              -1.51756837585876e-05,
+              2.39306956780702e-06,
+              1.34810070473955e-06
+            ],
+            "raw_score_inf": 1.51756837585876e-05,
+            "projected_score_inf": 1.51756837585876e-05
+          }
+        ]
+      },
+      "exact_marginal_loss_difference": -3.24007487506606e-12,
+      "prediction": {
+        "mean": [
+          -0.682957203379246,
+          1.0157521356696,
+          2.00666591678142
+        ],
+        "covariance": [
+          [
+            0.226091007823186,
+            0.000317158261530226,
+            -0.0322780401429112
+          ],
+          [
+            0.000317158261530226,
+            0.188066848610685,
+            0.0285849208918879
+          ],
+          [
+            -0.0322780401429112,
+            0.0285849208918879,
+            0.233984681411467
+          ]
+        ],
+        "sd": [
+          0.475490281523383,
+          0.433666748334116,
+          0.48371963099658
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_x": [
+        -1.8,
+        0.6,
+        2
+      ],
+      "future_has_response": false,
+      "new_group_mean": [
+        -0.208731695428597,
+        1.54389272882827,
+        2.56625697631144
+      ],
+      "new_group_sd": [
+        1.13724934246614,
+        0.897674524309091,
+        0.944247149427174
+      ],
+      "metrics": {
+        "mse": 0.82258306818784,
+        "pointwise_coverage": 0.666666666666667,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.730260176773693,
+        "truth": 0.7
+      },
+      "fixture_sha256": "6b98a3a8e3add41e4bd86472cc362c19f0cfa08dbfafda11e05602aa3edbceaf"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.482,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "4ef986b11837fa3b9d1ba2432563670a8d3d8ff41c9488e6223ac87f52333e68",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 15,
+    "seed": 120514
+  }
+]

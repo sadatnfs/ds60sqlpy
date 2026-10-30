@@ -1,0 +1,22 @@
+{
+  "scope": "Independent host SciPy quadrature crosscheck of analytic repeated-sampling L1 moments; no runtime inference or empirical Monte Carlo",
+  "scipy_version": "1.18.0",
+  "reference_sha256": "3fe291b29d7011e7eac73881d3a1292318886369d6d8ad6ce750eba439beb6f7",
+  "checks": [
+    {
+      "true_slope": 0.15,
+      "integrated_mean": 0.07916958994602315,
+      "integrated_mse": 0.01884284863340581,
+      "mean_absolute_error": 1.3877787807814457e-17,
+      "mse_absolute_error": 0.0
+    },
+    {
+      "true_slope": 1.2,
+      "integrated_mean": 1.0750000000165145,
+      "integrated_mse": 0.04687499995947153,
+      "mean_absolute_error": 2.220446049250313e-16,
+      "mse_absolute_error": 2.220446049250313e-16
+    }
+  ],
+  "passed": true
+}

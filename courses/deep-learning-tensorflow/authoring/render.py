@@ -1,7 +1,13 @@
 from pathlib import Path
 import json, textwrap, re
+import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+SOURCE_ROOT = ROOT
+if str(SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT))
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 SPECS = {}
 DEFAULT_DIAGNOSIS = "When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result."
 
@@ -25,7 +31,7 @@ def add(id, mental, anatomy, terms, exercises, source, imports="import numpy as 
     )
 
 
-def write_all(only=None, guides_only=False):
+def write_all(only=None, guides_only=False, markdown_only=False):
     for track in ["deep-learning-tensorflow", "llm-theory"]:
         base = ROOT / "courses" / track
         plan = json.loads((ROOT / "docs/expansion/plans" / f"{track}.json").read_text())
@@ -175,10 +181,14 @@ The question is: {e["prompt"]}
                     f"    # Exercise {n}: {e['title']}\n" + textwrap.indent(e["code"], "    ")
                 )
             explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
-            (ROOT / guide).write_text(document)
+            (ROOT / guide).write_text(canonical_markdown(document, root=SOURCE_ROOT, path=guide))
             if guides_only:
                 continue
-            (ROOT / explanation).write_text(explanation_doc)
+            (ROOT / explanation).write_text(
+                canonical_markdown(explanation_doc, root=SOURCE_ROOT, path=explanation)
+            )
+            if markdown_only:
+                continue
             if reading:
                 (ROOT / learner).write_text(
                     f"# {id}: {p['title']}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n"
@@ -222,6 +232,8 @@ The question is: {e["prompt"]}
                         verification_id=None,
                     )
                 )
+        if markdown_only:
+            continue
         inventory["lessons"].sort(key=lambda x: x["id"])
         (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
     print("Authored", len(SPECS), "lesson bundles")

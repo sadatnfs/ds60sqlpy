@@ -1,0 +1,9 @@
+{
+  "run_native_extended.py": "40335001a8b8a4116ee27691910e69fd434996d68ad4f175dde69fff3852e98e",
+  "extended_support.py": "1588e5f0033e6f0fa0958d53179df1ceb7877203368a0b53162172dd76f16691",
+  "generate_extended_fixtures.py": "9948e15e35aaedaef1a84a11947571d01b810ce301e23867d659557d3cf3eeb8",
+  "aggregate_extended.py": "8e4ee61f5ec1e66547ff4a8a324ab9e0938373db215798fd59d1515f0072cbfd",
+  "study_support.py": "264341df3c4e70c804c7150f70d61203a6037d1dc102eb3b292ef42f28c216fd",
+  "run_spark.py": "1e00ba61ba8aa241acb931812c442e100caea5bb2d991306f4dc3cbd62bd145f",
+  "fixtures/native020-smoke.json": "858a9d44b062a20dbb9df8841588d5f68c9ba9aabd27dc76cc01f98a3cdeeeb9"
+}

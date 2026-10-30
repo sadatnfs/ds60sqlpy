@@ -421,7 +421,7 @@ object PreparedArtifact {
     val engine = node.get("engine")
     Json.fields(engine, Set("name", "version", "source_sha256"))
     require(Json.text(engine, "name") == "TMBad", "Unexpected native engine")
-    Json.text(engine, "version", 64)
+    require(Json.text(engine, "version", 64) == "1.9.25", "Unsupported prepared TMBad engine version")
     Json.hash(Json.text(engine, "source_sha256", 64))
     val parsed = Json.elements(node.get("models"), 128, "prepared models").map(NativeModel.parse)
     require(

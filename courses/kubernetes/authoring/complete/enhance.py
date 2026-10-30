@@ -1,4 +1,4 @@
-from author import BASE, ROOT, hello
+from author import BASE, ROOT, canonical_markdown, hello
 import copy, json
 
 # These are host-only finite commands, never admitted by the normal worker.
@@ -127,4 +127,5 @@ These commands are more general than the normal hello-task contract and are reje
 """
     if "## Inspect the specific owned object" not in text:
         text = text.replace("## Run and bounded evidence", block + "## Run and bounded evidence")
+    text = canonical_markdown(text, root=ROOT, path=path.relative_to(ROOT).as_posix())
     path.write_text(text)

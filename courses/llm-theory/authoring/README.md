@@ -46,3 +46,31 @@ link and grouped-test gates. Run only this directory's documented generator;
 Check the generated diff and execute changed references in their declared
 runtime. A generation pass, parser result or historical receipt is not new
 runtime evidence. Preserve learner data and immutable evidence files.
+
+## Canonical displayed code
+
+The owner renderer passes Markdown through the shared guarded fence formatter
+before writing it. Python fences use the pinned Ruff tool already present in
+the Core quality environment, with independent AST, literal and comment guards.
+Missing tools fail explicitly; generation never installs a dependency or runs
+framework examples. Formatting configuration comes from the renderer's stable
+source root even when a regeneration test uses a temporary output directory.
+
+For a formatting-only publication pass, run this directory's normal `build.py`
+with `--markdown-only`. That mode writes guides and explanatory solutions while
+preserving standalone learner/reference programs, plans, manifests and review
+ledgers. Normal full generation retains its existing scope. After generation,
+apply the maintained prose normalizer and the shared reader/TeX pipeline.
+
+Historical execution and frozen-artifact receipts remain unchanged. Changed
+Python fence layout needs the separate self-verifying
+`curriculum/inline-format-parity.json` binding from a retained pre-format source
+snapshot. Its verifier preserves non-code spans, fence identities, Python AST
+values/type comments and ordered comments before exposing historical bytes for
+old hash assertions. This is static formatting parity, not new execution.
+
+The standalone textbook/review prose tools keep their code-preserving default.
+Their explicit `--canonical-code` mode also canonicalizes displayed Python;
+normal owner builds request it after the prose layer. Use
+`python courses/llm-theory/authoring/review_guides.py --canonical-code` for the
+reviewed pilot/expert guide and explanation surfaces that tool owns.

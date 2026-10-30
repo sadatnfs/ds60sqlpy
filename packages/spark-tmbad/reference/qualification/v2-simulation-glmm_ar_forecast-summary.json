@@ -1,0 +1,28 @@
+{
+  "requested_replications": 16,
+  "attempted_replications": 16,
+  "successful_replications": 16,
+  "failed_replications": 0,
+  "completion": "complete",
+  "interpretation": "bias/MSE conditional on successful fits; failures are retained",
+  "simulation_unit": "dataset",
+  "distinct_observed_dataset_hashes": 16,
+  "repeated_observed_dataset": false,
+  "dataset_monte_carlo_uncertainty": true,
+  "bias": 0.018132936619266203,
+  "mse": 0.004884368955745424,
+  "bias_mcse": 0.01742711596967419,
+  "mse_mcse": 0.0014968727825827625,
+  "prediction_mse_conditional_on_success": 0.2870734782329766,
+  "prediction_mse_mcse_across_datasets": 0.06517568408655167,
+  "conditional_pointwise_coverage": 1,
+  "procedural_pointwise_coverage": 1.0,
+  "coverage_mcse_across_independent_datasets": 0.0,
+  "failure_rate": 0.0,
+  "failure_rate_wilson95": [
+    0.0,
+    0.1936076805344365
+  ],
+  "coverage_claim": "A few smoke repetitions are execution evidence, not a calibration guarantee",
+  "elapsed_seconds": 30.530123846998322
+}

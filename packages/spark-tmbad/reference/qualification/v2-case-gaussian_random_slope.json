@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "gaussian_random_slope",
+    "options": {},
+    "seed": 1729
+  },
+  "result": {
+    "case": "gaussian_random_slope",
+    "target": "marginal ML; Gaussian Laplace equals exact integration",
+    "parameters": [1.21828475070674, 0.71130950913539, -0.924704089668617, -0.527199194576432, -1.41368880749712, 0.13359908107595],
+    "diagnostics": {
+      "converged": true,
+      "objective": 268.387857691286,
+      "raw_score_inf": 8.03679220246946e-06,
+      "projected_score_inf": 8.03679220246946e-06,
+      "iterations": null,
+      "pd_hessian": true,
+      "restored_objective": 268.387857691286,
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [1.21828493721804, 0.711309836329627, -0.924704897039013, -0.527195258110345, -1.41368010093629, 0.133594888156633],
+          "parameter_names": ["beta", "beta", "log_sd", "log_sd", "log_sd", "correlation_coordinate"],
+          "objective": 268.387857693791,
+          "convergence": 1,
+          "message": "singular convergence (7)",
+          "iterations": 21,
+          "evaluations": [30, 22],
+          "gradient": [9.755054737719e-06, 0.000144581729782874, -0.000410915521799216, 0.000245292055921713, 0.000351742286111276, -0.000139560211188452],
+          "projected_gradient": [9.755054737719e-06, 0.000144581729782874, -0.000410915521799216, 0.000245292055921713, 0.000351742286111276, -0.000139560211188452],
+          "raw_score_inf": 0.000410915521799216,
+          "projected_score_inf": 0.000410915521799216
+        },
+        {
+          "method": "optim L-BFGS-B refinement",
+          "parameters": [1.21828475070674, 0.71130950913539, -0.924704089668617, -0.527199194576432, -1.41368880749712, 0.13359908107595],
+          "parameter_names": ["beta", "beta", "log_sd", "log_sd", "log_sd", "correlation_coordinate"],
+          "objective": 268.387857691286,
+          "convergence": 0,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+          "iterations": null,
+          "evaluations": [9, 9],
+          "gradient": [5.87901105225869e-07, 5.38034586568797e-06, 2.54209869306738e-06, 2.7406513682425e-06, -4.3428093087557e-06, -8.03679220246946e-06],
+          "projected_gradient": [5.87901105225869e-07, 5.38034586568797e-06, 2.54209869306738e-06, 2.7406513682425e-06, -4.3428093087557e-06, -8.03679220246946e-06],
+          "raw_score_inf": 8.03679220246946e-06,
+          "projected_score_inf": 8.03679220246946e-06
+        }
+      ]
+    },
+    "exact_marginal_loss_difference": -2.89901436190121e-12,
+    "prediction": {
+      "mean": [0.493729898403875, 1.53423163241406, 2.14119097725333],
+      "covariance": [
+        [0.207662433886758, -0.000275492329010002, -0.0297966367535973],
+        [-0.000275492329010002, 0.174372668555471, 0.0271445331441418],
+        [-0.0297966367535973, 0.0271445331441418, 0.217690465643822]
+      ],
+      "sd": [0.455699938431813, 0.417579535604261, 0.466573108573374],
+      "uncertainty": "observation/latent uncertainty at fitted population parameters"
+    },
+    "future_x": [-1.8, 0.6, 2],
+    "future_has_response": false,
+    "new_group_mean": [-0.0620723657369632, 1.64507045618797, 2.64090376897752],
+    "new_group_sd": [0.792962688746073, 0.741562311494744, 0.904807661902],
+    "metrics": {
+      "mse": 0.331253861270505,
+      "pointwise_coverage": 1,
+      "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+      "primary_estimate": 0.71130950913539,
+      "truth": 0.7
+    },
+    "fixture_sha256": "f8bdcb3dfd15097267ab4ac1161ab901365e8df5ce0408946e2a36125f9f057b"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.456
+}

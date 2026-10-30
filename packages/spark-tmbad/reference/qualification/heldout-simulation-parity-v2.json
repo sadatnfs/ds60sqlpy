@@ -1,0 +1,342 @@
+{
+  "scope": "same 48 training datasets and fitted parameter vectors before and after adding heldout future evaluation",
+  "passed": true,
+  "comparisons": [
+    {
+      "case": "nonlinear_growth",
+      "replicate": 0,
+      "training_sha256": "eeb3857e5046535bb81fd727d413d5421fd2e3a586fee75641196ca677070d3f",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 1,
+      "training_sha256": "7001867e2bf3b6a1c2754d5274c041d621a5a8209b2e2485242f2975293f1b0a",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 2,
+      "training_sha256": "27ff48a934fc9e218c381613bb5b287f904d63cd58008a843292bafafec08302",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 3,
+      "training_sha256": "bce4ac3b565d8033d76ae78518bcb37bf435beed51e00e6e900e660296c9e746",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 4,
+      "training_sha256": "0cf96e756541d85c8724f3701fd3df4847bc82d4e1e537c1535d704674ae06a9",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 5,
+      "training_sha256": "f8e1cdba17e723478b28a8a9f4e3072262b6918aa5547265c41725928d630f71",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 6,
+      "training_sha256": "2ca2b987c1e0241c29eb13eccea698ed5249a7f1f626062636c775ede02656cf",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 7,
+      "training_sha256": "b1d4e5f46dfe9124a86715cb68a9f2cf3b1f6540982620e20859060e8a6bc661",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 8,
+      "training_sha256": "ac7362ad1fbef25f97c9cc7e48b91748ac9343fec188319f416dc0b411d95fa6",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 9,
+      "training_sha256": "728f312043d24c0dbf23f2b93137618e60621a6d960c4df1a3f961d029c83e46",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 10,
+      "training_sha256": "6af2fdc2f56e352e84ee69eb7c6eb7923d4455e78c4b4f613dc2b9a2be8c372c",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 11,
+      "training_sha256": "b9bef18c6800d55948ca681366772a599f72402f86292aeb695c38bade449cb4",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 12,
+      "training_sha256": "bd1a1e6a752fd7871a5845952dec1d78d5bb1b3d6187d2f23459609cf37ed38a",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 13,
+      "training_sha256": "da73d7f429f4ee459e854727214512e03d89c22fb5b47c0b832257f2c465b21a",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 14,
+      "training_sha256": "59784d41aef6aaf19023b96d5debb3f5feef8c1d353008c158b10fd6cf287d22",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "nonlinear_growth",
+      "replicate": 15,
+      "training_sha256": "12fd2c82d28cdc1d628045bc5e351625cb14b96eb12ffe4a1e1852ce71b42165",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 0,
+      "training_sha256": "87cde11c90dc73d2f2b3ac3044f6cf419864d7fcd2d50a2a35e1e9290edea0e8",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 1,
+      "training_sha256": "076d3a60feaecad79e90806f4b694649510a4a6ad1bda0432b03e42dc1eca35b",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 2,
+      "training_sha256": "80092e0fd531afb0d0bba47772cf61bb800fe9d5c00a9289ca63fc1cd53d89b6",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 3,
+      "training_sha256": "87311d0e97bff125d19a8cd7da16dabb17ff26880fd806a72a33ea4c3877a23c",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 4,
+      "training_sha256": "0ead2433886f256541b9a9e484232fe89799a56765732523ee155cab1b02970b",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 5,
+      "training_sha256": "2ab7392bdf73b3a79f563b7328fa6184be0876ec75385b54413c9eebb12cfecb",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 6,
+      "training_sha256": "ea4acfc7cd27a203b1d188207875426a474ce9ef75efc98a936c2951acfe0292",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 7,
+      "training_sha256": "98b91f7eea7870535ea4d919a0a0877ac0f71118429602ea0c6d11167c3cc64f",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 8,
+      "training_sha256": "015c7b50c211148e2683f2ceb2a36670ab1cf561071552afbe2bebf41dfc20e0",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 9,
+      "training_sha256": "4cb407b75c1a73e063d92561373849b0c60302d88b19e73829b6941c25e0a412",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 10,
+      "training_sha256": "3cd6b233d914f9bb0ff067d9a598b58e22a24069d8b609a0ceba619a2a0d68ad",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 11,
+      "training_sha256": "a7998f35a6743687e5d963224a62899c2688c6f69681b7131fdf9f807e9ea242",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 12,
+      "training_sha256": "d1d73adb1855f507768bc6a63f61abc8ced9c58e67171bed91f38fb386938f4f",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 13,
+      "training_sha256": "d8fc908b99779d21615a4023c8cb4319e228e793d04edce14029ec0cb9dd0b17",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 14,
+      "training_sha256": "54a81bea99586205f6b5f280ceebc6e037a000c90d39d659a299a16976b12472",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "panel_ar1",
+      "replicate": 15,
+      "training_sha256": "4ae8c56e091cf959a5383444c43e25ab522d55593ba04e134156fc93c7a9eea0",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 0,
+      "training_sha256": "dc789014ccbb37c059d790c05706e4b1dd32856d93f8a56d6d83047b4fab50b8",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 1,
+      "training_sha256": "0eddf115dbc48ca62c34046a151cfb26cbbe6b525951657dfda829ba87d42da1",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 2,
+      "training_sha256": "29c22cc570c5d3b45665382dfc685391530a2ef7188353daddf89e9fb8aedfe0",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 3,
+      "training_sha256": "5319eada4e316f51a2b1fbfccdd26716f05a7975db233923a70e413dec545b30",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 4,
+      "training_sha256": "83470b5d0a2470938b0732d98ecc6b08d8d7dec6911ef2eb5ec8cb4c50baf583",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 5,
+      "training_sha256": "5c8b79cd124105ac46d0e06ecce9a8d15d241cf3943759bab8fd8de32674c559",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 6,
+      "training_sha256": "c31ce69c52ff384f6d37dda058dfb5569cdc4b5b32098f52fce482cf425b3089",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 7,
+      "training_sha256": "ee8f11f9f2359ffe96f4fd17af01f1f001a07e198467f699fb5bb3c9687f4941",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 8,
+      "training_sha256": "3ae32a0eefaba995e9f892f9eb5866637e9a65ff6dea3401ff6816cf4c9fae1f",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 9,
+      "training_sha256": "0fda0e29e39b0eaafca1f8b0ebc8d0192d6374856825ed50c941437ac2fef8e3",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 10,
+      "training_sha256": "ebed46e646dd0c840dc0652cc0c53db4da203e5f32f0377e8bac09ec714bb197",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 11,
+      "training_sha256": "f93afe0546ef796f1ee0785b356b2876bdc8781bb2d854a6f310e043cf4b839a",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 12,
+      "training_sha256": "0289bc00b1744a28434a147d575de08b2ea8cfd08e2ba35b40c01db91befb4ed",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 13,
+      "training_sha256": "3d69792fa54cbcf72975751fd79123fa07e8ee7e2babf49f43258d76ec9a7f3d",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 14,
+      "training_sha256": "f3fa2e256b8872799bbadad1d066388d1f1b966fceba8bafe4636fa31b8bd55b",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    },
+    {
+      "case": "glmm_ar_forecast",
+      "replicate": 15,
+      "training_sha256": "a03366e0b1ccdea1f30e38deeeb75ed8403e0aea7218495187c3c70161efec1e",
+      "training_unchanged": true,
+      "fitted_parameters_unchanged": true
+    }
+  ]
+}

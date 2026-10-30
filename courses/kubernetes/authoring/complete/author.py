@@ -1,8 +1,14 @@
 from pathlib import Path
 import json, textwrap
 import yaml
+import sys
 
 ROOT = Path(__file__).resolve().parents[4]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 BASE = ROOT / "courses/kubernetes"
 PLAN = json.loads((ROOT / "docs/expansion/plans/kubernetes.json").read_text())["lessons"]
 
@@ -144,6 +150,8 @@ def author(
         assert "\u2014" not in text
         p = ROOT / relative
         p.parent.mkdir(parents=True, exist_ok=True)
+        if p.suffix == ".md":
+            text = canonical_markdown(text, root=ROOT, path=relative)
         p.write_text(text)
     manifest = BASE / "lessons.json"
     data = json.loads(manifest.read_text())

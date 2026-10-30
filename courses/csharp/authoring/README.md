@@ -1,6 +1,23 @@
 # Reproducible C# authoring
 
-Run `python courses/csharp/authoring/build.py` from the repository root. Only the Python standard library is needed for generation. `foundations.py`, `composition.py` and `advanced.py` contain the original chapter specifications, examples, task contracts and diagnosis. `render.py` writes the published artifacts and manifests.
+Prepare Python and the [pinned shared formatting toolchain](../../../docker/formatting/README.md),
+including `clang-format 21.1.8` and the shared toolchain's locked syntax parsers.
+Any other supported language fences require their prepared formatter/parser too.
+Then run from the repository root:
+
+```sh
+python courses/csharp/authoring/build.py
+```
+
+`foundations.py`, `composition.py` and `advanced.py` contain the original chapter
+specifications, examples, task contracts and diagnosis. `render.py` writes the
+published artifacts and manifests. Its central writer passes only Markdown
+through `scripts.format_inline_code.canonical_markdown` in memory before the
+normal write, preserving the existing final-newline rule. The shared policy must
+explicitly admit each generated Markdown output path. Unsupported snippets,
+transcripts and protected regions retain their bytes with preservation
+diagnostics. Missing prepared tools/parsers or genuine formatting errors stop
+generation; there is no silent fallback or automatic download.
 
 The source order defines stable IDs csharp-001 through csharp-048. Do not reorder existing specifications or renumber them after publication. Additive work requires a reviewed stable-ID strategy. The three stages each have sixteen lessons.
 

@@ -1,10 +1,11 @@
 # Modeling simulation studies
 
 These original studies compare `ds60-spark-tmbad` and `ds60-spark-likelihood`
-without changing either core package. The first experiments use their existing
-normal, linear, nonlinear and complete-group likelihood interfaces. Broader
-models have explicit implementation requirements; a feature listed in the
-research matrix is not a claim of package support.
+without changing either core package. The first paired experiments use normal,
+linear, nonlinear and complete-group likelihood interfaces. Native 0.2 also
+provides named targets and additional prepared families. Package availability,
+actual API qualification and a completed simulation study are separate claims;
+a feature listed in the research matrix is not evidence that its study ran.
 
 Start with [the methods contract](design/METHODS.md),
 [the feature matrix](design/FEATURE-MATRIX.md), and
@@ -14,11 +15,44 @@ contrasts. [The source index](SOURCE-INDEX.json) pins the primary repositories,
 licenses and inspected file hashes. Current study runtime observations are kept
 separate from these designs.
 
+## Native 0.2 availability and study status
+
+The native 0.2 registry contains 23 prepared models. Its
+[extended target API](../python/docs/EXTENDED-TARGETS.md) supports named diagonal
+Gaussian priors, selected L1 with a proximal solver and constrained KKT checks,
+fixed coordinates, public fixed-point evaluation and separate PreparedParameters
+prediction/forecasting. Actual local Linux ARM64 Spark checks cover these APIs;
+they do not establish a repeated-data study or separate-container acceptance.
+
+The [additional models](../docs/EXTENDED-MODELS.md) include binomial,
+beta-binomial, beta, lognormal, Student-t, positive-count Poisson, zero-inflated
+Poisson, hurdle Poisson and exact correlated Gaussian intercept/slope likelihoods.
+[Their checks](../python/docs/NEW-MODEL-CHECKS.md) distinguish actual native
+value/gradient/Hessian and moment qualification from Spark execution and fitting.
+The four paired study runners below remain their original experiments. The new
+[native 0.2 worked guide](guides/native020-study-expansion.md) documents actual
+sim-003/004 local Spark smoke: two scenarios, two methods and two reductions,
+with 16 accepted fits at replication zero, retained as the initial stage. A later
+sim-003/004 expansion now covers sixteen independent datasets per scenario:
+16 target/scenario/method/reduction groups and all 256 fit records accepted. Its
+separate bounded aggregate reports observed risk, coverage and dataset-level MCSE;
+methods and reductions do not add independent datasets or establish calibration.
+The five additional family, correlated-panel and independent-group studies now
+also have a separate eight-dataset expansion: 176 method records, 172 accepted
+and four optimizer failures retained without fitted predictions. All 64 individual
+normal-group fits passed. A clearly labeled independent aggregation verifies the
+unchanged raw shards and reports success-conditional metrics and dataset-level
+MCSE, with procedural coverage retaining failures. The guide preserves the initial
+smoke stages and binds the expanded observations to their older JAR; a later
+proximal fix does not migrate or relabel them. Broader contrasts, general
+calibration and native/Torch parity remain unclaimed.
+
 Two important scientific boundaries govern all examples:
 
-- Both current packages' scalar L2 option penalizes the whole optimized vector.
+- Both packages' legacy scalar L2 option penalizes the whole optimized vector.
   For a Gaussian regression that includes its intercept and `log_sigma`. It is
-  not automatically a conventional slope-only ridge penalty.
+  not automatically a conventional slope-only ridge penalty. Native 0.2 named
+  Gaussian terms can select only a slope; legacy L2 retains its old semantics.
 - A likelihood fit, a MAP estimate, a random-effect Laplace integral, and a
   parameter posterior are different objects. Conditional random-effect moments
   at fitted population parameters do not include uncertainty in those parameters.
@@ -89,7 +123,10 @@ shows a rigorously restricted exception to naive independent-group decomposition
 Its current partition slices and dense oracle are a mathematical reference, not
 an implemented Spark package backend or a general sparse-Laplace engine.
 
-Current project order puts classroom publication and wrap-up first, independent
-native modeling next, and broader Torch expansion afterward. These studies and
-all sim-* curriculum placements are explicitly next-stage work. Existing lesson
-IDs and the active release source remain unchanged.
+The additive native 0.2 studies use their own fixture, runner and aggregation
+files. The named-target smoke explicitly uses the one-covariate known-sigma
+intercept-and-slope design; the existing four-column ridge/lasso calculation
+remains a serial mathematical reference. Broader Torch work remains separate.
+All sim-* identifiers remain
+study-design IDs until separately admitted as classroom material. Historical
+fixtures, observed receipts and existing lesson IDs remain unchanged.

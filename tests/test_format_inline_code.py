@@ -12,6 +12,7 @@ import pytest
 
 from scripts import format_inline_code as inline
 from scripts import format_repo
+from scripts import inline_format_contracts as guard_contracts
 
 
 def python_adapter(source: bytes, language: str, suffix: str, root: Path) -> bytes:
@@ -112,7 +113,7 @@ def test_non_idempotent_formatter_is_rejected(tmp_path: Path) -> None:
 
     def alternating(*args: Any) -> bytes:
         counter["calls"] += 1
-        return b"x = 1\n" if counter["calls"] == 1 else b"x=1\n"
+        return b"x = 1\n" if counter["calls"] % 2 else b"x=1\n"
 
     text = "```python\nx=1\n```\n"
     result, rows = inline.format_document(
@@ -353,3 +354,352 @@ def test_budget_is_checked_between_files_before_reading_the_next_source(
     assert report["complete"] is False and not report["passed"]
     assert report["status_counts"] == {"not-checked": 1}
     assert report["records"][0]["path"] == "not-read.md"
+
+
+def test_python_cell_marker_and_unicode_comments_remain_exact(tmp_path: Path) -> None:
+    original = '#%%\nvalue="é"  #Expected: é  value\n'
+    candidate = '# %%\nvalue = "é"  # Expected: é  value\n'
+    tool = inline.Formatter(tmp_path, lambda *args: candidate.encode())
+    assert tool.format(original.encode(), "python", ".py").decode() == (
+        '#%%\nvalue = "é"  #Expected: é  value\n'
+    )
+
+
+@pytest.mark.parametrize(
+    "grammar,before,after",
+    guard_contracts.TREE_EQUIVALENCES,
+)
+def test_reviewed_tree_layout_changes_preserve_program_structure(
+    grammar: str, before: str, after: str
+) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    assert (
+        inline.tree_signature(before.encode(), grammar)[0]
+        == inline.tree_signature(after.encode(), grammar)[0]
+    )
+
+
+@pytest.mark.parametrize(
+    "grammar,before,after",
+    guard_contracts.TREE_DIFFERENCES,
+)
+def test_tree_normalization_preserves_holes_tuple_arity_types_and_literal_values(
+    grammar: str, before: str, after: str
+) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    assert (
+        inline.tree_signature(before.encode(), grammar)[0]
+        != inline.tree_signature(after.encode(), grammar)[0]
+    )
+
+
+def test_html_attribute_quotes_and_text_are_restored_exactly(tmp_path: Path) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    before = b"<p title='a  &amp; b'>literal  text</p>\n"
+    candidate = b'<p title="a  &amp; b">literal  text</p>\n'
+    tool = inline.Formatter(tmp_path, lambda *args: candidate)
+    assert tool.format(before, "web", ".html") == before
+
+
+@pytest.mark.parametrize(
+    "source,mode",
+    [
+        (b"class Main { public static void main(String[] args) {} }\n", "unit"),
+        (b"int total=2+3; assert total==5;\n", "statements"),
+        (b"static int twice(int value) { return 2*value; }\n", "members"),
+        (b"private int value = 2;\n", "members"),
+        (
+            b"boolean failed=false; try { fail(); } catch(Exception e) { failed=true; }\n",
+            "statements",
+        ),
+    ],
+)
+def test_java_excerpts_have_bounded_syntax_context(source: bytes, mode: str) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    wrapped, observed = inline.java_context(source)
+    assert observed == mode
+    assert inline.java_unwrap(wrapped, mode) == source
+
+
+def test_java_wrapper_escape_and_unparseable_fragments_are_refused() -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    with pytest.raises(inline.UnsupportedSnippet):
+        inline.java_context(b"} dangerous(); {\n")
+    with pytest.raises(inline.FormatFailure, match="identity"):
+        inline.java_unwrap(b"class Replaced {}\n", "members")
+    with pytest.raises(inline.UnsupportedSnippet, match="mixed-member"):
+        inline.java_context(b"static void f() {} assert true;\n")
+
+
+def test_fenced_cpp_adapter_disables_only_added_namespace_comments(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config = tmp_path / "docker/formatting"
+    config.mkdir(parents=True)
+    (config / "clang-format.yaml").write_text("BasedOnStyle: LLVM\nSortIncludes: Never\n")
+    observed = []
+
+    def fake(command: list[str], source: bytes, root: Path) -> bytes:
+        observed.extend(command)
+        return source
+
+    monkeypatch.setattr(inline, "invoke", fake)
+    inline.adapter_bytes(b"namespace x {}\n", "cpp", ".cpp", tmp_path)
+    style = json.loads(next(option for option in observed if option.startswith("--style="))[8:])
+    assert style == {"BasedOnStyle": "LLVM", "SortIncludes": "Never", "FixNamespaceComments": False}
+
+
+def test_shell_placeholder_is_preserved_but_quoted_literal_remains_code(tmp_path: Path) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    tool = inline.Formatter(tmp_path, lambda source, *args: source)
+    placeholder = "```sh\ndocker run <your-formatting-image> command\n```\n"
+    output, rows = inline.format_document(placeholder, tool, {"shell"}, path="docs/tools.md")
+    assert output == placeholder and rows[0]["reason"] == "unsubstituted-shell-template-placeholder"
+    literal = "```sh\nprintf '%s' '<your-formatting-image>'\n```\n"
+    output, rows = inline.format_document(literal, tool, {"shell"}, path="docs/tools.md")
+    assert output == literal and rows[0]["status"] == "clean"
+
+
+def test_python_non_prose_values_and_replace_needles_are_not_formatted(tmp_path: Path) -> None:
+    text = "```python\nx=1\n```\n"
+    source = (
+        "guide = " + repr(text) + "\nexpected = " + repr(text) + "\n"
+        "guide = guide.replace(" + repr(text) + ", 'literal replacement')\n"
+        "code = {'body': " + repr(text) + "}\n"
+    )
+    updated, records = inline.format_authoring_python(
+        source, formatter(tmp_path), {"python"}, path="courses/demo/authoring/units.py"
+    )
+    tree = ast.parse(updated)
+    assert isinstance(tree.body[0], ast.Assign) and isinstance(tree.body[0].value, ast.Constant)
+    assert tree.body[0].value.value == "```python\nx = 1\n```\n"
+    assert "expected = " + repr(text) in updated
+    assert "guide.replace(" + repr(text) in updated
+    assert "code = {'body': " + repr(text) + "}" in updated
+    assert any("non-prose" in item["reason"] for item in records)
+
+
+def test_reviewed_nlp_example_role_does_not_admit_solution_arguments(tmp_path: Path) -> None:
+    text = "```python\nx=1\n```\n"
+    source = "author(1, 'intro', [], [('title', " + repr(text) + ")], [], " + repr(text) + ")\n"
+    updated, records = inline.format_authoring_python(
+        source, formatter(tmp_path), {"python"}, path="courses/nlp/authoring/advanced/batch.py"
+    )
+    assert updated.count("x = 1") == 1 and updated.count("x=1") == 1
+    assert [record["status"] for record in records].count("formatted") == 1
+
+
+def test_json_prose_and_identical_expected_values_are_distinct_roles(tmp_path: Path) -> None:
+    text = "```python\nx=1\n```\n"
+    source = json.dumps(
+        {"guide": text, "expected": text, "worked_examples": [{"explanation": text, "code": text}]}
+    )
+    updated, records = inline.format_authoring_json(
+        source, formatter(tmp_path), {"python"}, path="courses/demo/authoring/units.json"
+    )
+    parsed = json.loads(updated)
+    assert parsed["guide"] == "```python\nx = 1\n```\n"
+    assert parsed["expected"] == text and parsed["worked_examples"][0]["code"] == text
+    assert parsed["worked_examples"][0]["explanation"] == "```python\nx = 1\n```\n"
+    assert [record["status"] for record in records] == [
+        "formatted",
+        "preserved",
+        "formatted",
+        "preserved",
+    ]
+
+
+def test_literal_restoration_may_converge_but_final_output_must_be_idempotent(
+    tmp_path: Path,
+) -> None:
+    variants = {b"x=1\n": b"x =1\n", b"x =1\n": b"x = 1\n", b"x = 1\n": b"x = 1\n"}
+    tool = inline.Formatter(tmp_path, lambda source, *args: variants[source])
+    assert tool.format(b"x=1\n", "python", ".py") == b"x = 1\n"
+
+
+def test_html_void_tail_is_sibling_text_but_foreign_content_is_not_normalized() -> None:
+    parsers = pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    before = b'<label><input type="checkbox">Show a reminder</label>'
+    after = b'<label><input type="checkbox" />Show a reminder</label>'
+    assert inline.tree_signature(before, "html")[0] == inline.tree_signature(after, "html")[0]
+    assert (
+        inline.tree_signature(before, "html")[0]
+        != inline.tree_signature(after.replace(b"reminder", b"different"), "html")[0]
+    )
+    tree = parsers.get_parser("html").parse(b'<svg><input name="literal"></input></svg>')
+    pending = [tree.root_node]
+    while pending:
+        node = pending.pop()
+        assert not inline.html_void_tag(node)
+        pending.extend(node.children)
+
+
+@pytest.mark.parametrize(
+    "before,after",
+    [
+        (b'type A = {kind:"one"} | {kind:"two"};', b'type A = | {kind:"one"} | {kind:"two"};'),
+        (b"type A = string | (number & B);", b"type A = | string | (number & B);"),
+    ],
+)
+def test_typescript_leading_union_separator_retains_all_members(
+    before: bytes, after: bytes
+) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    assert (
+        inline.tree_signature(before, "typescript")[0]
+        == inline.tree_signature(after, "typescript")[0]
+    )
+    assert (
+        inline.tree_signature(b"type A = string | number;", "typescript")[0]
+        != inline.tree_signature(b"type A = | string;", "typescript")[0]
+    )
+
+
+def test_rust_macro_punctuation_is_opaque_and_restored_with_explicit_inventory(
+    tmp_path: Path,
+) -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    before = b"fn main(){custom!(a,b);}\n"
+    candidate = b"fn main() { custom!(a, b,); }\n"
+    tool = inline.Formatter(tmp_path, lambda *args: candidate)
+    output, rows = inline.format_document(
+        "```rust\n" + before.decode() + "```\n", tool, {"rust"}, path="guide.md"
+    )
+    assert "custom!(a,b)" in output and "custom!(a, b,)" not in output
+    assert rows[0]["preserved_regions"] == {"opaque-rust-macro-token-trees": 1}
+    assert "opaque-rust-macro" in rows[0]["reason"]
+    assert (
+        inline.tree_signature(before, "rust")[0]
+        != inline.tree_signature(before.replace(b"a,b", b"a,b,"), "rust")[0]
+    )
+
+
+def test_scala_single_string_continuation_keeps_its_literal_value() -> None:
+    pytest.importorskip(
+        "tree_sitter_language_pack", reason="Pinned native formatter parser required"
+    )
+    before = b'val query = "SELECT id FROM rows"\n'
+    after = b'val query =\n  "SELECT id FROM rows"\n'
+    assert inline.tree_signature(before, "scala")[0] == inline.tree_signature(after, "scala")[0]
+    assert (
+        inline.tree_signature(before, "scala")[0]
+        != inline.tree_signature(after.replace(b"id", b"name"), "scala")[0]
+    )
+
+
+def generation_root(tmp_path: Path) -> Path:
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts/format-policy.json").write_text(
+        json.dumps(
+            {
+                "exclude": [
+                    {"pattern": "generated/*.md", "reason": "Generated by the owner renderer"}
+                ],
+                "preserve": [
+                    {"path": "generated/historical.md", "reason": "Immutable historical receipt"}
+                ],
+            }
+        )
+    )
+    return tmp_path
+
+
+def test_generation_hook_formats_memory_and_preserves_owner_write_boundary(tmp_path: Path) -> None:
+    root = generation_root(tmp_path)
+    source = "Prose \\(x^2\\).\n```python\nx=1\n```\n"
+    result = inline.canonical_markdown(
+        source, root=root, path="generated/guide.md", formatter=formatter(root)
+    )
+    assert result == "Prose \\(x^2\\).\n```python\nx = 1\n```\n"
+    assert not (root / "generated/guide.md").exists()
+    assert (
+        inline.canonical_markdown(
+            result, root=root, path="generated/guide.md", formatter=formatter(root)
+        )
+        == result
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "../escape.md",
+        "/absolute.md",
+        "generated/guide.html",
+        "authored.md",
+        "generated/historical.md",
+    ],
+)
+def test_generation_hook_rejects_unowned_or_unsafe_outputs(tmp_path: Path, path: str) -> None:
+    root = generation_root(tmp_path)
+    with pytest.raises(ValueError):
+        inline.canonical_markdown(
+            "```python\nx=1\n```\n", root=root, path=path, formatter=formatter(root)
+        )
+
+
+def test_generation_hook_missing_tool_is_not_silently_skipped(tmp_path: Path) -> None:
+    root = generation_root(tmp_path)
+
+    def unavailable(*args: Any) -> bytes:
+        raise inline.FormatFailure("Missing prepared adapter: ruff")
+
+    tool = inline.Formatter(root, unavailable)
+    with pytest.raises(inline.FormatFailure, match="prepared formatter environment"):
+        inline.canonical_markdown(
+            "```python\nx=1\n```\n", root=root, path="generated/guide.md", formatter=tool
+        )
+
+
+def test_generation_hook_reports_transcripts_without_changing_them(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = generation_root(tmp_path)
+    source = "```text\nExpected   output\n```\n"
+    assert (
+        inline.canonical_markdown(
+            source, root=root, path="generated/guide.md", formatter=formatter(root)
+        )
+        == source
+    )
+    assert "untyped-or-output-transcript" in capsys.readouterr().err
+
+
+def test_python_formatter_cannot_move_an_identical_type_ignore_between_statements(
+    tmp_path: Path,
+) -> None:
+    before = b"x: int = 'first' # type: ignore[assignment]\ny: int = 'second'\n"
+    after = b"x: int = 'first'\ny: int = 'second' # type: ignore[assignment]\n"
+    tool = inline.Formatter(tmp_path, lambda *args: after)
+    with pytest.raises(inline.FormatFailure, match="syntax or literal"):
+        tool.format(before, "python", ".py")
+
+
+def test_native_contract_gate_rejects_a_guard_that_erases_semantic_differences(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(inline, "tree_signature", lambda *args, **kwargs: ("same", []))
+    with pytest.raises(ValueError, match="semantic distinction"):
+        guard_contracts.verify(tmp_path, {"web"})
+
+
+def test_python_native_contract_gate_needs_no_non_python_parser(tmp_path: Path) -> None:
+    assert guard_contracts.verify(tmp_path, {"python"}) == 2

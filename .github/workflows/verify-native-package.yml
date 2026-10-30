@@ -1,0 +1,157 @@
+name: Native standalone package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: native-standalone-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Independent native package (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            machine: x86_64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            machine: aarch64
+            runner: ubuntu-24.04-arm
+    env:
+      EXPECTED_MACHINE: ${{ matrix.machine }}
+      EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
+      IMAGE: ds60-native-qualification:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Check native runner and copy the independent project
+        run: |
+          test "$(uname -m)" = "$EXPECTED_MACHINE"
+          test "$(docker info --format '{{.OSType}}')" = linux
+          mkdir -p "$RUNNER_TEMP/native-evidence"
+          chmod 777 "$RUNNER_TEMP/native-evidence"
+          cp -a packages/spark-tmbad "$RUNNER_TEMP/native-project"
+          test ! -e "$RUNNER_TEMP/native-project/.git"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/native-evidence/source-revision.txt"
+          git status --porcelain > "$RUNNER_TEMP/native-evidence/checkout-status.txt"
+          test ! -s "$RUNNER_TEMP/native-evidence/checkout-status.txt"
+          printf 'PACKAGE=%s\n' "$RUNNER_TEMP/native-project" >> "$GITHUB_ENV"
+          printf 'REPORTS=%s\n' "$RUNNER_TEMP/native-evidence" >> "$GITHUB_ENV"
+      - name: Authenticate hosted base-image pulls with private configuration
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKERHUB_USERNAME"
+          test -n "$DOCKERHUB_TOKEN"
+          export DOCKER_CONFIG="$RUNNER_TEMP/native-docker-config"
+          install -d -m 700 "$DOCKER_CONFIG"
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          chmod 600 "$DOCKER_CONFIG/config.json"
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
+      - name: Build the unmodified neutral default Docker recipe
+        run: |
+          timeout 3600 docker build --pull --progress=plain --tag "$IMAGE" "$PACKAGE" 2>&1 | tee "$REPORTS/default-build.log"
+          docker image inspect "$IMAGE" > "$REPORTS/image.json"
+          test "$(docker image inspect "$IMAGE" --format '{{.Architecture}}')" = "$EXPECTED_ARCHITECTURE"
+      - name: Retain exact preparation metadata before runtime checks
+        run: |
+          metadata_container="native-metadata-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$EXPECTED_ARCHITECTURE"
+          docker create --name "$metadata_container" --entrypoint /bin/true "$IMAGE"
+          trap 'docker rm "$metadata_container" >/dev/null 2>&1 || true' EXIT
+          for filename in artifact.json native-build.json jvm-build.json runtime-description.json; do
+            docker cp "$metadata_container:/opt/spark-tmbad/$filename" "$REPORTS/$filename"
+          done
+          docker rm "$metadata_container"
+          trap - EXIT
+      - name: Check native mathematics and installed Python APIs offline
+        run: |
+          flags=(--rm --pull=never --network=none --read-only --cpus=2 --memory=4g --pids-limit=1024
+            --cap-drop=ALL --security-opt=no-new-privileges --hostname localhost
+            --env SPARK_LOCAL_IP=127.0.0.1 --env JAVA_TOOL_OPTIONS='-Duser.home=/tmp -XX:ActiveProcessorCount=2'
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777
+            --tmpfs /work:rw,exec,nosuid,nodev,size=536870912,mode=1777
+            --mount "type=bind,src=$REPORTS,dst=/out")
+          docker run "${flags[@]}" --entrypoint python3 "$IMAGE" \
+            /src/python/examples/validate_native_oracles.py --manifest /opt/spark-tmbad/artifact.json --case all \
+            > "$REPORTS/native-unit-oracles.log" 2>&1
+          docker run "${flags[@]}" --entrypoint python3 "$IMAGE" \
+            /src/python/examples/validate_new_model_oracles.py --manifest /opt/spark-tmbad/artifact.json \
+            --rows /src/python/examples/new_model_references/rows-v3.json \
+            --gaussian /src/python/examples/new_model_references/gaussian-v3.json \
+            --supplement /src/python/examples/new_model_references/supplement-v3.json \
+            --output /out/new-native-oracles > "$REPORTS/new-native-oracles.log" 2>&1
+          docker run "${flags[@]}" "$IMAGE" --master 'local[2]' \
+            /src/python/examples/validate_installed.py --manifest /opt/spark-tmbad/artifact.json \
+            > "$REPORTS/python-installed.log" 2>&1
+          docker run "${flags[@]}" "$IMAGE" --master 'local[2]' \
+            /src/python/examples/validate_extended.py --manifest /opt/spark-tmbad/artifact.json \
+            --output /out/python-extended.json > "$REPORTS/python-extended.log" 2>&1
+          docker run "${flags[@]}" "$IMAGE" --master 'local[2]' \
+            /src/python/examples/validate_new_models.py --manifest /opt/spark-tmbad/artifact.json \
+            --row-references /src/python/examples/new_model_references/rows-v3.json \
+            --gaussian-references /src/python/examples/new_model_references/gaussian-v3.json \
+            --output /out/python-new-models.json > "$REPORTS/python-new-models.log" 2>&1
+      - name: Compile and run Scala API checks against the production JAR
+        run: |
+          flags=(--rm --pull=never --network=none --read-only --cpus=2 --memory=4g --pids-limit=1024
+            --cap-drop=ALL --security-opt=no-new-privileges --hostname localhost
+            --env SPARK_LOCAL_IP=127.0.0.1 --env JAVA_TOOL_OPTIONS='-Duser.home=/tmp -XX:ActiveProcessorCount=2'
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777
+            --tmpfs /work:rw,exec,nosuid,nodev,size=536870912,mode=1777
+            --mount "type=bind,src=$REPORTS,dst=/out")
+          docker run "${flags[@]}" --entrypoint python3 "$IMAGE" /src/jvm/build_checks.py \
+            --production-jar /opt/spark-tmbad/spark-tmbad.jar --output /out/checks.jar \
+            > "$REPORTS/scala-check-compilation.log" 2>&1
+          for check in ContractChecks RegularizationOracleChecks TargetContractChecks ProximalRoundoffChecks; do
+            docker run "${flags[@]}" --entrypoint java "$IMAGE" -Xmx768m \
+              -cp '/opt/spark/jars/*:/opt/spark-tmbad/spark-tmbad.jar:/out/checks.jar' \
+              "io.ds60.spark.tmbad.$check" > "$REPORTS/$check.log" 2>&1
+          done
+          docker run "${flags[@]}" "$IMAGE" --master 'local[2]' \
+            --class io.ds60.spark.tmbad.FeatureSparkChecks /out/checks.jar \
+            /opt/spark-tmbad/artifact.json /out/scala-extended.json > "$REPORTS/scala-extended.log" 2>&1
+      - name: Export exact artifacts and run isolated multi-container recovery
+        run: |
+          export_container="native-export-$GITHUB_RUN_ID-$EXPECTED_ARCHITECTURE"
+          docker create --name "$export_container" --entrypoint /bin/true "$IMAGE"
+          trap 'docker rm "$export_container" >/dev/null 2>&1 || true' EXIT
+          docker cp "$export_container:/opt/spark-tmbad" "$RUNNER_TEMP/native-install"
+          docker rm "$export_container"
+          trap - EXIT
+          wheels=("$RUNNER_TEMP/native-install/wheels/"*.whl)
+          test "${#wheels[@]}" -eq 1
+          test -f "${wheels[0]}"
+          python "$PACKAGE/integration/run.py" --image "$IMAGE" \
+            --wheel "${wheels[0]}" \
+            --native-install "$RUNNER_TEMP/native-install" --output "$REPORTS/compose" --timeout 1200 \
+            > "$REPORTS/compose.log" 2>&1
+      - name: Preserve source-bound success and failure evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: native-standalone-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/native-evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove this job's private registry configuration
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/native-docker-config"

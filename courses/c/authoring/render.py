@@ -5,10 +5,17 @@ import os
 import re
 import shlex
 import subprocess
+import sys
 import textwrap
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
+ROOT = BASE.parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
 SPECS = []
 
 
@@ -225,6 +232,8 @@ Finish with a fresh case about {s["terms"][-1][0].lower()}.
             ("reference", program(s)),
             ("answers", answers),
         ]:
+            if key in {"guide", "answers"}:
+                content = canonical_markdown(content, root=ROOT, path=paths[key])
             target = BASE.parent.parent / paths[key]
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(content, encoding="utf-8", newline="\n")

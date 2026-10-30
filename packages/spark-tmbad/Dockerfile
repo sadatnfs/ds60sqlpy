@@ -61,6 +61,8 @@ COPY --from=jvm /tmp/wheels /tmp/wheels
 RUN python3 /src/tooling/assemble.py --native-build /tmp/tmbad-native --sdk /tmp/tmbad-sdk \
       --jar /tmp/spark-tmbad.jar --output /opt/spark-tmbad \
     && python3 -m pip install --no-index --no-deps /tmp/wheels/ds60_spark_tmbad-*.whl \
+    && mkdir -p /opt/spark-tmbad/wheels \
+    && cp /tmp/wheels/ds60_spark_tmbad-*.whl /opt/spark-tmbad/wheels/ \
     && /opt/spark-tmbad/tmbad-worker --describe >/opt/spark-tmbad/runtime-description.json \
     && python3 -c 'from ds60_spark_tmbad import PreparedRuntime; PreparedRuntime.from_manifest("/opt/spark-tmbad/artifact.json")' \
     && rm -rf /tmp/tmbad-native /tmp/tmbad-sdk /tmp/wheels /tmp/spark-tmbad.jar /tmp/spark-tmbad.jar.json

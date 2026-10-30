@@ -104,6 +104,81 @@ class Workload:
         if baseline["fit"]["data_ledger"] != recovered["fit"]["data_ledger"]:
             raise AssertionError("Worker loss changed the accepted native data ledger")
 
+    def named_target_check(self, frame):
+        spec = ModelSpec("normal", {"y": "y"}, id_columns=["row_id"])
+        regularization = {
+            "schema_version": 1,
+            "coordinate_system": "native_optimizer_parameters",
+            "normalization": "summed_likelihood_target",
+            "gaussian": {"mu": {"mean": 1.0, "precision": float(self.rows)}},
+            "l1": {"mu": float(self.rows)},
+        }
+        records = []
+        for reduction in ("sum", "weighted_mean"):
+            target = {
+                "regularization": regularization,
+                "fixed_parameters": {"log_sigma": 0.0},
+                "reduction": reduction,
+            }
+            denominator = self.rows if reduction == "weighted_mean" else 1
+            fitted = self.api.fit_shared(
+                frame, spec,
+                options=target | {
+                    "initial_parameters": [0.0, 0.0],
+                    "max_iterations": 100,
+                    "batch_rows": 1024,
+                    "solver": {
+                        "method": "proximal_gradient",
+                        "initial_step": denominator / (2 * self.rows),
+                        "kkt_tolerance": 1e-6,
+                    },
+                },
+            )
+            document = fitted.model
+            path = Path(f"/work/evidence/named-fit-{self.iteration}-{reduction}.json")
+            fitted.save(path)
+            if not document["fit"]["converged"] or document["fit"]["row_count"] != self.rows:
+                raise AssertionError(
+                    "Distributed named target lost data or did not converge; "
+                    f"retained {path.name}, status={document['fit']['status']}, "
+                    f"rows={document['fit']['row_count']}"
+                )
+            # Sum y = 7.5*n. One global N(1,1/n) prior and n*abs(mu), with
+            # fixed sigma=1, give soft_threshold((7.5*n+n)/(2*n), 1/2)=3.75.
+            close(document["parameters"], [3.75, 0.0], 1e-10)
+            if document["target"]["stationarity"]["summed_inf"] > 1e-6:
+                raise AssertionError("Distributed exact L1 did not satisfy summed KKT")
+            restored = FittedModel.load(path, runtime=self.runtime)
+            future = self.spark.range(2).selectExpr("id + 200000 AS row_id")
+            predictions = [
+                row.asDict() for row in restored.predict(
+                    future, options={"target": "response", "columns": {}}
+                ).orderBy("row_id").collect()
+            ]
+            if [row["row_id"] for row in predictions] != [200000, 200001]:
+                raise AssertionError("Named-target prediction lost row identities")
+            for row in predictions:
+                close([row["tmbad_mean"], row["tmbad_sd"]], [3.75, 1.0], 1e-10)
+            evaluated = self.api.evaluate_shared(frame, spec, [3.75, 0.0], options=target)
+            close([evaluated["loss_components"]["total_reduced"]], [document["fit"]["loss"]], 1e-10)
+            records.append({"reduction": reduction, "model": document,
+                "evaluation": evaluated, "prediction": predictions})
+        close([records[0]["model"]["fit"]["loss"] / self.rows],
+            [records[1]["model"]["fit"]["loss"]], 1e-10)
+        return records
+
+    def compare_named_targets(self, baseline, recovered):
+        if len(baseline) != 2 or len(recovered) != 2:
+            raise AssertionError("Both named-target reductions are required")
+        for before, after in zip(baseline, recovered, strict=True):
+            if before["reduction"] != after["reduction"]:
+                raise AssertionError("Named-target reduction changed after worker loss")
+            close(before["model"]["parameters"], after["model"]["parameters"], 1e-12)
+            if before["model"]["fit"]["data_ledger"] != after["model"]["fit"]["data_ledger"]:
+                raise AssertionError("Worker loss changed the named-target data ledger")
+            if before["model"]["target"]["target_spec_digest"] != after["model"]["target"]["target_spec_digest"]:
+                raise AssertionError("Worker loss changed the named statistical target")
+
     def forecast(self):
         recipe = json.loads(Path("/integration/ar1-fixture.json").read_text())
         if self.ar1 is None:

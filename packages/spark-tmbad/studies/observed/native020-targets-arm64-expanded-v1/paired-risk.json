@@ -1,0 +1,37 @@
+{
+  "scope": "derived paired comparison of unchanged observed replicates, no refit",
+  "contrasts": [
+    {
+      "study": "sim-003",
+      "scenario": "weak_slope",
+      "contrast": "selected_gaussian minus unpenalized slope squared error",
+      "count": 16,
+      "mean": -0.011783238747888341,
+      "mcse": 0.004493935227031064
+    },
+    {
+      "study": "sim-003",
+      "scenario": "strong_slope",
+      "contrast": "selected_gaussian minus unpenalized slope squared error",
+      "count": 16,
+      "mean": 0.032772180293151223,
+      "mcse": 0.013962260547795707
+    },
+    {
+      "study": "sim-004",
+      "scenario": "weak_slope",
+      "contrast": "selected_l1 minus unpenalized slope squared error",
+      "count": 16,
+      "mean": -0.011894640663371345,
+      "mcse": 0.008106130793334623
+    },
+    {
+      "study": "sim-004",
+      "scenario": "strong_slope",
+      "contrast": "selected_l1 minus unpenalized slope squared error",
+      "count": 16,
+      "mean": 0.019279372663418903,
+      "mcse": 0.011700593125618754
+    }
+  ]
+}

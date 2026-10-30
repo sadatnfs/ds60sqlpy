@@ -2,6 +2,8 @@
 #pragma once
 #include "models.hpp"
 #include "models_extra.hpp"
+#include "models_families.hpp"
+#include "models_correlated.hpp"
 #include "../../models/custom_models.hpp"
 #include <set>
 namespace ds60_tmbad {
@@ -17,7 +19,16 @@ inline std::vector<Model> prepared_models() {
                             poisson_random_slope_model(),
                             bernoulli_model(),
                             negative_binomial_model(),
-                            gamma_model()};
+                            gamma_model(),
+                            binomial_model(),
+                            binomial_model(true),
+                            beta_model(),
+                            lognormal_model(),
+                            student_t_model(),
+                            poisson_component_model("zero_truncated_poisson"),
+                            poisson_component_model("zero_inflated_poisson"),
+                            poisson_component_model("hurdle_poisson"),
+                            correlated_gaussian_slope_model()};
   for (auto model : custom_models())
     result.push_back(std::move(model));
   std::set<std::string> ids;

@@ -26,19 +26,31 @@
       "id": "sim-003",
       "title": "Conventional ridge with selected coefficients",
       "case": "ridge_selected",
-      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
+      "status": "local ARM64 Spark named-target expansion accepted all 128 fit records for this study across 16 independent datasets per scenario, both methods and reductions; initial smoke retained; broader study/calibration pending",
       "existing_lesson_links": ["clp-013", "bayes-003"],
       "worked_contrast": "Vary collinearity and prior precision, keep the intercept unpenalized explicitly, and compare an analytic Gaussian oracle.",
-      "source": "run_reference.py"
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Two-column orthogonal [1,x], weak/strong slope, fixed sigma, named nonzero-center Gaussian prior; observed risk and MCSE over 16 datasets per scenario; collinearity and precision-grid contrasts remain pending.",
+      "reference_source": "run_reference.py",
+      "observed_receipt": "observed/native020-targets-arm64-v1/sim-003-r0.json",
+      "observed_expansion": "observed/native020-targets-arm64-expanded-v1/AGGREGATE.json",
+      "independent_datasets_per_scenario": 16
     },
     {
       "id": "sim-004",
       "title": "Exact lasso, soft thresholding and KKT conditions",
       "case": "lasso_orthogonal",
-      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
+      "status": "local ARM64 Spark named-target expansion accepted all 128 fit records for this study across 16 independent datasets per scenario, both methods and reductions; initial smoke retained; broader study/calibration pending",
       "existing_lesson_links": ["clp-013", "asm-010"],
       "worked_contrast": "Contrast coefficient sparsity with ridge and verify active and zero-coordinate KKT conditions; do not substitute smooth absolute values.",
-      "source": "run_reference.py"
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Weak/strong slope, exact soft-threshold oracle and sum/weighted_mean KKT over 16 datasets per scenario; L1 zeros observed in 7/16 weak and 0/16 strong datasets; broader tuning contrasts remain pending.",
+      "reference_source": "run_reference.py",
+      "observed_receipt": "observed/native020-targets-arm64-v1/sim-004-r0.json",
+      "observed_expansion": "observed/native020-targets-arm64-expanded-v1/AGGREGATE.json",
+      "independent_datasets_per_scenario": 16
     },
     {
       "id": "sim-005",
@@ -78,15 +90,21 @@
       "id": "sim-009",
       "title": "Independent fits and boundary variance estimates",
       "case": "independent_boundaries",
-      "status": "planned",
+      "status": "old-JAR local ARM64 expansion across 8 datasets per scenario: 32/32 method records and all 64 individual group fits accepted; independent derivation and initial smoke preserved; broader study pending",
       "existing_lesson_links": ["asm-003", "tmb-016"],
-      "worked_contrast": "Study small-group failures and variance components at a boundary without calling one-group estimates identified."
+      "worked_contrast": "Study small-group failures and variance components at a boundary without calling one-group estimates identified.",
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Equal/heterogeneous normal group means with 16 training rows per group; broader small-group/boundary-variance contrasts remain pending.",
+      "observed_receipt": "observed/native020-families-arm64-v1/sim-009-r0.json",
+      "observed_expansion": "observed/native020-families-arm64-expanded-v1/aggregate-derived.json",
+      "independent_datasets_per_scenario": 8
     },
     {
       "id": "sim-010",
       "title": "MLE, MAP and exact posterior targets",
       "case": "conjugate_targets",
-      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
+      "status": "bounded exact posterior reference host-tested; native 0.2 MAP/declared-parameter API locally qualified; full study pending",
       "existing_lesson_links": ["bayes-003", "asm-036"],
       "worked_contrast": "Use Gaussian and Gamma-Poisson cases so posterior mean, mode and uncertainty cannot be conflated.",
       "source": "run_reference.py"
@@ -168,15 +186,21 @@
       "id": "sim-020",
       "title": "Zero inflation versus hurdle models",
       "case": "zeros_hurdles",
-      "status": "new models required",
+      "status": "old-JAR local ARM64 expansion across 8 datasets per scenario: 47/48 method records accepted; ZIP on Poisson truth replication 2 retained function_stalled_without_stationarity; broader study pending",
       "existing_lesson_links": ["clp-011", "tmb-011"],
-      "worked_contrast": "Simulate structural zeros separately from sampling zeros and evaluate normalized probabilities and distinct mean targets."
+      "worked_contrast": "Simulate structural zeros separately from sampling zeros and evaluate normalized probabilities and distinct mean targets.",
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Ordinary/structural-zero Poisson data; model-correct scores, no general family-composition or Torch parity claim.",
+      "observed_receipt": "observed/native020-families-arm64-v1/sim-020-r0.json",
+      "observed_expansion": "observed/native020-families-arm64-expanded-v1/aggregate-derived.json",
+      "independent_datasets_per_scenario": 8
     },
     {
       "id": "sim-021",
       "title": "Truncation, censoring and sample selection",
       "case": "selection",
-      "status": "new models required",
+      "status": "native zero-truncated Poisson numerically qualified; censoring/other selection models and full study pending",
       "existing_lesson_links": ["clp-009", "tmb-011"],
       "worked_contrast": "Use the correct normalization or survival contribution rather than deleting observations or treating bounds as values."
     },
@@ -184,15 +208,21 @@
       "id": "sim-022",
       "title": "Binomial overdispersion and COM-binomial",
       "case": "bounded_counts",
-      "status": "new models required",
+      "status": "old-JAR local ARM64 expansion across 8 datasets per scenario: 30/32 method records accepted; beta-binomial on binomial truth replications 0 and 3 retained line_search_failed without predictions; broader study pending",
       "existing_lesson_links": ["clp-007", "tmb-011"],
-      "worked_contrast": "Separate trial size, probability and latent heterogeneity; compare overdispersion with underdispersion."
+      "worked_contrast": "Separate trial size, probability and latent heterogeneity; compare overdispersion with underdispersion.",
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Binomial/beta-binomial data and model-correct heldout scores; two optimizer failures remain visible; COM-binomial remains unimplemented.",
+      "observed_receipt": "observed/native020-families-arm64-v1/sim-022-r0.json",
+      "observed_expansion": "observed/native020-families-arm64-expanded-v1/aggregate-derived.json",
+      "independent_datasets_per_scenario": 8
     },
     {
       "id": "sim-023",
       "title": "Beta, ordered-beta and ordinal boundaries",
       "case": "bounded_outcomes",
-      "status": "new models required",
+      "status": "native interior beta numerically qualified; ordered-beta/ordinal and full study pending",
       "existing_lesson_links": ["clp-004", "bayes-011"],
       "worked_contrast": "Distinguish continuous interior proportions, endpoint masses and ordered discrete categories."
     },
@@ -200,9 +230,15 @@
       "id": "sim-024",
       "title": "Gamma, lognormal, Student-t and skewness",
       "case": "continuous_families",
-      "status": "Gamma native subset; other models planned",
+      "status": "old-JAR local ARM64 expansion across 8 datasets per scenario: 31/32 method records accepted; Gaussian on contaminated truth replication 7 retained function_stalled_without_stationarity; broader study pending",
       "existing_lesson_links": ["bayes-011", "clp-010"],
-      "worked_contrast": "Match mean and variance deliberately, then change tail behavior and compare robust predictive scores."
+      "worked_contrast": "Match mean and variance deliberately, then change tail behavior and compare robust predictive scores.",
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Gaussian/symmetric-contamination contrast; Gamma/lognormal/skewness study contrasts remain pending.",
+      "observed_receipt": "observed/native020-families-arm64-v1/sim-024-r0.json",
+      "observed_expansion": "observed/native020-families-arm64-expanded-v1/aggregate-derived.json",
+      "independent_datasets_per_scenario": 8
     },
     {
       "id": "sim-025",
@@ -224,7 +260,7 @@
       "id": "sim-027",
       "title": "Conditional mean, zero and dispersion submodels",
       "case": "three_predictors",
-      "status": "new typed model schemas required",
+      "status": "native Poisson mean/zero scalar predictors available; general mean/zero/dispersion designs and study pending",
       "existing_lesson_links": ["tmb-016", "asm-002"],
       "worked_contrast": "Keep independent design matrices, offsets and parameter blocks explicit."
     },
@@ -232,9 +268,15 @@
       "id": "sim-028",
       "title": "Correlated random intercepts and slopes",
       "case": "correlated_slopes",
-      "status": "current native diagonal-prior subset only",
+      "status": "old-JAR local ARM64 expansion across 8 datasets per scenario: 32/32 method records and conditional/unseen-group targets accepted; dataset-level MCSE retained; broader study pending",
       "existing_lesson_links": ["tmb-016", "asm-033"],
-      "worked_contrast": "Vary prior correlation and distinguish it from posterior covariance induced by observations."
+      "worked_contrast": "Vary prior correlation and distinguish it from posterior covariance induced by observations.",
+      "source": "run_native_extended.py",
+      "guide": "guides/native020-study-expansion.md",
+      "implementation_scope": "Positive/negative latent correlation and known/estimated covariance; one estimate reached its correlation bound; broader covariance studies remain separate.",
+      "observed_receipt": "observed/native020-families-arm64-v1/sim-028-r0.json",
+      "observed_expansion": "observed/native020-families-arm64-expanded-v1/aggregate-derived.json",
+      "independent_datasets_per_scenario": 8
     },
     {
       "id": "sim-029",

@@ -1,0 +1,2096 @@
+[
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 1729
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000230291575233062,
+        "objective": 527.495721446443,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.80543610069194,
+              0.25973747543052,
+              -1.27120830409374,
+              -0.461382500274235,
+              0.742012712316911
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 527.495721446443,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.000230291575233062,
+              -0.000180524023034361,
+              0.000131730614270663,
+              0.000112595114359539,
+              -0.000128533532815882
+            ],
+            "score_inf": 0.000230291575233062,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.80543610069194,
+        0.25973747543052
+      ],
+      "latent_phi": 0.595886924072961,
+      "latent_marginal_sd": 0.630411498704401,
+      "observation_sd": 0.280492496704501,
+      "forecast": {
+        "mean": [
+          0.268218090758427,
+          0.361148506506474,
+          0.425012348539559
+        ],
+        "covariance": [
+          [
+            0.356754288434144,
+            0.165703191689414,
+            0.0987403652048771
+          ],
+          [
+            0.165703191689414,
+            0.433719159288464,
+            0.211565551844467
+          ],
+          [
+            0.0987403652048771,
+            0.211565551844467,
+            0.461047940011985
+          ]
+        ],
+        "sd": [
+          0.597289116286362,
+          0.658573579251752,
+          0.679005110446147
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.202614525398807,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.595886924072961,
+        "truth": 0.6
+      },
+      "fixture_sha256": "29122c13cbd7ead7ecc85abbcda6533c8708e91599b6edbf819e4b1af09d46b4"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.747,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "ca33297cccba93b87d71492cbe08280c6dbddfbda5e36bd3d93af02ab18e687b",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 0,
+    "seed": 1729
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 9648
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 2.04210295038298e-05,
+        "objective": 525.692657160798,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.914844690754149,
+              0.368158048573701,
+              -1.94708147931057,
+              -0.348530485006888,
+              0.730710994723469
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 525.692657160798,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              5.84614069768505e-06,
+              4.08232434322492e-06,
+              -2.14271939264566e-06,
+              -7.02257968348474e-06,
+              2.04210295038298e-05
+            ],
+            "score_inf": 2.04210295038298e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.914844690754149,
+        0.368158048573701
+      ],
+      "latent_phi": 0.589985937127506,
+      "latent_marginal_sd": 0.705724400682782,
+      "observation_sd": 0.142689907926322,
+      "forecast": {
+        "mean": [
+          0.789501615412265,
+          0.663253483461556,
+          0.60042557168434
+        ],
+        "covariance": [
+          [
+            0.35172233130865,
+            0.195498873775479,
+            0.115341586251798
+          ],
+          [
+            0.195498873775479,
+            0.46038705414634,
+            0.259609532111575
+          ],
+          [
+            0.115341586251798,
+            0.259609532111575,
+            0.498211440984623
+          ]
+        ],
+        "sd": [
+          0.593061827559867,
+          0.678518278417273,
+          0.705840945953565
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.13394457837113,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.589985937127506,
+        "truth": 0.6
+      },
+      "fixture_sha256": "6f4cf622422a7c86aea523da830f956cb7366013f553b95f26d2b1b4fc820faa"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.748,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "7f6f7f72a5ee0f6b0e9eb724f5dcf399fccf42acf093a1dd87b863e52794b431",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 1,
+    "seed": 9648
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 17567
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 1.47706075078021e-05,
+        "objective": 529.689567747099,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.809430365597383,
+              0.455671737892277,
+              -1.60142139385327,
+              -0.445595951693055,
+              0.559427239753414
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 529.689567747099,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -1.3180534278606e-05,
+              1.01311321786496e-05,
+              -2.521726914593e-06,
+              -7.29124168488333e-06,
+              1.47706075078021e-05
+            ],
+            "score_inf": 1.47706075078021e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.809430365597383,
+        0.455671737892277
+      ],
+      "latent_phi": 0.488222796606715,
+      "latent_marginal_sd": 0.640442489494533,
+      "observation_sd": 0.201609747380256,
+      "forecast": {
+        "mean": [
+          0.340815433996955,
+          0.32568156506979,
+          0.324734884050215
+        ],
+        "covariance": [
+          [
+            0.361644779357586,
+            0.156718682419579,
+            0.0765136334114064
+          ],
+          [
+            0.156718682419579,
+            0.429558784539571,
+            0.18987584795829
+          ],
+          [
+            0.0765136334114064,
+            0.18987584795829,
+            0.445746868626432
+          ]
+        ],
+        "sd": [
+          0.601369087464251,
+          0.655407342451678,
+          0.667642770219548
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.248723956868997,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.488222796606715,
+        "truth": 0.6
+      },
+      "fixture_sha256": "47eac95928c6c2e69536b21e54ad8508b4da229865ed17d450f2f726e8fed657"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.75,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "0c802eea8f81dc157b5ffafa5c8f2ad37042c8f98ee92c105d617cd1c83a7169",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 2,
+    "seed": 17567
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 25486
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 9.81462499258221e-06,
+        "objective": 539.910753928932,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.798627880839201,
+              0.44328025972014,
+              -1.28389446430567,
+              -0.385353074929438,
+              0.855008121431766
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 539.910753928932,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -4.10190611728832e-06,
+              -9.81462499258221e-06,
+              2.873549248494e-06,
+              7.80301530839448e-06,
+              -5.02119926136282e-06
+            ],
+            "score_inf": 9.81462499258221e-06,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.798627880839201,
+        0.44328025972014
+      ],
+      "latent_phi": 0.649855543187551,
+      "latent_marginal_sd": 0.680210428552369,
+      "observation_sd": 0.276956599851794,
+      "forecast": {
+        "mean": [
+          1.02008945424587,
+          0.748742805116702,
+          0.591012266565985
+        ],
+        "covariance": [
+          [
+            0.36966498297001,
+            0.1903816960282,
+            0.123720600485373
+          ],
+          [
+            0.1903816960282,
+            0.467713734819234,
+            0.254099220920039
+          ],
+          [
+            0.123720600485373,
+            0.254099220920039,
+            0.509120921568386
+          ]
+        ],
+        "sd": [
+          0.608000808362958,
+          0.683895997077943,
+          0.713527099393139
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.0332914584509272,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.649855543187551,
+        "truth": 0.6
+      },
+      "fixture_sha256": "0c85d3e2eced7bd19d090784b7836a195d2ab9cb900913084f1bc0edee338b2e"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.745,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "8a66c1a083ff2203d8226bdbc463358f9bbcd473f603215dec27a0167870f037",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 3,
+    "seed": 25486
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 33405
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.00171680712977432,
+        "objective": 512.584485315195,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.817931779146339,
+              0.322047070774821,
+              -1.13866554477886,
+              -0.542546232356628,
+              0.781600501805159
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 512.584485315195,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              0.00171680712977432,
+              0.000118733598570007,
+              -0.000610662598206777,
+              -0.000855988437847368,
+              0.000431315512969252
+            ],
+            "score_inf": 0.00171680712977432,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.817931779146339,
+        0.322047070774821
+      ],
+      "latent_phi": 0.615815516035122,
+      "latent_marginal_sd": 0.581266327381357,
+      "observation_sd": 0.320246090868672,
+      "forecast": {
+        "mean": [
+          0.551974991336533,
+          0.505055332722557,
+          0.487790730542468
+        ],
+        "covariance": [
+          [
+            0.33943967546515,
+            0.14587568296496,
+            0.0898325089820427
+          ],
+          [
+            0.14587568296496,
+            0.402130387301747,
+            0.184481596025223
+          ],
+          [
+            0.0898325089820427,
+            0.184481596025223,
+            0.425904507574959
+          ]
+        ],
+        "sd": [
+          0.582614517039483,
+          0.634137514504344,
+          0.65261359744872
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.501378620154076,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.615815516035122,
+        "truth": 0.6
+      },
+      "fixture_sha256": "d22047d7611ae9ce9598407484f1bae24c8f3492cd9a6aa42d6973e6b96c2bbe"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.781,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "a73a42a7a39cb3f203f684645dafcacf789d4ba39354fdd1ce1854d23d9b3c84",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 4,
+    "seed": 33405
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 41324
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.00105919254220683,
+        "objective": 520.103729179167,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.720219117496333,
+              0.455595490256913,
+              -1.45392879989351,
+              -0.377578644851414,
+              0.861563627962057
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 520.103729179167,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.00105919254220683,
+              -0.00017504884102232,
+              6.20468020360762e-05,
+              -0.000218467232479026,
+              4.02704788594277e-05
+            ],
+            "score_inf": 0.00105919254220683,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.720219117496333,
+        0.455595490256913
+      ],
+      "latent_phi": 0.652719968926847,
+      "latent_marginal_sd": 0.685519286901805,
+      "observation_sd": 0.233650516353563,
+      "forecast": {
+        "mean": [
+          0.159125229614572,
+          0.155782221663882,
+          0.172947400293897
+        ],
+        "covariance": [
+          [
+            0.343882229580817,
+            0.188825141664348,
+            0.123249940599761
+          ],
+          [
+            0.188825141664348,
+            0.4475657905721,
+            0.256501472372803
+          ],
+          [
+            0.123249940599761,
+            0.256501472372803,
+            0.491739483049206
+          ]
+        ],
+        "sd": [
+          0.586414724901087,
+          0.669003580388102,
+          0.701241387147968
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.207520268361127,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.652719968926847,
+        "truth": 0.6
+      },
+      "fixture_sha256": "0e0eabbc48fcb4e3bcf3a4c669c5e4b409764fbf2910d822db3565a0bce1ba7c"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.816,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "9565af1fbffd55435be0b4621528e5d14ff377dab4b97f448ec9b6f6b6afebca",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 5,
+    "seed": 41324
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 49243
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000517198064590757,
+        "objective": 537.873925097743,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.817997373138929,
+              0.38463916757367,
+              -1.38414156676068,
+              -0.428058148380917,
+              0.677519004164194
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 537.873925097743,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              9.68001403672228e-06,
+              9.95876607228852e-05,
+              -0.000138970648544473,
+              -0.000517198064590757,
+              0.000363138513169693
+            ],
+            "score_inf": 0.000517198064590757,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.817997373138929,
+        0.38463916757367
+      ],
+      "latent_phi": 0.560904691871648,
+      "latent_marginal_sd": 0.65177351412224,
+      "observation_sd": 0.250538778321188,
+      "forecast": {
+        "mean": [
+          0.958475753577698,
+          0.702734037294291,
+          0.569539521988664
+        ],
+        "covariance": [
+          [
+            0.370328547634178,
+            0.172511212195349,
+            0.0967623483208365
+          ],
+          [
+            0.172511212195349,
+            0.450689941653703,
+            0.217586295146247
+          ],
+          [
+            0.0967623483208365,
+            0.217586295146247,
+            0.475972767167365
+          ]
+        ],
+        "sd": [
+          0.608546257596066,
+          0.671334448433642,
+          0.689907796134647
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.269793024568087,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.560904691871648,
+        "truth": 0.6
+      },
+      "fixture_sha256": "c6610e9a9c8a3f0c9b95b577cf288f756eb232caf7cb4d4e38d696facdb0ecf4"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.748,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "13b48e01d47737566c1b34b2cfc8034c17d529e47537ec8e8e894e3a3a477732",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 6,
+    "seed": 49243
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 57162
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 1.3898844680702e-05,
+        "objective": 515.568497129278,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.904130695306212,
+              0.206076908971255,
+              -1.55080161450823,
+              -0.414859037445701,
+              0.739514499074433
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 515.568497129278,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              5.32513577490311e-06,
+              2.90091991794235e-07,
+              1.1030160706782e-06,
+              -1.3898844680702e-05,
+              -7.57626361526009e-06
+            ],
+            "score_inf": 1.3898844680702e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.904130695306212,
+        0.206076908971255
+      ],
+      "latent_phi": 0.594590742611418,
+      "latent_marginal_sd": 0.660433370518593,
+      "observation_sd": 0.212077900947133,
+      "forecast": {
+        "mean": [
+          0.37481022293162,
+          0.490685291926983,
+          0.566271812579958
+        ],
+        "covariance": [
+          [
+            0.340747979146891,
+            0.175862664686884,
+            0.104566312393797
+          ],
+          [
+            0.175862664686884,
+            0.43151205912237,
+            0.229830146401946
+          ],
+          [
+            0.104566312393797,
+            0.229830146401946,
+            0.463600624152197
+          ]
+        ],
+        "sd": [
+          0.583736223946134,
+          0.65689577493113,
+          0.680882239562905
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.390926877497026,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.594590742611418,
+        "truth": 0.6
+      },
+      "fixture_sha256": "036bdb4e98a17dfe984d2e8adf8a28e2eeccbcf63a039b795c95bb9cc81b871d"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.758,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "94ea3228601bbb1e275619edf38a72b0064d773d60dc69540a6daa3f477f3a60",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 7,
+    "seed": 57162
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 65081
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000104594816859534,
+        "objective": 524.914670058564,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.814766892048264,
+              0.461835090107028,
+              -1.18023999841356,
+              -0.454027813213373,
+              0.880555007181874
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 524.914670058564,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.000104594816859534,
+              -0.000102688881674003,
+              -2.39017400674423e-05,
+              -5.82675614537199e-05,
+              3.03789703791133e-05
+            ],
+            "score_inf": 0.000104594816859534,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.814766892048264,
+        0.461835090107028
+      ],
+      "latent_phi": 0.660862610519995,
+      "latent_marginal_sd": 0.635065069799999,
+      "observation_sd": 0.307205001040149,
+      "forecast": {
+        "mean": [
+          0.365974502185406,
+          0.320108629741354,
+          0.31005739898542
+        ],
+        "covariance": [
+          [
+            0.351699235806289,
+            0.170056023942053,
+            0.112383667916996
+          ],
+          [
+            0.170056023942053,
+            0.433925889534102,
+            0.224396544978939
+          ],
+          [
+            0.112383667916996,
+            0.224396544978939,
+            0.469837508123555
+          ]
+        ],
+        "sd": [
+          0.593042355828224,
+          0.658730513589664,
+          0.685446940414468
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.241179165248727,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.660862610519995,
+        "truth": 0.6
+      },
+      "fixture_sha256": "5cf8c7971c924d67e1c9d070e799d8744aa4b666e07c820d165a3c703c267d0f"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.749,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "a253f6a75da050682688e726237408a47409ec68b18257a443556fae9d9b1bd0",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 8,
+    "seed": 65081
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 73000
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000127457114677492,
+        "objective": 520.193908675332,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.735699592619591,
+              0.484598622480753,
+              -1.36091535816403,
+              -0.420225554535331,
+              0.817902988223093
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 520.193908675332,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              2.05991044200948e-05,
+              -5.77659426000789e-05,
+              -2.52235636127362e-05,
+              6.98637776837595e-05,
+              0.000127457114677492
+            ],
+            "score_inf": 0.000127457114677492,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.735699592619591,
+        0.484598622480753
+      ],
+      "latent_phi": 0.633108495933483,
+      "latent_marginal_sd": 0.656898636637245,
+      "observation_sd": 0.256425947908724,
+      "forecast": {
+        "mean": [
+          -0.133377881925023,
+          -0.0325302295585156,
+          0.0502594938183301
+        ],
+        "covariance": [
+          [
+            0.345649395622703,
+            0.177203984052812,
+            0.112189347817097
+          ],
+          [
+            0.177203984052812,
+            0.436496515165958,
+            0.234720067266731
+          ],
+          [
+            0.112189347817097,
+            0.234720067266731,
+            0.472910436101507
+          ]
+        ],
+        "sd": [
+          0.587919548597173,
+          0.660678829058384,
+          0.687684837772004
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.0266104838922396,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.633108495933483,
+        "truth": 0.6
+      },
+      "fixture_sha256": "d7dde527d5d9c810958c32b9d6514671b5b7bea5885f39dc98b7ca27596ddd08"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.749,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "75f7ed2632c97fa3e9e8f95bdabd02db0729032ca27851bf35839b0fa520f568",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 9,
+    "seed": 73000
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 80919
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 2.23171122275229e-05,
+        "objective": 562.061574265348,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.772036273528275,
+              0.519271704398566,
+              -1.05541745915305,
+              -0.417143215490064,
+              0.890149211295052
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 562.061574275034,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              0.00115451078268668,
+              0.000409294493140971,
+              -0.00151823665227073,
+              -0.00251133976964309,
+              0.000787791148233612
+            ],
+            "score_inf": 0.00251133976964309,
+            "pd_hessian": true,
+            "warnings": []
+          },
+          {
+            "method": "upstream optim BFGS refit",
+            "parameters": [
+              0.772032816373679,
+              0.519271353098372,
+              -1.05540844745927,
+              -0.417141094923837,
+              0.890153844441237
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 562.061574265348,
+            "convergence": 0,
+            "message": null,
+            "gradient": [
+              1.26911831312808e-07,
+              -5.06884434155313e-06,
+              1.219573318959e-05,
+              2.23171122275229e-05,
+              -7.5687284208349e-06
+            ],
+            "score_inf": 2.23171122275229e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.772032816373679,
+        0.519271353098372
+      ],
+      "latent_phi": 0.664891483616383,
+      "latent_marginal_sd": 0.658927941997127,
+      "observation_sd": 0.348050238034329,
+      "forecast": {
+        "mean": [
+          0.620897029001635,
+          0.450426250038495,
+          0.36022138878772
+        ],
+        "covariance": [
+          [
+            0.400744628003455,
+            0.18590742197708,
+            0.123608261613638
+          ],
+          [
+            0.18590742197708,
+            0.486988003787063,
+            0.243249908053929
+          ],
+          [
+            0.123608261613638,
+            0.243249908053929,
+            0.525114534428951
+          ]
+        ],
+        "sd": [
+          0.633043938446183,
+          0.697845257766407,
+          0.724647869264066
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 1.02080005008197,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.664891483616383,
+        "truth": 0.6
+      },
+      "fixture_sha256": "c6fd4ae21b927b4cec427c25a056519d1d8a8479982a37d3fd3d224e2940fc6e"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.902,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "3a8d982b97072eb033734867f0b52ea69575552f02a6deee32ac4af1441bd210",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 10,
+    "seed": 80919
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 88838
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 6.22061191007896e-05,
+        "objective": 523.73312671056,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.788280715565459,
+              0.372727440299744,
+              -8.25356232184959,
+              -0.397626327783294,
+              0.526267240210855
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 523.73312671056,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -4.66939732986328e-07,
+              2.86358915103222e-07,
+              1.19917095194275e-07,
+              6.22061191007896e-05,
+              -3.99187527198721e-05
+            ],
+            "score_inf": 6.22061191007896e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.788280715565459,
+        0.372727440299744
+      ],
+      "latent_phi": 0.465712789028982,
+      "latent_marginal_sd": 0.671913055999,
+      "observation_sd": 0.000260329525971364,
+      "forecast": {
+        "mean": [
+          0.517926807106991,
+          0.44747300150821,
+          0.418486288822148
+        ],
+        "covariance": [
+          [
+            0.353549247588286,
+            0.164652374591402,
+            0.0766807165912065
+          ],
+          [
+            0.164652374591402,
+            0.430229949480652,
+            0.200363558134395
+          ],
+          [
+            0.0766807165912065,
+            0.200363558134395,
+            0.446861104367985
+          ]
+        ],
+        "sd": [
+          0.594600073653112,
+          0.655919163830919,
+          0.668476704431789
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.696288216316497,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.465712789028982,
+        "truth": 0.6
+      },
+      "fixture_sha256": "b815008370a17c926d6ea67f5eca3934ef19baa8b8cea360eeda5e831bb58866"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.771,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "1fef090400accb73033da2c693acd8df900c56fce8882963035d1cc7428abe25",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 11,
+    "seed": 88838
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 96757
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000399939973629195,
+        "objective": 542.75984355404,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.878206857220962,
+              0.390442839405243,
+              -1.4490432740397,
+              -0.354490054933162,
+              0.801004954341289
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 542.75984355404,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -7.02742671166531e-05,
+              0.000399939973629195,
+              1.34848295697172e-06,
+              -9.81199354900338e-05,
+              -0.000188463510220557
+            ],
+            "score_inf": 0.000399939973629195,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.878206857220962,
+        0.390442839405243
+      ],
+      "latent_phi": 0.625173194314767,
+      "latent_marginal_sd": 0.701531094330397,
+      "observation_sd": 0.234794814966149,
+      "forecast": {
+        "mean": [
+          0.308461828294465,
+          0.344021726639471,
+          0.380981073102894
+        ],
+        "covariance": [
+          [
+            0.373287907928718,
+            0.198904667628515,
+            0.124349866425436
+          ],
+          [
+            0.198904667628515,
+            0.479273304090988,
+            0.265163896297997
+          ],
+          [
+            0.124349866425436,
+            0.265163896297997,
+            0.520696797731121
+          ]
+        ],
+        "sd": [
+          0.610972919145127,
+          0.692295676781957,
+          0.721593235646732
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.23326633380572,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.625173194314767,
+        "truth": 0.6
+      },
+      "fixture_sha256": "919fb66c81fbca58ac2ddd699d7164641d14c973c847393b4283e1d7552e85d8"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.748,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "deeca3b3d1f9a64758cf420c489344fc759c8cc5e011a0fef5c4930d80ad3c57",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 12,
+    "seed": 96757
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 104676
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.00021969298253929,
+        "objective": 536.560100500214,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.822481943984631,
+              0.411008192895102,
+              -1.05918263819461,
+              -0.430360456171862,
+              1.04552767955555
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 536.560100500214,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              -0.00021969298253929,
+              -8.95639347497121e-05,
+              -7.93820676112464e-05,
+              -0.000194826163351112,
+              0.000121555562516
+            ],
+            "score_inf": 0.00021969298253929,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.822481943984631,
+        0.411008192895102
+      ],
+      "latent_phi": 0.72266600897553,
+      "latent_marginal_sd": 0.650274656960079,
+      "observation_sd": 0.34673910583837,
+      "forecast": {
+        "mean": [
+          0.382375340204421,
+          0.347386015961489,
+          0.34450503096713
+        ],
+        "covariance": [
+          [
+            0.364317436197236,
+            0.176395133257035,
+            0.127474766953569
+          ],
+          [
+            0.176395133257035,
+            0.44972439163025,
+            0.238115836878562
+          ],
+          [
+            0.127474766953569,
+            0.238115836878562,
+            0.494327846187581
+          ]
+        ],
+        "sd": [
+          0.603587140516791,
+          0.670614935436313,
+          0.703084522790525
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.12771188001405,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.72266600897553,
+        "truth": 0.6
+      },
+      "fixture_sha256": "9d0e90ed296315d9e974f3b269619e275c1eaf658466c7d40981d63a02690a4f"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.752,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "5ff23ef15386c5ba98de282423d648a804a4e72dbfd3df486abcff5fa9760ea9",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 13,
+    "seed": 104676
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 112595
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 0.000346371593264053,
+        "objective": 505.709390703782,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.918452495217133,
+              0.364234232693642,
+              -1.15682622226179,
+              -0.469430327661759,
+              1.01028765350622
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 505.709390703782,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              0.000346371593264053,
+              0.000275679980613462,
+              -9.05773086973855e-05,
+              0.000127010792568109,
+              -6.48392167211829e-05
+            ],
+            "score_inf": 0.000346371593264053,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.918452495217133,
+        0.364234232693642
+      ],
+      "latent_phi": 0.710716096050501,
+      "latent_marginal_sd": 0.625358416220462,
+      "observation_sd": 0.314482696868373,
+      "forecast": {
+        "mean": [
+          0.623709975176872,
+          0.566506649383572,
+          0.544956659365289
+        ],
+        "covariance": [
+          [
+            0.32729523654065,
+            0.162324621017236,
+            0.115366720942247
+          ],
+          [
+            0.162324621017236,
+            0.407801396260199,
+            0.219541644561132
+          ],
+          [
+            0.115366720942247,
+            0.219541644561132,
+            0.448466455860947
+          ]
+        ],
+        "sd": [
+          0.572097226475229,
+          0.638593294875697,
+          0.669676381441773
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.0746886059145658,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.710716096050501,
+        "truth": 0.6
+      },
+      "fixture_sha256": "d4c2124b5a8d050d11b8f49c7b8aeeb4010b29a01da098c56cbbd90e15c814ae"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.75,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "85cc201275066cf5f132b68fb1eb9c3fd0fc8e6439d0c2920661aaa4de251ab2",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 14,
+    "seed": 112595
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "glmm_ar_forecast",
+      "options": {},
+      "seed": 120514
+    },
+    "result": {
+      "case": "glmm_ar_forecast",
+      "backend": "upstream glmmTMB fit plus independent Gaussian conditioning",
+      "diagnostics": {
+        "converged": true,
+        "pd_hessian": true,
+        "score_inf": 8.18328794477699e-05,
+        "objective": 529.887653063785,
+        "warnings": [],
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              0.800952788748199,
+              0.328215872607429,
+              -1.30886011102685,
+              -0.391957125951314,
+              0.876196590731388
+            ],
+            "parameter_names": [
+              "beta",
+              "beta",
+              "betadisp",
+              "theta",
+              "theta"
+            ],
+            "objective": 529.887653063785,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "gradient": [
+              8.18328794477699e-05,
+              6.01898957686434e-05,
+              -2.34639345537922e-06,
+              3.94969781155186e-05,
+              1.16791986030881e-05
+            ],
+            "score_inf": 8.18328794477699e-05,
+            "pd_hessian": true,
+            "warnings": []
+          }
+        ]
+      },
+      "fixed_effects": [
+        0.800952788748199,
+        0.328215872607429
+      ],
+      "latent_phi": 0.65901418702885,
+      "latent_marginal_sd": 0.675733084752748,
+      "observation_sd": 0.270127796653243,
+      "forecast": {
+        "mean": [
+          -0.522112947486044,
+          -0.21218804729491,
+          0.00635057452384347
+        ],
+        "covariance": [
+          [
+            0.356479995656628,
+            0.186837750836215,
+            0.123128728473627
+          ],
+          [
+            0.186837750836215,
+            0.454405112249034,
+            0.251371791937065
+          ],
+          [
+            0.123128728473627,
+            0.251371791937065,
+            0.496933960880796
+          ]
+        ],
+        "sd": [
+          0.597059457388146,
+          0.674095773795559,
+          0.704935430291879
+        ],
+        "uncertainty": "observation/latent uncertainty at fitted population parameters"
+      },
+      "future_time": [
+        12,
+        13,
+        14
+      ],
+      "future_covariates": [
+        -0.756802495307928,
+        -0.929014501270762,
+        -0.998954917097928
+      ],
+      "future_has_response": false,
+      "interpretation": "latent AR1 plus separate measurement noise; differs from directly observed AR1",
+      "metrics": {
+        "mse": 0.184437606783679,
+        "pointwise_coverage": 1,
+        "interval": "pointwise plug-in Gaussian 95%; population-parameter uncertainty excluded",
+        "primary_estimate": 0.65901418702885,
+        "truth": 0.6
+      },
+      "fixture_sha256": "99af1154495035346033ea423cc582df8815b868539d2ddb401ace65c85d60ae"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.752,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "891c50fcebfd31f040a5101de9620b3cd4bb7c3066a45352173c681dc0726eb5",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 15,
+    "seed": 120514
+  }
+]

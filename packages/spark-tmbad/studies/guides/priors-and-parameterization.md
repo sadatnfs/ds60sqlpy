@@ -47,14 +47,19 @@ Predictive improvement or degradation must be measured, not assumed.
 A prior only on the slope would instead use
 \(P=\lambda\beta_1^2/2\). A prior centered at a scientifically motivated slope
 \(m\) uses \(\lambda(\beta_1-m)^2/2\). Neither is obtained by silently penalizing
-all coordinates. They need a named-coordinate penalty or an explicit study-level
-wrapper around a public unpenalized evaluator.
+all coordinates. Native 0.2 supplies named Gaussian terms: select beta1 with
+mean m and positive precision lambda, and omit beta0 and log_sigma. Fixed nuisance
+values use fixed_parameters explicitly. Torch's current scalar L2 has not acquired
+that interface. See [the native target contract](../../python/docs/EXTENDED-TARGETS.md).
 
 If \(L\) is a summed likelihood with global weight mass \(W\), then
 \(L+P\) and \(L/W+P/W\) have the same optimum. The objective \(L/W+P\) generally
 has a different optimum. Keeping the same numeric lambda while switching
-reduction changes the inferential target. Likewise, adding \(P\) once per
-partition changes the prior when partition count changes.
+reduction changes the legacy scalar-L2 target. Native 0.2 named regularization
+instead declares a summed-likelihood target and divides both data and penalty
+terms by W under weighted_mean. Gaussian terms include their normalizing constants;
+selected L1 is a penalty without a Laplace-density normalizer. Adding \(P\) once
+per partition would still change the prior when partition count changes.
 
 ## Worked case: MLE coordinates and posterior density measure
 
@@ -106,9 +111,20 @@ coordinates is
 Ridge instead scales a coefficient continuously and generally does not make it
 exactly zero. For lasso, a zero coordinate satisfies \(|g_j|\le\lambda\), while
 an active coordinate satisfies \(g_j+\lambda\operatorname{sign}(\beta_j)=0\).
-These KKT checks are the relevant optimality diagnostic. The current smooth
-optimizers must not be described as exact lasso solvers. A Laplace prior can give
-an L1 MAP target, but a MAP vector is still not a posterior draw.
+These KKT checks are the relevant optimality diagnostic. Native 0.2 now implements
+selected L1 through its proximal solver and reports constrained target stationarity.
+The smooth BFGS/L-BFGS-B routes are not exact lasso solvers. A fixed log_sigma
+coordinate is excluded from free-direction stationarity; its raw score need not
+vanish. A Laplace prior can give an L1 MAP target, but a MAP vector is still not a
+posterior draw.
+
+The current four-column orthogonal calculation in run_reference.py remains a
+serial mathematical reference. The prepared native linear_gaussian model has an
+intercept and one covariate. An executable native version must explicitly use a
+two-column design and fix its known scale, or first qualify a broader model.
+Compare the data loss and penalty components separately: a normalized named
+Gaussian term includes constants absent from the quadratic-only ridge oracle.
+API qualification does not establish repeated-data selection or coverage results.
 
 ## Study interpretation and interview discussion
 

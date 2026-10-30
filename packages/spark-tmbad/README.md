@@ -42,22 +42,29 @@ python -m pip install ./python
 ```
 
 Follow [runtime preparation](docs/PREPARATION.md) for the native/JAR manifest setup.
-Explore the [14-model gallery](docs/EXAMPLES.md), and read the
+Explore the [original 14-model gallery](docs/EXAMPLES.md) and the
+[nine additional likelihoods](docs/EXTENDED-MODELS.md). The prepared registry now
+contains 23 models. Read the
 [Python guide](docs/PYTHON.md) for complete DataFrame examples,
 [model contracts](docs/MODELS.md) for statistical meaning and input boundaries,
 [custom-model authoring](docs/CUSTOM-MODELS.md) for prepared C++ extensions,
 and [protocol](docs/PROTOCOL.md) for the common native and JVM contract.
+Version 0.2 adds [named Gaussian priors, exact L1 penalties, fixed parameters and
+declared parameter sets](python/docs/EXTENDED-TARGETS.md). Its public evaluation
+API reports the likelihood and penalty components without inventing fit status.
+The optional [R/TMB/glmmTMB reference project](reference/README.md) has its own
+preparation, dependencies and qualification records.
 
 ### Build a standalone image
 
 Copy this entire directory into a fresh project, enter that directory, and build:
 
 ```sh
-docker build --tag spark-tmbad:0.1.0 .
+docker build --tag spark-tmbad:0.2.0 .
 docker run --rm --network none --entrypoint /opt/spark-tmbad/tmbad-worker \
-  spark-tmbad:0.1.0 --describe
+  spark-tmbad:0.2.0 --describe
 docker run --rm --network none --hostname localhost \
-  --env SPARK_LOCAL_IP=127.0.0.1 spark-tmbad:0.1.0 \
+  --env SPARK_LOCAL_IP=127.0.0.1 spark-tmbad:0.2.0 \
   --master 'local[2]' /src/python/examples/validate_installed.py \
   --manifest /opt/spark-tmbad/artifact.json
 ```

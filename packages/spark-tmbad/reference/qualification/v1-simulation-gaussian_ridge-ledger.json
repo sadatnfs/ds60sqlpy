@@ -1,0 +1,2218 @@
+[
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 1729
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.40649704761586,
+        0.688032041596664
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 158.929561727534,
+        "raw_score_inf": 1.37077119294338e-07,
+        "projected_score_inf": 1.37077119294338e-07,
+        "iterations": 8,
+        "pd_hessian": true,
+        "restored_objective": 158.929561727534,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.40649704761586,
+              0.688032041596664
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 158.929561727534,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 8,
+            "evaluations": [
+              11,
+              9
+            ],
+            "gradient": [
+              -8.88169418289397e-08,
+              1.37077119294338e-07
+            ],
+            "projected_gradient": [
+              -8.88169418289397e-08,
+              1.37077119294338e-07
+            ],
+            "raw_score_inf": 1.37077119294338e-07,
+            "projected_score_inf": 1.37077119294338e-07
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          7.92977061792044e-09,
+          6.50868514640024e-09
+        ]
+      },
+      "analytic_solution": [
+        1.40649704788786,
+        0.688032041293966
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.12657715112277,
+          3.47059317176976,
+          3.81460919241674
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.688032041293966,
+        "truth": 0.8
+      },
+      "fixture_sha256": "2201bb35a1f13d2f8557ff2cb764f5f7736969e11c17f9b266f5352a21982250"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.418,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "db1f7b7715e1413a66a4e7669dd6045a498545c1932dda48c36ec7fc22d082ab",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 0,
+    "seed": 1729
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 9648
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.51646679601802,
+        0.77769566392135
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 167.472102554006,
+        "raw_score_inf": 2.73597949451698e-06,
+        "projected_score_inf": 2.73597949451698e-06,
+        "iterations": 8,
+        "pd_hessian": true,
+        "restored_objective": 167.472102554006,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.51646679601802,
+              0.77769566392135
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 167.472102554006,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -6.38003278208288e-07,
+              2.73597949451698e-06
+            ],
+            "projected_gradient": [
+              -6.38003278208288e-07,
+              2.73597949451698e-06
+            ],
+            "raw_score_inf": 2.73597949451698e-06,
+            "projected_score_inf": 2.73597949451698e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          9.1584411165968e-09,
+          1.35789264277264e-08
+        ]
+      },
+      "analytic_solution": [
+        1.51646679797191,
+        0.777695657879667
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.46070594267107,
+          3.84955377161091,
+          4.23840160055074
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.777695657879667,
+        "truth": 0.8
+      },
+      "fixture_sha256": "9fac34d7a84cd6e183b490ee06c40a6995c9b4c5d4c12e955873f6d93ca5cd5a"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.415,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "9f3ecd7c4e0915279e0519afe07820cae8e7336d8a2f4e97e8732d00053d277d",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 1,
+    "seed": 9648
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 17567
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.48567385509684,
+        0.772928983037081
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 177.08046452234,
+        "raw_score_inf": 8.78196540909926e-06,
+        "projected_score_inf": 8.78196540909926e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 177.08046452234,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.48567385509684,
+              0.772928983037081
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 177.08046452234,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -1.73967197769631e-06,
+              8.78196540909926e-06
+            ],
+            "projected_gradient": [
+              -1.73967197769631e-06,
+              8.78196540909926e-06
+            ],
+            "raw_score_inf": 8.78196540909926e-06,
+            "projected_score_inf": 8.78196540909926e-06
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.48567385509684,
+              0.772928983037081
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 177.08046452234,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -1.73967197769631e-06,
+              8.78196540909926e-06
+            ],
+            "projected_gradient": [
+              -1.73967197769631e-06,
+              8.78196540909926e-06
+            ],
+            "raw_score_inf": 8.78196540909926e-06,
+            "projected_score_inf": 8.78196540909926e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          5.32531885255594e-09,
+          1.4705392459291e-08
+        ]
+      },
+      "analytic_solution": [
+        1.48567386042459,
+        0.772928963644446
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.4179962695357,
+          3.80446075135792,
+          4.19092523318015
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.772928963644446,
+        "truth": 0.8
+      },
+      "fixture_sha256": "13953850453b825a33c3110db77e66701ab99991da23b8bebf7819a1e87bdac2"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.415,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "d400371f8c6c057c8ae8f7920d83b458ccd7a3215608c8a7cefcdfcb7c7d12cb",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 2,
+    "seed": 17567
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 25486
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.46346212581209,
+        0.784327950764543
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 170.670437708024,
+        "raw_score_inf": 3.6112070249672e-06,
+        "projected_score_inf": 3.6112070249672e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 170.670437708024,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.46346212581209,
+              0.784327950764543
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 170.670437708024,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -6.76601394467014e-07,
+              3.6112070249672e-06
+            ],
+            "projected_gradient": [
+              -6.76601394467014e-07,
+              3.6112070249672e-06
+            ],
+            "raw_score_inf": 3.6112070249672e-06,
+            "projected_score_inf": 3.6112070249672e-06
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.46346212581209,
+              0.784327950764543
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 170.670437708024,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -6.76601394467014e-07,
+              3.6112070249672e-06
+            ],
+            "projected_gradient": [
+              -6.76601394467014e-07,
+              3.6112070249672e-06
+            ],
+            "raw_score_inf": 3.6112070249672e-06,
+            "projected_score_inf": 3.6112070249672e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          6.32854835203034e-09,
+          2.15468958231213e-08
+        ]
+      },
+      "analytic_solution": [
+        1.46346212788418,
+        0.784327942790153
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.42428198485956,
+          3.81644595625464,
+          4.20860992764971
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.784327942790153,
+        "truth": 0.8
+      },
+      "fixture_sha256": "dd5763732db643b0cf7dd9a6e05da5d120d98c2f4f021f899b26c492d1dc2f36"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.413,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "57d6025123d43436306d32ba6c6d5fa917c714f4a15baadadc6b8934f3041939",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 3,
+    "seed": 25486
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 33405
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.47208796511262,
+        0.767310209057431
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 176.816006685739,
+        "raw_score_inf": 3.77163271636505e-06,
+        "projected_score_inf": 3.77163271636505e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 176.816006685739,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.47208796511262,
+              0.767310209057431
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 176.816006685739,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -7.1907533616411e-07,
+              3.77163271636505e-06
+            ],
+            "projected_gradient": [
+              -7.1907533616411e-07,
+              3.77163271636505e-06
+            ],
+            "raw_score_inf": 3.77163271636505e-06,
+            "projected_score_inf": 3.77163271636505e-06
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.47208796511262,
+              0.767310209057431
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 176.816006685739,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -7.1907533616411e-07,
+              3.77163271636505e-06
+            ],
+            "projected_gradient": [
+              -7.1907533616411e-07,
+              3.77163271636505e-06
+            ],
+            "raw_score_inf": 3.77163271636505e-06,
+            "projected_score_inf": 3.77163271636505e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          2.43801423494006e-09,
+          3.37018946083845e-08
+        ]
+      },
+      "analytic_solution": [
+        1.47208796731479,
+        0.767310200728783
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.39036346913675,
+          3.77401856950114,
+          4.15767366986553
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.767310200728783,
+        "truth": 0.8
+      },
+      "fixture_sha256": "589c3067db700c33678efee706d7edb8bb4615858edf4d4f71da1fb2337eecb9"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.417,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "eae26fcae5f1b8e80019510d026588da958368fb5793f78dfde36e6a98663def",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 4,
+    "seed": 33405
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 41324
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.42105528519549,
+        0.818697277582871
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 171.714515585598,
+        "raw_score_inf": 1.61153475231046e-06,
+        "projected_score_inf": 1.61153475231046e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 171.714515585598,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.42105528519549,
+              0.818697277582871
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 171.714515585598,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -2.75180122910612e-07,
+              1.61153475231046e-06
+            ],
+            "projected_gradient": [
+              -2.75180122910612e-07,
+              1.61153475231046e-06
+            ],
+            "raw_score_inf": 1.61153475231046e-06,
+            "projected_score_inf": 1.61153475231046e-06
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.42105528519549,
+              0.818697277582871
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 171.714515585598,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -2.75180122910612e-07,
+              1.61153475231046e-06
+            ],
+            "projected_gradient": [
+              -2.75180122910612e-07,
+              1.61153475231046e-06
+            ],
+            "raw_score_inf": 1.61153475231046e-06,
+            "projected_score_inf": 1.61153475231046e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          5.06628339280724e-09,
+          3.06458218801708e-08
+        ]
+      },
+      "analytic_solution": [
+        1.42105528603823,
+        0.818697274024225
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.46779847109879,
+          3.8771471081109,
+          4.28649574512301
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.818697274024225,
+        "truth": 0.8
+      },
+      "fixture_sha256": "60d25541055b182b0e75e5353bd0f67168aab359f0e3c2b06a26065e0f18f564"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.413,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "acb06a3b69575a6e24d30d3e933fdb32dc34aed871edd9a14aa086f115c285c7",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 5,
+    "seed": 41324
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 49243
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.5907591929196,
+        0.763242689233714
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 170.274595053632,
+        "raw_score_inf": 2.75335310107039e-14,
+        "projected_score_inf": 2.75335310107039e-14,
+        "iterations": 10,
+        "pd_hessian": true,
+        "restored_objective": 170.274595053632,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.5907591929196,
+              0.763242689233714
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 170.274595053632,
+            "convergence": 0,
+            "message": "both X-convergence and relative convergence (5)",
+            "iterations": 10,
+            "evaluations": [
+              14,
+              10
+            ],
+            "gradient": [
+              -2.75335310107039e-14,
+              -1.50990331349021e-14
+            ],
+            "projected_gradient": [
+              -2.75335310107039e-14,
+              -1.50990331349021e-14
+            ],
+            "raw_score_inf": 2.75335310107039e-14,
+            "projected_score_inf": 2.75335310107039e-14
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          1.50584469338355e-08,
+          3.21114725920779e-08
+        ]
+      },
+      "analytic_solution": [
+        1.5907591929196,
+        0.763242689233714
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.49886591600388,
+          3.88048726062074,
+          4.26210860523759
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.763242689233714,
+        "truth": 0.8
+      },
+      "fixture_sha256": "aeccb78bb67af725cb4f5a281f3439b1f0a02b1f6e46ac0b8e3980ec69a1468c"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.419,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "8b8d2c9714a7ebfeda7090304f196a70ff6df1513fb6d4478b07584ab03116a6",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 6,
+    "seed": 49243
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 57162
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.55482976180177,
+        0.757316126058849
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 175.088458151411,
+        "raw_score_inf": 7.82707232360735e-14,
+        "projected_score_inf": 7.82707232360735e-14,
+        "iterations": 10,
+        "pd_hessian": true,
+        "restored_objective": 175.088458151411,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.55482976180177,
+              0.757316126058849
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 175.088458151411,
+            "convergence": 0,
+            "message": "both X-convergence and relative convergence (5)",
+            "iterations": 10,
+            "evaluations": [
+              14,
+              10
+            ],
+            "gradient": [
+              -7.82707232360735e-14,
+              -5.72875080706581e-14
+            ],
+            "projected_gradient": [
+              -7.82707232360735e-14,
+              -5.72875080706581e-14
+            ],
+            "raw_score_inf": 7.82707232360735e-14,
+            "projected_score_inf": 7.82707232360735e-14
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          1.71201008924982e-08,
+          4.54076598543907e-08
+        ]
+      },
+      "analytic_solution": [
+        1.55482976180177,
+        0.757316126058849
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.4481200769489,
+          3.82677813997832,
+          4.20543620300775
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.757316126058849,
+        "truth": 0.8
+      },
+      "fixture_sha256": "0f2c266121f4e23a50962f98cdb11b26dd01ef9f8fc27907a2acbf1fc4603680"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.419,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "784b7dbc64b358bebf3bbbc86759d6cb1256c92ee754822bbd07bd8f20ef2217",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 7,
+    "seed": 57162
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 65081
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.47483956572725,
+        0.742166204377495
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 167.438938592787,
+        "raw_score_inf": 6.65619828654762e-06,
+        "projected_score_inf": 6.65619828654762e-06,
+        "iterations": 8,
+        "pd_hessian": true,
+        "restored_objective": 167.438938592787,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.47483956572725,
+              0.742166204377495
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 167.438938592787,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -1.24052549532738e-06,
+              6.65619828654762e-06
+            ],
+            "projected_gradient": [
+              -1.24052549532738e-06,
+              6.65619828654762e-06
+            ],
+            "raw_score_inf": 6.65619828654762e-06,
+            "projected_score_inf": 6.65619828654762e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          6.54853238302167e-09,
+          1.40471456688829e-08
+        ]
+      },
+      "analytic_solution": [
+        1.47483956952636,
+        0.742166189679051
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.33025504372399,
+          3.70133813856351,
+          4.07242123340304
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.742166189679051,
+        "truth": 0.8
+      },
+      "fixture_sha256": "e8178cef11f7cc3fdb758bd6c01dc31258af35a3d16f481fb24cc6e7474d942c"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.417,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "ddcb9f5554ee0be3299dd11c44cf0220757b3e5f00ed75662b33968f888fb75b",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 8,
+    "seed": 65081
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 73000
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.41847700509687,
+        0.838866606369782
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 168.174844075891,
+        "raw_score_inf": 3.58225859109496e-06,
+        "projected_score_inf": 3.58225859109496e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 168.174844075891,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.41847700509687,
+              0.838866606369782
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 168.174844075891,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -6.2404098222224e-07,
+              3.58225859109496e-06
+            ],
+            "projected_gradient": [
+              -6.2404098222224e-07,
+              3.58225859109496e-06
+            ],
+            "raw_score_inf": 3.58225859109496e-06,
+            "projected_score_inf": 3.58225859109496e-06
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.41847700509687,
+              0.838866606369782
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 168.174844075891,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -6.2404098222224e-07,
+              3.58225859109496e-06
+            ],
+            "projected_gradient": [
+              -6.2404098222224e-07,
+              3.58225859109496e-06
+            ],
+            "raw_score_inf": 3.58225859109496e-06,
+            "projected_score_inf": 3.58225859109496e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          9.04549324332038e-10,
+          3.39275629812619e-08
+        ]
+      },
+      "analytic_solution": [
+        1.418477007008,
+        0.838866598459317
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.51564350315629,
+          3.93507680238595,
+          4.35451010161561
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.838866598459317,
+        "truth": 0.8
+      },
+      "fixture_sha256": "a0438d962b4b9051c17c5ce41042db83d8572a8520792e2d7fe32e7fe48820c6"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.412,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "7d3bca2dcb030d8bbd60eeed6eafd24ae234b18d4e4b0084a7658935d6ca72e5",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 9,
+    "seed": 73000
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 80919
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.48269427310509,
+        0.784630092591023
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 182.081626337261,
+        "raw_score_inf": 7.32503544043084e-06,
+        "projected_score_inf": 7.32503544043084e-06,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 182.081626337261,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.48269427310509,
+              0.784630092591023
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 182.081626337261,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -1.44489489395383e-06,
+              7.32503544043084e-06
+            ],
+            "projected_gradient": [
+              -1.44489489395383e-06,
+              7.32503544043084e-06
+            ],
+            "raw_score_inf": 7.32503544043084e-06,
+            "projected_score_inf": 7.32503544043084e-06
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.48269427310509,
+              0.784630092591023
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 182.081626337261,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -1.44489489395383e-06,
+              7.32503544043084e-06
+            ],
+            "projected_gradient": [
+              -1.44489489395383e-06,
+              7.32503544043084e-06
+            ],
+            "raw_score_inf": 7.32503544043084e-06,
+            "projected_score_inf": 7.32503544043084e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          1.25083943203208e-09,
+          1.86443571692507e-08
+        ]
+      },
+      "analytic_solution": [
+        1.48269427753008,
+        0.784630076415631
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.44426946856916,
+          3.83658450677698,
+          4.22889954498479
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.784630076415631,
+        "truth": 0.8
+      },
+      "fixture_sha256": "6dfca94afb70363d60b158903d3aa0f982b25d35b91da500097c123d9e6897ef"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.41,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "bbeae04de20b2cec8753f6f7d7cc5eb7a43281271c17a9d749c6e86e24d43923",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 10,
+    "seed": 80919
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 88838
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.52647271428222,
+        0.824864154380253
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 166.962061006075,
+        "raw_score_inf": 1.04464645590552e-05,
+        "projected_score_inf": 1.04464645590552e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 166.962061006075,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.52647271428222,
+              0.824864154380253
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 166.962061006075,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -1.99200791412002e-06,
+              1.04464645590552e-05
+            ],
+            "projected_gradient": [
+              -1.99200791412002e-06,
+              1.04464645590552e-05
+            ],
+            "raw_score_inf": 1.04464645590552e-05,
+            "projected_score_inf": 1.04464645590552e-05
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.52647271428222,
+              0.824864154380253
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 166.962061006075,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -1.99200791412002e-06,
+              1.04464645590552e-05
+            ],
+            "projected_gradient": [
+              -1.99200791412002e-06,
+              1.04464645590552e-05
+            ],
+            "raw_score_inf": 1.04464645590552e-05,
+            "projected_score_inf": 1.04464645590552e-05
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          4.58481963505619e-09,
+          2.38368897953478e-08
+        ]
+      },
+      "analytic_solution": [
+        1.52647272038274,
+        0.824864131312015
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.58863304866278,
+          4.00106511431878,
+          4.41349717997479
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.824864131312015,
+        "truth": 0.8
+      },
+      "fixture_sha256": "845719ef652c5e9d2cd6f50a2496176a7141bec576d7a11d50766e4578e87bd3"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.413,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "5ef6629aa089b056860c83ce6c1e7e1a83d335639e0d9307837811591c2fd2a3",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 11,
+    "seed": 88838
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 96757
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.51717042798534,
+        0.758472356054352
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 177.491906297476,
+        "raw_score_inf": 9.61887303141395e-09,
+        "projected_score_inf": 9.61887303141395e-09,
+        "iterations": 9,
+        "pd_hessian": true,
+        "restored_objective": 177.491906297476,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.51717042798534,
+              0.758472356054352
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 177.491906297476,
+            "convergence": 0,
+            "message": "both X-convergence and relative convergence (5)",
+            "iterations": 9,
+            "evaluations": [
+              13,
+              9
+            ],
+            "gradient": [
+              -2.35080793720144e-09,
+              9.61887303141395e-09
+            ],
+            "projected_gradient": [
+              -2.35080793720144e-09,
+              9.61887303141395e-09
+            ],
+            "raw_score_inf": 9.61887303141395e-09,
+            "projected_score_inf": 9.61887303141395e-09
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          6.3880634115776e-09,
+          3.97156441067636e-08
+        ]
+      },
+      "analytic_solution": [
+        1.51717042799254,
+        0.758472356033111
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.41335131807532,
+          3.79258749609187,
+          4.17182367410843
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.758472356033111,
+        "truth": 0.8
+      },
+      "fixture_sha256": "5f113b8d8e228ec0376541bf61dc4808c1ccbbfa66947abec30d6ba90202c6bd"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.418,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "24218bc107825c5ee6489df487f9291800be11b7f68f6ead28e9644518a601c4",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 12,
+    "seed": 96757
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 104676
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.48667384566026,
+        0.766159787824486
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 167.792066798177,
+        "raw_score_inf": 1.03119068275426e-05,
+        "projected_score_inf": 1.03119068275426e-05,
+        "iterations": 8,
+        "pd_hessian": true,
+        "restored_objective": 167.792066798177,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.48667384566026,
+              0.766159787824486
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 167.792066798177,
+            "convergence": 0,
+            "message": "relative convergence (4)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -2.05194000035824e-06,
+              1.03119068275426e-05
+            ],
+            "projected_gradient": [
+              -2.05194000035824e-06,
+              1.03119068275426e-05
+            ],
+            "raw_score_inf": 1.03119068275426e-05,
+            "projected_score_inf": 1.03119068275426e-05
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          7.67613528296351e-09,
+          5.31508703716099e-08
+        ]
+      },
+      "analytic_solution": [
+        1.48667385194433,
+        0.766159765053382
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.40207326457778,
+          3.78515314710447,
+          4.16823302963116
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.766159765053382,
+        "truth": 0.8
+      },
+      "fixture_sha256": "3c6f14036c06fc3583ba9ea77436aaa9b9470bc51069572d829255fdc6604b51"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.419,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "df829a33998d4cd123a717d71e8747ceaf2481db047650738bfc79a30c14c1c0",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 13,
+    "seed": 104676
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 112595
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.54961331455218,
+        0.713675587344729
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 158.522868431928,
+        "raw_score_inf": 2.60244532748755e-06,
+        "projected_score_inf": 2.60244532748755e-06,
+        "iterations": 8,
+        "pd_hessian": true,
+        "restored_objective": 158.522868431928,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.54961331455218,
+              0.713675587344729
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 158.522868431928,
+            "convergence": 0,
+            "message": "both X-convergence and relative convergence (5)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              8
+            ],
+            "gradient": [
+              1.16650326033307e-06,
+              -2.60244532748755e-06
+            ],
+            "projected_gradient": [
+              1.16650326033307e-06,
+              -2.60244532748755e-06
+            ],
+            "raw_score_inf": 2.60244532748755e-06,
+            "projected_score_inf": 2.60244532748755e-06
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          8.32727664601407e-09,
+          1.98327825273736e-08
+        ]
+      },
+      "analytic_solution": [
+        1.54961331097977,
+        0.713675593091537
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.33380229370861,
+          3.69064009025438,
+          4.04747788680015
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.713675593091537,
+        "truth": 0.8
+      },
+      "fixture_sha256": "bccc023b5cdeb18c83ce27f0b71166abaa36e7eb3e6fda01563f771f60a360cc"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.473,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "9c2d729bce3c5811ff23cd59514fba38b2a44e0ca2b0037d0dd339f31806496f",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 14,
+    "seed": 112595
+  },
+  {
+    "schema_version": 1,
+    "status": "passed",
+    "request": {
+      "case": "gaussian_ridge",
+      "options": {},
+      "seed": 120514
+    },
+    "result": {
+      "case": "gaussian_ridge",
+      "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+      "parameters": [
+        1.52074084939218,
+        0.808045428771928
+      ],
+      "parameter_names": [
+        "intercept",
+        "slope"
+      ],
+      "prior": {
+        "center": [
+          0,
+          0.3
+        ],
+        "precision": [
+          0,
+          12
+        ],
+        "measure": "d beta"
+      },
+      "diagnostics": {
+        "converged": true,
+        "objective": 190.684389442523,
+        "raw_score_inf": 1.34378528713341e-05,
+        "projected_score_inf": 1.34378528713341e-05,
+        "iterations": null,
+        "pd_hessian": true,
+        "restored_objective": 190.684389442523,
+        "optimizer_attempts": [
+          {
+            "method": "nlminb",
+            "parameters": [
+              1.52074084939218,
+              0.808045428771928
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 190.684389442523,
+            "convergence": 1,
+            "message": "singular convergence (7)",
+            "iterations": 8,
+            "evaluations": [
+              12,
+              9
+            ],
+            "gradient": [
+              -2.70113119316129e-06,
+              1.34378528713341e-05
+            ],
+            "projected_gradient": [
+              -2.70113119316129e-06,
+              1.34378528713341e-05
+            ],
+            "raw_score_inf": 1.34378528713341e-05,
+            "projected_score_inf": 1.34378528713341e-05
+          },
+          {
+            "method": "optim L-BFGS-B refinement",
+            "parameters": [
+              1.52074084939218,
+              0.808045428771928
+            ],
+            "parameter_names": [
+              "beta",
+              "beta"
+            ],
+            "objective": 190.684389442523,
+            "convergence": 0,
+            "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+            "iterations": null,
+            "evaluations": [
+              1,
+              1
+            ],
+            "gradient": [
+              -2.70113119316129e-06,
+              1.34378528713341e-05
+            ],
+            "projected_gradient": [
+              -2.70113119316129e-06,
+              1.34378528713341e-05
+            ],
+            "raw_score_inf": 1.34378528713341e-05,
+            "projected_score_inf": 1.34378528713341e-05
+          }
+        ]
+      },
+      "gradient_check": {
+        "steps": [
+          2e-05,
+          5e-06
+        ],
+        "maximum_absolute_errors": [
+          3.62820173904765e-09,
+          4.75308752356796e-08
+        ]
+      },
+      "analytic_solution": [
+        1.52074085766439,
+        0.808045399098004
+      ],
+      "future": {
+        "x": [
+          2.5,
+          3,
+          3.5
+        ],
+        "mean": [
+          3.5408543554094,
+          3.9448770549584,
+          4.3488997545074
+        ],
+        "future_has_response": false
+      },
+      "metrics": {
+        "primary_estimate": 0.808045399098004,
+        "truth": 0.8
+      },
+      "fixture_sha256": "5cea338032a622da267e593eeb14b608c837d3bd0b1c98c79050fcb74cf2c94c"
+    },
+    "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+    "prepared_manifest_sha256": "a4b0d9602355cbad614f6dfaa34e8235b86a2750e43213ae689a18a6e0b22566",
+    "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "packages": {
+      "TMB": "1.9.25",
+      "glmmTMB": "1.1.15.9000",
+      "RTMB": "2.0",
+      "Matrix": "1.7.6",
+      "RcppEigen": "0.3.4.0.2",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    },
+    "elapsed_seconds": 0.465,
+    "driver": {
+      "returncode": 0,
+      "request_sha256": "93c8c6bdc22c811a9d3bf35f1edab1bf85807e188c274a6916d2766d7ce2adc0",
+      "source_sha256": "4be3c6b090ee6d10427ad74147dc046d2af9771eefadcd29878e33cee8233ac2"
+    },
+    "replicate": 15,
+    "seed": 120514
+  }
+]

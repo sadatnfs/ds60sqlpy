@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "request": {
+    "case": "gaussian_ridge",
+    "options": {},
+    "seed": 1729
+  },
+  "result": {
+    "case": "gaussian_ridge",
+    "target": "selected-coefficient Gaussian MAP; intercept and known log-scale unpenalized",
+    "parameters": [1.40649704761586, 0.688032041596664],
+    "parameter_names": ["intercept", "slope"],
+    "prior": {
+      "center": [0, 0.3],
+      "precision": [0, 12],
+      "measure": "d beta"
+    },
+    "diagnostics": {
+      "converged": true,
+      "objective": 158.929561727534,
+      "raw_score_inf": 1.37077119294338e-07,
+      "projected_score_inf": 1.37077119294338e-07,
+      "iterations": 8,
+      "pd_hessian": true,
+      "restored_objective": 158.929561727534,
+      "optimizer_attempts": [
+        {
+          "method": "nlminb",
+          "parameters": [1.40649704761586, 0.688032041596664],
+          "parameter_names": ["beta", "beta"],
+          "objective": 158.929561727534,
+          "convergence": 0,
+          "message": "relative convergence (4)",
+          "iterations": 8,
+          "evaluations": [11, 9],
+          "gradient": [-8.88169418289397e-08, 1.37077119294338e-07],
+          "projected_gradient": [-8.88169418289397e-08, 1.37077119294338e-07],
+          "raw_score_inf": 1.37077119294338e-07,
+          "projected_score_inf": 1.37077119294338e-07
+        }
+      ]
+    },
+    "gradient_check": {
+      "steps": [2e-05, 5e-06],
+      "maximum_absolute_errors": [7.92977061792044e-09, 6.50868514640024e-09]
+    },
+    "analytic_solution": [1.40649704788786, 0.688032041293966],
+    "future": {
+      "x": [2.5, 3, 3.5],
+      "mean": [3.12657715112277, 3.47059317176976, 3.81460919241674],
+      "future_has_response": false
+    },
+    "metrics": {
+      "primary_estimate": 0.688032041293966,
+      "truth": 0.8
+    },
+    "fixture_sha256": "2201bb35a1f13d2f8557ff2cb764f5f7736969e11c17f9b266f5352a21982250"
+  },
+  "scope": "serial optional R/TMB/glmmTMB reference; no Spark or native-port claim",
+  "prepared_manifest_sha256": "eb8e21ef703458d2dbcfa90c787cc9e2449324e11b1a3897dd85c8bea063e2e8",
+  "source_revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+  "packages": {
+    "TMB": "1.9.25",
+    "glmmTMB": "1.1.15.9000",
+    "RTMB": "2.0",
+    "Matrix": "1.7.6",
+    "RcppEigen": "0.3.4.0.2",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "elapsed_seconds": 0.356
+}

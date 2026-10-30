@@ -19,7 +19,7 @@ from typing import Any
 
 import pytest
 
-from scripts.source_format_parity import source_digest_before_formatting
+from scripts.source_format_parity import markdown_before_formatting, source_digest_before_formatting
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/deep-learning-pytorch"
@@ -407,7 +407,15 @@ def test_review_runtime_evidence_matches_current_references_and_worked_programs(
         if record["kind"] == "reference":
             source = (ROOT / record["source_path"]).read_bytes()
         else:
-            guide = (ROOT / record["guide_path"]).read_bytes()
+            current_guide = (ROOT / record["guide_path"]).read_bytes()
+            expected_guide = (
+                bindings[record["guide_path"]]["presentation_sha256"]
+                if record["guide_path"] in bindings
+                else record["guide_sha256"]
+            )
+            guide = markdown_before_formatting(
+                ROOT, record["guide_path"], current_guide, expected_sha256=expected_guide
+            )
             guide_digest = hashlib.sha256(guide).hexdigest()
             if record["guide_path"] in bindings:
                 # The runtime receipt keeps the historical guide hash. A

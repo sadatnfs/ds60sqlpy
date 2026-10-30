@@ -154,6 +154,16 @@ reference_growth_case <- function(engine, seed) {
   reference_close(curvatures[1], curvatures[2], 2e-3)
   quadrature <- reference_quadrature(joint, mode, exp(theta[5]), 1 / sqrt(curvatures[2]))
   laplace_group_loss <- joint(mode) + 0.5 * log(curvatures[2]) - 0.5 * log(2 * pi)
+  # A separate random stream generates an unseen group's held-out observations.
+  # These responses are never supplied to the fit or prediction calculation.
+  set.seed(seed + 200000L)
+  future_u <- rnorm(1, sd = exp(truth[5]))
+  future_y <- truth[1] + exp(truth[2] + future_u) *
+    (1 - exp(-exp(truth[3]) * future_time)) + rnorm(length(future_time), sd = exp(truth[4]))
+  metrics <- reference_prediction_metrics(future_y, list(mean = integrated, sd = sqrt(new_variance)))
+  metrics$interval <- "pointwise mean plus/minus normal quantile times mixture SD; not exact mixture quantiles"
+  metrics$primary_estimate <- exp(theta[3])
+  metrics$truth <- exp(truth[3])
   list(
     case = "nonlinear_growth", target = "nonlinear mixed-model marginal ML via approximate random-effect Laplace",
     parameters = theta, diagnostics = fitted$diagnostics,
@@ -166,8 +176,9 @@ reference_growth_case <- function(engine, seed) {
       difference = laplace_group_loss - quadrature$negative_log_integral
     ),
     uncertainty = "new-group observation/latent moments; population-parameter uncertainty excluded",
-    metrics = list(primary_estimate = exp(theta[3]), truth = exp(truth[3])),
-    fixture = list(training = data.frame(group = group, time = time, y = y), future_time = future_time, truth = truth)
+    metrics = metrics,
+    fixture = list(training = data.frame(group = group, time = time, y = y),
+      future_time = future_time, heldout_future_y = future_y, truth = truth)
   )
 }
 
@@ -228,6 +239,16 @@ reference_panel_case <- function(engine, seed) {
     reference_panel_covariance(future_time, training_time, parameters, time_scale),
     reference_panel_covariance(future_time, future_time, parameters, time_scale)
   )
+  truth_future <- reference_conditional(
+    y[selected], as.numeric(X[selected, ] %*% truth$beta), as.numeric(future_X %*% truth$beta),
+    covariance, reference_panel_covariance(future_time, training_time, truth, time_scale),
+    reference_panel_covariance(future_time, future_time, truth, time_scale)
+  )
+  set.seed(seed + 200000L)
+  future_y <- truth_future$mean + as.numeric(t(chol(truth_future$covariance)) %*% rnorm(length(future_time)))
+  metrics <- reference_prediction_metrics(future_y, prediction)
+  metrics$primary_estimate <- parameters$beta[3]
+  metrics$truth <- truth$beta[3]
   return(list(
     case = "panel_ar1", target = "exact Gaussian marginal ML with panel intercept/slope and heteroskedastic observed AR1",
     parameters = parameters, diagnostics = fitted$diagnostics, gradient_check = gradient,
@@ -235,7 +256,8 @@ reference_panel_case <- function(engine, seed) {
     future_covariate_scenario = future_x, future_has_response = FALSE,
     fit_time_maximum = max(training_time), forecast_time_minimum = min(future_time),
     provenance = "Original synthetic panel inspired by AFModel's scientific topics; no operational code or data reused",
-    metrics = list(primary_estimate = parameters$beta[3], truth = truth$beta[3]),
-    fixture = list(training = data.frame(group = group, time = time, x = x, y = y), future_time = future_time, future_x = future_x, truth = truth)
+    metrics = metrics,
+    fixture = list(training = data.frame(group = group, time = time, x = x, y = y),
+      future_time = future_time, future_x = future_x, heldout_future_y = future_y, truth = truth)
   ))
 }

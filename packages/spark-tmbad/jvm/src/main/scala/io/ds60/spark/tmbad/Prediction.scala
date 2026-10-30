@@ -23,14 +23,15 @@ private[tmbad] final case class PredictionOptions(
 private[tmbad] object PredictionOptions {
   def parse(
       text: String,
-      loaded: ModelDocument.Loaded,
+      loaded: PredictionBinding,
       forecast: Boolean,
       conditional: Boolean,
       grouped: Boolean = false
   ): PredictionOptions = {
     val value = Json.read(text)
     val base =
-      Set("target", "output_prefix", "allow_unconverged", "batch_rows", "task_timeout_seconds")
+      Set("target", "output_prefix", "batch_rows", "task_timeout_seconds") ++
+        (if (loaded.declared.isEmpty) Set("allow_unconverged") else Set.empty[String])
     val roles =
       if (forecast)
         Set(
@@ -61,15 +62,15 @@ private[tmbad] object PredictionOptions {
     )
     def names(key: String, default: Vector[String]): Vector[String] =
       if (value.has(key)) Json.strings(value.get(key), 64, key) else default
-    val ids = names(if (forecast) "future_id_columns" else "id_columns", loaded.spec.idColumns)
+    val ids = names(if (forecast) "future_id_columns" else "id_columns", loaded.layout.ids)
     val groups =
-      names(if (forecast) "future_group_columns" else "group_columns", loaded.spec.groupColumns)
+      names(if (forecast) "future_group_columns" else "group_columns", loaded.layout.groups)
     val order = names(
       if (forecast) "future_order_columns" else "order_columns",
-      if (forecast) loaded.spec.orderColumns else Vector.empty
+      if (forecast) loaded.layout.order else Vector.empty
     )
-    val historyGroups = names("history_group_columns", loaded.spec.groupColumns)
-    val historyOrder = names("history_order_columns", loaded.spec.orderColumns)
+    val historyGroups = names("history_group_columns", loaded.layout.groups)
+    val historyOrder = names("history_order_columns", loaded.layout.order)
     require(ids.nonEmpty, "Prediction requires explicit future/target identity columns")
     require(
       !forecast || !loaded.model.ordered || order.nonEmpty,
@@ -100,10 +101,7 @@ private[tmbad] object PredictionOptions {
       selected
     } else "tmbad_"
     val allow = value.has("allow_unconverged") && Json.boolean(value, "allow_unconverged")
-    require(
-      loaded.converged || allow || grouped,
-      "Unconverged fit cannot predict/forecast without explicit allow_unconverged=true"
-    )
+    loaded.admit(allow, grouped)
     PredictionOptions(
       name,
       columns,
@@ -150,7 +148,7 @@ private[tmbad] final case class JointRecord(
 
 private[tmbad] object Prediction {
   private def target(
-      loaded: ModelDocument.Loaded,
+      loaded: PredictionBinding,
       options: PredictionOptions,
       forecast: Boolean
   ): NativeTarget =
@@ -192,7 +190,7 @@ private[tmbad] object Prediction {
 
   def rows(
       frame: DataFrame,
-      loaded: ModelDocument.Loaded,
+      loaded: PredictionBinding,
       artifact: DistributedArtifact,
       options: PredictionOptions
   ): DataFrame = {
@@ -276,10 +274,11 @@ private[tmbad] object Prediction {
 
   private def modelRecords(
       models: DataFrame,
-      template: ModelDocument.Loaded,
+      template: PredictionBinding,
       artifact: PreparedArtifact
   ): RDD[(JointKey, JointRecord)] = {
-    val names = template.spec.groupColumns
+    val templateSpec = template.fittedSpec.getOrElse(throw new IllegalArgumentException("Group models require fitted provenance"))
+    val names = templateSpec.groupColumns
     require(
       names.forall(models.schema.fieldNames.contains),
       "Fitted-model group columns are missing"
@@ -292,8 +291,7 @@ private[tmbad] object Prediction {
         val encoded = row.getString(names.size)
         val loaded = ModelDocument.parse(encoded, artifact)
         require(
-          loaded.model.id == template.model.id && loaded.spec.copy(json = "") == template.spec
-            .copy(json = ""),
+          loaded.model.id == template.model.id && loaded.spec.copy(json = "") == templateSpec.copy(json = ""),
           "Independent fitted models do not share one declared model/specification"
         )
         JointKey(KeyAtom.encode(keys), 0, Vector.empty, Vector.empty) -> JointRecord(
@@ -307,7 +305,7 @@ private[tmbad] object Prediction {
   def joined(
       history: Option[DataFrame],
       future: DataFrame,
-      template: ModelDocument.Loaded,
+      template: PredictionBinding,
       models: Option[DataFrame],
       artifact: DistributedArtifact,
       options: PredictionOptions,
@@ -373,7 +371,7 @@ private[tmbad] object Prediction {
       }
     }
     models.foreach { frame =>
-      sameKeyTypes(frame, template.spec.groupColumns, future, options.groups)
+      sameKeyTypes(frame, template.layout.groups, future, options.groups)
       tagged = tagged.union(modelRecords(frame, template, artifact.artifact))
     }
     import JointKey.ordering
@@ -388,7 +386,7 @@ private[tmbad] object Prediction {
       try {
         while (input.hasNext) {
           val group = input.head._1.group
-          var fitted: Option[ModelDocument.Loaded] = None
+          var fitted: Option[PredictionBinding] = None
           val past = scala.collection.mutable.ArrayBuffer.empty[NativeRow]
           val targets = scala.collection.mutable.ArrayBuffer.empty[NativeRow]
           val pastBudget = new RowBudget
@@ -403,10 +401,7 @@ private[tmbad] object Prediction {
                   throw new IllegalArgumentException("Future group has no fitted independent model")
                 )
               else template
-            require(
-              loaded.converged || options.allowUnconverged,
-              "Unconverged independent model cannot predict/forecast without explicit override"
-            )
+            loaded.admit(options.allowUnconverged)
             require(
               !declared.needsHistory || past.nonEmpty,
               "Future group is missing required conditional history"
@@ -438,7 +433,7 @@ private[tmbad] object Prediction {
             item.role match {
               case 0 =>
                 require(fitted.isEmpty, "Duplicate independent model for a group")
-                fitted = Some(ModelDocument.parse(item.model.get, artifact.artifact))
+                fitted = Some(PredictionBinding.fitted(ModelDocument.parse(item.model.get, artifact.artifact)))
               case 1 =>
                 require(
                   past.size < template.model.maxUnitRows,

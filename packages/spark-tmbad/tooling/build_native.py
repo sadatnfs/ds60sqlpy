@@ -108,7 +108,7 @@ def main() -> None:
     source = inventory(native)
     provenance = {
         "schema_version": 1,
-        "package_version": "0.1.0",
+        "package_version": "0.2.0",
         "native_source": source,
         "build_scripts": inventory(root / "tooling"),
         "sdk_files": sdk_files,
