@@ -1,0 +1,10 @@
+# Supply a reviewed Spark 4.0.1 Python image and a complete hashed wheel lock.
+ARG SPARK_BASE
+FROM ${SPARK_BASE}
+USER root
+COPY wheelhouse/ /opt/notebook-wheelhouse/
+COPY notebook.lock /opt/notebook.lock
+RUN python3 -m pip install --no-index --find-links=/opt/notebook-wheelhouse \
+    --require-hashes -r /opt/notebook.lock \
+    && python3 -c "import jupyterlab, pyspark; assert pyspark.__version__ == '4.0.1'"
+USER 65534:65534

@@ -332,7 +332,8 @@ final case class PreparedArtifact(
     models: Map[String, NativeModel],
     jvmPath: Option[String],
     jvmSha256: Option[String],
-    identityJson: String
+    identityJson: String,
+    packageVersion: String = "0.1.0"
 ) extends Serializable {
   def model(id: String): NativeModel =
     models.getOrElse(
@@ -402,8 +403,8 @@ object PreparedArtifact {
       "Unsupported artifact protocol"
     )
     require(
-      Json.text(node, "kind") == "spark-tmbad-artifact" && Json
-        .text(node, "package_version") == "0.1.0",
+      Json.text(node, "kind") == "spark-tmbad-artifact" &&
+        Set("0.1.0", "0.2.0")(Json.text(node, "package_version")),
       "Unsupported artifact kind/version"
     )
     val platform = node.get("platform")
@@ -458,7 +459,8 @@ object PreparedArtifact {
       parsed.map(x => x.id -> x).toMap,
       jvmPath,
       jvmHash,
-      Json.write(identity)
+      Json.write(identity),
+      Json.text(node, "package_version")
     )
   }
 }

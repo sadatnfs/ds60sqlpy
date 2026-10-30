@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "models": ["gaussian_linear", "gaussian_random_slope", "nonlinear_growth", "panel_ar1"],
+  "cases": {
+    "gaussian_ridge": { "function": "reference_ridge_case", "options": {} },
+    "gaussian_random_slope": { "function": "reference_random_slope_case", "options": {} },
+    "nonlinear_growth": { "function": "reference_growth_case", "options": {} },
+    "panel_ar1": { "function": "reference_panel_case", "options": {} },
+    "regularization_posterior": { "function": "reference_regularization_case", "options": {} },
+    "glmm_family": {
+      "function": "reference_glmm_family_case",
+      "options": {
+        "family_name": [
+          "gaussian",
+          "poisson",
+          "nbinom1",
+          "nbinom2",
+          "beta",
+          "betabinomial",
+          "Gamma",
+          "student",
+          "lognormal"
+        ]
+      }
+    },
+    "glmm_zero_inflation": { "function": "reference_glmm_zero_case", "options": {} },
+    "glmm_hurdle": {
+      "function": "reference_glmm_zero_case",
+      "fixed_options": { "hurdle": true },
+      "options": {}
+    },
+    "glmm_map": { "function": "reference_glmm_map_case", "options": {} },
+    "glmm_covariance": {
+      "function": "reference_glmm_covariance_case",
+      "options": { "structure": ["ar1", "ou", "cs", "diag", "toep", "us"] }
+    },
+    "glmm_ar_forecast": { "function": "reference_glmm_ar_forecast_case", "options": {} }
+  }
+}

@@ -1,0 +1,958 @@
+{
+  "schema_version": 1,
+  "r_version": "4.6.1",
+  "source_metadata_sha256": "bf2d4aba3141cee3728c31903f7b93b5c1d6436c1edb369d671eacd2818aaa4f",
+  "packages": [
+    {
+      "name": "Rcpp",
+      "version": "1.1.2",
+      "url": "https://cran.r-project.org/src/contrib/Rcpp_1.1.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/Rcpp/Rcpp_1.1.2.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "methods, utils",
+        "LinkingTo": ""
+      },
+      "sha256": "2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "lattice",
+      "version": "0.22-7",
+      "url": "https://cran.r-project.org/src/contrib/Archive/lattice/lattice_0.22-7.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/lattice/lattice_0.22-7.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "grid, grDevices, graphics, stats, utils",
+        "LinkingTo": ""
+      },
+      "sha256": "400fa62b95e90410d52a36cee2ddeb025dd49695e55fe3db709fe60886bff9f7",
+      "bytes": 598622,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "Matrix",
+      "version": "1.7-4",
+      "url": "https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-4.tar.gz",
+      "license": "GPL (>= 2) | file LICENCE",
+      "dependencies": {
+        "Depends": "R (>= 4.4), methods",
+        "Imports": "grDevices, graphics, grid, lattice, stats, utils",
+        "LinkingTo": ""
+      },
+      "sha256": "7b131ecb6a21ff09a33691dac7bf8a7bc2eab9fd1dd09ef14856d74346eb4779",
+      "bytes": 2485182,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "RcppEigen",
+      "version": "0.3.4.0.2",
+      "url": "https://cran.r-project.org/src/contrib/RcppEigen_0.3.4.0.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/RcppEigen/RcppEigen_0.3.4.0.2.tar.gz",
+      "license": "GPL (>= 2) | file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.6.0)",
+        "Imports": "Rcpp (>= 0.11.0), stats, utils",
+        "LinkingTo": "Rcpp"
+      },
+      "sha256": "ecad7ba2129fd48b7ebb825558d38492ed1f3a8934959e27fcd6688175e542bb",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "TMB",
+      "version": "1.9.25",
+      "url": "https://cran.r-project.org/src/contrib/TMB_1.9.25.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/TMB/TMB_1.9.25.tar.gz",
+      "license": "GPL-2",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0)",
+        "Imports": "graphics, methods, stats, utils, Matrix (>= 1.0-12)",
+        "LinkingTo": "Matrix, RcppEigen"
+      },
+      "sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "MASS",
+      "version": "7.3-65",
+      "url": "https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-65.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-65.tar.gz",
+      "license": "GPL-2 | GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 4.4.0), grDevices, graphics, stats, utils",
+        "Imports": "methods",
+        "LinkingTo": ""
+      },
+      "sha256": "b07ef1e3c364ce56269b4a8a7759cc9f87c876554f91293437bb578cfe38172f",
+      "bytes": 510322,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "RTMB",
+      "version": "2.0",
+      "url": "https://cran.r-project.org/src/contrib/RTMB_2.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/RTMB/RTMB_2.0.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "Rcpp (>= 1.0.9), Matrix, methods, TMB (>= 1.9.7), MASS",
+        "LinkingTo": "Rcpp, TMB, RcppEigen"
+      },
+      "sha256": "a87b21eb5b30071c702b6b45866dfd2ee2aee51d78da0cbf4fdab5d7c1454635",
+      "bytes": 684988,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "rbibutils",
+      "version": "2.4.1",
+      "url": "https://cran.r-project.org/src/contrib/rbibutils_2.4.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/rbibutils/rbibutils_2.4.1.tar.gz",
+      "license": "GPL-2",
+      "dependencies": {
+        "Depends": "R (>= 2.10)",
+        "Imports": "utils, tools",
+        "LinkingTo": ""
+      },
+      "sha256": "da313d920a0f35ffdf30a54929ba8904b2b5a0d7f11a519db8674148129c8f32",
+      "bytes": 1191704,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "Rdpack",
+      "version": "2.6.6",
+      "url": "https://cran.r-project.org/src/contrib/Rdpack_2.6.6.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/Rdpack/Rdpack_2.6.6.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 2.15.0), methods",
+        "Imports": "tools, utils, rbibutils (> 2.4)",
+        "LinkingTo": ""
+      },
+      "sha256": "b4e19d22bd5a2ec79cdb08ba209e79c66ea16dbc2fd2e7db8bca46412651cbdb",
+      "bytes": 378731,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "boot",
+      "version": "1.3-31",
+      "url": "https://cran.r-project.org/src/contrib/Archive/boot/boot_1.3-31.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/boot/boot_1.3-31.tar.gz",
+      "license": "Unlimited",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0), graphics, stats",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "d8542e8cd1b503ca412e774908f386c0522a991296d57560ebded0f3d201c8d2",
+      "bytes": 238458,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "minqa",
+      "version": "1.2.8",
+      "url": "https://cran.r-project.org/src/contrib/minqa_1.2.8.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/minqa/minqa_1.2.8.tar.gz",
+      "license": "GPL-2",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "Rcpp (>= 0.9.10)",
+        "LinkingTo": "Rcpp"
+      },
+      "sha256": "5941e4b9b01978fc6d9fe24e6ca60cca66883fe9fa6ff3cbfa32aa1ac9db5467",
+      "bytes": 54644,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "nlme",
+      "version": "3.1-168",
+      "url": "https://cran.r-project.org/src/contrib/Archive/nlme/nlme_3.1-168.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nlme/nlme_3.1-168.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.6.0)",
+        "Imports": "graphics, stats, utils, lattice",
+        "LinkingTo": ""
+      },
+      "sha256": "23b78468344cb6775dee5e0d9c8133032d64f08ebaba20776508a0443a897362",
+      "bytes": 860576,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "nloptr",
+      "version": "2.2.1",
+      "url": "https://cran.r-project.org/src/contrib/nloptr_2.2.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nloptr/nloptr_2.2.1.tar.gz",
+      "license": "LGPL (>= 3)",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "76ba40750b475c8b1ad6a86c9e05f0c1746af16d965235ff9293953920aed7f4",
+      "bytes": 2253853,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "reformulas",
+      "version": "0.4.4",
+      "url": "https://cran.r-project.org/src/contrib/reformulas_0.4.4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/reformulas/reformulas_0.4.4.tar.gz",
+      "license": "GPL-3",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "stats, methods, Matrix, Rdpack",
+        "LinkingTo": ""
+      },
+      "sha256": "6a76d85eb4e19325aef87510180175f8cd7b5904a7075c89aff073765529e2f7",
+      "bytes": 85205,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "lme4",
+      "version": "2.1-0",
+      "url": "https://cran.r-project.org/src/contrib/lme4_2.1-0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/lme4/lme4_2.1-0.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.6), Matrix, methods, stats",
+        "Imports": "MASS, Rdpack, boot, graphics, grid, lattice, minqa (>= 1.1.15), nlme (>= 3.1-123), nloptr (>= 1.0.4), parallel, reformulas (>= 0.4.3.1), splines, utils",
+        "LinkingTo": "Matrix (>= 1.5-0), Rcpp (>= 1.1.1-1.1), RcppEigen (>= 0.3.3.9.4)"
+      },
+      "sha256": "361d6eba45826b6ff4972eac57d400c4c7198506430418217af693adedd54b4b",
+      "bytes": 4530297,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "numDeriv",
+      "version": "2016.8-1.1",
+      "url": "https://cran.r-project.org/src/contrib/numDeriv_2016.8-1.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/numDeriv/numDeriv_2016.8-1.1.tar.gz",
+      "license": "GPL-2",
+      "dependencies": {
+        "Depends": "R (>= 2.11.1)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "d8c4d19ff9aeb31b0c628bd4a16378e51c1c9a3813b525469a31fe89af00b345",
+      "bytes": 76053,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "mgcv",
+      "version": "1.9-3",
+      "url": "https://cran.r-project.org/src/contrib/Archive/mgcv/mgcv_1.9-3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/mgcv/mgcv_1.9-3.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.6.0), nlme (>= 3.1-64)",
+        "Imports": "methods, stats, graphics, Matrix, splines, utils",
+        "LinkingTo": ""
+      },
+      "sha256": "43f0ccdba176890a1d7bbe9a0a0859222e1fbcc97064c6e6ad7a3f545fd82f1d",
+      "bytes": 1127049,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "backports",
+      "version": "1.5.1",
+      "url": "https://cran.r-project.org/src/contrib/backports_1.5.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/backports/backports_1.5.1.tar.gz",
+      "license": "GPL-2 | GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "b8eeeabe3c27e1486f43e0b18dae57f0e870dd7c6979d3668df76bf0d4735bad",
+      "bytes": 30108,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "cli",
+      "version": "3.6.6",
+      "url": "https://cran.r-project.org/src/contrib/cli_3.6.6.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/cli/cli_3.6.6.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.4)",
+        "Imports": "utils",
+        "LinkingTo": ""
+      },
+      "sha256": "b2b58d6dd82f5798b335e39c00591686a01fd3e94399ef898e146173e36f18f9",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "generics",
+      "version": "0.1.4",
+      "url": "https://cran.r-project.org/src/contrib/generics_0.1.4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/generics/generics_0.1.4.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.6)",
+        "Imports": "methods",
+        "LinkingTo": ""
+      },
+      "sha256": "bbe95a097792d38fc3b7e677738af1b95b66ea5e5017e33b8beac6a6088d0801",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "glue",
+      "version": "1.8.1",
+      "url": "https://cran.r-project.org/src/contrib/glue_1.8.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/glue/glue_1.8.1.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1)",
+        "Imports": "methods",
+        "LinkingTo": ""
+      },
+      "sha256": "1c55905d3efc3d5c199ceb0bd12218e97f0d4c64df6038ff41ecef415478a122",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "rlang",
+      "version": "1.3.0",
+      "url": "https://cran.r-project.org/src/contrib/rlang_1.3.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/rlang/rlang_1.3.0.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "utils",
+        "LinkingTo": ""
+      },
+      "sha256": "80aa537d49e72265f443a15e8936128af583caa5e572086518b503cbf064279c",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "lifecycle",
+      "version": "1.0.5",
+      "url": "https://cran.r-project.org/src/contrib/lifecycle_1.0.5.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/lifecycle/lifecycle_1.0.5.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.6)",
+        "Imports": "cli (>= 3.4.0), rlang (>= 1.1.0)",
+        "LinkingTo": ""
+      },
+      "sha256": "61841e3e6edba056a88355a3f1d6698ab8d5d9cb3c05f2af0ec5a44ab516f8ee",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "magrittr",
+      "version": "2.0.5",
+      "url": "https://cran.r-project.org/src/contrib/magrittr_2.0.5.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/magrittr/magrittr_2.0.5.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.4.0)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "3f5b5b1d4e6d12807a95c50b6c88cb1d8af2c5eb5213f08bfe58f278eca2ed23",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "utf8",
+      "version": "1.2.6",
+      "url": "https://cran.r-project.org/src/contrib/utf8_1.2.6.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/utf8/utf8_1.2.6.tar.gz",
+      "license": "Apache License (== 2.0) | file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 2.10)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "4589f8b72291329e70b7f3a8c20f2feb4e7764eebad2e6976bc9a3eee7686ce9",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "vctrs",
+      "version": "0.7.3",
+      "url": "https://cran.r-project.org/src/contrib/vctrs_0.7.3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/vctrs/vctrs_0.7.3.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "cli (>= 3.4.0), glue, lifecycle (>= 1.0.3), rlang (>= 1.1.7)",
+        "LinkingTo": ""
+      },
+      "sha256": "b45078413e06ac624dddb7221a3a43908b405c8abec09822cb86638d30b0435b",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "pillar",
+      "version": "1.11.1",
+      "url": "https://cran.r-project.org/src/contrib/pillar_1.11.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/pillar/pillar_1.11.1.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "cli (>= 2.3.0), glue, lifecycle, rlang (>= 1.0.2), utf8 (>= 1.1.0), utils, vctrs (>= 0.5.0)",
+        "LinkingTo": ""
+      },
+      "sha256": "056ce154238c9b5b8d5dcbcb52e1bc51d33870ce08c8a9ca9496478bd59f4653",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "R6",
+      "version": "2.6.1",
+      "url": "https://cran.r-project.org/src/contrib/R6_2.6.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/R6/R6_2.6.1.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.6)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "59c6eba8b1b912eb7e104f65053235604be853425ee67c152ac4e86a1f2073b4",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "pkgconfig",
+      "version": "2.0.3",
+      "url": "https://cran.r-project.org/src/contrib/pkgconfig_2.0.3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/pkgconfig/pkgconfig_2.0.3.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "utils",
+        "LinkingTo": ""
+      },
+      "sha256": "330fef440ffeb842a7dcfffc8303743f1feae83e8d6131078b5a44ff11bc3850",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "tibble",
+      "version": "3.3.1",
+      "url": "https://cran.r-project.org/src/contrib/tibble_3.3.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/tibble/tibble_3.3.1.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.4.0)",
+        "Imports": "cli, lifecycle (>= 1.0.0), magrittr, methods, pillar (>= 1.8.1), pkgconfig, rlang (>= 1.0.2), utils, vctrs (>= 0.5.0)",
+        "LinkingTo": ""
+      },
+      "sha256": "fb309f8a1939021b237c7e85ff7ad6e8ff5acd57a6230d220a452094b492b28f",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "withr",
+      "version": "3.0.3",
+      "url": "https://cran.r-project.org/src/contrib/withr_3.0.3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/withr/withr_3.0.3.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.6.0)",
+        "Imports": "graphics, grDevices",
+        "LinkingTo": ""
+      },
+      "sha256": "d86c6454164fc85678bfc85e2a6cce42f7461d45fa9a87de71f376e7956c991e",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "tidyselect",
+      "version": "1.2.1",
+      "url": "https://cran.r-project.org/src/contrib/tidyselect_1.2.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/tidyselect/tidyselect_1.2.1.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.4)",
+        "Imports": "cli (>= 3.3.0), glue (>= 1.3.0), lifecycle (>= 1.0.3), rlang (>= 1.0.4), vctrs (>= 0.5.2), withr",
+        "LinkingTo": ""
+      },
+      "sha256": "169e97ba0bbfbcdf4a80534322751f87a04370310c40e27f04aac6525d45903c",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "dplyr",
+      "version": "1.2.1",
+      "url": "https://cran.r-project.org/src/contrib/dplyr_1.2.1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/dplyr/dplyr_1.2.1.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "cli (>= 3.6.2), generics, glue (>= 1.3.2), lifecycle (>= 1.0.5), magrittr (>= 1.5), methods, pillar (>= 1.9.0), R6, rlang (>= 1.1.7), tibble (>= 3.2.0), tidyselect (>= 1.2.0), utils, vctrs (>= 0.7.1)",
+        "LinkingTo": ""
+      },
+      "sha256": "18d66fe2f24cda8b619c177326d39dd015229ab99695fa67d3fa31e4569390e0",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "purrr",
+      "version": "1.2.2",
+      "url": "https://cran.r-project.org/src/contrib/purrr_1.2.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/purrr/purrr_1.2.2.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli (>= 3.6.1), lifecycle (>= 1.0.3), magrittr (>= 1.5.0), rlang (>= 1.1.1), vctrs (>= 0.6.3)",
+        "LinkingTo": "cli"
+      },
+      "sha256": "ac3bc0fc0e789510042522e6c4294336c71447be8f6921b5ef78b9a9fb86617d",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "stringi",
+      "version": "1.8.9",
+      "url": "https://cran.r-project.org/src/contrib/stringi_1.8.9.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/stringi/stringi_1.8.9.tar.gz",
+      "license": "file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.4)",
+        "Imports": "tools, utils, stats",
+        "LinkingTo": ""
+      },
+      "sha256": "427fcebd281d7ea850becce75e0807576dd394a723a814b2d487419b93275a33",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "stringr",
+      "version": "1.6.0",
+      "url": "https://cran.r-project.org/src/contrib/stringr_1.6.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/stringr/stringr_1.6.0.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "cli, glue (>= 1.6.1), lifecycle (>= 1.0.3), magrittr, rlang (>= 1.0.0), stringi (>= 1.5.3), vctrs (>= 0.4.0)",
+        "LinkingTo": ""
+      },
+      "sha256": "24f2fc5df980a7eb888659e22b9744d2316c558624015c7a7cd8c3ce3e370064",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "cpp11",
+      "version": "0.5.5",
+      "url": "https://cran.r-project.org/src/contrib/cpp11_0.5.5.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/cpp11/cpp11_0.5.5.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "72486beb0605c1229bf3d422cd536224af8dc09bd389a3116f62f4c7705c62f4",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "tidyr",
+      "version": "1.3.2",
+      "url": "https://cran.r-project.org/src/contrib/tidyr_1.3.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/tidyr/tidyr_1.3.2.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "cli (>= 3.4.1), dplyr (>= 1.1.0), glue, lifecycle (>= 1.0.3), magrittr, purrr (>= 1.0.1), rlang (>= 1.1.1), stringr (>= 1.5.0), tibble (>= 2.1.1), tidyselect (>= 1.2.1), utils, vctrs (>= 0.5.2)",
+        "LinkingTo": "cpp11 (>= 0.4.0)"
+      },
+      "sha256": "04c0e6daf0af682af73763a42c027d7171761cdbdbf9ff7a77a0e421343d665a",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "broom",
+      "version": "1.0.13",
+      "url": "https://cran.r-project.org/src/contrib/broom_1.0.13.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/broom/broom_1.0.13.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1)",
+        "Imports": "backports, cli, dplyr (>= 1.0.0), generics (>= 0.0.2), glue, lifecycle, purrr, rlang (>= 1.1.0), stringr, tibble (>= 3.0.0), tidyr (>= 1.0.0)",
+        "LinkingTo": ""
+      },
+      "sha256": "f946601f57b4d90e7d2ea88c55c1516dacb8220cb12a980ba1e0fa1832320f61",
+      "bytes": 466689,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "gtable",
+      "version": "0.3.6",
+      "url": "https://cran.r-project.org/src/contrib/gtable_0.3.6.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/gtable/gtable_0.3.6.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.0)",
+        "Imports": "cli, glue, grid, lifecycle, rlang (>= 1.1.0), stats",
+        "LinkingTo": ""
+      },
+      "sha256": "d305a5fa11278b649d2d8edc5288bf28009be888a42be58ff8714018e49de0ef",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "isoband",
+      "version": "0.3.0",
+      "url": "https://cran.r-project.org/src/contrib/isoband_0.3.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/isoband/isoband_0.3.0.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "cli, grid, rlang, utils",
+        "LinkingTo": "cpp11"
+      },
+      "sha256": "fe8d3d58ca75bbee32f389152ac0058818f3f76f09c9867949531de7abc424ac",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "S7",
+      "version": "0.2.2",
+      "url": "https://cran.r-project.org/src/contrib/S7_0.2.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/S7/S7_0.2.2.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "utils",
+        "LinkingTo": ""
+      },
+      "sha256": "6f33245dde05b74265b1c4d379e034bc3a8923d41e7b52e6e75a75ce97d42af7",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "farver",
+      "version": "2.1.2",
+      "url": "https://cran.r-project.org/src/contrib/farver_2.1.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/farver/farver_2.1.2.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "528823b95daab4566137711f1c842027a952bea1b2ae6ff098e2ca512b17fe25",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "labeling",
+      "version": "0.4.3",
+      "url": "https://cran.r-project.org/src/contrib/labeling_0.4.3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/labeling/labeling_0.4.3.tar.gz",
+      "license": "MIT + file LICENSE | Unlimited",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "stats, graphics",
+        "LinkingTo": ""
+      },
+      "sha256": "c62f4fc2cc74377d7055903c5f1913b7295f7587456fe468592738a483e264f2",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "RColorBrewer",
+      "version": "1.1-3",
+      "url": "https://cran.r-project.org/src/contrib/RColorBrewer_1.1-3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/RColorBrewer/RColorBrewer_1.1-3.tar.gz",
+      "license": "Apache License 2.0",
+      "dependencies": {
+        "Depends": "R (>= 2.0.0)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "4f42f5423c45688b39f492c7892d93f37b4541831c8ffb140364d2bd89031ac0",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "viridisLite",
+      "version": "0.4.3",
+      "url": "https://cran.r-project.org/src/contrib/viridisLite_0.4.3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/viridisLite/viridisLite_0.4.3.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 2.10)",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "433be9bde66234dc76301fb4ffbbc9fc74bab5c14f4548d8ef2fc0065e121ef5",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "scales",
+      "version": "1.4.0",
+      "url": "https://cran.r-project.org/src/contrib/scales_1.4.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/scales/scales_1.4.0.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli, farver (>= 2.0.3), glue, labeling, lifecycle, R6, RColorBrewer, rlang (>= 1.1.0), viridisLite",
+        "LinkingTo": ""
+      },
+      "sha256": "d55ef5f08c92652d7a95cfa27584024723ab17873f1b2577dd488cb7c883ceee",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "ggplot2",
+      "version": "4.0.3",
+      "url": "https://cran.r-project.org/src/contrib/ggplot2_4.0.3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_4.0.3.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli, grDevices, grid, gtable (>= 0.3.6), isoband, lifecycle (> 1.0.1), rlang (>= 1.1.0), S7, scales (>= 1.4.0), stats, vctrs (>= 0.6.0), withr (>= 2.5.0)",
+        "LinkingTo": ""
+      },
+      "sha256": "690224bd61642b6222adb109470988e87f786e193cca77a15c0923cf9da73fa5",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "cowplot",
+      "version": "1.2.0",
+      "url": "https://cran.r-project.org/src/contrib/cowplot_1.2.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/cowplot/cowplot_1.2.0.tar.gz",
+      "license": "GPL-2",
+      "dependencies": {
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "ggplot2 (>= 3.5.2), grid, gtable, grDevices, methods, rlang, scales",
+        "LinkingTo": ""
+      },
+      "sha256": "431d582a4fb68f005f45e0d963c19daad826289374b429b05fe168ef6f231aa1",
+      "bytes": 1638386,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "Deriv",
+      "version": "4.3.6",
+      "url": "https://cran.r-project.org/src/contrib/Deriv_4.3.6.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/Deriv/Deriv_4.3.6.tar.gz",
+      "license": "GPL (>= 3)",
+      "dependencies": {
+        "Depends": "Rcpp, R (>= 4.5)",
+        "Imports": "methods",
+        "LinkingTo": "Rcpp"
+      },
+      "sha256": "8950065ee01803e936e4fa48b525bcff702ecc21f6dd41ab3e98e37fd9efeb9c",
+      "bytes": 47790,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "colorspace",
+      "version": "2.1-4",
+      "url": "https://cran.r-project.org/src/contrib/colorspace_2.1-4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/colorspace/colorspace_2.1-4.tar.gz",
+      "license": "BSD_3_clause + file LICENSE",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0), methods",
+        "Imports": "graphics, grDevices, stats",
+        "LinkingTo": ""
+      },
+      "sha256": "3bb168c19772bc3f11d15933da008d96505376eab31cb5b3106392a322e9c62c",
+      "bytes": 2149687,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "fracdiff",
+      "version": "1.5-4",
+      "url": "https://cran.r-project.org/src/contrib/fracdiff_1.5-4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/fracdiff/fracdiff_1.5-4.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "",
+        "Imports": "stats",
+        "LinkingTo": ""
+      },
+      "sha256": "c38ea9c377144a01e72c32f7fd30d6548f9795c1be909aab143b0efb26b42d9e",
+      "bytes": 59652,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "zoo",
+      "version": "1.9-1",
+      "url": "https://cran.r-project.org/src/contrib/zoo_1.9-1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/zoo/zoo_1.9-1.tar.gz",
+      "license": "GPL-2 | GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 3.1.0), stats",
+        "Imports": "utils, graphics, grDevices, lattice (>= 0.20-27)",
+        "LinkingTo": ""
+      },
+      "sha256": "a2d998726a9b528efd20af449099e4b2df53887a0d10f48ac9ba63992b3a053a",
+      "bytes": 691004,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "lmtest",
+      "version": "0.9-40",
+      "url": "https://cran.r-project.org/src/contrib/lmtest_0.9-40.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/lmtest/lmtest_0.9-40.tar.gz",
+      "license": "GPL-2 | GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0), stats, zoo",
+        "Imports": "graphics",
+        "LinkingTo": ""
+      },
+      "sha256": "64400d4d6cc635316531042971f1783539686e9015c76f5741c07304fa14d997",
+      "bytes": 230313,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "nnet",
+      "version": "7.3-20",
+      "url": "https://cran.r-project.org/src/contrib/Archive/nnet/nnet_7.3-20.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/nnet/nnet_7.3-20.tar.gz",
+      "license": "GPL-2 | GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0), stats, utils",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "8f33e17e0eb161cfbc1bfee4875baa23c66fcdba8215a64a63402b099db2b555",
+      "bytes": 31285,
+      "hash_origin": "downloaded R4.6-compatible archived source"
+    },
+    {
+      "name": "timeDate",
+      "version": "4052.112",
+      "url": "https://cran.r-project.org/src/contrib/timeDate_4052.112.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/timeDate/timeDate_4052.112.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.6.0), methods",
+        "Imports": "graphics, utils, stats",
+        "LinkingTo": ""
+      },
+      "sha256": "7f5b8e294f9fdf977cb721e711a6fcd664e379ee1b0ddb4c733374940e0e4646",
+      "bytes": 367313,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "urca",
+      "version": "1.3-4",
+      "url": "https://cran.r-project.org/src/contrib/urca_1.3-4.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/urca/urca_1.3-4.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 2.0.0), methods",
+        "Imports": "nlme, graphics, stats",
+        "LinkingTo": ""
+      },
+      "sha256": "fe3d6ce5041f1e7caaf3137dfb6187640bcd2d208e19c59ee1202355ac0acb16",
+      "bytes": 680691,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "RcppArmadillo",
+      "version": "15.6.2-1",
+      "url": "https://cran.r-project.org/src/contrib/RcppArmadillo_15.6.2-1.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/RcppArmadillo/RcppArmadillo_15.6.2-1.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.3.0)",
+        "Imports": "Rcpp (>= 1.1.1), stats, utils, methods",
+        "LinkingTo": "Rcpp"
+      },
+      "sha256": "66fb2b707e237e1086b4f39111a172794f43a8bb815c1b589363d2219d61368d",
+      "bytes": 1097105,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "forecast",
+      "version": "9.0.2",
+      "url": "https://cran.r-project.org/src/contrib/forecast_9.0.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/forecast/forecast_9.0.2.tar.gz",
+      "license": "GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "colorspace, fracdiff, generics (>= 0.1.2), ggplot2 (>= 3.4.0), graphics, lmtest, magrittr, nnet, parallel, Rcpp (>= 0.12.4), stats, timeDate, urca, withr, zoo",
+        "LinkingTo": "Rcpp (>= 0.12.4), RcppArmadillo (>= 0.2.35)"
+      },
+      "sha256": "86dadffb846903b83fa6471d4e33d29e37435cc492641963a5b1daa925150653",
+      "bytes": 590857,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "modelr",
+      "version": "0.1.11",
+      "url": "https://cran.r-project.org/src/contrib/modelr_0.1.11.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/modelr/modelr_0.1.11.tar.gz",
+      "license": "GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 3.2)",
+        "Imports": "broom, magrittr, purrr (>= 0.2.2), rlang (>= 1.0.6), tibble, tidyr (>= 0.8.0), tidyselect, vctrs",
+        "LinkingTo": ""
+      },
+      "sha256": "94ebd506e9ccf3bf25318be6a182f8f89c3669a77b41864a0b9dbcc1d4337bd3",
+      "bytes": 121480,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "doBy",
+      "version": "4.7.2",
+      "url": "https://cran.r-project.org/src/contrib/doBy_4.7.2.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/doBy/doBy_4.7.2.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 4.2.0), methods",
+        "Imports": "boot, broom, cowplot, Deriv, dplyr, forecast, ggplot2, MASS, Matrix, modelr, rlang, purrr, tibble, tidyr,",
+        "LinkingTo": ""
+      },
+      "sha256": "9d4b2c4dca86b9e54f5c3778f6af93485334cd4b4f6105ac69e5d55579af7b7f",
+      "bytes": 4477331,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "pbkrtest",
+      "version": "0.5.5",
+      "url": "https://cran.r-project.org/src/contrib/pbkrtest_0.5.5.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/pbkrtest/pbkrtest_0.5.5.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 4.2.0), lme4 (>= 1.1.31)",
+        "Imports": "broom, dplyr, MASS, methods, numDeriv, Matrix (>= 1.2.3), doBy (>= 4.6.22)",
+        "LinkingTo": ""
+      },
+      "sha256": "d26c8ef0a6fd73bba184bde8e3434439d62539d93aef0a0b5b480a0f309bc51b",
+      "bytes": 77353,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "sandwich",
+      "version": "3.1-3",
+      "url": "https://cran.r-project.org/src/contrib/sandwich_3.1-3.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/sandwich/sandwich_3.1-3.tar.gz",
+      "license": "GPL-2 | GPL-3",
+      "dependencies": {
+        "Depends": "R (>= 3.0.0)",
+        "Imports": "stats, utils, zoo",
+        "LinkingTo": ""
+      },
+      "sha256": "960006cf4fcbada936b43acd04ddd8c0d1255570f41dda046ce778873f546134",
+      "bytes": 1423483,
+      "hash_origin": "downloaded pinned archive"
+    },
+    {
+      "name": "jsonlite",
+      "version": "2.0.0",
+      "url": "https://cran.r-project.org/src/contrib/jsonlite_2.0.0.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/jsonlite/jsonlite_2.0.0.tar.gz",
+      "license": "MIT + file LICENSE",
+      "dependencies": {
+        "Depends": "methods",
+        "Imports": "",
+        "LinkingTo": ""
+      },
+      "sha256": "75eb910c82b350ec33f094779da0f87bff154c232e4ae39c9896a9b89f3ac82d",
+      "hash_origin": "retained verified project dependency lock"
+    },
+    {
+      "name": "digest",
+      "version": "0.6.39",
+      "url": "https://cran.r-project.org/src/contrib/digest_0.6.39.tar.gz",
+      "archive_url": "https://cran.r-project.org/src/contrib/Archive/digest/digest_0.6.39.tar.gz",
+      "license": "GPL (>= 2)",
+      "dependencies": {
+        "Depends": "R (>= 3.3.0)",
+        "Imports": "utils",
+        "LinkingTo": ""
+      },
+      "sha256": "8bf048b49b2d17077138fae758bda56bbd53278d9437f2fdeaedf979c90a13c9",
+      "hash_origin": "retained verified project dependency lock"
+    }
+  ],
+  "upstream": {
+    "name": "glmmTMB",
+    "version": "1.1.15.9000",
+    "revision": "1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "url": "https://codeload.github.com/glmmTMB/glmmTMB/tar.gz/1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c",
+    "sha256": "712e791f53200617d73e48368d9d431b4c006e24156048bfcc417a801307c508",
+    "bytes": 56471823,
+    "package_prefix": "glmmTMB-1db3b4692aa4c61ae5c9974b32b9f91555cf5f2c/glmmTMB/",
+    "license": "AGPL-3"
+  }
+}

@@ -48,7 +48,8 @@ private[tmbad] final case class GlobalEvaluation(
     rows: Long,
     units: Long,
     weight: Double,
-    ledger: Ledger
+    ledger: Ledger,
+    partitions: Int = 1
 )
 private[tmbad] final class Accumulator(parameters: Int) {
   private val objective = new StableSum
@@ -108,7 +109,7 @@ private[tmbad] final class SharedObjective private (
   private var baseline: Option[(Long, Long, Double, Ledger)] = None
   private var latest: Option[GlobalEvaluation] = None
   private var closed = false
-  def evaluate(theta: Vector[Double]): Optimizer.Evaluation = {
+  def evaluateRaw(theta: Vector[Double]): GlobalEvaluation = {
     require(!closed, "Shared objective is closed")
     model.validateTheta(theta)
     val selectedModel = model
@@ -200,13 +201,17 @@ private[tmbad] final class SharedObjective private (
         "Native candidate rejected after complete partition/ledger validation: " + rejected
           .mkString(",")
       )
-    val denominator = if (options.reduction == "weighted_mean") weight.value else 1.0
-    val penalized = loss.value / denominator + GlobalPenalty.value(theta, options.l2Strength)
-    val score = theta.indices
-      .map(i => gradient(i).value / denominator + options.l2Strength * theta(i))
-      .toVector
+    val result = GlobalEvaluation(loss.value, gradient.map(_.value).toVector, count, units, weight.value, ledger, partitions)
+    latest = Some(result)
+    result
+  }
+  def evaluate(theta: Vector[Double]): Optimizer.Evaluation = {
+    val raw = evaluateRaw(theta)
+    val denominator = if (options.reduction == "weighted_mean") raw.weight else 1.0
+    val penalized = raw.value / denominator + GlobalPenalty.value(theta, options.l2Strength)
+    val score = theta.indices.map(i => raw.gradient(i) / denominator + options.l2Strength * theta(i)).toVector
     require(penalized.isFinite && score.forall(_.isFinite), "Global reduction/penalty is nonfinite")
-    latest = Some(GlobalEvaluation(penalized, score, count, units, weight.value, ledger))
+    latest = Some(raw.copy(value = penalized, gradient = score))
     Optimizer.Evaluation(penalized, score)
   }
   def accounting: GlobalEvaluation =
@@ -252,13 +257,14 @@ private[tmbad] object ModelDocument {
       spec: FitSpecification,
       options: FitOptions,
       fit: Optimizer.Result,
-      accounting: GlobalEvaluation
+      accounting: GlobalEvaluation,
+    targetJson: Option[String] = None
   ): String = {
     val document = Json.obj()
     document
-      .put("schema_version", 1)
+      .put("schema_version", if (targetJson.nonEmpty) 2 else 1)
       .put("kind", "spark-tmbad-model")
-      .put("package_version", "0.1.0")
+      .put("package_version", artifact.packageVersion)
       .put("model_id", model.id)
       .put("model_digest", model.digest)
     document.set[JsonNode]("artifact_identity", Json.read(artifact.identityJson))
@@ -271,7 +277,9 @@ private[tmbad] object ModelDocument {
       .put("status", fit.status)
       .put(
         "reason",
-        if (fit.converged)
+        if (fit.converged && targetJson.nonEmpty)
+          "Declared constrained stationarity criterion only; no global optimum, identification or posterior-sampling claim"
+        else if (fit.converged)
           "Projected first-order stationarity only; no global optimum or identifiability claim"
         else "Optimizer stopped without satisfying its stationarity criterion"
       )
@@ -301,6 +309,7 @@ private[tmbad] object ModelDocument {
         .put("hessian_reset", entry.hessianReset)
       trace.add(row)
     }
+    targetJson.foreach(value => document.set[JsonNode]("target", Json.read(value)))
     Json.write(document)
   }
   final case class Loaded(
@@ -312,6 +321,7 @@ private[tmbad] object ModelDocument {
   ) extends Serializable
   def parse(text: String, artifact: PreparedArtifact): Loaded = {
     val node = Json.read(text)
+    val schemaVersion = Json.integer(node, "schema_version", 1, 2)
     Json.fields(
       node,
       Set(
@@ -325,12 +335,11 @@ private[tmbad] object ModelDocument {
         "parameter_names",
         "spec",
         "fit"
-      )
+      ) ++ (if (schemaVersion == 2) Set("target") else Set.empty[String])
     )
     require(
-      Json.integer(node, "schema_version", 1, 1) == 1 && Json
-        .text(node, "kind") == "spark-tmbad-model" &&
-        Json.text(node, "package_version") == "0.1.0",
+      Json.text(node, "kind") == "spark-tmbad-model" &&
+        Json.text(node, "package_version") == artifact.packageVersion,
       "Unsupported fitted model format"
     )
     val model = artifact.model(Json.text(node, "model_id", 64))
@@ -434,6 +443,7 @@ private[tmbad] object ModelDocument {
         require(Json.text(ledger, name, 64).matches("[a-f0-9]{1,64}"), "Invalid ledger hash")
       )
     }
+    if (schemaVersion == 2) FitTarget.validateDocument(node.get("target"), model, parameters, fit)
     Loaded(model, parameters, spec, converged, Json.write(node))
   }
 }
@@ -448,13 +458,14 @@ private[tmbad] object Fitting {
   ): String = {
     val objective = SharedObjective.open(frame, spec, model, artifact, options)
     try {
-      val result = Optimizer.minimize(
-        objective.evaluate,
-        options.initial,
-        options.optimizer,
-        Some(model.bounds)
-      )
-      ModelDocument.create(model, artifact.artifact, spec, options, result, objective.accounting)
+      options.extension match {
+        case None =>
+          val result = Optimizer.minimize(objective.evaluate, options.initial, options.optimizer, Some(model.bounds))
+          ModelDocument.create(model, artifact.artifact, spec, options, result, objective.accounting)
+        case Some(settings) =>
+          val (result, accounting, target) = FitTarget.solve(objective.evaluateRaw, settings)
+          ModelDocument.create(model, artifact.artifact, spec, options, result, accounting, Some(target))
+      }
     } finally objective.close()
   }
 
@@ -468,7 +479,7 @@ private[tmbad] object Fitting {
   ): String = {
     require(rows.nonEmpty, "Cannot fit an empty group")
     var accounting: Option[GlobalEvaluation] = None
-    def evaluate(theta: Vector[Double]): Optimizer.Evaluation = {
+    def evaluateRaw(theta: Vector[Double]): GlobalEvaluation = {
       taskDeadline.check()
       artifact.artifact.requireLoadedJvm(classOf[NativeWorker])
       val worker =
@@ -489,23 +500,31 @@ private[tmbad] object Fitting {
         worker.finish()
         val result = sums.summary(0, model, artifact.artifact)
         require(result.weight > 0, "Independent fit has zero effective likelihood weight")
-        val denominator = if (options.reduction == "weighted_mean") result.weight else 1.0
-        val value = result.loss / denominator + GlobalPenalty.value(theta, options.l2Strength)
-        val gradient = theta.indices
-          .map(i => result.gradient(i) / denominator + options.l2Strength * theta(i))
-          .toVector
-        accounting = Some(
-          GlobalEvaluation(value, gradient, result.rows, result.units, result.weight, result.ledger)
-        )
-        Optimizer.Evaluation(value, gradient)
+        val value = GlobalEvaluation(result.loss, result.gradient, result.rows, result.units, result.weight, result.ledger)
+        accounting = Some(value)
+        value
       } catch {
         case error: NativeFailure if NumericalRejection.reviewed(error) =>
           throw new Optimizer.DomainFailure("Independent native candidate rejected: " + error.code)
       } finally worker.close()
     }
 
-    val fit = Optimizer.minimize(evaluate, options.initial, options.optimizer, Some(model.bounds))
-    ModelDocument.create(model, artifact.artifact, spec, options, fit, accounting.get)
+    options.extension match {
+      case None =>
+        def evaluate(theta: Vector[Double]): Optimizer.Evaluation = {
+          val raw = evaluateRaw(theta)
+          val denominator = if (options.reduction == "weighted_mean") raw.weight else 1.0
+          val value = raw.value / denominator + GlobalPenalty.value(theta, options.l2Strength)
+          val gradient = theta.indices.map(i => raw.gradient(i) / denominator + options.l2Strength * theta(i)).toVector
+          accounting = Some(raw.copy(value = value, gradient = gradient))
+          Optimizer.Evaluation(value, gradient)
+        }
+        val fit = Optimizer.minimize(evaluate, options.initial, options.optimizer, Some(model.bounds))
+        ModelDocument.create(model, artifact.artifact, spec, options, fit, accounting.get)
+      case Some(settings) =>
+        val (fit, accepted, target) = FitTarget.solve(evaluateRaw, settings)
+        ModelDocument.create(model, artifact.artifact, spec, options, fit, accepted, Some(target))
+    }
   }
 
   def independent(

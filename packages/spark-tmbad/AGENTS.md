@@ -4,17 +4,18 @@ The human authorized implementation on 2026-10-29, including custom likelihood
 and random-effects fitting, prediction and forecasting through Scala and Python
 entrypoints. This supersedes the earlier research-only restriction.
 
-This package is a separate development stream. Keep it untracked and uncommitted
-until root coordinates its release. Do not change the active 1.1.0 classroom
-release, shared package, catalog or workflow files. No new clones/worktrees.
-The local classroom source packager walks untracked packages too: root must
-export the exact tracked release tree for 1.1.0 packaging instead of using this
-working tree. Do not publish this package or native artifacts incidentally.
+This package is tracked and independently versioned. Coordinate its releases
+with the root agent, preserving checkpoints and unrelated working changes.
+Classroom 1.1.0 was built from its earlier immutable source and does not include
+this package. Export that exact release tree when reproducing its source payload.
+No new clones/worktrees. Do not publish the package or native artifacts
+incidentally; package implementation does not authorize PyPI publication.
 
-Ownership: native/ belongs to phase2_torch_likelihood_book; jvm/ belongs to
-phase2_advanced_spark_book; python/, README.md and other docs belong to
-native_model_python_api. Root owns docs/PROTOCOL.md, build integration and release
-coordination. Coordinate boundary changes before editing another owner's files.
+Use the current session's explicit ownership assignments rather than historical
+agent names. Root owns versioning, shared generation, build scheduling and
+release coordination. Coordinate interface changes across native/, jvm/ and
+python/ before changing another owner's files. Keep integration/ self-contained
+for an independently copied package directory.
 
 Use the fixed process-worker protocol. At most one serial TMBad process is live per task attempt, containing its mutable
 recording context. Independent fitting uses a fresh, successfully terminated

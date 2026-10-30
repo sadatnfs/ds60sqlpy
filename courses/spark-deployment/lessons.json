@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "track_id": "spark-deployment",
+  "lessons": [
+    {
+      "id": "spark-deploy-001",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-001.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-001.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-002",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-002.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-002.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-003",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-003.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-003.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-004",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-004.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-004.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-005",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-005.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-005.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-006",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-006.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-006.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-007",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-007.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-007.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-008",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-008.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-008.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-009",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-009.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-009.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-010",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-010.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-010.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-011",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-011.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-011.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-012",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-012.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-012.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-013",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-013.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-013.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-014",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-014.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-014.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-015",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-015.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-015.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-016",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-016.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-016.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-017",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-017.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-017.md",
+      "solution_paths": [],
+      "verification_id": null
+    },
+    {
+      "id": "spark-deploy-018",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/spark-deployment/guides/spark-deploy-018.md",
+      "source_path": "courses/spark-deployment/lessons/spark-deploy-018.md",
+      "solution_paths": [],
+      "verification_id": null
+    }
+  ]
+}

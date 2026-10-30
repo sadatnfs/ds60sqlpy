@@ -119,6 +119,25 @@ Keep low-dimensional driver optimization separate from TorchDistributor/Lightnin
 training. The optional R/TMB reference requires prepared native artifacts and its
 own API/ABI/compiler receipts; it does not make R a package requirement.
 
+The independent [Spark/TMBad package](../../../packages/spark-tmbad/README.md)
+provides a separate prepared C++/JVM route with Scala and Python driver APIs.
+Its sources were added after the accepted classroom 1.1.0 publisher. Read its
+current artifact-bound qualification before integrating lessons; an existing
+native gallery or same-host executor test does not establish the later dedicated
+Compose topology, controlled worker-loss recovery, AMD64 or cloud deployment.
+Both independent package folders need their own copied-project installation,
+dependencies, build/Docker tooling, examples and qualification. Keep native and
+Torch execution contracts separate. Do not promise arbitrary Torch programs
+become distributed without an explicit supported mode.
+
+New simulation/modeling lessons must bind the actual generator, fitted model,
+parameterization and prediction target. Compare independent numerical references,
+report replication counts and Monte Carlo uncertainty, and preserve leakage-safe
+forecast splits. Coefficient-only ridge, exact nonsmooth lasso and selected priors
+need their own implemented, tested semantics. Optimizing with priors gives MAP,
+not posterior samples; a successful fit alone does not establish posterior
+inference. Keep unimplemented study designs outside admitted lesson claims.
+
 Python web lessons use the ordinary `python-web` worker for finite offline
 framework/test-client programs. Multi-process HTTP, WebSockets, SSE and durable
 job/session behavior belong to the owned web-lab project. A successful in-process
@@ -212,6 +231,16 @@ The dispatch-only `verify-published-images.yml` is a read-only historical
 recovery path for the accepted partial 1.0.0 image set, not a shortcut for
 publishing a new version. It compares the old promotion receipt and allowed
 verifier-only source delta, then tests native pulls without changing tags.
+The separate `audit-published-release.yml` handles a completed full publication:
+it validates the exact promotion attempt, exports the original published tree,
+then audits each native ordinary group with canonical pulls, selected setup,
+saved profile/version choices and stop/resume. Its current verifier must pass
+source CI, and its result stays separate from image/runtime qualification.
+Read the actual receipts before claiming all-module coverage. A `ci-*` candidate
+is never the final learner image. Derive subject/profile/image mappings from the
+loaders and catalog, and retain the original release SHA when later package
+checkpoints share its app version. See the
+[full-release audit guide](../../../docs/dockerhub.md#audit-every-published-module-without-republishing).
 
 ## Reuse the data and scientific execution contracts
 

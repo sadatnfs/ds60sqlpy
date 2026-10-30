@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import platform
 import shutil
 import stat
 import subprocess
@@ -364,17 +365,27 @@ def wrapper(tmp_path: Path) -> Any:
     docker = binaries / "docker"
     docker.write_text(
         f"#!{sys.executable}\n"
-        + """import json, os, sys
+        + """import json, os, platform, sys
 from pathlib import Path
 args = sys.argv[1:]
 with Path(os.environ["FORMAT_TEST_CALLS"]).open("a") as out:
     out.write(json.dumps(args) + "\\n")
 if args[:1] == ["info"]:
-    print(os.environ.get("FORMAT_TEST_ENGINE", "linux"))
+    if args[-1] == "{{.Architecture}}":
+        print(os.environ.get("FORMAT_TEST_ENGINE_ARCH", platform.machine()))
+    else:
+        print(os.environ.get("FORMAT_TEST_ENGINE", "linux"))
 elif args[:2] == ["context", "inspect"]:
     print(os.environ.get("FORMAT_TEST_ENDPOINT", "unix:///fake/docker.sock"))
 elif args[:2] == ["image", "inspect"]:
-    sys.exit(0 if os.environ.get("FORMAT_TEST_IMAGE", "present") == "present" else 1)
+    if os.environ.get("FORMAT_TEST_IMAGE", "present") != "present":
+        sys.exit(1)
+    if "--format" in args:
+        native = "arm64" if platform.machine().lower() in {"arm64", "aarch64"} else "amd64"
+        print(os.environ.get("FORMAT_TEST_IMAGE_OS", "linux"),
+              os.environ.get("FORMAT_TEST_IMAGE_ARCH", native),
+              os.environ.get("FORMAT_TEST_IMAGE_ID", "sha256:" + "a" * 64))
+    sys.exit(0)
 elif (args[:1] == ["run"] and os.environ.get("FORMAT_TEST_FAIL_R")
       and any(a.startswith("ds60-formatting-r:") for a in args)):
     sys.exit(int(os.environ["FORMAT_TEST_FAIL_R"]))
@@ -394,7 +405,14 @@ elif args[:1] not in (["build"], ["run"]):
     env = {
         key: value
         for key, value in os.environ.items()
-        if key not in {"DOCKER_HOST", "DOCKER_CONTEXT"}
+        if key
+        not in {
+            "DOCKER_HOST",
+            "DOCKER_CONTEXT",
+            "DS60_FORMAT_IMAGE",
+            "DS60_FORMAT_R_IMAGE",
+            "DS60_FORMAT_JULIA_IMAGE",
+        }
     }
     env.update(PATH=f"{binaries}{os.pathsep}{env.get('PATH', '')}", FORMAT_TEST_CALLS=str(calls))
 
@@ -858,3 +876,117 @@ def test_prettier_write_requires_bounded_convergence(
     assert sum("--write" in command for command in commands) == writes
     assert len(commands) == len(outcomes)
     assert source.read_text(encoding="utf-8") == "const value = 1;\n"
+
+
+@pytest.mark.parametrize(
+    "language,variable",
+    [
+        ("python", "DS60_FORMAT_IMAGE"),
+        ("r", "DS60_FORMAT_R_IMAGE"),
+        ("julia", "DS60_FORMAT_JULIA_IMAGE"),
+    ],
+)
+def test_prepared_native_override_is_pinned_without_build_pull_or_retag(
+    wrapper: Any, language: str, variable: str
+) -> None:
+    _, invoke = wrapper
+    result, calls = invoke(
+        "--check", "--language", language, settings={variable: "retained-tools:reviewed"}
+    )
+    assert result.returncode == 0, result.stderr
+    assert not any(call[:1] in (["build"], ["pull"], ["tag"]) for call in calls)
+    runs = [call for call in calls if call[0] == "run"]
+    assert len(runs) == 1 and "--pull=never" in runs[0]
+    assert "--entrypoint=python3" in runs[0] and "--platform" in runs[0]
+    assert "sha256:" + "a" * 64 in runs[0]
+    assert "retained-tools:reviewed" not in runs[0]
+    assert "Current build inputs are not requalified" in result.stderr
+    assert "sha256:" + "a" * 64 in result.stderr
+
+
+@pytest.mark.parametrize(
+    "variable", ["DS60_FORMAT_IMAGE", "DS60_FORMAT_R_IMAGE", "DS60_FORMAT_JULIA_IMAGE"]
+)
+def test_prepared_overrides_refuse_force_build_before_any_engine_action(
+    wrapper: Any, variable: str
+) -> None:
+    _, invoke = wrapper
+    result, calls = invoke("--build", settings={variable: "retained-tools:reviewed"})
+    assert result.returncode != 0 and "cannot be combined" in result.stderr
+    assert not calls
+
+
+@pytest.mark.parametrize(
+    "settings,diagnostic",
+    [
+        ({"FORMAT_TEST_IMAGE": "missing"}, "not already local"),
+        ({"FORMAT_TEST_IMAGE_OS": "windows"}, "Linux image"),
+        ({"FORMAT_TEST_IMAGE_ID": "sha256:bad"}, "Linux image"),
+    ],
+)
+def test_prepared_override_refuses_missing_or_invalid_images(
+    wrapper: Any, settings: dict[str, str], diagnostic: str
+) -> None:
+    _, invoke = wrapper
+    result, calls = invoke(
+        "--check",
+        "--language",
+        "python",
+        settings={"DS60_FORMAT_IMAGE": "retained-tools:reviewed", **settings},
+    )
+    assert result.returncode != 0 and diagnostic in result.stderr
+    assert not any(call[0] in {"build", "run", "pull"} for call in calls)
+
+
+def test_prepared_override_refuses_non_native_image_and_engine(wrapper: Any) -> None:
+    _, invoke = wrapper
+    other = "amd64" if platform.machine().lower() in {"arm64", "aarch64"} else "arm64"
+    for field in ("FORMAT_TEST_IMAGE_ARCH", "FORMAT_TEST_ENGINE_ARCH"):
+        result, calls = invoke(
+            "--check",
+            "--language",
+            "python",
+            settings={"DS60_FORMAT_IMAGE": "retained-tools:reviewed", field: other},
+        )
+        assert result.returncode != 0 and "native" in result.stderr
+        assert not any(call[0] in {"build", "run", "pull"} for call in calls)
+
+
+def test_every_selected_override_is_validated_before_any_source_edit(wrapper: Any) -> None:
+    _, invoke = wrapper
+    result, calls = invoke(
+        settings={
+            "DS60_FORMAT_IMAGE": "retained-tools:reviewed",
+            "DS60_FORMAT_R_IMAGE": "bad image name",
+        }
+    )
+    assert result.returncode != 0 and "already-local image" in result.stderr
+    assert not any(call[0] in {"build", "run", "pull"} for call in calls)
+
+
+def test_focused_inventory_keeps_symlink_guards_and_omits_other_files(tmp_path: Path) -> None:
+    put(tmp_path, "docs/source.md", "# Source\n")
+    put(tmp_path, "generated/reader.html", "<html></html>\n")
+    external = tmp_path.parent / "external-focused.md"
+    external.write_text("private")
+    (tmp_path / "docs/linked.md").symlink_to(external)
+    assert formatting.source_files(tmp_path, include=lambda name: name.endswith(".md")) == [
+        "docs/source.md"
+    ]
+    with pytest.raises(TimeoutError, match="Source inventory"):
+        formatting.source_files(tmp_path, deadline=0)
+
+
+def test_container_git_inventory_disables_host_fsmonitor_and_has_a_timeout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / ".git").mkdir()
+
+    def timeout(command: list[str], **kwargs: Any) -> Any:
+        assert "core.fsmonitor=false" in command
+        assert kwargs["timeout"] == 30
+        raise subprocess.TimeoutExpired(command, 30)
+
+    monkeypatch.setattr(subprocess, "run", timeout)
+    with pytest.raises(subprocess.TimeoutExpired):
+        formatting.source_files(tmp_path)

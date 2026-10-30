@@ -1,0 +1,46 @@
+# spark-deploy-007: Repair driver DNS and callback routes
+
+Tutorial mode. Stage: intermediate. Direct prerequisites: `spark-deploy-006`, `k8s-048`.
+
+Read this tutorial in the classroom. Its commands run only in the separately prepared [owned workshop](../projects/cluster-lab/README.md); there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.
+
+## Diagnose the callback path from the executor's location
+
+`spark.driver.bindAddress` selects the driver's listening interfaces. `spark.driver.host` is the address advertised to other processes. The master URL is a third address. A correct master URL can allocate executors while an incorrect driver address makes the application fail afterward.
+
+Compose supplies service-name DNS within its network. Use `driver` or `notebook` there. A host-published port is for a connection originating outside that network. The workshop never publishes master RPC or worker data ports to the host. A multi-host deployment needs actual routes and firewall rules for its advertised addresses, not a larger set of random public port mappings.
+
+## Worked case A: trace the working two-way path
+
+```text
+driver resolves master -> connects to master:7077
+worker launches executor -> executor resolves driver
+executor connects to driver:39000
+driver and executor exchange block data using their advertised block endpoints
+```
+
+Use the master UI to establish allocation, the executor inventory to establish registration, and a completed aggregate to establish usable data movement. Each observation answers a narrower question. An HTTP response from the driver UI says nothing about executor RPC permission. A TCP connection establishes a listener, not application protocol compatibility.
+
+With fixed driver ports, firewall analysis can name driver RPC 39000 and driver block manager 39001. Executor block-manager ports also matter. They remain within the private Compose network here. For a restricted Kubernetes policy, deliberately configure the corresponding executor ports and allow the full Spark data flow, not only a one-way driver-to-executor connection.
+
+## Worked case B: interpret an unreachable loopback advertisement
+
+```text
+master worker list: two live workers
+driver host advertised to executors: 127.0.0.1
+executor log: connection refused to 127.0.0.1:39000
+driver HTTP UI: reachable from host
+```
+
+These observations are mutually consistent. Each executor's loopback belongs to its own network namespace. The minimal correction is a reachable advertised driver address with a matching listener, not publishing every port or setting an arbitrary longer timeout. Reproduce the failure only in an owned test, retain its diagnostic and restore the valid configuration before running acceptance.
+
+## Diagnose and transfer
+
+Follow this order: name resolution, route, listener, policy, then protocol. DNS can return an address whose Service has no ready endpoints. A successful ping may bypass a blocked TCP port. NAT can make an advertised container address unreachable across machines. A remote notebook using a VPN may advertise a laptop interface that cluster nodes cannot route to.
+
+Prefer running the driver inside the cluster's network boundary when client reachability is difficult. A port-forward is excellent for a local browser inspecting HTTP, but is not generally a replacement for all distributed executor callbacks. Record the origin and destination for every test so a host-side success is not mistaken for an executor-side success.
+
+## Primary references
+
+- [Spark driver and block-manager settings](https://spark.apache.org/docs/4.0.1/configuration.html)
+- [Kubernetes client-mode networking](https://spark.apache.org/docs/4.0.1/running-on-kubernetes.html#client-mode-networking)

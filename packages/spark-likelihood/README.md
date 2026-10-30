@@ -4,19 +4,40 @@
 
 Version 0.1.0 is the first package release. The row kernel preserves the separately tested objective, gradient, reduction, weighting, empty-partition and optimizer contracts. A distinct complete-unit protocol preserves joint likelihoods; scalar group losses must never be sent through the row-batching kernel. Cross-group latent covariance and a differentiable Spark SQL plan are different problems and are not implied by this package.
 
-## Install from this checkout
+## Install from the package directory
+
+Copy this entire folder into a fresh project, enter that folder, and run:
 
 ```bash
-python -m pip install ./packages/spark-likelihood
+python -m pip install .
 ```
 
 The core contracts use the Python standard library. Install optional dependencies explicitly before execution, never inside a fit:
 
 ```bash
-python -m pip install './packages/spark-likelihood[spark,torch,scipy]'
+python -m pip install '.[spark,torch,scipy]'
 ```
 
-The prepared classroom Spark/Torch project supplies the tested CPU Torch, Spark and SciPy environment. A source installation elsewhere also needs a compatible Java runtime for Spark. Choose the appropriate Torch distribution for the machine during environment preparation; installing the package does not promise GPU support. Native qualification records exact versions and architecture separately.
+The extras declare compatible interfaces; they are not a pinned CPU environment. Spark also needs a compatible Java runtime. Choose the Torch distribution deliberately during preparation. The package owns exact CPU/scientific/build locks and a standalone Docker recipe in [runtime preparation](docs/PREPARATION.md). Neither installing the package nor selecting a Torch extra promises GPU support. Native qualification records actual versions and architecture separately.
+
+## Prepare the complete CPU image
+
+```sh
+docker build --tag spark-likelihood:0.1.0 .
+```
+
+The build context is this package alone. Neutral public Python and Spark bases,
+exact package-local CPU dependencies, noneditable wheel installation and explicit
+source-checked Spark launcher preparation replace any parent-checkout dependency.
+The recipe supports reviewed offline wheelhouses and explicit prepared-image
+compatibility overrides. Model execution never installs packages or patches Spark.
+
+Qualification of the new neutral default bases is still pending. An existing
+prepared classroom image is only an optional compatibility input; its earlier
+receipt does not qualify a different Docker build. Read [preparation](docs/PREPARATION.md)
+and [tooling](tooling/README.md) before selecting the network/offline path. Use
+[integration](integration/README.md) for the separate master/two-worker/driver
+acceptance procedure; a built image alone is not distributed execution evidence.
 
 ## Additive row likelihoods
 
@@ -42,9 +63,9 @@ An optimizer success flag is not a proof of identification, correct sampling ass
 ## Development
 
 ```bash
-python -m pip install -e './packages/spark-likelihood[test,scipy]'
-python -m pytest packages/spark-likelihood/tests
-python -m pip wheel --no-deps --no-build-isolation ./packages/spark-likelihood --wheel-dir dist
+python -m pip install -e '.[test,scipy]'
+python -m pytest tests
+python -m pip wheel --no-deps --no-build-isolation . --wheel-dir dist
 ```
 
 Build and test the wheel independently from the parent classroom application. Installed-wheel checks must not rely on a repository `PYTHONPATH` or the old compatibility imports. `ds60sqlpy.spark_likelihood` contains only migration aliases; canonical implementations live here. No PyPI publication is performed by these commands.

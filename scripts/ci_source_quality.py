@@ -26,6 +26,8 @@ def main() -> int:
     args = parser.parse_args()
     ensure_publication_paths(ROOT)
     options = [option for name in languages(args.toolchain) for option in ("--language", name)]
+    # Each shard checks both standalone source and supported fenced programs in
+    # Markdown and durable authoring containers with its own pinned adapters.
     subprocess.run(["bash", "scripts/format-repo", "--check", *options], cwd=ROOT, check=True)
     subprocess.run(["bash", "scripts/lint-repo", *options], cwd=ROOT, check=True)
     subprocess.run(["git", "diff", "--exit-code"], cwd=ROOT, check=True)

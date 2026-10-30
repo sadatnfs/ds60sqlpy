@@ -48,6 +48,40 @@ Explore the [14-model gallery](docs/EXAMPLES.md), and read the
 [custom-model authoring](docs/CUSTOM-MODELS.md) for prepared C++ extensions,
 and [protocol](docs/PROTOCOL.md) for the common native and JVM contract.
 
+### Build a standalone image
+
+Copy this entire directory into a fresh project, enter that directory, and build:
+
+```sh
+docker build --tag spark-tmbad:0.1.0 .
+docker run --rm --network none --entrypoint /opt/spark-tmbad/tmbad-worker \
+  spark-tmbad:0.1.0 --describe
+docker run --rm --network none --hostname localhost \
+  --env SPARK_LOCAL_IP=127.0.0.1 spark-tmbad:0.1.0 \
+  --master 'local[2]' /src/python/examples/validate_installed.py \
+  --manifest /opt/spark-tmbad/artifact.json
+```
+
+The default Dockerfile uses public Python 3.12.12 and Apache Spark 4.0.1 bases,
+installs Debian Bookworm's GCC12/OpenSSL and JDK17 dependencies, verifies pinned
+native source archives, builds a wheel and JAR, and installs them in the final
+runtime. It does not need another DS60 checkout, classroom image or R runtime.
+Image preparation needs network access; model execution does not download or
+compile dependencies. The example above is a local Spark check, not evidence of
+multiple worker containers or another architecture.
+
+`CPP_IMAGE`, `PYTHON_IMAGE` and `SPARK_IMAGE` are explicit build overrides for
+prepared environments. `PREPARED_OS_PACKAGES=1` skips apt preparation only when
+the chosen images already contain every declared compiler/runtime dependency.
+That opt-out does not skip source hashes, compilation, native checks, wheel
+installation or final-runtime artifact validation. Record the actual base image
+identities and native architecture with any qualification result. Do not treat
+a build using prepared overrides as qualification of different default bases.
+It is not an offline-build switch: the default preparation stages still fetch
+hash-pinned native sources and Python build wheels. For a fully offline build,
+use the archive-based commands in the preparation guide and already prepared
+packaging tools.
+
 Match the native compiler ABI and shared libraries to the executor runtime as
 well as its Linux architecture. Successful compilation in a different image
 does not prove that the worker can start in the Spark executor image.

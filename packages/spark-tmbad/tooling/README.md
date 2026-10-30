@@ -7,8 +7,10 @@ workers run on Linux, with one matched ARM64 or AMD64 build per executor platfor
 Do not use cross-architecture emulation as qualification.
 
 Use a Linux environment with Python3.11+, GCC12, OpenSSL development headers,
-and the exact Spark4.0.1/Scala2.13 jars plus JDK17 or21. The prepared classroom
-C++20 and Spark images provide these toolchains. The explicit GCC12 selection
+and the exact Spark4.0.1/Scala2.13 jars plus JDK17 or21. The package Dockerfile
+prepares these tools from public Python and Apache Spark images. Its build
+context is this package alone, so copying it into a fresh project is supported.
+The explicit GCC12 selection
 matches Debian12 Spark's libstdc++ ABI. A newer compiler's binary may compile
 successfully yet fail to load in an older executor image. Always run the native
 worker inside the final executor environment before claiming compatibility.
@@ -39,11 +41,13 @@ binary hash bind model descriptors to those bytes. Assembly checks the native
 and JVM receipts and emits `artifact.json`. Relocation may update absolute paths
 but cannot change file hashes or scientific model identity.
 
-For Spark, distribute the same prepared installation and native libraries to
-every executor. Load the exact JAR at session creation with
-`--jars /opt/spark-tmbad/spark-tmbad.jar`. The Python API does not silently add JARs
-or copy native files into a running cluster. Mixed architectures require separate
-qualified builds and are not admitted by a single-platform artifact manifest.
+For Spark, place the complete prepared installation on the driver and load its
+exact JAR at session creation with `--jars /opt/spark-tmbad/spark-tmbad.jar`.
+The JVM verifies and distributes an immutable native-worker snapshot through
+SparkFiles. Executors need matching native libraries, architecture and executable
+temporary storage. The Python API does not silently add a JAR to a running
+session. Mixed architectures require separate qualified builds and are not
+admitted by a single-platform artifact manifest.
 
 Compilation and the native C++ numerical checks are only the first tier. Run
 `python/examples/validate_native_oracles.py` against the installed manifest,

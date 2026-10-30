@@ -1,0 +1,46 @@
+# spark-deploy-001: Processes, deploy modes and ports
+
+Tutorial mode. Stage: beginner. Direct prerequisites: `spark-030`.
+
+Read this tutorial in the classroom. Its commands run only in the separately prepared [owned workshop](../projects/cluster-lab/README.md); there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.
+
+## Separate the process from the machine
+
+A Spark application has one driver, which creates its session and schedules work, and executors, which run tasks. A cluster manager allocates those executors. In Standalone, the master knows available workers; a worker launches executor processes. A worker is therefore not an executor and a container is not a physical machine. Two worker containers on this laptop share its CPU, memory, storage and failure domain.
+
+The word client describes driver placement. In client deploy mode, the submitting process contains the driver. In cluster deploy mode, the manager starts a driver elsewhere. A separate Docker driver container still uses client mode. A notebook kernel usually contains a client-mode driver. Spark Connect is a different client/server API boundary and is not the execution path in this workshop.
+
+Read a port as a destination belonging to one process. The master listens on 7077 for Spark traffic and its own UI on 8080. An application driver uses 4040 for its UI by default. Driver RPC and block transfers are separate channels; this project fixes its driver RPC at 39000 and driver block manager at 39001. A browser port does not substitute for either.
+
+## Worked case A: trace a separate driver
+
+```text
+submit command -> driver container -> master:7077
+worker-a -> executor JVM -> Python task process
+worker-b -> executor JVM -> Python task process
+executors -> driver:39000 and driver:39001
+browser -> loopback-published driver UI -> driver:4040
+```
+
+The expected observation is a driver hostname of `driver`, partition hosts from both workers and two non-driver executor records. Worker host plus process identity distinguishes processes even when container PID namespaces reuse the same numeric PID. The receipt in `app/bounded_job.py` records Python worker PIDs and separately queries the JVM executor inventory. Neither record alone proves separate physical hosts.
+
+## Worked case B: move the driver, then change the address
+
+```text
+Before: driver.host=driver, driver.bindAddress=0.0.0.0
+After moving to notebook: driver.host=notebook, bindAddress unchanged
+Wrong advertisement: driver.host=127.0.0.1
+```
+
+Binding chooses interfaces on the driver's own container. Advertising tells executors where to call back. Advertising loopback tells each executor to contact itself, so master registration may succeed while tasks cannot communicate with the real driver. Publishing 4040 on the host does not repair the RPC route. The changed condition is driver placement, not a changed algorithm.
+
+## Diagnose and transfer
+
+If the master lists a worker but the application has no executors, inspect requested resources and worker launch logs. If executors appear but tasks fail to register or fetch blocks, inspect advertised driver DNS and the two data/control ports. Record whether a number is a worker count, executor count, task count or input partition count. These can differ without contradiction.
+
+Explain the same trace for Kubernetes: the Kubernetes API replaces the Standalone master for allocation, while driver and executor communication still matters. The later Kubernetes chapters provide the process-specific configuration rather than treating a cluster-manager URL as a complete deployment.
+
+## Primary references
+
+- [Spark application submission](https://spark.apache.org/docs/4.0.1/submitting-applications.html)
+- [Spark Standalone roles](https://spark.apache.org/docs/4.0.1/spark-standalone.html)

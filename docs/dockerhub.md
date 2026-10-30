@@ -17,6 +17,32 @@ with the actual lowercase username or organization namespace. The app and every
 ordinary worker have separate tags. PostgreSQL keeps its upstream/mirror image;
 GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
+## Published release and its evidence
+
+The [1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
+completed successfully from
+[source `59a0d116`](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644).
+It promoted 26 combined version indexes and 26 latest aliases in
+`sadatnfs/ds60sqlpy`, after both native ordinary-worker and scientific-project
+gates passed. Its separate native AMD64 and ARM64 acceptance jobs pulled and
+started App/Core, retained the saved release and learner marker, and passed
+stop/resume with the same stateful containers and volumes.
+
+The original acceptance started App/Core only. The additional
+[all-module pull audit](#audit-every-published-module-without-republishing) is
+pending; its source implementation and tests are not a completed hosted result.
+Worker runtime qualification, canonical publication, fresh module pulls and
+saved-state acceptance are separate evidence.
+
+Use the [exact 1.1.0 source ZIP](https://github.com/sadatnfs/ds60sqlpy/archive/59a0d116a1759d5d509718c52c4f3439e1986644.zip)
+or its matching release starter for reproducibility. The launcher compares the
+resolved app version with its checked-in version; it does not require the local
+Git HEAD to equal the publisher SHA. A later checkout still labeled 1.1.0 can
+contain changes that those images do not include. In particular, the later
+`packages/spark-tmbad/` native package is not part of this published source.
+The independent `ds60-spark-likelihood` distribution has its own package version;
+that version does not select a classroom image tag.
+
 ## Tag layouts
 
 | Publication route | App tag | Example worker tag |
@@ -24,12 +50,79 @@ GPU workers, SDK/tooling base images and unrelated local images are excluded.
 | Full CI release after promotion | `1.1.0`, with `latest` then pointing to that completed release | `1.1.0-worker-python-core` |
 | Manual architecture set | `1.1.0-lab-arm64` or `1.1.0-lab-amd64` | `1.1.0-worker-python-core-arm64` or `1.1.0-worker-python-core-amd64` |
 
+A candidate such as
+`ci-59a0d116a1759d5d509718c52c4f3439e1986644-40961726148-1-r-statistics-amd64`
+records the source, run, attempt, profile and native architecture. It is a
+staging tag. Normal R setup uses `1.1.0-worker-r-statistics`; the corresponding
+moving alias is `latest-worker-r-statistics`. All ordinary worker aliases use
+`latest-<catalog suffix>`. Do not enter a `ci-*` candidate as the learner release.
+
 Each combined release tag points to an image index containing Linux
 `amd64` and `arm64` variants. Docker selects the variant matching the engine. This is the default `--from-hub` layout.
 Manual architecture tags require the consumer's explicit `--architecture-tags`
 option. Publishing ARM64 images from a Mac does not create AMD64 images for a
 typical Windows/WSL machine, and the local publisher does not create a combined
 manifest. [Docker multi-platform images](https://docs.docker.com/build/building/multi-platform/)
+
+### Subjects, runtime profiles and canonical images
+
+The app contains the complete shipped reading library. A worker image contains
+the prepared tools for its execution profile. Several subjects can share a
+compatible worker, and a subject can offer variants using different workers.
+There is no separate image for each lesson. The following mapping comes from
+`ModuleCatalog` and [`docker/classroom-images.tsv`](../docker/classroom-images.tsv).
+Every tag below is under `sadatnfs/ds60sqlpy:` for the accepted 1.1.0 release.
+Each row describes only the lessons or variants declaring that profile. App is
+always included; use `--profile` for ordinary workers and `--image-tag app=VERSION`
+when explicitly choosing the app version.
+
+| Subjects using the execution profile | Image profile | Canonical version tag |
+| --- | --- | --- |
+| Complete reading library, classroom UI and coordination | `app` | `1.1.0` |
+| Applied Science; Bayesian Computing; CUDA CPU study variants; Data and ML Engineering; Data Visualization; TensorFlow; Applied LLMs; LLM Evaluation; LLM Theory; NLP; Statistics and ML | `python-core` | `1.1.0-worker-python-core` |
+| C++ | `cpp20` | `1.1.0-worker-cpp20` |
+| Java | `java21` | `1.1.0-worker-java21` |
+| JavaScript and TypeScript | `javascript-node` | `1.1.0-worker-javascript-node` |
+| JavaScript and TypeScript | `typescript-node` | `1.1.0-worker-typescript-node` |
+| CUDA CPU study variants; TensorFlow | `tensorflow-cpu` | `1.1.0-worker-tensorflow-cpu` |
+| CUDA CPU study variants; Custom Likelihoods; Data and ML Engineering; PyTorch; Applied LLMs; LLM Evaluation; LLM Theory | `llm-torch-cpu` | `1.1.0-worker-llm-torch-cpu` |
+| Scala and Spark | `scala-jvm` | `1.1.0-worker-scala-jvm` |
+| Advanced Spark Modeling; CUDA CPU study variants; Scala and Spark | `spark-local-scala` | `1.1.0-worker-spark-local-scala` |
+| Advanced Spark Modeling; CUDA CPU study variants; Data and ML Engineering; Scala and Spark | `spark-local-python` | `1.1.0-worker-spark-local-python` |
+| C | `c17` | `1.1.0-worker-c17` |
+| Go | `go` | `1.1.0-worker-go` |
+| C# | `csharp-dotnet` | `1.1.0-worker-csharp-dotnet` |
+| Rust | `rust-stable` | `1.1.0-worker-rust-stable` |
+| Swift | `swift-linux` | `1.1.0-worker-swift-linux` |
+| Web Development | `php-cli` | `1.1.0-worker-php-cli` |
+| JAX | `jax-cpu` | `1.1.0-worker-jax-cpu` |
+| Bayesian Computing; Statistics and ML | `bayesian-cpu` | `1.1.0-worker-bayesian-cpu` |
+| R; TMB Modeling | `r-statistics` | `1.1.0-worker-r-statistics` |
+| Data and ML Engineering; dbt; ML Engineering; Polars | `data-engineering` | `1.1.0-worker-data-engineering` |
+| Apache and Open Data Platforms | `data-platforms-python` | `1.1.0-worker-data-platforms-python` |
+| Bayesian Computing | `stan-cpu` | `1.1.0-worker-stan-cpu` |
+| Julia | `julia` | `1.1.0-worker-julia` |
+| dbt | `dbt-duckdb` | `1.1.0-worker-dbt-duckdb` |
+| Python Web Development | `python-web` | `1.1.0-worker-python-web` |
+
+Legacy Python and Python/PostgreSQL bridge work also uses the Core environment;
+PostgreSQL uses its separately selected upstream database image. Browser
+JavaScript/D3, HTML/CSS previews, reading lessons and offline DAX do not need
+additional ordinary worker images. Optional CUDA profiles and the owned
+Kubernetes adapter are outside the full ordinary image set. Persistent service
+workshops have their own explicit preparation and state contracts.
+
+For R and TMB lesson pads, select the R profile with the matching source release:
+
+```sh
+./classroom --profile r-statistics --from-hub sadatnfs --tag 1.1.0
+```
+
+That selects App, Core, R and PostgreSQL. It does not pull all unrelated language
+workers or prepare the separate Spark/TMB reference workshop. For the classroom's
+Scala and PySpark pads, explicitly select `scala-jvm`, `spark-local-scala` and
+`spark-local-python` as needed. Those ordinary local Spark profiles do not start
+a distributed cluster or install either independent modeling package.
 
 ## 1. Build and try the release on your machine
 
@@ -150,7 +243,7 @@ combined release:
 For a new project, omitting `--tag` resolves the app's `latest` alias and
 saves its concrete version. The accepted partial 1.0.0 release contains App,
 Core, JavaScript and TypeScript. Select only those workers and pin that release,
-including after `latest` moves to the completed full 1.1.0 release:
+including after `latest` moved to the completed full 1.1.0 release:
 
 ```sh
 ./classroom --profile javascript-node --profile typescript-node \
@@ -296,13 +389,14 @@ After local checks, stage the reviewed release changes on `main` and create
 the opt-in commit, for example:
 
 ```sh
-git commit -m "Release 1.1.0 [publish-docker]"
+git commit -m "Release the reviewed version [publish-docker]"
 git push origin main
 ```
 
-The source version is `1.1.0` for this release. The workflow reads the checked-in
-version rather than inventing a registry-only version. Do not combine a
-publication commit with a CI-skip marker.
+The accepted source version is `1.1.0`. A new image release from changed source
+needs the next coherent checked-in version before this commit. The workflow
+reads that version rather than inventing a registry-only version. Do not combine
+a publication commit with a CI-skip marker or overwrite an existing release.
 
 ### Native builds, staging and promotion
 
@@ -319,7 +413,11 @@ the publication workflow performs the native runtime qualification itself.
    immutable image identity and qualification evidence. Image layers move
    through the registry; the workflow does not transfer giant Docker image
    archives through Actions artifacts.
-3. Promotion requires the complete ordinary image set for both architectures
+3. The dedicated scientific-project jobs prepare and qualify the installed
+   Spark/Torch package and optional R/TMB reference serially on each native
+   architecture, using this run's exact qualified bases. Their complete
+   source-bound receipts are also required.
+4. Promotion requires the complete ordinary image set for both architectures
    and all required checks to succeed. It publishes and validates the worker
    version tags first, then the app version tag. Worker latest aliases follow,
    and the app `latest` pointer moves last.
@@ -342,7 +440,7 @@ A failed promotion can complete matching partial version tags using those
 original image identities, without rewriting completed matching tags. A new
 commit or a full rebuild that encounters partial or conflicting immutable tags
 must finish the original failed promotion or use a consistent checked-in patch
-bump, such as `1.0.2`. No registry-only version is invented.
+bump, such as `1.1.1` after 1.1.0. No registry-only version is invented.
 
 A complete same-revision release can be recognized without rebuilding or used
 to finish missing latest aliases. Older reruns cannot move latest backward.
@@ -357,9 +455,53 @@ passed on AMD64 and ARM64 after a test expectation and learner-identity fix.
 A new release still needs its own promotion and automatic pull acceptance.
 
 Review the actual workflow result, receipts and published manifests before
-announcing availability. Local tests, source configuration, staging pushes
-and successful final promotion are different evidence. This guide does not
-claim that a particular registry upload has completed.
+announcing availability. The accepted 1.1.0 evidence is identified above;
+configuration, staging pushes and local tests do not establish a later release.
+
+### Audit every published module without republishing
+
+[`audit-published-release.yml`](https://github.com/sadatnfs/ds60sqlpy/blob/main/.github/workflows/audit-published-release.yml)
+is a dispatch-only full-release verifier. It uses the original promotion receipt
+and exports the exact published Git tree for the launcher, Compose files and
+catalog. The current verifier source must pass its own exact-revision source CI.
+The workflow records both revisions, so a later verifier does not change which
+source the immutable images contain. This is separate from the historical
+partial-1.0.0 recovery workflow.
+
+A repository maintainer with permission to dispatch Actions can select **Audit
+published full classroom release** in GitHub, or use the authenticated
+[GitHub CLI workflow command](https://cli.github.com/manual/gh_workflow_run):
+
+```sh
+gh workflow run audit-published-release.yml \
+  --repo sadatnfs/ds60sqlpy --ref main \
+  -f published_run_id=40961726148 \
+  -f published_sha=59a0d116a1759d5d509718c52c4f3439e1986644 \
+  -f published_attempt=1 -f check_latest=true
+```
+
+The workflow's `GITHUB_TOKEN` has repository-content and Actions read permissions. Hosted
+runners use the existing Docker Hub account secrets for authenticated pulls;
+no local Docker Hub login or access is needed. The verifier has no build,
+staging, push or promotion operation. It shares the publication concurrency
+group so canonical pointers remain stable during readback. Existing immutable
+tags and the original publisher result remain unchanged.
+
+The published catalog currently produces 19 groups on each native architecture,
+with at most four audit jobs running together. Each isolated job pulls only
+App/Core plus its chosen group. It checks the combined indexes and native image
+identities, saved version and selected profiles, pull-only preparation without
+runtime resources, strict startup, exact service selection and stop/resume with
+retained learner state. It retains bounded JSON evidence and failure diagnostics
+before cleaning its own disposable project. Learner projects are not audit targets.
+
+`check_latest=true` also requires the current selected aliases to match this
+release. For a historical release whose aliases have legitimately advanced,
+choose `check_latest=false`; canonical version, source, platform and lifecycle
+checks still run. Aggregate every required group/architecture receipt before
+claiming complete module pull coverage. Pull/setup acceptance does not rerun all
+scientific reference programs or establish another host's GPU/cluster readiness.
+Runner capacity, image downloads and account pull limits still apply.
 
 ### Transfer and account limits
 

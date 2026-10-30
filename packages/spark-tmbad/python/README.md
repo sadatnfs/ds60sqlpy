@@ -24,9 +24,12 @@ python -m pip install '.[spark]'
 ```
 
 Start Spark with the matching JAR in `--jars` or `spark.jars` before creating the
-session. The manifest's absolute worker path must refer to the matching prepared
-executable on every executor. A Python wheel installation does not distribute
-the worker binary or JAR to a cluster.
+session. The manifest's absolute worker path identifies the matching prepared
+executable on the driver. The JVM adapter verifies and distributes an immutable
+worker snapshot through SparkFiles, then validates the local executor copy.
+Executors need the matching Linux architecture, shared libraries and writable
+executable temporary storage. Installing the Python wheel alone does not prepare
+the native worker or load the JAR into an existing Spark session.
 
 ```python
 from ds60_spark_tmbad import ModelSpec, PreparedRuntime, SparkTMBad
@@ -70,8 +73,12 @@ explicit replacement. For independent group models, persist the `.models`
 DataFrame with Spark storage and rewrap it using `api.from_group_models(df)`.
 The JVM validates each model row when executing predictions or forecasts.
 
-See the package's [Python guide](../docs/PYTHON.md),
+In a complete copied project, see the package's [Python guide](../docs/PYTHON.md),
 [model contracts](../docs/MODELS.md) and [protocol](../docs/PROTOCOL.md).
+These sibling guides belong to the full project distribution; they are not
+bundled in the Python-only wheel. The wheel's package metadata includes this
+standalone introduction. Keep the complete project when preparing native models
+or following the model gallery.
 `examples/validate_installed.py` exercises the installed frontend with real
 Spark and a prepared native artifact. Pure tests under `tests/` verify Python
 contracts only; they are not distributed runtime evidence.

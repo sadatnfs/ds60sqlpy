@@ -1,0 +1,88 @@
+x-service: &service
+  image: ${INTEGRATION_IMAGE:?Select an already prepared local image}
+  platform: ${INTEGRATION_PLATFORM:?Use the engine native platform}
+  pull_policy: never
+  init: true
+  user: "65534:65534"
+  entrypoint: ["python3", "/integration/service.py"]
+  working_dir: /work
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  pids_limit: 768
+  environment: &environment
+    HOME: /tmp
+    PYTHONPATH: ""
+    PYTHONDONTWRITEBYTECODE: "1"
+    PYTHONUNBUFFERED: "1"
+    PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    JAVA_TOOL_OPTIONS: "-Duser.home=/tmp -XX:ActiveProcessorCount=2"
+    SPARK_DAEMON_MEMORY: 256m
+    SPARK_LOG_DIR: /work/logs
+    SPARK_PID_DIR: /work/pids
+    SPARK_LOCAL_DIRS: /work/spark-local
+    OPENBLAS_NUM_THREADS: "1"
+    OMP_NUM_THREADS: "1"
+    INTEGRATION_PACKAGE: ${INTEGRATION_PACKAGE:?Select package}
+  tmpfs:
+    - /tmp:rw,exec,nosuid,size=268435456,mode=1777
+    - /work:rw,exec,nosuid,size=536870912,uid=65534,gid=65534,mode=700
+  volumes: &mounts
+    - ${INTEGRATION_DIRECTORY:?}:/integration:ro
+    - ${PROBE_DIRECTORY:?}:/probe:ro
+    - ${WHEEL_DIRECTORY:?}:/wheels:ro
+  networks: [isolated]
+  labels:
+    ds60.owner: ds60-isolated-spark-integration
+  restart: "no"
+
+services:
+  master:
+    <<: *service
+    hostname: master
+    command: [master]
+    mem_limit: 384m
+    cpus: 0.5
+    healthcheck:
+      test: [CMD, python3, /integration/service.py, health, --host, master]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  worker1:
+    <<: *service
+    hostname: worker1
+    command: [worker, --host, worker1]
+    mem_limit: 1536m
+    cpus: 1
+    depends_on:
+      master: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python3, /integration/service.py, health, --host, worker1]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  worker2:
+    <<: *service
+    hostname: worker2
+    command: [worker, --host, worker2]
+    mem_limit: 1536m
+    cpus: 1
+    depends_on:
+      master: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python3, /integration/service.py, health, --host, worker2]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  driver:
+    <<: *service
+    hostname: driver
+    command: [driver]
+    mem_limit: 2048m
+    cpus: 1
+    depends_on:
+      worker1: {condition: service_healthy}
+      worker2: {condition: service_healthy}
+networks:
+  isolated:
+    internal: true

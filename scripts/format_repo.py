@@ -16,7 +16,9 @@ import shutil
 import stat
 import subprocess
 import sys
+import time
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -155,8 +157,19 @@ def language_for(path: str) -> str | None:
     return SUFFIXES.get(Path(path).suffix.lower())
 
 
-def source_files(root: Path) -> list[str]:
+def source_files(
+    root: Path,
+    *,
+    include: Callable[[str], bool] | None = None,
+    deadline: float | None = None,
+) -> list[str]:
     """Use Git's ignore rules when available and a conservative ZIP fallback."""
+
+    def check_deadline() -> None:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Source inventory time limit reached; use a validated host snapshot")
+
+    check_deadline()
     host_inventory = os.environ.get("DS60_FORMAT_FILE_LIST")
     if host_inventory:
         candidates = sorted(
@@ -168,6 +181,8 @@ def source_files(root: Path) -> list[str]:
                 "git",
                 "-c",
                 f"safe.directory={root}",
+                "-c",
+                "core.fsmonitor=false",
                 "ls-files",
                 "--cached",
                 "--others",
@@ -177,11 +192,13 @@ def source_files(root: Path) -> list[str]:
             cwd=root,
             capture_output=True,
             check=True,
+            timeout=30 if deadline is None else max(0.1, min(30, deadline - time.monotonic())),
         )
         candidates = sorted({os.fsdecode(p) for p in result.stdout.split(b"\0") if p})
     else:
         candidates = []
         for current, directories, filenames in os.walk(root, followlinks=False):
+            check_deadline()
             directories[:] = sorted(
                 d
                 for d in directories
@@ -194,12 +211,14 @@ def source_files(root: Path) -> list[str]:
         if not Path(name).is_absolute()
         and ".." not in Path(name).parts
         and not any(part in IGNORED_DIRS for part in Path(name).parts)
+        and (include is None or include(name))
     }
     ancestors = {parent.as_posix() for name in wanted for parent in Path(name).parents}
     safe: set[str] = set()
     visited: set[str] = set()
 
     def collect(directory: Path, prefix: str = "") -> None:
+        check_deadline()
         if prefix in visited:
             return
         visited.add(prefix)
@@ -208,6 +227,7 @@ def source_files(root: Path) -> list[str]:
         with os.scandir(directory) as iterator:
             entries = list(iterator)
         for entry in entries:
+            check_deadline()
             name = prefix + entry.name
             if name not in wanted and name not in ancestors:
                 continue
@@ -579,6 +599,12 @@ def main(argv: list[str] | None = None) -> int:
             print(f"PRESERVE {name}: {reason}")
         for name in unmanaged:
             print(f"OTHER {name}: no syntax formatter (binary, data, lock or compatibility file)")
+        from scripts import format_inline_code
+
+        inline_report = format_inline_code.inspect_sources(
+            ROOT, set(chosen), check=True, list_only=True
+        )
+        format_inline_code.print_report(inline_report, detail=True)
         return 0
     if not args.language:
         ensure_publication_paths(ROOT)
@@ -611,7 +637,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     if missing:
         parser.error("Missing tools: " + ", ".join(missing) + ". Use ./scripts/format-repo.")
-    success = True
+    from scripts import format_inline_code
+
+    # Fences in durable authoring strings are updated before Python/JSON source
+    # style, so the same pass leaves both containers and embedded code canonical.
+    inline_report = format_inline_code.inspect_sources(ROOT, set(chosen), check=args.check)
+    format_inline_code.print_report(inline_report)
+    success = bool(inline_report["passed"])
     for language in chosen:
         paths = groups.get(language, [])
         if paths:
@@ -641,6 +673,6 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print(f"Formatting error: {exc}", file=sys.stderr)
         raise SystemExit(2) from None

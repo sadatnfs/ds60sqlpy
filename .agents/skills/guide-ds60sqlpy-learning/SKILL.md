@@ -58,12 +58,24 @@ For a matching CI-published release, use
 set, or `./classroom pull --all --from-hub USER --tag VERSION` to download only.
 The default layout uses combined Linux AMD64/ARM64 indexes. A matching checkout
 or starter ZIP is still required, and Hub mode never falls back to local builds.
+Use the [subject/profile/image mapping](../../../docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
+to select the needed execution environment. Several subjects can share a worker;
+selecting R does not require every other language image. Core remains included.
+A `ci-*` Docker Hub tag is a publication candidate, not the learner version.
+Canonical tags use App `VERSION` and worker `VERSION-<catalog suffix>`.
+The accepted 1.1.0 source and evidence are recorded in the release guide. Later
+source or package additions are not automatically present in those images.
 
 An explicit `--tag latest` resolves to a concrete app version, must match the
 checkout, and pins that version for workers and future resume. Bare
 `./classroom resume` never pulls or follows a moving alias. Apply an intentional
 source/version/layout change with `--rebuild` on the same project; in Hub mode
-it pulls and applies images without compiling.
+it pulls and applies images without compiling. A repeated same-namespace
+`--from-hub USER` retains the saved version. `--image-tag PROFILE=VERSION` pins
+one selected ordinary worker, `PROFILE=latest` resolves and saves its concrete
+version, and `PROFILE=default` clears that worker pin. A worker must have the
+same qualified source revision as the app; arbitrary cross-release mixes are
+not supported. Retain selections and volumes when diagnosing a mismatch.
 
 Manual local publication uses architecture tags. Select those with
 `--architecture-tags`; an ARM64-only publication cannot serve an AMD64 engine.
@@ -80,7 +92,11 @@ marker or push images without publication authorization, and never ask the
 learner to paste token values into chat or source. Use the
 [Docker Hub guide](../../../docs/dockerhub.md) for the complete commands.
 A configured workflow, staging tag or local pass does not prove a completed
-release. Private repositories require appropriate Docker authentication.
+release. Distinguish ordinary-worker/scientific qualification, combined-tag
+promotion and actual pull/setup/resume receipts. Original full-release lifecycle
+checks use App/Core; the separate full-module audit needs completed receipts
+before claiming every module was pulled and started. Private repositories require
+appropriate Docker authentication.
 
 Named volumes store learner work, PostgreSQL and private runtime state.
 `.classroom/<project>/` stores launcher preferences, not a full backup. Changing
@@ -182,6 +198,16 @@ different things. Opening a lesson must not install packages or fetch models.
   one shared fit, separate group fits and DDP as different statistical/execution
   choices. Preserve complete groups, explicit weight meaning and prediction target.
   A fitted new-group mean is not a conditional latent-effect prediction.
+- The separately installed native Spark/TMBad package uses a JVM adapter and
+  prepared C++ executor processes, with Scala and Python driver entrypoints.
+  It was added after the classroom 1.1.0 source. Consult its own installation,
+  model declarations and qualification records before recommending a run.
+  A named forecast target defines its required history and future inputs;
+  point prediction does not automatically provide conditional-history forecasts.
+  Same-host checks do not prove a dedicated Compose cluster, worker-loss recovery
+  or cloud execution. Planned richer families, penalties and inference remain
+  distinct from tested APIs. Priors plus optimization mean MAP, not a posterior
+  sample. Do not promise arbitrary Torch programs or unlimited distributed scale.
 - The optional Spark/TMB reference uses R and precompiled trusted C++ models.
   Source/library/ABI checks and local objective pointers matter; never serialize
   an R pointer through Spark or promise arbitrary code compilation during fitting.

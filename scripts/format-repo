@@ -13,12 +13,52 @@ trap cleanup EXIT
 run_tools() {
   local tool_image=$1
   shift
-  docker run --rm --init --network=none --read-only --cap-drop=ALL \
+  docker run --rm --pull=never ${platform_args[@]+"${platform_args[@]}"} --entrypoint=python3 --init --network=none --read-only --cap-drop=ALL \
     --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
     --tmpfs /tmp:rw,nosuid,size=1g --env HOME=/tmp --env PYTHONDONTWRITEBYTECODE=1 \
     --env PYTHONUTF8=1 --env RUFF_CACHE_DIR=/tmp/ruff --mount "$mount" \
     ${inventory_args[@]+"${inventory_args[@]}"} --workdir /workspace "$tool_image" \
-    python3 /workspace/scripts/format_repo.py "$@"
+    /workspace/scripts/format_repo.py "$@"
+}
+
+prepared_override() {
+  local requested="$1" label="$2" information image_os image_arch image_id extra engine_arch host_arch
+  [[ "$requested" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/@:-]*$ ]] || {
+    echo "Use one already-local image name or immutable ID for the $label override." >&2
+    exit 2
+  }
+  engine_arch=$(docker info --format '{{.Architecture}}') || exit 2
+  case "$engine_arch" in aarch64 | arm64) engine_arch=arm64 ;; x86_64 | amd64) engine_arch=amd64 ;; *)
+    echo 'Prepared formatting overrides require a native AMD64 or ARM64 engine.' >&2
+    exit 2
+    ;;
+  esac
+  host_arch=$(uname -m)
+  case "$host_arch" in aarch64 | arm64) host_arch=arm64 ;; x86_64 | amd64) host_arch=amd64 ;; *)
+    echo 'Prepared formatting overrides require a supported native host.' >&2
+    exit 2
+    ;;
+  esac
+  [[ "$host_arch" == "$engine_arch" ]] || {
+    echo 'Prepared formatting overrides refuse a non-native engine architecture.' >&2
+    exit 2
+  }
+  information=$(docker image inspect "$requested" --format '{{.Os}} {{.Architecture}} {{.Id}}') || {
+    echo "The $label formatting override is not already local; no pull or build was attempted." >&2
+    exit 2
+  }
+  [[ "$information" != *$'\n'* ]] || {
+    echo "The $label formatting override returned unexpected multiline metadata." >&2
+    exit 2
+  }
+  read -r image_os image_arch image_id extra <<<"$information"
+  [[ "$image_os" == linux && "$image_arch" == "$engine_arch" && "$image_id" =~ ^sha256:[a-f0-9]{64}$ && -z "${extra:-}" ]] || {
+    echo "The $label formatting override must be a Linux image matching the native engine." >&2
+    exit 2
+  }
+  printf 'Using prepared %s formatting tools: %s (%s). Current build inputs are not requalified by this override.\n' "$label" "$requested" "$image_id" >&2
+  selected_prepared_image="$image_id"
+  platform_args=(--platform "linux/$engine_arch")
 }
 
 main() {
@@ -91,6 +131,9 @@ Default: format maintained sources and refresh generated readers.
 R and Julia use separate pinned tools images. Other languages use the existing
 Ubuntu formatting image. A full pass checks R first and refreshes shared
 readers only after all source adapters succeed. Listing needs no R tools image.
+Prepared-image overrides: DS60_FORMAT_IMAGE, DS60_FORMAT_R_IMAGE and
+DS60_FORMAT_JULIA_IMAGE require existing local native Linux images. They never
+pull or retag an image and cannot be combined with --build. Actual IDs are shown.
 Requires Bash and a local Linux Docker engine. Windows users run inside WSL 2.
 Tools run offline without engine sockets, classroom containers or learner volumes.
 HELP
@@ -112,6 +155,10 @@ HELP
     want_r=0
     want_julia=0
     want_main=1
+  fi
+  if [[ "$force_build" == 1 && -n "${DS60_FORMAT_IMAGE:-}${DS60_FORMAT_R_IMAGE:-}${DS60_FORMAT_JULIA_IMAGE:-}" ]]; then
+    echo 'Prepared formatting image overrides cannot be combined with --build.' >&2
+    exit 2
   fi
   command -v docker >/dev/null 2>&1 || {
     echo 'Docker is required; start your Linux-container engine.' >&2
@@ -138,6 +185,23 @@ HELP
       exit 2
       ;;
   esac
+  # Validate every selected override before any source-editing container runs.
+  platform_args=()
+  main_override=''
+  r_override=''
+  julia_override=''
+  if [[ "$want_main" == 1 && -n "${DS60_FORMAT_IMAGE:-}" ]]; then
+    prepared_override "$DS60_FORMAT_IMAGE" main
+    main_override="$selected_prepared_image"
+  fi
+  if [[ "$want_r" == 1 && -n "${DS60_FORMAT_R_IMAGE:-}" ]]; then
+    prepared_override "$DS60_FORMAT_R_IMAGE" R
+    r_override="$selected_prepared_image"
+  fi
+  if [[ "$want_julia" == 1 && -n "${DS60_FORMAT_JULIA_IMAGE:-}" ]]; then
+    prepared_override "$DS60_FORMAT_JULIA_IMAGE" Julia
+    julia_override="$selected_prepared_image"
+  fi
   mount="type=bind,src=$root,dst=/workspace"
   if [[ "$readonly_mount" == 1 ]]; then mount="$mount,readonly"; fi
   inventory_args=()
@@ -148,16 +212,20 @@ HELP
       --mount "type=bind,src=$source_list,dst=/tmp/source-files.bin,readonly")
   fi
   if [[ "$want_r" == 1 ]]; then
-    r_fingerprint=$(
-      cd "$root"
-      for file in docker/formatting/Dockerfile.r docker/workers/r/packages.lock.json docker/workers/r/install_packages.py; do
-        cksum "$file" || exit 2
-      done | cksum | awk '{print $1 "-" $2}'
-    )
-    r_image="ds60-formatting-r:$r_fingerprint"
-    if [[ "$force_build" == 1 ]] || ! docker image inspect "$r_image" >/dev/null 2>&1; then
-      echo 'Preparing the isolated R formatting tools from the shared locked R packages.'
-      docker build --progress=plain -f "$root/docker/formatting/Dockerfile.r" -t "$r_image" "$root"
+    if [[ -n "$r_override" ]]; then
+      r_image="$r_override"
+    else
+      r_fingerprint=$(
+        cd "$root"
+        for file in docker/formatting/Dockerfile.r docker/workers/r/packages.lock.json docker/workers/r/install_packages.py; do
+          cksum "$file" || exit 2
+        done | cksum | awk '{print $1 "-" $2}'
+      )
+      r_image="ds60-formatting-r:$r_fingerprint"
+      if [[ "$force_build" == 1 ]] || ! docker image inspect "$r_image" >/dev/null 2>&1; then
+        echo 'Preparing the isolated R formatting tools from the shared locked R packages.'
+        docker build --progress=plain -f "$root/docker/formatting/Dockerfile.r" -t "$r_image" "$root"
+      fi
     fi
     # Parse every original option before any formatting, then narrow this pass.
     r_args=(${args[@]+"${args[@]}"} --only-language r)
@@ -166,44 +234,52 @@ HELP
     args+=(--exclude-language r)
   fi
   if [[ "$want_julia" == 1 ]]; then
-    julia_fingerprint=$(
-      cd "$root"
-      for file in docker/workers/Dockerfile.julia docker/workers/native/releases.lock.json docker/workers/native/install_native.py docker/workers/julia/Project.toml docker/workers/julia/Manifest.toml; do
-        cksum "$file" || exit 2
-      done | cksum | awk '{print $1 "-" $2}'
-    )
-    julia_image="ds60-formatting-julia:$julia_fingerprint"
-    if [[ "$force_build" == 1 ]] || ! docker image inspect "$julia_image" >/dev/null 2>&1; then
-      echo 'Preparing the locked Julia formatting tools.'
-      docker build --progress=plain --target toolchain -f "$root/docker/workers/Dockerfile.julia" -t "$julia_image" "$root"
+    if [[ -n "$julia_override" ]]; then
+      julia_image="$julia_override"
+    else
+      julia_fingerprint=$(
+        cd "$root"
+        for file in docker/workers/Dockerfile.julia docker/workers/native/releases.lock.json docker/workers/native/install_native.py docker/workers/julia/Project.toml docker/workers/julia/Manifest.toml; do
+          cksum "$file" || exit 2
+        done | cksum | awk '{print $1 "-" $2}'
+      )
+      julia_image="ds60-formatting-julia:$julia_fingerprint"
+      if [[ "$force_build" == 1 ]] || ! docker image inspect "$julia_image" >/dev/null 2>&1; then
+        echo 'Preparing the locked Julia formatting tools.'
+        docker build --progress=plain --target toolchain -f "$root/docker/workers/Dockerfile.julia" -t "$julia_image" "$root"
+      fi
     fi
     julia_args=(${args[@]+"${args[@]}"} --only-language julia)
     run_tools "$julia_image" "${julia_args[@]}"
     args+=(--exclude-language julia)
   fi
   if [[ "$want_main" == 0 ]]; then return 0; fi
-  fingerprint=$(
-    cd "$root"
-    find docker/formatting -type f -not -name README.md -not -name Dockerfile.r \
-      -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
-      LC_ALL=C sort | while IFS= read -r file; do cksum "$file"; done | cksum | awk '{print $1 "-" $2}'
-  )
-  image="ds60-formatting:$fingerprint"
-  if [[ "$force_build" == 1 ]] || ! docker image inspect "$image" >/dev/null 2>&1; then
-    echo 'Preparing the formatting tools. Downloads are needed only for this build.'
-    registry=${DS60_FORMAT_NPM_REGISTRY:-https://registry.npmjs.org}
-    case "$registry" in
-      https://*'@'* | https://*'?'* | https://*'#'* | https://*' '* | https://*$'\n'*)
-        echo 'Use a public HTTPS npm registry URL without credentials or query parameters.' >&2
-        exit 2
-        ;;
-      https://*) ;;
-      *)
-        echo 'The optional npm registry must use HTTPS.' >&2
-        exit 2
-        ;;
-    esac
-    docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" -t "$image" "$root/docker/formatting"
+  if [[ -n "$main_override" ]]; then
+    image="$main_override"
+  else
+    fingerprint=$(
+      cd "$root"
+      find docker/formatting -type f -not -name README.md -not -name Dockerfile.r \
+        -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
+        LC_ALL=C sort | while IFS= read -r file; do cksum "$file"; done | cksum | awk '{print $1 "-" $2}'
+    )
+    image="ds60-formatting:$fingerprint"
+    if [[ "$force_build" == 1 ]] || ! docker image inspect "$image" >/dev/null 2>&1; then
+      echo 'Preparing the formatting tools. Downloads are needed only for this build.'
+      registry=${DS60_FORMAT_NPM_REGISTRY:-https://registry.npmjs.org}
+      case "$registry" in
+        https://*'@'* | https://*'?'* | https://*'#'* | https://*' '* | https://*$'\n'*)
+          echo 'Use a public HTTPS npm registry URL without credentials or query parameters.' >&2
+          exit 2
+          ;;
+        https://*) ;;
+        *)
+          echo 'The optional npm registry must use HTTPS.' >&2
+          exit 2
+          ;;
+      esac
+      docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" -t "$image" "$root/docker/formatting"
+    fi
   fi
   run_tools "$image" ${args[@]+"${args[@]}"}
 }

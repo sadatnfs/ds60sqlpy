@@ -66,10 +66,12 @@ cd ds60sqlpy
 ./classroom
 ```
 
-If the owner has completed a full `[publish-docker]` CI release, replace the final
-startup command with `./classroom --all --from-hub YOUR_DOCKERHUB_USER`.
-Use the actual publisher's namespace. This downloads matching images without
-building locally; see [Docker Hub distribution](#optional-docker-hub-distribution).
+The published 1.1.0 images are available from `sadatnfs/ds60sqlpy`. Use the
+[exact release source](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644)
+or matching starter, then replace the final startup command with
+`./classroom --all --from-hub sadatnfs --tag 1.1.0` to download its images.
+See [Docker Hub distribution](#optional-docker-hub-distribution) for acceptance
+scope, selective installation and saved versions.
 
 `doctor` checks the local engine and configuration without starting services.
 In local-build mode, the final command prepares PostgreSQL and the ordinary
@@ -245,21 +247,34 @@ and [textbook rendering](docs/textbook-rendering.md) for the authoring contract.
 
 ### Optional Docker Hub distribution
 
-Ordinary startup uploads nothing. Once a full `[publish-docker]` CI release is complete,
-use the matching checkout or starter ZIP and start the full classroom from Hub:
+The [1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
+completed from [source `59a0d116`](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644),
+publishing App and all 25 ordinary workers as combined Linux AMD64/ARM64 images.
+Its native worker/scientific gates passed. Separate App/Core fresh-pull and
+stop/resume checks passed on both architectures with saved learner state.
+The additional all-module selective-pull audit is pending; those original
+lifecycle checks did not start every worker.
+
+Use that exact source or its matching starter to install the full ordinary set:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER
+./classroom --all --from-hub sadatnfs --tag 1.1.0
 ```
 
-For a new Hub selection, omitting `--tag` resolves the app's `latest` alias to
-a concrete release, requires the matching checkout or starter ZIP, and saves
-that version for the project. The accepted partial release uses App tag
-`YOUR_DOCKERHUB_USER/ds60sqlpy:1.0.0` with Core, JavaScript and TypeScript
-workers. After the full 1.1.0 release is promoted, its app tags are `:1.1.0`
-and `:latest`, with workers such as `:1.1.0-worker-python-core` in the same
-repository. Docker selects the engine's native architecture from the combined
-Linux AMD64/ARM64 image indexes. Hub mode never falls back to local builds.
+Ordinary startup uploads nothing. For a new Hub selection, omitting `--tag`
+resolves the app's `latest` alias to a concrete release, requires a matching
+checked-in app version, and saves that version. App tags are `:1.1.0` and
+`:latest`; distinct worker tags include `:1.1.0-worker-r-statistics` and
+`:1.1.0-worker-python-core`. Docker selects the native architecture. Tags starting
+`ci-` are publication staging candidates, not learner releases. Hub mode never
+falls back to local builds. The [complete subject/profile/image mapping](docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
+explains which runtime serves each subject and how to select only needed workers.
+
+A later checkout still labeled 1.1.0 can include changes absent from these images.
+The separately developed native [Spark/TMBad package](packages/spark-tmbad/README.md)
+was added after this publisher's source and is not included in the 1.1.0 release.
+Use each independent package's own version, installation guide and qualification
+records; a classroom image version does not imply package acceptance.
 
 For a partial publication, select only its available workers. For example, an
 app/Core plus JavaScript and TypeScript publication is installed with:
@@ -319,7 +334,7 @@ for accepted markers, version rules and the selected-profile install command.
 After staging and validating the reviewed release changes on `main`:
 
 ```sh
-git commit -m "Release 1.1.0 [publish-docker]"
+git commit -m "Release the reviewed version [publish-docker]"
 git push origin main
 ```
 
@@ -330,10 +345,13 @@ by latest aliases with app `latest` last. Small receipts record the evidence;
 large Docker archives are not transferred through Actions artifacts.
 
 The version comes from checked-in source. An incompatible existing version is
-refused; changes after publication should use a new patch release such as `1.0.2`.
+refused; changes after publication need a coherent new patch version such as `1.1.1`.
 The first upload can be large, and later runs reuse unchanged layers where
 available. Account pull limits, fair use and runner capacity still apply.
 A workflow configuration or staging upload does not prove final publication.
+For published full versions, the [read-only module audit](docs/dockerhub.md#audit-every-published-module-without-republishing)
+checks canonical pulls and selected setup using the exact original source,
+without rebuilding or publishing images.
 
 #### Publish an existing local image set manually
 

@@ -20,6 +20,13 @@ same push does not select a release. `js` is a short alias for the
 `[publish-javascript-node]` publishes both workers after qualification. The
 `python-core` group selects only App and Core.
 
+The accepted full 1.1.0 release is described in the
+[release/image guide](dockerhub.md#published-release-and-its-evidence). It has distinct
+canonical tags for every ordinary profile. Selecting fewer workers when
+installing that full release is supported and does not require a new partial
+publication. For example, `--profile r-statistics --from-hub sadatnfs --tag 1.1.0`
+selects the existing App/Core/R images plus PostgreSQL.
+
 ## Using a partial release
 
 A successful targeted publish creates combined AMD64 and ARM64 version indexes
@@ -66,14 +73,24 @@ starter job, then rechecks them before canonical writes. Native App/Core and
 selected worker receipts bind their source revision, workflow run and attempt,
 platform, tested image IDs, qualification reports and selected seed digests.
 Promotion requires both native platforms and every selected group receipt.
-Candidate staging uploads are not a completed release.
+Candidate staging uploads are not a completed release. A tag such as
+`ci-<source>-<run>-<attempt>-r-statistics-amd64` is a native candidate;
+`VERSION-worker-r-statistics` is the final combined R version tag and
+`latest-worker-r-statistics` is its moving alias. All selected canonical images
+use the checked-in classroom release version. Independent modeling distributions
+retain their own package versions.
 
 After successful promotion, a separate hosted acceptance job reads that run's
 published receipt, checks the selected combined indexes, then pulls and starts
 a fresh classroom on native AMD64 and ARM64 runners. It verifies that the
 launcher pins the release, that the selected worker is available, and that
 stop/resume retains PostgreSQL and worker container IDs, saved selections,
-learning/database volume names and a learner marker. If Docker reassigns the
+learning/database volume names and a learner marker. The full publisher's
+original lifecycle acceptance uses App/Core; the separate
+[full-module audit](dockerhub.md#audit-every-published-module-without-republishing)
+checks every ordinary group from the exact original source without publishing.
+Do not turn an unrun audit implementation into a successful module-pull claim.
+If Docker reassigns the
 dynamic browser port, only the App container may be recreated from the same
 image to repair its public-port setting. The result and any bounded diagnostics
 are retained as separate acceptance artifacts.

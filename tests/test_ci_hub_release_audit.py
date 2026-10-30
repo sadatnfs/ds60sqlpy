@@ -372,10 +372,11 @@ def test_workflow_is_dispatch_only_and_never_builds_or_publishes() -> None:
     assert "contents: read" in workflow and "actions: read" in workflow
     assert "classroom-dockerhub-publication" in workflow
     assert "fromJSON(needs.preflight.outputs.matrix)" in workflow
-    assert "max-parallel: 4" in workflow
+    assert "max-parallel: 1" in workflow
     assert "ci_hub_release_audit.py preflight" in workflow
     assert "ci_hub_release_audit.py prepare" in workflow
-    assert "ci_hub_release_audit.py accept" in workflow
+    assert "operation=accept" in workflow
+    assert 'ci_hub_release_audit.py "$operation"' in workflow
     assert "docker build" not in workflow and "docker push" not in workflow
     assert "--password-stdin" in workflow
 

@@ -1,0 +1,55 @@
+# spark-deploy-013: Observe controlled worker loss and recovery
+
+Tutorial mode. Stage: advanced. Direct prerequisites: `spark-deploy-011`, `spark-deploy-012`.
+
+Read this tutorial in the classroom. Its commands run only in the separately prepared [owned workshop](../projects/cluster-lab/README.md); there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.
+
+## Lose an owned worker during useful work
+
+An executor failure can cause Spark to retry a task or recompute unavailable data. This is not the same as restarting a failed driver or recovering an external sink. A successful retry must preserve the original input population and output contract. Numerical success after silently dropping a partition is not recovery.
+
+The workshop wrapper can stop only one of its two named workers after validating container ownership. The host controls the failure; services have no Docker socket. The deterministic partition delay holds work long enough to observe a running stage. Sleeping is only a fault-injection aid, not a method for proving that a particular task has started.
+
+## Worked case A: observe, stop and verify recovery
+
+In terminal one:
+
+```sh
+python3 lab.py submit --partition-seconds 15 --allow-one-worker
+```
+
+In terminal two, first inspect the live UI and confirm an active task on worker-a, then:
+
+```sh
+python3 lab.py worker-stop worker-a
+```
+
+The `--allow-one-worker` flag permits final results from the survivor and does not waive count, partition or moment oracles. Record the actual application ID, stage/task/attempt, worker container ID, stop timestamp and executor-lost diagnostic. The final eight partition records must still cover all IDs exactly once and recover intercept 3/slope 2. If the stop occurred after work completed, the run did not test in-flight recovery.
+
+The application report intentionally writes `worker_loss_observed: false`: the driver cannot certify the host's intervention merely because one worker returned results. An acceptance collector must combine the host action and Spark events before claiming recovery. Do not flip that field by hand and call it measured evidence.
+
+## Worked case B: restore capacity without replacing data
+
+```sh
+python3 lab.py worker-start worker-a
+python3 lab.py submit
+```
+
+The new baseline must again show both worker hosts and two executor registrations. It is a new application with a new ID. Compare its numerical oracles to the earlier baseline, while preserving the failed/retried application's events separately. Do not delete event logs to make the recovered run appear clean.
+
+## Observed local qualification
+
+The retained ARM64 run stopped worker-a only after observing its RUNNING task. Partition 0 then completed as attempt 1 on worker-b; all eight successful partition results preserved 100000 rows and the same coefficients and future-input predictions. The host action and task evidence are bound in the project receipt. A later restored baseline used both workers again. This observed stop/retry is narrower than physical-host or driver-loss recovery.
+
+## Diagnose and transfer
+
+A pure deterministic map can be replayed. Sending an email, charging a card or appending to an uncontrolled file inside a task can duplicate effects on retry. Use durable idempotency keys and an actual sink protocol for such work; task success alone cannot prove exactly-once external effects.
+
+An RDD result includes successful partition results, while accumulators and side-effect logs can reflect attempts. Do not sum all observed attempt records as if they were disjoint data. A malformed input or deterministic code bug may fail every attempt; increasing retry limits will not repair it.
+
+This single-host container-loss exercise does not establish multi-machine high availability, master recovery, storage loss recovery or GPU fault tolerance. Every independent Spark package must additionally run its own actual fit, prediction and forecast API in the required isolated topology.
+
+## Primary references
+
+- [Spark execution and retry settings](https://spark.apache.org/docs/4.0.1/configuration.html)
+- [RDD fault recovery model](https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html)

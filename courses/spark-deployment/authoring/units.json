@@ -1,0 +1,303 @@
+[
+  {
+    "id": "spark-deploy-001",
+    "title": "Processes, deploy modes and ports",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": [
+      "spark-030"
+    ],
+    "concepts": [
+      "driver",
+      "executor",
+      "worker",
+      "deploy mode"
+    ],
+    "outcome": "Trace driver and executor placement and distinguish browser ports from Spark RPC."
+  },
+  {
+    "id": "spark-deploy-002",
+    "title": "Prepare and identify compatible images",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": [
+      "spark-deploy-001"
+    ],
+    "concepts": [
+      "image",
+      "architecture",
+      "dependencies",
+      "preparation"
+    ],
+    "outcome": "Bind a native prepared Spark image to its immutable identity and explain notebook preparation."
+  },
+  {
+    "id": "spark-deploy-003",
+    "title": "Own an isolated Compose topology",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": [
+      "spark-deploy-002"
+    ],
+    "concepts": [
+      "Compose",
+      "ownership",
+      "state",
+      "lifecycle"
+    ],
+    "outcome": "Start and resume a scoped master/two-worker/separate-driver lab without registry access or state deletion."
+  },
+  {
+    "id": "spark-deploy-004",
+    "title": "Submit a bounded distributed fit",
+    "level": "beginner",
+    "minutes": 60,
+    "prerequisites": [
+      "spark-deploy-003",
+      "spark-022"
+    ],
+    "concepts": [
+      "submission",
+      "partitions",
+      "sufficient statistics",
+      "fitting"
+    ],
+    "outcome": "Check partition coverage, closed-form fitting and future-covariate prediction without collecting observations."
+  },
+  {
+    "id": "spark-deploy-005",
+    "title": "Run supported Standalone cluster jobs",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-004",
+      "spark-009"
+    ],
+    "concepts": [
+      "JAR",
+      "Scala",
+      "cluster mode",
+      "compatibility"
+    ],
+    "outcome": "Distinguish supported JVM cluster submission from unsupported Standalone Python cluster mode."
+  },
+  {
+    "id": "spark-deploy-006",
+    "title": "Use Jupyter as a client-mode driver",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-004"
+    ],
+    "concepts": [
+      "Jupyter",
+      "kernel",
+      "session",
+      "authentication"
+    ],
+    "outcome": "Connect an explicitly prepared notebook kernel to executors and clean up its owned Spark session."
+  },
+  {
+    "id": "spark-deploy-007",
+    "title": "Repair driver DNS and callback routes",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-006",
+      "k8s-048"
+    ],
+    "concepts": [
+      "DNS",
+      "RPC",
+      "bind address",
+      "networking"
+    ],
+    "outcome": "Diagnose a reachable master with an unreachable advertised driver address."
+  },
+  {
+    "id": "spark-deploy-008",
+    "title": "Distribute Python, JVM and native dependencies",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-002",
+      "spark-deploy-004"
+    ],
+    "concepts": [
+      "wheel",
+      "JAR",
+      "ABI",
+      "SparkFiles"
+    ],
+    "outcome": "Place each dependency at its actual importing process and test source/architecture identity."
+  },
+  {
+    "id": "spark-deploy-009",
+    "title": "Inspect a live Spark UI securely",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-007"
+    ],
+    "concepts": [
+      "UI",
+      "loopback",
+      "port forwarding",
+      "authorization"
+    ],
+    "outcome": "Bind UI evidence to the actual application while keeping access scoped to loopback or an authorized tunnel."
+  },
+  {
+    "id": "spark-deploy-010",
+    "title": "Retain event logs and read completed history",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-009"
+    ],
+    "concepts": [
+      "History Server",
+      "event logs",
+      "retention",
+      "readback"
+    ],
+    "outcome": "Inspect completed application history after container replacement without replaying its computation."
+  },
+  {
+    "id": "spark-deploy-011",
+    "title": "Separate scratch, checkpoints and published state",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-010",
+      "k8s-022"
+    ],
+    "concepts": [
+      "storage",
+      "checkpoint",
+      "PVC",
+      "publication"
+    ],
+    "outcome": "Identify which state must survive worker, driver and container failure and choose a compatible storage boundary."
+  },
+  {
+    "id": "spark-deploy-012",
+    "title": "Budget memory, cores, PIDs and results",
+    "level": "intermediate",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-004",
+      "spark-039"
+    ],
+    "concepts": [
+      "memory",
+      "CPU",
+      "PIDs",
+      "resources"
+    ],
+    "outcome": "Diagnose memory, thread and result-size failures using distinct resource evidence."
+  },
+  {
+    "id": "spark-deploy-013",
+    "title": "Observe controlled worker loss and recovery",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-011",
+      "spark-deploy-012"
+    ],
+    "concepts": [
+      "worker loss",
+      "retry",
+      "partition coverage",
+      "recovery"
+    ],
+    "outcome": "Bind an owned in-flight worker stop to task attempts and complete numerical result coverage."
+  },
+  {
+    "id": "spark-deploy-014",
+    "title": "Submit Kubernetes cluster-mode applications",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-005",
+      "k8s-018"
+    ],
+    "concepts": [
+      "Kubernetes",
+      "cluster mode",
+      "Pod",
+      "submission"
+    ],
+    "outcome": "Review an explicit-target Kubernetes submission and distinguish allocation, image and application failures."
+  },
+  {
+    "id": "spark-deploy-015",
+    "title": "Connect Kubernetes notebook drivers",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-006",
+      "spark-deploy-014",
+      "k8s-057"
+    ],
+    "concepts": [
+      "client mode",
+      "Service",
+      "Pod identity",
+      "garbage collection"
+    ],
+    "outcome": "Give one notebook driver a reachable Service and verify executor ownership and cleanup boundaries."
+  },
+  {
+    "id": "spark-deploy-016",
+    "title": "Constrain identities, secrets and network policy",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-014",
+      "k8s-021"
+    ],
+    "concepts": [
+      "RBAC",
+      "ServiceAccount",
+      "secrets",
+      "NetworkPolicy"
+    ],
+    "outcome": "Separate notebook, Kubernetes, Spark and storage authorization and test a narrow policy."
+  },
+  {
+    "id": "spark-deploy-017",
+    "title": "Transfer to cloud storage and scheduling",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-011",
+      "spark-deploy-016"
+    ],
+    "concepts": [
+      "cloud",
+      "storage",
+      "scheduling",
+      "portability"
+    ],
+    "outcome": "Plan an explicitly authorized provider deployment while preserving untested-environment boundaries."
+  },
+  {
+    "id": "spark-deploy-018",
+    "title": "Build an incident and acceptance dossier",
+    "level": "advanced",
+    "minutes": 90,
+    "prerequisites": [
+      "spark-deploy-013",
+      "spark-deploy-017"
+    ],
+    "concepts": [
+      "evidence",
+      "diagnosis",
+      "acceptance",
+      "cleanup"
+    ],
+    "outcome": "Combine source, topology, numerical, recovery and retained-state evidence without promoting planned checks to success."
+  }
+]

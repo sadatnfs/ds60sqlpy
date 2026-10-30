@@ -158,6 +158,16 @@ Package integrity remains checked against the lockfile. The override accepts no
 embedded credentials or query parameters and applies only while building tools;
 formatting and lint checks themselves run without network access.
 
+For an explicitly reviewed prepared tool image, set `DS60_FORMAT_IMAGE`,
+`DS60_FORMAT_R_IMAGE` or `DS60_FORMAT_JULIA_IMAGE` to its already-local name or
+immutable ID. The wrapper checks Linux/native architecture, pins the inspected
+ID, overrides the container entrypoint to Python tooling, and uses `--pull=never`.
+Missing or mismatched images fail before source work; overrides reject `--build`.
+These overrides reuse reviewed tool installations when rebuilding is unavailable.
+They do not certify that an old image was built from changed Docker inputs and
+never retag it under the current build fingerprint. Record the actual IDs and
+verify the required locked tool versions for the work being qualified.
+
 The owned Hive project's `.hql` files use Hive grammar. Their two explicit
 preservation entries keep reviewed layout and identify the native Hive lifecycle
 checker as their grammar/behavior gate. They remain highlighted readable source;
@@ -177,17 +187,33 @@ not compilation, runtime behavior or proof of lesson correctness. Keep the
 relevant tests and prepared-worker execution checks after linting. A new
 language needs a deliberate lint/validation adapter alongside its formatter.
 
-Markdown files are not passed through Prettier. Bare technical identifiers,
-inline code and ordinary teaching fences keep their authored spelling and
-spacing. Reviewed prose/math normalization and the explicitly owned statistics
-example synchronization below are separate steps.
+Markdown prose is not passed through Prettier. Technical identifier code spans,
+TeX and text outside fenced program bodies retain their authored bytes.
+`scripts/format_inline_code.py` checks supported language-tagged fences through
+the same pinned source adapters, with parsing, literal-preservation and
+idempotence guards before an edit. It also handles fences in static Python/JSON
+authoring prose strings and notebook Markdown cells. Notebook code, saved outputs
+and metadata values retain their existing owners. See the
+[fenced-code contract](docker/formatting/README.md#fenced-code-and-authoring-containers).
+
+The inventory names untyped outputs, prompts, unsupported languages, nested
+Markdown containers, dynamic templates and fragments that cannot be admitted as
+standalone programs. Those are preserved with reasons and are not counted as
+formatted. A missing adapter or failed preservation guard is an error. Use
+`--list` for source positions and reasons; no language silently disappears from
+the selected adapter coverage.
 
 Formatting includes application code, notebooks, every supported language's
 executable lesson files, fixtures and authoring programs. Generated executable
 programs receive the same style pass as handwritten code; their generators
-remain the durable content source. Markdown code fences and literal tutorial
-program strings retain their authored text, so source-pairing checks compare
-syntax while preserving literal values. Generated HTML, third-party bundles,
+remain the durable content source. Fences in generated Markdown are inspected,
+but drift is repaired in their authoring inputs followed by the normal subject
+generator. A `needs-regeneration` result is actionable drift, not an exemption.
+The formatter lists matching authored fence candidates where it can identify
+them. Dynamic templates and code strings assembled by a generator require that
+owner's source contract; the tool never evaluates authoring code to discover it.
+Source-pairing checks continue to compare syntax and preserve literal values.
+Generated HTML, third-party bundles,
 dependency locks, immutable runtime evidence and learner state retain their
 existing owners. The checked-in policy and `--list` make exclusions inspectable.
 
@@ -328,13 +354,15 @@ credentials, broken links and unrelated formatting. Follow repository review
 policy for commits and publication. Local image builds do not authorize pushing
 them to a registry.
 
-Complete Python examples in the statistics book are the one fence-synchronization
-exception: the full formatting command uses `scripts/sync_example_fences.py` to
-copy each manifest-declared, styled example into its matching chapter fence only
-after proving that the Python syntax trees and literal values agree. Other
-fences and teaching strings retain their authored content. SQL formatting
-preserves quoted values and entire dollar-quoted routine bodies exactly, and
-checks PostgreSQL syntax trees plus psql controls before writing.
+Complete Python examples in the statistics book retain their explicit
+`scripts/sync_example_fences.py` source relationship: the full command copies each
+manifest-declared, styled example into its matching chapter fence only after
+proving that Python syntax trees and literal values agree. Other generated
+subjects retain their normal builders. Run an affected subject's generator after
+updating its durable inline source, then rerun formatting and its generation
+check before shared readers. SQL formatting preserves quoted values and entire
+dollar-quoted routine bodies exactly, and checks PostgreSQL syntax trees plus
+psql controls before writing. Shell heredoc bodies remain protected literals.
 
 ## Scientific and data-system contributions
 

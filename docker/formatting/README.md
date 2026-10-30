@@ -43,12 +43,36 @@ This README is excluded from the image build context and fingerprint. Updating
 instructions therefore reuses the same tools. Dockerfile, locks, wrappers and
 `.dockerignore` remain fingerprinted; a tool-input change selects a new image.
 
+### Reuse an explicitly reviewed local tool image
+
+A retained image can be selected without a registry connection:
+
+```sh
+DS60_FORMAT_IMAGE=reviewed-main-tools:local \
+DS60_FORMAT_R_IMAGE=reviewed-r-tools:local \
+DS60_FORMAT_JULIA_IMAGE=reviewed-julia-tools:local \
+  ./scripts/format-repo --check
+```
+
+Use actual prepared image names or immutable IDs available on the machine.
+Overrides require Linux images matching both the local engine and host native
+architecture. The wrapper inspects every selected override before any source
+edit, pins its immutable ID, prints that identity, selects the tooling entrypoint
+and uses `--pull=never`. It refuses missing images, architecture mismatches and
+`--build` together with an override. Ordinary default fingerprint selection is
+unchanged. An override never retags an old image as a new build and does not prove
+that changed Docker inputs have been rebuilt. Verify the locked tool versions
+and retain the actual image identities with the resulting checks.
+
 ## Prepared tools
 
 | Sources | Tool and pinned release |
 | --- | --- |
 | Python and Python notebook cells | Ruff 0.16.0 |
 | R source (`.R` and `.r`) | R 4.6.1, styler 1.11.0 and lintr 3.4.0 in the separate R image |
+| Julia | Julia 1.13.3 and JuliaFormatter 2.14.0 from the locked Julia environment |
+| Stan | stanc supplied by the hash-locked formatting environment; its parser and auto-formatter run without model execution |
+| dbt SQL/Jinja | shandy-sqlfmt 0.32.0 |
 | JavaScript, TypeScript, JSON, CSS, HTML and YAML | Prettier 3.6.2 |
 | Java | prettier-plugin-java 2.7.7 |
 | XML, including C# project files | @prettier/plugin-xml 3.4.2 |
@@ -64,12 +88,61 @@ instructions therefore reuses the same tools. Dockerfile, locks, wrappers and
 | Dockerfiles | dockerfmt 0.5.4 |
 | CMake | cmakelang 0.6.13 |
 
-Markdown is deliberately outside Prettier formatting. Prose, bare technical
-identifiers, inline code and ordinary fences retain their authored text. The
-repository's reviewed prose and mathematical normalizers own permitted text
-repairs. The separate statistics-book synchronizer updates only manifest-linked
-complete Python fences after independently proving AST equivalence with the
-styled example files. Other subjects' frozen fences remain unchanged.
+## Fenced code and authoring containers
+
+Markdown prose remains outside Prettier. The shared formatting pass uses
+[`format_inline_code.py`](../../scripts/format_inline_code.py) for supported
+language-tagged fenced programs. The fence scanner distinguishes backticks and
+tildes, opening/closing lengths, up to three spaces of CommonMark indentation,
+closed versus unclosed blocks and LF/CRLF input. It replaces only admitted body
+spans. Prose, TeX, headings, links, fence delimiters and technical identifier
+code spans remain byte-for-byte unchanged.
+
+Every public language family in the standalone formatter has explicit fence
+aliases. Python, R, Julia, Stan, SQL/dbt, JavaScript/TypeScript, JSON/YAML,
+HTML/CSS, Java, C/C++/CUDA, C#, Go, Rust, Swift, Scala, PHP, TOML, XML, CMake
+and Dockerfile snippets use their pinned existing adapter. Python uses an AST
+and comment signature; SQL retains its PostgreSQL/psql guard; R and Julia compare
+native parsed expressions; other families use typed values or syntax trees with
+protected literal spans. XML permits indentation between element-only children,
+while mixed content, leaf text and `xml:space="preserve"` remain exact. Formatter
+output must parse, preserve the admitted structure and values, and be idempotent.
+No example is executed, compiled to run, or permitted to download dependencies.
+
+The same body-only contract applies to complete fences inside static Python and
+JSON authoring prose strings. An independent enclosing-file check allows only
+those approved prose constants to change. Notebook Markdown cells are supported;
+code cells, outputs, execution counters and metadata values are preserved.
+Python authoring f-strings and concatenated literals are inventoried explicitly
+when their source cannot be rewritten safely without interpreting templates.
+
+Generated Markdown is checked but never rewritten directly. A differing fence
+reports `needs-regeneration`, with matching authored source candidates when
+available. Repair its durable program/prose input, run the subject's documented
+generator, then repeat the formatting and generation checks. Existing publication
+assertions remain in place. The statistics-book synchronizer retains its declared
+complete-example relationships and independent AST equivalence proof. Shared
+HTML is regenerated only after successful source checks.
+
+Untyped/text/output blocks, interactive prompts, nested Markdown containers,
+unknown language labels, R Markdown/Quarto documents and fragments rejected by
+the declared parser are retained with explicit reasons and positions. DAX and
+PowerShell labels currently have no standalone formatter adapter and are listed
+as unsupported. These entries are not reported as formatted or executed. A missing
+prepared tool, unexpected formatter failure, changed literal/structure or unstable
+second pass fails the check. `./scripts/format-repo --list` includes the complete
+inventory; normal runs show preservation counts and all actionable drift/errors.
+
+For a machine-readable inventory inside a prepared tools environment:
+
+```sh
+python3 scripts/format_inline_code.py --list --report /tmp/inline-inventory.json
+```
+
+The report records source positions, language, status, reason and hashes without
+copying entire programs. It does not replace compiler, runtime or scientific
+qualification. Language-only passes cover only that selection and still require
+the other toolchain shards for a full repository result.
 
 R source checks use `Rscript --vanilla` and stdin. Formatting uses styler's
 line-break scope and independently compares parsed expressions before any
@@ -134,7 +207,7 @@ docker run --rm --network none --read-only --tmpfs /tmp \
 ```
 
 It exercises the configured syntax formatters, checks that a second pass is
-unchanged, and checks SQL literal and psql directive boundaries. Prose rendering
+unchanged, and checks SQL literal and psql directive boundaries. Prose rendering, guarded fence formatting
 and owned-fence synchronization have separate repository gates. Replace `<your-formatting-image>` with the actual `ds60-formatting` tag prepared
 by the wrapper and shown in the local image inventory; do not guess a version.
 The public root script manages that fingerprinted tag. Use the smoke command when changing

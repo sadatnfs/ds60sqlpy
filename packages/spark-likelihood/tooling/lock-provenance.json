@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "license": "Apache-2.0 package build source; dependency versions retain their own licenses. Lock entries are dependency metadata, not copied dependency implementations.",
+  "locks": {
+    "locks/torch.arm64.lock": {
+      "upstream_repository_path": "docker/workers/requirements-torch.arm64.lock",
+      "upstream_source_sha256": "98bdc10b06fba4b26b1629d8da8179980714fb325f212a03ad66625624ffe401",
+      "copied_lock_sha256": "3055baae8227625d96a975794a8dc59e4dc48bfde1797bb23457f7a9d899633b",
+      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
+    },
+    "locks/torch.amd64.lock": {
+      "upstream_repository_path": "docker/workers/requirements-torch.amd64.lock",
+      "upstream_source_sha256": "1d257c17f2119a2cd55dcc6464545e577788dfc336b4ddcb080ad35cc0a78502",
+      "copied_lock_sha256": "faf4f63ae8fbc8507a19e527a9712f013d9871f54987c8eac13fb6952f0e5917",
+      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
+    },
+    "locks/scientific.lock": {
+      "upstream_repository_path": "courses/advanced-spark-modeling/projects/spark-torch/requirements.lock",
+      "upstream_source_sha256": "febd81b5459b16e5f6d13d624e4675468849936cd296dfa46cf743de6e3e575a",
+      "copied_lock_sha256": "0ef1ded78805fd4216ff06bd6190972bf450395e80cfb75fc6993183db3d930b",
+      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
+    },
+    "locks/build.lock": {
+      "upstream_repository_path": "packages/spark-tmbad/tooling/python-build-requirements.txt",
+      "upstream_source_sha256": "7479054cafb7e927bdf5f598843572e596d81aa8461319556181f99962ec1cd3",
+      "copied_lock_sha256": "6f67db4bb7d7078519f083efb5c51c73a091f0f8181ace5f6bebebbadd8e0b2d",
+      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
+    }
+  }
+}

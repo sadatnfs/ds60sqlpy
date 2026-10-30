@@ -80,7 +80,8 @@ final case class FitOptions(
     l2Strength: Double,
     batchRows: Int,
     taskTimeoutSeconds: Int,
-    maxPartitions: Int
+    maxPartitions: Int,
+    extension: Option[FitTarget.Settings] = None
 ) extends Serializable {
   def optimizer: Optimizer.Settings = Optimizer.Settings(
     maxIterations = maxIterations,
@@ -105,7 +106,10 @@ object FitOptions {
         "l2_strength",
         "batch_rows",
         "task_timeout_seconds",
-        "max_partitions"
+        "max_partitions",
+        "regularization",
+        "fixed_parameters",
+        "solver"
       )
     )
     def integer(name: String, default: Int, minimum: Int, maximum: Int): Int =
@@ -120,7 +124,7 @@ object FitOptions {
     val function = number("function_tolerance", 1e-12)
     val penalty = number("l2_strength", 0.0)
     require(gradient > 0 && function >= 0 && penalty >= 0, "Invalid optimizer tolerance or penalty")
-    FitOptions(
+    val base = FitOptions(
       initial,
       integer("max_iterations", 100, 1, 1000),
       gradient,
@@ -132,6 +136,9 @@ object FitOptions {
       integer("task_timeout_seconds", 120, 1, 3600),
       integer("max_partitions", 4096, 1, 4096)
     )
+    if (Vector("regularization", "fixed_parameters", "solver").exists(value.has))
+      base.copy(extension = Some(FitTarget.resolve(value, model, base)))
+    else base
   }
 }
 

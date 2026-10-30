@@ -29,6 +29,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts import ci_release_artifacts as artifacts  # noqa: E402
+from scripts.ci_hub_pull_diagnostics import command_failure_category  # noqa: E402
 from scripts.ci_profiles import selected as group_profiles  # noqa: E402
 from scripts.ci_targeted_images import parse_marker  # noqa: E402
 from scripts.docker_registry import (  # noqa: E402
@@ -82,7 +83,13 @@ def run_output(args: list[str], *, timeout: int = 120, root: Path = ROOT) -> byt
         args, cwd=root, env=environment(), capture_output=True, check=False, timeout=timeout
     )
     if result.returncode:
-        raise ReleaseError("Hosted Docker command failed: " + " ".join(args[:3]))
+        raise ReleaseError(
+            "Hosted Docker command failed: "
+            + " ".join(args[:3])
+            + " ("
+            + command_failure_category(result.stderr)
+            + ")"
+        )
     if len(result.stdout) > MAX_INDEX:
         raise ReleaseError("Hosted Docker metadata exceeds its bound")
     return result.stdout

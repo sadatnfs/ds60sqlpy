@@ -1,0 +1,145 @@
+x-runtime: &runtime
+  image: ${DS60_SPARK_IMAGE:?Run lab.py init with a prepared local image}
+  pull_policy: never
+  user: "65534:65534"
+  entrypoint: ["python3", "/lab/entrypoint.py"]
+  networks: [lab]
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs:
+    - /tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777
+  volumes:
+    - ./entrypoint.py:/lab/entrypoint.py:ro
+    - ./jupyter_config.py:/lab/jupyter_config.py:ro
+    - ./app:/lab/app:ro
+    - ./conf:/lab/conf:ro
+  environment: &spark-environment
+    HOME: /tmp
+    SPARK_LOCAL_DIRS: /tmp/spark-local
+    SPARK_CONF_DIR: /lab/conf
+    SPARK_NO_DAEMONIZE: "1"
+    SPARK_DAEMON_MEMORY: 256m
+    PYSPARK_PYTHON: python3
+    PYSPARK_DRIVER_PYTHON: python3
+  labels:
+    ds60.owner: ${DS60_SPARK_OWNER:?Missing workshop identity}
+
+services:
+  master:
+    <<: *runtime
+    hostname: master
+    environment:
+      <<: *spark-environment
+      SPARK_LOCAL_IP: master
+    command: [master]
+    mem_limit: 512m
+    cpus: 0.2
+    pids_limit: 128
+  worker-a:
+    <<: *runtime
+    hostname: worker-a
+    environment:
+      <<: *spark-environment
+      SPARK_LOCAL_IP: worker-a
+    command: [worker, worker-a]
+    mem_limit: 1536m
+    cpus: 1
+    pids_limit: 512
+    depends_on: [master]
+  worker-b:
+    <<: *runtime
+    hostname: worker-b
+    environment:
+      <<: *spark-environment
+      SPARK_LOCAL_IP: worker-b
+    command: [worker, worker-b]
+    mem_limit: 1536m
+    cpus: 1
+    pids_limit: 512
+    depends_on: [master]
+  driver:
+    <<: *runtime
+    hostname: driver
+    environment:
+      <<: *spark-environment
+      SPARK_LOCAL_IP: driver
+    command: [idle]
+    mem_limit: 1536m
+    cpus: 1
+    pids_limit: 512
+    volumes:
+      - ./entrypoint.py:/lab/entrypoint.py:ro
+      - ./jupyter_config.py:/lab/jupyter_config.py:ro
+      - ./app:/lab/app:ro
+      - ./conf:/lab/conf:ro
+      - ${DS60_SPARK_STATE:?Missing workshop state}/events:/events
+      - ${DS60_SPARK_STATE}/results:/results
+    depends_on: [master, worker-a, worker-b]
+  history:
+    <<: *runtime
+    hostname: history
+    environment:
+      <<: *spark-environment
+      SPARK_LOCAL_IP: history
+    command: [history]
+    mem_limit: 768m
+    cpus: 0.2
+    pids_limit: 256
+    volumes:
+      - ./entrypoint.py:/lab/entrypoint.py:ro
+      - ./jupyter_config.py:/lab/jupyter_config.py:ro
+      - ./app:/lab/app:ro
+      - ./conf:/lab/conf:ro
+      - ${DS60_SPARK_STATE}/events:/events:ro
+  notebook:
+    <<: *runtime
+    image: ${DS60_NOTEBOOK_IMAGE:-${DS60_SPARK_IMAGE}}
+    profiles: [notebook]
+    hostname: notebook
+    environment:
+      <<: *spark-environment
+      SPARK_LOCAL_IP: notebook
+    command: [notebook]
+    mem_limit: 1536m
+    cpus: 1
+    pids_limit: 512
+    volumes:
+      - ./entrypoint.py:/lab/entrypoint.py:ro
+      - ./jupyter_config.py:/lab/jupyter_config.py:ro
+      - ./app:/lab/app:ro
+      - ./conf:/lab/conf:ro
+      - ${DS60_SPARK_STATE}/events:/events
+      - ${DS60_SPARK_STATE}/notebooks:/notebooks
+      - ${DS60_SPARK_STATE}/private:/private:ro
+    depends_on: [master, worker-a, worker-b]
+
+  ui:
+    image: ${DS60_SPARK_IMAGE:?Missing prepared image}
+    pull_policy: never
+    hostname: ui
+    user: "65534:65534"
+    entrypoint: ["python3", "/lab/ui_proxy.py"]
+    networks: [lab, ingress]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 96m
+    cpus: 0.1
+    pids_limit: 96
+    volumes:
+      - ./ui_proxy.py:/lab/ui_proxy.py:ro
+    ports:
+      - "127.0.0.1:${DS60_MASTER_UI_PORT:-0}:8080"
+      - "127.0.0.1:${DS60_DRIVER_UI_PORT:-0}:4040"
+      - "127.0.0.1:${DS60_HISTORY_UI_PORT:-0}:18080"
+      - "127.0.0.1:${DS60_NOTEBOOK_PORT:-0}:8888"
+      - "127.0.0.1:${DS60_NOTEBOOK_UI_PORT:-0}:14040"
+    labels:
+      ds60.owner: ${DS60_SPARK_OWNER:?Missing workshop identity}
+    depends_on: [master, driver, history]
+
+networks:
+  lab:
+    internal: true
+  ingress: {}

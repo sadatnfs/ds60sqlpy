@@ -15,6 +15,21 @@ on:
         description: Attempt that uploaded the full published promotion receipt
         required: true
         type: string
+      diagnostic_only:
+        description: Observe authentication and quota with HEAD only; do not pull images
+        required: true
+        default: false
+        type: boolean
+      resume_runs:
+        description: Completed prior audit run IDs to retain, comma-separated; their recovery ancestry is followed
+        required: false
+        default: ""
+        type: string
+      cases:
+        description: Up to six unresolved group/architecture cases, comma-separated; recovery defaults to one canary
+        required: false
+        default: ""
+        type: string
       check_latest:
         description: Require current latest aliases to match this release
         required: true
@@ -34,6 +49,9 @@ env:
   PUBLISHED_RUN_ID: ${{ inputs.published_run_id }}
   PUBLISHED_SHA: ${{ inputs.published_sha }}
   PUBLISHED_ATTEMPT: ${{ inputs.published_attempt }}
+  DIAGNOSTIC_ONLY: ${{ inputs.diagnostic_only }}
+  RESUME_RUNS: ${{ inputs.resume_runs }}
+  RECOVERY_CASES: ${{ inputs.cases }}
 
 jobs:
   preflight:
@@ -42,6 +60,7 @@ jobs:
     timeout-minutes: 100
     outputs:
       matrix: ${{ steps.bound.outputs.matrix }}
+      has_cases: ${{ steps.bound.outputs.has_cases }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -56,11 +75,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          diagnostic_args=()
+          if [ "$DIAGNOSTIC_ONLY" = true ]; then diagnostic_args+=(--diagnostic-only); fi
           python scripts/ci_hub_release_audit.py preflight \
             --published-run-id "$PUBLISHED_RUN_ID" \
             --published-sha "$PUBLISHED_SHA" \
             --published-attempt "$PUBLISHED_ATTEMPT" \
-            --directory work/full-hub-audit --github-output "$GITHUB_OUTPUT"
+            --directory work/full-hub-audit --github-output "$GITHUB_OUTPUT" \
+            --resume-runs "$RESUME_RUNS" --cases "$RECOVERY_CASES" "${diagnostic_args[@]}"
       - name: Retain the bounded source and promotion binding
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
@@ -68,17 +90,19 @@ jobs:
           path: |
             work/full-hub-audit/preflight.json
             work/full-hub-audit/release.json
+            work/full-hub-audit/reused/
           if-no-files-found: error
           retention-days: 30
 
   native-module-pull:
-    name: Pull selected modules (${{ matrix.group }}, ${{ matrix.architecture }})
+    name: ${{ inputs.diagnostic_only && 'Inspect registry quota' || 'Pull selected modules' }} (${{ matrix.group }}, ${{ matrix.architecture }})
     needs: preflight
+    if: needs.preflight.outputs.has_cases == 'true'
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 1
       matrix: ${{ fromJSON(needs.preflight.outputs.matrix) }}
     env:
       ARCHITECTURE: ${{ matrix.architecture }}
@@ -118,7 +142,9 @@ jobs:
           printf '%s\n' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           latest_args=()
           if [ "$CHECK_LATEST" != true ]; then latest_args+=(--skip-latest); fi
-          python scripts/ci_hub_release_audit.py accept \
+          operation=accept
+          if [ "$DIAGNOSTIC_ONLY" = true ]; then operation=diagnose; fi
+          python scripts/ci_hub_release_audit.py "$operation" \
             --published-run-id "$PUBLISHED_RUN_ID" \
             --published-sha "$PUBLISHED_SHA" \
             --published-attempt "$PUBLISHED_ATTEMPT" \
@@ -131,6 +157,7 @@ jobs:
           name: full-hub-audit-${{ matrix.group }}-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
           path: |
             work/full-hub-audit/acceptance.json
+            work/full-hub-audit/registry-diagnostic.json
             work/full-hub-audit/source/work/hub-audit-diagnostics.json
           if-no-files-found: ignore
           retention-days: 30

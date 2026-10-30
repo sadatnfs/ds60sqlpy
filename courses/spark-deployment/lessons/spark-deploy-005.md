@@ -1,0 +1,51 @@
+# spark-deploy-005: Run supported Standalone cluster jobs
+
+Tutorial mode. Stage: intermediate. Direct prerequisites: `spark-deploy-004`, `spark-009`.
+
+Read this tutorial in the classroom. Its commands run only in the separately prepared [owned workshop](../projects/cluster-lab/README.md); there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.
+
+## Put a supported driver on a worker
+
+Spark Standalone 4.0.1 supports JVM cluster-mode applications. It does not support Python cluster deploy mode. A PySpark program running in a separate driver container is still client mode. Use the supported language/manager pair rather than changing a label in a receipt.
+
+An application JAR contains its entrypoint and nonprovided dependencies. Spark and the matching Scala binary API are normally supplied by the runtime. Packaging a different Spark distribution inside the JAR can create class conflicts. The example uses Spark's bundled Scala SparkPi program to focus on driver placement; its Monte Carlo number is not a correctness oracle for the bounded linear fit.
+
+## Worked case A: submit the bundled JVM example
+
+In an explicitly prepared Spark 4.0.1 gateway on the same private network, locate the exact bundled examples JAR first:
+
+```sh
+ls /opt/spark/examples/jars/spark-examples_2.13-4.0.1.jar
+/opt/spark/bin/spark-submit \
+  --master spark://master:7077 \
+  --deploy-mode cluster \
+  --class org.apache.spark.examples.SparkPi \
+  --conf spark.standalone.submit.waitAppCompletion=true \
+  --conf spark.eventLog.enabled=false \
+  /opt/spark/examples/jars/spark-examples_2.13-4.0.1.jar 4
+```
+
+These commands run inside the prepared gateway environment, not blindly in the host terminal. The application artifact must be reachable through the supported Standalone submission path. The expected evidence is a driver launched by a worker, a completed application and its driver/executor logs. Capture actual host identities. A submission acknowledgment alone proves acceptance of a request, not job completion. Event logging is explicitly disabled here because this gateway recipe does not supply shared event storage on every possible worker-hosted driver.
+
+## Worked case B: change only the deploy mode for Python
+
+```text
+Application: bounded_job.py
+Manager: Standalone
+Requested deploy mode: cluster
+Expected result: unsupported manager/language combination
+Supported repair: client mode with reachable driver, or Kubernetes cluster mode
+```
+
+Do not treat this expected refusal as a reason to downgrade the version or hide the error. Keeping the Python program unchanged while selecting Kubernetes is a deployment change with new image, API identity and storage requirements. The Kubernetes submission chapter supplies those dependencies explicitly.
+
+## Diagnose and transfer
+
+If a custom JVM job fails with a class-not-found error, inspect its main-class name, JAR contents and supplied dependency list. An ABI mismatch can surface as a method-not-found error despite the class existing. Record Spark version, Scala binary version and the compiled artifact hash together. A successful compile on the host does not establish executor loading.
+
+Standalone supervision can restart a failed driver when deliberately enabled, but a restarted application can repeat external effects. Decide whether the job is safe to restart and persist an idempotent output identity before using supervision. Worker-loss recovery, driver restart and recovery of external state are separate experiments.
+
+## Primary references
+
+- [Supported submission modes](https://spark.apache.org/docs/4.0.1/submitting-applications.html)
+- [Standalone cluster submission and supervision](https://spark.apache.org/docs/4.0.1/spark-standalone.html)

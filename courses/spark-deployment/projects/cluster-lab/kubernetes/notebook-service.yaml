@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notebook-driver
+  namespace: NAMESPACE
+spec:
+  clusterIP: None
+  selector:
+    ds60-session: NOTEBOOK_SESSION
+  ports:
+    - name: driver-rpc
+      port: 39000
+      targetPort: 39000
+    - name: blocks
+      port: 39001
+      targetPort: 39001
+    - name: spark-ui
+      port: 4040
+      targetPort: 4040

@@ -1,0 +1,10 @@
+**
+!Dockerfile.cluster
+!Dockerfile.notebook
+!app/
+!app/kubernetes_job.py
+!kubernetes/
+!kubernetes/executor-template.yaml
+!notebook.lock
+!wheelhouse/
+!wheelhouse/**

@@ -1,0 +1,340 @@
+{
+  "schema_version": 1,
+  "qualified_utc": "2026-10-30T02:17:51.586338+00:00",
+  "scope": "One physical host, Linux ARM64, separate Compose master/two worker containers/client driver, History Server and fixed-destination loopback UI relay",
+  "spark": "4.0.1",
+  "image_id": "sha256:7eaaf5b6ff64e67e033cae8b3b3a516c86f973c1358ea37f8580fc7b0cfb5385",
+  "runtime_source_sha256": {
+    "lab.py": "61d3a3734a51edfc8bd35bbf15529399932ff357f077cf96939be9f1859b77d3",
+    "entrypoint.py": "6b1b8f181d5c558674b88dbbc4585bbcedf3a88e78ca048fe3c93e9be86e3e13",
+    "ui_proxy.py": "e01ab107ce975257a86329e0991c914857d324c3b9ff7ca49c1d4f8a5fcaa56b",
+    "app/bounded_job.py": "df2febcebaa8bbd2e4f1a61733b7b51215d3ffee24aaeafda4c48feb5587ac60",
+    "compose.yaml": "8b86f863a2946ab9578ba54b99ae27c297065e74cbb659e5d68f72363d0613eb",
+    "conf/spark-defaults.conf": "fd546392b642a7e7089428d85a701f68f637232a5558fa4a5177d1eef87871a6"
+  },
+  "aggregate_caps": {
+    "memory_bytes": 6274678784,
+    "cpu_cores": 3.5
+  },
+  "baseline": {
+    "application_id": "app-20261030021133-0000",
+    "spark": "4.0.1",
+    "driver_host": "driver",
+    "driver_max_result_size": "1m",
+    "partitions": [
+      {
+        "partition": 0,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 100,
+        "n": 12500,
+        "sx": 78118750,
+        "sxx": 650963543750,
+        "sy": 156275000,
+        "sxy": 1302161443750
+      },
+      {
+        "partition": 1,
+        "attempt": 0,
+        "host": "worker-a",
+        "python_pid": 99,
+        "n": 12500,
+        "sx": 234368750,
+        "sxx": 4557057293750,
+        "sy": 468775000,
+        "sxy": 9114817693750
+      },
+      {
+        "partition": 2,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 100,
+        "n": 12500,
+        "sx": 390618750,
+        "sxx": 12369401043750,
+        "sy": 781275000,
+        "sxy": 24739973943750
+      },
+      {
+        "partition": 3,
+        "attempt": 0,
+        "host": "worker-a",
+        "python_pid": 99,
+        "n": 12500,
+        "sx": 546868750,
+        "sxx": 24087994793750,
+        "sy": 1093775000,
+        "sxy": 48177630193750
+      },
+      {
+        "partition": 4,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 100,
+        "n": 12500,
+        "sx": 703118750,
+        "sxx": 39712838543750,
+        "sy": 1406275000,
+        "sxy": 79427786443750
+      },
+      {
+        "partition": 5,
+        "attempt": 0,
+        "host": "worker-a",
+        "python_pid": 99,
+        "n": 12500,
+        "sx": 859368750,
+        "sxx": 59243932293750,
+        "sy": 1718775000,
+        "sxy": 118490442693750
+      },
+      {
+        "partition": 6,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 100,
+        "n": 12500,
+        "sx": 1015618750,
+        "sxx": 82681276043750,
+        "sy": 2031275000,
+        "sxy": 165365598943750
+      },
+      {
+        "partition": 7,
+        "attempt": 0,
+        "host": "worker-a",
+        "python_pid": 99,
+        "n": 12500,
+        "sx": 1171868750,
+        "sxx": 110024869793750,
+        "sy": 2343775000,
+        "sxy": 220053255193750
+      }
+    ],
+    "totals": {
+      "n": 100000,
+      "sx": 4999950000,
+      "sxx": 333328333350000,
+      "sy": 10000200000,
+      "sxy": 666671666550000
+    },
+    "coefficients": {
+      "intercept": 3.0,
+      "slope": 2.0
+    },
+    "future_covariate_predictions": [
+      {
+        "x": 100000,
+        "prediction": 200003.0
+      },
+      {
+        "x": 100001,
+        "prediction": 200005.0
+      }
+    ],
+    "forecast_semantics": "Deterministic future-covariate linear extrapolation, not a conditional-history time-series model",
+    "executors": [
+      {
+        "id": "1",
+        "hostPort": "worker-a:35419",
+        "isActive": true,
+        "totalTasks": 4,
+        "failedTasks": 0
+      },
+      {
+        "id": "0",
+        "hostPort": "worker-b:36189",
+        "isActive": true,
+        "totalTasks": 4,
+        "failedTasks": 0
+      }
+    ],
+    "worker_loss_observed": false
+  },
+  "controlled_worker_loss": {
+    "application_id": "app-20261030021235-0001",
+    "target_container_id": "05887eeeb936f4ed8f8d90255ce78956f2796ebca3f4f052b0f1c933c60d8bad",
+    "target_stage": 0,
+    "target_task": 0,
+    "observed_running_before_stop": true,
+    "retained_partition_results": [
+      {
+        "partition": 0,
+        "attempt": 1,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 78118750,
+        "sxx": 650963543750,
+        "sy": 156275000,
+        "sxy": 1302161443750
+      },
+      {
+        "partition": 1,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 234368750,
+        "sxx": 4557057293750,
+        "sy": 468775000,
+        "sxy": 9114817693750
+      },
+      {
+        "partition": 2,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 390618750,
+        "sxx": 12369401043750,
+        "sy": 781275000,
+        "sxy": 24739973943750
+      },
+      {
+        "partition": 3,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 546868750,
+        "sxx": 24087994793750,
+        "sy": 1093775000,
+        "sxy": 48177630193750
+      },
+      {
+        "partition": 4,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 703118750,
+        "sxx": 39712838543750,
+        "sy": 1406275000,
+        "sxy": 79427786443750
+      },
+      {
+        "partition": 5,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 859368750,
+        "sxx": 59243932293750,
+        "sy": 1718775000,
+        "sxy": 118490442693750
+      },
+      {
+        "partition": 6,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 1015618750,
+        "sxx": 82681276043750,
+        "sy": 2031275000,
+        "sxy": 165365598943750
+      },
+      {
+        "partition": 7,
+        "attempt": 0,
+        "host": "worker-b",
+        "python_pid": 160,
+        "n": 12500,
+        "sx": 1171868750,
+        "sxx": 110024869793750,
+        "sy": 2343775000,
+        "sxy": 220053255193750
+      }
+    ],
+    "coefficients": {
+      "intercept": 3.0,
+      "slope": 2.0
+    },
+    "future_covariate_predictions": [
+      {
+        "x": 100000,
+        "prediction": 200003.0
+      },
+      {
+        "x": 100001,
+        "prediction": 200005.0
+      }
+    ],
+    "completed_history": true
+  },
+  "ui_http": {
+    "live-driver": {
+      "status": 200,
+      "bytes": 6739,
+      "sha256": "7ed89b3aee69cc24ce622737c2c5fb0adf0e97f3d7b94414cc605d169134369c",
+      "title": "ds60-deployment-bounded-fit - Spark Jobs"
+    },
+    "history": {
+      "status": 200,
+      "bytes": 3218,
+      "sha256": "ae39e89a95a8c5039593ed57633045bd0cefbd72a1b5bd18cc29f60311e1b120",
+      "title": "History Server"
+    },
+    "master": {
+      "status": 200,
+      "bytes": 8719,
+      "sha256": "58042d6c5e19ab7098cd78b8f7f9215fc3b10c2d23b2c3d78f4ecf68a5c05106",
+      "title": "Spark Master at spark://master:7077"
+    }
+  },
+  "loopback_bindings": {
+    "14040/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "32776"
+      }
+    ],
+    "18080/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "32777"
+      }
+    ],
+    "4040/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "32773"
+      }
+    ],
+    "8080/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "32774"
+      }
+    ],
+    "8888/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "32775"
+      }
+    ]
+  },
+  "lifecycle": {
+    "exact_container_resume": true,
+    "replacement_preserved_file_count": 15,
+    "completed_history_without_replay": true,
+    "owned_containers_remaining": 0,
+    "preexisting_volumes_preserved": 51
+  },
+  "retained_failures": [
+    "Initial native zstd load failed because tmpfs lacked executable mappings; repaired with bounded exec scratch.",
+    "Prepared pad image inherited loopback SPARK_LOCAL_IP; per-service addresses were made explicit.",
+    "The executor evidence probe used loopback after the UI bound to the driver address; repaired to use the actual SparkContext UI URL.",
+    "The engine did not publish ports from an internal-only network; compute remained internal and a fixed-destination UI relay supplied host-loopback access."
+  ],
+  "not_run": [
+    "Other native architectures",
+    "Multiple physical hosts",
+    "JVM Standalone cluster-mode example",
+    "Notebook image preparation and kernel",
+    "Kubernetes or cloud deployment",
+    "Negative raw-data collection guard",
+    "Independent modeling-package integration"
+  ]
+}

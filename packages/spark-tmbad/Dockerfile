@@ -1,8 +1,32 @@
-# Build context is this package directory. The base images must be prepared first.
-ARG CPP_IMAGE=ds60sqlpy-worker-cpp20:1.1.0
-ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:1.1.0
+# Build context is this independent package directory. No classroom image is required.
+ARG CPP_IMAGE=python:3.12.12-slim-bookworm
+ARG PYTHON_IMAGE=python:3.12.12-slim-bookworm
+ARG SPARK_IMAGE=spark:4.0.1-scala2.13-java17-python3-ubuntu
+FROM ${SPARK_IMAGE} AS spark-distribution
+
+FROM ${PYTHON_IMAGE} AS runtime-base
+USER root
+# Explicitly prepared local bases may opt out after verifying these packages.
+# The default builds a neutral Python/Spark/JDK environment from public bases.
+ARG PREPARED_OS_PACKAGES=0
+RUN if [ "$PREPARED_OS_PACKAGES" = 0 ]; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+        openjdk-17-jdk-headless libstdc++6 libssl3 ca-certificates \
+      && rm -rf /var/lib/apt/lists/*; \
+    elif [ "$PREPARED_OS_PACKAGES" != 1 ]; then exit 2; fi
+COPY --from=spark-distribution /opt/spark /opt/spark
+ENV SPARK_HOME=/opt/spark \
+    PATH=/opt/spark/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin \
+    PYTHONPATH="" PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
 FROM ${CPP_IMAGE} AS native
 USER root
+ARG PREPARED_OS_PACKAGES=0
+RUN if [ "$PREPARED_OS_PACKAGES" = 0 ]; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+        g++-12 libssl-dev openssl ca-certificates \
+      && rm -rf /var/lib/apt/lists/*; \
+    elif [ "$PREPARED_OS_PACKAGES" != 1 ]; then exit 2; fi
 WORKDIR /src
 COPY native /src/native
 COPY tooling /src/tooling
@@ -11,7 +35,7 @@ COPY tooling /src/tooling
 RUN python3 tooling/prepare.py --destination /tmp/tmbad-sdk --allow-download \
     && python3 tooling/build_native.py --sdk /tmp/tmbad-sdk --output /tmp/tmbad-native --compiler g++-12
 
-FROM ${SPARK_IMAGE} AS jvm
+FROM runtime-base AS jvm
 USER root
 COPY jvm /src/jvm
 COPY python /src/python
@@ -20,7 +44,7 @@ RUN python3 -m pip install --require-hashes -r /src/python-build-requirements.tx
     && python3 -m pip wheel --no-deps --no-build-isolation --wheel-dir /tmp/wheels /src/python
 RUN python3 /src/jvm/build.py --spark-home /opt/spark --output /tmp/spark-tmbad.jar
 
-FROM ${SPARK_IMAGE}
+FROM runtime-base
 USER root
 COPY native /src/native
 COPY tooling /src/tooling

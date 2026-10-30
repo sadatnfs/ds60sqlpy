@@ -1,0 +1,6 @@
+# Select the official, reviewed Spark 4.0.1 Python image for your native platform.
+# Its Kubernetes entrypoint is retained. A classroom pad image is not equivalent.
+ARG SPARK_BASE
+FROM ${SPARK_BASE}
+COPY app/kubernetes_job.py /opt/spark/work-dir/kubernetes_job.py
+COPY kubernetes/executor-template.yaml /opt/spark/work-dir/executor-template.yaml

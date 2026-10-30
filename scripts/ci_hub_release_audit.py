@@ -14,6 +14,7 @@ import argparse
 import io
 import json
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -326,7 +327,441 @@ def verification_identity(request: recovery.Request) -> dict[str, str]:
     }
 
 
-def preflight(request: recovery.Request, directory: Path, root: Path) -> dict[str, Any]:
+def recovery_inputs(value: str, *, cases: bool = False) -> list[str]:
+    if not value:
+        return []
+    items = value.split(",")
+    pattern = r"[a-z][a-z0-9-]{0,40}/(?:amd64|arm64)" if cases else r"[1-9][0-9]{0,19}"
+    limit = 6 if cases else 12
+    if (
+        not 1 <= len(items) <= limit
+        or len(set(items)) != len(items)
+        or any(re.fullmatch(pattern, item) is None for item in items)
+    ):
+        raise ReleaseError(
+            "Recovery inputs need unique bounded run IDs or group/architecture cases"
+        )
+    return items
+
+
+def case_identity(group: str, architecture: str) -> str:
+    return group + "/" + architecture
+
+
+def prior_artifact(artifact: dict[str, Any], repository: str) -> dict[str, bytes]:
+    if (
+        type(artifact.get("id")) is not int
+        or artifact["id"] < 1
+        or artifact.get("expired") is not False
+        or type(artifact.get("size_in_bytes")) is not int
+        or not 0 < artifact["size_in_bytes"] <= 2 * 1024 * 1024
+    ):
+        raise ReleaseError("Recovery requires an unexpired bounded audit artifact")
+    raw = artifacts.gh(
+        ["api", f"repos/{repository}/actions/artifacts/{artifact['id']}/zip"],
+        maximum=2 * 1024 * 1024,
+    )
+    if artifact.get("digest") != sha256(raw):
+        raise ReleaseError("Prior audit archive differs from its GitHub digest")
+    result: dict[str, bytes] = {}
+    try:
+        with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
+            entries = bundle.infolist()
+            if not 1 <= len(entries) <= 64:
+                raise ReleaseError("Prior audit artifact has unexpected entry coverage")
+            for item in entries:
+                path = PurePosixPath(item.filename)
+                if (
+                    item.is_dir()
+                    or path.is_absolute()
+                    or ".." in path.parts
+                    or "\\" in item.filename
+                    or item.filename in result
+                    or stat.S_ISLNK(item.external_attr >> 16)
+                    or not 0 < item.file_size <= hub.MAX_REPORT
+                ):
+                    raise ReleaseError("Prior audit artifact has an invalid ordinary JSON entry")
+                result[item.filename] = bundle.read(item)
+    except (zipfile.BadZipFile, RuntimeError):
+        raise ReleaseError("Prior audit artifact is not a valid bounded ZIP") from None
+    return result
+
+
+def validate_prior_acceptance(
+    value: dict[str, Any],
+    *,
+    context: Context,
+    source: Path,
+    verifier_sha: str,
+    run_id: str,
+    attempt: str,
+    group: str,
+    architecture: str,
+) -> None:
+    workers = ci_profiles.selected(group, source)
+    selected = list(dict.fromkeys(["app", "python-core", *workers]))
+    profiles = catalog(source)
+    if (
+        value.get("schema_version") != 1
+        or value.get("kind") != "ds60-full-hub-module-audit"
+        or value.get("status") != "accepted"
+        or value.get("group") != group
+        or value.get("architecture") != architecture
+        or value.get("published_revision") != context.revision
+        or value.get("published_run_id") != context.run_id
+        or value.get("version") != context.version
+        or value.get("saved_version") != context.version
+        or value.get("verification")
+        != {"revision": verifier_sha, "run_id": run_id, "run_attempt": attempt}
+        or value.get("profiles_pulled") != selected
+        or value.get("profiles_started") != workers
+    ):
+        raise ReleaseError("Prior acceptance does not bind the requested published module case")
+    for key in (
+        "stop_resume_same_stateful_containers",
+        "app_image_unchanged",
+        "learning_marker_retained",
+        "browser_readback_ok",
+    ):
+        if value.get(key) is not True:
+            raise ReleaseError("Prior acceptance lacks complete saved-state and browser evidence")
+    if (
+        type(value.get("persistent_volumes")) is not int
+        or not 2 <= value["persistent_volumes"] <= 64
+        or type(value.get("latest_aliases_checked")) is not bool
+        or value.get("latest_resolved") is not value["latest_aliases_checked"]
+    ):
+        raise ReleaseError("Prior acceptance has incomplete lifecycle or latest selection metadata")
+    prepared = value.get("prepared_observation")
+    if not isinstance(prepared, dict) or prepared.get("no_runtime_resources") is not True:
+        raise ReleaseError("Prior acceptance lacks pull-only preparation evidence")
+    images = prepared.get("images")
+    if not isinstance(images, list) or len(images) != len(selected):
+        raise ReleaseError("Prior acceptance lacks exact selected image coverage")
+    for key, image in zip(selected, images, strict=True):
+        if (
+            not isinstance(image, dict)
+            or set(image) != {"profile", "reference", "image_id"}
+            or image["profile"] != key
+            or image["reference"]
+            != context.repository + ":" + version_tag(profiles[key], context.version)
+            or not isinstance(image["image_id"], str)
+            or re.fullmatch(r"sha256:[a-f0-9]{64}", image["image_id"]) is None
+        ):
+            raise ReleaseError("Prior acceptance contains an invalid canonical image binding")
+    references = {
+        context.repository + ":" + version_tag(profiles[key], context.version) for key in selected
+    }
+    if value["latest_aliases_checked"]:
+        references.update(
+            context.repository + ":" + latest_tag(profiles[key]) for key in ("app", workers[0])
+        )
+    observed = prepared.get("release_references")
+    if (
+        not isinstance(observed, list)
+        or len(observed) != len(references)
+        or set(observed) != references
+    ):
+        raise ReleaseError("Prior acceptance contains an unexpected selected pull reference")
+    services = sorted(
+        {
+            "lab",
+            "classroom-init",
+            "postgres",
+            *[service_for_profile(key, source) for key in selected if key != "app"],
+        }
+    )
+    for key in ("started_observation", "resumed_observation"):
+        observation = value.get(key)
+        if (
+            not isinstance(observation, dict)
+            or observation.get("profile_images_match_promotion") is not True
+            or observation.get("services") != services
+        ):
+            raise ReleaseError("Prior acceptance lacks exact selected service identity evidence")
+
+
+def collect_prior_acceptances(
+    request: recovery.Request,
+    context: Context,
+    source: Path,
+    directory: Path,
+    requested_runs: list[str],
+    *,
+    root: Path,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Retain raw passed receipts and their original run identities without replay."""
+    pending = [(run_id, frozenset()) for run_id in requested_runs]
+    visited: set[str] = set()
+    accepted: dict[str, dict[str, Any]] = {}
+    while pending:
+        run_id, ancestry = pending.pop(0)
+        if run_id in ancestry or run_id == request.current_run_id:
+            raise ReleaseError("Audit recovery ancestry contains a cycle or this active run")
+        if run_id in visited:
+            continue
+        if len(visited) >= 12:
+            raise ReleaseError("Audit recovery ancestry exceeds its bounded history")
+        visited.add(run_id)
+        run = recovery.gh_json(
+            ["api", f"repos/{request.source_repository}/actions/runs/{run_id}"], maximum=256 * 1024
+        )
+        revision = run.get("head_sha")
+        path = ".github/workflows/audit-published-release.yml"
+        if (
+            run.get("id") != int(run_id)
+            or run.get("event") != "workflow_dispatch"
+            or run.get("head_branch") != "main"
+            or not isinstance(revision, str)
+            or re.fullmatch(r"[a-f0-9]{40}", revision) is None
+            or run.get("path")
+            not in {path, path + "@main", path + "@refs/heads/main", path + "@" + revision}
+            or run.get("status") != "completed"
+            or run.get("conclusion") not in {"success", "failure"}
+        ):
+            raise ReleaseError("Recovery requires a completed main audit from this repository")
+        recovery.git(["merge-base", "--is-ancestor", revision, "HEAD"], root=root)
+        pages = recovery.gh_pages(
+            f"repos/{request.source_repository}/actions/runs/{run_id}/artifacts?per_page=100"
+        )
+        artifact_rows = [
+            item for page in pages for item in page.get("artifacts", []) if isinstance(item, dict)
+        ]
+        jobs = [
+            job
+            for page in recovery.gh_pages(
+                f"repos/{request.source_repository}/actions/runs/{run_id}/jobs?filter=all&per_page=100"
+            )
+            for job in page.get("jobs", [])
+            if isinstance(job, dict)
+        ]
+        preflights = [
+            item
+            for item in artifact_rows
+            if re.fullmatch(
+                r"full-hub-audit-preflight-attempt-[1-9][0-9]{0,5}", str(item.get("name", ""))
+            )
+        ]
+        for artifact in preflights:
+            attempt = artifact["name"].rsplit("-", 1)[1]
+            successful = [
+                job
+                for job in jobs
+                if job.get("name") == "Bind published full source and promotion"
+                and str(job.get("run_attempt")) == attempt
+                and job.get("conclusion") == "success"
+            ]
+            if len(successful) != 1:
+                continue
+            files = prior_artifact(artifact, request.source_repository)
+            if "preflight.json" not in files:
+                raise ReleaseError("Prior audit preflight artifact is incomplete")
+            report = json_object(files["preflight.json"], hub.MAX_REPORT)
+            if (
+                report.get("kind") != "ds60-full-hub-audit-preflight"
+                or report.get("status") != "passed"
+                or report.get("verification")
+                != {"revision": revision, "run_id": run_id, "run_attempt": attempt}
+                or report.get("published") != asdict(context)
+            ):
+                raise ReleaseError("Prior audit preflight has different publication identity")
+            predecessors = report.get("resume_runs", [])
+            if not isinstance(predecessors, list) or any(
+                not isinstance(value, str) for value in predecessors
+            ):
+                raise ReleaseError("Prior audit recovery ancestry is malformed")
+            recovery_inputs(",".join(predecessors))
+            pending.extend((value, ancestry | {run_id}) for value in predecessors)
+        pattern = re.compile(
+            r"full-hub-audit-([a-z][a-z0-9-]{0,40})-(amd64|arm64)-attempt-([1-9][0-9]{0,5})\Z"
+        )
+        for artifact in artifact_rows:
+            match = pattern.fullmatch(str(artifact.get("name", "")))
+            if match is None:
+                continue
+            group, architecture, attempt = match.groups()
+            name = f"Pull selected modules ({group}, {architecture})"
+            matching = [
+                job
+                for job in jobs
+                if job.get("name") == name
+                and str(job.get("run_attempt")) == attempt
+                and job.get("conclusion") == "success"
+            ]
+            if not matching:
+                continue
+            if len(matching) != 1 or type(matching[0].get("id")) is not int:
+                raise ReleaseError("Prior successful module job identity is ambiguous")
+            files = prior_artifact(artifact, request.source_repository)
+            if (
+                set(files) - {"acceptance.json", "registry-diagnostic.json"}
+                or "acceptance.json" not in files
+            ):
+                raise ReleaseError("Prior successful audit artifact has unexpected contents")
+            raw = files["acceptance.json"]
+            value = json_object(raw, hub.MAX_REPORT)
+            validate_prior_acceptance(
+                value,
+                context=context,
+                source=source,
+                verifier_sha=revision,
+                run_id=run_id,
+                attempt=attempt,
+                group=group,
+                architecture=architecture,
+            )
+            expected_tree = recovery.git(
+                ["rev-parse", context.revision + "^{tree}"], root=root
+            ).decode()
+            if value.get("published_tree") != expected_tree:
+                raise ReleaseError("Prior acceptance used a different published source tree")
+            key = case_identity(group, architecture)
+            record = {
+                "case": key,
+                "run_id": run_id,
+                "run_attempt": attempt,
+                "verifier_revision": revision,
+                "artifact_id": artifact["id"],
+                "job_id": matching[0]["id"],
+                "receipt_sha256": sha256(raw),
+                "published_revision": context.revision,
+                "latest_aliases_checked": value["latest_aliases_checked"],
+            }
+            target = (
+                directory
+                / "reused"
+                / (run_id + "-" + group + "-" + architecture + "-" + attempt + ".json")
+            )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+            record["receipt_path"] = target.relative_to(directory).as_posix()
+            if key not in accepted or (int(run_id), int(attempt)) > (
+                int(accepted[key]["run_id"]),
+                int(accepted[key]["run_attempt"]),
+            ):
+                accepted[key] = record
+    return [accepted[key] for key in sorted(accepted)], sorted(visited, key=int)
+
+
+def execution_selection(
+    matrix: dict[str, Any],
+    reused: list[dict[str, Any]],
+    *,
+    resume: bool,
+    requested_cases: list[str],
+    diagnostic_only: bool,
+) -> dict[str, Any]:
+    rows = matrix["include"]
+    by_case = {case_identity(row["group"], row["architecture"]): row for row in rows}
+    accepted = {row["case"] for row in reused}
+    if not accepted <= set(by_case):
+        raise ReleaseError("Reused receipt is outside the published native matrix")
+    unresolved = [key for key in by_case if key not in accepted]
+    if requested_cases and not resume:
+        raise ReleaseError("Explicit recovery cases require prior audit receipts")
+    if any(key not in unresolved for key in requested_cases):
+        raise ReleaseError("Recovery may select only unresolved native cases, never accepted ones")
+    selected = requested_cases or (unresolved[:1] if resume else unresolved)
+    if diagnostic_only:
+        selected = []
+        for architecture in ARCHITECTURES:
+            candidates = [key for key in unresolved if by_case[key]["architecture"] == architecture]
+            if candidates:
+                selected.append(candidates[0])
+    return {
+        "expected_cases": list(by_case),
+        "accepted_cases": sorted(accepted),
+        "unresolved_cases": unresolved,
+        "selected_cases": selected,
+        "execution_matrix": {"include": [by_case[key] for key in selected]},
+        "diagnostic_only": diagnostic_only,
+        "scope_complete_before_run": not unresolved,
+    }
+
+
+def diagnose(
+    request: recovery.Request,
+    directory: Path,
+    architecture: str,
+    *,
+    require_pulls: bool,
+    root: Path,
+) -> dict[str, Any]:
+    from scripts import ci_hub_pull_diagnostics as diagnostics
+
+    diagnostics.hosted_guard()
+    report_file = hub.destination(directory, root) / "registry-diagnostic.json"
+    report: dict[str, Any] = {
+        "schema_version": 1,
+        "kind": "ds60-hub-head-diagnostic",
+        "status": "checking",
+        "verification": verification_identity(request),
+        "architecture": architecture,
+    }
+    try:
+        _, _, context = prepared_identity(request, directory, root)
+        hub.native_engine(architecture, root)
+        report.update(
+            diagnostics.inspect_hub(context.namespace, context.version, hub.environment())
+        )
+        # Only booleans/counts leave Docker info; proxy or mirror URLs are never read.
+        raw = (
+            hub.run_output(
+                [
+                    "docker",
+                    "info",
+                    "--format",
+                    "{{if .HTTPProxy}}true{{else}}false{{end}} {{if .HTTPSProxy}}true{{else}}false{{end}} {{len .RegistryConfig.Mirrors}}",
+                ],
+                root=root,
+            )
+            .decode("ascii")
+            .strip()
+            .split()
+        )
+        if (
+            len(raw) == 3
+            and raw[0] in {"true", "false"}
+            and raw[1] in {"true", "false"}
+            and raw[2].isdigit()
+        ):
+            report["engine_transport"] = {
+                "http_proxy_configured": raw[0] == "true",
+                "https_proxy_configured": raw[1] == "true",
+                "registry_mirror_count": int(raw[2]),
+            }
+        report["process_transport"] = {
+            "http_proxy_configured": bool(
+                os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy")
+            ),
+            "https_proxy_configured": bool(
+                os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+            ),
+        }
+        report["status"] = "observed" if report["pulls_allowed"] else "blocked"
+        if require_pulls and not report["pulls_allowed"]:
+            raise ReleaseError(
+                "Hosted registry observations block image pulls; inspect the sanitized diagnostic"
+            )
+    except (OSError, ValueError, ReleaseError, subprocess.SubprocessError) as error:
+        report.setdefault("pulls_allowed", False)
+        report["status"] = "blocked"
+        report["error"] = str(error)
+        raise
+    finally:
+        write_json(report_file, report)
+    return report
+
+
+def preflight(
+    request: recovery.Request,
+    directory: Path,
+    root: Path,
+    *,
+    resume_runs: list[str] | None = None,
+    requested_cases: list[str] | None = None,
+    diagnostic_only: bool = False,
+) -> dict[str, Any]:
     tree = verify_checkout(request, root)
     source_ci = recovery.current_source_jobs(request)
     publication = published_run(request)
@@ -339,6 +774,16 @@ def preflight(request: recovery.Request, directory: Path, root: Path) -> dict[st
     exported = export_source(request, directory, root)
     receipt_indexes(receipt, context, directory / "source")
     matrix = ci_profiles.matrix(native=True, root=directory / "source")
+    reused, prior_runs = collect_prior_acceptances(
+        request, context, directory / "source", directory, resume_runs or [], root=root
+    )
+    selection = execution_selection(
+        matrix,
+        reused,
+        resume=bool(resume_runs),
+        requested_cases=requested_cases or [],
+        diagnostic_only=diagnostic_only,
+    )
     (directory / "release.json").write_bytes(raw)
     report = {
         "schema_version": 1,
@@ -352,6 +797,9 @@ def preflight(request: recovery.Request, directory: Path, root: Path) -> dict[st
         "receipt_sha256": sha256(raw),
         "source_export": exported,
         "matrix": matrix,
+        "resume_runs": prior_runs,
+        "reused_receipts": reused,
+        **selection,
     }
     write_json(directory / "preflight.json", report)
     return report
@@ -523,6 +971,11 @@ def accept(
     }
     try:
         preflight_report, receipt, context = prepared_identity(request, directory, root)
+        selection = preflight_report.get("selected_cases")
+        if selection is not None and case_identity(group, architecture) not in selection:
+            raise ReleaseError("Native case was not selected by this audit preflight")
+        if preflight_report.get("diagnostic_only") is True:
+            raise ReleaseError("A diagnostic-only dispatch cannot pull classroom images")
         verify_export(request, directory)
         if (
             sha256((directory / "source-manifest.json").read_bytes())
@@ -652,7 +1105,7 @@ def accept(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("preflight", "prepare", "accept"))
+    parser.add_argument("command", choices=("preflight", "prepare", "diagnose", "accept"))
     parser.add_argument("--published-sha", required=True)
     parser.add_argument("--published-run-id", required=True)
     parser.add_argument("--published-attempt", required=True)
@@ -661,6 +1114,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--architecture", choices=ARCHITECTURES)
     parser.add_argument("--skip-latest", action="store_true")
     parser.add_argument("--github-output", type=Path)
+    parser.add_argument("--resume-runs", default="")
+    parser.add_argument("--cases", default="")
+    parser.add_argument("--diagnostic-only", action="store_true")
     args = parser.parse_args(argv)
     try:
         request = recovery.dispatch_request(
@@ -668,17 +1124,36 @@ def main(argv: list[str] | None = None) -> int:
         )
         directory = hub.destination(args.directory, ROOT)
         if args.command == "preflight":
-            report = preflight(request, directory, ROOT)
+            report = preflight(
+                request,
+                directory,
+                ROOT,
+                resume_runs=recovery_inputs(args.resume_runs),
+                requested_cases=recovery_inputs(args.cases, cases=True),
+                diagnostic_only=args.diagnostic_only,
+            )
             if args.github_output:
                 with args.github_output.open("a") as stream:
                     stream.write(
-                        "matrix=" + json.dumps(report["matrix"], separators=(",", ":")) + "\n"
+                        "matrix="
+                        + json.dumps(report["execution_matrix"], separators=(",", ":"))
+                        + "\n"
+                    )
+                    stream.write(
+                        "has_cases="
+                        + str(bool(report["execution_matrix"]["include"])).lower()
+                        + "\n"
                     )
         elif args.command == "prepare":
             prepare(request, directory, ROOT)
+        elif args.command == "diagnose":
+            if args.architecture is None:
+                raise ReleaseError("Registry diagnostics require one native architecture")
+            diagnose(request, directory, args.architecture, require_pulls=False, root=ROOT)
         else:
             if args.group is None or args.architecture is None:
                 raise ReleaseError("Native acceptance requires an explicit group and architecture")
+            diagnose(request, directory, args.architecture, require_pulls=True, root=ROOT)
             accept(request, directory, args.group, args.architecture, not args.skip_latest, ROOT)
         return 0
     except (OSError, ValueError, ReleaseError, subprocess.SubprocessError) as error:

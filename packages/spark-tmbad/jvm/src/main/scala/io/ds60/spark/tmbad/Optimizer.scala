@@ -100,7 +100,8 @@ object Optimizer {
       objective: Vector[Double] => Evaluation,
       initial: Vector[Double],
       settings: Settings = Settings(),
-      specifiedBounds: Option[Bounds] = None
+      specifiedBounds: Option[Bounds] = None,
+      onAccepted: (Vector[Double], Evaluation) => Unit = (_, _) => ()
   ): Result = {
     finite(initial)
     val bounds = specifiedBounds.getOrElse(Bounds.unbounded(initial.size))
@@ -120,6 +121,7 @@ object Optimizer {
       result
     }
     var current = evaluate(point)
+    onAccepted(point, current)
     var inverse = identity(initial.size)
     var iteration = 0
     var status = "maximum_iterations"
@@ -207,6 +209,7 @@ object Optimizer {
               math.max(1.0, math.max(math.abs(current.value), math.abs(proposed.value)))
             point = next
             current = proposed
+            onAccepted(point, current)
             iteration += 1
             val projected = projectedScore(point, current.gradient, bounds)
             trace += Iteration(
