@@ -105,7 +105,7 @@ if [[ $action == prepare ]]; then
       ;;
   esac
   requested_image=$image
-  for image in ds60sqlpy-worker-java21:1.2.0 ds60sqlpy-worker-data-platforms-python:1.2.0; do verify_native_image; done
+  for image in ds60sqlpy-worker-java21:1.3.0 ds60sqlpy-worker-data-platforms-python:1.3.0; do verify_native_image; done
   image=$requested_image
   upstream=apache/hive@sha256:b19bb5bd01f233a3f99d941ebf08acaff68c55911dd5fa42ea03928e51860b91
   postgres_upstream=postgres@sha256:00bc86618629af00d2937fdc5a5d63db3ff8450acf52f0636ec813c7f4902929
@@ -133,8 +133,8 @@ if [[ $action == prepare ]]; then
   "$docker_cmd" run --rm --pull never --network bridge --memory 256m --cpus 0.5 --pids-limit 64 --cap-drop ALL --security-opt no-new-privileges --user "$(id -u):$(id -g)" \
     --mount "type=bind,source=$project_dir/prepare_jdbc.py,target=/project/prepare_jdbc.py,readonly" \
     --mount "type=bind,source=$project_dir/.workshop,target=/project/.workshop" \
-    --entrypoint python3 ds60sqlpy-worker-data-platforms-python:1.2.0 /project/prepare_jdbc.py
-  bash prepare-metadata.sh "$image" ds60sqlpy-worker-java21:1.2.0
+    --entrypoint python3 ds60sqlpy-worker-data-platforms-python:1.3.0 /project/prepare_jdbc.py
+  bash prepare-metadata.sh "$image" ds60sqlpy-worker-java21:1.3.0
   exit 0
 fi
 if [[ ! -e .env && ! -L .env ]]; then
@@ -149,7 +149,7 @@ if [[ ! -e .env && ! -L .env ]]; then
   }
   verify_native_image
   saved_image=$image
-  image=ds60sqlpy-worker-data-platforms-python:1.2.0
+  image=ds60sqlpy-worker-data-platforms-python:1.3.0
   verify_native_image
   image=$saved_image
   verify_selected_image ds60-apache-hive-postgres:17.6
@@ -161,7 +161,7 @@ if [[ ! -e .env && ! -L .env ]]; then
   (
     umask 077
     printf '%s\n' "DS60_WORKSHOP_OWNER=$owner" "DS60_WORKSHOP_PROJECT=ds60-apache-hive-${owner:0:12}" \
-      "DS60_HIVE_IMAGE=$image" "DS60_PLATFORM_IMAGE=ds60sqlpy-worker-data-platforms-python:1.2.0" "DS60_POSTGRES_IMAGE=ds60-apache-hive-postgres:17.6" >.env
+      "DS60_HIVE_IMAGE=$image" "DS60_PLATFORM_IMAGE=ds60sqlpy-worker-data-platforms-python:1.3.0" "DS60_POSTGRES_IMAGE=ds60-apache-hive-postgres:17.6" >.env
   )
 fi
 [[ -f .env && ! -L .env && $(wc -c <.env) -le 4096 ]] || {

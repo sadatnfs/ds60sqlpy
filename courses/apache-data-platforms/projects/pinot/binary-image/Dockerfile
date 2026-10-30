@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-scala-jvm:1.2.0
+ARG BASE_IMAGE=ds60sqlpy-worker-scala-jvm:1.3.0
 FROM ${BASE_IMAGE}
 USER root
 COPY install.py /tmp/install-pinot.py

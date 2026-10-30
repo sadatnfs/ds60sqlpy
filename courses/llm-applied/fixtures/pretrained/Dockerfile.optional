@@ -1,6 +1,6 @@
 # Build the local llm-torch-cpu classroom profile first. Its base supplies
 # CPU-only Torch and libgomp; the full lock fixes all optional dependencies.
-ARG DS60_TORCH_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.2.0
+ARG DS60_TORCH_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.3.0
 FROM ${DS60_TORCH_IMAGE}
 WORKDIR /recipe
 ARG TARGETARCH

@@ -127,8 +127,112 @@ reference_restore_fit <- function(objective, parameters, expected_loss) {
   )
 }
 
+reference_newton_seed <- function(objective, start, lower, upper, tolerance) {
+  # This is an opt-in local seed for a fresh genuine optimizer attempt. It is
+  # never itself reported as an accepted fit or given a synthetic status zero.
+  reference_assert(length(start) == 5L && length(lower) == 5L && length(upper) == 5L &&
+    all(is.finite(c(start, lower, upper))) && all(start > lower + 1e-5) &&
+    all(start < upper - 1e-5), "Newton seed requires five interior bounded coordinates")
+  evaluate <- function(par) {
+    value <- as.numeric(objective$fn(par))
+    gradient <- as.numeric(objective$gr(par))
+    reference_assert(length(value) == 1L && is.finite(value) && length(gradient) == 5L &&
+      all(is.finite(gradient)), "Newton seed objective/gradient is nonfinite")
+    list(objective = value, gradient = gradient, score_inf = max(abs(gradient)))
+  }
+  initial <- evaluate(start)
+  hessian <- function(width) {
+    result <- matrix(0, 5L, 5L)
+    for (j in seq_len(5L)) {
+      step <- width * max(1, abs(start[j]))
+      high <- low <- start
+      high[j] <- high[j] + step
+      low[j] <- low[j] - step
+      reference_assert(
+        high[j] < upper[j] && low[j] > lower[j],
+        "Newton finite differences leave declared bounds"
+      )
+      result[, j] <- (evaluate(high)$gradient - evaluate(low)$gradient) / (2 * step)
+    }
+    result
+  }
+  wide <- hessian(1e-4)
+  narrow <- hessian(5e-5)
+  repeated <- evaluate(start)
+  reference_assert(
+    abs(initial$objective - repeated$objective) <= 1e-9 &&
+      max(abs(initial$gradient - repeated$gradient)) <= 1e-7,
+    "Newton marginal gradient or inner-mode branch drifted"
+  )
+  reference_assert(
+    all(is.finite(wide)) && all(is.finite(narrow)) &&
+      max(abs(wide - narrow)) <= 1e-3 &&
+      max(abs(wide - t(wide))) <= 1e-3 && max(abs(narrow - t(narrow))) <= 1e-3,
+    "Newton marginal Hessian is unstable or asymmetric"
+  )
+  matrix <- (wide + t(wide) + narrow + t(narrow)) / 4
+  eigenvalues <- eigen(matrix, symmetric = TRUE, only.values = TRUE)$values
+  reference_assert(
+    all(is.finite(eigenvalues)) && min(eigenvalues) > 0 &&
+      max(eigenvalues) / min(eigenvalues) <= 1e6,
+    "Newton marginal Hessian is not positive definite and well conditioned"
+  )
+  factor <- chol(matrix)
+  direction <- as.numeric(backsolve(factor, forwardsolve(t(factor), -repeated$gradient)))
+  reference_assert(
+    all(is.finite(direction)) && max(abs(direction)) <= 0.1 &&
+      sum(repeated$gradient * direction) < 0,
+    "Newton direction is unbounded or is not descent"
+  )
+  trials <- list()
+  for (index in 0:7) {
+    alpha <- 2^(-index)
+    candidate <- start + alpha * direction
+    if (any(candidate <= lower) || any(candidate >= upper)) {
+      trials[[length(trials) + 1L]] <- list(alpha = alpha, feasible = FALSE)
+      next
+    }
+    inspected <- evaluate(candidate)
+    trials[[length(trials) + 1L]] <- list(
+      alpha = alpha, feasible = TRUE, objective = inspected$objective,
+      score_inf = inspected$score_inf
+    )
+    if (inspected$objective < repeated$objective &&
+      inspected$score_inf < min(tolerance, repeated$score_inf)) {
+      confirmed <- evaluate(candidate)
+      reference_assert(
+        abs(confirmed$objective - inspected$objective) <= 1e-12 &&
+          max(abs(confirmed$gradient - inspected$gradient)) <= 1e-7 &&
+          confirmed$objective < repeated$objective &&
+          confirmed$score_inf < min(tolerance, repeated$score_inf),
+        "Newton selected trial objective or gradient drifted"
+      )
+      return(list(
+        par = candidate, objective = confirmed$objective,
+        diagnostics = list(
+          initial_objective = repeated$objective, initial_score_inf = repeated$score_inf,
+          hessian_widths = c(1e-4, 5e-5),
+          hessian_max_scale_difference = max(abs(wide - narrow)),
+          hessian_max_asymmetry = max(abs(wide - t(wide)), abs(narrow - t(narrow))),
+          hessian_eigenvalues = eigenvalues,
+          direction = direction, directional_derivative = sum(repeated$gradient * direction),
+          trials = trials, selected_alpha = alpha,
+          selected_trial_recheck = list(
+            objective = confirmed$objective, gradient = confirmed$gradient,
+            score_inf = confirmed$score_inf,
+            objective_drift = confirmed$objective - inspected$objective,
+            gradient_drift_inf = max(abs(confirmed$gradient - inspected$gradient))
+          )
+        )
+      ))
+    }
+  }
+  stop("Newton seed found no feasible monotone score-improving trial", call. = FALSE)
+}
+
 reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
-                          upper = rep(Inf, length(objective$par)), tolerance = 2e-4) {
+                          upper = rep(Inf, length(objective$par)), tolerance = 2e-4,
+                          nonlinear_growth_polish = FALSE) {
   fit <- nlminb(objective$par, objective$fn, objective$gr,
     lower = lower, upper = upper,
     control = list(iter.max = 1500, eval.max = 3000, rel.tol = 1e-11)
@@ -149,9 +253,61 @@ reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
   }
   attempts <- list(inspect(fit, "nlminb"))
   accepted <- function(candidate, diagnostic) {
-    candidate$convergence == 0L && all(is.finite(candidate$par)) &&
+    isTRUE(candidate$convergence == 0L) && all(is.finite(candidate$par)) &&
       is.finite(candidate$objective) && all(is.finite(diagnostic$gradient)) &&
       diagnostic$projected_score_inf < tolerance
+  }
+  polish_diagnostics <- NULL
+  fail_fit <- function(polish_reason = NULL) {
+    diagnostics <- list(optimizer_attempts = attempts)
+    if (!is.null(polish_diagnostics)) diagnostics$newton_polish <- polish_diagnostics
+    if (!is.null(polish_reason)) diagnostics$newton_polish_refusal <- polish_reason
+    stop(structure(
+      list(
+        message = "TMB optimization/refinement failed the original status or score checks",
+        call = NULL, diagnostics = diagnostics
+      ),
+      class = c("reference_fit_error", "error", "condition")
+    ))
+  }
+  verify_polished <- function(candidate, seed, baseline) {
+    check <- function() {
+      list(
+        objective = as.numeric(objective$fn(candidate$par)),
+        gradient = as.numeric(objective$gr(candidate$par))
+      )
+    }
+    first <- check()
+    second <- check()
+    reference_assert(
+      length(first$objective) == 1L && is.finite(first$objective) &&
+        length(first$gradient) == length(candidate$par) && all(is.finite(first$gradient)) &&
+        length(second$objective) == 1L && is.finite(second$objective) &&
+        length(second$gradient) == length(candidate$par) && all(is.finite(second$gradient)) &&
+        all(is.finite(candidate$par)) && all(candidate$par >= lower) && all(candidate$par <= upper),
+      "Newton-seeded final source evaluation is invalid or outside bounds"
+    )
+    projected <- first$gradient
+    projected[candidate$par <= lower + 1e-7 & first$gradient > 0] <- 0
+    projected[candidate$par >= upper - 1e-7 & first$gradient < 0] <- 0
+    projected_repeat <- second$gradient
+    projected_repeat[candidate$par <= lower + 1e-7 & second$gradient > 0] <- 0
+    projected_repeat[candidate$par >= upper - 1e-7 & second$gradient < 0] <- 0
+    reference_assert(
+      abs(first$objective - second$objective) <= 1e-12 &&
+        max(abs(first$gradient - second$gradient)) <= 1e-7 &&
+        abs(first$objective - candidate$objective) <= 1e-9 &&
+        first$objective <= seed$objective && first$objective <= baseline$objective &&
+        second$objective <= seed$objective && second$objective <= baseline$objective &&
+        max(abs(projected)) < tolerance && max(abs(projected_repeat)) < tolerance,
+      "Newton-seeded final objective, score or inner-mode branch is uncertified"
+    )
+    list(
+      objective = first$objective, gradient = first$gradient,
+      projected_score_inf = max(abs(projected)),
+      repeat_objective_drift = second$objective - first$objective,
+      repeat_gradient_drift_inf = max(abs(first$gradient - second$gradient))
+    )
   }
   if (!accepted(fit, attempts[[1]])) {
     # Optimize the same bounded objective from the retained first attempt.
@@ -165,19 +321,85 @@ reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
     refined$evaluations <- refined$counts
     attempts[[2]] <- inspect(refined, "optim L-BFGS-B refinement")
     if (!accepted(refined, attempts[[2]])) {
-      stop(structure(
-        list(
-          message = "TMB optimization/refinement failed the original status or score checks",
-          call = NULL, diagnostics = list(optimizer_attempts = attempts)
+      if (!isTRUE(nonlinear_growth_polish)) fail_fit()
+      if (!is.finite(refined$objective) || refined$objective > fit$objective) {
+        fail_fit("The second optimizer did not decrease the same objective")
+      }
+      seed <- tryCatch(
+        reference_newton_seed(objective, refined$par, lower, upper, tolerance),
+        error = function(error) error
+      )
+      if (inherits(seed, "error")) fail_fit(conditionMessage(seed))
+      polish_diagnostics <- seed$diagnostics
+      restarted <- tryCatch(
+        nlminb(seed$par, objective$fn, objective$gr,
+          lower = lower, upper = upper,
+          control = list(iter.max = 1500, eval.max = 3000, rel.tol = 1e-11)
         ),
-        class = c("reference_fit_error", "error", "condition")
-      ))
+        error = function(error) error
+      )
+      if (inherits(restarted, "error")) fail_fit(conditionMessage(restarted))
+      restarted_diagnostic <- tryCatch(
+        inspect(restarted, "nlminb Newton-seeded restart"),
+        error = function(error) error
+      )
+      if (inherits(restarted_diagnostic, "error")) fail_fit(conditionMessage(restarted_diagnostic))
+      attempts[[3]] <- restarted_diagnostic
+      restart_ok <- accepted(restarted, attempts[[3]]) &&
+        restarted$objective <= seed$objective && restarted$objective <= refined$objective
+      if (restart_ok) {
+        certificate <- tryCatch(verify_polished(restarted, seed, refined),
+          error = function(error) error
+        )
+        if (inherits(certificate, "error")) fail_fit(conditionMessage(certificate))
+        polish_diagnostics$final_recheck <- certificate
+        fit <- restarted
+      } else {
+        seed_check <- tryCatch(list(
+          objective = as.numeric(objective$fn(seed$par)),
+          gradient = as.numeric(objective$gr(seed$par))
+        ), error = function(error) error)
+        if (inherits(seed_check, "error") || length(seed_check$objective) != 1L ||
+          !is.finite(seed_check$objective) ||
+          length(seed_check$gradient) != length(seed$par) ||
+          !all(is.finite(seed_check$gradient)) ||
+          abs(seed_check$objective - seed$objective) > 1e-12 ||
+          max(abs(seed_check$gradient -
+            seed$diagnostics$selected_trial_recheck$gradient)) > 1e-7) {
+          fail_fit("Newton seed changed after failed restart")
+        }
+        last <- tryCatch(
+          optim(seed$par, objective$fn, objective$gr,
+            method = "L-BFGS-B", lower = lower, upper = upper,
+            control = list(maxit = 1500, factr = 1, pgtol = tolerance / 10)
+          ),
+          error = function(error) error
+        )
+        if (inherits(last, "error")) fail_fit(conditionMessage(last))
+        last$objective <- last$value
+        last$evaluations <- last$counts
+        last_diagnostic <- tryCatch(
+          inspect(last, "optim L-BFGS-B Newton-seeded restart"),
+          error = function(error) error
+        )
+        if (inherits(last_diagnostic, "error")) fail_fit(conditionMessage(last_diagnostic))
+        attempts[[4]] <- last_diagnostic
+        if (!accepted(last, attempts[[4]]) || last$objective > seed$objective ||
+          last$objective > refined$objective) fail_fit("Newton-seeded optimizers remained uncertified")
+        certificate <- tryCatch(verify_polished(last, seed, refined),
+          error = function(error) error
+        )
+        if (inherits(certificate, "error")) fail_fit(conditionMessage(certificate))
+        polish_diagnostics$final_recheck <- certificate
+        fit <- last
+      }
+    } else {
+      reference_assert(
+        refined$objective <= fit$objective + 1e-8 * (1 + abs(fit$objective)),
+        "TMB refinement increased the objective"
+      )
+      fit <- refined
     }
-    reference_assert(
-      refined$objective <= fit$objective + 1e-8 * (1 + abs(fit$objective)),
-      "TMB refinement increased the objective"
-    )
-    fit <- refined
   }
   final <- attempts[[length(attempts)]]
   gradient <- final$gradient
@@ -191,14 +413,22 @@ reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
   uncertainty <- TMB::sdreport(objective, par.fixed = fit$par)
   reference_assert(isTRUE(uncertainty$pdHess), "TMB fixed-parameter curvature is not positive definite")
   restored <- reference_restore_fit(objective, fit$par, fit$objective)
+  if (!is.null(polish_diagnostics)) reference_assert(
+    abs(restored$restored_loss - polish_diagnostics$final_recheck$objective) <= 1e-9 &&
+      restored$restored_loss <= polish_diagnostics$selected_trial_recheck$objective &&
+      restored$restored_loss <= polish_diagnostics$initial_objective,
+    "Newton-seeded restored objective differs from fresh final evaluation"
+  )
+  diagnostics <- list(
+    converged = TRUE, objective = fit$objective,
+    raw_score_inf = max(abs(gradient)), projected_score_inf = max(abs(projected)),
+    iterations = fit$iterations, pd_hessian = uncertainty$pdHess,
+    restored_objective = restored$restored_loss, optimizer_attempts = attempts
+  )
+  if (!is.null(polish_diagnostics)) diagnostics$newton_polish <- polish_diagnostics
   list(
     objective = objective, optimizer = fit, parameters = restored$parameters, report = restored$report,
-    diagnostics = list(
-      converged = TRUE, objective = fit$objective,
-      raw_score_inf = max(abs(gradient)), projected_score_inf = max(abs(projected)),
-      iterations = fit$iterations, pd_hessian = uncertainty$pdHess,
-      restored_objective = restored$restored_loss, optimizer_attempts = attempts
-    ),
+    diagnostics = diagnostics,
     uncertainty = uncertainty
   )
 }

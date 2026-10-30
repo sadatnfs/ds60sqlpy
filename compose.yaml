@@ -22,7 +22,7 @@ services:
       retries: 30
 
   lab:
-    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:1.2.0}
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:1.3.0}
     pull_policy: never
     build:
       context: .

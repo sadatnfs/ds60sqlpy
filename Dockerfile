@@ -10,7 +10,7 @@ RUN node scripts/compile_lesson_tex.mjs <tex-inputs.json >compiled-tex.json
 FROM ${DS60_BASE_IMAGE}
 
 LABEL org.opencontainers.image.title="DS60 Learning Lab" \
-    org.opencontainers.image.version="1.2.0" \
+    org.opencontainers.image.version="1.3.0" \
     org.opencontainers.image.description="Local classroom for programming, data science and machine learning" \
     org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy" \
     org.opencontainers.image.url="https://github.com/sadatnfs/ds60sqlpy" \

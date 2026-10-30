@@ -144,7 +144,7 @@ if [[ $action == prepare ]]; then
     echo 'Select the explicit checksum-verified prepare --binary route.' >&2
     exit 2
   }
-  base=${DS60_FLINK_JAVA_IMAGE:-ds60sqlpy-worker-scala-jvm:1.2.0}
+  base=${DS60_FLINK_JAVA_IMAGE:-ds60sqlpy-worker-scala-jvm:1.3.0}
   [[ $base =~ ^ds60sqlpy-worker-scala-jvm:[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
     echo 'Use a reviewed local Java17 classroom base.' >&2
     exit 2

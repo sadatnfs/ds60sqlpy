@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Local publisher:</strong> <code>./classroom publish</code> previews already built images. Adding <code>--push</code> uploads the selected images for their one actual architecture.</li>
 </ul>
 <p>All publication routes use one repository, <code>YOUR_DOCKERHUB_USER/ds60sqlpy</code>. Replace the placeholder with the actual lowercase username or organization namespace. The app and every ordinary worker have separate tags. PostgreSQL keeps its upstream/mirror image; GPU workers, SDK/tooling base images and unrelated local images are excluded.</p>
-<p>This checkout targets <strong>1.2.0</strong>. Its publication, native image indexes and fresh pull/resume acceptance must be checked for that exact release. A version string or an earlier successful run does not establish those gates.</p>
+<p>This checkout targets <strong>1.3.0</strong>. Its publication, native image indexes and fresh pull/resume acceptance must be checked for that exact release. A version string or an earlier successful run does not establish those gates.</p>
 <h3 id="published-release-and-its-evidence">Published release and its evidence<a class="heading-anchor" href="#published-release-and-its-evidence" aria-label="Link to this section">#</a></h3>
 <p>The <a href="https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148">1.1.0 publisher</a> completed successfully from <a href="https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644">source <code>59a0d116</code></a>. It promoted 26 combined version indexes and 26 latest aliases in <code>sadatnfs/ds60sqlpy</code>, after both native ordinary-worker and scientific-project gates passed. Its separate native AMD64 and ARM64 acceptance jobs pulled and started App/Core, retained the saved release and learner marker, and passed stop/resume with the same stateful containers and volumes.</p>
 <p>The original acceptance started App/Core only. The additional <a href="https://github.com/sadatnfs/ds60sqlpy/actions/runs/40999272225">all-module pull audit</a> accepted 19 native groups and retained 19 failed groups. A later authenticated <a href="https://github.com/sadatnfs/ds60sqlpy/actions/runs/41019340315">metadata-only observation</a> returned HTTP 404 for the 1.1.0 App tag on October 30, 2026. Keep the original receipts as historical evidence and verify current tag availability separately. Worker runtime qualification, canonical publication, fresh module pulls and saved-state acceptance remain separate gates.</p>
@@ -214,19 +214,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr></thead><tbody>
 <tr>
 <td>Full CI release after promotion</td>
-<td><code>1.2.0</code>, with <code>latest</code> then pointing to that completed release</td>
-<td><code>1.2.0-worker-python-core</code></td>
+<td><code>1.3.0</code>, with <code>latest</code> then pointing to that completed release</td>
+<td><code>1.3.0-worker-python-core</code></td>
 </tr>
 <tr>
 <td>Manual architecture set</td>
-<td><code>1.2.0-lab-arm64</code> or <code>1.2.0-lab-amd64</code></td>
-<td><code>1.2.0-worker-python-core-arm64</code> or <code>1.2.0-worker-python-core-amd64</code></td>
+<td><code>1.3.0-lab-arm64</code> or <code>1.3.0-lab-amd64</code></td>
+<td><code>1.3.0-worker-python-core-arm64</code> or <code>1.3.0-worker-python-core-amd64</code></td>
 </tr>
 </tbody></table></div>
-<p>A candidate such as <code>ci-59a0d116a1759d5d509718c52c4f3439e1986644-40961726148-1-r-statistics-amd64</code> records the source, run, attempt, profile and native architecture. It is a staging tag. Normal R setup uses <code>1.2.0-worker-r-statistics</code>; the corresponding moving alias is <code>latest-worker-r-statistics</code>. All ordinary worker aliases use <code>latest-&lt;catalog suffix&gt;</code>. Do not enter a <code>ci-*</code> candidate as the learner release.</p>
+<p>A candidate such as <code>ci-59a0d116a1759d5d509718c52c4f3439e1986644-40961726148-1-r-statistics-amd64</code> records the source, run, attempt, profile and native architecture. It is a staging tag. Normal R setup uses <code>1.3.0-worker-r-statistics</code>; the corresponding moving alias is <code>latest-worker-r-statistics</code>. All ordinary worker aliases use <code>latest-&lt;catalog suffix&gt;</code>. Do not enter a <code>ci-*</code> candidate as the learner release.</p>
 <p>Each combined release tag points to an image index containing Linux <code>amd64</code> and <code>arm64</code> variants. Docker selects the variant matching the engine. This is the default <code>--from-hub</code> layout. Manual architecture tags require the consumer&#x27;s explicit <code>--architecture-tags</code> option. Publishing ARM64 images from a Mac does not create AMD64 images for a typical Windows/WSL machine, and the local publisher does not create a combined manifest. <a href="https://docs.docker.com/build/building/multi-platform/">Docker multi-platform images</a></p>
 <h4 id="subjects-runtime-profiles-and-canonical-images">Subjects, runtime profiles and canonical images<a class="heading-anchor" href="#subjects-runtime-profiles-and-canonical-images" aria-label="Link to this section">#</a></h4>
-<p>The app contains the complete shipped reading library. A worker image contains the prepared tools for its execution profile. Several subjects can share a compatible worker, and a subject can offer variants using different workers. There is no separate image for each lesson. The following mapping comes from <code>ModuleCatalog</code> and <a href="../docker/classroom-images.tsv.html"><code>docker/classroom-images.tsv</code></a>. Every tag below is under <code>sadatnfs/ds60sqlpy:</code> for the 1.2.0 release layout. They are available only after its completed publication and acceptance. Each row describes only the lessons or variants declaring that profile. App is always included; use <code>--profile</code> for ordinary workers and <code>--image-tag app=VERSION</code> when explicitly choosing the app version.</p>
+<p>The app contains the complete shipped reading library. A worker image contains the prepared tools for its execution profile. Several subjects can share a compatible worker, and a subject can offer variants using different workers. There is no separate image for each lesson. The following mapping comes from <code>ModuleCatalog</code> and <a href="../docker/classroom-images.tsv.html"><code>docker/classroom-images.tsv</code></a>. Every tag below is under <code>sadatnfs/ds60sqlpy:</code> for the 1.3.0 release layout. They are available only after its completed publication and acceptance. Each row describes only the lessons or variants declaring that profile. App is always included; use <code>--profile</code> for ordinary workers and <code>--image-tag app=VERSION</code> when explicitly choosing the app version.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Subjects using the execution profile</th>
 <th>Image profile</th>
@@ -235,144 +235,144 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>Complete reading library, classroom UI and coordination</td>
 <td><code>app</code></td>
-<td><code>1.2.0</code></td>
+<td><code>1.3.0</code></td>
 </tr>
 <tr>
 <td>Applied Science; Bayesian Computing; CUDA CPU study variants; Data and ML Engineering; Data Visualization; TensorFlow; Applied LLMs; LLM Evaluation; LLM Theory; NLP; Statistics and ML</td>
 <td><code>python-core</code></td>
-<td><code>1.2.0-worker-python-core</code></td>
+<td><code>1.3.0-worker-python-core</code></td>
 </tr>
 <tr>
 <td>C++</td>
 <td><code>cpp20</code></td>
-<td><code>1.2.0-worker-cpp20</code></td>
+<td><code>1.3.0-worker-cpp20</code></td>
 </tr>
 <tr>
 <td>Java</td>
 <td><code>java21</code></td>
-<td><code>1.2.0-worker-java21</code></td>
+<td><code>1.3.0-worker-java21</code></td>
 </tr>
 <tr>
 <td>JavaScript and TypeScript</td>
 <td><code>javascript-node</code></td>
-<td><code>1.2.0-worker-javascript-node</code></td>
+<td><code>1.3.0-worker-javascript-node</code></td>
 </tr>
 <tr>
 <td>JavaScript and TypeScript</td>
 <td><code>typescript-node</code></td>
-<td><code>1.2.0-worker-typescript-node</code></td>
+<td><code>1.3.0-worker-typescript-node</code></td>
 </tr>
 <tr>
 <td>CUDA CPU study variants; TensorFlow</td>
 <td><code>tensorflow-cpu</code></td>
-<td><code>1.2.0-worker-tensorflow-cpu</code></td>
+<td><code>1.3.0-worker-tensorflow-cpu</code></td>
 </tr>
 <tr>
 <td>CUDA CPU study variants; Custom Likelihoods; Data and ML Engineering; PyTorch; Applied LLMs; LLM Evaluation; LLM Theory</td>
 <td><code>llm-torch-cpu</code></td>
-<td><code>1.2.0-worker-llm-torch-cpu</code></td>
+<td><code>1.3.0-worker-llm-torch-cpu</code></td>
 </tr>
 <tr>
 <td>Scala and Spark</td>
 <td><code>scala-jvm</code></td>
-<td><code>1.2.0-worker-scala-jvm</code></td>
+<td><code>1.3.0-worker-scala-jvm</code></td>
 </tr>
 <tr>
 <td>Advanced Spark Modeling; CUDA CPU study variants; Scala and Spark</td>
 <td><code>spark-local-scala</code></td>
-<td><code>1.2.0-worker-spark-local-scala</code></td>
+<td><code>1.3.0-worker-spark-local-scala</code></td>
 </tr>
 <tr>
 <td>Advanced Spark Modeling; CUDA CPU study variants; Data and ML Engineering; Scala and Spark</td>
 <td><code>spark-local-python</code></td>
-<td><code>1.2.0-worker-spark-local-python</code></td>
+<td><code>1.3.0-worker-spark-local-python</code></td>
 </tr>
 <tr>
 <td>C</td>
 <td><code>c17</code></td>
-<td><code>1.2.0-worker-c17</code></td>
+<td><code>1.3.0-worker-c17</code></td>
 </tr>
 <tr>
 <td>Go</td>
 <td><code>go</code></td>
-<td><code>1.2.0-worker-go</code></td>
+<td><code>1.3.0-worker-go</code></td>
 </tr>
 <tr>
 <td>C#</td>
 <td><code>csharp-dotnet</code></td>
-<td><code>1.2.0-worker-csharp-dotnet</code></td>
+<td><code>1.3.0-worker-csharp-dotnet</code></td>
 </tr>
 <tr>
 <td>Rust</td>
 <td><code>rust-stable</code></td>
-<td><code>1.2.0-worker-rust-stable</code></td>
+<td><code>1.3.0-worker-rust-stable</code></td>
 </tr>
 <tr>
 <td>Swift</td>
 <td><code>swift-linux</code></td>
-<td><code>1.2.0-worker-swift-linux</code></td>
+<td><code>1.3.0-worker-swift-linux</code></td>
 </tr>
 <tr>
 <td>Web Development</td>
 <td><code>php-cli</code></td>
-<td><code>1.2.0-worker-php-cli</code></td>
+<td><code>1.3.0-worker-php-cli</code></td>
 </tr>
 <tr>
 <td>JAX</td>
 <td><code>jax-cpu</code></td>
-<td><code>1.2.0-worker-jax-cpu</code></td>
+<td><code>1.3.0-worker-jax-cpu</code></td>
 </tr>
 <tr>
 <td>Bayesian Computing; Statistics and ML</td>
 <td><code>bayesian-cpu</code></td>
-<td><code>1.2.0-worker-bayesian-cpu</code></td>
+<td><code>1.3.0-worker-bayesian-cpu</code></td>
 </tr>
 <tr>
 <td>R; TMB Modeling</td>
 <td><code>r-statistics</code></td>
-<td><code>1.2.0-worker-r-statistics</code></td>
+<td><code>1.3.0-worker-r-statistics</code></td>
 </tr>
 <tr>
 <td>Data and ML Engineering; dbt; ML Engineering; Polars</td>
 <td><code>data-engineering</code></td>
-<td><code>1.2.0-worker-data-engineering</code></td>
+<td><code>1.3.0-worker-data-engineering</code></td>
 </tr>
 <tr>
 <td>Apache and Open Data Platforms</td>
 <td><code>data-platforms-python</code></td>
-<td><code>1.2.0-worker-data-platforms-python</code></td>
+<td><code>1.3.0-worker-data-platforms-python</code></td>
 </tr>
 <tr>
 <td>Bayesian Computing</td>
 <td><code>stan-cpu</code></td>
-<td><code>1.2.0-worker-stan-cpu</code></td>
+<td><code>1.3.0-worker-stan-cpu</code></td>
 </tr>
 <tr>
 <td>Julia</td>
 <td><code>julia</code></td>
-<td><code>1.2.0-worker-julia</code></td>
+<td><code>1.3.0-worker-julia</code></td>
 </tr>
 <tr>
 <td>dbt</td>
 <td><code>dbt-duckdb</code></td>
-<td><code>1.2.0-worker-dbt-duckdb</code></td>
+<td><code>1.3.0-worker-dbt-duckdb</code></td>
 </tr>
 <tr>
 <td>Python Web Development</td>
 <td><code>python-web</code></td>
-<td><code>1.2.0-worker-python-web</code></td>
+<td><code>1.3.0-worker-python-web</code></td>
 </tr>
 </tbody></table></div>
 <p>Legacy Python and Python/PostgreSQL bridge work also uses the Core environment; PostgreSQL uses its separately selected upstream database image. Browser JavaScript/D3, HTML/CSS previews, reading lessons and offline DAX do not need additional ordinary worker images. Optional CUDA profiles and the owned Kubernetes adapter are outside the full ordinary image set. Persistent service workshops have their own explicit preparation and state contracts.</p>
 <p>For R and TMB lesson pads, select the R profile with the matching source release:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --profile r-statistics --from-hub sadatnfs --tag <span class="syntax-number">1</span>.2.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --profile r-statistics --from-hub sadatnfs --tag <span class="syntax-number">1</span>.3.0</code></pre>
 <p>That selects App, Core, R and PostgreSQL. It does not pull all unrelated language workers or prepare the separate Spark/TMB reference workshop. For the classroom&#x27;s Scala and PySpark pads, explicitly select <code>scala-jvm</code>, <code>spark-local-scala</code> and <code>spark-local-python</code> as needed. Those ordinary local Spark profiles do not start a distributed cluster or install either independent modeling package.</p>
 <h3 id="1-build-and-try-the-release-on-your-machine">1. Build and try the release on your machine<a class="heading-anchor" href="#1-build-and-try-the-release-on-your-machine" aria-label="Link to this section">#</a></h3>
 <p>The CI route builds its own images on native runners. The commands in this section prepare a local installation or the manual publisher&#x27;s input images. Use Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows.</p>
 <p>Build the complete ordinary set with visible logs and start the classroom:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">1</span>.2.0 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">1</span>.3.0 --rebuild</code></pre>
 <p>To build without starting services:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">1</span>.2.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">1</span>.3.0</code></pre>
 <p>Already built and tested the matching image set? No rebuild is required merely to publish it manually. Check actual lessons, compiler diagnostics, figures, saved drafts and prior results, then verify stop/resume:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom stop
 ./classroom resume</code></pre>
@@ -384,20 +384,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Docker Hub normally uses a device-code/browser sign-in flow. An interactive username-and-token login is available through <code>docker login --username YOUR_LOGIN_USERNAME</code>. Keep credentials in Docker&#x27;s configured credential store and out of source files, commands, screenshots and lessons. Organization destinations need write access from the authenticated account. The local publisher never logs in or reads a password. <a href="https://docs.docker.com/reference/cli/docker/login/">Docker login</a>, <a href="https://docs.docker.com/security/access-tokens/">access tokens</a>.</p>
 <h3 id="3-review-the-complete-image-mapping-then-publish-manually">3. Review the complete image mapping, then publish manually<a class="heading-anchor" href="#3-review-the-complete-image-mapping-then-publish-manually" aria-label="Link to this section">#</a></h3>
 <p>Preview the complete local image set without tagging or uploading:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0</code></pre>
 <p>Omitting a selection, or adding <code>--all</code>, includes the app and every ordinary worker in <code>docker/classroom-images.tsv</code>. All selected images must exist and agree on one Linux architecture before any tag or push operation. The tag defaults to the checked-in source version; an explicit version must match it. Each invocation inspects the current local images and pins their immutable IDs. It neither builds missing images nor proves that existing images passed tests.</p>
 <p>After reviewing the mapping and your local qualification, upload deliberately:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0 --push</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0 --push</code></pre>
 <p>Keep the tested image set unchanged between review and upload. A missing image stops preflight before any selected image is tagged or pushed. Prepare the complete set first, or explicitly select a smaller distribution.</p>
 <p>For a starter-only set, preview both necessary images:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0 --profile app --profile python-core</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0 --profile app --profile python-core</code></pre>
 <p>Append <code>--push</code> only when ready to upload that same selection. Repeated <code>--profile</code> options select exact images, with no implicit app or Core. <code>--all</code> and <code>--profile</code> cannot be combined. A partial set cannot serve a full <code>--all</code> installation. The older <code>./scripts/publish-images</code> entrypoint and <code>--namespace</code>/<code>--version</code> aliases remain supported; supply one spelling per namespace/version option.</p>
 <p>This route creates architecture tags only. A learner on that architecture uses:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0 --architecture-tags</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0 --architecture-tags</code></pre>
 <p>Use <code>--starter</code> instead of <code>--all</code> for the explicitly published starter set. There is no manual <code>latest</code> shortcut. Treat released architecture tags as immutable and use a new checked-in version when image content changes.</p>
 <h3 id="4-start-from-published-images">4. Start from published images<a class="heading-anchor" href="#4-start-from-published-images" aria-label="Link to this section">#</a></h3>
 <p>Download the checkout or starter ZIP matching the release for its launcher and Compose files. After a full <code>[publish-docker]</code> publication, pull and start the combined release:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0</code></pre>
 <p>For a new project, omitting <code>--tag</code> resolves the app&#x27;s <code>latest</code> alias and saves its concrete version. The accepted partial 1.0.0 release contains App, Core, JavaScript and TypeScript. Select only those workers and pin that release, including after <code>latest</code> moves to a later completed full release:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom --profile javascript-node --profile typescript-node <span class="syntax-string">\</span>
   --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.0.0</code></pre>
@@ -418,16 +418,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An individual <code>VERSION</code> may be <code>latest</code>. The launcher uses Docker Buildx to read that worker alias&#x27;s published OCI index, checks its profile, source revision and Linux AMD64/ARM64 platforms, and saves its actual version. If Buildx or valid index metadata is unavailable, choose a concrete version. Any different worker patch version must stay in the app&#x27;s major.minor line and have the same published source revision. Current CI binds one checked-in version to each source revision, so its releases do not qualify mixing worker images from different versions. A different revision stops before startup. Manual architecture tags do not support latest aliases or mixed-version selections. The project&#x27;s saved image settings remain compatible with older three-field and four-field selections. Use <code>--image-tag javascript-node=default --rebuild</code> to remove a saved worker pin and make it inherit the app&#x27;s version again. An explicit <code>--tag VERSION</code> sets a new default and resets previous worker pins unless you repeat them.</p>
 <h4 id="pull-only-setup-and-strict-resume">Pull-only setup and strict resume<a class="heading-anchor" href="#pull-only-setup-and-strict-resume" aria-label="Link to this section">#</a></h4>
 <p>For a new project using a completed full release, separate downloading from startup:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0
+<pre class="highlighted-code"><code class="language-bash">./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0
 ./classroom resume</code></pre>
 <p>The project records the namespace, layout, profiles and concrete release. <code>resume</code> and <code>--no-build</code> never pull, build or resolve latest. Ordinary startup can prepare missing images from the saved source. Pull-only preparation leaves existing containers unchanged.</p>
 <p>Existing saved Hub settings from older versions retain their architecture-tag layout. A new explicit <code>--from-hub</code> selection defaults to the combined layout; add <code>--architecture-tags</code> when selecting a manual/older architecture release.</p>
 <h4 id="apply-an-update-while-retaining-progress">Apply an update while retaining progress<a class="heading-anchor" href="#apply-an-update-while-retaining-progress" aria-label="Link to this section">#</a></h4>
 <p>For an existing local project, an architecture-layout project moving to CI tags, or an intentional Hub version update, keep the project name and apply the intended full release explicitly:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.2.0 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">1</span>.3.0 --rebuild</code></pre>
 <p>Use the matching new source version when upgrading. To deliberately follow <code>latest</code> again, update the checkout/ZIP and use <code>--tag latest --rebuild</code>. In Hub mode, <code>--rebuild</code> pulls and applies images; it never compiles locally. A new download alone does not replace running containers.</p>
 <p>To return to local development:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">1</span>.2.0 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">1</span>.3.0 --rebuild</code></pre>
 <p>Keep the same custom <code>--project NAME</code> on every command. Images contain runtime tools and course sources, not saved drafts, notes, receipts or database state. Named volumes retain that state. Moving machines requires the separate <a href="one-command-classroom.md.html#backup-and-transfer">backup and transfer procedure</a>.</p>
 <h3 id="5-github-actions-publication">5. GitHub Actions publication<a class="heading-anchor" href="#5-github-actions-publication" aria-label="Link to this section">#</a></h3>
 <p>The separate <a href="targeted-images.md.html">targeted image workflow</a> accepts a HEAD marker such as <code>[build-test-js]</code> to qualify the JavaScript and TypeScript group on both native platforms without publishing. <code>[publish-js]</code> on <code>main</code> publishes App, Core and that group after the required checks. Profile names are aliases for their complete qualification group. Its partial versioned release needs selected profiles in the install command above.</p>
@@ -450,7 +450,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>After local checks, stage the reviewed release changes on <code>main</code> and create the opt-in commit, for example:</p>
 <pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;Release the reviewed version [publish-docker]&quot;</span>
 git push origin main</code></pre>
-<p>The checked-in source version is <code>1.2.0</code>. A new image release from changed source needs the next coherent checked-in version before this commit. The workflow reads that version rather than inventing a registry-only version. Do not combine a publication commit with a CI-skip marker or overwrite an existing release.</p>
+<p>The checked-in source version is <code>1.3.0</code>. A new image release from changed source needs the next coherent checked-in version before this commit. The workflow reads that version rather than inventing a registry-only version. Do not combine a publication commit with a CI-skip marker or overwrite an existing release.</p>
 <h4 id="native-builds-staging-and-promotion">Native builds, staging and promotion<a class="heading-anchor" href="#native-builds-staging-and-promotion" aria-label="Link to this section">#</a></h4>
 <p>The gate waits for the exact revision&#x27;s source validation and Docker starter checks, and promotion rechecks that qualification before canonical tag writes. The ordinary Docker runtime matrix is skipped for this marked main push because the publication workflow performs the native runtime qualification itself.</p>
 <ol>
@@ -462,7 +462,7 @@ git push origin main</code></pre>
 <p>Staging uploads can occur before the full matrix completes. A staging tag is not a completed release. Normal installation uses the completed app/version pointer and its concrete worker version tags. This order avoids selecting a new app before its required worker versions are available.</p>
 <h4 id="retrying-an-interrupted-run">Retrying an interrupted run<a class="heading-anchor" href="#retrying-an-interrupted-run" aria-label="Link to this section">#</a></h4>
 <p>Registry operations across multiple tags are not a transaction. <strong>Re-run failed jobs</strong> can reuse successful receipts from earlier attempts of the same workflow run and source revision. The selected receipts must be unique and valid, and worker receipts must bind the exact app/Core seed digests they used. Receipts from another run or revision are rejected; rebuilt seeds cannot silently be combined with old worker results.</p>
-<p>A failed promotion can complete matching partial version tags using those original image identities, without rewriting completed matching tags. A new commit or a full rebuild that encounters partial or conflicting immutable tags must finish the original failed promotion or use a consistent checked-in patch bump, such as <code>1.2.1</code> after 1.2.0. No registry-only version is invented.</p>
+<p>A failed promotion can complete matching partial version tags using those original image identities, without rewriting completed matching tags. A new commit or a full rebuild that encounters partial or conflicting immutable tags must finish the original failed promotion or use a consistent checked-in patch bump, such as <code>1.2.1</code> after 1.3.0. No registry-only version is invented.</p>
 <p>A complete same-revision release can be recognized without rebuilding or used to finish missing latest aliases. Older reruns cannot move latest backward. Do not delete or overwrite a published version merely to make a run succeed.</p>
 <p>If promotion succeeds but the later Hub pull check fails, the canonical version tags already exist and must remain immutable. The dispatch-only <code>verify-published-images.yml</code> workflow can check the original partial 1.0.0 receipt and tags from a verifier-only source commit, with no stage or push operation. Its <a href="https://github.com/sadatnfs/ds60sqlpy/actions/runs/40787547771">native read-only acceptance</a> passed on AMD64 and ARM64 after a test expectation and learner-identity fix. A new release still needs its own promotion and automatic pull acceptance.</p>
 <p>Review the actual workflow result, receipts and published manifests before announcing availability. The historical 1.1.0 evidence is identified above; configuration, staging pushes and local tests do not establish a later release.</p>
@@ -481,7 +481,7 @@ git push origin main</code></pre>
 <p>The separate <a href="https://github.com/sadatnfs/ds60sqlpy/blob/main/.github/workflows/inspect-registry-metadata.yml"><code>inspect-registry-metadata.yml</code></a> workflow runs focused, hash-locked diagnostic tests followed by native metadata observations. It uses authenticated and anonymous-control HEAD requests to observe quota, plus an authenticated canonical App HEAD. It does not pull images or write registry tags, and it does not claim classroom or whole-source acceptance. It retains config-binding booleans, numeric quota/status/retry fields and proxy/mirror presence without credentials, raw token claims, IP headers, config contents or response bodies.</p>
 <p>A maintainer can dispatch that observation with:</p>
 <pre class="highlighted-code"><code class="language-bash">gh workflow run inspect-registry-metadata.yml <span class="syntax-string">\</span>
-  --repo sadatnfs/ds60sqlpy --ref main -f version<span class="syntax-operator">=</span><span class="syntax-number">1</span>.2.0</code></pre>
+  --repo sadatnfs/ds60sqlpy --ref main -f version<span class="syntax-operator">=</span><span class="syntax-number">1</span>.3.0</code></pre>
 <p>A successful login alone does not prove how every later request was attributed. Authenticated requests can still meet shared-IP throttling. Missing quota headers mean unknown, not unlimited capacity; deleting images does not reset a pull-rate limit. Use the actual status and available quota observations to decide whether to wait or investigate auth/config propagation. A missing canonical-tag HEAD alone does not distinguish a missing tag from a missing/private repository. <a href="https://docs.docker.com/docker-hub/usage/pulls/">Docker pull-limit diagnostics</a> and <a href="https://docs.docker.com/docker-hub/troubleshoot/">429 troubleshooting</a>.</p>
 <p>The full module audit keeps its seven-job source gate. After that gate and current registry state have been reconciled, <code>resume_runs</code> accepts completed prior full-audit run IDs and follows their bounded recovery ancestry. It validates and retains their raw accepted receipts, source/verifier/job identities and hashes. Recovery selects one unresolved canary by default. The optional <code>cases</code> input can select up to six unresolved <code>group/architecture</code> pairs, separated by commas; an already accepted case is refused. At most four selected cases run concurrently, and known exhausted quota or rejected registry observations stop before image pulls.</p>
 <p>Prior receipts remain historical evidence. They do not establish current availability after tags or repositories have been removed or changed. Inspect current canonical identities before treating retained scope as live coverage. Do not overwrite immutable versions, replay every accepted group blindly, or reinterpret a metadata-only workflow result as a completed module audit.</p>

@@ -85,7 +85,7 @@ prepare_image() {
   esac
   build_args=()
   if [[ $image == ds60-apache-ballista-swift:54.1.0 ]]; then
-    base=ds60sqlpy-worker-swift-linux:1.2.0
+    base=ds60sqlpy-worker-swift-linux:1.3.0
     [[ $("$docker_cmd" image inspect --format '{{.Os}}|{{.Architecture}}' "$base") == "$native" ]] || {
       echo 'Prepare the matching native Swift/Noble classroom image first.' >&2
       exit 2

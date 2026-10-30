@@ -123,7 +123,10 @@ reference_growth_case <- function(engine, seed) {
     list(theta = c(0.3, log(2), log(0.35), log(0.3), log(0.25)), u = rep(0, groups)),
     random = "u"
   )
-  fitted <- reference_fit(objective, lower = c(-5, -3, -5, -6, -6), upper = c(5, 4, 2, 2, 2))
+  fitted <- reference_fit(objective,
+    lower = c(-5, -3, -5, -6, -6), upper = c(5, 4, 2, 2, 2),
+    nonlinear_growth_polish = TRUE
+  )
   theta <- fitted$parameters$theta
   latent <- fitted$parameters$u
   future_time <- c(9, 10, 11)

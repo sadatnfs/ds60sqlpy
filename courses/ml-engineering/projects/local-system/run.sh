@@ -20,7 +20,7 @@ fi
   exit 2
 }
 if [[ ! -e .env ]]; then
-  image=${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.2.0}
+  image=${DS60_DATA_IMAGE:-ds60sqlpy-worker-data-engineering:1.3.0}
   docker image inspect "$image" >/dev/null 2>&1 || {
     echo 'Prepare the data-engineering image from the main repository first; see README.md.' >&2
     exit 2

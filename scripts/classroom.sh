@@ -63,7 +63,7 @@ Examples:
   ./classroom
   ./classroom --starter
   ./classroom --profile cpp20 --profile java21
-  ./classroom --starter --from-hub USER --image-tag python-core=1.2.0
+  ./classroom --starter --from-hub USER --image-tag python-core=1.3.0
   ./classroom resume
   ./classroom --rebuild
   ./classroom stop

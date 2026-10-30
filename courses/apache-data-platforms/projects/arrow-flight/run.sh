@@ -90,7 +90,7 @@ if [[ ! -e .env && ! -L .env ]]; then
     echo 'No initialized workshop. Use start first.' >&2
     exit 2
   }
-  image=${DS60_PLATFORM_IMAGE:-ds60sqlpy-worker-data-platforms-python:1.2.0}
+  image=${DS60_PLATFORM_IMAGE:-ds60sqlpy-worker-data-platforms-python:1.3.0}
   [[ $image =~ ^ds60sqlpy-worker-data-platforms-python:[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
     echo 'Use a local versioned data-platforms-python image.' >&2
     exit 2

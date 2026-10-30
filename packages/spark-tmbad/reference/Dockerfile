@@ -18,6 +18,7 @@ ENV MAKEFLAGS=-j1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
     PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 HOME=/tmp
 RUN python3 prepare.py --output /opt/reference-prepared --allow-download \
     && Rscript --vanilla tests/pure.R /opt/reference \
+    && Rscript --vanilla tests/newton_seed.R /opt/reference \
     && chmod -R a+rX /opt/reference /opt/reference-prepared \
     && mkdir /work && chown 65534:65534 /work
 WORKDIR /work

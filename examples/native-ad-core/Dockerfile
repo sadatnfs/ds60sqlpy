@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-cpp20:1.2.0
+ARG BASE_IMAGE=ds60sqlpy-worker-cpp20:1.3.0
 FROM ${BASE_IMAGE}
 USER root
 WORKDIR /opt/native-ad

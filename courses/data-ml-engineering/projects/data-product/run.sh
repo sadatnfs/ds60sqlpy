@@ -24,7 +24,7 @@ Owned data-product workshop (Docker only; Windows uses WSL 2)
   ./run.sh rollback VERSION --reason TEXT
   ./run.sh configure-port PORT  Change the saved port only after down
 Initial options: DS60_PRODUCT_PORT=8894
-  DS60_PRODUCT_IMAGE=ds60sqlpy-worker-data-engineering:1.2.0
+  DS60_PRODUCT_IMAGE=ds60sqlpy-worker-data-engineering:1.3.0
 Images are never built or pulled here. State stays in this copy's .workshop/.
 HELP
   exit 0
@@ -108,7 +108,7 @@ if [[ ! -e .workshop/settings.env ]]; then
     echo 'This copy has no saved workshop. Run ./run.sh start first.' >&2
     exit 2
   }
-  image_ref=${DS60_PRODUCT_IMAGE:-ds60sqlpy-worker-data-engineering:1.2.0}
+  image_ref=${DS60_PRODUCT_IMAGE:-ds60sqlpy-worker-data-engineering:1.3.0}
   port=${DS60_PRODUCT_PORT:-8894}
   [[ $image_ref =~ ^[A-Za-z0-9][A-Za-z0-9._/:@-]+$ ]] || exit 2
   [[ $port =~ ^[1-9][0-9]{3,4}$ && $port -ge 1024 && $port -le 65535 ]] || {

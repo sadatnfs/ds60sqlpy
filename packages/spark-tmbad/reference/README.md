@@ -58,6 +58,18 @@ source archives and complete compressed build logs are retained. A preparation
 failure never creates a successful manifest or replaces an existing prepared
 installation. Source changes require fresh preparation and qualification.
 
+For `nonlinear_growth` only, the serial fit has a bounded local recovery route
+when its ordinary `nlminb` and L-BFGS-B attempts both fail the existing
+status or score checks. It differentiates the actual marginal score at two
+step scales and requires stable, finite, positive definite curvature, an
+interior descent direction and a strictly lower objective with an improved
+score. That point is only a seed for a fresh optimizer. Acceptance still
+requires genuine optimizer status 0, the unchanged projected-score threshold,
+positive definite `sdreport` curvature and restored objective/layout checks.
+Every failed attempt and refusal remains visible. The portable pure controls
+run during image preparation after `tests/pure.R`; this route does not change
+the nonlinear model, other reference cases or the scientific target.
+
 ## Work through concrete examples
 
 The Python driver accepts registry identifiers and bounded data-only options.
