@@ -12,6 +12,8 @@ from pathlib import Path
 
 def assert_installed_wheel():
     """Refuse source-tree masking when claiming an installed distribution pass."""
+    import ds60_torch_training as training_package
+
     import ds60_spark_likelihood as package
 
     distribution = importlib.metadata.distribution("ds60-spark-likelihood")
@@ -26,7 +28,35 @@ def assert_installed_wheel():
         raise RuntimeError(
             "validation must resolve the installed wheel, not an editable/source checkout"
         )
+    training_declared = distribution.locate_file("ds60_torch_training/__init__.py").resolve()
+    training_actual = Path(training_package.__file__).resolve()
+    if training_actual != training_declared or not training_actual.is_file():
+        raise RuntimeError("Torch training must resolve through the same installed wheel")
     files = {str(path) for path in distribution.files or ()}
+    required_training = {
+        "ds60_torch_training/" + name + ".py"
+        for name in (
+            "__init__",
+            "_integration_fixture",
+            "contracts",
+            "program",
+            "data",
+            "checkpoint",
+            "torch_adapter",
+            "runner",
+            "launch",
+            "observer",
+            "training_examples",
+        )
+    }
+    if not required_training <= files:
+        raise RuntimeError("Installed wheel is missing a Torch training source module")
+    try:
+        importlib.metadata.distribution("ds60-torch-training-draft")
+    except importlib.metadata.PackageNotFoundError:
+        pass
+    else:
+        raise RuntimeError("Obsolete separate draft wheel masks one-wheel acceptance")
     if any(path.startswith("ds60sqlpy/") for path in files):
         raise RuntimeError("standalone wheel unexpectedly contains classroom code")
     if any(name == "ds60sqlpy" or name.startswith("ds60sqlpy.") for name in sys.modules):
@@ -38,6 +68,7 @@ def assert_installed_wheel():
                 "passed": True,
                 "version": distribution.version,
                 "module_path": str(actual),
+                "training_module_path": str(training_actual),
                 "classroom_imported": False,
                 "rscript_present": shutil.which("Rscript") is not None,
             },

@@ -133,6 +133,12 @@ jobs:
         run: uv run --no-sync python scripts/build_course_guide.py --check
       - name: Check generated lesson reader drift
         run: uv run --no-sync python scripts/build_lesson_readers.py --check
+      - name: Check accomplishment lookup and loader parity
+        env:
+          DS60_INDEX_REPO: ${{ github.workspace }}
+        run: |
+          uv run --no-sync python accomplishments/index.py check --repo .
+          uv run --no-sync python -m unittest -v accomplishments/test_index.py
       - name: Validate published HTML links and heading anchors
         run: uv run --no-sync python scripts/check_published_links.py
       - name: Validate authored module manifests

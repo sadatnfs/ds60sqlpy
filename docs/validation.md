@@ -88,6 +88,8 @@ python scripts/check_content_rendering.py
 python scripts/build_course_guide.py --check
 python scripts/compile_lesson_tex.py --check
 python scripts/build_lesson_readers.py --check
+python accomplishments/index.py check --repo .
+DS60_INDEX_REPO="$PWD" python -m unittest -v accomplishments/test_index.py
 python scripts/check_modules.py
 python scripts/check_repository_guidance.py
 python scripts/validate_notebooks.py
@@ -116,8 +118,14 @@ and synchronized typesetting artifacts, not correct derivations or statistical
 assumptions. Code remains literal, and uncompiled draft expressions retain the
 safe native MathML fallback.
 
-After an intentional content change, regenerate the catalog, reports and
-readers with `make generate`, or run that target's listed Python commands when
+The [accomplishment lookup](../accomplishments/INDEX.md) is generated from
+maintained source and edited `manual-capabilities.json`. Its byte-for-byte
+check and loader-parity test run after catalog and reader checks. Keep the
+dated `RUNNING.md` manual. A source row is not runtime, publication or learner
+acceptance.
+
+After an intentional content change, regenerate the catalog, reports,
+readers and accomplishment lookup with `make generate`, or run that target's listed Python commands when
 Make is unavailable. Review the generated diff. Never hand-edit maintained
 HTML to hide source drift. The journey preview is a developer design archive;
 the live `/classroom`, `/learn` and `/journeys` URLs use one shared interface.

@@ -30,10 +30,17 @@ def main() -> None:
         PACKAGE / "LICENSE",
         PACKAGE / "MANIFEST.in",
     ]
-    for directory in ("src", "docs", "examples"):
+    for directory in ("src", "docs", "examples", "training-integration"):
         if any(path.is_symlink() for path in (PACKAGE / directory).rglob("*")):
             parser.error("Package trees must not contain symlinks")
-    sources += list((PACKAGE / "src").rglob("*.py"))
+        sources += [
+            path
+            for path in (PACKAGE / directory).rglob("*")
+            if path.is_file()
+            and "__pycache__" not in path.parts
+            and path.suffix != ".pyc"
+            and path.name != ".DS_Store"
+        ]
     if any(path.is_symlink() or not path.is_file() for path in sources):
         parser.error("Package build inputs must be regular files")
     before = {
@@ -46,7 +53,7 @@ def main() -> None:
         copied.mkdir()
         for name in ("pyproject.toml", "README.md", "LICENSE", "MANIFEST.in"):
             shutil.copyfile(PACKAGE / name, copied / name)
-        for name in ("src", "docs", "examples"):
+        for name in ("src", "docs", "examples", "training-integration"):
             shutil.copytree(
                 PACKAGE / name,
                 copied / name,

@@ -21,6 +21,10 @@ notice. For legacy Python/SQL/bridge use the catalog and planner. For modern
 subjects use `ModuleCatalog`, the authored manifest and the selected variant.
 Use `module_subjects`, `module_lessons` and `module_lesson` through the MCP
 adapter when available. Planned metadata is not proof of an authored lesson.
+Use the [accomplishment lookup](../../../accomplishments/INDEX.md) to find
+a registered lesson, model or package API. Its statuses are source and
+evidence metadata, not saved learner progress, installed optional runtime
+proof or current publication. The catalog remains the lesson loader.
 The catalog's `learning_mode: tutorial` exposes complete worked answers for the
 statistics book, Applied Science and Bayesian Computing. Do not apply a practice
 answer gate to those tracks.

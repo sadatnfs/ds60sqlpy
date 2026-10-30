@@ -1,0 +1,3 @@
+include README.md LICENSE
+recursive-include accomplishments *.md *.json *.py
+global-exclude __pycache__ *.py[cod]

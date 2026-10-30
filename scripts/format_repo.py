@@ -469,6 +469,7 @@ def ensure_publication_paths(root: Path) -> None:
         "README.md",
         "CONTRIBUTING.md",
         "AGENTS.md",
+        "accomplishments",
         "lesson-pages",
         "reference-pages",
         "courses",
@@ -541,6 +542,14 @@ def generated_views(root: Path, check: bool) -> bool:
         if check:
             command.append("--check")
         success = run(command, root) and success
+    index_command = [
+        sys.executable,
+        str(root / "accomplishments/index.py"),
+        "check" if check else "build",
+        "--repo",
+        str(root),
+    ]
+    success = run(index_command, root) and success
     return success
 
 

@@ -45,7 +45,11 @@ Use the [authoring skill](../.agents/skills/add-learning-path/SKILL.md),
 [extension playbook](curriculum-extension-playbook.md), [module contract](implementation/ADDING_A_MODULE.md)
 and [content contract](content-authoring.md) for progression, durable sources,
 registration, runtime preparation and browser acceptance. Read the closest subject
-AGENTS file and authoring README. Derive IDs/counts from loaders, not another list.
+AGENTS file and authoring README. Derive IDs/counts from loaders,
+not another list. Use the [accomplishment lookup](../accomplishments/INDEX.md)
+for source-derived discovery and its
+[running log](../accomplishments/RUNNING.md) for dated evidence. They do not
+replace the catalog loaders or learner progress.
 
 The [curriculum map](curriculum-map.md), [gap backlog](curriculum-gap-backlog.md)
 and [design references](curriculum-design-references.md) support teaching decisions.

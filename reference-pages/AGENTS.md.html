@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="repository-guidance-for-coding-agents">Repository guidance for coding agents<a class="heading-anchor" href="#repository-guidance-for-coding-agents" aria-label="Link to this section">#</a></h2>
 <h3 id="mission-and-first-steps">Mission and first steps<a class="heading-anchor" href="#mission-and-first-steps" aria-label="Link to this section">#</a></h3>
-<p>Maintain one local Docker classroom at <code>/classroom</code> for programming, data science, statistics, machine learning and systems. Derive subject and lesson IDs, variants and readiness from the catalog loaders, not a copied inventory. Historical day numbers are stable labels, not a deadline.</p>
+<p>Maintain one local Docker classroom at <code>/classroom</code> for programming, data science, statistics, machine learning and systems. Derive subject and lesson IDs, variants and readiness from the catalog loaders, not a copied inventory. The <a href="accomplishments/INDEX.md.html">accomplishment lookup</a> helps find registered source and evidence records; it does not track learner progress or prove current publication. Historical day numbers are stable labels, not a deadline.</p>
 <p>Read <a href="README.md.html">README.md</a>, <a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a>, and the closest subject <code>AGENTS.md</code>. Inspect <code>git status --short --branch</code> and preserve unrelated work. Use the user&#x27;s requested checkout and parallel agents with explicit file ownership. Respect existing task authorization; do not add a separate approval step for ordinary authorized edits. Git publication, image publication, history rewrites and destructive cleanup have distinct scopes. Do not use em dashes.</p>
 <h3 id="choose-the-right-role">Choose the right role<a class="heading-anchor" href="#choose-the-right-role" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -225,6 +225,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>Unified directory, editor and preview</td>
 <td><code>classroom.py</code>, <code>assets/classroom.*</code>, <code>browser_runs.py</code></td>
+</tr>
+<tr>
+<td>Accomplishment lookup and dated evidence log</td>
+<td><a href="accomplishments/INDEX.md.html">index</a>, generated <code>accomplishments/inventory.json</code>, edited <code>accomplishments/manual-capabilities.json</code>, manual <a href="accomplishments/RUNNING.md.html">running log</a>, <a href="accomplishments/index.py.html">builder</a></td>
 </tr>
 <tr>
 <td>Historical Python/SQL/bridge identity</td>

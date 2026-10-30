@@ -56,6 +56,7 @@ COPY docs /opt/spark-likelihood/docs
 COPY examples /opt/spark-likelihood/examples
 COPY tests /opt/spark-likelihood/tests
 COPY integration /opt/spark-likelihood/integration
+COPY training-integration /opt/spark-likelihood/training-integration
 COPY tooling/*.py tooling/*.md tooling/lock-provenance.json /opt/spark-likelihood/tooling/
 COPY tooling/locks /opt/spark-likelihood/tooling/locks
 COPY tooling/tests /opt/spark-likelihood/tooling/tests

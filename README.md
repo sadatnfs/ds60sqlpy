@@ -494,7 +494,11 @@ the maintained architecture and explicit verification boundaries. Use the
 workflow result for the exact revision when checking CI status.
 The [curriculum map](docs/curriculum-map.md) and generated catalog describe the
 Python, SQL and bridge inventory; authored module manifests retain the newer
-subjects' stable IDs.
+subjects' stable IDs. The [accomplishment lookup](accomplishments/INDEX.md)
+provides source-derived search across lessons, package APIs, models, reference
+cases and study IDs. Its separate [running log](accomplishments/RUNNING.md)
+records dated evidence tiers. Neither is learner progress or a current release
+acceptance claim.
 
 ## Develop and contribute
 

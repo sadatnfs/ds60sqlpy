@@ -2,7 +2,7 @@
 
 The low-dimensional likelihood optimizer supports at most 64 parameters and moves only numerical objective/gradient summaries to its driver. It is not a general neural-network DDP trainer. Large neural networks use a training loop, distributed optimizer state, data sharding, checkpointing and a failure policy appropriate to that workload.
 
-The package retains separate, original integration examples using Spark's actual TorchDistributor, PyTorch DDP and Lightning. They have one- and two-process CPU oracles, explicit unequal-rank loss scaling and a sampler-padding audit. They demonstrate local process coordination. They do not establish multi-node scheduling, GPU assignment, remote storage recovery or large-model throughput.
+The package retains separate, original integration examples using Spark's actual TorchDistributor, PyTorch DDP and Lightning. They have one- and two-process CPU oracles, explicit unequal-rank loss scaling and a sampler-padding audit. They demonstrate local process coordination. The bounded CPU executor training route in [CPU executor training](CPU-TORCH-TRAINING.md) has its own immutable data, checkpoint and observer contract. None of these local checks establishes remote-cluster or GPU performance.
 
 ## Prepare explicitly before running
 

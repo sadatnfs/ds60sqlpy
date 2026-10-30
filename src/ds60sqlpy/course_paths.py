@@ -14,6 +14,7 @@ COURSE_PATHS = (
     "sql",
     "bridge",
     "docs",
+    "accomplishments",
     "lesson-pages",
     "reference-pages",
     "START_HERE.html",

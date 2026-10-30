@@ -1,0 +1,162 @@
+name: Standalone Spark PyTorch package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: torch-standalone-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Independent Spark PyTorch (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    # Build and three serial Compose deadlines need separate evidence-upload headroom.
+    timeout-minutes: 210
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            machine: x86_64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            machine: aarch64
+            runner: ubuntu-24.04-arm
+    env:
+      EXPECTED_MACHINE: ${{ matrix.machine }}
+      EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
+      IMAGE: ds60-torch-qualification:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+      - name: Freeze the independently copied package
+        timeout-minutes: 5
+        run: |
+          test "$(uname -m)" = "$EXPECTED_MACHINE"
+          test "$(docker info --format '{{.OSType}}')" = linux
+          mkdir -p "$RUNNER_TEMP/torch-evidence"
+          chmod 777 "$RUNNER_TEMP/torch-evidence"
+          cp -a packages/spark-likelihood "$RUNNER_TEMP/torch-project"
+          test ! -e "$RUNNER_TEMP/torch-project/.git"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/torch-evidence/source-revision.txt"
+          printf 'PACKAGE=%s\n' "$RUNNER_TEMP/torch-project" >> "$GITHUB_ENV"
+          printf 'REPORTS=%s\n' "$RUNNER_TEMP/torch-evidence" >> "$GITHUB_ENV"
+      - name: Authenticate hosted base-image pulls privately
+        timeout-minutes: 5
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKERHUB_USERNAME"
+          test -n "$DOCKERHUB_TOKEN"
+          export DOCKER_CONFIG="$RUNNER_TEMP/torch-docker-config"
+          install -d -m 700 "$DOCKER_CONFIG"
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          chmod 600 "$DOCKER_CONFIG/config.json"
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
+      - name: Build the neutral default image with pinned CPU dependencies
+        timeout-minutes: 65
+        run: |
+          timeout 3600 docker build --pull --progress=plain --tag "$IMAGE" "$PACKAGE" 2>&1 | tee "$REPORTS/default-build.log"
+          test "$(docker image inspect "$IMAGE" --format '{{.Architecture}}')" = "$EXPECTED_ARCHITECTURE"
+          docker image inspect "$IMAGE" > "$REPORTS/image.json"
+      - name: Retain installed source, wheel and preparation identities
+        timeout-minutes: 10
+        run: |
+          export_container="torch-export-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$EXPECTED_ARCHITECTURE"
+          mkdir -p "$RUNNER_TEMP/torch-install"
+          docker create --name "$export_container" --entrypoint /bin/true "$IMAGE"
+          trap 'docker rm "$export_container" >/dev/null 2>&1 || true' EXIT
+          docker cp "$export_container:/opt/spark-likelihood" "$RUNNER_TEMP/torch-install/project"
+          docker cp "$export_container:/opt/spark-likelihood-wheels" "$RUNNER_TEMP/torch-install/wheels"
+          docker rm "$export_container"
+          trap - EXIT
+          cp "$RUNNER_TEMP/torch-install/project/preparation.json" "$REPORTS/preparation.json"
+          cp "$RUNNER_TEMP/torch-install/project/environment.json" "$REPORTS/environment.json"
+          tar -czf "$REPORTS/installed-package.tar.gz" -C "$RUNNER_TEMP/torch-install" .
+      - name: Check numerical, installed Spark and checkpoint APIs offline
+        timeout-minutes: 20
+        run: |
+          flags=(--rm --pull=never --network=none --read-only --cpus=2 --memory=4g --pids-limit=1024
+            --cap-drop=ALL --security-opt=no-new-privileges --hostname localhost
+            --env SPARK_LOCAL_IP=127.0.0.1 --env JAVA_TOOL_OPTIONS='-Duser.home=/tmp -XX:ActiveProcessorCount=2'
+            --tmpfs '/tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777'
+            --tmpfs '/work:rw,exec,nosuid,nodev,size=536870912,mode=1777')
+          docker run "${flags[@]}" --entrypoint python3 "$IMAGE" \
+            /opt/spark-likelihood/tooling/check_environment.py > "$REPORTS/installed-environment.log" 2>&1
+          for case in numerical spark ml; do
+            docker run "${flags[@]}" "$IMAGE" --master 'local[2]' \
+              /opt/spark-likelihood/examples/validate_installed.py "$case" \
+              > "$REPORTS/installed-$case.log" 2>&1
+          done
+          docker run "${flags[@]}" --entrypoint python3 "$IMAGE" -m unittest discover \
+            -s /opt/spark-likelihood/tests/torch_training -p test_torch_adapter_runtime.py -v \
+            > "$REPORTS/checkpoint-continuation.log" 2>&1
+      - name: Qualify likelihood fitting and predictions with actual worker loss
+        timeout-minutes: 25
+        run: |
+          wheels=("$RUNNER_TEMP/torch-install/wheels/"*.whl)
+          test "${#wheels[@]}" -eq 1
+          test -f "${wheels[0]}"
+          python "$PACKAGE/integration/run.py" --image "$IMAGE" \
+            --wheel "${wheels[0]}" --output "$REPORTS/likelihood-compose" --timeout 1200 \
+            > "$REPORTS/likelihood-compose.log" 2>&1
+      - name: Qualify executor training, checkpoint recovery and DataFrame shards
+        timeout-minutes: 45
+        run: |
+          wheels=("$RUNNER_TEMP/torch-install/wheels/"*.whl)
+          test "${#wheels[@]}" -eq 1
+          test -f "${wheels[0]}"
+          for case in full dataframe; do
+            python "$PACKAGE/training-integration/run.py" --image "$IMAGE" \
+              --wheel "${wheels[0]}" --output "$REPORTS/training-$case" --timeout 1200 \
+              --case-set "$case" > "$REPORTS/training-$case.log" 2>&1
+          done
+      - name: Transfer only owned synthetic evidence to the artifact uploader
+        if: always()
+        timeout-minutes: 5
+        run: |
+          sudo python3 - "$RUNNER_TEMP/torch-evidence" "$(id -u)" "$(id -g)" <<'PY'
+          import os
+          from pathlib import Path
+          import stat
+          import sys
+
+          root = Path(sys.argv[1])
+          uid, gid = int(sys.argv[2]), int(sys.argv[3])
+          if root.is_symlink() or root.name != 'torch-evidence' or not root.is_dir():
+              raise ValueError('Expected this job owned evidence directory')
+          for directory, subdirs, filenames in os.walk(root, followlinks=False):
+              for path in [Path(directory), *(Path(directory) / name for name in subdirs + filenames)]:
+                  mode = path.lstat().st_mode
+                  if not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
+                      raise ValueError('Evidence must contain only regular files and directories')
+                  os.chown(path, uid, gid, follow_symlinks=False)
+          PY
+      - name: Retain success and failure evidence
+        if: always()
+        timeout-minutes: 10
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: torch-standalone-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/torch-evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove only this job private registry configuration
+        if: always()
+        timeout-minutes: 2
+        run: rm -rf -- "$RUNNER_TEMP/torch-docker-config"
