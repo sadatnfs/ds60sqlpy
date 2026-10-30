@@ -100,7 +100,7 @@ source revisions, hosted runs, artifact hashes and limits for this completion.
   disk expansion were recorded with a complete supported snapshot. The local
   deliverables assembly made no Docker state changes.
 
-- **The repository now has a maintained lookup for future Codex work.**
+- **The repository now has a maintained lookup for future maintainers.**
   `accomplishments/INDEX.md` and `inventory.json` index 2,277 registered
   lessons, variants, packages, models, APIs, capabilities and study IDs.
   `index.py build`, `check` and `search` keep the generated lookup tied to its
