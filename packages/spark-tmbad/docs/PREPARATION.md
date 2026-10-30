@@ -135,10 +135,12 @@ installing SciPy in the runtime:
 ```sh
 python python/examples/validate_row_references.py \
   --manifest /opt/spark-tmbad/artifact.json \
-  --references python/examples/row_reference_fixtures.json
+  --references python/examples/row_reference_fixtures_v2.json
 ```
 
-The reference file records the SciPy version and generator source hash. Refreshing
+The current v2 reference file records the SciPy version and generator source hash.
+The original `row_reference_fixtures.json` remains unchanged for historical
+qualification receipts. Refreshing
 it is an explicit authoring operation using an already prepared scientific
 environment with SciPy:
 

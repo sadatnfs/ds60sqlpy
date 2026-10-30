@@ -86,7 +86,7 @@ def reference(model_id, theta, rows):
                         float(digamma(shape)) - math.log(shape) - 1 + log_mu - math.log(y) + y / mu
                     )
                 partial = [score, score * x, scale_score]
-        gradient = [total + value for total, value in zip(gradient, partial)]
+        gradient = [total + value for total, value in zip(gradient, partial, strict=True)]
     return {"loss": loss, "gradient": gradient}
 
 
@@ -191,7 +191,11 @@ def main():
         "kind": "spark-tmbad-independent-row-references",
         "scipy_version": scipy.__version__,
         "generator_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "scope": "Independent analytic gradients plus SciPy distribution normalization; finite differences only in test Hessian references",
+        "scope": (
+            "Independent analytic gradients plus SciPy distribution "
+            "normalization; finite differences only in test Hessian "
+            "references"
+        ),
         "cases": build(),
     }
     with args.output.open("x", encoding="utf-8") as stream:

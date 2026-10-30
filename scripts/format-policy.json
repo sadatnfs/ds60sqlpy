@@ -805,6 +805,10 @@
     {
       "path": "packages/spark-tmbad/studies/fixtures/smoke.json",
       "reason": "Canonical compact shared study fixture with deterministic generator identity and retained fixture SHA256. Regenerate through studies/generate_fixtures.py, not a layout formatter."
+    },
+    {
+      "path": "packages/spark-tmbad/python/examples/row_reference_fixtures_v2.json",
+      "reason": "Executed v2 independent numerical reference generator output with exact generator/SciPy provenance and35cases compared to retained historicalv1. Preserve canonical generator bytes; refresh only by a deliberate new generator execution and oracle checks."
     }
   ]
 }

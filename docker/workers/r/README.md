@@ -5,6 +5,13 @@ closure in `packages.lock.json`. Downloads remain SHA-256 verified and the R
 version check remains mandatory. A failed installation stops the build; later
 packages are not attempted.
 
+CRAN can rate-limit simultaneous source builds. HTTP 429, 502, 503 and 504
+responses retry the same reviewed URL at most five times, with bounded backoff
+and a maximum 60-second numeric Retry-After delay. Every retry remains visible.
+The original SHA-256 check still applies to successful downloads; no unverified
+mirror or replacement version is selected. A missing archive retains the
+existing explicit archive-URL fallback, and exhausted retries fail the build.
+
 The locked `sass` package compiles vendored libsass. Its headers produce repeated
 GCC `-Woverloaded-virtual` diagnostics across translation units. The installer
 prints each distinct complete warning block, including its source excerpt,

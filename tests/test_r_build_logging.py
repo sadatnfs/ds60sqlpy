@@ -11,6 +11,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.error
+from email.message import Message
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -155,6 +157,58 @@ class BuildLoggingTests(unittest.TestCase):
             version_check.assert_not_called()
             manifest = json.loads((directory / "manifest.json").read_text())
             self.assertEqual(manifest["packages"], [{"returncode": 17}])
+
+    def test_throttled_download_retries_same_source_then_returns_exact_bytes(self) -> None:
+        headers = Message()
+        headers["Retry-After"] = "3"
+        url = "https://cloud.r-project.org/src/contrib/example_1.0.tar.gz"
+        throttled = urllib.error.HTTPError(url, 429, "Too Many Requests", headers, None)
+        with (
+            patch.object(
+                installer.urllib.request,
+                "urlopen",
+                side_effect=[throttled, io.BytesIO(b"exact locked bytes")],
+            ) as fetch,
+            patch.object(installer.time, "sleep") as sleep,
+        ):
+            self.assertEqual(installer.download_archive(url), b"exact locked bytes")
+            self.assertEqual(fetch.call_count, 2)
+            self.assertTrue(all(call.args == (url,) for call in fetch.call_args_list))
+            sleep.assert_called_once_with(3.0)
+
+    def test_download_retry_budget_fails_closed_and_caps_server_delay(self) -> None:
+        headers = Message()
+        headers["Retry-After"] = "999999"
+        errors = [
+            urllib.error.HTTPError(
+                "https://cloud.r-project.org/source", 429, "limited", headers, None
+            )
+            for _ in range(installer._DOWNLOAD_ATTEMPTS)
+        ]
+        with (
+            patch.object(installer.urllib.request, "urlopen", side_effect=errors) as fetch,
+            patch.object(installer.time, "sleep") as sleep,
+            self.assertRaises(urllib.error.HTTPError) as result,
+        ):
+            installer.download_archive("https://cloud.r-project.org/source")
+        self.assertEqual(result.exception.code, 429)
+        self.assertEqual(fetch.call_count, installer._DOWNLOAD_ATTEMPTS)
+        self.assertEqual(sleep.call_count, installer._DOWNLOAD_ATTEMPTS - 1)
+        self.assertTrue(all(call.args == (60.0,) for call in sleep.call_args_list))
+
+    def test_missing_archive_and_authorization_errors_are_not_retried(self) -> None:
+        for code in (403, 404):
+            error = urllib.error.HTTPError(
+                "https://cloud.r-project.org/source", code, "stop", Message(), None
+            )
+            with (
+                patch.object(installer.urllib.request, "urlopen", side_effect=error) as fetch,
+                patch.object(installer.time, "sleep") as sleep,
+                self.assertRaises(urllib.error.HTTPError),
+            ):
+                installer.download_archive("https://cloud.r-project.org/source")
+            fetch.assert_called_once()
+            sleep.assert_not_called()
 
 
 if __name__ == "__main__":

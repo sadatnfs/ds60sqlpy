@@ -142,15 +142,16 @@ def verify_operation(api, fitted, spark, recipe, operation, forecast):
     reference = expected_values(recipe["model_id"], fitted.model["parameters"], operation)
     if [row["row_id"] for row in actual] != [row["row_id"] for row in operation["rows"]]:
         raise AssertionError("Prediction/forecast lost or duplicated a requested row identity")
-    for row, expected in zip(actual, reference):
+    for row, expected in zip(actual, reference, strict=True):
         if len(target["columns"]) != len(expected):
             raise AssertionError(
                 "Declared output columns differ from the independent target formula"
             )
-        for name, value in zip(target["columns"], expected):
+        for name, value in zip(target["columns"], expected, strict=True):
             if not math.isclose(row["example_" + name], value, rel_tol=3e-6, abs_tol=3e-6):
                 raise AssertionError(
-                    f"{recipe['model_id']} {operation['target']} disagrees with independent {name} formula"
+                    f"{recipe['model_id']} {operation['target']} disagrees with "
+                    f"independent {name} formula"
                 )
     return {
         "operation": "forecast" if forecast else "predict",
@@ -279,7 +280,9 @@ def main_for(model_id=None):
             "schema_version": 1,
             "kind": "spark-tmbad-gallery-execution",
             "status": "passed" if all(row["status"] == "passed" for row in results) else "failed",
-            "scope": "actual Spark DataFrame fit, prediction and forecast; observed deployment only",
+            "scope": (
+                "actual Spark DataFrame fit, prediction and forecast; observed deployment only"
+            ),
             "spark_version": spark.version,
             "platform": runtime.manifest["platform"],
             "artifact_build_id": runtime.manifest["build_id"],

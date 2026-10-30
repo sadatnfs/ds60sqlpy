@@ -34,7 +34,7 @@ def close(actual, expected, tolerance=2e-7):
     if isinstance(expected, list):
         if not isinstance(actual, list) or len(actual) != len(expected):
             raise AssertionError(f"Shape mismatch: {actual!r}; expected {expected!r}")
-        for observed, reference in zip(actual, expected):
+        for observed, reference in zip(actual, expected, strict=True):
             close(observed, reference, tolerance)
     elif (
         isinstance(actual, bool)
@@ -79,8 +79,7 @@ class NativeHarness:
         process = subprocess.run(
             [str(self.binary), "--stdio"],
             input=struct.pack(">I", len(payload)) + payload,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             timeout=45,
             check=False,
         )
@@ -129,7 +128,9 @@ def gaussian_checks(native):
             close(exact["gradient"], reference["gradient"])
             for step in (2e-5, 5e-6):
                 hessian = finite_difference_hessian(
-                    lambda point: gaussian_random_intercept(point, observations)["gradient"],
+                    lambda point, observations=observations: gaussian_random_intercept(
+                        point, observations
+                    )["gradient"],
                     theta,
                     step,
                 )
@@ -274,7 +275,9 @@ def combined_checks(native):
             close(result["gradient"], reference["gradient"])
             for step in (2e-5, 5e-6):
                 hessian = finite_difference_hessian(
-                    lambda point: gaussian_ar1_random_intercept(point, history)["gradient"],
+                    lambda point, history=history: gaussian_ar1_random_intercept(point, history)[
+                        "gradient"
+                    ],
                     theta,
                     step,
                 )

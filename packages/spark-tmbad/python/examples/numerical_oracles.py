@@ -166,22 +166,24 @@ def poisson_random_slope(theta, rows):
             rate
             - count * (beta0 + beta1 * x + latent[0] + latent[1] * x + math.log(exposure))
             + math.lgamma(count + 1)
-            for rate, (x, exposure, count) in zip(rates, rows)
+            for rate, (x, exposure, count) in zip(rates, rows, strict=True)
         )
         joint += (
             log_tau0
             + log_tau1
             + LOG_TWO_PI
-            + 0.5 * math.fsum(q * u * u for q, u in zip(precision, latent))
+            + 0.5 * math.fsum(q * u * u for q, u in zip(precision, latent, strict=True))
         )
         score = [
-            math.fsum((rate - row[2]) * a[index] for rate, row, a in zip(rates, rows, design))
+            math.fsum(
+                (rate - row[2]) * a[index] for rate, row, a in zip(rates, rows, design, strict=True)
+            )
             + precision[index] * latent[index]
             for index in range(2)
         ]
         hessian = [
             [
-                math.fsum(rate * a[i] * a[j] for rate, a in zip(rates, design))
+                math.fsum(rate * a[i] * a[j] for rate, a in zip(rates, design, strict=True))
                 + (precision[i] if i == j else 0.0)
                 for j in range(2)
             ]
@@ -196,10 +198,10 @@ def poisson_random_slope(theta, rows):
             break
         factor = _cholesky(hessian)
         step = _solve_cholesky(factor, [-value for value in score])
-        slope = math.fsum(g * d for g, d in zip(score, step))
+        slope = math.fsum(g * d for g, d in zip(score, step, strict=True))
         for trial in range(45):
             scale = 2.0**-trial
-            candidate = [u + scale * d for u, d in zip(latent, step)]
+            candidate = [u + scale * d for u, d in zip(latent, step, strict=True)]
             proposed, proposed_score, _, _ = evaluate(candidate)
             ordinary = proposed <= joint + 1e-4 * scale * slope
             roundoff = proposed <= joint + 2e-14 * max(1.0, abs(joint)) and max(
@@ -219,12 +221,13 @@ def poisson_random_slope(theta, rows):
     for parameter in range(4):
         if parameter < 2:
             mixed = [
-                math.fsum(rate * a[i] * a[parameter] for rate, a in zip(rates, design))
+                math.fsum(rate * a[i] * a[parameter] for rate, a in zip(rates, design, strict=True))
                 for i in range(2)
             ]
             mode_derivative = _solve_cholesky(factor, [-value for value in mixed])
             direct = math.fsum(
-                (rate - row[2]) * a[parameter] for rate, row, a in zip(rates, rows, design)
+                (rate - row[2]) * a[parameter]
+                for rate, row, a in zip(rates, rows, design, strict=True)
             )
         else:
             index = parameter - 2
@@ -242,9 +245,11 @@ def poisson_random_slope(theta, rows):
                     * a[j]
                     * (
                         (a[parameter] if parameter < 2 else 0.0)
-                        + math.fsum(z * derivative for z, derivative in zip(a, mode_derivative))
+                        + math.fsum(
+                            z * derivative for z, derivative in zip(a, mode_derivative, strict=True)
+                        )
                     )
-                    for rate, a in zip(rates, design)
+                    for rate, a in zip(rates, design, strict=True)
                 )
                 if parameter >= 2 and i == j == parameter - 2:
                     curvature_derivative[i][j] -= 2 * precision[i]
@@ -351,7 +356,7 @@ def gaussian_ar1_random_intercept(theta, rows):
     loss = 0.5 * (
         size * LOG_TWO_PI
         + 2 * math.fsum(math.log(factor[i][i]) for i in range(size))
-        + math.fsum(left * right for left, right in zip(residual, score))
+        + math.fsum(left * right for left, right in zip(residual, score, strict=True))
     )
     inverse_columns = [
         _solve_cholesky(factor, [float(i == j) for i in range(size)]) for j in range(size)
@@ -399,10 +404,10 @@ def gaussian_ar1_random_intercept_prediction(theta, future_times, history=None):
     score = _solve_cholesky(factor, residual)
     result = []
     for index, weights in enumerate(cross):
-        mean = beta + math.fsum(left * right for left, right in zip(weights, score))
+        mean = beta + math.fsum(left * right for left, right in zip(weights, score, strict=True))
         solution = _solve_cholesky(factor, weights)
         variance = future_covariance[index][index] - math.fsum(
-            left * right for left, right in zip(weights, solution)
+            left * right for left, right in zip(weights, solution, strict=True)
         )
         result.append([mean, variance, math.sqrt(variance)])
     return result

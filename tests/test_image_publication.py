@@ -208,6 +208,15 @@ def test_only_small_same_run_receipts_cross_jobs() -> None:
                     )
                     assert step["with"]["path"] == "work/scientific/"
                     assert step["if"] == "always()"
+                elif step["with"]["name"].startswith("r-build-logs-"):
+                    assert step["with"]["name"] == (
+                        "r-build-logs-${{ matrix.architecture }}-"
+                        "attempt-${{ github.run_attempt }}"
+                    )
+                    assert step["with"]["path"] == "work/r-build-logs/"
+                    assert step["if"] == "always() && matrix.group == 'r'"
+                    assert step["with"]["if-no-files-found"] == "ignore"
+                    assert step["with"]["retention-days"] == "7"
                 else:
                     assert all(path.endswith(".json") for path in step["with"]["path"].split())
                 assert int(step["with"]["retention-days"]) <= 30

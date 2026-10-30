@@ -211,8 +211,11 @@ class Acceptance:
             near(row.tmbad_sd, math.sqrt(1.25))
         self.record("valid-normal-fit-and-response-free-prediction", rows=4, prediction_rows=2)
 
-        weighted = self.sql("""SELECT id AS row_id, CAST(id+1 AS DOUBLE) AS y,
-            CAST(CASE id WHEN 0 THEN 0 WHEN 2 THEN 2 ELSE 1 END AS DOUBLE) AS w FROM range(4)""")
+        weighted = self.sql(
+            "SELECT id AS row_id, CAST(id+1 AS DOUBLE) AS y,\n            "
+            "CAST(CASE id WHEN 0 THEN 0 WHEN 2 THEN 2 ELSE 1 END AS DOUBLE) "
+            "AS w FROM range(4)"
+        )
         self.current = "valid-zero-row-weight-control"
         fitted_weighted = self.normal_fit(
             weighted, True, initial_parameters=[3.0, 0.5 * math.log(0.5)]
@@ -225,9 +228,11 @@ class Acceptance:
         self.record("valid-zero-row-weight-control", rows=4, positive_weight_mass=4)
 
         self.current = "valid-poisson-initial-domain-control"
-        poisson = self.sql("""SELECT id AS row_id,
-            CAST(CASE WHEN id%2=0 THEN -1 ELSE 1 END AS DOUBLE) AS x,
-            CAST(1 AS DOUBLE) AS exposure, CAST(1 AS BIGINT) AS y FROM range(4)""")
+        poisson = self.sql(
+            "SELECT id AS row_id,\n            CAST(CASE WHEN id%2=0 THEN -1 "
+            "ELSE 1 END AS DOUBLE) AS x,\n            CAST(1 AS DOUBLE) AS "
+            "exposure, CAST(1 AS BIGINT) AS y FROM range(4)"
+        )
         poisson_spec = ModelSpec(
             "poisson_exposure", {"x": "x", "exposure": "exposure", "y": "y"}, id_columns=["row_id"]
         )
@@ -250,9 +255,12 @@ class Acceptance:
         near(poisson_predictions[0].tmbad_mean, 2.0)
         near(poisson_predictions[0].tmbad_variance, 2.0)
         self.record("valid-poisson-initial-domain-control", observations=4, future_rows=1)
-        invalid_poisson = self.sql("""SELECT id AS row_id,
-            CAST(CASE WHEN id%2=0 THEN -1 ELSE 1 END AS DOUBLE) AS x,
-            CAST(1 AS DOUBLE) AS exposure, CAST(CASE WHEN id=0 THEN -1 ELSE 1 END AS BIGINT) AS y FROM range(4)""")
+        invalid_poisson = self.sql(
+            "SELECT id AS row_id,\n            CAST(CASE WHEN id%2=0 THEN -1 "
+            "ELSE 1 END AS DOUBLE) AS x,\n            CAST(1 AS DOUBLE) AS "
+            "exposure, CAST(CASE WHEN id=0 THEN -1 ELSE 1 END AS BIGINT) AS y "
+            "FROM range(4)"
+        )
         # This is the INITIAL objective evaluation, outside line-search candidate
         # handling. Returning any model, including a nonconverged one, is failure.
         self.refusal(
@@ -308,8 +316,11 @@ class Acceptance:
             ),
         )
 
-        groups = self.sql("""SELECT id AS row_id, CASE WHEN id<4 THEN 'A' ELSE 'B' END AS series,
-              CAST(id%4+1 AS DOUBLE) AS y, CAST(1 AS DOUBLE) AS w FROM range(8)""")
+        groups = self.sql(
+            "SELECT id AS row_id, CASE WHEN id<4 THEN 'A' ELSE 'B' END AS "
+            "series,\n              CAST(id%4+1 AS DOUBLE) AS y, CAST(1 AS "
+            "DOUBLE) AS w FROM range(8)"
+        )
         group_spec = ModelSpec(
             "normal", {"y": "y"}, id_columns=["row_id"], group_columns=["series"], weight_column="w"
         )
@@ -328,8 +339,11 @@ class Acceptance:
                 raise AssertionError("Independent analytic optimum did not converge")
             near(json.loads(row.tmbad_model_json)["parameters"][0], 2.5)
         self.record("valid-independent-group-control", groups=2, observations=8)
-        zero_group = self.sql("""SELECT id AS row_id, CASE WHEN id<4 THEN 'A' ELSE 'B' END AS series,
-              CAST(id%4+1 AS DOUBLE) AS y, CAST(CASE WHEN id<4 THEN 1 ELSE 0 END AS DOUBLE) AS w FROM range(8)""")
+        zero_group = self.sql(
+            "SELECT id AS row_id, CASE WHEN id<4 THEN 'A' ELSE 'B' END AS "
+            "series,\n              CAST(id%4+1 AS DOUBLE) AS y, CAST(CASE "
+            "WHEN id<4 THEN 1 ELSE 0 END AS DOUBLE) AS w FROM range(8)"
+        )
         self.refusal(
             "all-zero-independent-group-weight-refusal",
             lambda: self.api.fit_groups(
@@ -338,8 +352,12 @@ class Acceptance:
             ("Independent fit has zero effective likelihood weight",),
         )
 
-        unit = self.sql("""SELECT id AS row_id, CAST(FLOOR(id/4) AS STRING) AS series,
-             CAST(FLOOR(id/4)+1+CASE id%4 WHEN 0 THEN -0.4 WHEN 1 THEN 0.4 WHEN 2 THEN -0.2 ELSE 0.2 END AS DOUBLE) AS y FROM range(20)""")
+        unit = self.sql(
+            "SELECT id AS row_id, CAST(FLOOR(id/4) AS STRING) AS series,\n     "
+            "        CAST(FLOOR(id/4)+1+CASE id%4 WHEN 0 THEN -0.4 WHEN 1 "
+            "THEN 0.4 WHEN 2 THEN -0.2 ELSE 0.2 END AS DOUBLE) AS y FROM "
+            "range(20)"
+        )
         unit_spec = ModelSpec(
             "gaussian_random_intercept", {"y": "y"}, id_columns=["row_id"], group_columns=["series"]
         )
@@ -366,7 +384,8 @@ class Acceptance:
         self.record("valid-complete-unit-and-conditional-prediction", units=5, observations=20)
         maximum = self.api.runtime.descriptor("gaussian_random_intercept")["max_unit_rows"]
         oversized = self.sql(
-            f"SELECT id AS row_id, 'oversized' AS series, CAST(id%5 AS DOUBLE) AS y FROM range({maximum + 1})"
+            "SELECT id AS row_id, 'oversized' AS series, CAST(id%5 AS DOUBLE) "
+            f"AS y FROM range({maximum + 1})"
         )
         self.refusal(
             "oversized-complete-unit-refusal",
@@ -375,7 +394,9 @@ class Acceptance:
         )
 
         ar = self.sql(
-            "SELECT * FROM VALUES (0,0,'A',CAST(-1 AS DOUBLE)),(1,1,'A',CAST(0 AS DOUBLE)),(2,2,'A',CAST(1 AS DOUBLE)) AS t(row_id,time,series,y)"
+            "SELECT * FROM VALUES (0,0,'A',CAST(-1 AS "
+            "DOUBLE)),(1,1,'A',CAST(0 AS DOUBLE)),(2,2,'A',CAST(1 AS DOUBLE)) "
+            "AS t(row_id,time,series,y)"
         )
         ar_spec = ModelSpec(
             "ar1",
@@ -390,7 +411,8 @@ class Acceptance:
         if not ar_model.model["fit"]["converged"]:
             raise AssertionError("Ordered analytic stationary control did not converge")
         ar_future = self.sql(
-            "SELECT CAST(id+100 AS INT) AS row_id, CAST(id+3 AS INT) AS time, 'A' AS series FROM range(2)"
+            "SELECT CAST(id+100 AS INT) AS row_id, CAST(id+3 AS INT) AS time, "
+            "'A' AS series FROM range(2)"
         )
         forecast_options = {
             "target": "conditional_history",
@@ -407,7 +429,9 @@ class Acceptance:
             near(row.tmbad_variance, 2.0 / 3.0)
         self.record("valid-ordered-unit-and-forecast-control", observations=3, horizon=2)
         ar_duplicate = self.sql(
-            "SELECT * FROM VALUES (0,0,'A',CAST(-1 AS DOUBLE)),(1,0,'A',CAST(0 AS DOUBLE)),(2,1,'A',CAST(1 AS DOUBLE)) AS t(row_id,time,series,y)"
+            "SELECT * FROM VALUES (0,0,'A',CAST(-1 AS "
+            "DOUBLE)),(1,0,'A',CAST(0 AS DOUBLE)),(2,1,'A',CAST(1 AS DOUBLE)) "
+            "AS t(row_id,time,series,y)"
         )
         self.refusal(
             "duplicate-ar-order-refusal",
@@ -536,7 +560,9 @@ def main() -> None:
         "schema_version": 1,
         "kind": "spark-tmbad-actual-spark-failures",
         "status": "failed",
-        "scope": "small actual Spark SQL fixtures and prepared native processes; no scale benchmark",
+        "scope": (
+            "small actual Spark SQL fixtures and prepared native processes; no scale benchmark"
+        ),
         "checks": [],
         "script_sha256": sha_file(Path(__file__)),
     }

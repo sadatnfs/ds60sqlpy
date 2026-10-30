@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -26,6 +27,30 @@ _DIAGNOSTIC_CONTEXT = re.compile(
 )
 _MAX_BLOCK_BYTES = 128 * 1024
 _MAX_BLOCK_IDENTITIES = 4096
+_DOWNLOAD_ATTEMPTS = 5
+
+
+def download_archive(url: str) -> bytes:
+    """Retry bounded CRAN throttling/transient failures without changing source."""
+    for attempt in range(_DOWNLOAD_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(url, timeout=120) as response:
+                return response.read(80_000_001)
+        except urllib.error.HTTPError as error:
+            if error.code not in {429, 502, 503, 504} or attempt + 1 == _DOWNLOAD_ATTEMPTS:
+                raise
+            delay = float(min(30, 2 ** (attempt + 1)))
+            retry_after = error.headers.get("Retry-After", "")
+            if retry_after.isdecimal() and len(retry_after) <= 6:
+                delay = float(min(60, int(retry_after)))
+            print(
+                f"CRAN returned HTTP {error.code}; retrying the same locked source "
+                f"in {delay:g}s (attempt {attempt + 2}/{_DOWNLOAD_ATTEMPTS}).",
+                flush=True,
+            )
+            error.close()
+            time.sleep(delay)
+    raise AssertionError("Unreachable download attempt boundary")
 
 
 class DiagnosticSummary:
@@ -164,8 +189,7 @@ def main(
                 if not url.startswith("https://cloud.r-project.org/src/contrib/"):
                     raise ValueError("Unreviewed R package host")
                 try:
-                    with urllib.request.urlopen(url, timeout=120) as response:
-                        data = response.read(80_000_001)
+                    data = download_archive(url)
                     break
                 except urllib.error.HTTPError as exc:
                     if exc.code != 404:

@@ -56,7 +56,7 @@ def validate_model(value: Mapping[str, Any], runtime: PreparedRuntime) -> dict[s
     bounds = descriptor.get("parameter_bounds")
     if not isinstance(bounds, list) or len(bounds) != len(theta):
         raise ContractError("Prepared model parameter bounds are malformed")
-    for name, parameter, bound in zip(names, theta, bounds):
+    for name, parameter, bound in zip(names, theta, bounds, strict=True):
         if not isinstance(bound, list) or len(bound) != 2:
             raise ContractError("Prepared model parameter bounds are malformed")
         low, high = bound
@@ -198,7 +198,7 @@ def save_model(path: str | Path, raw: str, *, overwrite: bool) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         if overwrite:
-            os.replace(temporary, target)
+            Path(temporary).replace(target)
         else:
             # A hard link publishes complete bytes atomically and fails if the
             # target appeared concurrently. Both paths are in the same directory.

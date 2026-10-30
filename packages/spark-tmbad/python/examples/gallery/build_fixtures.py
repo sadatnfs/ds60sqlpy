@@ -305,7 +305,10 @@ def build():
             "schema_version": 1,
             "kind": "spark-tmbad-gallery-fixtures",
             "cases": cases,
-            "scope": "Small public synthetic data; generating parameters are not exact finite-sample MLEs",
+            "scope": (
+                "Small public synthetic data; generating parameters are "
+                "not exact finite-sample MLEs"
+            ),
         }
     )
 

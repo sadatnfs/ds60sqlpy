@@ -13,7 +13,7 @@ def compare(actual, expected, tolerance, absolute):
     if isinstance(expected, list):
         if not isinstance(actual, list) or len(actual) != len(expected):
             raise AssertionError("Native output shape differs from reference")
-        for left, right in zip(actual, expected):
+        for left, right in zip(actual, expected, strict=True):
             compare(left, right, tolerance, absolute)
     elif not math.isfinite(actual) or not math.isclose(
         actual, expected, rel_tol=tolerance, abs_tol=absolute

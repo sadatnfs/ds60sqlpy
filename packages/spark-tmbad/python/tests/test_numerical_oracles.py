@@ -23,13 +23,13 @@ class NumericalOracleTests(unittest.TestCase):
                 reference = oracles.gaussian_random_intercept(theta, observations)
                 for step in (2e-5, 5e-6):
                     numerical = oracles.finite_difference_gradient(
-                        lambda point: oracles.gaussian_random_intercept(point, observations)[
-                            "loss"
-                        ],
+                        lambda point, observations=observations: oracles.gaussian_random_intercept(
+                            point, observations
+                        )["loss"],
                         theta,
                         step,
                     )
-                    for actual, expected in zip(reference["gradient"], numerical):
+                    for actual, expected in zip(reference["gradient"], numerical, strict=True):
                         self.assert_close(actual, expected)
 
     def test_gaussian_existing_group_and_new_group_are_different(self):
@@ -50,11 +50,13 @@ class NumericalOracleTests(unittest.TestCase):
                 self.assertGreater(reference["curvature"], 0)
                 for step in (2e-5, 5e-6):
                     numerical = oracles.finite_difference_gradient(
-                        lambda point: oracles.poisson_random_intercept(point, rows)["loss"],
+                        lambda point, rows=rows: oracles.poisson_random_intercept(point, rows)[
+                            "loss"
+                        ],
                         theta,
                         step,
                     )
-                    for actual, expected in zip(reference["gradient"], numerical):
+                    for actual, expected in zip(reference["gradient"], numerical, strict=True):
                         self.assert_close(actual, expected)
         reference = oracles.poisson_random_intercept([-0.4, -0.3], [[0.5, 0], [1.5, 2], [2.0, 5]])
         # Frozen-mode joint differentiation misses the log-curvature derivative.
@@ -98,7 +100,9 @@ class NumericalOracleTests(unittest.TestCase):
     def test_ar1_mean_and_variance_propagate_each_innovation(self):
         theta = [2.0, math.atanh(-0.5), math.log(0.7)]
         result = oracles.ar1_forecast(theta, [1, 2, 3], last_observation=4.0)
-        for actual, expected in zip(result, [[1.0, 0.49], [2.5, 0.6125], [1.75, 0.643125]]):
+        for actual, expected in zip(
+            result, [[1.0, 0.49], [2.5, 0.6125], [1.75, 0.643125]], strict=True
+        ):
             self.assert_close(actual[0], expected[0])
             self.assert_close(actual[1], expected[1])
         stationary = oracles.ar1_forecast(theta, [1, 2, 3])
@@ -117,7 +121,7 @@ class NumericalOracleTests(unittest.TestCase):
                     theta,
                     step,
                 )
-                for actual, expected in zip(reference["gradient"], numerical):
+                for actual, expected in zip(reference["gradient"], numerical, strict=True):
                     self.assert_close(actual, expected)
 
     def test_combined_model_reduces_to_random_intercept_at_zero_phi(self):
@@ -129,7 +133,7 @@ class NumericalOracleTests(unittest.TestCase):
         )
         self.assert_close(combined["loss"], simple["loss"])
         for actual, expected in zip(
-            [combined["gradient"][index] for index in (0, 2, 3)], simple["gradient"]
+            [combined["gradient"][index] for index in (0, 2, 3)], simple["gradient"], strict=True
         ):
             self.assert_close(actual, expected)
         predicted = oracles.gaussian_ar1_random_intercept_prediction(theta, [4, 5, 6], rows)
@@ -137,7 +141,7 @@ class NumericalOracleTests(unittest.TestCase):
             [theta[0], theta[2], theta[3]], [row[1] for row in rows]
         )
         for row in predicted:
-            for actual, reference in zip(row, expected):
+            for actual, reference in zip(row, expected, strict=True):
                 self.assert_close(actual, reference)
 
     def test_combined_conditional_variance_is_smaller_than_new_series_variance(self):
@@ -145,7 +149,7 @@ class NumericalOracleTests(unittest.TestCase):
         rows = [[0, 0.7], [1, -0.2], [2, 1.4], [3, 0.3]]
         conditional = oracles.gaussian_ar1_random_intercept_prediction(theta, [4, 5, 6], rows)
         prior = oracles.gaussian_ar1_random_intercept_prediction(theta, [4, 5, 6])
-        for observed, new in zip(conditional, prior):
+        for observed, new in zip(conditional, prior, strict=True):
             self.assertGreater(observed[1], 0)
             self.assertLess(observed[1], new[1])
         self.assertNotEqual(conditional[0][0], prior[0][0])
@@ -160,7 +164,7 @@ class NumericalOracleTests(unittest.TestCase):
                 numerical = oracles.finite_difference_gradient(
                     lambda point: oracles.poisson_random_slope(point, rows)["loss"], theta, step
                 )
-                for actual, expected in zip(reference["gradient"], numerical):
+                for actual, expected in zip(reference["gradient"], numerical, strict=True):
                     self.assert_close(actual, expected)
             for x in (-0.8, 0.5):
                 existing = oracles.poisson_random_slope_prediction(theta, x, 1.2, rows)

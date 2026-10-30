@@ -11,11 +11,14 @@ EXAMPLES = Path(__file__).parents[1] / "examples"
 
 class RowReferenceContractTests(unittest.TestCase):
     def setUp(self):
-        self.reference = json.loads((EXAMPLES / "row_reference_fixtures.json").read_text())
+        self.reference = json.loads((EXAMPLES / "row_reference_fixtures_v2.json").read_text())
 
     def test_reference_provenance_binds_the_maintained_generator(self):
         self.assertEqual(self.reference["kind"], "spark-tmbad-independent-row-references")
         self.assertTrue(self.reference["scipy_version"])
+        historical = json.loads((EXAMPLES / "row_reference_fixtures.json").read_text())
+        self.assertEqual(len(self.reference["cases"]), 35)
+        self.assertEqual(self.reference["cases"], historical["cases"])
         self.assertEqual(
             self.reference["generator_sha256"],
             hashlib.sha256((EXAMPLES / "build_row_references.py").read_bytes()).hexdigest(),
