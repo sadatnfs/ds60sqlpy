@@ -153,9 +153,7 @@ Those are separate execution records.
 
 Observed in the installed Python wheel on Linux arm64, Spark 4.0.1, `local[2]`.
 
-The native build is `324c97bdfa9c` and JAR digest is `80e5f77b54db`. The [retained
-report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes,
-diagnostics and unrounded values.
+The native build is `324c97bdfa9c` and JAR digest is `754b4bb08f25`. The [retained report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes, diagnostics and unrounded values.
 
 | Stored parameter | Observed estimate | Original-scale interpretation |
 | --- | --- | --- |
@@ -163,9 +161,7 @@ diagnostics and unrounded values.
 | `slope` | 0.48672345 | 0.48672345 |
 | `log_shape` | 1.4359766 | shape = 4.2037485 |
 
-The fit converged with projected gradient norm 8.9461374e-07; raw gradient norm 8.9461374e-07. It
-used 9 iterations and 27 objective calls, including 0 reviewed numerical candidate rejections.
-Observed objective value: 232.87931. Active bound indices: `[]`.
+The fit converged with projected gradient norm 8.9461374e-07; raw gradient norm 8.9461374e-07. It used 9 iterations and 27 objective calls, including 0 reviewed numerical candidate rejections. Observed objective value: 232.87931. Active bound indices: `[]`.
 
 ### Observed prediction: `response`
 
@@ -174,8 +170,7 @@ Observed objective value: 232.87931. Active bound indices: `[]`.
 | 1000 | -0.5 | 1 | 1.1439109 | 1.4551883 | 1.2063119 |
 | 1001 | 1 | 1.5 | 3.5608643 | 6.5771613 | 2.5645977 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: NB2 observation variance mu+mu^2/shape; no parameter uncertainty.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: NB2 observation variance mu+mu^2/shape; no parameter uncertainty.
 
 ### Observed forecast: `response`
 
@@ -184,11 +179,11 @@ Uncertainty: NB2 observation variance mu+mu^2/shape; no parameter uncertainty.
 | 1000 | -0.5 | 1 | 1.1439109 | 1.4551883 | 1.2063119 |
 | 1001 | 1 | 1.5 | 3.5608643 | 6.5771613 | 2.5645977 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: NB2 observation variance mu+mu^2/shape; no parameter uncertainty.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: NB2 observation variance mu+mu^2/shape; no parameter uncertainty.
 
-The estimates above are actual finite-sample results, not the fixture's generating values. This
-local execution does not establish multi-node scale, a global optimum or general model adequacy.
+The estimates above are actual finite-sample results, not the fixture's generating values. This local execution does not establish multi-node scale, a global optimum or general model adequacy.
+
+Direct Scala execution passed the same model and declared targets on this artifact and fixture. Observed fitted parameters and objective values match the Python run; see the [frontend parity receipt](../../qualification/arm64-frontend-parity.json). This is a same-host qualification, not the separately requested Compose cluster or worker-container-loss acceptance.
 
 ## Common mistakes
 

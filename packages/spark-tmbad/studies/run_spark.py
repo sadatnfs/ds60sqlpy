@@ -454,6 +454,11 @@ def main() -> None:
                 else {}
             ),
         },
+        "planned_records": [
+            {"scenario": case["scenario"], "method": method["id"], "case_sha256": digest(case)}
+            for case in cases
+            for method in case["methods"]
+        ],
         "records": [],
         "scope": "small synthetic actual Spark shard; no Monte Carlo or cluster-scaling conclusion",
     }

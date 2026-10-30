@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 from typing import Any
 
-from study_support import bounded_json, canonical
+from study_support import bounded_json, canonical, digest
 
 
 def compare(native: dict[str, Any], torch: dict[str, Any]) -> dict[str, Any]:
@@ -85,9 +85,17 @@ def compare(native: dict[str, Any], torch: dict[str, Any]) -> dict[str, Any]:
         "replicate": native["replicate"],
         "fixture_sha256": native["fixture_sha256"],
         "records": result,
+        "native_report_sha256": digest(native),
+        "torch_report_sha256": digest(torch),
+        "partitions": {"native": native["partitions"], "torch": torch["partitions"]},
+        "package_identities": {
+            "native": native["package_identity"],
+            "torch": torch["package_identity"],
+        },
         "scope": (
             "comparison of observed fitted states; differing nonlinear fits can reflect "
-            "weak identification or separate stationary points, not automatically a runtime regression"
+            "weak identification or separate stationary points, "
+            "not automatically a runtime regression"
         ),
     }
 

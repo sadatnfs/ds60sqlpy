@@ -1,0 +1,38 @@
+{
+  "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+  "boundaries": [
+    "Linux ARM64 only",
+    "separate Spark and frontend receipts are required",
+    "dedicated multi-container Compose and worker-container-loss recovery are not established by this receipt"
+  ],
+  "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+  "kind": "spark-tmbad-native-numerical-acceptance",
+  "models": [
+    "ar1",
+    "bernoulli_logistic",
+    "gamma_regression",
+    "gaussian_ar1_random_intercept",
+    "gaussian_random_intercept",
+    "gaussian_random_intercept_laplace",
+    "linear_gaussian",
+    "negative_binomial2",
+    "normal",
+    "poisson_exposure",
+    "poisson_random_intercept",
+    "poisson_random_slope",
+    "quadratic_gaussian",
+    "saturating_growth"
+  ],
+  "native_process_calls": 222,
+  "platform": {
+    "arch": "arm64",
+    "os": "linux"
+  },
+  "reports": {
+    "arm64-native-row-oracles.json": "da2a22ad57ad999e7271d1a2b68cd1a63b9279897978e07b2e14fb37a3397981",
+    "arm64-native-unit-oracles.json": "7b311c954a7bd27e19b3dd963f14bbca74dc0c0ad96400e192ade63110632cbd"
+  },
+  "schema_version": 1,
+  "scope": "Actual native-only independent numerical checks in a compatible Spark runtime image; no JVM scheduling or cluster-scale claim",
+  "status": "passed"
+}

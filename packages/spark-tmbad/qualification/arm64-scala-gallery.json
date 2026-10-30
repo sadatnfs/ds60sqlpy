@@ -1,0 +1,2217 @@
+{
+  "kind": "spark-tmbad-scala-gallery",
+  "artifact_identity": {
+    "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+    "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+    "platform": {
+      "os": "linux",
+      "arch": "arm64"
+    },
+    "engine": {
+      "name": "TMBad",
+      "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+      "version": "1.9.25"
+    },
+    "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+  },
+  "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea",
+  "spark_version": "4.0.1",
+  "scope": "bounded prepared fixtures; native task execution, not a scale or global-optimum claim",
+  "cases": [
+    {
+      "model_id": "ar1",
+      "model_digest": "696aad84f158aaa69a8a49f1719c7421b29c79f575e7312285a22fcde01b22b5",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 10,
+        "objective_calls": 34,
+        "rejected_candidates": 0,
+        "loss": 66.50655134071746,
+        "raw_gradient_inf": 3.189197531838772e-06,
+        "projected_gradient_inf": 3.189197531838772e-06,
+        "row_count": 200,
+        "unit_count": 10,
+        "weight_sum": 10.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 200,
+          "xor": "60a5349d87b51dad8ffa764928021357f0a5c79baf8ebd7ddbd5c3ff9d1661c7",
+          "sum": "f34dccdbd7b950538c63a46716132fb97d9df589b2e1641bc9a3ba6a3122dc19"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 70.28665033308174,
+            "raw_gradient_inf": 41.43300493183625,
+            "projected_gradient_inf": 41.43300493183625,
+            "step_inf": 0.3849727114404877,
+            "objective_calls": 10,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 68.30947801830875,
+            "raw_gradient_inf": 34.01993416676646,
+            "projected_gradient_inf": 34.01993416676646,
+            "step_inf": 0.14459114617137558,
+            "objective_calls": 19,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 68.17576927508532,
+            "raw_gradient_inf": 16.796826238229833,
+            "projected_gradient_inf": 16.796826238229833,
+            "step_inf": 0.1884389459319643,
+            "objective_calls": 27,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 66.67181732105738,
+            "raw_gradient_inf": 9.747513165286975,
+            "projected_gradient_inf": 9.747513165286975,
+            "step_inf": 0.1313954487727914,
+            "objective_calls": 28,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 66.50979042496469,
+            "raw_gradient_inf": 1.1148613322315413,
+            "projected_gradient_inf": 1.1148613322315413,
+            "step_inf": 0.02600715918436336,
+            "objective_calls": 29,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 66.50665931396122,
+            "raw_gradient_inf": 0.14923326897993228,
+            "projected_gradient_inf": 0.14923326897993228,
+            "step_inf": 0.006068596746964361,
+            "objective_calls": 30,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 66.5065548619013,
+            "raw_gradient_inf": 0.042255342678646945,
+            "projected_gradient_inf": 0.042255342678646945,
+            "step_inf": 0.000952909524162493,
+            "objective_calls": 31,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 66.5065513707499,
+            "raw_gradient_inf": 0.004701880155176252,
+            "projected_gradient_inf": 0.004701880155176252,
+            "step_inf": 0.00010071917725440471,
+            "objective_calls": 32,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 66.50655134080988,
+            "raw_gradient_inf": 0.00017065488738998713,
+            "projected_gradient_inf": 0.00017065488738998713,
+            "step_inf": 1.0580466643483888e-05,
+            "objective_calls": 33,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 66.50655134071746,
+            "raw_gradient_inf": 3.189197531838772e-06,
+            "projected_gradient_inf": 3.189197531838772e-06,
+            "step_inf": 8.905577740803139e-07,
+            "objective_calls": 34,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.39765227556517735,
+        0.6024396275586648,
+        -1.0949781496448197
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 1,
+          "passed": true,
+          "conditioning": "one supplied exact previous observation and fitted parameters",
+          "uncertainty": "one innovation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "conditional_history",
+          "rows": 3,
+          "passed": true,
+          "conditioning": "last exact observation of complete unit-spaced integer history and fitted parameters",
+          "uncertainty": "propagated future innovations; pointwise variance, not simultaneous intervals"
+        },
+        {
+          "operation": "forecast",
+          "target": "stationary_new_series",
+          "rows": 3,
+          "passed": true,
+          "conditioning": "new stationary unit-spaced series and fitted parameters",
+          "uncertainty": "stationary marginal variance; future steps are correlated"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "bernoulli_logistic",
+      "model_digest": "d82569665d4e9bedd53b9ed4a8016160ad68e64aa798b29c8f3c76f0e5ff2bfc",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 7,
+        "objective_calls": 16,
+        "rejected_candidates": 0,
+        "loss": 101.8809336254063,
+        "raw_gradient_inf": 8.663801916997116e-07,
+        "projected_gradient_inf": 8.663801916997116e-07,
+        "row_count": 160,
+        "unit_count": 0,
+        "weight_sum": 160.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 160,
+          "xor": "38ef78bac6003cc9dce6a9539e5bb8d4fa6bfb36273da47e7d71c40c65b4f1fc",
+          "sum": "d6659c2744b0c8122068ecd2a7ab32b79b5b1aee34fad918e5221c54d6a0e118"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 102.70498331089561,
+            "raw_gradient_inf": 5.2553290472451915,
+            "projected_gradient_inf": 5.2553290472451915,
+            "step_inf": 0.8246425178351142,
+            "objective_calls": 6,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 102.61558453981208,
+            "raw_gradient_inf": 4.665948662873011,
+            "projected_gradient_inf": 4.665948662873011,
+            "step_inf": 0.20266182825780366,
+            "objective_calls": 8,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 101.99227970812004,
+            "raw_gradient_inf": 2.5944830794207596,
+            "projected_gradient_inf": 2.5944830794207596,
+            "step_inf": 0.2441704966215853,
+            "objective_calls": 12,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 101.88211145274568,
+            "raw_gradient_inf": 0.28123033457168956,
+            "projected_gradient_inf": 0.28123033457168956,
+            "step_inf": 0.08446146206443939,
+            "objective_calls": 13,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 101.88093427531368,
+            "raw_gradient_inf": 0.005124089553066646,
+            "projected_gradient_inf": 0.005124089553066646,
+            "step_inf": 0.008101097301431326,
+            "objective_calls": 14,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 101.88093362707161,
+            "raw_gradient_inf": 0.0002722109551043239,
+            "projected_gradient_inf": 0.0002722109551043239,
+            "step_inf": 0.0002518359877508036,
+            "objective_calls": 15,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 101.8809336254063,
+            "raw_gradient_inf": 8.663801916997116e-07,
+            "projected_gradient_inf": 8.663801916997116e-07,
+            "step_inf": 1.211593333949601e-05,
+            "objective_calls": 16,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        -0.15613690533304,
+        0.8560266300397266
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied covariates and fitted parameters",
+          "uncertainty": "Bernoulli observation variance; no parameter uncertainty; future rows conditionally independent"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied covariates and fitted parameters",
+          "uncertainty": "Bernoulli observation variance; no parameter uncertainty; future rows conditionally independent"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "gamma_regression",
+      "model_digest": "d665130842bda9c0ec54478e9367acf9cf0b8a72156e9f6526fc75d4e9597a58",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 11,
+        "objective_calls": 47,
+        "rejected_candidates": 0,
+        "loss": 126.9634078766523,
+        "raw_gradient_inf": 1.9714067889253784e-07,
+        "projected_gradient_inf": 1.9714067889253784e-07,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "8fe44a3062aadba01edb571ba80f2e60a8be9ae08cd63c5f209dfa9fce26592a",
+          "sum": "49fe192ce81b43ddd8d93e6034cab3a7ce960587938828b97a6e9f3e5a6a4a4e"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 136.60985504944023,
+            "raw_gradient_inf": 28.502104790086335,
+            "projected_gradient_inf": 28.502104790086335,
+            "step_inf": 0.38074695930931035,
+            "objective_calls": 10,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 131.97199489300465,
+            "raw_gradient_inf": 45.242421669101006,
+            "projected_gradient_inf": 45.242421669101006,
+            "step_inf": 0.41435902090339816,
+            "objective_calls": 17,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 127.68946194977268,
+            "raw_gradient_inf": 14.354911319877,
+            "projected_gradient_inf": 14.354911319877,
+            "step_inf": 0.1767282096449258,
+            "objective_calls": 26,
+            "hessian_reset": true
+          },
+          {
+            "iteration": 4,
+            "loss": 127.60518110880562,
+            "raw_gradient_inf": 18.76788637956372,
+            "projected_gradient_inf": 18.76788637956372,
+            "step_inf": 0.046703002726109055,
+            "objective_calls": 34,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 127.5405265856835,
+            "raw_gradient_inf": 18.216312083168084,
+            "projected_gradient_inf": 18.216312083168084,
+            "step_inf": 0.10638521815583069,
+            "objective_calls": 41,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 126.99038277194508,
+            "raw_gradient_inf": 3.938993074453969,
+            "projected_gradient_inf": 3.938993074453969,
+            "step_inf": 0.05806475977622072,
+            "objective_calls": 42,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 126.96380196533033,
+            "raw_gradient_inf": 0.23326237419891527,
+            "projected_gradient_inf": 0.23326237419891527,
+            "step_inf": 0.01225171116438406,
+            "objective_calls": 43,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 126.96340796760623,
+            "raw_gradient_inf": 0.007275073440174751,
+            "projected_gradient_inf": 0.007275073440174751,
+            "step_inf": 0.003320968198199159,
+            "objective_calls": 44,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 126.96340787684883,
+            "raw_gradient_inf": 0.0003808811985237526,
+            "projected_gradient_inf": 0.0003808811985237526,
+            "step_inf": 2.103488392163344e-05,
+            "objective_calls": 45,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 126.96340787665272,
+            "raw_gradient_inf": 3.1354296101682166e-05,
+            "projected_gradient_inf": 3.1354296101682166e-05,
+            "step_inf": 9.229568923019293e-07,
+            "objective_calls": 46,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 126.9634078766523,
+            "raw_gradient_inf": 1.9714067889253784e-07,
+            "projected_gradient_inf": 1.9714067889253784e-07,
+            "step_inf": 6.907236349551482e-08,
+            "objective_calls": 47,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.29108802051812865,
+        0.4416739362574534,
+        1.267267355987871
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied covariates and fitted parameters",
+          "uncertainty": "Gamma observation variance mu^2/shape; no parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied covariates and fitted parameters",
+          "uncertainty": "Gamma observation variance mu^2/shape; no parameter uncertainty"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "gaussian_ar1_random_intercept",
+      "model_digest": "a3d81f1259e6ce179d75e8a719a01c9daa1e51cce622efb68fe680fecd284d30",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 11,
+        "objective_calls": 36,
+        "rejected_candidates": 0,
+        "loss": 87.21452123602975,
+        "raw_gradient_inf": 7.37337420675388e-07,
+        "projected_gradient_inf": 7.37337420675388e-07,
+        "row_count": 200,
+        "unit_count": 10,
+        "weight_sum": 10.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 200,
+          "xor": "47b16051e5c38d0dec91e345be803590258373ef78c91a7adf47ffd3aec64394",
+          "sum": "3e6dc34eef61ce760fa858c78cc11004c21439723aa04f93e94716036543d95c"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 90.45379037186277,
+            "raw_gradient_inf": 30.277515382926758,
+            "projected_gradient_inf": 30.277515382926758,
+            "step_inf": 0.35058061958249764,
+            "objective_calls": 10,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 87.60709525893613,
+            "raw_gradient_inf": 4.796326807434662,
+            "projected_gradient_inf": 4.796326807434662,
+            "step_inf": 0.2641352508118835,
+            "objective_calls": 18,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 87.3490095093691,
+            "raw_gradient_inf": 4.180094614647142,
+            "projected_gradient_inf": 4.180094614647142,
+            "step_inf": 0.1625157884732661,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 87.30259354881267,
+            "raw_gradient_inf": 3.8916947964269815,
+            "projected_gradient_inf": 3.8916947964269815,
+            "step_inf": 0.05073520835059597,
+            "objective_calls": 29,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 87.2236275637733,
+            "raw_gradient_inf": 1.2517191337992983,
+            "projected_gradient_inf": 1.2517191337992983,
+            "step_inf": 0.031513071161834105,
+            "objective_calls": 30,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 87.21520500756861,
+            "raw_gradient_inf": 0.5920126682952027,
+            "projected_gradient_inf": 0.5920126682952027,
+            "step_inf": 0.014052153006838264,
+            "objective_calls": 31,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 87.21452444241095,
+            "raw_gradient_inf": 0.041460512688479056,
+            "projected_gradient_inf": 0.041460512688479056,
+            "step_inf": 0.0020492412109007763,
+            "objective_calls": 32,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 87.21452129206568,
+            "raw_gradient_inf": 0.0023885844874200757,
+            "projected_gradient_inf": 0.0023885844874200757,
+            "step_inf": 0.00027512090520975807,
+            "objective_calls": 33,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 87.21452123617348,
+            "raw_gradient_inf": 0.00012891763655176192,
+            "projected_gradient_inf": 0.00012891763655176192,
+            "step_inf": 6.0604168369171596e-05,
+            "objective_calls": 34,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 87.21452123603072,
+            "raw_gradient_inf": 1.2314083358333505e-05,
+            "projected_gradient_inf": 1.2314083358333505e-05,
+            "step_inf": 3.980032240002984e-06,
+            "objective_calls": 35,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 87.21452123602975,
+            "raw_gradient_inf": 7.37337420675388e-07,
+            "projected_gradient_inf": 7.37337420675388e-07,
+            "step_inf": 2.75577806685412e-07,
+            "objective_calls": 36,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.2561742953286436,
+        0.6530797036730667,
+        -1.038519508864471,
+        -0.9210939270318466
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "conditional_history",
+          "rows": 3,
+          "passed": true,
+          "conditioning": "complete exact Gaussian history of one group with consecutive integer times and fitted parameters",
+          "uncertainty": "posterior latent uncertainty and propagated innovations; pointwise variance excludes parameter uncertainty"
+        },
+        {
+          "operation": "predict",
+          "target": "stationary_new_series",
+          "rows": 3,
+          "passed": true,
+          "conditioning": "one new stationary group and fitted parameters",
+          "uncertainty": "prior shared latent plus stationary AR1 variance; future steps are correlated"
+        },
+        {
+          "operation": "forecast",
+          "target": "conditional_history",
+          "rows": 3,
+          "passed": true,
+          "conditioning": "complete exact Gaussian history of one group with consecutive integer times and fitted parameters",
+          "uncertainty": "posterior latent uncertainty and propagated innovations; pointwise variance excludes parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "stationary_new_series",
+          "rows": 3,
+          "passed": true,
+          "conditioning": "one new stationary group and fitted parameters",
+          "uncertainty": "prior shared latent plus stationary AR1 variance; future steps are correlated"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "gaussian_random_intercept",
+      "model_digest": "35815d8fd031e54d505ae6af3421833c8b9001d9f53042d01fbeaf7f431d79be",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 11,
+        "objective_calls": 26,
+        "rejected_candidates": 0,
+        "loss": 55.36276378814683,
+        "raw_gradient_inf": 5.713401207696478e-06,
+        "projected_gradient_inf": 5.713401207696478e-06,
+        "row_count": 80,
+        "unit_count": 10,
+        "weight_sum": 10.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 80,
+          "xor": "9431c6fae5255f5ab80bcc5f5992e59b7ac2f934e3fb6da288e3e3b5eeee2cb8",
+          "sum": "e212fdaad8755413006e6f52d0de754583960b8da6a6f6a2b05e5e9cf0d4b02a"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 62.209869332136876,
+            "raw_gradient_inf": 35.304212427283424,
+            "projected_gradient_inf": 35.304212427283424,
+            "step_inf": 0.5273674614394923,
+            "objective_calls": 8,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 60.00827996771234,
+            "raw_gradient_inf": 29.796746027706074,
+            "projected_gradient_inf": 29.796746027706074,
+            "step_inf": 0.9189801157881746,
+            "objective_calls": 12,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 58.75145590750854,
+            "raw_gradient_inf": 27.973153331920386,
+            "projected_gradient_inf": 27.973153331920386,
+            "step_inf": 0.24027533088696895,
+            "objective_calls": 18,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 58.589197687832424,
+            "raw_gradient_inf": 18.219090779031884,
+            "projected_gradient_inf": 18.219090779031884,
+            "step_inf": 0.9266017678427615,
+            "objective_calls": 19,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 55.50965240017162,
+            "raw_gradient_inf": 4.770395302272133,
+            "projected_gradient_inf": 4.770395302272133,
+            "step_inf": 0.46002521809190233,
+            "objective_calls": 20,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 55.37833743901737,
+            "raw_gradient_inf": 1.1335584233076772,
+            "projected_gradient_inf": 1.1335584233076772,
+            "step_inf": 0.13297359615988302,
+            "objective_calls": 21,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 55.36309796365822,
+            "raw_gradient_inf": 0.12797793606738095,
+            "projected_gradient_inf": 0.12797793606738095,
+            "step_inf": 0.041645201542218846,
+            "objective_calls": 22,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 55.362785003675825,
+            "raw_gradient_inf": 0.059620978967560134,
+            "projected_gradient_inf": 0.059620978967560134,
+            "step_inf": 0.006537326429270296,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 55.362764106158416,
+            "raw_gradient_inf": 0.0061457500964969825,
+            "projected_gradient_inf": 0.0061457500964969825,
+            "step_inf": 0.00045485470718131804,
+            "objective_calls": 24,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 55.36276379414268,
+            "raw_gradient_inf": 0.000786851351238127,
+            "projected_gradient_inf": 0.000786851351238127,
+            "step_inf": 6.912778340018022e-05,
+            "objective_calls": 25,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 55.36276378814683,
+            "raw_gradient_inf": 5.713401207696478e-06,
+            "projected_gradient_inf": 5.713401207696478e-06,
+            "step_inf": 1.0173818994152484e-05,
+            "objective_calls": 26,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.6813420400843525,
+        -0.8330020445912368,
+        -1.1250752237266541
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "complete observed group and fitted parameters",
+          "uncertainty": "exact posterior latent and future observation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "predict",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters",
+          "uncertainty": "prior latent and observation variance; shared latent induces cross-step dependence"
+        },
+        {
+          "operation": "forecast",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "complete observed group and fitted parameters",
+          "uncertainty": "exact posterior latent and future observation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters",
+          "uncertainty": "prior latent and observation variance; shared latent induces cross-step dependence"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "gaussian_random_intercept_laplace",
+      "model_digest": "ede1413e8fc7d88383501028152969c40fed8417a6d2c8352ccbdc31a9bc561b",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 11,
+        "objective_calls": 26,
+        "rejected_candidates": 3,
+        "loss": 55.36276378814682,
+        "raw_gradient_inf": 5.713401210583058e-06,
+        "projected_gradient_inf": 5.713401210583058e-06,
+        "row_count": 80,
+        "unit_count": 10,
+        "weight_sum": 10.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 80,
+          "xor": "9431c6fae5255f5ab80bcc5f5992e59b7ac2f934e3fb6da288e3e3b5eeee2cb8",
+          "sum": "e212fdaad8755413006e6f52d0de754583960b8da6a6f6a2b05e5e9cf0d4b02a"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 62.209869332136876,
+            "raw_gradient_inf": 35.30421242728344,
+            "projected_gradient_inf": 35.30421242728344,
+            "step_inf": 0.5273674614394923,
+            "objective_calls": 8,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 60.00827996771235,
+            "raw_gradient_inf": 29.79674602770607,
+            "projected_gradient_inf": 29.79674602770607,
+            "step_inf": 0.9189801157881746,
+            "objective_calls": 12,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 58.75145590750853,
+            "raw_gradient_inf": 27.973153331920372,
+            "projected_gradient_inf": 27.973153331920372,
+            "step_inf": 0.24027533088696873,
+            "objective_calls": 18,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 58.589197687832495,
+            "raw_gradient_inf": 18.21909077903188,
+            "projected_gradient_inf": 18.21909077903188,
+            "step_inf": 0.9266017678427746,
+            "objective_calls": 19,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 55.50965240017162,
+            "raw_gradient_inf": 4.770395302272174,
+            "projected_gradient_inf": 4.770395302272174,
+            "step_inf": 0.46002521809191166,
+            "objective_calls": 20,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 55.378337439017365,
+            "raw_gradient_inf": 1.1335584233077194,
+            "projected_gradient_inf": 1.1335584233077194,
+            "step_inf": 0.13297359615988924,
+            "objective_calls": 21,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 55.36309796365822,
+            "raw_gradient_inf": 0.12797793606737962,
+            "projected_gradient_inf": 0.12797793606737962,
+            "step_inf": 0.041645201542221066,
+            "objective_calls": 22,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 55.362785003675825,
+            "raw_gradient_inf": 0.059620978967564575,
+            "projected_gradient_inf": 0.059620978967564575,
+            "step_inf": 0.006537326429270518,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 55.36276410615842,
+            "raw_gradient_inf": 0.0061457500964969825,
+            "projected_gradient_inf": 0.0061457500964969825,
+            "step_inf": 0.00045485470718142906,
+            "objective_calls": 24,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 55.36276379414267,
+            "raw_gradient_inf": 0.0007868513512372388,
+            "projected_gradient_inf": 0.0007868513512372388,
+            "step_inf": 6.912778340018022e-05,
+            "objective_calls": 25,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 55.36276378814682,
+            "raw_gradient_inf": 5.713401210583058e-06,
+            "projected_gradient_inf": 5.713401210583058e-06,
+            "step_inf": 1.0173818994152484e-05,
+            "objective_calls": 26,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.6813420400843525,
+        -0.8330020445912368,
+        -1.1250752237266541
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "complete observed group and fitted parameters",
+          "uncertainty": "exact posterior latent and future observation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "predict",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters",
+          "uncertainty": "prior latent and observation variance; shared latent induces cross-step dependence"
+        },
+        {
+          "operation": "forecast",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "complete observed group and fitted parameters",
+          "uncertainty": "exact posterior latent and future observation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters",
+          "uncertainty": "prior latent and observation variance; shared latent induces cross-step dependence"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "linear_gaussian",
+      "model_digest": "533c25064597d3de83b61609b485f1619223c63cc4e0c44db61310f3d6220f06",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 13,
+        "objective_calls": 37,
+        "rejected_candidates": 0,
+        "loss": 76.00536120420283,
+        "raw_gradient_inf": 4.284495567219437e-06,
+        "projected_gradient_inf": 4.284495567219437e-06,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "6a9fabe3466abdbb32fbd4b1249c0a0ea3399193479e574abe32dbd58b5a9143",
+          "sum": "429c182ffd39ca5520c03dabc358eefdd49e1c1440aad342264b4cf50eb17e39"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 103.09983218867572,
+            "raw_gradient_inf": 77.93091457496249,
+            "projected_gradient_inf": 77.93091457496249,
+            "step_inf": 0.8290338879488304,
+            "objective_calls": 9,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 95.53908492864085,
+            "raw_gradient_inf": 88.11574478648319,
+            "projected_gradient_inf": 88.11574478648319,
+            "step_inf": 0.2798354729437017,
+            "objective_calls": 18,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 94.83512021598548,
+            "raw_gradient_inf": 93.291085987981,
+            "projected_gradient_inf": 93.291085987981,
+            "step_inf": 0.08890387360892055,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 79.47171514917451,
+            "raw_gradient_inf": 49.48070063171272,
+            "projected_gradient_inf": 49.48070063171272,
+            "step_inf": 0.3679448210692249,
+            "objective_calls": 28,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 77.29903354506706,
+            "raw_gradient_inf": 18.08800557604954,
+            "projected_gradient_inf": 18.08800557604954,
+            "step_inf": 0.14506591462322238,
+            "objective_calls": 29,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 76.05940669155862,
+            "raw_gradient_inf": 4.647233960852002,
+            "projected_gradient_inf": 4.647233960852002,
+            "step_inf": 0.06817246513793374,
+            "objective_calls": 30,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 76.00842348897248,
+            "raw_gradient_inf": 1.746002794239426,
+            "projected_gradient_inf": 1.746002794239426,
+            "step_inf": 0.012731813823454785,
+            "objective_calls": 31,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 76.00551401321576,
+            "raw_gradient_inf": 0.38673893476753696,
+            "projected_gradient_inf": 0.38673893476753696,
+            "step_inf": 0.0032314281759497354,
+            "objective_calls": 32,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 76.00537810901038,
+            "raw_gradient_inf": 0.1093214328763743,
+            "projected_gradient_inf": 0.1093214328763743,
+            "step_inf": 0.0006421925058320288,
+            "objective_calls": 33,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 76.00536124981187,
+            "raw_gradient_inf": 0.0053314687073537925,
+            "projected_gradient_inf": 0.0053314687073537925,
+            "step_inf": 0.0002186301000124402,
+            "objective_calls": 34,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 76.00536120460005,
+            "raw_gradient_inf": 0.0004347443914864968,
+            "projected_gradient_inf": 0.0004347443914864968,
+            "step_inf": 1.12574062696158e-05,
+            "objective_calls": 35,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 12,
+            "loss": 76.00536120420553,
+            "raw_gradient_inf": 3.5726044321116035e-05,
+            "projected_gradient_inf": 3.5726044321116035e-05,
+            "step_inf": 1.1760566764884572e-06,
+            "objective_calls": 36,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 13,
+            "loss": 76.00536120420283,
+            "raw_gradient_inf": 4.284495567219437e-06,
+            "projected_gradient_inf": 4.284495567219437e-06,
+            "step_inf": 1.4938954429055684e-07,
+            "objective_calls": 37,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.4760701184243754,
+        1.189486726952739,
+        -0.8251466586315007
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "fitted parameters and supplied x",
+          "uncertainty": "observation only; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "fitted parameters and supplied x",
+          "uncertainty": "observation only; parameter uncertainty excluded"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "negative_binomial2",
+      "model_digest": "034827cc8beb6547ed11892526af61234fd6e8faecbc2ddb2da19cc1dde80c7b",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 9,
+        "objective_calls": 27,
+        "rejected_candidates": 0,
+        "loss": 232.8793077504953,
+        "raw_gradient_inf": 8.946137395327014e-07,
+        "projected_gradient_inf": 8.946137395327014e-07,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "763848ed11c1c783a60edd1480cb8c5228f08f9c28fac214f9c4e390ce21ff2f",
+          "sum": "15d820886de4fda614208adda74c0046ce4009c62ed8718111a5834e18dce695"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 235.5381274248321,
+            "raw_gradient_inf": 7.162440021174673,
+            "projected_gradient_inf": 7.162440021174673,
+            "step_inf": 0.4169008096244642,
+            "objective_calls": 9,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 234.51596938155646,
+            "raw_gradient_inf": 19.019870885637417,
+            "projected_gradient_inf": 19.019870885637417,
+            "step_inf": 0.3961447118337723,
+            "objective_calls": 14,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 234.06248531167518,
+            "raw_gradient_inf": 17.833931514994077,
+            "projected_gradient_inf": 17.833931514994077,
+            "step_inf": 0.1604767998895149,
+            "objective_calls": 21,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 232.92480623660617,
+            "raw_gradient_inf": 3.9025213172706747,
+            "projected_gradient_inf": 3.9025213172706747,
+            "step_inf": 0.15656921915761823,
+            "objective_calls": 22,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 232.88164270572312,
+            "raw_gradient_inf": 0.17267870072098646,
+            "projected_gradient_inf": 0.17267870072098646,
+            "step_inf": 0.02203698790213504,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 232.87956007574928,
+            "raw_gradient_inf": 0.05683805840770351,
+            "projected_gradient_inf": 0.05683805840770351,
+            "step_inf": 0.017828610230000708,
+            "objective_calls": 24,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 232.87930783045616,
+            "raw_gradient_inf": 0.0009984218620640029,
+            "projected_gradient_inf": 0.0009984218620640029,
+            "step_inf": 0.008734009236940121,
+            "objective_calls": 25,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 232.87930775049978,
+            "raw_gradient_inf": 2.0845444250738865e-05,
+            "projected_gradient_inf": 2.0845444250738865e-05,
+            "step_inf": 0.00015596660522954053,
+            "objective_calls": 26,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 232.8793077504953,
+            "raw_gradient_inf": 8.946137395327014e-07,
+            "projected_gradient_inf": 8.946137395327014e-07,
+            "step_inf": 9.914146712475258e-07,
+            "objective_calls": 27,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.3778147261804436,
+        0.48672345037344267,
+        1.4359766362035684
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied covariates/exposure and fitted parameters",
+          "uncertainty": "NB2 observation variance mu+mu^2/shape; no parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied covariates/exposure and fitted parameters",
+          "uncertainty": "NB2 observation variance mu+mu^2/shape; no parameter uncertainty"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "normal",
+      "model_digest": "de4ff36f1078d1fbaeb1837b8282fb0d882c1b1102836db069e9594f52fccbdf",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 7,
+        "objective_calls": 24,
+        "rejected_candidates": 0,
+        "loss": 130.03571573634,
+        "raw_gradient_inf": 6.462135733187324e-07,
+        "projected_gradient_inf": 6.462135733187324e-07,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "592679f61c59c50a0d15d54b00d01e33f4be28f67c76d4b46846c5a953c63cfd",
+          "sum": "259c2807d756d8d317c70dbe8d612bcb7c58ee97c5a0279acad8a6695b69200d"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 131.7465446616494,
+            "raw_gradient_inf": 27.360579579940634,
+            "projected_gradient_inf": 27.360579579940634,
+            "step_inf": 0.5201907050325594,
+            "objective_calls": 9,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 130.0704790371766,
+            "raw_gradient_inf": 4.464283671532563,
+            "projected_gradient_inf": 4.464283671532563,
+            "step_inf": 0.12068517950402435,
+            "objective_calls": 18,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 130.03693622495217,
+            "raw_gradient_inf": 0.6997263678600429,
+            "projected_gradient_inf": 0.6997263678600429,
+            "step_inf": 0.017995927165656234,
+            "objective_calls": 20,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 130.0357240033029,
+            "raw_gradient_inf": 0.06491349604380048,
+            "projected_gradient_inf": 0.06491349604380048,
+            "step_inf": 0.002448613818300416,
+            "objective_calls": 21,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 130.03571576434157,
+            "raw_gradient_inf": 0.0028909121250606518,
+            "projected_gradient_inf": 0.0028909121250606518,
+            "step_inf": 0.0002649253362949633,
+            "objective_calls": 22,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 130.03571573634989,
+            "raw_gradient_inf": 7.542316203235089e-05,
+            "projected_gradient_inf": 7.542316203235089e-05,
+            "step_inf": 1.1302184957318051e-05,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 130.03571573634,
+            "raw_gradient_inf": 6.462135733187324e-07,
+            "projected_gradient_inf": 6.462135733187324e-07,
+            "step_inf": 2.6541689734926877e-07,
+            "objective_calls": 24,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        1.520190702777828,
+        -0.40303450193387946
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "fitted parameters",
+          "uncertainty": "observation only; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "fitted parameters",
+          "uncertainty": "observation only; parameter uncertainty excluded"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "poisson_exposure",
+      "model_digest": "1eb8eab9baf881f6a93f389eb8e2c56a84f0f9727ca16953c86b3455ed436c9a",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 7,
+        "objective_calls": 21,
+        "rejected_candidates": 0,
+        "loss": 191.16397920625263,
+        "raw_gradient_inf": 5.376055574046745e-07,
+        "projected_gradient_inf": 5.376055574046745e-07,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "e92fd49b98cd255fa9a4a6974a7f6304c772fac2e26cac8ab7d8ebb7727173d9",
+          "sum": "f1a40b07d54df835a1c162456075e6b74969433ac53ebd1c035e024167c9c5f3"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 196.39087507484624,
+            "raw_gradient_inf": 49.8283094247129,
+            "projected_gradient_inf": 49.8283094247129,
+            "step_inf": 0.4356037201810595,
+            "objective_calls": 9,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 195.6778045904116,
+            "raw_gradient_inf": 39.408335797355946,
+            "projected_gradient_inf": 39.408335797355946,
+            "step_inf": 0.20637925006412747,
+            "objective_calls": 16,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 191.35961295398516,
+            "raw_gradient_inf": 7.480194921994091,
+            "projected_gradient_inf": 7.480194921994091,
+            "step_inf": 0.27431342775659395,
+            "objective_calls": 17,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 191.16674471938924,
+            "raw_gradient_inf": 0.9517335426492721,
+            "projected_gradient_inf": 0.9517335426492721,
+            "step_inf": 0.028211539109472605,
+            "objective_calls": 18,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 191.16398121201559,
+            "raw_gradient_inf": 0.025112155216341137,
+            "projected_gradient_inf": 0.025112155216341137,
+            "step_inf": 0.0033271053510044862,
+            "objective_calls": 19,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 191.1639792062762,
+            "raw_gradient_inf": 8.432563278049088e-05,
+            "projected_gradient_inf": 8.432563278049088e-05,
+            "step_inf": 9.253036326539732e-05,
+            "objective_calls": 20,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 191.16397920625263,
+            "raw_gradient_inf": 5.376055574046745e-07,
+            "projected_gradient_inf": 5.376055574046745e-07,
+            "step_inf": 5.040022802438315e-07,
+            "objective_calls": 21,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.045831657351571416,
+        0.6887699001987977
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "fitted parameters and supplied exposure",
+          "uncertainty": "Poisson observation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "fitted parameters and supplied exposure",
+          "uncertainty": "Poisson observation variance; parameter uncertainty excluded"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "poisson_random_intercept",
+      "model_digest": "de99c44fbbaaed271bea8b24614cb402fedb7eaeecb068c48254a11a13b6264b",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 10,
+        "objective_calls": 18,
+        "rejected_candidates": 0,
+        "loss": 153.03876734524778,
+        "raw_gradient_inf": 4.039744796457967e-07,
+        "projected_gradient_inf": 4.039744796457967e-07,
+        "row_count": 80,
+        "unit_count": 10,
+        "weight_sum": 10.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 80,
+          "xor": "1d5623d2bf2625b5195b27d37c8885284c66c72ed8ead016642e6c5efc987def",
+          "sum": "c397ad9eb4b0fcd5df28988df615bbdfd6fce3b6de66b85d90bcc59c7ad48f89"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 155.86395692611603,
+            "raw_gradient_inf": 5.278614146957626,
+            "projected_gradient_inf": 5.278614146957626,
+            "step_inf": 1.1444959743357896,
+            "objective_calls": 6,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 155.68546163803524,
+            "raw_gradient_inf": 4.456068685446965,
+            "projected_gradient_inf": 4.456068685446965,
+            "step_inf": 0.2184592523551147,
+            "objective_calls": 9,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 153.52869186908492,
+            "raw_gradient_inf": 2.4462243756617297,
+            "projected_gradient_inf": 2.4462243756617297,
+            "step_inf": 0.5049604797851562,
+            "objective_calls": 10,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 153.22422531891874,
+            "raw_gradient_inf": 2.0845466754599933,
+            "projected_gradient_inf": 2.0845466754599933,
+            "step_inf": 0.3476206136672779,
+            "objective_calls": 12,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 153.05976559459899,
+            "raw_gradient_inf": 0.651426269936846,
+            "projected_gradient_inf": 0.651426269936846,
+            "step_inf": 0.17678016836038635,
+            "objective_calls": 13,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 153.03963262609113,
+            "raw_gradient_inf": 0.15671453738330765,
+            "projected_gradient_inf": 0.15671453738330765,
+            "step_inf": 0.031468530221222785,
+            "objective_calls": 14,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 153.03877716156745,
+            "raw_gradient_inf": 0.015371148509167543,
+            "projected_gradient_inf": 0.015371148509167543,
+            "step_inf": 0.00974177253389702,
+            "objective_calls": 15,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 153.0387676592406,
+            "raw_gradient_inf": 0.002425510518806906,
+            "projected_gradient_inf": 0.002425510518806906,
+            "step_inf": 0.001057898489115583,
+            "objective_calls": 16,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 153.03876734526798,
+            "raw_gradient_inf": 2.4907806881024896e-05,
+            "projected_gradient_inf": 2.4907806881024896e-05,
+            "step_inf": 0.00020846503730637123,
+            "objective_calls": 17,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 153.03876734524778,
+            "raw_gradient_inf": 4.039744796457967e-07,
+            "projected_gradient_inf": 4.039744796457967e-07,
+            "step_inf": 1.576007126302681e-06,
+            "objective_calls": 18,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.4571286649645646,
+        -0.15501992815027485
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "local Gaussian Laplace posterior for the observed group and fitted parameters",
+          "uncertainty": "Poisson/lognormal moments under Laplace posterior approximation; no parameter uncertainty"
+        },
+        {
+          "operation": "predict",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters",
+          "uncertainty": "exact prior Poisson/lognormal moments; no parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "local Gaussian Laplace posterior for the observed group and fitted parameters",
+          "uncertainty": "Poisson/lognormal moments under Laplace posterior approximation; no parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters",
+          "uncertainty": "exact prior Poisson/lognormal moments; no parameter uncertainty"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "poisson_random_slope",
+      "model_digest": "9a15b79808469ff24dcc47d653b1b15675570825756de36194e74dc85b1e7120",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 13,
+        "objective_calls": 28,
+        "rejected_candidates": 0,
+        "loss": 180.09258551583008,
+        "raw_gradient_inf": 1.2121172385803902e-06,
+        "projected_gradient_inf": 1.2121172385803902e-06,
+        "row_count": 96,
+        "unit_count": 12,
+        "weight_sum": 12.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 96,
+          "xor": "303b9dfa3b7f94427b75e50ae92b896f042021ef4f976b9e1959f41b909bbf",
+          "sum": "f8a56008f73777762807fc14cc8abae2ecdcf48b21654a58483acbbb449d8937"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 183.8831918740683,
+            "raw_gradient_inf": 16.917416303611002,
+            "projected_gradient_inf": 16.917416303611002,
+            "step_inf": 0.6451989282703512,
+            "objective_calls": 7,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 183.13685205733347,
+            "raw_gradient_inf": 4.732789083318365,
+            "projected_gradient_inf": 4.732789083318365,
+            "step_inf": 0.30160652994075865,
+            "objective_calls": 12,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 181.99337180244794,
+            "raw_gradient_inf": 4.994555430865509,
+            "projected_gradient_inf": 4.994555430865509,
+            "step_inf": 0.7867523523457316,
+            "objective_calls": 13,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 180.44208740664283,
+            "raw_gradient_inf": 2.380266747435222,
+            "projected_gradient_inf": 2.380266747435222,
+            "step_inf": 0.40982951348370156,
+            "objective_calls": 16,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 180.39890715443843,
+            "raw_gradient_inf": 2.5980377278852265,
+            "projected_gradient_inf": 2.5980377278852265,
+            "step_inf": 0.14302006563557268,
+            "objective_calls": 20,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 180.20178774800505,
+            "raw_gradient_inf": 1.0362482196488427,
+            "projected_gradient_inf": 1.0362482196488427,
+            "step_inf": 0.18341926323730928,
+            "objective_calls": 21,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 180.1054573023271,
+            "raw_gradient_inf": 0.5728691825366657,
+            "projected_gradient_inf": 0.5728691825366657,
+            "step_inf": 0.1918309928135653,
+            "objective_calls": 22,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 180.09353859009732,
+            "raw_gradient_inf": 0.10157850285551984,
+            "projected_gradient_inf": 0.10157850285551984,
+            "step_inf": 0.05673207149390147,
+            "objective_calls": 23,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 180.0927869011362,
+            "raw_gradient_inf": 0.05143692278318179,
+            "projected_gradient_inf": 0.05143692278318179,
+            "step_inf": 0.02467649931256477,
+            "objective_calls": 24,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 180.09258726188023,
+            "raw_gradient_inf": 0.006743629955708208,
+            "projected_gradient_inf": 0.006743629955708208,
+            "step_inf": 0.006347976070891548,
+            "objective_calls": 25,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 180.09258556985657,
+            "raw_gradient_inf": 0.002099189314473726,
+            "projected_gradient_inf": 0.002099189314473726,
+            "step_inf": 0.0004829708811877609,
+            "objective_calls": 26,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 12,
+            "loss": 180.09258551623475,
+            "raw_gradient_inf": 0.00020964230822251295,
+            "projected_gradient_inf": 0.00020964230822251295,
+            "step_inf": 7.083828063270126e-05,
+            "objective_calls": 27,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 13,
+            "loss": 180.09258551583008,
+            "raw_gradient_inf": 1.2121172385803902e-06,
+            "projected_gradient_inf": 1.2121172385803902e-06,
+            "step_inf": 5.813297123680172e-06,
+            "objective_calls": 28,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.5233210187703254,
+        0.6260259298197657,
+        -0.3866022329121879,
+        -1.3505901917941878
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "local Gaussian Laplace posterior for both observed-group latent effects and fitted parameters",
+          "uncertainty": "Poisson/lognormal moments under multivariate Laplace approximation; no parameter uncertainty"
+        },
+        {
+          "operation": "predict",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters at supplied future covariates",
+          "uncertainty": "exact prior Poisson/lognormal moments; shared latent effects induce cross-row dependence"
+        },
+        {
+          "operation": "forecast",
+          "target": "existing_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "local Gaussian Laplace posterior for both observed-group latent effects and fitted parameters",
+          "uncertainty": "Poisson/lognormal moments under multivariate Laplace approximation; no parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "new_group",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "one new group and fitted parameters at supplied future covariates",
+          "uncertainty": "exact prior Poisson/lognormal moments; shared latent effects induce cross-row dependence"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "quadratic_gaussian",
+      "model_digest": "3614e859a68f433b5032887f9110251486fe7a647392931365fd373d8608deac",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 14,
+        "objective_calls": 39,
+        "rejected_candidates": 0,
+        "loss": 16.070462676237256,
+        "raw_gradient_inf": 1.2672430984572713e-06,
+        "projected_gradient_inf": 1.2672430984572713e-06,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "d5972e7b788a2d5fecbd7bb53897e9b1b164a911deadba46c77691951b6ac365",
+          "sum": "1b2a93df520d1c13b9e839c8707b52480e510407b979b99aebd49fa4c0666f81"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 104.38602881792823,
+            "raw_gradient_inf": 102.78107619311368,
+            "projected_gradient_inf": 102.78107619311368,
+            "step_inf": 0.5725833813382355,
+            "objective_calls": 11,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 98.2951355261003,
+            "raw_gradient_inf": 115.22543531764214,
+            "projected_gradient_inf": 115.22543531764214,
+            "step_inf": 0.2109222529290523,
+            "objective_calls": 20,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 3,
+            "loss": 98.01639324922238,
+            "raw_gradient_inf": 120.90234091027834,
+            "projected_gradient_inf": 120.90234091027834,
+            "step_inf": 0.21879979878666556,
+            "objective_calls": 25,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 34.7938681234972,
+            "raw_gradient_inf": 107.27717978177563,
+            "projected_gradient_inf": 107.27717978177563,
+            "step_inf": 0.5192560107367539,
+            "objective_calls": 26,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 19.860769740907415,
+            "raw_gradient_inf": 45.77513869577986,
+            "projected_gradient_inf": 45.77513869577986,
+            "step_inf": 0.2552395234208513,
+            "objective_calls": 27,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 18.766509762056376,
+            "raw_gradient_inf": 85.07113901764727,
+            "projected_gradient_inf": 85.07113901764727,
+            "step_inf": 0.15842056838384577,
+            "objective_calls": 29,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": 16.670606633980878,
+            "raw_gradient_inf": 24.56301304942882,
+            "projected_gradient_inf": 24.56301304942882,
+            "step_inf": 0.053140260143965,
+            "objective_calls": 31,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": 16.209331971755283,
+            "raw_gradient_inf": 7.9280963659158985,
+            "projected_gradient_inf": 7.9280963659158985,
+            "step_inf": 0.07923560087983117,
+            "objective_calls": 33,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": 16.092405534659548,
+            "raw_gradient_inf": 5.682336802053529,
+            "projected_gradient_inf": 5.682336802053529,
+            "step_inf": 0.0371031671673967,
+            "objective_calls": 34,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": 16.071869136227015,
+            "raw_gradient_inf": 1.7313457286921086,
+            "projected_gradient_inf": 1.7313457286921086,
+            "step_inf": 0.008740273523008768,
+            "objective_calls": 35,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": 16.07046860768052,
+            "raw_gradient_inf": 0.051565261894165104,
+            "projected_gradient_inf": 0.051565261894165104,
+            "step_inf": 0.001864340723188307,
+            "objective_calls": 36,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 12,
+            "loss": 16.07046270424799,
+            "raw_gradient_inf": 0.003480403170899482,
+            "projected_gradient_inf": 0.003480403170899482,
+            "step_inf": 0.0002150682497270573,
+            "objective_calls": 37,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 13,
+            "loss": 16.07046267623838,
+            "raw_gradient_inf": 3.540494543585737e-05,
+            "projected_gradient_inf": 3.540494543585737e-05,
+            "step_inf": 1.3608268905285215e-05,
+            "objective_calls": 38,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 14,
+            "loss": 16.070462676237256,
+            "raw_gradient_inf": 1.2672430984572713e-06,
+            "projected_gradient_inf": 1.2672430984572713e-06,
+            "step_inf": 5.320152973720127e-08,
+            "objective_calls": 39,
+            "hessian_reset": false
+          }
+        ]
+      },
+      "parameters": [
+        0.9942280674779396,
+        0.6989680885824898,
+        -1.293388043810994
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied squared design and fitted parameters",
+          "uncertainty": "Gaussian observation variance; parameter uncertainty excluded"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied squared design and fitted parameters",
+          "uncertainty": "Gaussian observation variance; parameter uncertainty excluded"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "model_id": "saturating_growth",
+      "model_digest": "48bb5c52c67b47e249acc3aa60c53c790e5745bf9746a727dc6e40101494d5cb",
+      "fit": {
+        "converged": true,
+        "status": "projected_gradient_tolerance",
+        "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+        "iterations": 19,
+        "objective_calls": 66,
+        "rejected_candidates": 0,
+        "loss": -36.86894889649173,
+        "raw_gradient_inf": 2.3423735768801635e-06,
+        "projected_gradient_inf": 2.3423735768801635e-06,
+        "row_count": 128,
+        "unit_count": 0,
+        "weight_sum": 128.0,
+        "reduction": "sum",
+        "l2_strength": 0.0,
+        "active_bounds": [],
+        "data_ledger": {
+          "count": 128,
+          "xor": "a23672823e1b8a5b424e3faaf68b96800bfabd2247bae2dde1d4551db2ab535b",
+          "sum": "2ad3e95154080217c5788c9538ab73fdd69684adcc5e9cab34aa59500bbdeea9"
+        },
+        "trace": [
+          {
+            "iteration": 1,
+            "loss": 92.16598431297626,
+            "raw_gradient_inf": 612.4160930762255,
+            "projected_gradient_inf": 612.4160930762255,
+            "step_inf": 0.4408583939795716,
+            "objective_calls": 13,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 2,
+            "loss": 63.58556748355718,
+            "raw_gradient_inf": 301.6383422995314,
+            "projected_gradient_inf": 301.6383422995314,
+            "step_inf": 0.2990312954473757,
+            "objective_calls": 25,
+            "hessian_reset": true
+          },
+          {
+            "iteration": 3,
+            "loss": 41.638398634778625,
+            "raw_gradient_inf": 468.4364511628726,
+            "projected_gradient_inf": 468.4364511628726,
+            "step_inf": 0.4932075360742735,
+            "objective_calls": 32,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 4,
+            "loss": 36.31398063790642,
+            "raw_gradient_inf": 306.3546283325419,
+            "projected_gradient_inf": 306.3546283325419,
+            "step_inf": 0.23947362082880375,
+            "objective_calls": 42,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 5,
+            "loss": 35.582205210541545,
+            "raw_gradient_inf": 336.49988512674554,
+            "projected_gradient_inf": 336.49988512674554,
+            "step_inf": 0.07268604705524284,
+            "objective_calls": 50,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 6,
+            "loss": 7.865351228839788,
+            "raw_gradient_inf": 350.52529518577944,
+            "projected_gradient_inf": 350.52529518577944,
+            "step_inf": 0.48830388008835024,
+            "objective_calls": 51,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 7,
+            "loss": -7.054908815493986,
+            "raw_gradient_inf": 331.227345158268,
+            "projected_gradient_inf": 331.227345158268,
+            "step_inf": 0.26077646366846174,
+            "objective_calls": 52,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 8,
+            "loss": -15.062848261212253,
+            "raw_gradient_inf": 71.00686009213692,
+            "projected_gradient_inf": 71.00686009213692,
+            "step_inf": 0.15910884176275752,
+            "objective_calls": 54,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 9,
+            "loss": -28.26168643619665,
+            "raw_gradient_inf": 47.06334214324048,
+            "projected_gradient_inf": 47.06334214324048,
+            "step_inf": 0.221809129946565,
+            "objective_calls": 55,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 10,
+            "loss": -33.117015528667125,
+            "raw_gradient_inf": 99.53632196849782,
+            "projected_gradient_inf": 99.53632196849782,
+            "step_inf": 0.2996201497053199,
+            "objective_calls": 56,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 11,
+            "loss": -36.35609845188675,
+            "raw_gradient_inf": 64.13559055532461,
+            "projected_gradient_inf": 64.13559055532461,
+            "step_inf": 0.13091958915574242,
+            "objective_calls": 57,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 12,
+            "loss": -36.67744823145018,
+            "raw_gradient_inf": 33.709730753271884,
+            "projected_gradient_inf": 33.709730753271884,
+            "step_inf": 0.025999013946571226,
+            "objective_calls": 59,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 13,
+            "loss": -36.86570520963116,
+            "raw_gradient_inf": 7.630583569547994,
+            "projected_gradient_inf": 7.630583569547994,
+            "step_inf": 0.03628266894119864,
+            "objective_calls": 60,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 14,
+            "loss": -36.868238276919705,
+            "raw_gradient_inf": 3.7757809143721204,
+            "projected_gradient_inf": 3.7757809143721204,
+            "step_inf": 0.003537085127885975,
+            "objective_calls": 61,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 15,
+            "loss": -36.86894470387531,
+            "raw_gradient_inf": 0.05909367313597613,
+            "projected_gradient_inf": 0.05909367313597613,
+            "step_inf": 0.001223662239994372,
+            "objective_calls": 62,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 16,
+            "loss": -36.86894881793671,
+            "raw_gradient_inf": 0.019574912560891278,
+            "projected_gradient_inf": 0.019574912560891278,
+            "step_inf": 8.561166991716274e-05,
+            "objective_calls": 63,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 17,
+            "loss": -36.86894889570942,
+            "raw_gradient_inf": 0.0003834463481524608,
+            "projected_gradient_inf": 0.0003834463481524608,
+            "step_inf": 1.875624033265133e-05,
+            "objective_calls": 64,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 18,
+            "loss": -36.86894889649153,
+            "raw_gradient_inf": 2.9552154153122956e-05,
+            "projected_gradient_inf": 2.9552154153122956e-05,
+            "step_inf": 2.185225816075942e-06,
+            "objective_calls": 65,
+            "hessian_reset": false
+          },
+          {
+            "iteration": 19,
+            "loss": -36.86894889649173,
+            "raw_gradient_inf": 2.3423735768801635e-06,
+            "projected_gradient_inf": 2.3423735768801635e-06,
+            "step_inf": 3.169619822163128e-08,
+            "objective_calls": 66,
+            "hessian_reset": true
+          }
+        ]
+      },
+      "parameters": [
+        0.41811527855187014,
+        0.9168360700378894,
+        -0.5728656481807257,
+        -1.7069771980161341
+      ],
+      "operations": [
+        {
+          "operation": "predict",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied nonnegative time and fitted growth parameters",
+          "uncertainty": "independent Gaussian observation variance around the growth curve; no parameter uncertainty"
+        },
+        {
+          "operation": "forecast",
+          "target": "response",
+          "rows": 2,
+          "passed": true,
+          "conditioning": "supplied nonnegative time and fitted growth parameters",
+          "uncertainty": "independent Gaussian observation variance around the growth curve; no parameter uncertainty"
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "log_sha256": "42d26699fd7e6780a81a384e2416228f49406822327e667dfa6de353311dbb1d",
+  "operation_count": 39
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "kind": "spark-tmbad-jvm-qualification",
+  "accepted": true,
+  "platform": "linux/arm64",
+  "spark_version": "4.0.1",
+  "scala_binary_version": "2.13",
+  "jdk_major": 17,
+  "native_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+  "native_binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+  "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
+  "checks_jar_sha256": "c85005cded188fa9ac4b6ae2be13fc1211b6564c7fae4bb66414d7701bbac3f9",
+  "main_source_sha256": {
+    "src/main/scala/io/ds60/spark/tmbad/ArtifactFiles.scala": "c238bc9965282100c8f4f305969d95e20c915e14e8ddf45a980ad4328c74f0ac",
+    "src/main/scala/io/ds60/spark/tmbad/Contract.scala": "d2b03b71641e4ee624d34e9edd14d8789df5500e0ad99d352c2dd8ae51d0e535",
+    "src/main/scala/io/ds60/spark/tmbad/Data.scala": "8d8049f043783a3e1b44720a8f527363913f580db15d21871e7edc6e8d4849e4",
+    "src/main/scala/io/ds60/spark/tmbad/Fitting.scala": "bbb8af83c6db327912da1e2c43b8d38bcc11cf7d2b811b640b54492bef62dcd1",
+    "src/main/scala/io/ds60/spark/tmbad/NativeCalls.scala": "26660d4c2d1c75214327926aa58b6431354bea15e818defc1f707e3a36504075",
+    "src/main/scala/io/ds60/spark/tmbad/NativeWorker.scala": "32029462a1a423204499b6e774256562ed0ec0c598e6c47c43c50cb9cb92e695",
+    "src/main/scala/io/ds60/spark/tmbad/Optimizer.scala": "eb74f747dbbfbb3c435965257805b2062eb4ed04655f476c3b22a0e0d4b86fdf",
+    "src/main/scala/io/ds60/spark/tmbad/Prediction.scala": "d100bfdb33f9172d6d3961bbf34c22a26e40778dd1507289544469719005bc54",
+    "src/main/scala/io/ds60/spark/tmbad/PythonBridge.scala": "86077894f7d8c2b03490f49ec6a2d0003d48f1123a85dcb624621793d9611774",
+    "src/main/scala/io/ds60/spark/tmbad/TaskSpool.scala": "5161f06edf1959de49b67f7cbd90fc3ef18220dc9e15fdf3936bf6fa451100a2",
+    "src/main/scala/io/ds60/spark/tmbad/examples/ModelGallery.scala": "2cb494332ef02e08af5fa91fd260dd7ba8e99f16808322c836eb5640279841da"
+  },
+  "test_source_sha256": {
+    "src/test/scala/io/ds60/spark/tmbad/CandidateChecks.scala": "1001fd8de15e55b3a493628fc154c3c44461dabcc06140424d2c8e9979b61bee",
+    "src/test/scala/io/ds60/spark/tmbad/ContractChecks.scala": "143bb2775ede76ce2056c1059aaa2e5b2edaad5b5f99b0a995c6f2d79419dca3",
+    "src/test/scala/io/ds60/spark/tmbad/ExecutorChecks.scala": "93f62c8fcd58278ee4f7a91643f116e0c62ce9d8094920a1ab0aee929124698d",
+    "src/test/scala/io/ds60/spark/tmbad/LifecycleChecks.scala": "77963ff10a4c0e6eb43c68c86da6b65dfbc69582e5233873aa369164965f9250",
+    "src/test/scala/io/ds60/spark/tmbad/ResourceChecks.scala": "226d37b68fda06afbbbf97352f71389f9d18dd01ce5f52561af4424a216c5177",
+    "src/test/scala/io/ds60/spark/tmbad/SparkChecks.scala": "42f6fe2cbe96c6189bc5b10481bb093430986d3a939600bb4a17180f9c647139"
+  },
+  "build_script_sha256": "8fd0931411d34bb45bbb9a9e5d07279e63665fea3bf640aed67494ee18344cd2",
+  "test_build_script_sha256": "8042a6d2f90f5d0193740ed05d37b37f3792a607b79ae06064f0af1c54f6229f",
+  "evidence_sha256": {
+    "spark": "729dd21af36096cc6cbaccedcd82d45cc1ba810810c883cba2f16f58cea81923",
+    "resource_candidate_lifecycle": "5426ed65d4f04a6ac59131d565e64a895df929c7e63d8a6083aa11d9fba92c07",
+    "two_executor_environment": "4f4f0681e3c7efc1958a2722c86ab08a999708586e25d768901311eb3be44f46",
+    "two_executor_numerics": "fd38de367dc7438a58a1261e1082b34531eccc812f77894c024cbdb3bcb27843",
+    "scala_gallery": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d"
+  },
+  "observations": {
+    "spark_contracts": 14,
+    "scala_model_fits": 14,
+    "scala_prediction_forecast_operations": 39,
+    "lifecycle_controls": 11,
+    "lexical_session_retention_probe": 32,
+    "cache_entry_cap": 16,
+    "cache_byte_cap": 268435456,
+    "same_host_executor_jvms": 2,
+    "two_executor_pid_limit": 1024,
+    "two_executor_observed_peak_pids": 546,
+    "two_executor_pid_limit_events": 0,
+    "shared_laplace_rejected_candidates": 3,
+    "independent_boundary_rejected_candidates": 2
+  },
+  "limitations": [
+    "Native ARM64 observed; no local AMD64 emulation or AMD64 runtime claim.",
+    "Two executor JVMs shared one container/host; separate-container and multi-host execution are not yet qualified.",
+    "Spark base image plus read-only assembled artifacts were tested; a full sealed package Dockerfile build is a separate gate.",
+    "Lifecycle fault emitters are explicitly test-only Python processes, distinct from native numerical execution.",
+    "Direct Scala gallery validates fit convergence, finite outputs and identity coverage; Python/native suites supply independent target formulas.",
+    "One-group variance-component renewal is a boundary-likelihood test, not identified interior random-effect inference."
+  ]
+}

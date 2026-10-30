@@ -195,9 +195,7 @@ Those are separate execution records.
 
 Observed in the installed Python wheel on Linux arm64, Spark 4.0.1, `local[2]`.
 
-The native build is `324c97bdfa9c` and JAR digest is `80e5f77b54db`. The [retained
-report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes,
-diagnostics and unrounded values.
+The native build is `324c97bdfa9c` and JAR digest is `754b4bb08f25`. The [retained report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes, diagnostics and unrounded values.
 
 | Stored parameter | Observed estimate | Original-scale interpretation |
 | --- | --- | --- |
@@ -206,9 +204,7 @@ diagnostics and unrounded values.
 | `log_tau0` | -0.38660223 | tau0 = 0.67936127 |
 | `log_tau1` | -1.3505902 | tau1 = 0.2590873 |
 
-The fit converged with projected gradient norm 1.2121172e-06; raw gradient norm 1.2121172e-06. It
-used 13 iterations and 28 objective calls, including 0 reviewed numerical candidate rejections.
-Observed objective value: 180.09259. Active bound indices: `[]`.
+The fit converged with projected gradient norm 1.2121172e-06; raw gradient norm 1.2121172e-06. It used 13 iterations and 28 objective calls, including 0 reviewed numerical candidate rejections. Observed objective value: 180.09259. Active bound indices: `[]`.
 
 ### Observed prediction: `existing_group`
 
@@ -217,9 +213,7 @@ Observed objective value: 180.09259. Active bound indices: `[]`.
 | 1000 | s0 | -0.5 | 1 | 1.6016892 | 1.7445495 | 1.320814 |
 | 1001 | s0 | 0.8 | 1.5 | 3.9305691 | 4.9679026 | 2.2288792 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: Poisson/lognormal moments under multivariate Laplace approximation; no parameter
-uncertainty.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: Poisson/lognormal moments under multivariate Laplace approximation; no parameter uncertainty.
 
 ### Observed prediction: `new_group`
 
@@ -228,9 +222,7 @@ uncertainty.
 | 2000 | unseen | -0.5 | 1 | 1.5674729 | 3.0744583 | 1.7534133 |
 | 2001 | unseen | 0.8 | 1.5 | 5.3755083 | 24.335528 | 4.9331053 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: exact prior Poisson/lognormal moments; shared latent effects induce cross-row
-dependence.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: exact prior Poisson/lognormal moments; shared latent effects induce cross-row dependence.
 
 ### Observed forecast: `existing_group`
 
@@ -239,9 +231,7 @@ dependence.
 | 1000 | s0 | -0.5 | 1 | 1.6016892 | 1.7445495 | 1.320814 |
 | 1001 | s0 | 0.8 | 1.5 | 3.9305691 | 4.9679026 | 2.2288792 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: Poisson/lognormal moments under multivariate Laplace approximation; no parameter
-uncertainty.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: Poisson/lognormal moments under multivariate Laplace approximation; no parameter uncertainty.
 
 ### Observed forecast: `new_group`
 
@@ -250,12 +240,11 @@ uncertainty.
 | 2000 | unseen | -0.5 | 1 | 1.5674729 | 3.0744583 | 1.7534133 |
 | 2001 | unseen | 0.8 | 1.5 | 5.3755083 | 24.335528 | 4.9331053 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: exact prior Poisson/lognormal moments; shared latent effects induce cross-row
-dependence.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: exact prior Poisson/lognormal moments; shared latent effects induce cross-row dependence.
 
-The estimates above are actual finite-sample results, not the fixture's generating values. This
-local execution does not establish multi-node scale, a global optimum or general model adequacy.
+The estimates above are actual finite-sample results, not the fixture's generating values. This local execution does not establish multi-node scale, a global optimum or general model adequacy.
+
+Direct Scala execution passed the same model and declared targets on this artifact and fixture. Observed fitted parameters and objective values match the Python run; see the [frontend parity receipt](../../qualification/arm64-frontend-parity.json). This is a same-host qualification, not the separately requested Compose cluster or worker-container-loss acceptance.
 
 ## Common mistakes
 

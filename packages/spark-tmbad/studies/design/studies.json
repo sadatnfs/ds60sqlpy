@@ -8,45 +8,49 @@
       "id": "sim-001",
       "title": "Gaussian MLE, weights and partition invariance",
       "case": "normal_mle",
-      "status": "paired package source planned",
+      "status": "paired runner source prepared; actual backend study gates not run",
       "existing_lesson_links": [
         "clp-002",
         "asm-008"
       ],
-      "worked_contrast": "Change partition sizes and distinguish replication weights from inverse-variance or sampling weights."
+      "worked_contrast": "Change partition sizes and distinguish replication weights from inverse-variance or sampling weights.",
+      "source": "run_spark.py"
     },
     {
       "id": "sim-002",
       "title": "All-coordinate L2 and its actual prior",
       "case": "linear_all_coordinate_map",
-      "status": "paired package source planned",
+      "status": "paired runner source prepared; actual backend study gates not run",
       "existing_lesson_links": [
         "clp-013",
         "asm-008"
       ],
-      "worked_contrast": "Compare zero versus nonzero L2 while recording that the intercept and log-scale are penalized too."
+      "worked_contrast": "Compare zero versus nonzero L2 while recording that the intercept and log-scale are penalized too.",
+      "source": "run_spark.py"
     },
     {
       "id": "sim-003",
       "title": "Conventional ridge with selected coefficients",
       "case": "ridge_selected",
-      "status": "reference source planned; native interface pending",
+      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
       "existing_lesson_links": [
         "clp-013",
         "bayes-003"
       ],
-      "worked_contrast": "Vary collinearity and prior precision, keep the intercept unpenalized explicitly, and compare an analytic Gaussian oracle."
+      "worked_contrast": "Vary collinearity and prior precision, keep the intercept unpenalized explicitly, and compare an analytic Gaussian oracle.",
+      "source": "run_reference.py"
     },
     {
       "id": "sim-004",
       "title": "Exact lasso, soft thresholding and KKT conditions",
       "case": "lasso_orthogonal",
-      "status": "reference source planned; distributed proximal interface pending",
+      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
       "existing_lesson_links": [
         "clp-013",
         "asm-010"
       ],
-      "worked_contrast": "Contrast coefficient sparsity with ridge and verify active and zero-coordinate KKT conditions; do not substitute smooth absolute values."
+      "worked_contrast": "Contrast coefficient sparsity with ridge and verify active and zero-coordinate KKT conditions; do not substitute smooth absolute values.",
+      "source": "run_reference.py"
     },
     {
       "id": "sim-005",
@@ -63,12 +67,13 @@
       "id": "sim-006",
       "title": "Nonlinear growth and extrapolation",
       "case": "nonlinear_growth",
-      "status": "paired package source planned",
+      "status": "paired runner source prepared; actual backend study gates not run",
       "existing_lesson_links": [
         "clp-006",
         "tmb-010"
       ],
-      "worked_contrast": "Use matched curve families in different coordinates, then shorten the observed time range to expose weak identification."
+      "worked_contrast": "Use matched curve families in different coordinates, then shorten the observed time range to expose weak identification.",
+      "source": "run_spark.py"
     },
     {
       "id": "sim-007",
@@ -85,12 +90,13 @@
       "id": "sim-008",
       "title": "Pooling and complete-group Gaussian likelihoods",
       "case": "random_intercept",
-      "status": "paired package source planned",
+      "status": "paired runner source prepared; actual backend study gates not run",
       "existing_lesson_links": [
         "asm-003",
         "asm-033"
       ],
-      "worked_contrast": "Change group imbalance and distinguish shared hyperparameters, independent fits and plug-in shrinkage."
+      "worked_contrast": "Change group imbalance and distinguish shared hyperparameters, independent fits and plug-in shrinkage.",
+      "source": "run_spark.py"
     },
     {
       "id": "sim-009",
@@ -107,23 +113,25 @@
       "id": "sim-010",
       "title": "MLE, MAP and exact posterior targets",
       "case": "conjugate_targets",
-      "status": "reference source planned",
+      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
       "existing_lesson_links": [
         "bayes-003",
         "asm-036"
       ],
-      "worked_contrast": "Use Gaussian and Gamma-Poisson cases so posterior mean, mode and uncertainty cannot be conflated."
+      "worked_contrast": "Use Gaussian and Gamma-Poisson cases so posterior mean, mode and uncertainty cannot be conflated.",
+      "source": "run_reference.py"
     },
     {
       "id": "sim-011",
       "title": "Coordinates, priors and Jacobians",
       "case": "prior_coordinates",
-      "status": "reference source planned",
+      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
       "existing_lesson_links": [
         "clp-004",
         "tmb-004"
       ],
-      "worked_contrast": "Compare positive-parameter and log-parameter MAP targets and verify density normalization under a change of measure."
+      "worked_contrast": "Compare positive-parameter and log-parameter MAP targets and verify density normalization under a change of measure.",
+      "source": "run_reference.py"
     },
     {
       "id": "sim-012",
@@ -393,24 +401,26 @@
       "id": "sim-036",
       "title": "Failure accounting and reproducible study operations",
       "case": "study_operations",
-      "status": "reference source planned",
+      "status": "bounded mathematical reference implemented and host-smoke tested; full study still pending",
       "existing_lesson_links": [
         "tmb-014",
         "asm-004"
       ],
-      "worked_contrast": "Retain failed replicates, environment/source identities and MCSE; never turn a short smoke test into a coverage or scaling claim."
+      "worked_contrast": "Retain failed replicates, environment/source identities and MCSE; never turn a short smoke test into a coverage or scaling claim.",
+      "source": "run_reference.py"
     },
     {
       "id": "sim-037",
       "title": "Global Gaussian coupling through bounded sufficient statistics",
       "case": "global_gaussian_low_rank",
-      "status": "original reference planned; public distributed integration pending",
+      "status": "streaming statistics and exact Gaussian reference tested; actual Spark/core integration pending",
       "existing_lesson_links": [
         "asm-011",
         "tmb-015",
         "bayes-016"
       ],
-      "worked_contrast": "Compare one genuinely shared low-rank Gaussian latent vector with incorrect independent partition effects, using Gram statistics, determinant/Schur identities and independent dense oracles."
+      "worked_contrast": "Compare one genuinely shared low-rank Gaussian latent vector with incorrect independent partition effects, using Gram statistics, determinant/Schur identities and independent dense oracles.",
+      "source": "run_global_reference.py"
     }
   ]
 }

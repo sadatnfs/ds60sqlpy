@@ -198,9 +198,7 @@ Those are separate execution records.
 
 Observed in the installed Python wheel on Linux arm64, Spark 4.0.1, `local[2]`.
 
-The native build is `324c97bdfa9c` and JAR digest is `80e5f77b54db`. The [retained
-report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes,
-diagnostics and unrounded values.
+The native build is `324c97bdfa9c` and JAR digest is `754b4bb08f25`. The [retained report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes, diagnostics and unrounded values.
 
 | Stored parameter | Observed estimate | Original-scale interpretation |
 | --- | --- | --- |
@@ -209,9 +207,7 @@ diagnostics and unrounded values.
 | `log_sigma` | -1.0385195 | sigma = 0.35397836 |
 | `log_tau` | -0.92109393 | tau = 0.39808333 |
 
-The fit converged with projected gradient norm 7.3733742e-07; raw gradient norm 7.3733742e-07. It
-used 11 iterations and 36 objective calls, including 0 reviewed numerical candidate rejections.
-Observed objective value: 87.214521. Active bound indices: `[]`.
+The fit converged with projected gradient norm 7.3733742e-07; raw gradient norm 7.3733742e-07. It used 11 iterations and 36 objective calls, including 0 reviewed numerical candidate rejections. Observed objective value: 87.214521. Active bound indices: `[]`.
 
 ### Observed prediction: `conditional_history`
 
@@ -221,9 +217,7 @@ Observed objective value: 87.214521. Active bound indices: `[]`.
 | 1001 | s0 | 21 | 0.69381688 | 0.17802182 | 0.42192633 |
 | 1002 | s0 | 22 | 0.64259098 | 0.19690159 | 0.44373594 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: posterior latent uncertainty and propagated innovations; pointwise variance excludes
-parameter uncertainty.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: posterior latent uncertainty and propagated innovations; pointwise variance excludes parameter uncertainty.
 
 ### Observed prediction: `stationary_new_series`
 
@@ -233,8 +227,7 @@ parameter uncertainty.
 | 2001 | unseen | 21 | 0.2561743 | 0.34525685 | 0.58758561 |
 | 2002 | unseen | 22 | 0.2561743 | 0.34525685 | 0.58758561 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: prior shared latent plus stationary AR1 variance; future steps are correlated.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: prior shared latent plus stationary AR1 variance; future steps are correlated.
 
 ### Observed forecast: `conditional_history`
 
@@ -244,9 +237,7 @@ Uncertainty: prior shared latent plus stationary AR1 variance; future steps are 
 | 1001 | s0 | 21 | 0.69381688 | 0.17802182 | 0.42192633 |
 | 1002 | s0 | 22 | 0.64259098 | 0.19690159 | 0.44373594 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: posterior latent uncertainty and propagated innovations; pointwise variance excludes
-parameter uncertainty.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: posterior latent uncertainty and propagated innovations; pointwise variance excludes parameter uncertainty.
 
 ### Observed forecast: `stationary_new_series`
 
@@ -256,11 +247,11 @@ parameter uncertainty.
 | 2001 | unseen | 21 | 0.2561743 | 0.34525685 | 0.58758561 |
 | 2002 | unseen | 22 | 0.2561743 | 0.34525685 | 0.58758561 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: prior shared latent plus stationary AR1 variance; future steps are correlated.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: prior shared latent plus stationary AR1 variance; future steps are correlated.
 
-The estimates above are actual finite-sample results, not the fixture's generating values. This
-local execution does not establish multi-node scale, a global optimum or general model adequacy.
+The estimates above are actual finite-sample results, not the fixture's generating values. This local execution does not establish multi-node scale, a global optimum or general model adequacy.
+
+Direct Scala execution passed the same model and declared targets on this artifact and fixture. Observed fitted parameters and objective values match the Python run; see the [frontend parity receipt](../../qualification/arm64-frontend-parity.json). This is a same-host qualification, not the separately requested Compose cluster or worker-container-loss acceptance.
 
 ## Common mistakes
 

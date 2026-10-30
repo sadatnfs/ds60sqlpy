@@ -1,0 +1,70 @@
+{
+  "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+  "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+  "checks": [
+    {
+      "checks": [
+        "exact marginal F/G/H",
+        "Gaussian Laplace parity",
+        "whole-unit weight",
+        "existing/new group predictions and forecasts",
+        "parameter uncertainty excluded"
+      ],
+      "model": "gaussian_random_intercept",
+      "parameter_data_cases": 4
+    },
+    {
+      "checks": [
+        "analytic scalar mode",
+        "Laplace F/G with implicit curvature derivative",
+        "existing-group Laplace moments",
+        "new-group exact prior moments",
+        "parameter uncertainty excluded"
+      ],
+      "model": "poisson_random_intercept",
+      "parameter_data_cases": 9
+    },
+    {
+      "checks": [
+        "positive/negative autocorrelation",
+        "four-step innovation propagation",
+        "conditional versus stationary targets",
+        "one-step lag prediction"
+      ],
+      "model": "ar1",
+      "parameter_data_cases": 2
+    },
+    {
+      "checks": [
+        "independent dense-covariance marginal F/G/H",
+        "positive/negative/zero AR coefficient",
+        "dense Gaussian conditional forecasts",
+        "stationary new-series moments",
+        "parameter uncertainty excluded"
+      ],
+      "model": "gaussian_ar1_random_intercept",
+      "parameter_data_cases": 6
+    },
+    {
+      "checks": [
+        "analytic two-dimensional mode and total Laplace gradient",
+        "full posterior covariance including off-diagonal term",
+        "existing/new group predictions and future-covariate forecasts"
+      ],
+      "model": "poisson_random_slope",
+      "parameter_data_cases": 4
+    }
+  ],
+  "native_process_calls": 117,
+  "oracle_source_sha256": {
+    "numerical_oracles.py": "2cfe74db4a4ca69a5b09e6ea792962d092d822674469762550c62ede2f7ac673",
+    "validate_native_oracles.py": "e3a644961883c5a2c1526de1ab2824a299c46317431d0ff09740a125fa1f2ae0"
+  },
+  "platform": {
+    "arch": "arm64",
+    "os": "linux"
+  },
+  "python_version": "3.12.12",
+  "scope": "native-only independent numerical oracles; no Spark",
+  "status": "passed"
+}

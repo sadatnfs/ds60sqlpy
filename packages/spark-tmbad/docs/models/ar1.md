@@ -181,9 +181,7 @@ Those are separate execution records.
 
 Observed in the installed Python wheel on Linux arm64, Spark 4.0.1, `local[2]`.
 
-The native build is `324c97bdfa9c` and JAR digest is `80e5f77b54db`. The [retained
-report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes,
-diagnostics and unrounded values.
+The native build is `324c97bdfa9c` and JAR digest is `754b4bb08f25`. The [retained report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes, diagnostics and unrounded values.
 
 | Stored parameter | Observed estimate | Original-scale interpretation |
 | --- | --- | --- |
@@ -191,9 +189,7 @@ diagnostics and unrounded values.
 | `atanh_phi` | 0.60243963 | phi = 0.53878328 |
 | `log_sigma` | -1.0949781 | sigma = 0.33454692 |
 
-The fit converged with projected gradient norm 3.1891975e-06; raw gradient norm 3.1891975e-06. It
-used 10 iterations and 34 objective calls, including 0 reviewed numerical candidate rejections.
-Observed objective value: 66.506551. Active bound indices: `[]`.
+The fit converged with projected gradient norm 3.1891975e-06; raw gradient norm 3.1891975e-06. It used 10 iterations and 34 objective calls, including 0 reviewed numerical candidate rejections. Observed objective value: 66.506551. Active bound indices: `[]`.
 
 ### Observed prediction: `response`
 
@@ -201,8 +197,7 @@ Observed objective value: 66.506551. Active bound indices: `[]`.
 | --- | --- | --- | --- | --- | --- |
 | 3000 | s0 | 1.1139107 | 0.78356032 | 0.11192164 | 0.33454692 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: one innovation variance; parameter uncertainty excluded.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: one innovation variance; parameter uncertainty excluded.
 
 ### Observed forecast: `conditional_history`
 
@@ -212,8 +207,7 @@ Uncertainty: one innovation variance; parameter uncertainty excluded.
 | 1001 | s0 | 21 | 0.60557308 | 0.14441108 | 0.38001458 |
 | 1002 | s0 | 22 | 0.50967653 | 0.15384236 | 0.39222743 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: propagated future innovations; pointwise variance, not simultaneous intervals.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: propagated future innovations; pointwise variance, not simultaneous intervals.
 
 ### Observed forecast: `stationary_new_series`
 
@@ -223,11 +217,11 @@ Uncertainty: propagated future innovations; pointwise variance, not simultaneous
 | 2001 | unseen | 21 | 0.39765228 | 0.15769995 | 0.39711453 |
 | 2002 | unseen | 22 | 0.39765228 | 0.15769995 | 0.39711453 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: stationary marginal variance; future steps are correlated.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: stationary marginal variance; future steps are correlated.
 
-The estimates above are actual finite-sample results, not the fixture's generating values. This
-local execution does not establish multi-node scale, a global optimum or general model adequacy.
+The estimates above are actual finite-sample results, not the fixture's generating values. This local execution does not establish multi-node scale, a global optimum or general model adequacy.
+
+Direct Scala execution passed the same model and declared targets on this artifact and fixture. Observed fitted parameters and objective values match the Python run; see the [frontend parity receipt](../../qualification/arm64-frontend-parity.json). This is a same-host qualification, not the separately requested Compose cluster or worker-container-loss acceptance.
 
 ## Common mistakes
 

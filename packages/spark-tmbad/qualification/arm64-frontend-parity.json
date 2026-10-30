@@ -1,0 +1,111 @@
+{
+  "artifact_identity": {
+    "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+    "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+    "engine": {
+      "name": "TMBad",
+      "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+      "version": "1.9.25"
+    },
+    "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
+    "platform": {
+      "arch": "arm64",
+      "os": "linux"
+    }
+  },
+  "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea",
+  "kind": "spark-tmbad-python-scala-fit-parity",
+  "models": [
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "ar1",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "bernoulli_logistic",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "gamma_regression",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "gaussian_ar1_random_intercept",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "gaussian_random_intercept",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "gaussian_random_intercept_laplace",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "linear_gaussian",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "negative_binomial2",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "normal",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "poisson_exposure",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "poisson_random_intercept",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "poisson_random_slope",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "quadratic_gaussian",
+      "objective_difference": 0.0,
+      "passed": true
+    },
+    {
+      "maximum_parameter_difference": 0.0,
+      "model_id": "saturating_growth",
+      "objective_difference": 0.0,
+      "passed": true
+    }
+  ],
+  "reports": {
+    "arm64-python-gallery.json": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
+    "arm64-scala-gallery.json": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d"
+  },
+  "schema_version": 1,
+  "scope": "Observed parameter/objective parity and target/cardinality coverage; independent target formulas checked by Python/native gates",
+  "status": "passed"
+}

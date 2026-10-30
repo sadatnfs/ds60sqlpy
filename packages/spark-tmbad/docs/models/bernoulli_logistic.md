@@ -142,18 +142,14 @@ Those are separate execution records.
 
 Observed in the installed Python wheel on Linux arm64, Spark 4.0.1, `local[2]`.
 
-The native build is `324c97bdfa9c` and JAR digest is `80e5f77b54db`. The [retained
-report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes,
-diagnostics and unrounded values.
+The native build is `324c97bdfa9c` and JAR digest is `754b4bb08f25`. The [retained report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes, diagnostics and unrounded values.
 
 | Stored parameter | Observed estimate | Original-scale interpretation |
 | --- | --- | --- |
 | `intercept` | -0.15613691 | -0.15613691 |
 | `slope` | 0.85602663 | 0.85602663 |
 
-The fit converged with projected gradient norm 8.6638019e-07; raw gradient norm 8.6638019e-07. It
-used 7 iterations and 16 objective calls, including 0 reviewed numerical candidate rejections.
-Observed objective value: 101.88093. Active bound indices: `[]`.
+The fit converged with projected gradient norm 8.6638019e-07; raw gradient norm 8.6638019e-07. It used 7 iterations and 16 objective calls, including 0 reviewed numerical candidate rejections. Observed objective value: 101.88093. Active bound indices: `[]`.
 
 ### Observed prediction: `response`
 
@@ -162,9 +158,7 @@ Observed objective value: 101.88093. Active bound indices: `[]`.
 | 1000 | -0.5 | 0.35797819 | 0.2298298 | 0.47940568 |
 | 1001 | 1 | 0.66816332 | 0.2217211 | 0.4708727 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: Bernoulli observation variance; no parameter uncertainty; future rows conditionally
-independent.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: Bernoulli observation variance; no parameter uncertainty; future rows conditionally independent.
 
 ### Observed forecast: `response`
 
@@ -173,12 +167,11 @@ independent.
 | 1000 | -0.5 | 0.35797819 | 0.2298298 | 0.47940568 |
 | 1001 | 1 | 0.66816332 | 0.2217211 | 0.4708727 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: Bernoulli observation variance; no parameter uncertainty; future rows conditionally
-independent.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: Bernoulli observation variance; no parameter uncertainty; future rows conditionally independent.
 
-The estimates above are actual finite-sample results, not the fixture's generating values. This
-local execution does not establish multi-node scale, a global optimum or general model adequacy.
+The estimates above are actual finite-sample results, not the fixture's generating values. This local execution does not establish multi-node scale, a global optimum or general model adequacy.
+
+Direct Scala execution passed the same model and declared targets on this artifact and fixture. Observed fitted parameters and objective values match the Python run; see the [frontend parity receipt](../../qualification/arm64-frontend-parity.json). This is a same-host qualification, not the separately requested Compose cluster or worker-container-loss acceptance.
 
 ## Common mistakes
 

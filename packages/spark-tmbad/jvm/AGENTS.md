@@ -23,3 +23,17 @@ Keep IDs in outputs, enforce within-unit ordering where required, and make no
 promise about global DataFrame row order. Record actual scale, native platform,
 compiler/runtime versions and numerical oracles. A parsed source or host solver
 test is not native worker, Spark or multi-host qualification. No em dashes.
+
+Numerical rejection is narrowly reviewed. Only an evaluation response with the
+exact request/build/model binding, EOF and native exit2 can yield one of the four
+allowed scientific rejection codes. Initial rejection stays fatal. Validate all
+partition/ledger coverage and erase partial sums before a driver DomainFailure.
+Never catch a generic SparkException as a numerical trial.
+
+Independent objective sessions use lexical try/finally, no per-session task hook,
+and one shared task deadline. Keep cancellation checks and constructor cleanup.
+The prepared cache has explicit entry/byte caps, weak context references and
+owned cleanup retry; do not evict artifacts used by active tasks. Compile test
+classes separately so they cannot replace the prepared production adapter JAR.
+Treat qualification.json as retained evidence for its exact source hashes. Update
+it only after actual qualification and preserve superseded evidence externally.

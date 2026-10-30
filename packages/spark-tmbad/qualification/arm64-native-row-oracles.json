@@ -1,0 +1,20 @@
+{
+  "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+  "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+  "native_process_calls": 105,
+  "parameter_data_cases": {
+    "bernoulli_logistic": 3,
+    "gamma_regression": 9,
+    "linear_gaussian": 1,
+    "negative_binomial2": 18,
+    "normal": 1,
+    "poisson_exposure": 1,
+    "quadratic_gaussian": 1,
+    "saturating_growth": 1
+  },
+  "reference_sha256": "072a550dac39e6f10509e668a7b8b3ef30b2c071889e85d8148154bc295462f2",
+  "scipy_reference_version": "1.17.1",
+  "scope": "actual native row-model F/G/H and target checks; no Spark",
+  "status": "passed",
+  "validator_sha256": "e7630ff2d6c730b565528d81b6f91915a12bc29b3ae536806e2c9f1e4bd68dc6"
+}

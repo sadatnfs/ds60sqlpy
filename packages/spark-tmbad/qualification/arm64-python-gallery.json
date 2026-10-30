@@ -8,7 +8,7 @@
       "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
       "version": "1.9.25"
     },
-    "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+    "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
     "platform": {
       "arch": "arm64",
       "os": "linux"

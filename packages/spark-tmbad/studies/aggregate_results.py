@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
 from study_support import aggregate, bounded_json, canonical, digest, scalar_summary, wilson
 
 
-def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize(reports: Iterable[dict[str, Any]]) -> dict[str, Any]:
     groups: dict[tuple, list[dict[str, Any]]] = {}
     truths = {}
     configurations = {}
     seen = set()
+    source_reports = []
     for report in reports:
         if (
             report.get("kind") != "original-spark-modeling-study"
@@ -26,6 +28,21 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
         if identity in seen:
             raise ValueError("Duplicate Monte Carlo replication")
         seen.add(identity)
+        source_reports.append(
+            {"replication": list(identity), "canonical_report_sha256": digest(report)}
+        )
+        planned = {
+            (row["scenario"], row["method"], row["case_sha256"])
+            for row in report["planned_records"]
+        }
+        actual = {(row["scenario"], row["method"], row["case_sha256"]) for row in report["records"]}
+        if (
+            planned != actual
+            or len(planned) != len(report["planned_records"])
+            or len(actual) != len(report["records"])
+        ):
+            raise ValueError("Completed replication is missing or duplicating planned methods")
+        record_keys = set()
         environment = digest(
             {
                 "package": report["package_identity"],
@@ -38,6 +55,9 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
         )
         for row in report["records"]:
             key = (report["backend"], report["study"], row["scenario"], row["method"])
+            if key in record_keys:
+                raise ValueError("Duplicate method/scenario within one replication")
+            record_keys.add(key)
             configuration = {
                 "environment": environment,
                 "truth": row["truth"],
@@ -46,6 +66,7 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
                 "training_rows": row["training_rows"],
                 "future_rows": row["future_rows"],
                 "optimizer": report["optimizer_settings"],
+                "partitions": report["partitions"],
             }
             if key in configurations and configurations[key] != configuration:
                 raise ValueError(
@@ -53,7 +74,12 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
                 )
             configurations[key] = configuration
             truths[key] = row["truth"]
-            groups.setdefault(key, []).append(row)
+            # Do not retain full traces, model documents or prediction rows for
+            # every replication. Keep only bounded values needed by this summary.
+            reduced = {name: row[name] for name in ("status", "parameters")}
+            if row["status"] == "passed":
+                reduced["future_metrics"] = row["future_metrics"]
+            groups.setdefault(key, []).append(reduced)
     output = []
     for key, records in sorted(groups.items()):
         result = {
@@ -104,7 +130,12 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
         "kind": "modeling-monte-carlo-summary",
         "status": "completed",
         "groups": output,
-        "scope": "MCSE across independent generated datasets; conditional estimates and procedural coverage are separate; small replication counts are not calibration evidence",
+        "input_receipts": source_reports,
+        "scope": (
+            "MCSE across independent generated datasets; conditional estimates and "
+            "procedural coverage are separate; "
+            "small replication counts are not calibration evidence"
+        ),
     }
 
 
@@ -116,11 +147,11 @@ def main() -> None:
     if args.output.exists():
         raise FileExistsError("Keep previous results; select a new output path")
     if len(args.reports) > 10000:
-        raise ValueError("Aggregate at most10000 study shards at once")
-    result = summarize([bounded_json(path) for path in args.reports])
+        raise ValueError("Aggregate at most 10000 study shards at once")
+    result = summarize(bounded_json(path) for path in args.reports)
     body = canonical(result) + b"\n"
     if len(body) > 4 * 1024 * 1024:
-        raise ValueError("Summary exceeds4MiB; aggregate separate scenarios")
+        raise ValueError("Summary exceeds 4 MiB; aggregate separate scenarios")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("xb") as f:
         f.write(body)

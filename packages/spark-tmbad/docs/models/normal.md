@@ -131,18 +131,14 @@ Those are separate execution records.
 
 Observed in the installed Python wheel on Linux arm64, Spark 4.0.1, `local[2]`.
 
-The native build is `324c97bdfa9c` and JAR digest is `80e5f77b54db`. The [retained
-report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes,
-diagnostics and unrounded values.
+The native build is `324c97bdfa9c` and JAR digest is `754b4bb08f25`. The [retained report](../../qualification/arm64-python-gallery.json) contains full identities, source hashes, diagnostics and unrounded values.
 
 | Stored parameter | Observed estimate | Original-scale interpretation |
 | --- | --- | --- |
 | `mu` | 1.5201907 | 1.5201907 |
 | `log_sigma` | -0.4030345 | sigma = 0.66828904 |
 
-The fit converged with projected gradient norm 6.4621357e-07; raw gradient norm 6.4621357e-07. It
-used 7 iterations and 24 objective calls, including 0 reviewed numerical candidate rejections.
-Observed objective value: 130.03572. Active bound indices: `[]`.
+The fit converged with projected gradient norm 6.4621357e-07; raw gradient norm 6.4621357e-07. It used 7 iterations and 24 objective calls, including 0 reviewed numerical candidate rejections. Observed objective value: 130.03572. Active bound indices: `[]`.
 
 ### Observed prediction: `response`
 
@@ -151,8 +147,7 @@ Observed objective value: 130.03572. Active bound indices: `[]`.
 | 1000 | 1.5201907 | 0.66828904 |
 | 1001 | 1.5201907 | 0.66828904 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: observation only; parameter uncertainty excluded.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: observation only; parameter uncertainty excluded.
 
 ### Observed forecast: `response`
 
@@ -161,11 +156,11 @@ Uncertainty: observation only; parameter uncertainty excluded.
 | 1000 | 1.5201907 | 0.66828904 |
 | 1001 | 1.5201907 | 0.66828904 |
 
-These returned values passed the independent target formula check at the fitted parameters.
-Uncertainty: observation only; parameter uncertainty excluded.
+These returned values passed the independent target formula check at the fitted parameters. Uncertainty: observation only; parameter uncertainty excluded.
 
-The estimates above are actual finite-sample results, not the fixture's generating values. This
-local execution does not establish multi-node scale, a global optimum or general model adequacy.
+The estimates above are actual finite-sample results, not the fixture's generating values. This local execution does not establish multi-node scale, a global optimum or general model adequacy.
+
+Direct Scala execution passed the same model and declared targets on this artifact and fixture. Observed fitted parameters and objective values match the Python run; see the [frontend parity receipt](../../qualification/arm64-frontend-parity.json). This is a same-host qualification, not the separately requested Compose cluster or worker-container-loss acceptance.
 
 ## Common mistakes
 

@@ -1,0 +1,115 @@
+{
+  "kind": "spark-tmbad-separate-executor-checks",
+  "passed": true,
+  "scope": "two separate executor JVMs on one host; no multi-host/network-scale claim",
+  "executors": [
+    {
+      "executor_id": "0",
+      "jvm_pid": 146,
+      "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+      "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+      "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+    },
+    {
+      "executor_id": "1",
+      "jvm_pid": 145,
+      "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+      "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+      "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+    }
+  ],
+  "artifact_identity": {
+    "build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+    "binary_sha256": "d96d4da933affaf95978b16b9b185c9ead3922efb1863ee98b6c11a5aa7013aa",
+    "platform": {
+      "os": "linux",
+      "arch": "arm64"
+    },
+    "engine": {
+      "name": "TMBad",
+      "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
+      "version": "1.9.25"
+    },
+    "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+  },
+  "fit": {
+    "converged": true,
+    "status": "projected_gradient_tolerance",
+    "reason": "Projected first-order stationarity only; no global optimum or identifiability claim",
+    "iterations": 6,
+    "objective_calls": 9,
+    "rejected_candidates": 0,
+    "loss": 8.894629957687027,
+    "raw_gradient_inf": 1.470748518528353e-06,
+    "projected_gradient_inf": 1.470748518528353e-06,
+    "row_count": 4,
+    "unit_count": 0,
+    "weight_sum": 4.0,
+    "reduction": "sum",
+    "l2_strength": 0.0,
+    "active_bounds": [],
+    "data_ledger": {
+      "count": 4,
+      "xor": "570144ce00d6aa56597a1643b91fa381853a2c4b12eed4a73f3967e336924c4d",
+      "sum": "d0e137b5fe889b223e0e420396e5976b3b3ab4cb121b0c913b95ca1e658db639"
+    },
+    "trace": [
+      {
+        "iteration": 1,
+        "loss": 9.212700733039284,
+        "raw_gradient_inf": 1.017139663302271,
+        "projected_gradient_inf": 1.017139663302271,
+        "step_inf": 0.21137910796793213,
+        "objective_calls": 4,
+        "hessian_reset": false
+      },
+      {
+        "iteration": 2,
+        "loss": 8.897423013835024,
+        "raw_gradient_inf": 0.21356387433326462,
+        "projected_gradient_inf": 0.21356387433326462,
+        "step_inf": 0.7880999490551264,
+        "objective_calls": 5,
+        "hessian_reset": false
+      },
+      {
+        "iteration": 3,
+        "loss": 8.895047192533118,
+        "raw_gradient_inf": 0.025479550692986352,
+        "projected_gradient_inf": 0.025479550692986352,
+        "step_inf": 0.027593580536798723,
+        "objective_calls": 6,
+        "hessian_reset": false
+      },
+      {
+        "iteration": 4,
+        "loss": 8.894630718640027,
+        "raw_gradient_inf": 0.0011004066176740213,
+        "projected_gradient_inf": 0.0011004066176740213,
+        "step_inf": 0.03057586801620893,
+        "objective_calls": 7,
+        "hessian_reset": false
+      },
+      {
+        "iteration": 5,
+        "loss": 8.89462995789805,
+        "raw_gradient_inf": 5.8124396757452956e-05,
+        "projected_gradient_inf": 5.8124396757452956e-05,
+        "step_inf": 0.001375266669467301,
+        "objective_calls": 8,
+        "hessian_reset": false
+      },
+      {
+        "iteration": 6,
+        "loss": 8.894629957687027,
+        "raw_gradient_inf": 1.470748518528353e-06,
+        "projected_gradient_inf": 1.470748518528353e-06,
+        "step_inf": 7.081653273566246e-06,
+        "objective_calls": 9,
+        "hessian_reset": false
+      }
+    ]
+  },
+  "prediction_rows": 2,
+  "forecast_rows": 2
+}

@@ -23,17 +23,37 @@
         "stationary_new_series"
       ],
       "native_reference": "python/examples/validate_native_oracles.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -51,17 +71,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -79,17 +119,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -109,17 +169,37 @@
         "stationary_new_series"
       ],
       "native_reference": "python/examples/validate_native_oracles.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -139,17 +219,37 @@
         "new_group"
       ],
       "native_reference": "python/examples/validate_native_oracles.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -169,17 +269,37 @@
         "new_group"
       ],
       "native_reference": "python/examples/validate_native_oracles.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -197,17 +317,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -225,17 +365,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -253,17 +413,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -281,17 +461,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -311,17 +511,37 @@
         "new_group"
       ],
       "native_reference": "python/examples/validate_native_oracles.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -341,17 +561,37 @@
         "new_group"
       ],
       "native_reference": "python/examples/validate_native_oracles.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -369,17 +609,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     },
@@ -397,17 +657,37 @@
         "response"
       ],
       "native_reference": "python/examples/validate_row_references.py",
-      "native_status": "pending_final_receipt",
+      "native_status": "passed",
       "spark_python_status": "passed",
-      "spark_scala_status": "not_run",
+      "spark_scala_status": "passed",
       "evidence": [
         {
           "kind": "actual_python_spark_gallery",
           "path": "qualification/arm64-python-gallery.json",
-          "sha256": "054d7eb650e69bb9af23c83423182ea3da50a4151c453de34b57391654490ef0",
+          "sha256": "da3f8d52163683047a4f1905b3cbc2761db1e7eec187f7ccc45f1a135fa137db",
           "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
-          "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9",
           "fixture_sha256": "0b8bc499316c406b31efd3361015e6f27513c0cbebd395eb324751162d47bbea"
+        },
+        {
+          "kind": "actual_native_oracles",
+          "path": "qualification/arm64-native.json",
+          "sha256": "201da7461d4e8b885cb9ec78ac5284da6635a85619a2133e3e689741bce39763",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f"
+        },
+        {
+          "kind": "actual_scala_spark_gallery",
+          "path": "qualification/arm64-scala-gallery.json",
+          "sha256": "71d654a1a9b471033cf87a80c354e8f0adae90b0d63a73bdc2388751a1c06f7d",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+        },
+        {
+          "kind": "observed_frontend_fit_parity",
+          "path": "qualification/arm64-frontend-parity.json",
+          "sha256": "a5277b01da3c59ac7b56326eed28a7ba326492043f62f7d2a4126e039e1d6778",
+          "artifact_build_id": "324c97bdfa9cd990e2460421fb96885fefcb33915a982ec0d8b69cfa248e158f",
+          "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
         }
       ]
     }
@@ -424,6 +704,16 @@
       "source_sha256": "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2",
       "version": "1.9.25"
     },
-    "jvm_sha256": "80e5f77b54db11fa1937cf9486ffba3a56903afb286e34e200237424c2f27d3c"
+    "jvm_sha256": "754b4bb08f2522f6e4e3767c524404b459867b0c19910161f9325626228482e9"
+  },
+  "qualification_scope": {
+    "native": "Linux ARM64 direct native processes",
+    "python_gallery": "Spark 4.0.1 local[2]",
+    "scala_gallery": "Spark 4.0.1 local[2]",
+    "separate_executor_control": "normal model on two JVMs on one host",
+    "dedicated_compose_master_two_workers_driver": "not_run",
+    "worker_container_loss_recovery": "not_run",
+    "native_amd64": "not_run",
+    "multi_host_scale": "not_qualified"
   }
 }
