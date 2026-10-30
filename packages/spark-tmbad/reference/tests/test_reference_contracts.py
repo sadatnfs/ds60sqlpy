@@ -7,11 +7,14 @@ import hashlib
 import importlib.util
 import io
 import json
+import ssl
 import sys
 import tarfile
 import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "python"))
@@ -124,6 +127,102 @@ class ReferenceContracts(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "hash/size"):
                 prepare.acquire(entry, source.name, directory, directory / "copy", False)
             self.assertFalse((directory / "copy").exists())
+
+    def test_transient_reset_and_timeout_retry_once_then_verify(self):
+        payload = b"exact pinned archive bytes"
+        entry = {
+            "url": "https://cran.r-project.org/src/contrib/example_1.0.tar.gz",
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        }
+        failures = (
+            urllib.error.URLError(ConnectionResetError(104, "connection reset")),
+            urllib.error.URLError(TimeoutError("read timed out")),
+            TimeoutError("connect timed out"),
+        )
+        for failure in failures:
+            with (
+                self.subTest(error=type(failure).__name__),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                destination = Path(temporary) / "source.tar.gz"
+                with (
+                    patch.object(
+                        prepare.urllib.request,
+                        "urlopen",
+                        side_effect=[failure, io.BytesIO(payload)],
+                    ) as opener,
+                    patch.object(prepare.time, "sleep") as sleeper,
+                ):
+                    self.assertEqual(
+                        prepare.acquire(entry, destination.name, None, destination, True),
+                        destination,
+                    )
+                self.assertEqual(destination.read_bytes(), payload)
+                self.assertEqual(opener.call_count, 2)
+                self.assertEqual(sleeper.call_count, 1)
+                self.assertEqual(opener.call_args.kwargs["timeout"], 90)
+
+    def test_transient_transport_exhaustion_is_bounded(self):
+        entry = {
+            "url": "https://cran.r-project.org/src/contrib/example_1.0.tar.gz",
+            "sha256": hashlib.sha256(b"expected").hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "source.tar.gz"
+            with (
+                patch.object(
+                    prepare.urllib.request,
+                    "urlopen",
+                    side_effect=urllib.error.URLError(ConnectionResetError(104, "reset")),
+                ) as opener,
+                patch.object(prepare.time, "sleep") as sleeper,
+                self.assertRaisesRegex(RuntimeError, "five transport attempts"),
+            ):
+                prepare.acquire(entry, destination.name, None, destination, True)
+            self.assertEqual(opener.call_count, 5)
+            self.assertEqual(sleeper.call_count, 4)
+            self.assertFalse(destination.exists())
+
+    def test_certificate_failure_is_not_retried(self):
+        entry = {
+            "url": "https://cran.r-project.org/src/contrib/example_1.0.tar.gz",
+            "sha256": hashlib.sha256(b"expected").hexdigest(),
+        }
+        certificate = ssl.SSLCertVerificationError(1, "certificate verify failed")
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "source.tar.gz"
+            with (
+                patch.object(
+                    prepare.urllib.request,
+                    "urlopen",
+                    side_effect=urllib.error.URLError(certificate),
+                ) as opener,
+                patch.object(prepare.time, "sleep") as sleeper,
+                self.assertRaisesRegex(RuntimeError, "nontransient transport"),
+            ):
+                prepare.acquire(entry, destination.name, None, destination, True)
+            self.assertEqual(opener.call_count, 1)
+            sleeper.assert_not_called()
+            self.assertFalse(destination.exists())
+
+    def test_downloaded_bad_hash_is_not_retried(self):
+        entry = {
+            "url": "https://cran.r-project.org/src/contrib/example_1.0.tar.gz",
+            "sha256": hashlib.sha256(b"expected").hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "source.tar.gz"
+            with (
+                patch.object(
+                    prepare.urllib.request, "urlopen", return_value=io.BytesIO(b"bad")
+                ) as opener,
+                patch.object(prepare.time, "sleep") as sleeper,
+                self.assertRaisesRegex(ValueError, "hash/size mismatch"),
+            ):
+                prepare.acquire(entry, destination.name, None, destination, True)
+            self.assertEqual(opener.call_count, 1)
+            sleeper.assert_not_called()
+            self.assertFalse(destination.exists())
 
     def test_failures_and_unattempted_replications_remain_visible(self):
         passed = {"status": "passed", "result": {"metrics": {"primary_estimate": 1.2, "truth": 1}}}

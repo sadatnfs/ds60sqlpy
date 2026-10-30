@@ -5,11 +5,10 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from extended_fixtures import evaluation, regularization, runtime
-
 from ds60_spark_tmbad import ContractError, ModelSpec, SparkTMBad, client
 from ds60_spark_tmbad._evaluation import validate_evaluation
 from ds60_spark_tmbad._json import dumps, loads
+from extended_fixtures import evaluation, regularization, runtime
 
 
 class FixedEvaluationTests(unittest.TestCase):

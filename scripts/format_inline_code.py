@@ -894,16 +894,22 @@ class Formatter:
         self.check_time()
         # All native and generic syntax checks happen without executing source.
         formatted = self.once(source, language, suffix)
-        # Restored authored literals can affect a formatter's next line-wrap
-        # decision. Allow bounded convergence, checking meaning on every pass.
-        for _ in range(3):
+        # The pinned source adapter is deterministic: unchanged guarded bytes
+        # are already a fixed point. Custom adapters may be stateful, so retain
+        # their second invocation even when the first output is unchanged.
+        if self.adapter is adapter_bytes and formatted == source:
             self.check_time()
-            repeated = self.once(formatted, language, suffix)
-            if repeated == formatted:
-                break
-            formatted = repeated
         else:
-            raise FormatFailure("Pinned formatting did not reach an idempotent result")
+            # Restored authored literals can affect a formatter's next line-wrap
+            # decision. Allow bounded convergence, checking meaning on every pass.
+            for _ in range(3):
+                self.check_time()
+                repeated = self.once(formatted, language, suffix)
+                if repeated == formatted:
+                    break
+                formatted = repeated
+            else:
+                raise FormatFailure("Pinned formatting did not reach an idempotent result")
         size = len(source) + len(formatted)
         if self.cache_bytes + size > MAX_CACHE_BYTES:
             self.cache.clear()

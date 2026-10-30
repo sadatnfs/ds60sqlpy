@@ -7,8 +7,6 @@ import unittest
 from decimal import Decimal, localcontext
 from pathlib import Path
 
-from extended_fixtures import fitted_document, regularization, runtime
-
 from ds60_spark_tmbad import ContractError, FittedModel
 from ds60_spark_tmbad._targets import (
     kkt,
@@ -20,6 +18,7 @@ from ds60_spark_tmbad._targets import (
 from ds60_spark_tmbad._targets import (
     regularization as canonical_regularization,
 )
+from extended_fixtures import fitted_document, regularization, runtime
 
 
 class ExtendedTargetTests(unittest.TestCase):

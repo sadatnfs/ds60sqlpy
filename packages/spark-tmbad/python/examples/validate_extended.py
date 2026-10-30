@@ -14,9 +14,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-from pyspark.sql import SparkSession
-from validate_installed import check_installed
-
 import ds60_spark_tmbad
 from ds60_spark_tmbad import (
     ContractError,
@@ -26,10 +23,12 @@ from ds60_spark_tmbad import (
     PreparedRuntime,
     SparkTMBad,
 )
+from pyspark.sql import SparkSession
+from validate_installed import check_installed
 
 GALLERY = Path(__file__).parent / "gallery"
 sys.path.insert(0, str(GALLERY))
-from run_gallery import expected_values, frame
+from run_gallery import expected_values, frame  # noqa: E402 - gallery path is set above
 
 
 def close(actual, expected, tolerance=1e-7):
@@ -39,7 +38,8 @@ def close(actual, expected, tolerance=1e-7):
 
 def normal_target(api, spark, reduction):
     observations = spark.sql(
-        "SELECT CAST(id AS BIGINT) AS row_id, CAST(y AS DOUBLE) AS y FROM VALUES (0,1),(1,2),(2,4),(3,7) AS fixture(id,y)"
+        "SELECT CAST(id AS BIGINT) AS row_id, CAST(y AS DOUBLE) AS y "
+        "FROM VALUES (0,1),(1,2),(2,4),(3,7) AS fixture(id,y)"
     ).repartition(2)
     spec = ModelSpec("normal", {"y": "y"}, id_columns=["row_id"])
     regularization = {

@@ -496,7 +496,7 @@ group so canonical pointers remain stable during readback. Existing immutable
 tags and the original publisher result remain unchanged.
 
 The published catalog currently produces 19 groups on each native architecture,
-with one audit job running at a time. Each isolated job pulls only
+with at most four isolated audit jobs running concurrently. Each job pulls only
 App/Core plus its chosen group. It checks the combined indexes and native image
 identities, saved version and selected profiles, pull-only preparation without
 runtime resources, strict startup, exact service selection and stop/resume with
@@ -545,8 +545,8 @@ prior full-audit run IDs and follows their bounded recovery ancestry. It validat
 and retains their raw accepted receipts, source/verifier/job identities and
 hashes. Recovery selects one unresolved canary by default. The optional `cases`
 input can select up to six unresolved `group/architecture` pairs, separated by
-commas; an already accepted case is refused. Selected cases run serially and
-known exhausted quota or rejected registry observations stop before image pulls.
+commas; an already accepted case is refused. At most four selected cases run
+concurrently, and known exhausted quota or rejected registry observations stop before image pulls.
 
 Prior receipts remain historical evidence. They do not establish current
 availability after tags or repositories have been removed or changed. Inspect

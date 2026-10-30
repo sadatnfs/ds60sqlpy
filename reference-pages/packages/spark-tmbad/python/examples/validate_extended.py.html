@@ -209,9 +209,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> tempfile</span>
 <span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession</span>
-<span class="source-line"><span class="syntax-keyword">from</span> validate_installed <span class="syntax-keyword">import</span> check_installed</span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">import</span> ds60_spark_tmbad</span>
 <span class="source-line"><span class="syntax-keyword">from</span> ds60_spark_tmbad <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span></span>
 <span class="source-line">    ContractError<span class="syntax-punctuation">,</span></span>
@@ -221,10 +218,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    PreparedRuntime<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    SparkTMBad<span class="syntax-punctuation">,</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession</span>
+<span class="source-line"><span class="syntax-keyword">from</span> validate_installed <span class="syntax-keyword">import</span> check_installed</span>
 <span class="source-line"></span>
 <span class="source-line">GALLERY <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>__file__<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>parent <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gallery</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">sys<span class="syntax-operator">.</span>path<span class="syntax-operator">.</span>insert<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>GALLERY<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">from</span> run_gallery <span class="syntax-keyword">import</span> expected_values<span class="syntax-punctuation">,</span> frame</span>
+<span class="source-line"><span class="syntax-keyword">from</span> run_gallery <span class="syntax-keyword">import</span> expected_values<span class="syntax-punctuation">,</span> frame  <span class="syntax-comment"># noqa: E402 - gallery path is set above</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> tolerance<span class="syntax-operator">=</span><span class="syntax-number">1e-7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
@@ -234,7 +233,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">normal_target</span><span class="syntax-punctuation">(</span>api<span class="syntax-punctuation">,</span> spark<span class="syntax-punctuation">,</span> reduction<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    observations <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span></span>
-<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">SELECT CAST(id AS BIGINT) AS row_id, CAST(y AS DOUBLE) AS y FROM VALUES (0,1),(1,2),(2,4),(3,7) AS fixture(id,y)</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">SELECT CAST(id AS BIGINT) AS row_id, CAST(y AS DOUBLE) AS y </span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">FROM VALUES (0,1),(1,2),(2,4),(3,7) AS fixture(id,y)</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>repartition<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    spec <span class="syntax-operator">=</span> ModelSpec<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">normal</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> id_columns<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">row_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    regularization <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>

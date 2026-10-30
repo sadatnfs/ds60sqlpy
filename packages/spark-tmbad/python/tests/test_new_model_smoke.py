@@ -11,7 +11,7 @@ from pathlib import Path
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 sys.path.insert(0, str(EXAMPLES))
-import validate_new_models as smoke
+import validate_new_models as smoke  # noqa: E402 - examples path is set above
 
 REFERENCE_ROOT = EXAMPLES / "new_model_references"
 ROWS = REFERENCE_ROOT / "rows-v3.json"
@@ -85,7 +85,7 @@ class NewModelSmokeContracts(unittest.TestCase):
         self.assertEqual(len(cases), 18)
         self.assertEqual(
             Counter(model for model, _, _ in cases),
-            {model: 2 for model in [*smoke.ROW_FIELDS, smoke.CORRELATED]},
+            dict.fromkeys([*smoke.ROW_FIELDS, smoke.CORRELATED], 2),
         )
 
     def test_response_free_future_and_identity(self):

@@ -2,8 +2,6 @@
 
 import math
 
-from test_contracts import manifest, model
-
 from ds60_spark_tmbad import ModelSpec, PreparedRuntime
 from ds60_spark_tmbad._targets import (
     active_bounds,
@@ -14,6 +12,7 @@ from ds60_spark_tmbad._targets import (
     penalties,
     resolved_solver,
 )
+from test_contracts import manifest, model
 
 
 def runtime(version="0.2.0"):

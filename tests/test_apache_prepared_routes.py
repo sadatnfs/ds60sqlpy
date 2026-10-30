@@ -12,6 +12,8 @@ from typing import Any
 
 import pytest
 
+from ds60sqlpy import __version__
+
 BASE = Path(__file__).resolve().parents[1] / "courses/apache-data-platforms"
 
 
@@ -315,7 +317,7 @@ def test_portable_client_private_files_use_existing_payload_exclusion(
 @pytest.mark.parametrize(
     "project,wrong_image",
     [
-        ("pinot", "ds60sqlpy-worker-data-platforms-python:1.1.0"),
+        ("pinot", f"ds60sqlpy-worker-data-platforms-python:{__version__}"),
         ("hive", "ds60-apache-hive-postgres:17.6"),
     ],
 )

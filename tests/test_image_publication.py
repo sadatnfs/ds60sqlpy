@@ -68,7 +68,7 @@ def test_native_seed_and_workers_cover_both_platforms_and_all_ordinary_profiles(
         {"architecture": "arm64", "runner": "ubuntu-24.04-arm"},
     ]
     assert jobs["workers"]["needs"] == ["gate", "seed"]
-    assert jobs["workers"]["strategy"]["max-parallel"] == "2"
+    assert jobs["workers"]["strategy"]["max-parallel"] == "8"
     worker_rows = matrix(native=True, workers_only=True)["include"]
     ordinary = {
         line.split()[0]

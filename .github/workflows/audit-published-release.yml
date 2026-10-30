@@ -102,7 +102,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 4
       matrix: ${{ fromJSON(needs.preflight.outputs.matrix) }}
     env:
       ARCHITECTURE: ${{ matrix.architecture }}

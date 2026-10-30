@@ -7,7 +7,12 @@ from pathlib import Path
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 sys.path.insert(0, str(EXAMPLES))
-from validate_new_model_oracles import PROFILES, compare, loads, response_frame
+from validate_new_model_oracles import (  # noqa: E402 - examples path is set above
+    PROFILES,
+    compare,
+    loads,
+    response_frame,
+)
 
 
 class RunnerTests(unittest.TestCase):

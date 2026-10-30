@@ -7,10 +7,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from extended_fixtures import runtime
-
 from ds60_spark_tmbad import ContractError, FittedModel, PreparedParameters, PreparedRuntime, client
 from ds60_spark_tmbad._json import loads
+from extended_fixtures import runtime
 
 
 def declared(selected=None, purpose="simulation_truth", provenance=None):

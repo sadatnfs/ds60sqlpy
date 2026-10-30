@@ -359,10 +359,17 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     report = {
         "status": "running",
-        "scope": "Actual native framed-process F/G/H, response-free moments and domain refusals only; no Spark or optimization",
+        "scope": (
+            "Actual native framed-process F/G/H, response-free moments and "
+            "domain refusals only; no Spark or optimization"
+        ),
         "started_utc": datetime.now(UTC).isoformat(),
         "thresholds": PROFILES,
-        "threshold_policy": "Ordinary/tiny thresholds preserved from existing row oracle. New gamma endpoint absolute thresholds fixed before first execution to expose the retained 1.26e-9 cancellation regression.",
+        "threshold_policy": (
+            "Ordinary/tiny thresholds preserved from existing row oracle. New gamma "
+            "endpoint absolute thresholds fixed before first execution to expose the "
+            "retained 1.26e-9 cancellation regression."
+        ),
         "inputs_sha256": {
             key: digest(getattr(args, key))
             for key in ("manifest", "rows", "gaussian", "supplement")

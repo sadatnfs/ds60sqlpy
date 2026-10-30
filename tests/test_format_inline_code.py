@@ -123,6 +123,89 @@ def test_non_idempotent_formatter_is_rejected(tmp_path: Path) -> None:
     assert "idempotent" in rows[0]["reason"]
 
 
+def test_pinned_canonical_fence_uses_one_guarded_invocation_and_exact_cache_key(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[bytes] = []
+    admissions: list[bytes] = []
+    original_admission = inline.native_admission
+
+    def admitted(source: bytes, language: str, root: Path) -> None:
+        admissions.append(source)
+        original_admission(source, language, root)
+
+    def invoke(command: list[str], source: bytes, root: Path) -> bytes:
+        assert command[0] == "ruff"
+        calls.append(source)
+        return source
+
+    monkeypatch.setattr(inline, "native_admission", admitted)
+    monkeypatch.setattr(inline, "invoke", invoke)
+    source = b"x = 1\n"
+    tool = inline.Formatter(tmp_path)
+    assert tool.format(source, "python", ".py") == source
+    assert calls == [source] and admissions == [source]
+    assert tool.format(source, "python", ".py") == source
+    assert calls == [source]
+    assert tool.cache == {("python", ".py", source): source}
+
+
+def test_changed_pinned_fence_retains_second_guarded_invocation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[bytes] = []
+
+    def invoke(command: list[str], source: bytes, root: Path) -> bytes:
+        assert command[0] == "ruff"
+        calls.append(source)
+        return b"x = 1\n"
+
+    monkeypatch.setattr(inline, "invoke", invoke)
+    assert inline.Formatter(tmp_path).format(b"x=1\n", "python", ".py") == b"x = 1\n"
+    assert calls == [b"x=1\n", b"x = 1\n"]
+
+
+def test_custom_adapter_identity_then_change_still_converges(tmp_path: Path) -> None:
+    outputs = iter([b"x=1\n", b"x = 1\n", b"x = 1\n"])
+    calls: list[bytes] = []
+
+    def stateful(source: bytes, language: str, suffix: str, root: Path) -> bytes:
+        calls.append(source)
+        return next(outputs)
+
+    assert inline.Formatter(tmp_path, stateful).format(b"x=1\n", "python", ".py") == b"x = 1\n"
+    assert calls == [b"x=1\n", b"x=1\n", b"x = 1\n"]
+
+
+def test_custom_adapter_identity_then_alternation_still_fails(tmp_path: Path) -> None:
+    outputs = iter([b"x=1\n", b"x = 1\n", b"x=1\n", b"x = 1\n"])
+    calls: list[bytes] = []
+
+    def alternating(source: bytes, language: str, suffix: str, root: Path) -> bytes:
+        calls.append(source)
+        return next(outputs)
+
+    tool = inline.Formatter(tmp_path, alternating)
+    with pytest.raises(inline.FormatFailure, match="idempotent"):
+        tool.format(b"x=1\n", "python", ".py")
+    assert len(calls) == 4 and not tool.cache
+
+
+def test_pinned_fast_path_preserves_post_invocation_deadline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tool = inline.Formatter(tmp_path, max_seconds=1200)
+
+    def exhausted(source: bytes, language: str, suffix: str) -> bytes:
+        tool.deadline = 0
+        return source
+
+    monkeypatch.setattr(tool, "once", exhausted)
+    with pytest.raises(inline.BudgetExhausted):
+        tool.format(b"x = 1\n", "python", ".py")
+    assert not tool.cache
+
+
 def test_generated_markdown_drift_requires_owner_regeneration(tmp_path: Path) -> None:
     text = "```python\nx=1\n```\n"
     result, rows = document(text, tmp_path, generated=True)

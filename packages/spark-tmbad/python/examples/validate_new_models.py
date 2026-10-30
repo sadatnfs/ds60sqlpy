@@ -314,9 +314,8 @@ def run_case(api, spark, model_id, case, reference_sha):
 
 
 def check_installed():
-    from validate_installed import check_installed as check_installed_wheel
-
     import ds60_spark_tmbad
+    from validate_installed import check_installed as check_installed_wheel
 
     check_installed_wheel()
     distribution = importlib.metadata.distribution("ds60-spark-tmbad")
@@ -352,7 +351,7 @@ def write_receipt(path, report, *, create=False):
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        temporary.replace(path)
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
@@ -398,9 +397,8 @@ def main():
     spark = None
     try:
         report["installed_package"] = check_installed()
-        from pyspark.sql import SparkSession
-
         from ds60_spark_tmbad import PreparedRuntime, SparkTMBad
+        from pyspark.sql import SparkSession
 
         runtime = PreparedRuntime.from_manifest(args.manifest)
         require(

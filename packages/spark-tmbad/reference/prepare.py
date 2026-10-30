@@ -94,6 +94,12 @@ def validate_lock(lock):
         raise ValueError("Unreviewed upstream revision")
 
 
+def retryable_transport(error):
+    """Admit only connection resets and timeouts, including urllib wrappers."""
+    reason = error.reason if isinstance(error, urllib.error.URLError) else error
+    return isinstance(reason, (ConnectionResetError, TimeoutError))
+
+
 def acquire(entry, filename, archives, destination, allow_download):
     candidate = archives / filename if archives else None
     if candidate and candidate.is_file() and not candidate.is_symlink():
@@ -125,6 +131,16 @@ def acquire(entry, filename, archives, destination, allow_download):
                         raise RuntimeError(
                             "Source download failed with HTTP" + str(error.code)
                         ) from None
+                    time.sleep(min(30, 2 ** (attempt + 1)))
+                except (ConnectionResetError, TimeoutError, urllib.error.URLError) as error:
+                    if not retryable_transport(error):
+                        raise RuntimeError(
+                            "Source download failed with nontransient transport error"
+                        ) from error
+                    if attempt == 4:
+                        raise RuntimeError(
+                            "Source download exhausted five transport attempts"
+                        ) from error
                     time.sleep(min(30, 2 ** (attempt + 1)))
             if data is not None:
                 break
